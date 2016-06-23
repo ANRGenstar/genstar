@@ -1,5 +1,5 @@
 /**
- * 
+ * Read data from sources (files, databases...)
  */
 /**
  * @author sam

@@ -1,5 +1,5 @@
 /**
- * 
+ * Generation of Synthetic Population Library
  */
 /**
  * @author sam
