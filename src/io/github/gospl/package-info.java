@@ -2,7 +2,7 @@
  * Generation of Synthetic Population Library
  */
 /**
- * @author sam
+ * @author gospl-team
  *
  */
 package io.github.gospl;

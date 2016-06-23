@@ -2,7 +2,7 @@
  * Read data from sources (files, databases...)
  */
 /**
- * @author sam
+ * @author gospl-team
  *
  */
 package io.github.gospl.io.datareaders;
