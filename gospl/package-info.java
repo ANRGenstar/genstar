@@ -4,4 +4,4 @@
  * @author gospl-team
  *
  */
-package io.github.genstar.gospl;
+package genstar.gospl;
