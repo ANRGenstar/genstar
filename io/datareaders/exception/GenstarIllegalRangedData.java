@@ -1,4 +1,4 @@
-package io.datareaders.surveyreader.exception;
+package io.datareaders.exception;
 
 public class GenstarIllegalRangedData extends Exception {
 
@@ -11,5 +11,4 @@ public class GenstarIllegalRangedData extends Exception {
 		// TODO Auto-generated constructor stub
 		super(message);
 	}
-
 }

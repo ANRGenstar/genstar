@@ -1,4 +1,4 @@
-package idees.genstar.datareader;
+package io.datareaders.surveyreader;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,7 @@ import java.io.InputStream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import idees.genstar.datareader.exception.InputFileNotSupportedException;
+import io.datareaders.surveyreader.exception.InputFileNotSupportedException;
 
 public class SurveyStaticFactory {
 		

@@ -1,4 +1,4 @@
-package idees.genstar.datareader;
+package io.datareaders.surveyreader;
 
 import java.io.File;
 import java.io.FileReader;
@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
-import com.opencsv.CSVReader;
+import au.com.bytecode.opencsv.CSVReader;
 
 class CsvInputHandler implements ISurvey {
 	

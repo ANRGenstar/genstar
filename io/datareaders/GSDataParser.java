@@ -1,4 +1,4 @@
-package idees.genstar.datareader;
+package io.datareaders;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -10,8 +10,8 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import idees.genstar.datareader.exception.GenstarIllegalRangedData;
-import ummisco.genstar.metamodel.attributes.DataType;
+import gospl.metamodel.attribut.DataType;
+import io.datareaders.exception.GenstarIllegalRangedData;
 
 /**
  * 
@@ -39,12 +39,12 @@ public class GSDataParser {
 	public DataType getValueType(String value){
 		value = value.trim();
 		if(value.matches("(\\-)?(\\d+\\.\\d+)(E(\\-)?\\d+)?") || value.matches("(\\-)?(\\d+\\,\\d+)(E(\\-)?\\d+)?"))
-			return DataType.DOUBLE;
+			return DataType.Double;
 		if(value.matches("(\\-)?\\d+"))
-			return DataType.INTEGER;
+			return DataType.Integer;
 		if(Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value))
-			return DataType.BOOL;
-		return DataType.STRING;
+			return DataType.Boolean;
+		return DataType.String;
 	}
 
 	/**

@@ -1,4 +1,4 @@
-package io.github.gospl.metamodel;
+package gospl.metamodel.exception;
 
 /**
  * Exception raised when a question was asked about an unknown attribute

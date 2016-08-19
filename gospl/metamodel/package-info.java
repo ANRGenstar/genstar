@@ -6,4 +6,4 @@
  * @author gospl-team
  *
  */
-package io.github.gospl.metamodel;
+package gospl.metamodel;

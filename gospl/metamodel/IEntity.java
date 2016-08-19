@@ -1,6 +1,9 @@
-package io.github.gospl.metamodel;
+package gospl.metamodel;
 
 import java.util.Collection;
+
+import gospl.metamodel.attribut.IAttribute;
+import gospl.metamodel.exception.UndefinedAttributeException;
 
 /**
  * An entity might represent an household, an individual, etc.

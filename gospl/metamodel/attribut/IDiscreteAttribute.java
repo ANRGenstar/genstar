@@ -1,4 +1,4 @@
-package io.github.gospl.metamodel;
+package gospl.metamodel.attribut;
 
 /**
  * An attribute with a discrete set of potential values (categorial)

@@ -1,4 +1,4 @@
-package io.github.gospl.metamodel;
+package gospl.metamodel.attribut;
 
 /**
  * Attribute (of for instance an individual or household)

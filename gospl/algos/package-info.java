@@ -5,4 +5,4 @@
  * @author gospl-team
  *
  */
-package io.github.gospl.algos;
+package gospl.algos;

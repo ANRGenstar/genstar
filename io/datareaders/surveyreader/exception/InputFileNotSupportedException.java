@@ -1,4 +1,4 @@
-package idees.genstar.datareader.exception;
+package io.datareaders.surveyreader.exception;
 
 public class InputFileNotSupportedException extends Exception {
 

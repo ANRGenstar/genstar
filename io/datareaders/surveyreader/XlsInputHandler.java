@@ -1,4 +1,4 @@
-package idees.genstar.datareader;
+package io.datareaders.surveyreader;
 
 import java.io.File;
 import java.io.FileInputStream;

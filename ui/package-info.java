@@ -1,8 +1,7 @@
 /**
- * Genstar
- */
-/**
+ * Genstar: software interface
+ *
  * @author kevin chapuis
  *
  */
-package io.github.genstar.ui;
+package ui;
