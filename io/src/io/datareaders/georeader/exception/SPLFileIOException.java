@@ -1,4 +1,4 @@
-package spll.io.file.exception;
+package io.datareaders.georeader.exception;
 
 public class SPLFileIOException extends Exception {
 

@@ -9,8 +9,9 @@ import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import spll.io.file.GeotiffFileIO;
-import spll.io.file.ShapeFileIO;
+import io.datareaders.georeader.GeotiffFileIO;
+import io.datareaders.georeader.ShapeFileIO;
+
 
 public class SPLFileReader {
 

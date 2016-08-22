@@ -14,16 +14,17 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
+import io.datareaders.georeader.GeotiffFileIO;
+import io.datareaders.georeader.ISPLFileIO;
+import io.datareaders.georeader.ShapeFileIO;
+import io.datareaders.georeader.exception.SPLFileIOException;
+
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.LMRegressionAlgorithm;
+import spll.algo.exception.IllegalRegressionException;
 import spll.algo.variable.SPLMapper;
 import spll.algo.variable.SPLMatcherFactory;
 import spll.algo.variable.SPLRawVariable;
-import spll.io.exception.IllegalRegressionException;
-import spll.io.file.GeotiffFileIO;
-import spll.io.file.ISPLFileIO;
-import spll.io.file.ShapeFileIO;
-import spll.io.file.exception.SPLFileIOException;
 
 public class Localisation {
 	

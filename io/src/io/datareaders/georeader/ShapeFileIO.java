@@ -1,4 +1,4 @@
-package spll.io.file;
+package io.datareaders.georeader;
 
 import java.io.File;
 import java.io.IOException;

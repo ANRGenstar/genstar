@@ -1,4 +1,4 @@
-package spll.io.util;
+package spll.util;
 
 import java.awt.Color;
 import java.io.IOException;

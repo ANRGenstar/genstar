@@ -1,4 +1,4 @@
-package spll.io.file;
+package io.datareaders.georeader;
 
 import java.io.File;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;

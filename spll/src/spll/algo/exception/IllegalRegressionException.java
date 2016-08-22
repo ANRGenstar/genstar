@@ -1,4 +1,4 @@
-package spll.io.exception;
+package spll.algo.exception;
 
 public class IllegalRegressionException extends Exception {
 

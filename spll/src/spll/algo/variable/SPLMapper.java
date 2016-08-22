@@ -12,8 +12,8 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.type.Name;
 
 import spll.algo.ISPLRegressionAlgorithm;
-import spll.io.exception.IllegalRegressionException;
-import spll.io.file.ISPLFileIO;
+import spll.algo.exception.IllegalRegressionException;
+import io.datareaders.georeader.ISPLFileIO;
 
 /**
  * TODO: force <T> generic to fit a regression style contract: either boolean (variable is present or not) 

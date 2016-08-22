@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.opengis.feature.Feature;
 
-import spll.io.file.ISPLFileIO;
+import io.datareaders.georeader.ISPLFileIO;
 
 public class SPLMatcherFactory<F extends Feature, V extends ISPLVariable<?>, T> {
 

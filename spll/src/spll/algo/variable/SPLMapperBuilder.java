@@ -1,4 +1,4 @@
-package spll.io;
+package spll.algo.variable;
 
 public class SPLMapperBuilder {
 
