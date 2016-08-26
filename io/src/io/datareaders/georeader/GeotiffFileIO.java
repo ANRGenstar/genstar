@@ -5,41 +5,31 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.IntStream;
+import java.util.stream.DoubleStream;
 
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
-import org.geotools.coverage.grid.GridEnvelope2D;
-import org.geotools.coverage.grid.GridGeometry2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.OverviewPolicy;
 import org.geotools.factory.Hints;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
-import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
-import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.GeneralEnvelope;
-import org.geotools.geometry.jts.JTSFactoryFinder;
-import org.opengis.coverage.grid.GridCoordinates;
-import org.opengis.coverage.grid.GridEnvelope;
 import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-public class GeotiffFileIO implements ISPLFileIO<Feature> {
+import io.datareaders.georeader.geodat.GenstarPixel;
+
+public class GeotiffFileIO implements ISPLFileIO<GenstarPixel, Number, Double> {
 
 	private final AbstractGridCoverage2DReader store;
-	private final GridCoverage2D coverage;
-	private final List<Feature> featureList;
+	private GridCoverage2D coverage;
 	private String[] bandId;
 
 	/**
@@ -66,17 +56,21 @@ public class GeotiffFileIO implements ISPLFileIO<Feature> {
 
 		this.store = new GeoTiffReader(new File(inputPath), new Hints(Hints.USE_JAI_IMAGEREAD, true));
 		this.coverage = store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});
-		this.featureList = extractFeatures(store, coverage);
 		this.bandId = this.store.getGridCoverageNames();
 	}
 	
 	@Override
-	public List<Feature> getFeatures(){
-		return featureList;
+	public SPLFileType getSPLFileType(){
+		return SPLFileType.RASTER;
+	}
+	
+	@Override
+	public List<GenstarPixel> getGeoData() throws IOException, TransformException{
+		return extractFeatures(store, coverage);
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(ISPLFileIO<Feature> file) {
+	public boolean isCoordinateCompliant(ISPLFileIO<GenstarPixel, Number, Double> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 	
@@ -88,6 +82,19 @@ public class GeotiffFileIO implements ISPLFileIO<Feature> {
 	public String[] getBandId(){
 		return bandId;
 	}
+
+	// WARNING: not functional yet
+//	public void cropFile(GeneralEnvelope envelop) throws IOException, TransformException{
+//		CoverageProcessor processor = CoverageProcessor.getInstance();
+//		ParameterValueGroup param = processor.getOperation("CoverageCrop").getParameters();
+//		GeneralEnvelope crop = envelop;
+//		
+//		param.parameter("Source").setValue( coverage );
+//		param.parameter("Envelope").setValue( crop );
+//
+//		this.coverage = (GridCoverage2D) processor.doOperation(param);	
+//		this.featureList = extractFeatures(store, coverage);
+//	}
 
 	@Override
 	public String toString(){
@@ -127,57 +134,35 @@ public class GeotiffFileIO implements ISPLFileIO<Feature> {
 	 * 2) http://gis.stackexchange.com/questions/114598/creating-point-in-shapefile-from-latitude-longitude-using-geotools
 	 * 
 	 */
-	private List<Feature> extractFeatures(AbstractGridCoverage2DReader store, GridCoverage2D coverage) throws IOException, TransformException{
-		List<Feature> featureList = new ArrayList<>();
+	private List<GenstarPixel> extractFeatures(AbstractGridCoverage2DReader store, GridCoverage2D coverage) throws IOException, TransformException{
+		List<GenstarPixel> featureList = new ArrayList<>();
 		
-		
-		GridEnvelope dimensions = store.getOriginalGridRange();
-		GridCoordinates maxDimensions = dimensions.getHigh();
-		int w = maxDimensions.getCoordinateValue(0)+1;
-		int h = maxDimensions.getCoordinateValue(1)+1;
+		int w = (int) coverage.getProperty("image_width");
+		int h = (int) coverage.getProperty("image_height");
 		int numBands = store.getGridCoverageCount();
 
-		GridGeometry2D geometry = coverage.getGridGeometry();
-
-		SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
-
-		//set the name
-		b.setName( "FeatureFromRaster" );
-		//add a geometry property
-		b.setCRS(store.getCoordinateReferenceSystem()); // set crs first
-		b.add( "location", Point.class ); // then add geometry
-		//add band informations
-		b.add( "band", double[].class);
-		//build the type
-		final SimpleFeatureType TYPE = b.buildFeatureType();
+		int idx = 1;
 		
-		SimpleFeatureBuilder featureBuilder = new SimpleFeatureBuilder(TYPE);
-		GeometryFactory geometryFactory = JTSFactoryFinder.getGeometryFactory();
-		int idx = 0;
+		System.out.println("["+this.getClass().getSimpleName()+"] Theoretical space size to proceed raster file: width = "+w+" | heidth = "+h+" ("+(w*h)+")");
 		
-		IntStream intWidthStream = IntStream.range(0, w);
-		IntStream intHeighStream = IntStream.range(0, h);
-
-		for (int i=0; i<w; i++) {
-			for (int j=0; j<h; j++) {
-
-				Envelope2D pixelEnvelop =
-						geometry.gridToWorld(new GridEnvelope2D(i, j, 1, 1));
-
-				double lat = pixelEnvelop.getCenterY();
-				double lon = pixelEnvelop.getCenterX();
-
+		for (int i=0; i<w; i++){
+			for(int j=0; j<h; j++){
 				double[] vals = new double[numBands];
-				coverage.evaluate(new GridCoordinates2D(i, j), vals);
+				coverage.evaluate(new GridCoordinates2D(w, h), vals);
+				Double[] valsN = new Double[vals.length];
+				for(int k = 0; k < vals.length; k++)
+					valsN[k] = vals[k];
 
-				Point point = geometryFactory.createPoint(new Coordinate(lat, lon));
-				featureBuilder.add(point);
-				featureBuilder.add(vals);
 				
-				featureList.add(featureBuilder.buildFeature("pixel"+(idx++)));
-				System.out.println(idx);
+				featureList.add(new GenstarPixel(w, h, valsN));
+				
+				if(DoubleStream.of(vals).mapToObj(Double::valueOf).anyMatch(val -> val.isNaN() || val <= 0d || val == null))
+					System.out.println("["+this.getClass().getSimpleName()+"] Strange value: "+Arrays.toString(vals).toString());
+				if(idx % 1000000 == 0)
+					System.out.println("["+this.getClass().getSimpleName()+"] "+idx+" px transposed (vals = "+Arrays.toString(vals).toString()+")");
 			}
 		}
+		
 		return featureList;
 	}
 

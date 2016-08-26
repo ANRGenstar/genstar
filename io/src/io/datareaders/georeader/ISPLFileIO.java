@@ -1,18 +1,26 @@
 package io.datareaders.georeader;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.opengis.feature.Feature;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
-public interface ISPLFileIO<F extends Feature> {
+import io.datareaders.georeader.geodat.IGeoGenstarAttributes;
 
+public interface ISPLFileIO<G extends IGeoGenstarAttributes<A, D>, A, D> {
+
+	public SPLFileType getSPLFileType();
+	
 	/**
 	 * Retrieve main spatial component of the file: {@link Feature} from GeoTools api
 	 * 
 	 * @return
+	 * @throws TransformException 
+	 * @throws IOException 
 	 */
-	public List<F> getFeatures();
+	public List<G> getGeoData() throws IOException, TransformException;
 
 	/**
 	 * Says if geographical information of the two files are congruent in term of space.
@@ -22,7 +30,7 @@ public interface ISPLFileIO<F extends Feature> {
 	 * @param file
 	 * @return
 	 */
-	public boolean isCoordinateCompliant(ISPLFileIO<F> file);
+	public boolean isCoordinateCompliant(ISPLFileIO<G, A, D> file);
 
 	/**
 	 * The {@link CoordinateReferenceSystem} used by this file

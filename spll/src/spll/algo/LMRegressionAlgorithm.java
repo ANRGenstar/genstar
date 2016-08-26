@@ -9,24 +9,25 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.opengis.feature.Feature;
 
-import spll.algo.variable.ISPLVariableFeatureMatcher;
-import spll.algo.variable.SPLRawVariable;
+import io.datareaders.georeader.geodat.GenstarFeature;
+import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
+import spll.datamapper.variable.SPLRawVariable;
 
-public class LMRegressionAlgorithm extends OLSMultipleLinearRegression implements ISPLRegressionAlgorithm<SPLRawVariable> { 
+public class LMRegressionAlgorithm extends OLSMultipleLinearRegression implements ISPLRegressionAlgorithm<SPLRawVariable, Double> { 
 	
 	private List<SPLRawVariable> regVars;
 	
-	public void setupLinearRegressionAlgorithm(Map<Feature, Double> observations,
-			Set<ISPLVariableFeatureMatcher<Feature, SPLRawVariable, Double>> regressors){
+	@Override
+	public void setupData(Map<GenstarFeature, Double> observations,
+			Set<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> regressors){
 		this.regVars = new ArrayList<>(regressors
 				.parallelStream().map(varfm -> varfm.getVariable())
 				.collect(Collectors.toSet()));
 		double[] y = new double[observations.size()];
 		double[][] x = new double[observations.size()][];
 		int yIdx = 0;
-		for(Feature feature : observations.keySet()){
+		for(GenstarFeature feature : observations.keySet()){
 			y[yIdx] = observations.get(feature);
 			x[yIdx] = new double[regVars.size()];
 			for(int i = 0; i < regVars.size(); i++){

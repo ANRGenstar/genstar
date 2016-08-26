@@ -1,5 +1,8 @@
 package gospl.metamodel.attribut;
 
+import gospl.metamodel.attribut.value.IValue;
+import io.datareaders.DataType;
+
 /**
  * Attribute (of for instance an individual or household)
  * 
@@ -9,5 +12,9 @@ package gospl.metamodel.attribut;
 public interface IAttribute {
 
 	public String getName();
+	
+	public DataType getDataType();
+	
+	public IValue getValue();
 	
 }

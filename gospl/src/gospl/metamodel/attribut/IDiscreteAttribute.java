@@ -9,4 +9,11 @@ package gospl.metamodel.attribut;
 public interface IDiscreteAttribute<ContentType extends Object> 
 					extends IAttribute {
 
+	/**
+	 * The number of discrete value this attribute can take
+	 * 
+	 * @return
+	 */
+	public int getValueSize();
+	
 }

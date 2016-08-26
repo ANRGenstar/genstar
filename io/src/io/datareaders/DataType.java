@@ -1,4 +1,4 @@
-package gospl.metamodel.attribut;
+package io.datareaders;
 
 public enum DataType {
 

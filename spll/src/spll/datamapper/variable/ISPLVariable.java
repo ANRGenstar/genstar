@@ -1,4 +1,4 @@
-package spll.algo.variable;
+package spll.datamapper.variable;
 
 public interface ISPLVariable<T> {
 

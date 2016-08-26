@@ -1,11 +1,11 @@
-package spll.algo.variable;
+package spll.datamapper.variable;
 
 public class SPLRawVariable implements ISPLVariable<Object> {
 
 	private Object value;
 	private String name;
 	
-	protected SPLRawVariable(Object value, String name) {
+	public SPLRawVariable(Object value, String name) {
 		this.value = value;
 		this.name = name;
 	}

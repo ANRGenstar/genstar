@@ -1,22 +1,30 @@
-package spll.algo.variable;
+package spll.datamapper.matcher;
 
-import org.opengis.feature.Feature;
+import io.datareaders.georeader.geodat.GenstarFeature;
+import spll.datamapper.variable.SPLRawVariable;
 
-public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<Feature, SPLRawVariable, Double> {
+public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable, Double> {
 
-	private double area = 0d;
+	private double area;
 	
 	private final SPLRawVariable variable;
 
-	private Feature feature;
+	private GenstarFeature feature;
 	
-	protected SPLAreaMatcher(Feature feat, SPLRawVariable variable){
-		this.feature = feat;
-		this.variable = variable;
+	protected SPLAreaMatcher(GenstarFeature feat, SPLRawVariable variable){
+		this(feat, variable, 1d);
 	}
 	
-	public void setArea(double area){
+	protected SPLAreaMatcher(GenstarFeature feat, SPLRawVariable variable, double area){
+		this.feature = feat;
+		this.variable = variable;
 		this.area = area;
+	}
+	
+	@Override
+	public boolean expandValue(Double area){
+		this.area += area;
+		return true;
 	}
 	
 	@Override
@@ -35,7 +43,7 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<Feature, SPLRa
 	}
 
 	@Override
-	public Feature getFeature() {
+	public GenstarFeature getFeature() {
 		return feature;
 	}
 

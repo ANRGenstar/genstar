@@ -15,3 +15,10 @@ project/plugins/project/
 # Scala-IDE specific
 .scala_dependencies
 .worksheet
+
+# Eclipse specific
+*.classpath
+*.project
+
+# Mac os
+*.DS_store

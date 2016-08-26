@@ -6,10 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.geotools.data.Parameter;
-import org.geotools.swing.data.JParameterListWizard;
-import org.geotools.swing.wizard.JWizard;
-import org.geotools.util.KVP;
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
@@ -18,18 +14,18 @@ import io.datareaders.georeader.GeotiffFileIO;
 import io.datareaders.georeader.ISPLFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import io.datareaders.georeader.exception.SPLFileIOException;
-
-import spll.algo.ISPLRegressionAlgorithm;
-import spll.algo.LMRegressionAlgorithm;
+import io.datareaders.georeader.geodat.GenstarFeature;
 import spll.algo.exception.IllegalRegressionException;
-import spll.algo.variable.SPLMapper;
-import spll.algo.variable.SPLMatcherFactory;
-import spll.algo.variable.SPLRawVariable;
+import spll.datamapper.ASPLMapperBuilder;
+import spll.datamapper.SPLAreaMapperBuilder;
+import spll.datamapper.SPLMapper;
+import spll.datamapper.variable.SPLRawVariable;
 
 public class Localisation {
-	
+
 	static ShapeFileIO sfAdmin = null;
-	static List<ISPLFileIO<Feature>> endogeneousVarFile = new ArrayList<>();
+	@SuppressWarnings("rawtypes")
+	static List<ISPLFileIO> endogeneousVarFile = new ArrayList<>();
 
 	/**
 	 * args[0] = shape file of administrative & demographic information
@@ -41,49 +37,50 @@ public class Localisation {
 	public static void main(String[] args) {
 
 		try {
-			getLayersAndDisplay();
-		} catch (Exception e1) {
-			try {
-				sfAdmin = new ShapeFileIO(args[0]);
-				
-				for(int i = 2; i < args.length; i++){
-					if(new File(args[i]).exists()){
-						String landString = args[i];
-						if(landString.contains(".shp"))
-							endogeneousVarFile.add(new ShapeFileIO(landString));
-						if(landString.contains(".tif"))
-							endogeneousVarFile.add(new GeotiffFileIO(landString));
-					} else
-						throw new SPLFileIOException("The path "+args[i]+" does not represent a valid path");
-				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SPLFileIOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (TransformException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			sfAdmin = new ShapeFileIO(args[0]);
+
+			for(int i = 2; i < args.length; i++){
+				if(new File(args[i]).exists()){
+					String landString = args[i];
+					if(landString.contains(".shp"))
+						endogeneousVarFile.add(new ShapeFileIO(landString));
+					if(landString.contains(".tif"))
+						endogeneousVarFile.add(new GeotiffFileIO(landString));
+				} else
+					throw new SPLFileIOException("The path "+args[i]+" does not represent a valid path");
 			}
-		} 
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SPLFileIOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (TransformException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Name propertyName = sfAdmin.getGeoData().stream().findFirst().get().getProperties(args[1]).stream().findFirst().get().getName();
 		
-		ISPLRegressionAlgorithm<SPLRawVariable> splRegFunction = new LMRegressionAlgorithm();
-		Name propertyName = sfAdmin.getFeatures()
-				.stream().filter(feat -> !feat.getProperties((String) args[1]).isEmpty()).findFirst()
-				.get().getProperty((String) args[1]).getName();
+		System.out.println("["+Localisation.class.getSimpleName()+"] import data: done");
+
+		ASPLMapperBuilder<SPLRawVariable, Double> mBuilder = new SPLAreaMapperBuilder(sfAdmin, propertyName, endogeneousVarFile);
+		System.out.println("["+Localisation.class.getSimpleName()+"] setup MapperBuilder: done");
 		
-		// TODO: create a feature / variable mapper
-		SPLMapper<Feature, SPLRawVariable, Double> splMapper = new SPLMapper<>(sfAdmin, propertyName, new SPLMatcherFactory<>(), splRegFunction);
-		
-		// TODO: compute the area of each endogeneous variable through all features of the sfAdmin file
-		// e.g. in bkk compute land use area for each kwaeng
-		// WARNING: How to match patches (e.g. pixel of rasters) to demographic input geography (e.g. kwaeng) -> centroïde
-		// HINT: see how to match Feature from shp file and *** (see geotools to find the correct object) from tif file to ISPLVariable 
-		splMapper.insertMatchedVariable(endogeneousVarFile);
-		
+		SPLMapper<SPLRawVariable, Double> splMapper = null;
+		try {
+			splMapper = mBuilder.buildMapper();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		System.out.println("["+Localisation.class.getSimpleName()+"] build mapper: done");
+
 		// WARNING: often regression function can be customize using an "intercept", that is a specific value for coordinate [0;0]
 		// e.g. when area of a specific endogeneous variable is null, the population must be null
+		System.out.println("["+Localisation.class.getSimpleName()+"] start regression: ...");
 		Map<SPLRawVariable, Double> coeffRegression = null;
 		try {
 			coeffRegression = splMapper.regression();
@@ -91,51 +88,37 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+		System.out.println("["+Localisation.class.getSimpleName()+"] regression: done");
+
 		// TODO: compute a feature specific coefficient of correction to exactly match the dependent variable of each feature
 		// e.g. for each kwaeng we compute estimate population and then compute the ration of (real / estimate)
-		Map<Feature, Double> coeffCorrection = null;
+		System.out.println("["+Localisation.class.getSimpleName()+"] start correction coefficient computation: ...");
+		Map<GenstarFeature, Double> coeffCorrection = null;
 		try {
 			coeffCorrection = splMapper.getCorrectionCoefficient();
 		} catch (IllegalRegressionException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		System.out.println("["+Localisation.class.getSimpleName()+"] correction coefficient computed");
+
+		System.out.println("["+Localisation.class.getSimpleName()+"] "+coeffRegression.toString()+" of size "+coeffRegression.size());
+		coeffRegression.entrySet().stream().forEach(e -> System.out.println(e.getKey().getName()+" reg coeff = "+e.getValue()));
+		coeffCorrection.entrySet().stream().forEach(e -> System.out.println(e.getKey().getProperty(propertyName).getName()+" reg correction coeff = "+e.getValue()));
 		
-		GeotiffFileIO geoOutput = computePopPerFeature(splMapper, coeffRegression, coeffCorrection);
-		
-		System.out.println(geoOutput.toString());
-		
+		// GeotiffFileIO geoOutput = computePopPerFeature(splMapper, coeffRegression, coeffCorrection);
+		// System.out.println(geoOutput.toString());
+
 	}
 
 	// TODO: take 1.A) mapping between original features and variables 1.B) each variable coefficient from regression
 	//			1.C) correction coefficient for each features and then 2) compute overall population per "variable defined space geography"
 	// WARNING: from the beggining the output space geography must be define with variable space geography
-	private static GeotiffFileIO computePopPerFeature(SPLMapper<Feature, SPLRawVariable, Double> splMapper,
+	private static GeotiffFileIO computePopPerFeature(SPLMapper<SPLRawVariable, Double> splMapper,
 			Map<SPLRawVariable, Double> coeffRegression, 
 			Map<Feature, Double> coeffCorrection) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
-	private static void getLayersAndDisplay() throws Exception {
-        List<Parameter<?>> list = new ArrayList<Parameter<?>>();
-        list.add(new Parameter<File>("regressor", File.class, "Image",
-                "GeoTiff regressors",
-                new KVP( Parameter.EXT, "tif", Parameter.EXT, "jpg")));
-        list.add(new Parameter<File>("admin", File.class, "Shapefile",
-                "Basic administrativ info", new KVP(Parameter.EXT, "shp")));
 
-        JParameterListWizard wizard = new JParameterListWizard("Image Lab",
-                "Fill in the following layers", list);
-        int finish = wizard.showModalDialog();
-
-        if (finish != JWizard.FINISH) {
-            System.exit(0);
-        }
-        sfAdmin = new ShapeFileIO(((File) wizard.getConnectionParameters().get("admin")).getAbsolutePath());
-        endogeneousVarFile.add(new GeotiffFileIO(((File) wizard.getConnectionParameters().get("regressor")).getAbsolutePath()));
-        
-    }
-	
 }

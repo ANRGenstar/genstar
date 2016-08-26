@@ -1,6 +1,7 @@
 package spll;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.opengis.feature.Feature;
@@ -11,6 +12,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.GeotiffFileIO;
 import io.datareaders.georeader.ShapeFileIO;
+import io.datareaders.georeader.geodat.GenstarFeature;
+import io.datareaders.georeader.geodat.GenstarPixel;
 
 
 public class SPLFileReader {
@@ -45,16 +48,10 @@ public class SPLFileReader {
 
 		if(fileExtension.equals(".shp")){
 			String[] shapePathSplit = args[0].split("/");
-			List<Feature> featureList = shapeFile.getFeatures();
-
-			try {
-				System.out.println("Shape file named "+shapePathSplit[shapePathSplit.length-1]
-						+" contains "+featureList.size()
-						+"\nFeature of type: "+shapeFile.getFeatureType().getTypeName()+" with "+shapeFile.getFeatureType().getAttributeCount()+" attributes each");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			List<GenstarFeature> featureList = shapeFile.getGeoData();
+			System.out.println("["+SPLFileReader.class.getSimpleName()+"] Shape file named "+shapePathSplit[shapePathSplit.length-1]
+					+" contains "+featureList.size()
+					+"\nFeature descriptor: "+featureList.iterator().next().getDescriptor());
 			for(Feature feature : featureList){
 				SimpleFeature sF = (SimpleFeature) feature;
 				System.out.println(feature.getName());
@@ -66,9 +63,15 @@ public class SPLFileReader {
 			}
 		} else if(fileExtension.equals(".tif")){
 			String[] tiffPathSplit = args[0].split("/");
-			List<Feature> featureList = tiffFile.getFeatures();
-			System.out.println("Shape file named "+tiffPathSplit[tiffPathSplit.length-1]
-					+" contains "+featureList.size()
+			List<GenstarPixel> featureList = new ArrayList<>();
+			try {
+				featureList.addAll(tiffFile.getGeoData());
+			} catch (IOException | TransformException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("["+SPLFileReader.class.getSimpleName()+"] Shape file named "+tiffPathSplit[tiffPathSplit.length-1]
+					+" contains "+featureList.size()+ "features"
 					+"\nCRS: "+tiffFile.getCoordRefSystem()+" | number of band "+tiffFile.getBandId().length+" with names "+tiffFile.getBandId());
 		}
 	}
