@@ -2,7 +2,7 @@ package io.datareaders.georeader.geodat;
 
 import java.util.List;
 
-public interface IGeoGenstarAttributes<A, D> {
+public interface IGeoGSAttributes<A, D> {
 
 	public List<A> getData();
 	
@@ -10,6 +10,6 @@ public interface IGeoGenstarAttributes<A, D> {
 	
 	public String getGenstarName();
 	
-	public GenstarFeature transposeToGenstarFeature();
+	public GSFeature transposeToGenstarFeature();
 	
 }

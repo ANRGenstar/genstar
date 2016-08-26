@@ -1,6 +1,6 @@
 package spll.datamapper.matcher;
 
-import io.datareaders.georeader.geodat.GenstarFeature;
+import io.datareaders.georeader.geodat.GSFeature;
 import spll.datamapper.variable.SPLRawVariable;
 
 public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable, Double> {
@@ -9,13 +9,13 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable
 	
 	private final SPLRawVariable variable;
 
-	private GenstarFeature feature;
+	private GSFeature feature;
 	
-	protected SPLAreaMatcher(GenstarFeature feat, SPLRawVariable variable){
+	protected SPLAreaMatcher(GSFeature feat, SPLRawVariable variable){
 		this(feat, variable, 1d);
 	}
 	
-	protected SPLAreaMatcher(GenstarFeature feat, SPLRawVariable variable, double area){
+	protected SPLAreaMatcher(GSFeature feat, SPLRawVariable variable, double area){
 		this.feature = feat;
 		this.variable = variable;
 		this.area = area;
@@ -43,7 +43,7 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable
 	}
 
 	@Override
-	public GenstarFeature getFeature() {
+	public GSFeature getFeature() {
 		return feature;
 	}
 

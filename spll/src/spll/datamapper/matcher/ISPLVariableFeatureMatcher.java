@@ -1,6 +1,6 @@
 package spll.datamapper.matcher;
 
-import io.datareaders.georeader.geodat.GenstarFeature;
+import io.datareaders.georeader.geodat.GSFeature;
 import spll.datamapper.variable.ISPLVariable;
 
 public interface ISPLVariableFeatureMatcher<V extends ISPLVariable<?>, T> {
@@ -13,6 +13,6 @@ public interface ISPLVariableFeatureMatcher<V extends ISPLVariable<?>, T> {
 	
 	public V getVariable();
 
-	public GenstarFeature getFeature();
+	public GSFeature getFeature();
 
 }

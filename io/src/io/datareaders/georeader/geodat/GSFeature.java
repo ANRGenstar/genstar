@@ -15,16 +15,16 @@ import org.opengis.feature.type.Name;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.BoundingBox;
 
-public class GenstarFeature implements IGeoGenstarAttributes<Property, Object>, Feature {
+public class GSFeature implements IGeoGSAttributes<Property, Object>, Feature {
 
 	private final Feature innerFeature;
 	
-	public GenstarFeature(Feature innerFeature) {
+	public GSFeature(Feature innerFeature) {
 		this.innerFeature = innerFeature;
 	}
 	
 	@Override
-	public GenstarFeature transposeToGenstarFeature() {
+	public GSFeature transposeToGenstarFeature() {
 		return this;
 	}
 	

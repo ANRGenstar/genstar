@@ -12,8 +12,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.GeotiffFileIO;
 import io.datareaders.georeader.ShapeFileIO;
-import io.datareaders.georeader.geodat.GenstarFeature;
-import io.datareaders.georeader.geodat.GenstarPixel;
+import io.datareaders.georeader.geodat.GSFeature;
+import io.datareaders.georeader.geodat.GSPixel;
 
 
 public class SPLFileReader {
@@ -48,7 +48,7 @@ public class SPLFileReader {
 
 		if(fileExtension.equals(".shp")){
 			String[] shapePathSplit = args[0].split("/");
-			List<GenstarFeature> featureList = shapeFile.getGeoData();
+			List<GSFeature> featureList = shapeFile.getGeoData();
 			System.out.println("["+SPLFileReader.class.getSimpleName()+"] Shape file named "+shapePathSplit[shapePathSplit.length-1]
 					+" contains "+featureList.size()
 					+"\nFeature descriptor: "+featureList.iterator().next().getDescriptor());
@@ -63,7 +63,7 @@ public class SPLFileReader {
 			}
 		} else if(fileExtension.equals(".tif")){
 			String[] tiffPathSplit = args[0].split("/");
-			List<GenstarPixel> featureList = new ArrayList<>();
+			List<GSPixel> featureList = new ArrayList<>();
 			try {
 				featureList.addAll(tiffFile.getGeoData());
 			} catch (IOException | TransformException e) {

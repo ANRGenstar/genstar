@@ -19,11 +19,11 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import io.datareaders.georeader.geodat.GenstarFeature;
+import io.datareaders.georeader.geodat.GSFeature;
 
-public class ShapeFileIO implements ISPLFileIO<GenstarFeature, Property, Object> {
+public class ShapeFileIO implements ISPLFileIO<GSFeature, Property, Object> {
 
-	private List<GenstarFeature> features = null;
+	private List<GSFeature> features = null;
 	
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
@@ -50,7 +50,7 @@ public class ShapeFileIO implements ISPLFileIO<GenstarFeature, Property, Object>
 	    FeatureCollection<SimpleFeatureType, SimpleFeature> collection = fSource.getFeatures(filter);
 	    FeatureIterator<SimpleFeature> fItt = collection.features();
 	    while (fItt.hasNext())
-	    	features.add(new GenstarFeature(fItt.next()));
+	    	features.add(new GSFeature(fItt.next()));
 	}
 	
 	@Override
@@ -64,12 +64,12 @@ public class ShapeFileIO implements ISPLFileIO<GenstarFeature, Property, Object>
 	 * @return
 	 */
 	@Override
-	public List<GenstarFeature> getGeoData() {
+	public List<GSFeature> getGeoData() {
 		return Collections.unmodifiableList(features);
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(ISPLFileIO<GenstarFeature, Property, Object> file) {
+	public boolean isCoordinateCompliant(ISPLFileIO<GSFeature, Property, Object> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 

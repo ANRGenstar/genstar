@@ -12,7 +12,7 @@ import java.util.List;
 
 import au.com.bytecode.opencsv.CSVReader;
 
-class CsvInputHandler implements ISurvey {
+class CsvInputHandler implements IGSSurvey {
 	
 	private final char DEFAULT_SEPARATOR = ',';
 	private List<String[]> dataTable;

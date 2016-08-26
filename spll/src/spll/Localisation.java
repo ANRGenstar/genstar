@@ -14,7 +14,7 @@ import io.datareaders.georeader.GeotiffFileIO;
 import io.datareaders.georeader.ISPLFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import io.datareaders.georeader.exception.SPLFileIOException;
-import io.datareaders.georeader.geodat.GenstarFeature;
+import io.datareaders.georeader.geodat.GSFeature;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
 import spll.datamapper.SPLAreaMapperBuilder;
@@ -93,7 +93,7 @@ public class Localisation {
 		// TODO: compute a feature specific coefficient of correction to exactly match the dependent variable of each feature
 		// e.g. for each kwaeng we compute estimate population and then compute the ration of (real / estimate)
 		System.out.println("["+Localisation.class.getSimpleName()+"] start correction coefficient computation: ...");
-		Map<GenstarFeature, Double> coeffCorrection = null;
+		Map<GSFeature, Double> coeffCorrection = null;
 		try {
 			coeffCorrection = splMapper.getCorrectionCoefficient();
 		} catch (IllegalRegressionException e) {

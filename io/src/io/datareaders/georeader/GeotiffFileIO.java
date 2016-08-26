@@ -24,9 +24,9 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Point;
 
-import io.datareaders.georeader.geodat.GenstarPixel;
+import io.datareaders.georeader.geodat.GSPixel;
 
-public class GeotiffFileIO implements ISPLFileIO<GenstarPixel, Number, Double> {
+public class GeotiffFileIO implements ISPLFileIO<GSPixel, Number, Double> {
 
 	private final AbstractGridCoverage2DReader store;
 	private GridCoverage2D coverage;
@@ -65,12 +65,12 @@ public class GeotiffFileIO implements ISPLFileIO<GenstarPixel, Number, Double> {
 	}
 	
 	@Override
-	public List<GenstarPixel> getGeoData() throws IOException, TransformException{
+	public List<GSPixel> getGeoData() throws IOException, TransformException{
 		return extractFeatures(store, coverage);
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(ISPLFileIO<GenstarPixel, Number, Double> file) {
+	public boolean isCoordinateCompliant(ISPLFileIO<GSPixel, Number, Double> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 	
@@ -134,8 +134,8 @@ public class GeotiffFileIO implements ISPLFileIO<GenstarPixel, Number, Double> {
 	 * 2) http://gis.stackexchange.com/questions/114598/creating-point-in-shapefile-from-latitude-longitude-using-geotools
 	 * 
 	 */
-	private List<GenstarPixel> extractFeatures(AbstractGridCoverage2DReader store, GridCoverage2D coverage) throws IOException, TransformException{
-		List<GenstarPixel> featureList = new ArrayList<>();
+	private List<GSPixel> extractFeatures(AbstractGridCoverage2DReader store, GridCoverage2D coverage) throws IOException, TransformException{
+		List<GSPixel> featureList = new ArrayList<>();
 		
 		int w = (int) coverage.getProperty("image_width");
 		int h = (int) coverage.getProperty("image_height");
@@ -154,7 +154,7 @@ public class GeotiffFileIO implements ISPLFileIO<GenstarPixel, Number, Double> {
 					valsN[k] = vals[k];
 
 				
-				featureList.add(new GenstarPixel(w, h, valsN));
+				featureList.add(new GSPixel(w, h, valsN));
 				
 				if(DoubleStream.of(vals).mapToObj(Double::valueOf).anyMatch(val -> val.isNaN() || val <= 0d || val == null))
 					System.out.println("["+this.getClass().getSimpleName()+"] Strange value: "+Arrays.toString(vals).toString());

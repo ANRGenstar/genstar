@@ -17,6 +17,7 @@ import com.thoughtworks.xstream.converters.extended.NamedMapConverter;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplConfigurationFile;
+import gospl.survey.SurveyMetatDataType;
 
 public class GosplXmlSerializer {
 

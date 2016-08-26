@@ -14,13 +14,13 @@ import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-public class GenstarPixel implements IGeoGenstarAttributes<Number, Double> {
+public class GSPixel implements IGeoGSAttributes<Number, Double> {
 
 	int x, y;
 	
 	Number[] bandsData;
 	
-	public GenstarPixel(int x, int y, Number[] bandsData) {
+	public GSPixel(int x, int y, Number[] bandsData) {
 		this.x = x;
 		this.y = y;
 		this.bandsData = bandsData;
@@ -36,7 +36,7 @@ public class GenstarPixel implements IGeoGenstarAttributes<Number, Double> {
 	}
 	
 	@Override
-	public GenstarFeature transposeToGenstarFeature() {
+	public GSFeature transposeToGenstarFeature() {
 		SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
 		b.setName(this.getGenstarName());		
 		b.setCRS(DefaultGeographicCRS.WGS84); // set crs first
@@ -49,7 +49,7 @@ public class GenstarPixel implements IGeoGenstarAttributes<Number, Double> {
 		featureBuilder.add(point);
 		SimpleFeature feature = featureBuilder.buildFeature(null);
 
-		return new GenstarFeature(feature);
+		return new GSFeature(feature);
 	}
 	
 	@Override

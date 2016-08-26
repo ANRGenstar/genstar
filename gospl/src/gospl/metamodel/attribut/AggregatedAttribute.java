@@ -1,0 +1,58 @@
+package gospl.metamodel.attribut;
+
+import java.util.Map;
+import java.util.Set;
+
+import gospl.metamodel.attribut.value.IValue;
+import io.datareaders.DataType;
+
+public class AggregatedAttribute implements IAttribute {
+
+	public AggregatedAttribute(String name, DataType dataType, IAttribute referentAttribute,
+			Map<String, Set<String>> mapper) {
+		// TODO Auto-generated constructor stub
+	}
+
+	@Override
+	public String getName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public DataType getDataType() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public IAttribute getReferentAttribute() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public boolean isRecordAttribute() {
+		// TODO Auto-generated method stub
+		return false;
+	}
+
+	@Override
+	public Set<IValue> getValues() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void addAll(Set<IValue> values) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void setEmptyValue(IValue emptyValue) {
+		// TODO Auto-generated method stub
+		
+	}
+
+}

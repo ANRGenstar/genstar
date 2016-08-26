@@ -1,13 +1,13 @@
 package io.datareaders.surveyreader.exception;
 
-public class GenstarIllegalRangedData extends Exception {
+public class GSIllegalRangedData extends Exception {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public GenstarIllegalRangedData(String message) {
+	public GSIllegalRangedData(String message) {
 		// TODO Auto-generated constructor stub
 		super(message);
 	}

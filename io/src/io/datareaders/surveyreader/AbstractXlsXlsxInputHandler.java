@@ -20,7 +20,7 @@ import org.apache.poi.ss.usermodel.Workbook;
  * @author chapuisk
  *
  */
-public abstract class AbstractXlsXlsxInputHandler implements ISurvey {
+public abstract class AbstractXlsXlsxInputHandler implements IGSSurvey {
 
 	protected Workbook wb;
 	private String surveyFileName;

@@ -10,7 +10,7 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import io.datareaders.exception.GenstarIllegalRangedData;
+import io.datareaders.surveyreader.exception.GSIllegalRangedData;
 
 /**
  * 
@@ -53,9 +53,9 @@ public class GSDataParser {
 	 * 
 	 * @param range
 	 * @return {@link List} of min and max double values based on {@code range} string representation 
-	 * @throws GenstarIllegalRangedData
+	 * @throws GSIllegalRangedData
 	 */
-	public List<Double> getRangedDoubleData(String range, boolean nullValue) throws GenstarIllegalRangedData{
+	public List<Double> getRangedDoubleData(String range, boolean nullValue) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
 		if(nullValue)
 			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", " ");
@@ -63,9 +63,9 @@ public class GSDataParser {
 			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", " ");
 		List<String> stringRange = Arrays.asList(range.trim().split(" "));
 		if(stringRange.isEmpty())
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " does not represent any value");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
 	    for(String i : stringRange)
 	    	list.add(Double.valueOf(i));
 		return list;
@@ -80,10 +80,10 @@ public class GSDataParser {
 	 * @param nullValue
 	 * @param minVal
 	 * @return {@link List} of min and max double values based on given {@code minVal} and parsed max {@code range}
-	 * @throws GenstarIllegalRangedData
+	 * @throws GSIllegalRangedData
 	 */
 	@Deprecated
-	public List<Double> getRangedData(String range, boolean nullValue, Double minVal, Double maxVal) throws GenstarIllegalRangedData{
+	public List<Double> getRangedData(String range, boolean nullValue, Double minVal, Double maxVal) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
 		if(nullValue)
 			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", " ");
@@ -91,12 +91,12 @@ public class GSDataParser {
 			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", " ");
 		List<String> stringRange = Arrays.asList(range.trim().split(" "));
 		if(stringRange.isEmpty())
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " does not represent any value");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
 		if (stringRange.size() == 1){
 			if(minVal == null && maxVal == null)
-				throw new GenstarIllegalRangedData("for implicit bounded values, either min or max value in argument must be set to a concret value !");
+				throw new GSIllegalRangedData("for implicit bounded values, either min or max value in argument must be set to a concret value !");
 			if(maxVal == null && minVal != null)
 				stringRange.add(0, String.valueOf(minVal));
 			else if(minVal == null && maxVal != null)
@@ -118,9 +118,9 @@ public class GSDataParser {
 	 * 
 	 * @param range
 	 * @return {@link List} of min and max integer values based on {@code range} string representation
-	 * @throws GenstarIllegalRangedData
+	 * @throws GSIllegalRangedData
 	 */
-	public List<Integer> getRangedIntegerData(String range, boolean nullValue) throws GenstarIllegalRangedData{
+	public List<Integer> getRangedIntegerData(String range, boolean nullValue) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
 		range = range.replaceAll(Pattern.quote("+"), " ");
 		if(nullValue)
@@ -129,9 +129,9 @@ public class GSDataParser {
 			range = range.replaceAll("[^\\d+]", " ");
 		List<String> stringRange = new ArrayList<>(Arrays.asList(range.trim().split(" ")));
 		if(stringRange.isEmpty())
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " does not represent any value");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
 	    for(String i : stringRange)
 	    	list.add(Integer.valueOf(i));
 		return list;
@@ -146,10 +146,10 @@ public class GSDataParser {
 	 * @param nullValue
 	 * @param minVal
 	 * @return {@link List} of min and max values
-	 * @throws GenstarIllegalRangedData
+	 * @throws GSIllegalRangedData
 	 */
 	@Deprecated
-	public List<Integer> getRangedData(String range, boolean nullValue, Integer minVal, Integer maxVal) throws GenstarIllegalRangedData{
+	public List<Integer> getRangedData(String range, boolean nullValue, Integer minVal, Integer maxVal) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
 		if(nullValue)
 			range = range.replaceAll("[^-?\\d+]", " ");
@@ -157,12 +157,12 @@ public class GSDataParser {
 			range = range.replaceAll("[^\\d]+", " ");
 		List<String> stringRange = new ArrayList<>(Arrays.asList(range.trim().split(" ")));
 		if(stringRange.isEmpty())
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " does not represent any value");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
-			throw new GenstarIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
 		if(stringRange.size() == 1){
 			if(minVal == null && maxVal == null)
-				throw new GenstarIllegalRangedData("for implicit bounded values, either min or max value in argument must be set to a concret value !");
+				throw new GSIllegalRangedData("for implicit bounded values, either min or max value in argument must be set to a concret value !");
 			if(maxVal == null && minVal != null)
 				stringRange.add(0, String.valueOf(minVal));
 			else if(minVal == null && maxVal != null)

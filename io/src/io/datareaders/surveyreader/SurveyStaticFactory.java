@@ -10,7 +10,7 @@ import io.datareaders.surveyreader.exception.InputFileNotSupportedException;
 
 public class SurveyStaticFactory {
 		
-	public static ISurvey getSurvey(File file) throws IOException, InputFileNotSupportedException, InvalidFormatException{
+	public static IGSSurvey getSurvey(File file) throws IOException, InputFileNotSupportedException, InvalidFormatException{
 		if(file.getName().contains("xlsx"))
 			return new XlsxInputHandler(file);
 		if(file.getName().contains("xls"))
@@ -20,7 +20,7 @@ public class SurveyStaticFactory {
 		else throw new InputFileNotSupportedException();
 	}
 
-	public static ISurvey getSurvey(String fileName, InputStream surveyIS) throws InputFileNotSupportedException, IOException {
+	public static IGSSurvey getSurvey(String fileName, InputStream surveyIS) throws InputFileNotSupportedException, IOException {
 		if(fileName.contains("xlsx"))
 			return new XlsxInputHandler(surveyIS);
 		if(fileName.contains("xls"))
@@ -30,7 +30,7 @@ public class SurveyStaticFactory {
 		else throw new InputFileNotSupportedException();
 	}
 	
-	public static ISurvey getSurvey(File file, char csvSeparator) throws InputFileNotSupportedException, IOException, InvalidFormatException{
+	public static IGSSurvey getSurvey(File file, char csvSeparator) throws InputFileNotSupportedException, IOException, InvalidFormatException{
 		if(file.getName().contains("xlsx"))
 			return new XlsxInputHandler(file);
 		if(file.getName().contains("xls"))

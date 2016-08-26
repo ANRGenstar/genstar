@@ -15,8 +15,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.ISPLFileIO;
 import io.datareaders.georeader.ShapeFileIO;
-import io.datareaders.georeader.geodat.GenstarFeature;
-import io.datareaders.georeader.geodat.IGeoGenstarAttributes;
+import io.datareaders.georeader.geodat.GSFeature;
+import io.datareaders.georeader.geodat.IGeoGSAttributes;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
@@ -67,7 +67,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 
 	protected boolean insertMatchedVariable(ISPLFileIO regressorsFiles) throws IOException, TransformException{
 		boolean result = true;
-		for(GenstarFeature feature : mainSPLFile.getGeoData())
+		for(GSFeature feature : mainSPLFile.getGeoData())
 			for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(feature, regressorsFiles))
 				if(!insertMatchedVariable(matchedVariable) && result)
 					result = false;
@@ -81,7 +81,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 
 	// --------------------- Accessor --------------------- //
 
-	public List<GenstarFeature> getAttributes(){
+	public List<GSFeature> getAttributes(){
 		return mainSPLFile.getGeoData();
 	}
 
@@ -89,7 +89,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		return regFunction;
 	}
 
-	public Map<GenstarFeature, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
+	public Map<GSFeature, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
 		return getAttributes().stream().collect(Collectors.toMap(
 				feat -> feat, 
 				feat -> mapper.parallelStream().filter(map -> map.getFeature().equals(feat))
@@ -112,10 +112,10 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		return regFunction.regression();
 	}
 
-	public Map<GenstarFeature, Double> getCorrectionCoefficient() throws IllegalRegressionException {
-		Map<GenstarFeature, Double> correcCoeff = new HashMap<>();
+	public Map<GSFeature, Double> getCorrectionCoefficient() throws IllegalRegressionException {
+		Map<GSFeature, Double> correcCoeff = new HashMap<>();
 		Map<V, Double> regCoeff = this.regression();
-		for(GenstarFeature attribute : this.getAttributes()){
+		for(GSFeature attribute : this.getAttributes()){
 			double targetVal = Double.valueOf(attribute.getProperty(targetProp).getValue().toString());
 			double regressVal = mapper.parallelStream().filter(varMatcher -> varMatcher.getFeature().equals(attribute))
 					.mapToDouble(map -> getComputedRegressValue(regCoeff.get(map.getVariable()), map.getValue())).sum();

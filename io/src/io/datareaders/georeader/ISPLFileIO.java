@@ -7,9 +7,9 @@ import org.opengis.feature.Feature;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.geodat.IGeoGenstarAttributes;
+import io.datareaders.georeader.geodat.IGeoGSAttributes;
 
-public interface ISPLFileIO<G extends IGeoGenstarAttributes<A, D>, A, D> {
+public interface ISPLFileIO<G extends IGeoGSAttributes<A, D>, A, D> {
 
 	public SPLFileType getSPLFileType();
 	

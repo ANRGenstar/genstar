@@ -9,19 +9,19 @@ import org.opengis.feature.Property;
 import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.ISPLFileIO;
-import io.datareaders.georeader.geodat.GenstarFeature;
-import io.datareaders.georeader.geodat.IGeoGenstarAttributes;
+import io.datareaders.georeader.geodat.GSFeature;
+import io.datareaders.georeader.geodat.IGeoGSAttributes;
 import spll.datamapper.variable.SPLRawVariable;
 
 public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLRawVariable, Double> {
 
 	@Override
-	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(GenstarFeature feature, ISPLFileIO file) throws IOException, TransformException {
+	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(GSFeature feature, ISPLFileIO file) throws IOException, TransformException {
 		List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> areaMatcherList = new ArrayList<>();
 		for(Object feat : file.getGeoData()){
 			// WARNING: do something else 
 			// TODO: do not import direct ISPLFileIO but use a spectified (yet to implement) ISPLFileIORegressors
-			IGeoGenstarAttributes geoGenAtt = (IGeoGenstarAttributes) feat;
+			IGeoGSAttributes geoGenAtt = (IGeoGSAttributes) feat;
 			if(feature.getBounds().contains(geoGenAtt.transposeToGenstarFeature().getBounds())){
 				for(Object prop : geoGenAtt.getData()){
 					if(areaMatcherList.stream().anyMatch(varMatcher -> varMatcher.getVariable().getName().equals(geoGenAtt.getGenstarName()) &&

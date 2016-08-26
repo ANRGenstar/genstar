@@ -9,7 +9,7 @@ import java.util.List;
  * @author kevinchapuis
  *
  */
-public interface ISurvey {
+public interface IGSSurvey {
 
 	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}

@@ -1,4 +1,4 @@
-package gospl.survey.adapter;
+package gospl.survey;
 
 public enum SurveyMetatDataType {
 	
