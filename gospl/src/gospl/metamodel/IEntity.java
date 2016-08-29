@@ -3,6 +3,7 @@ package gospl.metamodel;
 import java.util.Collection;
 
 import gospl.metamodel.attribut.IAttribute;
+import gospl.metamodel.attribut.value.IValue;
 import gospl.metamodel.exception.UndefinedAttributeException;
 
 /**
@@ -25,7 +26,7 @@ public interface IEntity {
 	 * @param a
 	 * @return
 	 */
-	public Object getValueForAttribute(IAttribute a) throws UndefinedAttributeException;
+	public IValue getValueForAttribute(IAttribute a) throws UndefinedAttributeException;
 	
 	
 	

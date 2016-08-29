@@ -8,10 +8,7 @@ import java.util.Collection;
  * @author gospl-team
  *
  */
-public interface IPopulation {
+public interface IPopulation extends Collection<IEntity> {
 
-	public void add(IEntity entity);
-	public void remove(IEntity entity);
-	public Collection<IEntity> getAll();
 	
 }
