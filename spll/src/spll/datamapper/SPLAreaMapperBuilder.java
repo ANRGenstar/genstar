@@ -6,7 +6,7 @@ import java.util.List;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.ISPLFileIO;
+import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import spll.algo.LMRegressionAlgorithm;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
@@ -18,7 +18,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Doub
 	private SPLMapper<SPLRawVariable, Double> mapper;
 	
 	public SPLAreaMapperBuilder(ShapeFileIO mainFile, Name propertyName,
-			List<ISPLFileIO> ancillaryFiles) {
+			List<IGeoGSFileIO> ancillaryFiles) {
 		super(mainFile, propertyName, ancillaryFiles);
 		super.setRegressionAlgorithm(new LMRegressionAlgorithm());
 		super.setMatcherFactory(new SPLAreaMatcherFactory());
@@ -31,13 +31,13 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Doub
 		mapper.setMainProperty(propertyName);
 		mapper.setRegAlgo(regressionAlgorithm);
 		mapper.setMatcherFactory(matcherFactory);
-		for(ISPLFileIO file : ancillaryFiles)
+		for(IGeoGSFileIO file : ancillaryFiles)
 			mapRegressorFile(file);
 		return mapper;
 	}
 
 	@Override
-	public void mapRegressorFile(ISPLFileIO regressorFile) throws IOException, TransformException {
+	public void mapRegressorFile(IGeoGSFileIO regressorFile) throws IOException, TransformException {
 		if(mapper != null)
 			mapper.insertMatchedVariable(regressorFile);
 	}

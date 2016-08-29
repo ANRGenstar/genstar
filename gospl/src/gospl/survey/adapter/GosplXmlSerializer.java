@@ -11,11 +11,16 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
 import com.thoughtworks.xstream.converters.extended.NamedMapConverter;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
+import gospl.metamodel.attribut.AggregatedAttribute;
 import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import gospl.metamodel.attribut.RangeAttribute;
+import gospl.metamodel.attribut.RecordeAttribute;
+import gospl.metamodel.attribut.UniqueAttribute;
+import gospl.metamodel.attribut.value.RangeValue;
+import gospl.metamodel.attribut.value.UniqueValue;
 import gospl.survey.GosplConfigurationFile;
 import gospl.survey.SurveyMetatDataType;
 
@@ -30,7 +35,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 	private static final String GS_ATTRIBUTE_ALIAS = "IAttribute";
 	private static final String GS_ATTRIBUTE_LIST_ALIAS = "Iattributes";
 	
-	/*
+	
 	private static final String GS_UNIQUE_ATTRIBUTE_ALIAS = "uniqueAttribute";
 	private static final String GS_RANGE_ATTRIBUTE_ALIAS = "rangeAttribute";
 	private static final String GS_AGGREG_ATTRIBUTE_ALIAS = "aggregatedAttribute";
@@ -38,7 +43,6 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 
 	private static final String GS_UNIQUE_VALUE_ALIAS = "uniqueValue";
 	private static final String GS_RANGE_VALUE_ALIAS = "rangeValue";
-	*/
 	
 	private XStream xs = null;
 	private File mkdir = null;
@@ -55,14 +59,13 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		xs.alias(GS_METADATA_FILE_ALIAS, SurveyMetatDataType.class);
 		xs.alias(GS_ATTRIBUTE_ALIAS, IAttribute.class);
 		
-		/*
-		xs.alias(GS_UNIQUE_ATTRIBUTE_ALIAS, UniqueValuesAttribute.class);
+		
+		xs.alias(GS_UNIQUE_ATTRIBUTE_ALIAS, UniqueAttribute.class);
 		xs.alias(GS_UNIQUE_VALUE_ALIAS, UniqueValue.class);
-		xs.alias(GS_RANGE_ATTRIBUTE_ALIAS, RangeValuesAttribute.class);
+		xs.alias(GS_RANGE_ATTRIBUTE_ALIAS, RangeAttribute.class);
 		xs.alias(GS_RANGE_VALUE_ALIAS, RangeValue.class);
 		xs.alias(GS_AGGREG_ATTRIBUTE_ALIAS, AggregatedAttribute.class);
-		xs.alias(GS_RECORD_ATTRIBUTE_ALIAS, RecorderAttribute.class);
-		*/
+		xs.alias(GS_RECORD_ATTRIBUTE_ALIAS, RecordeAttribute.class);
 		
 		/*
 		 * Map Converter
@@ -75,10 +78,6 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		xs.aliasField(GS_FILE_LIST_ALIAS, GosplConfigurationFile.class, "dataFiles");
 		xs.aliasField(GS_ATTRIBUTE_LIST_ALIAS, GosplConfigurationFile.class, "attributes");
 		
-		/*
-		 * Field-to-attribute in xml
-		 */
-		xs.useAttributeFor(IValue.class, "valueType");
 	}
 	
 	public void serializeGSConfig(GosplConfigurationFile gcf, String xmlName) throws IOException{

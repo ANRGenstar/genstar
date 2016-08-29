@@ -26,7 +26,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import io.datareaders.georeader.geodat.GSPixel;
 
-public class GeotiffFileIO implements ISPLFileIO<GSPixel, Number, Double> {
+public class GeotiffFileIO implements IGeoGSFileIO<GSPixel, Number, Double> {
 
 	private final AbstractGridCoverage2DReader store;
 	private GridCoverage2D coverage;
@@ -60,8 +60,8 @@ public class GeotiffFileIO implements ISPLFileIO<GSPixel, Number, Double> {
 	}
 	
 	@Override
-	public SPLFileType getSPLFileType(){
-		return SPLFileType.RASTER;
+	public GeoGSFileType getGeoGSFileType(){
+		return GeoGSFileType.RASTER;
 	}
 	
 	@Override
@@ -70,7 +70,7 @@ public class GeotiffFileIO implements ISPLFileIO<GSPixel, Number, Double> {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(ISPLFileIO<GSPixel, Number, Double> file) {
+	public boolean isCoordinateCompliant(IGeoGSFileIO<GSPixel, Number, Double> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 	

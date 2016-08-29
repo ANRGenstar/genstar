@@ -1,7 +1,7 @@
 package gospl.metamodel.attribut.value;
 
 import gospl.metamodel.attribut.IAttribute;
-import io.datareaders.DataType;
+import io.data.GSDataType;
 
 public interface IValue {
 	
@@ -9,6 +9,6 @@ public interface IValue {
 	
 	public IAttribute getAttribute();
 	
-	public DataType getDataType();
+	public GSDataType getDataType();
 	
 }

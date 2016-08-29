@@ -1,6 +1,6 @@
-package io.datareaders;
+package io.data;
 
-public enum DataType {
+public enum GSDataType {
 
 	Double (Double.class, "0d"),
 	Integer (Integer.class, "0"),
@@ -10,13 +10,13 @@ public enum DataType {
 	private Class<?> wrapperClass;
 	private java.lang.String defaultValue;
 
-	private DataType(Class<?> wrapperClass, String defaultValue){
+	private GSDataType(Class<?> wrapperClass, String defaultValue){
 		this.wrapperClass = wrapperClass;
 		this.defaultValue = defaultValue;
 	}
 	
 	/**
-	 * Whether this {@link DataType} is numerical or not
+	 * Whether this {@link GSDataType} is numerical or not
 	 * 
 	 * @return
 	 */
@@ -25,7 +25,7 @@ public enum DataType {
 	}
 
 	/**
-	 * Default string value associated with this {@link DataType} 
+	 * Default string value associated with this {@link GSDataType} 
 	 * 
 	 * @return
 	 */

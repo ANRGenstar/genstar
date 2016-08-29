@@ -11,7 +11,7 @@ import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.GeotiffFileIO;
-import io.datareaders.georeader.ISPLFileIO;
+import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import io.datareaders.georeader.exception.SPLFileIOException;
 import io.datareaders.georeader.geodat.GSFeature;
@@ -25,7 +25,7 @@ public class Localisation {
 
 	static ShapeFileIO sfAdmin = null;
 	@SuppressWarnings("rawtypes")
-	static List<ISPLFileIO> endogeneousVarFile = new ArrayList<>();
+	static List<IGeoGSFileIO> endogeneousVarFile = new ArrayList<>();
 
 	/**
 	 * args[0] = shape file of administrative & demographic information

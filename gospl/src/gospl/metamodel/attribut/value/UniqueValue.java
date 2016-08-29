@@ -2,21 +2,21 @@ package gospl.metamodel.attribut.value;
 
 import gospl.metamodel.attribut.GosplValueType;
 import gospl.metamodel.attribut.IAttribute;
-import io.datareaders.DataType;
+import io.data.GSDataType;
 
 public class UniqueValue implements IValue {
 
-	private DataType dataType;
+	private GSDataType dataType;
 	private IAttribute attribute;
 	private String inputStringValue;
 
-	public UniqueValue(String inputStringValue, DataType dataType, IAttribute attribute) {
+	public UniqueValue(String inputStringValue, GSDataType dataType, IAttribute attribute) {
 		this.inputStringValue = inputStringValue;
 		this.dataType = dataType;
 		this.attribute = attribute;
 	}
 	
-	public UniqueValue(DataType dataType, IAttribute attribute) {
+	public UniqueValue(GSDataType dataType, IAttribute attribute) {
 		this(GosplValueType.unique.getDefaultStringValue(dataType), dataType, attribute);
 	}
 
@@ -31,7 +31,7 @@ public class UniqueValue implements IValue {
 	}
 
 	@Override
-	public DataType getDataType() {
+	public GSDataType getDataType() {
 		return dataType;
 	}
 

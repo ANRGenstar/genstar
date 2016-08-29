@@ -2,18 +2,18 @@ package gospl.metamodel.attribut.value;
 
 import gospl.metamodel.attribut.GosplValueType;
 import gospl.metamodel.attribut.IAttribute;
-import io.datareaders.DataType;
+import io.data.GSDataType;
 
 public class RangeValue implements IValue {
 
-	private DataType dataType;
+	private GSDataType dataType;
 	private IAttribute attribute;
 	
 	private String inputStringValue;
 	private String inputStringLowerBound;
 	private String inputStringUpperBound;
 
-	public RangeValue(String inputStringLowerBound, String inputStringUpperBound, String inputStringValue, DataType dataType, IAttribute attribute) {
+	public RangeValue(String inputStringLowerBound, String inputStringUpperBound, String inputStringValue, GSDataType dataType, IAttribute attribute) {
 		this.inputStringLowerBound = inputStringLowerBound;
 		this.inputStringUpperBound = inputStringUpperBound;
 		this.inputStringValue = inputStringValue;
@@ -21,7 +21,7 @@ public class RangeValue implements IValue {
 		this.attribute = attribute;
 	}
 	
-	public RangeValue(DataType dataType, IAttribute attribute) {
+	public RangeValue(GSDataType dataType, IAttribute attribute) {
 		this(GosplValueType.unique.getDefaultStringValue(dataType), GosplValueType.unique.getDefaultStringValue(dataType), 
 				GosplValueType.range.getDefaultStringValue(dataType), dataType, attribute);
 	}
@@ -47,7 +47,7 @@ public class RangeValue implements IValue {
 	}
 
 	@Override
-	public DataType getDataType() {
+	public GSDataType getDataType() {
 		// TODO Auto-generated method stub
 		return dataType;
 	}

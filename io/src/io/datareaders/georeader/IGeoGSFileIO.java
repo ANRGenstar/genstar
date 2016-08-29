@@ -9,9 +9,9 @@ import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.geodat.IGeoGSAttributes;
 
-public interface ISPLFileIO<G extends IGeoGSAttributes<A, D>, A, D> {
+public interface IGeoGSFileIO<G extends IGeoGSAttributes<A, D>, A, D> {
 
-	public SPLFileType getSPLFileType();
+	public GeoGSFileType getGeoGSFileType();
 	
 	/**
 	 * Retrieve main spatial component of the file: {@link Feature} from GeoTools api
@@ -30,7 +30,7 @@ public interface ISPLFileIO<G extends IGeoGSAttributes<A, D>, A, D> {
 	 * @param file
 	 * @return
 	 */
-	public boolean isCoordinateCompliant(ISPLFileIO<G, A, D> file);
+	public boolean isCoordinateCompliant(IGeoGSFileIO<G, A, D> file);
 
 	/**
 	 * The {@link CoordinateReferenceSystem} used by this file

@@ -21,7 +21,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import io.datareaders.georeader.geodat.GSFeature;
 
-public class ShapeFileIO implements ISPLFileIO<GSFeature, Property, Object> {
+public class ShapeFileIO implements IGeoGSFileIO<GSFeature, Property, Object> {
 
 	private List<GSFeature> features = null;
 	
@@ -54,8 +54,8 @@ public class ShapeFileIO implements ISPLFileIO<GSFeature, Property, Object> {
 	}
 	
 	@Override
-	public SPLFileType getSPLFileType() {
-		return SPLFileType.VECTOR;
+	public GeoGSFileType getGeoGSFileType() {
+		return GeoGSFileType.VECTOR;
 	}
 	
 	/**
@@ -69,7 +69,7 @@ public class ShapeFileIO implements ISPLFileIO<GSFeature, Property, Object> {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(ISPLFileIO<GSFeature, Property, Object> file) {
+	public boolean isCoordinateCompliant(IGeoGSFileIO<GSFeature, Property, Object> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 

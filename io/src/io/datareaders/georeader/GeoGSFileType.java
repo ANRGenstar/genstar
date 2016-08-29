@@ -1,6 +1,6 @@
 package io.datareaders.georeader;
 
-public enum SPLFileType {
+public enum GeoGSFileType {
 
 	RASTER,
 	VECTOR;

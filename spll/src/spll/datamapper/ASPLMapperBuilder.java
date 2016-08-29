@@ -6,7 +6,7 @@ import java.util.List;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.ISPLFileIO;
+import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.datamapper.matcher.ISPLMatcherFactory;
@@ -17,13 +17,13 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 	protected final ShapeFileIO mainFile;
 	protected final Name propertyName;
 	
-	protected List<ISPLFileIO> ancillaryFiles;
+	protected List<IGeoGSFileIO> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
 	
 	protected ISPLRegressionAlgorithm<V, T> regressionAlgorithm;
 	
 	public ASPLMapperBuilder(ShapeFileIO mainFile, Name propertyName,
-			List<ISPLFileIO> ancillaryFiles) {
+			List<IGeoGSFileIO> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.propertyName = propertyName;
 		this.ancillaryFiles = ancillaryFiles;
@@ -37,7 +37,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 		this.matcherFactory = matcherFactory;
 	}
 	
-	public abstract void mapRegressorFile(ISPLFileIO regressorFile) throws IOException, TransformException;
+	public abstract void mapRegressorFile(IGeoGSFileIO regressorFile) throws IOException, TransformException;
 	
 	public abstract SPLMapper<V, T> buildMapper() throws IOException, TransformException;
 	

@@ -1,6 +1,6 @@
 package gospl.metamodel.attribut;
 
-import io.datareaders.DataType;
+import io.data.GSDataType;
 
 public enum GosplValueType {
 
@@ -8,7 +8,7 @@ public enum GosplValueType {
 	range,
 	record;
 	
-	public String getDefaultStringValue(DataType dataType){
+	public String getDefaultStringValue(GSDataType dataType){
 		String def = "";
 		switch (this) {
 		case unique:

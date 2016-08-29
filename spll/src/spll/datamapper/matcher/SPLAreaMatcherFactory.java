@@ -8,7 +8,7 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.ISPLFileIO;
+import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.geodat.GSFeature;
 import io.datareaders.georeader.geodat.IGeoGSAttributes;
 import spll.datamapper.variable.SPLRawVariable;
@@ -16,7 +16,7 @@ import spll.datamapper.variable.SPLRawVariable;
 public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLRawVariable, Double> {
 
 	@Override
-	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(GSFeature feature, ISPLFileIO file) throws IOException, TransformException {
+	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(GSFeature feature, IGeoGSFileIO file) throws IOException, TransformException {
 		List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> areaMatcherList = new ArrayList<>();
 		for(Object feat : file.getGeoData()){
 			// WARNING: do something else 

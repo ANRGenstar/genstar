@@ -13,7 +13,7 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.ISPLFileIO;
+import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import io.datareaders.georeader.geodat.GSFeature;
 import io.datareaders.georeader.geodat.IGeoGSAttributes;
@@ -65,7 +65,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		this.targetProp = propertyName;
 	}
 
-	protected boolean insertMatchedVariable(ISPLFileIO regressorsFiles) throws IOException, TransformException{
+	protected boolean insertMatchedVariable(IGeoGSFileIO regressorsFiles) throws IOException, TransformException{
 		boolean result = true;
 		for(GSFeature feature : mainSPLFile.getGeoData())
 			for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(feature, regressorsFiles))

@@ -1,4 +1,4 @@
-package io.datareaders;
+package io.data;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -16,7 +16,7 @@ import io.datareaders.surveyreader.exception.GSIllegalRangedData;
  * 
  * Object that can read data and: 
  * <p><ul>
- *  <li> {@link #getValueType(String)} give the implicit parsed data type ( {@link DataType} )
+ *  <li> {@link #getValueType(String)} give the implicit parsed data type ( {@link GSDataType} )
  *  <li> {@link #getRangedDoubleData(String, boolean)} or {@link #getRangedIntegerData(String, boolean)}
  * </ul><p>
  * Can give explicit values from string ranged value data representation
@@ -29,21 +29,21 @@ public class GSDataParser {
 	public GSDataParser(){}
 	
 	/**
-	 * Methods that retrieve value type ({@link DataType}) through string parsing <br/>
-	 * Default type is {@value DataType#STRING}
+	 * Methods that retrieve value type ({@link GSDataType}) through string parsing <br/>
+	 * Default type is {@value GSDataType#STRING}
 	 * 
 	 * @param value
 	 * @return
 	 */
-	public DataType getValueType(String value){
+	public GSDataType getValueType(String value){
 		value = value.trim();
 		if(value.matches("(\\-)?(\\d+\\.\\d+)(E(\\-)?\\d+)?") || value.matches("(\\-)?(\\d+\\,\\d+)(E(\\-)?\\d+)?"))
-			return DataType.Double;
+			return GSDataType.Double;
 		if(value.matches("(\\-)?\\d+"))
-			return DataType.Integer;
+			return GSDataType.Integer;
 		if(Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value))
-			return DataType.Boolean;
-		return DataType.String;
+			return GSDataType.Boolean;
+		return GSDataType.String;
 	}
 
 	/**
@@ -122,11 +122,11 @@ public class GSDataParser {
 	 */
 	public List<Integer> getRangedIntegerData(String range, boolean nullValue) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
-		range = range.replaceAll(Pattern.quote("+"), " ");
+		range = range.replaceAll(Pattern.quote("+"), "");
 		if(nullValue)
-			range = range.replaceAll("[^-?\\d+]", " ");
+			range = range.replaceAll("[^-?\\d+]", "");
 		else
-			range = range.replaceAll("[^\\d+]", " ");
+			range = range.replaceAll("[^\\d+]", "");
 		List<String> stringRange = new ArrayList<>(Arrays.asList(range.trim().split(" ")));
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");

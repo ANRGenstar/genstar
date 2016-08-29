@@ -12,8 +12,8 @@ import gospl.metamodel.attribut.value.IValue;
 import gospl.metamodel.attribut.value.RangeValue;
 import gospl.metamodel.attribut.value.RecordValue;
 import gospl.metamodel.attribut.value.UniqueValue;
-import io.datareaders.DataType;
-import io.datareaders.GSDataParser;
+import io.data.GSDataType;
+import io.data.GSDataParser;
 import io.datareaders.surveyreader.exception.GSIllegalRangedData;
 
 public class AttributeFactory {
@@ -38,7 +38,7 @@ public class AttributeFactory {
 	 * <p> <ul>
 	 * <li>If {@code valueType.equals({@link GosplValueType#range})} then return a {@link RangeAttribute}
 	 * <li>If {@code valueType.equals({@link GosplValueType#unique})} then return a {@link UniqueAttribute}
-	 * <li>If {@code valueType.equals({@link GosplValueType#record})} then return a {@link RecorderAttribute}
+	 * <li>If {@code valueType.equals({@link GosplValueType#record})} then return a {@link RecordeAttribute}
 	 * <li>FutherMore if {@code !IAttribute#getReferentAttribute().equals(this) && !this.isRecordAttribute()} then return a {@link AggregatedAttribute} 
 	 * </ul><p>
 	 *   
@@ -55,13 +55,13 @@ public class AttributeFactory {
 	 * @throws GSException
 	 * @throws GenstarIllegalRangedData
 	 */
-	public IAttribute createAttribute(String name, DataType dataType, List<String> values,
+	public IAttribute createAttribute(String name, GSDataType dataType, List<String> values,
 			GosplValueType valueType) throws GSException, GSIllegalRangedData {
 		return createAttribute(name, dataType, values, valueType, null, Collections.emptyMap());
 	}
 
 	/**
-	 * Method that permit to instantiate specific case of {@link AbstractAttribute}: {@link RecorderAttribute} and {@link AggregatedAttribute}
+	 * Method that permit to instantiate specific case of {@link AbstractAttribute}: {@link RecordeAttribute} and {@link AggregatedAttribute}
 	 * <p>
 	 * TODO: explain how
 	 * 
@@ -78,7 +78,7 @@ public class AttributeFactory {
 	 * @throws GSIllegalRangedData 
 	 * @throws GenstarIllegalRangedData
 	 */
-	public IAttribute createAttribute(String name, DataType dataType, List<String> values,
+	public IAttribute createAttribute(String name, GSDataType dataType, List<String> values,
 			GosplValueType valueType, IAttribute referentAttribute, Map<String, Set<String>> mapper) throws GSException, GSIllegalRangedData {
 		IAttribute att = null;
 		switch (valueType) {
@@ -99,12 +99,12 @@ public class AttributeFactory {
 				throw new GSException("cannot instantiate aggregated value with "+referentAttribute+" referent attribute");
 			break;
 		case record:
-			att = new RecorderAttribute(name, dataType, referentAttribute);
+			att = new RecordeAttribute(name, dataType, referentAttribute);
 			break;
 		default:
 			throw new GSException("The attribute meta data type "+valueType+" is not applicable !");
 		}
-		att.addAll(this.getValues(valueType, dataType, values, att));
+		att.setValues(this.getValues(valueType, dataType, values, att));
 		att.setEmptyValue(this.getEmptyValue(valueType, dataType, att));
 		return att;
 	}
@@ -117,14 +117,14 @@ public class AttributeFactory {
 	 * will be empty
 	 * 
 	 * @param {@link GSAttDataType} valueType
-	 * @param {@link DataType} dataType
+	 * @param {@link GSDataType} dataType
 	 * @param {@code List<String>} values
 	 * @param {@link AbstractAttribute} attribute
 	 * @return a value with {@link AttributeValue} type
 	 * @throws GSException
 	 * @throws GenstarIllegalRangedData
 	 */
-	public IValue createValue(GosplValueType valueType, DataType dataType, List<String> values, IAttribute attribute) 
+	public IValue createValue(GosplValueType valueType, GSDataType dataType, List<String> values, IAttribute attribute) 
 			throws GSException, GSIllegalRangedData{
 		if(values.isEmpty())
 			return getEmptyValue(valueType, dataType, attribute);
@@ -133,7 +133,7 @@ public class AttributeFactory {
 
 	// ----------------------------- Back office ----------------------------- //
 
-	private Set<IValue> getValues(GosplValueType valueType, DataType dataType, List<String> values, IAttribute attribute) 
+	private Set<IValue> getValues(GosplValueType valueType, GSDataType dataType, List<String> values, IAttribute attribute) 
 			throws GSException, GSIllegalRangedData{
 		Set<IValue> vals = new HashSet<>();
 		switch (valueType) {
@@ -148,7 +148,7 @@ public class AttributeFactory {
 					vals.add(new UniqueValue(value.trim(), dataType, attribute));
 			return vals;
 		case range:
-			if(dataType.equals(DataType.Integer)){
+			if(dataType.equals(GSDataType.Integer)){
 				List<Integer> valList = new ArrayList<>();
 				for(String range : values)
 					valList.addAll(parser.getRangedIntegerData(range, false));
@@ -163,7 +163,7 @@ public class AttributeFactory {
 					}
 					vals.add(new RangeValue(intVal.get(0).toString(), intVal.get(1).toString(), val, dataType, attribute));
 				}
-			} else if(dataType.equals(DataType.Double)){
+			} else if(dataType.equals(GSDataType.Double)){
 				List<Double> valList = new ArrayList<>();
 				for(String range : values)
 					valList.addAll(parser.getRangedDoubleData(range, false));
@@ -185,7 +185,7 @@ public class AttributeFactory {
 		}
 	}
 
-	private IValue getEmptyValue(GosplValueType valueType, DataType dataType, IAttribute attribute) 
+	private IValue getEmptyValue(GosplValueType valueType, GSDataType dataType, IAttribute attribute) 
 			throws GSException{
 		switch (valueType) {
 		case unique:
