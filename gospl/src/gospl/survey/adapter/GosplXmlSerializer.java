@@ -22,7 +22,7 @@ import gospl.metamodel.attribut.UniqueAttribute;
 import gospl.metamodel.attribut.value.RangeValue;
 import gospl.metamodel.attribut.value.UniqueValue;
 import gospl.survey.GosplConfigurationFile;
-import gospl.survey.SurveyMetatDataType;
+import gospl.survey.GosplMetatDataType;
 
 public class GosplXmlSerializer {
 
@@ -56,7 +56,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		 */
 		xs.alias(GS_CONFIG_ALIAS, GosplConfigurationFile.class);
 		xs.alias(GS_FILE_ALIAS, GosplDataFile.class);
-		xs.alias(GS_METADATA_FILE_ALIAS, SurveyMetatDataType.class);
+		xs.alias(GS_METADATA_FILE_ALIAS, GosplMetatDataType.class);
 		xs.alias(GS_ATTRIBUTE_ALIAS, IAttribute.class);
 		
 		
@@ -70,7 +70,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		/*
 		 * Map Converter
 		 */
-		xs.registerConverter(new NamedMapConverter(xs.getMapper(), null, "Relative_path", Path.class, "Meta_data_type", SurveyMetatDataType.class));
+		xs.registerConverter(new NamedMapConverter(xs.getMapper(), null, "Relative_path", Path.class, "Meta_data_type", GosplMetatDataType.class));
 		
 		/*
 		 * field alias for xml record

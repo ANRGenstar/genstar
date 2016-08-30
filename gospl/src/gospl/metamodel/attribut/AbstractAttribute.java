@@ -58,6 +58,11 @@ public abstract class AbstractAttribute implements IAttribute {
 		}
 		return false;
 	}
+	
+	@Override
+	public IValue getEmptyValue() {
+		return emptyValue;
+	}
 
 	@Override
 	public void setEmptyValue(IValue emptyValue) {

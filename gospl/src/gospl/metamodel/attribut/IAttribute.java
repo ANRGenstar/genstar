@@ -61,6 +61,13 @@ public interface IAttribute {
 	public boolean setValues(Set<IValue> values);
 
 	/**
+	 * Return the empty default {@link IValue} for this {@link IAttribute}
+	 * 
+	 * @return
+	 */
+	public IValue getEmptyValue();
+	
+	/**
 	 * The empty default {@link IValue} for this {@link IAttribute}
 	 * 
 	 * @param emptyValue

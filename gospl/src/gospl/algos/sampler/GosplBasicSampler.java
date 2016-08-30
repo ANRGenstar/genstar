@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import gospl.algos.exception.GosplSampleException;
 import gospl.distribution.INDimensionalMatrix;
+import gospl.distribution.control.AControl;
 import gospl.distribution.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
@@ -35,8 +36,8 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
 		Map<ACoordinate<IAttribute, IValue>, Double> sortedDistribution = distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, Double>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
 						(e1, e2) -> e1, LinkedHashMap::new));
 		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : sortedDistribution.entrySet()){
 			indexedKey.add(entry.getKey());

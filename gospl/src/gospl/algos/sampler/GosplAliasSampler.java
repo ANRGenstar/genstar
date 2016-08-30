@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import gospl.distribution.INDimensionalMatrix;
+import gospl.distribution.control.AControl;
 import gospl.distribution.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
@@ -76,12 +77,12 @@ public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValu
 		
 		if(distribution == null)
 			throw new NullPointerException();
-		if(distribution.isEmpty())
+		if(distribution.getMatrix().isEmpty())
 			throw new IllegalArgumentException("Probability vector must be nonempty.");
 		
 		Map<ACoordinate<IAttribute, IValue>, Double> sortedMap = distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, Double>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
                         (e1, e2) -> e1, LinkedHashMap::new));
 		this.indexedKey = new ArrayList<>(sortedMap.keySet());
 		this.initProba = new ArrayList<>(sortedMap.values());

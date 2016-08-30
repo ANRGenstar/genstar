@@ -3,9 +3,7 @@ package gospl.algos;
 import java.util.stream.Collectors;
 
 import gospl.algos.exception.GosplSampleException;
-import gospl.algos.sampler.GosplBasicSampler;
 import gospl.algos.sampler.ISampler;
-import gospl.distribution.INDimensionalMatrix;
 import gospl.distribution.coordinate.ACoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
@@ -25,9 +23,8 @@ public class DistributionBasedGenerator implements ISyntheticPopGenerator {
 	
 	private ISampler<ACoordinate<IAttribute, IValue>> sampler;
 	
-	protected DistributionBasedGenerator(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSampleException {
-		// TODO use the builder to initialize sampler
-		this.sampler = new GosplBasicSampler(distribution);
+	protected DistributionBasedGenerator(ISampler<ACoordinate<IAttribute, IValue>> sampler) throws GosplSampleException {
+		this.sampler = sampler;
 	}
 	
 	@Override
