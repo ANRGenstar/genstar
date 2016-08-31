@@ -1,4 +1,4 @@
-package gospl.template.rouen;
+package template.rouen;
 
 import java.io.File;
 import java.io.FileNotFoundException;
