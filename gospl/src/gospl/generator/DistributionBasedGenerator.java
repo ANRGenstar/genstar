@@ -1,10 +1,10 @@
-package gospl.algos;
+package gospl.generator;
 
 import java.util.stream.Collectors;
 
-import gospl.algos.exception.GosplSampleException;
+import gospl.algos.exception.GosplSamplerException;
 import gospl.algos.sampler.ISampler;
-import gospl.distribution.coordinate.ACoordinate;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 import gospl.metamodel.IPopulation;
@@ -23,12 +23,12 @@ public class DistributionBasedGenerator implements ISyntheticPopGenerator {
 	
 	private ISampler<ACoordinate<IAttribute, IValue>> sampler;
 	
-	protected DistributionBasedGenerator(ISampler<ACoordinate<IAttribute, IValue>> sampler) throws GosplSampleException {
+	protected DistributionBasedGenerator(ISampler<ACoordinate<IAttribute, IValue>> sampler) throws GosplSamplerException {
 		this.sampler = sampler;
 	}
 	
 	@Override
-	public IPopulation generate(int numberOfIndividual) throws GosplSampleException {
+	public IPopulation generate(int numberOfIndividual) throws GosplSamplerException {
 		IPopulation pop = new GosplPopulation();
 		pop.addAll(sampler.draw(numberOfIndividual).parallelStream().map(coord -> new GosplEntity(coord.getMap())).collect(Collectors.toSet()));
 		return pop;

@@ -1,4 +1,4 @@
-package gospl.distribution;
+package gospl.distribution.matrix;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -12,10 +12,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import gospl.distribution.control.AControl;
-import gospl.distribution.coordinate.ACoordinate;
-import gospl.distribution.coordinate.GosplCoordinate;
 import gospl.distribution.exception.MatrixCoordinateException;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetatDataType;

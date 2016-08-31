@@ -3,9 +3,11 @@ package gospl.distribution;
 import java.util.Map;
 import java.util.Set;
 
-import gospl.distribution.control.AControl;
-import gospl.distribution.control.ControlContingency;
 import gospl.distribution.exception.MatrixCoordinateException;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.control.ControlContingency;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetatDataType;
@@ -21,23 +23,23 @@ import io.data.GSDataType;
  */
 public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
-	public GosplContingencyTable(Map<IAttribute, Set<IValue>> dimensionAspectMap) 
+	protected GosplContingencyTable(Map<IAttribute, Set<IValue>> dimensionAspectMap) 
 			throws MatrixCoordinateException {
 		super(dimensionAspectMap, GosplMetatDataType.ContingencyTable);
 	}
 		
 	// ----------------------- SETTER CONTRACT ----------------------- //
 
-	/*
+	
 	@Override
-	public boolean addValue(ACoordinate<AbstractAttribute, AttributeValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<IAttribute, IValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
 	}
 
 	@Override
-	public boolean setValue(ACoordinate<AbstractAttribute, AttributeValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<IAttribute, IValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size()+1+matrix.hashCode());
 			matrix.put(coordinate, new ControlContingency(value.getValue().intValue()));
@@ -45,7 +47,6 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 		}
 		return false;
 	}
-	*/
 	
 	// ----------------------- SIDE CONTRACT ----------------------- //
 	

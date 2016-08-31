@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import gospl.excpetion.GSException;
+import gospl.exception.GSException;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.metamodel.attribut.value.RangeValue;
 import gospl.metamodel.attribut.value.RecordValue;

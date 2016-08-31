@@ -1,4 +1,4 @@
-package gospl.distribution.control;
+package gospl.distribution.matrix.control;
 
 public abstract class AControl<T extends Number> implements Comparable<AControl<T>> {
 

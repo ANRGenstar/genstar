@@ -1,4 +1,4 @@
-package gospl.distribution.control;
+package gospl.distribution.matrix.control;
 
 public class ControlContingency extends AControl<Integer> {
 

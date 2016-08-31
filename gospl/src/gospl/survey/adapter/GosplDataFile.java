@@ -10,7 +10,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import gospl.survey.GosplMetatDataType;
 import io.datareaders.surveyreader.IGSSurvey;
 import io.datareaders.surveyreader.SurveyStaticFactory;
-import io.datareaders.surveyreader.exception.InputFileNotSupportedException;
 
 public class GosplDataFile {
 
@@ -83,7 +82,7 @@ public class GosplDataFile {
 	 * @throws IOException
 	 * @throws InputFileNotSupportedException
 	 */
-	public IGSSurvey getSurvey() throws InvalidFormatException, IOException, InputFileNotSupportedException{
+	public IGSSurvey getSurvey() throws InvalidFormatException, IOException {
 		return SurveyStaticFactory.getSurvey(new File(surveyFilePath), csvSeparator);
 	}
 

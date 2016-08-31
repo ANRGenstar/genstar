@@ -11,9 +11,9 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import gospl.distribution.INDimensionalMatrix;
-import gospl.distribution.control.AControl;
-import gospl.distribution.coordinate.ACoordinate;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 

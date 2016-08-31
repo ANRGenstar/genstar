@@ -1,4 +1,4 @@
-package gospl;
+package gospl.template.rouen;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import gospl.excpetion.GSException;
+import gospl.exception.GSException;
 import gospl.metamodel.attribut.AttributeFactory;
 import gospl.metamodel.attribut.GosplValueType;
 import gospl.metamodel.attribut.IAttribute;

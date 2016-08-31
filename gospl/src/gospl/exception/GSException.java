@@ -1,4 +1,4 @@
-package gospl.excpetion;
+package gospl.exception;
 
 public class GSException extends Exception {
 

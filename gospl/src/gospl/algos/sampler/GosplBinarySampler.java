@@ -9,10 +9,10 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import gospl.algos.exception.GosplSampleException;
-import gospl.distribution.INDimensionalMatrix;
-import gospl.distribution.control.AControl;
-import gospl.distribution.coordinate.ACoordinate;
+import gospl.algos.exception.GosplSamplerException;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import io.util.GSPerformanceUtil;
@@ -43,11 +43,11 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	
 	private final double EPSILON = Math.pow(10, -6);
 	
-	public GosplBinarySampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSampleException {
+	public GosplBinarySampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
 		this(ThreadLocalRandom.current(), distribution);
 	}
 	
-	public GosplBinarySampler(Random random, INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSampleException {
+	public GosplBinarySampler(Random random, INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
 				distribution.size(), DEBUG_SYSO);
 		gspu.sysoStempPerformance(0, this);
@@ -68,11 +68,11 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 				gspu.sysoStempPerformance(count * 1d / distribution.size(), this);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
-			throw new GosplSampleException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
+			throw new GosplSamplerException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
 		
 	@Override
-	public ACoordinate<IAttribute, IValue> draw() throws GosplSampleException {
+	public ACoordinate<IAttribute, IValue> draw() throws GosplSamplerException {
 		double rand = random.nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
@@ -91,13 +91,13 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 		if (floor - 1 == top)
 			if(indexedProbabilitySum.get(top) <= rand && rand < indexedProbabilitySum.get(floor))
 				return indexedKey.get(floor);
-		throw new GosplSampleException("Sample engine has not been able to draw one coordinate !!!\n"
+		throw new GosplSamplerException("Sample engine has not been able to draw one coordinate !!!\n"
 				+ "random ("+rand+"), floor ("+floor+" = "+indexedProbabilitySum.get(floor)+") and top ("+top+" = "+indexedProbabilitySum.get(top)+") could not draw index\n"
 						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
 	}
 	
 	@Override
-	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSampleException{
+	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSamplerException{
 		// TODO: find a way to do it with streams and parallelism
 		List<ACoordinate<IAttribute, IValue>> draws = new ArrayList<>();
 		for(int i = 0; i < numberOfDraw; i++)

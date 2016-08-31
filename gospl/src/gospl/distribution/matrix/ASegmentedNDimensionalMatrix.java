@@ -1,4 +1,4 @@
-package gospl.distribution;
+package gospl.distribution.matrix;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -9,11 +9,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import gospl.distribution.control.AControl;
-import gospl.distribution.control.ControlFrequency;
-import gospl.distribution.coordinate.ACoordinate;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.control.ControlFrequency;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetatDataType;
@@ -86,6 +86,10 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	// ---------------------- Matrix accessors ---------------------- //
+	
+	public Collection<AFullNDimensionalMatrix<T>> getMatrices(){
+		return Collections.unmodifiableSet(jointDistributionSet);
+	}
 	
 	@Override
 	public Map<ACoordinate<IAttribute, IValue>, AControl<T>> getMatrix(){

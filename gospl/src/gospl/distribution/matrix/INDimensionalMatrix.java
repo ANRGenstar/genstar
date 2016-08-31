@@ -1,12 +1,12 @@
-package gospl.distribution;
+package gospl.distribution.matrix;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import gospl.distribution.control.AControl;
-import gospl.distribution.coordinate.ACoordinate;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetatDataType;
@@ -57,6 +57,25 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public AControl<T> getVal(Collection<IValue> aspects);
+	
+	/**
+	 * Add a new value associated with a new coordinate. The add can fails if the specified coordinate in parameter
+	 * has already be binding with another value
+	 * 
+	 * @param coordinates
+	 * @param value
+	 * @return <code>true</code> if the value has been added, <code>false</code> otherwise
+	 */
+	public boolean addValue(ACoordinate<IAttribute, IValue> coordinates, AControl<? extends Number> value);
+	
+	/**
+	 * Add or replace the value associate with the coordinate in parameter for the new value passed as method's argument  
+	 * 
+	 * @param coordinate
+	 * @param value
+	 * @return <code>true</code> if the value has been added, <code>false</code> otherwise
+	 */
+	public boolean setValue(ACoordinate<IAttribute, IValue> coordinate, AControl<? extends Number> value);
 	
 // ------------------------- Accessors ------------------------- //
 	

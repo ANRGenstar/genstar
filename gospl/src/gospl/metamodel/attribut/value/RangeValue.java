@@ -28,7 +28,6 @@ public class RangeValue implements IValue {
 
 	@Override
 	public String getInputStringValue() {
-		// TODO Auto-generated method stub
 		return inputStringValue;
 	}
 	
@@ -42,13 +41,11 @@ public class RangeValue implements IValue {
 
 	@Override
 	public IAttribute getAttribute() {
-		// TODO Auto-generated method stub
 		return attribute;
 	}
 
 	@Override
 	public GSDataType getDataType() {
-		// TODO Auto-generated method stub
 		return dataType;
 	}
 

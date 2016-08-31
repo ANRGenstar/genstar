@@ -9,10 +9,10 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
-import gospl.algos.exception.GosplSampleException;
-import gospl.distribution.INDimensionalMatrix;
-import gospl.distribution.control.AControl;
-import gospl.distribution.coordinate.ACoordinate;
+import gospl.algos.exception.GosplSamplerException;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 
@@ -25,31 +25,39 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 
 	private final double EPSILON = Math.pow(10, -6);
 
-	public GosplBasicSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSampleException{
+	public GosplBasicSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException{
 		this(ThreadLocalRandom.current(), distribution);
+	}
+	
+	public GosplBasicSampler(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
+		this(ThreadLocalRandom.current(), map);
 	}
 
 	public GosplBasicSampler(ThreadLocalRandom random,
-			INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSampleException {
-		this.random = random;
-		this.indexedKey = new ArrayList<>(distribution.size());
-		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
-		double sumOfProbabilities = 0d;
-		Map<ACoordinate<IAttribute, IValue>, Double> sortedDistribution = distribution.getMatrix().entrySet()
+			INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
+		this(random, distribution.getMatrix().entrySet()
 				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
-						(e1, e2) -> e1, LinkedHashMap::new));
-		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : sortedDistribution.entrySet()){
+						(e1, e2) -> e1, LinkedHashMap::new)));
+	}
+	
+	public GosplBasicSampler(ThreadLocalRandom random,
+			LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
+		this.random = random;
+		this.indexedKey = new ArrayList<>(map.size());
+		this.indexedProbabilitySum = new ArrayList<>(map.size());
+		double sumOfProbabilities = 0d;
+		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : map.entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
-			throw new GosplSampleException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
+			throw new GosplSamplerException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
 
 	@Override
-	public ACoordinate<IAttribute, IValue> draw() throws GosplSampleException {
+	public ACoordinate<IAttribute, IValue> draw() throws GosplSamplerException {
 		double rand = random.nextDouble();
 		int idx = -1;
 		for(double proba : indexedProbabilitySum){
@@ -57,12 +65,12 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 			if(proba >= rand)
 				return indexedKey.get(idx);
 		}
-		throw new GosplSampleException("Sample engine has not been able to draw one coordinate !!!\n"
+		throw new GosplSamplerException("Sample engine has not been able to draw one coordinate !!!\n"
 				+ "Max probability is: "+indexedProbabilitySum.get(indexedKey.size() - 1)+" and random double is: "+rand);
 	}
 
 	@Override
-	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSampleException{
+	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSamplerException{
 		// TODO: find a way to do it with streams and parallelism
 		List<ACoordinate<IAttribute, IValue>> draws = new ArrayList<>();
 		for(int i = 0; i < numberOfDraw; i++)

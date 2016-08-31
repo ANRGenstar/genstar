@@ -1,4 +1,4 @@
-package gospl.distribution.coordinate;
+package gospl.distribution.matrix.coordinate;
 
 import java.util.Collection;
 import java.util.Map;
