@@ -23,7 +23,7 @@ public class DistributionBasedGenerator implements ISyntheticPopGenerator {
 	
 	private ISampler<ACoordinate<IAttribute, IValue>> sampler;
 	
-	protected DistributionBasedGenerator(ISampler<ACoordinate<IAttribute, IValue>> sampler) throws GosplSamplerException {
+	public DistributionBasedGenerator(ISampler<ACoordinate<IAttribute, IValue>> sampler) throws GosplSamplerException {
 		this.sampler = sampler;
 	}
 	

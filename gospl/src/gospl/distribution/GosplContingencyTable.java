@@ -10,7 +10,7 @@ import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 import io.data.GSDataParser;
 import io.data.GSDataType;
 
@@ -25,7 +25,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
 	protected GosplContingencyTable(Map<IAttribute, Set<IValue>> dimensionAspectMap) 
 			throws MatrixCoordinateException {
-		super(dimensionAspectMap, GosplMetatDataType.ContingencyTable);
+		super(dimensionAspectMap, GosplMetaDataType.ContingencyTable);
 	}
 		
 	// ----------------------- SETTER CONTRACT ----------------------- //

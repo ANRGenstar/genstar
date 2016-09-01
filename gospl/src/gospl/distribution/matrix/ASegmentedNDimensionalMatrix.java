@@ -16,7 +16,7 @@ import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		INDimensionalMatrix<IAttribute, IValue, T> {
@@ -41,8 +41,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 // ------------------------- META DATA ------------------------ //
 
 	@Override
-	public GosplMetatDataType getMetaDataType() {
-		Set<GosplMetatDataType> mdtSet = jointDistributionSet.stream().map(jd -> jd.getMetaDataType()).collect(Collectors.toSet());
+	public GosplMetaDataType getMetaDataType() {
+		Set<GosplMetaDataType> mdtSet = jointDistributionSet.stream().map(jd -> jd.getMetaDataType()).collect(Collectors.toSet());
 		if(mdtSet.size() != 1)
 			return null;
 		return mdtSet.iterator().next();

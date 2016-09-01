@@ -10,15 +10,15 @@ import gospl.algos.IDistributionInferenceAlgo;
 import gospl.algos.IndependantHypothesisAlgo;
 import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.generator.GosplSPGeneratorFactory;
+import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticPopGenerator;
 import gospl.metamodel.IPopulation;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-
 
 public class PopSynthesisRouen {
 
@@ -56,21 +56,30 @@ public class PopSynthesisRouen {
 		// Choice is made here to use distribution based generator
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<IAttribute, IValue, Double> distribution = df.collapseDistributions();
+		INDimensionalMatrix<IAttribute, IValue, Double> distribution = null;
+		try {
+			distribution = df.collapseDistributions();
+		} catch (IllegalDistributionCreation e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IllegalControlTotalException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (MatrixCoordinateException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		// we instantiate an inference algorithm
 		IDistributionInferenceAlgo<IAttribute, IValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
 		
 		// BUILD THE GENERATOR
-		GosplSPGeneratorFactory generatorFactory = new GosplSPGeneratorFactory();
 		ISyntheticPopGenerator ispGenerator = null;
 		try {
-			ispGenerator = generatorFactory.getGenerator(distribution, distributionInfAlgo);
+			ispGenerator = new DistributionBasedGenerator(distributionInfAlgo.inferDistributionSampler(distribution));
 		} catch (GosplSamplerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalDistributionCreation e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		

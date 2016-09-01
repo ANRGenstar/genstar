@@ -3,7 +3,6 @@ package gospl.algos.sampler;
 import java.util.List;
 
 import gospl.algos.exception.GosplSamplerException;
-import gospl.generator.GosplSPGeneratorFactory;
 
 /**
  * The global contract for sampler --

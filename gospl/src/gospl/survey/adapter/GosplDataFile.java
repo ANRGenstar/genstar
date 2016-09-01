@@ -7,7 +7,7 @@ import java.nio.file.Paths;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 import io.datareaders.surveyreader.IGSSurvey;
 import io.datareaders.surveyreader.SurveyStaticFactory;
 
@@ -16,28 +16,28 @@ public class GosplDataFile {
 	private final String surveyFilePath;
 	private char csvSeparator = ',';
 
-	private final GosplMetatDataType dataFileType;
+	private final GosplMetaDataType dataFileType;
 
 	private final int firstRowDataIndex;
 	private final int firstColumnDataIndex;
 
-	public GosplDataFile(String surveyFilePath, GosplMetatDataType dataFileType,  int firstRowDataIndex, int firstColumnDataIndex){
+	public GosplDataFile(String surveyFilePath, GosplMetaDataType dataFileType,  int firstRowDataIndex, int firstColumnDataIndex){
 		this.surveyFilePath = surveyFilePath;
 		this.dataFileType = dataFileType;
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
 	}
 
-	public GosplDataFile(File survey, GosplMetatDataType dataFileType, int firstRowDataIndex, int firstColumnDataIndex){
+	public GosplDataFile(File survey, GosplMetaDataType dataFileType, int firstRowDataIndex, int firstColumnDataIndex){
 		this(survey.getAbsolutePath(), dataFileType, firstRowDataIndex, firstColumnDataIndex);
 	}
 
-	public GosplDataFile(String survey, GosplMetatDataType dataFileType,  int firstRowDataIndex, int firstColumnDataIndex, char csvSeparator){
+	public GosplDataFile(String survey, GosplMetaDataType dataFileType,  int firstRowDataIndex, int firstColumnDataIndex, char csvSeparator){
 		this(survey, dataFileType, firstRowDataIndex, firstColumnDataIndex);
 		this.csvSeparator = csvSeparator;
 	}
 
-	public GosplDataFile(File survey, GosplMetatDataType dataFileType, int firstRowDataIndex, int firstColumnDataIndex, char csvSeparator){
+	public GosplDataFile(File survey, GosplMetaDataType dataFileType, int firstRowDataIndex, int firstColumnDataIndex, char csvSeparator){
 		this(survey.getAbsolutePath(), dataFileType, firstRowDataIndex, firstColumnDataIndex);
 		this.csvSeparator = csvSeparator;
 	}
@@ -52,7 +52,7 @@ public class GosplDataFile {
 		return Paths.get(surveyFilePath).getFileName().toString();
 	}
 
-	public GosplMetatDataType getDataFileType(){
+	public GosplMetaDataType getDataFileType(){
 		return dataFileType;
 	}
 
@@ -93,7 +93,7 @@ public class GosplDataFile {
 	 */
 	protected Object readResolve() throws ObjectStreamException {
 		String survey = getSurveyFilePath();
-		GosplMetatDataType dataFileType = getDataFileType();
+		GosplMetaDataType dataFileType = getDataFileType();
 		char csvSeparator = getCsvSeparator();
 		return new GosplDataFile(survey, dataFileType, getFirstRowDataIndex(), getFirstColumnDataIndex(), csvSeparator);
 	}

@@ -47,7 +47,12 @@ public class ControlContingency extends AControl<Integer> {
 
 	@Override
 	public boolean equalsVal(AControl<Integer> val, double epsilon) {
-		return Math.abs(Math.abs(this.getValue() - val.getValue())) / this.getValue().doubleValue() < epsilon;
+		return Math.abs(this.getValue() - val.getValue()) < epsilon;
+	}
+	
+	@Override
+	public boolean equalsCastedVal(AControl<? extends Number> val, double epsilon) {
+		return Math.abs(Math.abs(this.getValue() - val.getValue().doubleValue())) < epsilon;
 	}
 
 	@Override

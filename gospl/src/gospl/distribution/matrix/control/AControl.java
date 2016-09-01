@@ -86,14 +86,25 @@ public abstract class AControl<T extends Number> implements Comparable<AControl<
 
 	/**
 	 * Test if this {@link AControl} has value equals to {@code val} passed in argument.
-	 * The two inner value are compared and equality is assessed with precision equals to epsilon 
-	 * (Expressed as a proportion)
+	 * The two inner value are compared and equality is assessed with precision equals to 
+	 * epsilon
 	 * 
 	 * @param total
 	 * @param epsilon
 	 * @return
 	 */
 	public abstract boolean equalsVal(AControl<T> val, double epsilon);
+	
+	/**
+	 * Test if this {@link AControl} has value equals to {@code val} passed as argument.
+	 * The two inner value are cast (to double) and compared and equality is assessed with 
+	 * precision equals to epsilon
+	 * 
+	 * @param val
+	 * @param epsilon
+	 * @return
+	 */
+	public abstract boolean equalsCastedVal(AControl<? extends Number> val, double epsilon);
 
 	@Override
 	public String toString(){

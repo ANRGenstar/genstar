@@ -10,7 +10,7 @@ import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 import io.data.GSDataParser;
 import io.data.GSDataType;
 
@@ -22,7 +22,7 @@ import io.data.GSDataType;
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 
-	protected GosplJointDistribution(Map<IAttribute, Set<IValue>> dimensionAspectMap, GosplMetatDataType metaDataType) throws MatrixCoordinateException {
+	protected GosplJointDistribution(Map<IAttribute, Set<IValue>> dimensionAspectMap, GosplMetaDataType metaDataType) throws MatrixCoordinateException {
 		super(dimensionAspectMap, metaDataType);
 	}
 		

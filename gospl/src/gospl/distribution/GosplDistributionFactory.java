@@ -4,18 +4,25 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import gospl.distribution.exception.IllegalControlTotalException;
+import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.MatrixCoordinateException;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.metamodel.IEntity;
@@ -24,7 +31,7 @@ import gospl.metamodel.attribut.AbstractAttribute;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplConfigurationFile;
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 import gospl.survey.adapter.GosplDataFile;
 import gospl.survey.adapter.GosplXmlSerializer;
 import io.data.GSDataParser;
@@ -33,10 +40,12 @@ import io.datareaders.surveyreader.IGSSurvey;
 
 public class GosplDistributionFactory {
 
+	private final double EPSILON = Math.pow(10d, -6);
+
 	private final GosplConfigurationFile configuration;
 	private final GSDataParser dataParser;
-	
-	private Set<INDimensionalMatrix<IAttribute, IValue, ? extends Number>> distributions;
+
+	private Set<AFullNDimensionalMatrix<? extends Number>> distributions;
 	private Set<IPopulation> samples;
 
 	public GosplDistributionFactory(Path configurationFilePath) throws FileNotFoundException {
@@ -61,16 +70,30 @@ public class GosplDistributionFactory {
 	public void buildDistributions() throws InvalidFormatException, IOException, MatrixCoordinateException {
 		this.distributions = new HashSet<>();
 		for(GosplDataFile file : this.configuration.getDataFiles())
-			if(!file.getDataFileType().equals(GosplMetatDataType.Sample))
+			if(!file.getDataFileType().equals(GosplMetaDataType.Sample))
 				this.distributions.addAll(getDistribution(file, this.configuration.getAttributes()));
 	}
 
-	public INDimensionalMatrix<IAttribute, IValue, Double> collapseDistributions() {
-		INDimensionalMatrix<IAttribute, IValue, Double> matrix = null;
-		
-		// TODO: collapse all matrix 
-		
-		return matrix;
+	/**
+	 * 
+	 * Create a matrix from all matrices build with this factory
+	 * 
+	 * @return
+	 * @throws IllegalDistributionCreation
+	 * @throws IllegalControlTotalException
+	 * @throws MatrixCoordinateException
+	 *
+	 */
+	public INDimensionalMatrix<IAttribute, IValue, Double> collapseDistributions() 
+			throws IllegalDistributionCreation, IllegalControlTotalException, MatrixCoordinateException {
+		if(distributions.isEmpty())
+			throw new IllegalDistributionCreation("To collapse matrices you must build at least one first: see buildDistributions method");
+		if(distributions.size() == 1)
+			return getFrequency(distributions.iterator().next());
+		Set<AFullNDimensionalMatrix<Double>> fullMatrices = new HashSet<>();
+		for(AFullNDimensionalMatrix<? extends Number> mat : distributions)
+			fullMatrices.add(getFrequency(mat));
+		return new GosplConditionalDistribution(fullMatrices);
 	}
 
 	/**
@@ -86,7 +109,7 @@ public class GosplDistributionFactory {
 	public void buildSamples() {
 		samples = new HashSet<>();
 		for(GosplDataFile file : this.configuration.getDataFiles())
-			if(file.getDataFileType().equals(GosplMetatDataType.Sample))
+			if(file.getDataFileType().equals(GosplMetaDataType.Sample))
 				samples.add(getSample(file, this.configuration.getAttributes()));
 	}
 
@@ -96,9 +119,9 @@ public class GosplDistributionFactory {
 	/////////////////////////////////////////////////////////////////////////////////
 
 
-	private Set<INDimensionalMatrix<IAttribute, IValue, ? extends Number>> getDistribution(
+	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(
 			GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException, MatrixCoordinateException {
-		Set<INDimensionalMatrix<IAttribute, IValue, ? extends Number>> cTableSet = new HashSet<>();
+		Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		//Load survey
 		IGSSurvey survey = file.getSurvey();
 
@@ -122,12 +145,12 @@ public class GosplDistributionFactory {
 		for(Set<IAttribute> rSchema : rowSchemas){
 			for(Set<IAttribute> cSchema : columnSchemas){
 				//Create a matrix for each set of related attribute
-				INDimensionalMatrix<IAttribute, IValue, ? extends Number> jDistribution;
+				AFullNDimensionalMatrix<? extends Number> jDistribution;
 				//Matrix 'dimension / aspect' map
 				Map<IAttribute, Set<IValue>> dimTable = Stream.concat(rSchema.stream(), cSchema.stream())
 						.collect(Collectors.toMap(a -> a, a -> a.getValues()));
 				//Instantiate either contingency (int and global frame of reference) or frequency (double and either global or local frame of reference) matrix
-				if(file.getDataFileType().equals(GosplMetatDataType.ContingencyTable))
+				if(file.getDataFileType().equals(GosplMetaDataType.ContingencyTable))
 					jDistribution = new GosplContingencyTable(dimTable);
 				else
 					jDistribution = new GosplJointDistribution(dimTable, file.getDataFileType());
@@ -157,6 +180,65 @@ public class GosplDistributionFactory {
 			}
 		}
 		return cTableSet;
+	}
+
+	private AFullNDimensionalMatrix<Double> getFrequency(AFullNDimensionalMatrix<? extends Number> matrix) throws IllegalControlTotalException, MatrixCoordinateException {
+		// returned matrix
+		AFullNDimensionalMatrix<Double> freqMatrix = null;
+		
+		if(matrix.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable)){
+			// Identify local referent dimension
+			Map<IAttribute, List<AControl<? extends Number>>> mappedControls = matrix.getDimensions()
+					.stream().collect(Collectors.toMap(d -> d, d -> d.getValues()
+							.parallelStream().map(a -> matrix.getVal(a)).collect(Collectors.toList())));
+			Set<IAttribute> localReferentDimensions = mappedControls.entrySet()
+					.parallelStream().filter(e -> e.getValue().stream().allMatch(ac -> ac.equalsCastedVal(e.getValue().get(0), EPSILON)))
+					.map(e -> e.getKey()).collect(Collectors.toSet());
+			
+			// The most appropriate align referent matrix (the one that have most information about matrix to align, i.e. the highest number of shared dimensions)
+			Optional<AFullNDimensionalMatrix<? extends Number>> optionalRef = distributions
+					.stream().filter(ctFitter -> !ctFitter.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable)
+							&& localReferentDimensions.stream().allMatch(d -> ctFitter.getDimensions().contains(d)))
+					.sorted((jd1, jd2) -> (int) jd2.getDimensions().stream().filter(d -> matrix.getDimensions().contains(d)).count() 
+							- (int) jd1.getDimensions().stream().filter(d -> matrix.getDimensions().contains(d)).count())
+					.findFirst();
+			if(optionalRef.isPresent()){
+				freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
+						GosplMetaDataType.GlobalFrequencyTable);
+				AFullNDimensionalMatrix<? extends Number> matrixOfReference = optionalRef.get();
+				for(ACoordinate<IAttribute, IValue> controlKey : matrix.getMatrix().keySet()){
+					freqMatrix.addValue(controlKey, new ControlFrequency(matrix.getVal(controlKey).getRowProduct(matrixOfReference.getVal(controlKey.values()
+							.stream().filter(asp -> matrixOfReference.getDimensions()
+									.contains(asp.getAttribute())).collect(Collectors.toSet()))).doubleValue()));
+				}
+			} else {
+				freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
+						GosplMetaDataType.LocalFrequencyTable);
+				for(ACoordinate<IAttribute, IValue> coord : matrix.getMatrix().keySet())
+					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
+			}
+		} else {
+			// Init output matrix
+			freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
+							GosplMetaDataType.GlobalFrequencyTable);
+			
+			if(matrix.getMetaDataType().equals(GosplMetaDataType.GlobalFrequencyTable)){
+				for(ACoordinate<IAttribute, IValue> coord : matrix.getMatrix().keySet())
+					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
+			} else {
+				List<IAttribute> attributes = new ArrayList<>(matrix.getDimensions());
+				Collections.shuffle(attributes);
+				AControl<? extends Number> total = matrix.getVal(attributes.remove(0).getValues());
+				for(IAttribute attribut : attributes){
+					AControl<? extends Number> controlAtt = matrix.getVal(attribut.getValues());
+					if(Math.abs(controlAtt.getValue().doubleValue() - total.getValue().doubleValue()) / controlAtt.getValue().doubleValue() > this.EPSILON)
+						throw new IllegalControlTotalException(total, controlAtt);
+				}
+				for(ACoordinate<IAttribute, IValue> coord : matrix.getMatrix().keySet())
+					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue() / total.getValue().doubleValue()));
+			}
+		}
+		return freqMatrix;
 	}
 
 	private IPopulation getSample(GosplDataFile file, Set<IAttribute> attributes) {

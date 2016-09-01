@@ -29,6 +29,7 @@ import io.util.GSPerformanceUtil;
  * TODO: explain
  * 
  * TODO: find a way to choose the sampling algorithm, e.g. {@link GosplAliasSampler}, {@link GosplBasicSampler} or {@link GosplBinarySampler}
+ * HINT: choose a builder that take a {@link IDistributionInferenceAlgo} and an empty {@link ISampler} to fill with
  * 
  * @author kevinchapuis
  *
@@ -40,27 +41,67 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 	public IndependantHypothesisAlgo(boolean DEBUG_SYSO) {
 		this.DEBUG_SYSO = DEBUG_SYSO;
 	}
-	
+
 	@Override
 	public ISampler<ACoordinate<IAttribute, IValue>> inferDistributionSampler(
 			INDimensionalMatrix<IAttribute, IValue, Double> matrix) throws IllegalDistributionCreation, GosplSamplerException {
+		if(matrix == null || matrix.getMatrix().isEmpty())
+			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
+
+		// Begin the algorithm (and performance utility)
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
+				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), DEBUG_SYSO);
+		gspu.getStempPerformance(0);
+		
+		/////////////////////////////////////
+		// 1st STEP: identify and scale up GosplMetaDataType#LocalFrequencyTable
+		/////////////////////////////////////
+
+		// TODO
+				
+		/////////////////////////////////////
+		// 2st STEP: identify the various inner matrices
+		/////////////////////////////////////
+		
+		// Stop the algorithm and exit the unique matrix if there is only one
 		if(!matrix.isSegmented())
 			return new GosplBasicSampler(matrix);
+		
+		// Cast matrix to access inner full matrices
 		ASegmentedNDimensionalMatrix<Double> segmentedMatrix = (ASegmentedNDimensionalMatrix<Double>) matrix;
-		int theoreticalSpaceSize = segmentedMatrix.getDimensions().stream()
-				.mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
-				theoreticalSpaceSize, DEBUG_SYSO);
+
+		// Init sample distribution simple expression
 		Map<Set<IValue>, Double> sampleDistribution = new HashMap<>();
-		// Store the attributes that have been allocated
-		Set<IAttribute> allocatedAttribut = new HashSet<>();
-		// Begin the algorithm
-		gspu.getStempPerformance(0);
-		for(AFullNDimensionalMatrix<Double> jd : segmentedMatrix.getMatrices().stream()
+
+		// Init collection to store processed attributes & matrix
+		Set<IAttribute> allocatedAttributes = new HashSet<>();
+		Set<AFullNDimensionalMatrix<Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
+
+		/////////////////////////////////////
+		// 3rd STEP: disaggregate attributes
+		/////////////////////////////////////
+		
+		// First identify referent & aggregated attributes:
+		Set<IAttribute> refAtts = segmentedMatrix.getDimensions()
+				.stream().filter(d -> !d.isRecordAttribute() && !d.getReferentAttribute().equals(d))
+				.map(d -> d.getReferentAttribute()).collect(Collectors.toSet());
+		Map<IAttribute, Set<IAttribute>> aggAttributeMap = refAtts
+				.stream().collect(Collectors.toMap(refDim -> refDim, refDim -> segmentedMatrix.getDimensions()
+						.stream().filter(aggDim -> aggDim.getReferentAttribute().equals(refDim)).collect(Collectors.toSet())));
+
+		for(IAttribute referentAtt : aggAttributeMap.keySet()){
+			// TODO: the job
+		}
+
+		////////////////////////////////////
+		// 4th STEP: proceed the remaining matrices
+		////////////////////////////////////
+		
+		for(AFullNDimensionalMatrix<Double> jd : unallocatedMatrices.stream()
 				.sorted((jd1, jd2) -> jd2.size() - jd1.size()).collect(Collectors.toList())){
 			// Collect attribute in the schema for which a probability have already been calculated
 			Set<IAttribute> hookAtt = jd.getDimensions()
-					.stream().filter(att -> allocatedAttribut.contains(att)).collect(Collectors.toSet());
+					.stream().filter(att -> allocatedAttributes.contains(att)).collect(Collectors.toSet());
 
 			gspu.sysoStempPerformance(0d, this);
 			// If "hookAtt" is empty fill the proxy distribution with conditional probability of this joint distribution
@@ -98,7 +139,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 						+ "\n-------------------------");
 				sampleDistribution = newSampleDistribution;
 			}
-			allocatedAttribut.addAll(jd.getDimensions());
+			allocatedAttributes.addAll(jd.getDimensions());
 			gspu.resetStempProp();
 			gspu.sysoStempPerformance(1, this);
 		}
@@ -112,7 +153,6 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 				.collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey(), gspu), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new));
 		return new GosplBasicSampler(sdMap);
 	}
-
 
 	// Fake methode in order to create coordinate in lambda java 8 stream operation
 	private ACoordinate<IAttribute, IValue> safeCoordinateCreation(Set<IValue> coordinate, GSPerformanceUtil gspu){

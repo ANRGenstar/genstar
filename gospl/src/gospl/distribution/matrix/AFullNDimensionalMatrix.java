@@ -18,7 +18,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 
 /**
  * TODO: javadoc
@@ -29,7 +29,7 @@ import gospl.survey.GosplMetatDataType;
  */
 public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<IAttribute, IValue, T> {
 
-	private GosplMetatDataType dataType; 
+	private GosplMetaDataType dataType; 
 
 	private final Map<IAttribute, Set<IValue>> dimensions;
 	protected final Map<ACoordinate<IAttribute, IValue>, AControl<T>> matrix;
@@ -38,7 +38,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
-	public AFullNDimensionalMatrix(Map<IAttribute, Set<IValue>> dimensionAspectMap, GosplMetatDataType metaDataType) 
+	public AFullNDimensionalMatrix(Map<IAttribute, Set<IValue>> dimensionAspectMap, GosplMetaDataType metaDataType) 
 			throws MatrixCoordinateException {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
 		this.matrix = new HashMap<>(dimensions.entrySet().stream()
@@ -56,20 +56,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public GosplMetatDataType getMetaDataType() {
+	public GosplMetaDataType getMetaDataType() {
 		return dataType;
 	}
 
-	/*
-	@Override
-	public boolean setMetaDataType(GosplMetatDataType metaDataType) {
+	public boolean setMetaDataType(GosplMetaDataType metaDataType) {
 		if(dataType == null || !dataType.equals(metaDataType))
 			dataType = metaDataType;
 		else 
 			return false;
 		return true;
 	}
-	*/
+
 
 	// ---------------------- GLOBAL ACCESSORS ---------------------- //
 
@@ -256,5 +254,5 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		}
 		return csv;
 	}
-
+	
 }

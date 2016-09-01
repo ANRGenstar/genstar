@@ -19,7 +19,7 @@ import gospl.metamodel.attribut.AttributeFactory;
 import gospl.metamodel.attribut.GosplValueType;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.survey.GosplConfigurationFile;
-import gospl.survey.GosplMetatDataType;
+import gospl.survey.GosplMetaDataType;
 import gospl.survey.adapter.GosplDataFile;
 import gospl.survey.adapter.GosplXmlSerializer;
 import io.data.GSDataType;
@@ -52,18 +52,18 @@ public class PopSynthesisRouenConfiguration {
 			
 			
 			individualDataFiles.add(new GosplDataFile(INDIV_CLASS_PATH+File.separator+"Age & Couple-Tableau 1.csv",
-					GosplMetatDataType.ContingencyTable, 1, 1, ';'));
+					GosplMetaDataType.ContingencyTable, 1, 1, ';'));
 			individualDataFiles.add(new GosplDataFile(INDIV_CLASS_PATH+File.separator+"Age & Sexe & CSP-Tableau 1.csv",
-					GosplMetatDataType.ContingencyTable, 2, 1, ';'));
+					GosplMetaDataType.ContingencyTable, 2, 1, ';'));
 			individualDataFiles.add(new GosplDataFile(INDIV_CLASS_PATH+File.separator+"Age & Sexe-Tableau 1.csv",
-					GosplMetatDataType.ContingencyTable, 1, 1, ';'));
+					GosplMetaDataType.ContingencyTable, 1, 1, ';'));
 			
 			householdDataFiles.add(new GosplDataFile(HHOLD_CLASS_PATH+File.separator+"Ménage & Enfants-Tableau 1.csv",
-					GosplMetatDataType.ContingencyTable, 1, 1, ';'));
+					GosplMetaDataType.ContingencyTable, 1, 1, ';'));
 			householdDataFiles.add(new GosplDataFile(HHOLD_CLASS_PATH+File.separator+"Taille ménage & CSP référent-Tableau 1.csv", 
-					GosplMetatDataType.ContingencyTable, 1, 1, ';'));
+					GosplMetaDataType.ContingencyTable, 1, 1, ';'));
 			householdDataFiles.add(new GosplDataFile(HHOLD_CLASS_PATH+File.separator+"Taille ménage & Sex & Age-Tableau 1.csv", 
-					GosplMetatDataType.ContingencyTable, 2, 1, ';'));
+					GosplMetaDataType.ContingencyTable, 2, 1, ';'));
 
 			try {
 				// Instantiate a referent attribute
