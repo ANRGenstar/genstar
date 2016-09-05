@@ -41,8 +41,7 @@
 	  </dependency>
 	  <!-- end jts dependencies -->
 
-
-	  <!--  Geo tools dependecies : version of geo-tools main artifacts in properties -->
+  <!--  Geo tools dependecies : version of geo-tools main artifacts in properties -->
 	  <dependency>	  
 	  	<groupId>org.geotools</groupId>
 	  	<artifactId>gt-shapefile</artifactId>
@@ -506,7 +505,7 @@
 	  	</exclusions>
 	  </dependency>
 	  
-<!-- 	   <dependency>
+	   <dependency>
          <groupId>org.geotools</groupId>
          <artifactId>gt-swing</artifactId>
          <version>13.4</version>
@@ -516,7 +515,7 @@
       		 <artifactId>jts</artifactId>
 	  	  </exclusion>
 	  	 </exclusions>
-       </dependency> -->
+       </dependency> 
        <dependency>
         <groupId>org.geotools</groupId>
   		<artifactId>gt-wms</artifactId>
@@ -570,8 +569,9 @@
 	  	  </exclusion>
 	  	</exclusions>
 	  </dependency>
-	  <!--  end geo tools dependencies -->
  </dependencies>
+
+	
 
 
 </project>
