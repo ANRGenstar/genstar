@@ -70,6 +70,11 @@ public class GSPerformanceUtil {
 			System.out.println(s);
 		}
 	}
+	
+	public void sysoStempMessage(String message){
+		if(logSyso)
+			System.out.println(message);
+	}
 
 	public void resetStemp(){
 		this.resetStempCall();

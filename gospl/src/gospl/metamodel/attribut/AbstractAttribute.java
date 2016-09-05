@@ -60,6 +60,13 @@ public abstract class AbstractAttribute implements IAttribute {
 	}
 	
 	@Override
+	public IValue findMatchingAttributeValue(IValue val) {
+		if(values.contains(val))
+			return val;
+		return null;
+	}
+	
+	@Override
 	public IValue getEmptyValue() {
 		return emptyValue;
 	}

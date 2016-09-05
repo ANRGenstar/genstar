@@ -38,7 +38,7 @@ public class AttributeFactory {
 	 * <p> <ul>
 	 * <li>If {@code valueType.equals({@link GosplValueType#range})} then return a {@link RangeAttribute}
 	 * <li>If {@code valueType.equals({@link GosplValueType#unique})} then return a {@link UniqueAttribute}
-	 * <li>If {@code valueType.equals({@link GosplValueType#record})} then return a {@link RecordeAttribute}
+	 * <li>If {@code valueType.equals({@link GosplValueType#record})} then return a {@link RecordAttribute}
 	 * <li>FutherMore if {@code !IAttribute#getReferentAttribute().equals(this) && !this.isRecordAttribute()} then return a {@link AggregatedAttribute} 
 	 * </ul><p>
 	 *   
@@ -61,7 +61,7 @@ public class AttributeFactory {
 	}
 
 	/**
-	 * Method that permit to instantiate specific case of {@link AbstractAttribute}: {@link RecordeAttribute} and {@link AggregatedAttribute}
+	 * Method that permit to instantiate specific case of {@link AbstractAttribute}: {@link RecordAttribute} and {@link AggregatedAttribute}
 	 * <p>
 	 * TODO: explain how
 	 * 
@@ -99,7 +99,7 @@ public class AttributeFactory {
 				throw new GSException("cannot instantiate aggregated value with "+referentAttribute+" referent attribute");
 			break;
 		case record:
-			att = new RecordeAttribute(name, dataType, referentAttribute);
+			att = new RecordAttribute(name, dataType, referentAttribute);
 			break;
 		default:
 			throw new GSException("The attribute meta data type "+valueType+" is not applicable !");

@@ -17,7 +17,7 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 import gospl.metamodel.attribut.AggregatedAttribute;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.RangeAttribute;
-import gospl.metamodel.attribut.RecordeAttribute;
+import gospl.metamodel.attribut.RecordAttribute;
 import gospl.metamodel.attribut.UniqueAttribute;
 import gospl.metamodel.attribut.value.RangeValue;
 import gospl.metamodel.attribut.value.UniqueValue;
@@ -65,7 +65,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		xs.alias(GS_RANGE_ATTRIBUTE_ALIAS, RangeAttribute.class);
 		xs.alias(GS_RANGE_VALUE_ALIAS, RangeValue.class);
 		xs.alias(GS_AGGREG_ATTRIBUTE_ALIAS, AggregatedAttribute.class);
-		xs.alias(GS_RECORD_ATTRIBUTE_ALIAS, RecordeAttribute.class);
+		xs.alias(GS_RECORD_ATTRIBUTE_ALIAS, RecordAttribute.class);
 		
 		/*
 		 * Map Converter

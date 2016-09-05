@@ -73,5 +73,15 @@ public interface IAttribute {
 	 * @param emptyValue
 	 */
 	public void setEmptyValue(IValue emptyValue);
+
+	/**
+	 * Find the corresponding value. It either gives the {@code disVal} {@link IValue} given in argument or
+	 * a aggregated {@link IValue} given that the current {@link IAttribute} is a {@link AggregatedAttribute} 
+	 * and {@code disVal} pertain to its {@link #getReferentAttribute()}
+	 * 
+	 * @param disVal
+	 * @return
+	 */
+	public IValue findMatchingAttributeValue(IValue disVal);
 	
 }

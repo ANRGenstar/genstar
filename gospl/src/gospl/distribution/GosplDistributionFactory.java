@@ -91,7 +91,9 @@ public class GosplDistributionFactory {
 		if(distributions.size() == 1)
 			return getFrequency(distributions.iterator().next());
 		Set<AFullNDimensionalMatrix<Double>> fullMatrices = new HashSet<>();
-		for(AFullNDimensionalMatrix<? extends Number> mat : distributions)
+		for(AFullNDimensionalMatrix<? extends Number> mat : distributions
+				.stream().filter(mat -> mat.getDimensions().stream().allMatch(d -> !d.isRecordAttribute()))
+				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
 		return new GosplConditionalDistribution(fullMatrices);
 	}
@@ -185,7 +187,7 @@ public class GosplDistributionFactory {
 	private AFullNDimensionalMatrix<Double> getFrequency(AFullNDimensionalMatrix<? extends Number> matrix) throws IllegalControlTotalException, MatrixCoordinateException {
 		// returned matrix
 		AFullNDimensionalMatrix<Double> freqMatrix = null;
-		
+
 		if(matrix.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable)){
 			// Identify local referent dimension
 			Map<IAttribute, List<AControl<? extends Number>>> mappedControls = matrix.getDimensions()
@@ -194,7 +196,7 @@ public class GosplDistributionFactory {
 			Set<IAttribute> localReferentDimensions = mappedControls.entrySet()
 					.parallelStream().filter(e -> e.getValue().stream().allMatch(ac -> ac.equalsCastedVal(e.getValue().get(0), EPSILON)))
 					.map(e -> e.getKey()).collect(Collectors.toSet());
-			
+
 			// The most appropriate align referent matrix (the one that have most information about matrix to align, i.e. the highest number of shared dimensions)
 			Optional<AFullNDimensionalMatrix<? extends Number>> optionalRef = distributions
 					.stream().filter(ctFitter -> !ctFitter.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable)
@@ -211,17 +213,13 @@ public class GosplDistributionFactory {
 							.stream().filter(asp -> matrixOfReference.getDimensions()
 									.contains(asp.getAttribute())).collect(Collectors.toSet()))).doubleValue()));
 				}
-			} else {
-				freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
-						GosplMetaDataType.LocalFrequencyTable);
-				for(ACoordinate<IAttribute, IValue> coord : matrix.getMatrix().keySet())
-					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
-			}
+			} else
+				throw new IllegalControlTotalException("The matrix ("+matrix.hashCode()+") must be align to globale frequency table but lack of a referent matrix", matrix);
 		} else {
 			// Init output matrix
 			freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
-							GosplMetaDataType.GlobalFrequencyTable);
-			
+					GosplMetaDataType.GlobalFrequencyTable);
+
 			if(matrix.getMetaDataType().equals(GosplMetaDataType.GlobalFrequencyTable)){
 				for(ACoordinate<IAttribute, IValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
