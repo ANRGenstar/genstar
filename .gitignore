@@ -19,6 +19,7 @@ project/plugins/project/
 # Eclipse specific
 *.classpath
 *.project
+.settings
 
 # Mac os
 *.DS_store
