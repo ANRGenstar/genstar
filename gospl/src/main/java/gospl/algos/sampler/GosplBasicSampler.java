@@ -42,7 +42,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 	}
 	
 	public GosplBasicSampler(ThreadLocalRandom random,
-			LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
+			Map<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
 		this.random = random;
 		this.indexedKey = new ArrayList<>(map.size());
 		this.indexedProbabilitySum = new ArrayList<>(map.size());
