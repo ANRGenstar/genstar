@@ -22,5 +22,9 @@ project/plugins/project/
 .settings
 bin/
 
+# IDEA specific
+*.iml
+.idea/
+
 # Mac os
 *.DS_store
