@@ -59,7 +59,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 
 		// Stop the algorithm and exit the unique matrix if there is only one
 		if(!matrix.isSegmented())
-			return new GosplBasicSampler(matrix);
+			return new GosplBasicSampler(matrix.getMatrix().entrySet()
+					.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
+					.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue(),
+							(e1, e2) -> e1, LinkedHashMap::new)));
 
 
 		/////////////////////////////////////

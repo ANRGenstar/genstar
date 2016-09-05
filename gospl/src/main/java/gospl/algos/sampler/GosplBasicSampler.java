@@ -1,7 +1,6 @@
 package gospl.algos.sampler;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -10,8 +9,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import gospl.algos.exception.GosplSamplerException;
-import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
@@ -25,21 +22,20 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 
 	private final double EPSILON = Math.pow(10, -6);
 
-	public GosplBasicSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException{
-		this(ThreadLocalRandom.current(), distribution);
-	}
+//	public GosplBasicSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException{
+//		this(ThreadLocalRandom.current(), distribution);
+//	}
 	
-	public GosplBasicSampler(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
+	public GosplBasicSampler(Map<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
 		this(ThreadLocalRandom.current(), map);
 	}
 
-	public GosplBasicSampler(ThreadLocalRandom random,
-			INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
-		this(random, distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue(),
-						(e1, e2) -> e1, LinkedHashMap::new)));
-	}
+//	public GosplBasicSampler(ThreadLocalRandom random,
+//			INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
+//		this(random, distribution.getMatrix().entrySet()
+//				.parallelStream().sorted(Map.Entry.comparingByValue((v1, v2) -> v1.compareTo(v2)))
+//				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue())));
+//	}
 	
 	public GosplBasicSampler(ThreadLocalRandom random,
 			Map<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
