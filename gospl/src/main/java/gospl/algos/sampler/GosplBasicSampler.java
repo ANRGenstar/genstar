@@ -37,7 +37,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 			INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
 		this(random, distribution.getMatrix().entrySet()
 				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue(),
 						(e1, e2) -> e1, LinkedHashMap::new)));
 	}
 	
