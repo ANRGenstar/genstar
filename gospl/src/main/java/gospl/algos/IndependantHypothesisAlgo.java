@@ -158,11 +158,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 		double avrSize =  sampleDistribution.keySet().parallelStream().mapToInt(c -> c.size()).average().getAsDouble();
 		if(wrongPr != 0)
 			throw new IllegalDistributionCreation("Some sample indiv ("+( Math.round(Math.round(wrongPr * 1d / sampleDistribution.size() * 100)))+"%) have not all attributs (average attributs nb = "+avrSize+")");
-		
-		LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> sdMap = sampleDistribution.entrySet()
+	
+		return new GosplBasicSampler(sampleDistribution.entrySet()
 				.parallelStream().sorted(Map.Entry.comparingByValue())
-				.collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey(), gspu), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new));
-		return new GosplBasicSampler(sdMap);
+				.collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey(), gspu), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new)));
 	}
 
 	

@@ -20,6 +20,7 @@ project/plugins/project/
 *.classpath
 *.project
 .settings
+bin/
 
 # Mac os
 *.DS_store
