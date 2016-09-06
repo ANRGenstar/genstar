@@ -24,8 +24,7 @@
 	    <artifactId>xstream</artifactId>
 	    <version>1.4.9</version>
 	</dependency>
-
- </dependencies>
+</dependencies>
 
 
 </project>
