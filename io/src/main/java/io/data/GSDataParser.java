@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import io.datareaders.surveyreader.exception.GSIllegalRangedData;
 
@@ -25,6 +26,8 @@ import io.datareaders.surveyreader.exception.GSIllegalRangedData;
  *
  */
 public class GSDataParser {
+	
+	private String splitOperator = " ";
 	
 	public GSDataParser(){}
 	
@@ -58,10 +61,12 @@ public class GSDataParser {
 	public List<Double> getRangedDoubleData(String range, boolean nullValue) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
 		if(nullValue)
-			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", " ");
+			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
 		else 
-			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", " ");
-		List<String> stringRange = Arrays.asList(range.trim().split(" "));
+			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
+		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		stringRange.stream().forEach(s -> s.trim());
+		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
@@ -86,10 +91,12 @@ public class GSDataParser {
 	public List<Double> getRangedData(String range, boolean nullValue, Double minVal, Double maxVal) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
 		if(nullValue)
-			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", " ");
+			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
 		else 
-			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", " ");
-		List<String> stringRange = Arrays.asList(range.trim().split(" "));
+			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
+		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		stringRange.stream().forEach(s -> s.trim());
+		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
@@ -124,10 +131,12 @@ public class GSDataParser {
 		List<Integer> list = new ArrayList<>();
 		range = range.replaceAll(Pattern.quote("+"), "");
 		if(nullValue)
-			range = range.replaceAll("[^-?\\d+]", "");
+			range = range.replaceAll("[^-?\\d+]", splitOperator);
 		else
-			range = range.replaceAll("[^\\d+]", "");
-		List<String> stringRange = new ArrayList<>(Arrays.asList(range.trim().split(" ")));
+			range = range.replaceAll("[^\\d+]", splitOperator);
+		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		stringRange.stream().forEach(s -> s.trim());
+		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
@@ -152,10 +161,12 @@ public class GSDataParser {
 	public List<Integer> getRangedData(String range, boolean nullValue, Integer minVal, Integer maxVal) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
 		if(nullValue)
-			range = range.replaceAll("[^-?\\d+]", " ");
+			range = range.replaceAll("[^-?\\d+]", splitOperator);
 		else
-			range = range.replaceAll("[^\\d]+", " ");
-		List<String> stringRange = new ArrayList<>(Arrays.asList(range.trim().split(" ")));
+			range = range.replaceAll("[^\\d]+", splitOperator);
+		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		stringRange.stream().forEach(s -> s.trim());
+		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)

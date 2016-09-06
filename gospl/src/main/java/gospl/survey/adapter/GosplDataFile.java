@@ -85,6 +85,15 @@ public class GosplDataFile {
 	public IGSSurvey getSurvey() throws InvalidFormatException, IOException {
 		return SurveyStaticFactory.getSurvey(new File(surveyFilePath), csvSeparator);
 	}
+	
+// --------------------------- utility methods --------------------------- //
+	
+	@Override
+	public String toString(){
+		return getSurveyFileName()+" ("+getDataFileType()+")";
+	}
+	
+// --------------------------- inner methods --------------------------- //
 
 	/*
 	 * Method that enable a safe serialization / deserialization of this java class <br/>

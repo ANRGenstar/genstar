@@ -46,7 +46,8 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 
 	@Override
 	public ISampler<ACoordinate<IAttribute, IValue>> inferDistributionSampler(
-			INDimensionalMatrix<IAttribute, IValue, Double> matrix) throws IllegalDistributionCreation, GosplSamplerException {
+			INDimensionalMatrix<IAttribute, IValue, Double> matrix,
+			ISampler<ACoordinate<IAttribute, IValue>> sampler) throws IllegalDistributionCreation, GosplSamplerException {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
 		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable))
@@ -58,11 +59,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 		gspu.getStempPerformance(0);
 
 		// Stop the algorithm and exit the unique matrix if there is only one
-		if(!matrix.isSegmented())
-			return new GosplBasicSampler(matrix.getMatrix().entrySet()
-					.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-					.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue(),
-							(e1, e2) -> e1, LinkedHashMap::new)));
+		if(!matrix.isSegmented()){
+			sampler.setDistribution((AFullNDimensionalMatrix<Double>) matrix);
+			return sampler;
+		}
 
 
 		/////////////////////////////////////
@@ -112,34 +112,51 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 						- (int) mat1.getDimensions().stream().filter(dim1 -> aggAttributeMap.keySet().contains(dim1)).count())
 				.collect(Collectors.toList());
 		for(AFullNDimensionalMatrix<Double> mat : aggMatrices){
+			
 			// Store mapped relationship between aggregated (key) and disaggregated (values) values
 			Set<IAttribute> aggregAttSet = matrix.getDimensions()
 					.stream().filter(a -> !a.getReferentAttribute().equals(a))
 					.collect(Collectors.toSet());
 			Map<IValue, Set<IValue>> aggToRefValues = new HashMap<>();
+			
 			// For known matching
 			for(IValue val : aggregAttSet.stream().flatMap(att -> att.getValues().stream()).collect(Collectors.toSet()))
 				aggToRefValues.put(val, val.getAttribute().getReferentAttribute().getValues()
 						.stream().filter(disVal -> val.getAttribute().findMatchingAttributeValue(disVal).equals(val))
 						.collect(Collectors.toSet()));
+			
 			// For values that have no aggregate counterpart
 			for(IAttribute att : aggregAttSet)
 				aggToRefValues.put(att.getEmptyValue(), att.getReferentAttribute().getValues()
 					.stream().filter(val -> aggToRefValues.values().stream().allMatch(vals -> !vals.contains(val)))
 				.collect(Collectors.toSet()));
+			
+			Map<Set<IValue>, Double> updatedSampleDistribution = new HashMap<>();
+			
 			// Iterate over the old sampleDistribution to had new disaggregate values
-			for(Set<IValue> indiv : sampleDistribution.keySet()){
-				Set<IValue> hookVal = Stream.concat(indiv.stream().filter(val -> mat.getAspects().contains(val)), 
-						aggToRefValues.keySet().stream().filter(k -> aggToRefValues.get(k)
-								.stream().anyMatch(val -> indiv.contains(val))))
+			for(ACoordinate<IAttribute, IValue> aggCoord : mat.getMatrix().keySet()){
+				double aControl = mat.getMatrix().get(aggCoord).getValue();
+				Set<IAttribute> dissAtts = aggCoord.getMap().keySet()
+						.stream().filter(att -> aggregAttSet.contains(att))
+						.map(att -> att.getReferentAttribute())
 						.collect(Collectors.toSet());
-				Map<ACoordinate<IAttribute, IValue>, AControl<Double>> coordsHooked = mat.getMatrix().entrySet()
-						.parallelStream().filter(e -> e.getKey().containsAll(hookVal))
+				Map<Set<IValue>, Double> targetedIndiv = sampleDistribution.entrySet()
+						.parallelStream().filter(i -> dissAtts
+								.stream().allMatch(att -> aggToRefValues.get(att)
+										.stream().anyMatch(val -> i.getKey().contains(val))))
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
-				for(ACoordinate<IAttribute, IValue> HCoord : coordsHooked.keySet()){
-					
+				double mControl = targetedIndiv.values().stream().reduce(0d, (d1, d2) -> d1 + d2);
+				for(Set<IValue> indiv : targetedIndiv.keySet()){
+					Set<IValue> newIndiv = new HashSet<>(indiv);
+					newIndiv.addAll(aggCoord.getMap().entrySet()
+							.stream().filter(e -> !indiv
+									.stream().map(v -> v.getAttribute()).anyMatch(att -> att.equals(e.getKey())))
+							.map(e -> e.getValue()).collect(Collectors.toSet()));
+					updatedSampleDistribution.put(newIndiv, targetedIndiv.get(indiv) / mControl * aControl);
 				}
 			}
+			
+			sampleDistribution = updatedSampleDistribution;
 		}
 
 		////////////////////////////////////
@@ -162,9 +179,11 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 		if(wrongPr != 0)
 			throw new IllegalDistributionCreation("Some sample indiv ("+( Math.round(Math.round(wrongPr * 1d / sampleDistribution.size() * 100)))+"%) have not all attributs (average attributs nb = "+avrSize+")");
 	
-		return new GosplBasicSampler(sampleDistribution.entrySet()
+		sampler.setDistribution(sampleDistribution.entrySet()
 				.parallelStream().sorted(Map.Entry.comparingByValue())
-				.collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey(), gspu), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new)));
+				.collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey(), gspu), 
+						e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new)));
+		return sampler;
 	}
 
 	

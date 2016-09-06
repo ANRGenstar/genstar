@@ -9,11 +9,14 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import gospl.algos.IDistributionInferenceAlgo;
 import gospl.algos.IndependantHypothesisAlgo;
 import gospl.algos.exception.GosplSamplerException;
+import gospl.algos.sampler.GosplBasicSampler;
+import gospl.algos.sampler.ISampler;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticPopGenerator;
 import gospl.metamodel.IPopulation;
@@ -70,16 +73,24 @@ public class PopSynthesisRouen {
 			e1.printStackTrace();
 		}
 		
-		// we instantiate an inference algorithm
+		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		IDistributionInferenceAlgo<IAttribute, IValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
+		ISampler<ACoordinate<IAttribute, IValue>> sampler = null;
+		try {
+			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
+		} catch (IllegalDistributionCreation e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (GosplSamplerException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		
 		// BUILD THE GENERATOR
 		ISyntheticPopGenerator ispGenerator = null;
 		try {
-			ispGenerator = new DistributionBasedGenerator(distributionInfAlgo.inferDistributionSampler(distribution));
+			ispGenerator = new DistributionBasedGenerator(sampler);
 		} catch (GosplSamplerException e) {
-			e.printStackTrace();
-		} catch (IllegalDistributionCreation e) {
 			e.printStackTrace();
 		}
 		

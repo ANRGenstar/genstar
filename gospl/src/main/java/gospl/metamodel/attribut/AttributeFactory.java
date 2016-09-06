@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.geotools.xml.schema.AttributeValue;
+
 import gospl.exception.GSException;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.metamodel.attribut.value.RangeValue;
-import gospl.metamodel.attribut.value.RecordValue;
 import gospl.metamodel.attribut.value.UniqueValue;
-import io.data.GSDataType;
 import io.data.GSDataParser;
+import io.data.GSDataType;
 import io.datareaders.surveyreader.exception.GSIllegalRangedData;
 
 public class AttributeFactory {
@@ -193,7 +194,7 @@ public class AttributeFactory {
 		case range:
 			return new RangeValue(dataType, attribute);
 		default:
-			return new RecordValue(dataType, attribute);
+			return new UniqueValue(dataType, attribute);
 		}
 	}
 

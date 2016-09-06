@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import gospl.algos.exception.GosplSamplerException;
-import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
@@ -34,33 +34,32 @@ import io.util.GSPerformanceUtil;
  */
 public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IValue>> {
 	
-	private static final boolean DEBUG_SYSO = true;
+	private static boolean DEBUG_SYSO = true;
 	
-	private final List<ACoordinate<IAttribute, IValue>> indexedKey;
-	private final List<Double> indexedProbabilitySum;
+	private List<ACoordinate<IAttribute, IValue>> indexedKey;
+	private List<Double> indexedProbabilitySum;
 	
-	private final Random random;
+	private Random random = ThreadLocalRandom.current();
 	
 	private final double EPSILON = Math.pow(10, -6);
 	
-	public GosplBinarySampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
-		this(ThreadLocalRandom.current(), distribution);
-	}
+	// -------------------- setup methods -------------------- //
 	
-	public GosplBinarySampler(Random random, INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
+	@Override
+	public void setRandom(Random random) {
+		this.random = random;
+	}
+
+	@Override
+	public void setDistribution(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> distribution) throws GosplSamplerException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
 				distribution.size(), DEBUG_SYSO);
 		gspu.sysoStempPerformance(0, this);
-		this.random = random;
 		this.indexedKey = new ArrayList<>(distribution.size());
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
-		Map<ACoordinate<IAttribute, IValue>, Double> sortedDistribution = distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
-                        (e1, e2) -> e1, LinkedHashMap::new));
 		int count = 1;
-		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : sortedDistribution.entrySet()){
+		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : distribution.entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
@@ -70,6 +69,16 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
 			throw new GosplSamplerException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
+
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
+		this.setDistribution(distribution.getMatrix().entrySet()
+				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
+                        (e1, e2) -> e1, LinkedHashMap::new)));
+	}
+	
+	// -------------------- main contract -------------------- //
 		
 	@Override
 	public ACoordinate<IAttribute, IValue> draw() throws GosplSamplerException {
@@ -104,6 +113,8 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 			draws.add(draw());
 		return draws;
 	}
+	
+	// -------------------- utility -------------------- //
 	
 	@Override
 	public String toCsv(String csvSeparator){

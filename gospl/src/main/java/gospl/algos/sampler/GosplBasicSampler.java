@@ -1,6 +1,7 @@
 package gospl.algos.sampler;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,41 +10,35 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 import gospl.algos.exception.GosplSamplerException;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 
 public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValue>> {
 
-	private final List<ACoordinate<IAttribute, IValue>> indexedKey;
-	private final List<Double> indexedProbabilitySum;
+	private List<ACoordinate<IAttribute, IValue>> indexedKey;
+	private List<Double> indexedProbabilitySum;
 
-	private final Random random;
+	private Random random = ThreadLocalRandom.current();
 
 	private final double EPSILON = Math.pow(10, -6);
 
-//	public GosplBasicSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException{
-//		this(ThreadLocalRandom.current(), distribution);
-//	}
-	
-	public GosplBasicSampler(Map<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
-		this(ThreadLocalRandom.current(), map);
+	// -------------------- setup methods -------------------- //
+
+	@Override
+	public void setRandom(Random random) {
+		this.random = random;
 	}
 
-//	public GosplBasicSampler(ThreadLocalRandom random,
-//			INDimensionalMatrix<IAttribute, IValue, Double> distribution) throws GosplSamplerException {
-//		this(random, distribution.getMatrix().entrySet()
-//				.parallelStream().sorted(Map.Entry.comparingByValue((v1, v2) -> v1.compareTo(v2)))
-//				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue())));
-//	}
-	
-	public GosplBasicSampler(ThreadLocalRandom random,
-			Map<ACoordinate<IAttribute, IValue>, Double> map) throws GosplSamplerException{
-		this.random = random;
-		this.indexedKey = new ArrayList<>(map.size());
-		this.indexedProbabilitySum = new ArrayList<>(map.size());
+	@Override
+	public void setDistribution(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> distribution)
+			throws GosplSamplerException {
+		this.indexedKey = new ArrayList<>(distribution.size());
+		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
-		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : map.entrySet()){
+		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : distribution.entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
@@ -52,6 +47,16 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 			throw new GosplSamplerException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
 
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
+		this.setDistribution(distribution.getMatrix().entrySet()
+				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
+                        (e1, e2) -> e1, LinkedHashMap::new)));
+	}
+
+	// -------------------- main contract -------------------- //
+	
 	@Override
 	public ACoordinate<IAttribute, IValue> draw() throws GosplSamplerException {
 		double rand = random.nextDouble();
@@ -73,6 +78,8 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 			draws.add(draw());
 		return draws;
 	}
+	
+	// -------------------- utility -------------------- //
 
 	@Override
 	public String toCsv(String csvSeparator) {

@@ -10,9 +10,10 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IA
 
 	@Override
 	public ISampler<ACoordinate<IAttribute, IValue>> inferDistributionSampler(
-			INDimensionalMatrix<IAttribute, IValue, Double> matrix) {
-		// TODO Auto-generated method stub
-		return null;
+			INDimensionalMatrix<IAttribute, IValue, Double> matrix,
+			ISampler<ACoordinate<IAttribute, IValue>> sampler) {
+		
+		return sampler;
 	}
 
 }

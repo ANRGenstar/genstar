@@ -52,10 +52,8 @@ public abstract class AbstractAttribute implements IAttribute {
 
 	@Override
 	public boolean setValues(Set<IValue> values) {
-		if(values.isEmpty()){
-			values = new HashSet<>(values);
-			return true;
-		}
+		if(this.values.isEmpty())
+			return this.values.addAll(values);
 		return false;
 	}
 	
@@ -78,5 +76,10 @@ public abstract class AbstractAttribute implements IAttribute {
 	
 	@Override
 	public abstract boolean isRecordAttribute();
+	
+	@Override
+	public String toString(){
+		return name+" ("+dataType+") - "+values.size()+" values";
+	}
 
 }

@@ -38,7 +38,7 @@ public interface IDistributionInferenceAlgo<D, A> {
 	 * @throws IllegalDistributionCreation
 	 * @throws GosplSamplerException
 	 */
-	public ISampler<ACoordinate<D, A>> inferDistributionSampler(INDimensionalMatrix<D, A, Double> matrix) 
+	public ISampler<ACoordinate<D, A>> inferDistributionSampler(INDimensionalMatrix<D, A, Double> matrix, ISampler<ACoordinate<D, A>> sampler) 
 			throws IllegalDistributionCreation, GosplSamplerException;
 
 }

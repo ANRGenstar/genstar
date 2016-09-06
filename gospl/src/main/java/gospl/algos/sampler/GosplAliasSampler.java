@@ -7,11 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.algos.exception.GosplSamplerException;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
@@ -35,64 +35,37 @@ import gospl.metamodel.attribut.value.IValue;
  */
 public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValue>> {
 
-	private final List<ACoordinate<IAttribute, IValue>> indexedKey;
-	private final List<Double> initProba;
+	private List<ACoordinate<IAttribute, IValue>> indexedKey;
+	private List<Double> initProba;
 	
 	/* The random number generator used to sample from the distribution. */
-	private final Random random;
+	private Random random;
 
 	/* The probability and alias tables. */
-	private final int[] alias;
-	private final double[] probability;
+	private int[] alias;
+	private double[] probability;
 
-	/**
-	 * Constructs a new AliasMethod to sample from a discrete distribution and
-	 * hand back outcomes based on the probability distribution.
-	 * <p>
-	 * Given as input a list of probabilities corresponding to outcomes 0, 1,
-	 * ..., n - 1, this constructor creates the probability and alias tables
-	 * needed to efficiently sample from this distribution.
-	 *
-	 * @param probabilities The list of probabilities.
-	 */
-	protected GosplAliasSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution) {
-		this(distribution, ThreadLocalRandom.current());
+	// -------------------- setup methods -------------------- //
+
+	@Override
+	public void setRandom(Random random) {
+		this.random = random;
 	}
 
-	/**
-	 * Constructs a new AliasMethod to sample from a discrete distribution and
-	 * hand back outcomes based on the probability distribution.
-	 * <p>
-	 * Given as input a list of probabilities corresponding to outcomes 0, 1,
-	 * ..., n - 1, along with the random number generator that should be used
-	 * as the underlying generator, this constructor creates the probability 
-	 * and alias tables needed to efficiently sample from this distribution.
-	 *
-	 * @param probabilities The list of probabilities.
-	 * @param indexedKey 
-	 * @param random The random number generator
-	 * @param the upper bound of probabilities (in maths always 1 but for floating point issues should be scale up when distribution is huge)
-	 */
-	protected GosplAliasSampler(INDimensionalMatrix<IAttribute, IValue, Double> distribution, Random random) {
-		
+	@Override
+	public void setDistribution(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> distribution)
+			throws GosplSamplerException {
 		if(distribution == null)
 			throw new NullPointerException();
-		if(distribution.getMatrix().isEmpty())
+		if(distribution.isEmpty())
 			throw new IllegalArgumentException("Probability vector must be nonempty.");
 		
-		Map<ACoordinate<IAttribute, IValue>, Double> sortedMap = distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
-                        (e1, e2) -> e1, LinkedHashMap::new));
-		this.indexedKey = new ArrayList<>(sortedMap.keySet());
-		this.initProba = new ArrayList<>(sortedMap.values());
+		this.indexedKey = new ArrayList<>(distribution.keySet());
+		this.initProba = new ArrayList<>(distribution.values());
 		
 		/* Allocate space for the probability and alias tables. */
 		probability = new double[distribution.size()];
 		alias = new int[distribution.size()];
-
-		/* Store the underlying generator. */
-		this.random = random;
 
 		/* Compute the average probability and cache it for later use. */
 		final double average = 1.0 / distribution.size();
@@ -159,6 +132,16 @@ public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValu
 		while (!large.isEmpty())
 			probability[large.removeLast()] = 1.0;
 	}
+
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
+		this.setDistribution(distribution.getMatrix().entrySet()
+				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
+				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
+                        (e1, e2) -> e1, LinkedHashMap::new)));
+	}
+
+	// -------------------- main contract -------------------- //
 
 	/**
 	 * Samples a value from the underlying distribution.

@@ -250,7 +250,7 @@ public class GosplDistributionFactory {
 	///////////////////////////////////////////////////////////////////////
 
 
-	private Map<Integer, Set<IValue>> getColumnHeaders(GosplDataFile file, IGSSurvey survey,
+	private Map<Integer, Set<IValue>> getRowHeaders(GosplDataFile file, IGSSurvey survey,
 			Set<IAttribute> attributes) {
 		List<Integer> attributeIdx = new ArrayList<>();
 		for(int line = 0; line < file.getFirstRowDataIndex(); line++){
@@ -259,6 +259,11 @@ public class GosplDistributionFactory {
 				String headAtt = sLine.get(idx);
 				if(attributes.stream().map(att -> att.getName()).anyMatch(attName -> attName.equals(headAtt)))
 					attributeIdx.add(idx);
+				if(headAtt.isEmpty()){
+					List<String> valList = survey.readColumn(idx);
+					if(attributes.stream().anyMatch(att -> att.getValues().stream().allMatch(val -> valList.contains(val.getInputStringValue()))))
+						attributeIdx.add(idx);
+				}
 			}
 		}
 
@@ -287,7 +292,10 @@ public class GosplDistributionFactory {
 								.stream().flatMap(s -> attributes.stream().filter(a -> a.getName().equals(s)))
 								.collect(Collectors.toSet()));
 					}
-					vals = vals.stream().filter(av -> inferedHeads.contains(av.getAttribute())).collect(Collectors.toSet());
+					Set<IValue> vals2 = new HashSet<>(vals);
+					for(IValue val : vals2)
+						if(!inferedHeads.contains(val.getAttribute()))
+							vals.remove(val);
 				}
 				if(rowHeaders.containsKey(i))
 					rowHeaders.get(i).addAll(vals);
@@ -298,7 +306,7 @@ public class GosplDistributionFactory {
 		return rowHeaders;
 	}
 
-	private Map<Integer, Set<IValue>> getRowHeaders(GosplDataFile file, IGSSurvey survey, Set<IAttribute> attributes) {
+	private Map<Integer, Set<IValue>> getColumnHeaders(GosplDataFile file, IGSSurvey survey, Set<IAttribute> attributes) {
 		Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		for(int i = file.getFirstColumnDataIndex(); i <= survey.getLastColumnIndex(); i++){
 			List<String> column = survey.readLines(0, file.getFirstRowDataIndex(), i);
