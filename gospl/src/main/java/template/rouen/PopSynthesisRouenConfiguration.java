@@ -27,8 +27,8 @@ import io.datareaders.surveyreader.exception.GSIllegalRangedData;
 
 public class PopSynthesisRouenConfiguration {
 
-	public static String INDIV_CLASS_PATH = "template/Rouen/insee_indiv";
-	public static String HHOLD_CLASS_PATH = "template/Rouen/insee_ménage";
+	public static String INDIV_CLASS_PATH = "data/Rouen/insee_indiv";
+	public static String HHOLD_CLASS_PATH = "data/Rouen/insee_ménage";
 
 	public static void main(String[] args) throws InvalidFormatException {
 		// TODO Auto-generated method stub

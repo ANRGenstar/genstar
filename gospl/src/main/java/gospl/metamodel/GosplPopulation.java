@@ -24,7 +24,7 @@ public class GosplPopulation implements IPopulation {
 	}
 	
 	/**
-	 * Place the concret type of collection you want this population be. If the propose
+	 * Place the concrete type of collection you want this population be. If the propose
 	 * collection is not empty, then default inner collection type is choose.
 	 * 
 	 * @see GosplPopulation()
