@@ -11,4 +11,8 @@ public interface IValue {
 	
 	public GSDataType getDataType();
 	
+	public int hashCode();
+	
+	public boolean equals(Object obj);
+	
 }

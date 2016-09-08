@@ -8,6 +8,7 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -107,11 +108,22 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	
 	@Override
 	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSamplerException{
-		// TODO: find a way to do it with streams and parallelism
-		List<ACoordinate<IAttribute, IValue>> draws = new ArrayList<>();
-		for(int i = 0; i < numberOfDraw; i++)
-			draws.add(draw());
-		return draws;
+//		TODO: find a way to do it with streams and parallelism
+//		List<ACoordinate<IAttribute, IValue>> draws = new ArrayList<>();
+//		for(int i = 0; i < numberOfDraw; i++)
+//			draws.add(draw());
+//		return draws;
+		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> safeDraw()).collect(Collectors.toList());
+	}
+	
+	private ACoordinate<IAttribute, IValue> safeDraw(){
+		ACoordinate<IAttribute, IValue> draw = null;
+		try {
+			draw = draw();
+		} catch (GosplSamplerException e) {
+			e.printStackTrace();
+		}
+		return draw;
 	}
 	
 	// -------------------- utility -------------------- //

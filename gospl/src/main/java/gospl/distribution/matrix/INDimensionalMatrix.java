@@ -163,6 +163,8 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 
 // ------------------------- utility methods ------------------------- //
 	
+	public String toString();
+	
 	public String toCsv(char csvSeparator);
 
 	public AControl<T> getNulVal();

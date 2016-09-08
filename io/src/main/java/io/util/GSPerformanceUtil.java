@@ -3,11 +3,8 @@ package io.util;
 public class GSPerformanceUtil {
 
 	private int stempCalls;
-	private long latestStempCall;
-	private double cumulStempCall;
-
-	private long latestStempProportion;
-	private double cumulStempProportion;
+	private long latestStemp;
+	private double cumulStemp;
 
 	private boolean firstSyso;
 	private String performanceTestDescription;
@@ -24,41 +21,54 @@ public class GSPerformanceUtil {
 		this.performanceTestDescription = performanceTestDescription;
 	}
 
-	public String getStempPerformance(int step){
+	public String getStempPerformance(String message){
 		long thisStemp = System.currentTimeMillis(); 
-		double timer = (thisStemp - latestStempCall)/1000d;
-		if(latestStempCall != 0l)	
-			cumulStempCall += timer;
-		stempCalls += step;
-		this.latestStempCall = thisStemp;
-		return "Step "+(stempCalls)+" -> "+timer+" s / "+((double) Math.round(cumulStempCall * 1000) / 1000)+" s)";
+		double timer = (thisStemp - latestStemp)/1000d;
+		if(latestStemp != 0l)	
+			cumulStemp += timer;
+		this.latestStemp = thisStemp;
+		return message+" -> "+timer+" s / "+((double) Math.round(cumulStemp * 1000) / 1000)+" s)";
 	}
-
-	public void sysoStempPerformance(int step, Object caller){
-		String s = getStempPerformance(step);
-		if(logSyso){
-			if(firstSyso){
-				System.out.println("\nMethod caller: "+caller.getClass().getSimpleName()+
-						"\n-------------------------\n"+
-						performanceTestDescription+
-						"\n-------------------------");
-				firstSyso = false;
-			}
-			System.out.println(s);
-		}
+	
+	public String getStempPerformance(int stepFoward){
+		stempCalls += stepFoward;
+		return getStempPerformance("Step "+stempCalls);
 	}
 
 	public String getStempPerformance(double proportion){
-		long thisStemp = System.currentTimeMillis(); 
-		double timer = (thisStemp - latestStempProportion)/1000d;
-		if(latestStempProportion != 0l)
-			cumulStempProportion += timer;
-		this.latestStempProportion = thisStemp;
-		return (Math.round(Math.round(proportion*100)))+" % -> "+timer+" s / "+((double) Math.round(cumulStempProportion * 1000) / 1000)+" s)";
+		return getStempPerformance(Math.round(Math.round(proportion*100))+"%");
+	}
+	
+	public void sysoStempPerformance(int step, Object caller){
+		sysoStempMessage(getStempPerformance(step), caller);
 	}
 
 	public void sysoStempPerformance(double proportion, Object caller){
-		String s = getStempPerformance(proportion);
+		sysoStempMessage(getStempPerformance(proportion), caller);
+	}
+	
+	public void sysoStempPerformance(String message, Object caller){
+		sysoStempMessage(getStempPerformance(message), caller);
+	}
+	
+	public void sysoStempMessage(String message){
+		if(logSyso)
+			System.out.println(message);
+	}
+	
+	public void resetStemp(){
+		this.resetStempCalls();
+		firstSyso = true;
+		performanceTestDescription = "no reason";
+	}
+
+	public void resetStempCalls(){
+		stempCalls = 0;
+		latestStemp = 0l;
+		cumulStemp = 0d;
+	}
+	
+	private void sysoStempMessage(String message, Object caller){
 		if(logSyso){
 			if(firstSyso){
 				System.out.println("Method caller: "+caller.getClass().getSimpleName()+
@@ -67,30 +77,8 @@ public class GSPerformanceUtil {
 						"\n-------------------------");
 				firstSyso = false;
 			}
-			System.out.println(s);
+			System.out.println(message);
 		}
 	}
-	
-	public void sysoStempMessage(String message){
-		if(logSyso)
-			System.out.println(message);
-	}
 
-	public void resetStemp(){
-		this.resetStempCall();
-		this.resetStempProp();
-		firstSyso = true;
-		performanceTestDescription = "no reason";
-	}
-
-	public void resetStempCall(){
-		stempCalls = 0;
-		latestStempCall = 0l;
-		cumulStempCall = 0d;
-	}
-
-	public void resetStempProp(){
-		latestStempProportion = 0l;
-		cumulStempProportion = 0d;
-	}
 }

@@ -152,6 +152,13 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 // ----------------------- utility ----------------------- //
 	
 	@Override
+	public String toString(){
+		String s = "Segmented matrix with "+jointDistributionSet.size()+" inner full matrices:\n";
+		s += jointDistributionSet.stream().map(m -> m.toString()+"\n").reduce("", (s1, s2) -> s1 + s2);
+		return s;
+	}
+	
+	@Override
 	public String toCsv(char csvSeparator){
 		String s = "";
 		for(AFullNDimensionalMatrix<T> matrix : jointDistributionSet){

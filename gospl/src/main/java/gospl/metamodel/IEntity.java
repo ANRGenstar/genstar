@@ -23,11 +23,16 @@ public interface IEntity {
 	/**
 	 * returns the value for an attribute if any; the value might be null if no
 	 * value is defined; raises an exception if the attribute is not declared for this entity
-	 * @param a
+	 * @param attribute
 	 * @return
 	 */
-	public IValue getValueForAttribute(IAttribute a) throws UndefinedAttributeException;
-	
-	
+	public IValue getValueForAttribute(IAttribute attribute) throws UndefinedAttributeException;
+
+	/**
+	 * returns values for each attributes of the entity
+	 * 
+	 * @return
+	 */
+	public Collection<IValue> getValues();
 	
 }

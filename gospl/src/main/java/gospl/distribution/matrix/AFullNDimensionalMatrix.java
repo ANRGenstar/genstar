@@ -213,7 +213,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 					s += "| "+aspect+": "+empty+"\n";
 				}
 		}
-		s += " ----------------------------------- ";
+		s += " ----------------------------------- \n";
 		return s;
 	}
 

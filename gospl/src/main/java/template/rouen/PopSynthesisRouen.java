@@ -1,8 +1,13 @@
 package template.rouen;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -19,9 +24,11 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticPopGenerator;
+import gospl.metamodel.IEntity;
 import gospl.metamodel.IPopulation;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
+import io.util.GSPerformanceUtil;
 
 public class PopSynthesisRouen {
 
@@ -41,13 +48,10 @@ public class PopSynthesisRouen {
 		try {
 			df.buildDistributions();
 		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MatrixCoordinateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} 
 		
@@ -63,13 +67,10 @@ public class PopSynthesisRouen {
 		try {
 			distribution = df.collapseDistributions();
 		} catch (IllegalDistributionCreation e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (IllegalControlTotalException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (MatrixCoordinateException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -79,12 +80,13 @@ public class PopSynthesisRouen {
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (GosplSamplerException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+args[1], true);
 		
 		// BUILD THE GENERATOR
 		ISyntheticPopGenerator ispGenerator = null;
@@ -97,15 +99,41 @@ public class PopSynthesisRouen {
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(Integer.parseInt(args[1]));
+			gspu.sysoStempPerformance("End generating synthetic population: elapse time", PopSynthesisRouen.class.getName());
 		} catch (NumberFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (GosplSamplerException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		System.out.println(population);
+		// MAKE REPORT
+		String pathFolder = Paths.get(args[0].trim()).getParent().toString()+File.separator;
+		String report = "RouenPopReport.csv";
+		String export = "RouenPopExport.csv";
+		try {
+			gspu.sysoStempMessage("Start processing population to output files");
+			Files.write(Paths.get(pathFolder+report), population.csvReport(";").getBytes());
+			gspu.sysoStempPerformance("\treport done: "+pathFolder+report, PopSynthesisRouen.class.getName());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		// TODO: export to util class or into io project (with the problem of import IPopulation)
+		try {
+			CharSequence csvSep = ";";
+			int individual = 1;
+			BufferedWriter bw = Files.newBufferedWriter(Paths.get(pathFolder+export));
+			Collection<IAttribute> attributes = population.getPopulationAttributes();
+			bw.write("Individual"+csvSep+attributes.stream().map(att -> att.getName()).collect(Collectors.joining(csvSep))+"\n");
+			for(IEntity e : population){
+				bw.write(String.valueOf((individual++)));
+				for(IAttribute attribute : attributes)
+					bw.write(csvSep+e.getValueForAttribute(attribute).getInputStringValue());
+				bw.write("\n");
+			}
+			gspu.sysoStempPerformance("\texport done: "+pathFolder+export, PopSynthesisRouen.class.getName());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 

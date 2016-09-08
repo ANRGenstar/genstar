@@ -1,6 +1,7 @@
 package gospl.metamodel;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import gospl.metamodel.attribut.IAttribute;
@@ -23,6 +24,11 @@ public class GosplEntity implements IEntity {
 	@Override
 	public IValue getValueForAttribute(IAttribute attribute) throws UndefinedAttributeException {
 		return attributes.get(attribute);
+	}
+
+	@Override
+	public Collection<IValue> getValues() {
+		return Collections.unmodifiableCollection(attributes.values());
 	}
 
 }
