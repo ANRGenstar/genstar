@@ -17,13 +17,14 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 	protected final ShapeFileIO mainFile;
 	protected final Name propertyName;
 	
+	@SuppressWarnings("rawtypes")
 	protected List<IGeoGSFileIO> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
 	
 	protected ISPLRegressionAlgorithm<V, T> regressionAlgorithm;
 	
 	public ASPLMapperBuilder(ShapeFileIO mainFile, Name propertyName,
-			List<IGeoGSFileIO> ancillaryFiles) {
+			@SuppressWarnings("rawtypes") List<IGeoGSFileIO> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.propertyName = propertyName;
 		this.ancillaryFiles = ancillaryFiles;
@@ -37,7 +38,8 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 		this.matcherFactory = matcherFactory;
 	}
 	
-	public abstract void mapRegressorFile(IGeoGSFileIO regressorFile) throws IOException, TransformException;
+	public abstract void mapRegressorFile(@SuppressWarnings("rawtypes") IGeoGSFileIO regressorFile) 
+			throws IOException, TransformException;
 	
 	public abstract SPLMapper<V, T> buildMapper() throws IOException, TransformException;
 	

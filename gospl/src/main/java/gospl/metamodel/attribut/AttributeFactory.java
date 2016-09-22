@@ -3,9 +3,11 @@ package gospl.metamodel.attribut;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.geotools.xml.schema.AttributeValue;
 
@@ -40,7 +42,7 @@ public class AttributeFactory {
 	 * <li>If {@code valueType.equals({@link GosplValueType#range})} then return a {@link RangeAttribute}
 	 * <li>If {@code valueType.equals({@link GosplValueType#unique})} then return a {@link UniqueAttribute}
 	 * <li>If {@code valueType.equals({@link GosplValueType#record})} then return a {@link RecordAttribute}
-	 * <li>FutherMore if {@code !IAttribute#getReferentAttribute().equals(this) && !this.isRecordAttribute()} then return a {@link AggregatedAttribute} 
+	 * <li>FutherMore if {@code !IAttribute#getReferentAttribute().equals(this) && !this.isRecordAttribute()} then return a {@link MappedAttribute} 
 	 * </ul><p>
 	 *   
 	 * 
@@ -62,7 +64,7 @@ public class AttributeFactory {
 	}
 
 	/**
-	 * Method that permit to instantiate specific case of {@link AbstractAttribute}: {@link RecordAttribute} and {@link AggregatedAttribute}
+	 * Method that permit to instantiate specific case of {@link AbstractAttribute}: {@link RecordAttribute} and {@link MappedAttribute}
 	 * <p>
 	 * TODO: explain how
 	 * 
@@ -80,14 +82,37 @@ public class AttributeFactory {
 	 * @throws GenstarIllegalRangedData
 	 */
 	public IAttribute createAttribute(String name, GSDataType dataType, List<String> values,
-			GosplValueType valueType, IAttribute referentAttribute, Map<String, Set<String>> mapper) throws GSException, GSIllegalRangedData {
+			GosplValueType valueType, IAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSException, GSIllegalRangedData {
+		return createAttribute(name, dataType, 
+				values.stream().collect(Collectors.toMap(val -> val, val -> val, (v1, v2) -> v1, LinkedHashMap::new)),
+				valueType, referentAttribute, mapper);
+	}
+	
+	/**
+	 * Instantiates attributes with pairs mapped data / model values
+	 * 
+	 * @param name
+	 * @param dataType
+	 * @param values
+	 * @param valueType
+	 * @return
+	 * @throws GSException
+	 * @throws GSIllegalRangedData
+	 */
+	public IAttribute createAttribute(String name, GSDataType dataType, LinkedHashMap<String, String> values,
+			GosplValueType valueType) throws GSException, GSIllegalRangedData {
+		return createAttribute(name, dataType, values, valueType, null, Collections.emptyMap());
+	}
+	
+	public IAttribute createAttribute(String name, GSDataType dataType, LinkedHashMap<String, String> values,
+			GosplValueType valueType, IAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSException, GSIllegalRangedData {
 		IAttribute att = null;
 		switch (valueType) {
 		case unique:
 			if(referentAttribute == null)
 				att = new UniqueAttribute(name, dataType);
 			else if (!mapper.isEmpty())
-				att = new AggregatedAttribute(name, dataType, referentAttribute, mapper);
+				att = new MappedAttribute(name, dataType, referentAttribute, mapper);
 			else
 				throw new GSException("cannot instantiate aggregated value without mapper");
 			break;
@@ -95,7 +120,7 @@ public class AttributeFactory {
 			if(mapper.isEmpty())
 				att = new RangeAttribute(name, dataType);
 			else if(referentAttribute != null)
-				att = new AggregatedAttribute(name, dataType, referentAttribute, mapper);
+				att = new MappedAttribute(name, dataType, referentAttribute, mapper);
 			else
 				throw new GSException("cannot instantiate aggregated value with "+referentAttribute+" referent attribute");
 			break;
@@ -125,7 +150,7 @@ public class AttributeFactory {
 	 * @throws GSException
 	 * @throws GenstarIllegalRangedData
 	 */
-	public IValue createValue(GosplValueType valueType, GSDataType dataType, List<String> values, IAttribute attribute) 
+	public IValue createValue(GosplValueType valueType, GSDataType dataType, LinkedHashMap<String, String> values, IAttribute attribute) 
 			throws GSException, GSIllegalRangedData{
 		if(values.isEmpty())
 			return getEmptyValue(valueType, dataType, attribute);
@@ -134,28 +159,27 @@ public class AttributeFactory {
 
 	// ----------------------------- Back office ----------------------------- //
 
-	private Set<IValue> getValues(GosplValueType valueType, GSDataType dataType, List<String> values, IAttribute attribute) 
+	private Set<IValue> getValues(GosplValueType valueType, GSDataType dataType, LinkedHashMap<String, String> values, IAttribute attribute) 
 			throws GSException, GSIllegalRangedData{
 		Set<IValue> vals = new HashSet<>();
 		switch (valueType) {
 		case record:
-			if(values.size() > 1)
-				values = values.subList(0, 1);
+			vals.add(new UniqueValue(values.keySet().stream().iterator().next(), dataType, attribute));
 		case unique:
-			for(String value : values)
+			for(String value : values.keySet())
 				if(dataType.isNumericValue())
-					vals.add(new UniqueValue(parser.getNumber(value.trim()).get(0), dataType, attribute));
+					vals.add(new UniqueValue(value.trim(), parser.getNumber(values.get(value).trim()).get(0), dataType, attribute));
 				else
-					vals.add(new UniqueValue(value.trim(), dataType, attribute));
+					vals.add(new UniqueValue(value.trim(), values.get(value), dataType, attribute));
 			return vals;
 		case range:
 			if(dataType.equals(GSDataType.Integer)){
 				List<Integer> valList = new ArrayList<>();
-				for(String range : values)
-					valList.addAll(parser.getRangedIntegerData(range, false));
+				for(String range : values.keySet())
+					valList.addAll(parser.getRangedIntegerData(values.get(range), false));
 				Collections.sort(valList);
-				for(String val : values){
-					List<Integer> intVal = parser.getRangedIntegerData(val, false);
+				for(String val : values.keySet()){
+					List<Integer> intVal = parser.getRangedIntegerData(values.get(val), false);
 					if(intVal.size() == 1){
 						if(intVal.get(0).equals(valList.get(0)))
 							intVal.add(0, minInt);
@@ -166,11 +190,11 @@ public class AttributeFactory {
 				}
 			} else if(dataType.equals(GSDataType.Double)){
 				List<Double> valList = new ArrayList<>();
-				for(String range : values)
-					valList.addAll(parser.getRangedDoubleData(range, false));
+				for(String range : values.keySet())
+					valList.addAll(parser.getRangedDoubleData(values.get(range), false));
 				Collections.sort(valList);
-				for(String val : values){
-					List<Double> doublVal = parser.getRangedDoubleData(val, false);
+				for(String val : values.keySet()){
+					List<Double> doublVal = parser.getRangedDoubleData(values.get(val), false);
 					if(doublVal.size() == 1){
 						if(doublVal.get(0).equals(valList.get(0)))
 							doublVal.add(0, minDouble);

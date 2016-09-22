@@ -128,7 +128,7 @@ public class GosplPopulation implements IPopulation {
 								.stream().anyMatch(ea -> ea.equals(value))).count();
 				double valProp =  Math.round(Math.round(((valCount * 1d / this.population.size()) * 10000))) / 100d;
 				if(lines.get(lineNumber).isEmpty())
-					lines.set(lineNumber, value.getInputStringValue() + csvSep + valCount + csvSep + valProp);
+					lines.set(lineNumber, value.getStringValue() + csvSep + valCount + csvSep + valProp);
 				else
 					lines.set(lineNumber, lines.get(lineNumber) + csvSep + value.getInputStringValue() + csvSep + valCount + csvSep + valProp);
 				lineNumber++;

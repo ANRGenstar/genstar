@@ -8,9 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -50,6 +53,9 @@ public class PopSynthesisRouenConfiguration {
 			List<GosplDataFile> householdDataFiles = new ArrayList<>();
 			Set<IAttribute> householdAttributes = new HashSet<>();
 			
+			// TODO: setup the sample data file
+			List<GosplDataFile> sampleDataFiles = new ArrayList<>();
+			Set<IAttribute> sampleAttributes = new HashSet<>();
 			
 			individualDataFiles.add(new GosplDataFile(INDIV_CLASS_PATH+File.separator+"Age & Couple-Tableau 1.csv",
 					GosplMetaDataType.ContingencyTable, 1, 1, ';'));
@@ -74,41 +80,110 @@ public class PopSynthesisRouenConfiguration {
 								"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus"), GosplValueType.range);
 				indivAttributes.add(referentAgeAttribute);
 				// Create a mapper
-				Map<String, Set<String>> mapperA1 = new HashMap<>();
-				mapperA1.put("15 à 19 ans", new HashSet<>(Arrays.asList("15 à 19 ans")));
-				mapperA1.put("20 à 24 ans", new HashSet<>(Arrays.asList("20 à 24 ans")));
-				mapperA1.put("25 à 39 ans", new HashSet<>(Arrays.asList("25 à 29 ans", "30 à 34 ans", "35 à 39 ans")));
-				mapperA1.put("40 à 54 ans", new HashSet<>(Arrays.asList("40 à 44 ans", "45 à 49 ans", "50 à 54 ans")));
-				mapperA1.put("55 à 64 ans", new HashSet<>(Arrays.asList("55 à 59 ans", "60 à 64 ans")));
-				mapperA1.put("65 à 79 ans", new HashSet<>(Arrays.asList("65 à 69 ans", "70 à 74 ans", "75 à 79 ans")));
-				mapperA1.put("80 ans ou plus", new HashSet<>(Arrays.asList("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
-						"95 à 99 ans", "100 ans ou plus")));
+				Map<Set<String>, Set<String>> mapperA1 = new HashMap<>();
+				mapperA1.put(Stream.of("15 à 19 ans").collect(Collectors.toSet()), 
+						Stream.of("15 à 19 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("20 à 24 ans").collect(Collectors.toSet()), 
+						Stream.of("20 à 24 ans").collect(Collectors.toSet())); 
+				mapperA1.put(Stream.of("25 à 39 ans").collect(Collectors.toSet()), 
+						Stream.of("25 à 29 ans", "30 à 34 ans", "35 à 39 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("40 à 54 ans").collect(Collectors.toSet()), 
+						Stream.of("40 à 44 ans", "45 à 49 ans", "50 à 54 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("55 à 64 ans").collect(Collectors.toSet()),
+						Stream.of("55 à 59 ans", "60 à 64 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("65 à 79 ans").collect(Collectors.toSet()), 
+						Stream.of("65 à 69 ans", "70 à 74 ans", "75 à 79 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("80 ans ou plus").collect(Collectors.toCollection(HashSet::new)),
+						Stream.of("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
+						"95 à 99 ans", "100 ans ou plus").collect(Collectors.toCollection(HashSet::new)));
 				// Instantiate an aggregated attribute using previously referent attribute
 				indivAttributes.add(attf.createAttribute("Age_2", GSDataType.Integer,
-						new ArrayList<>(mapperA1.keySet()), GosplValueType.range, referentAgeAttribute,
-						mapperA1));
+						mapperA1.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
+						GosplValueType.range, referentAgeAttribute, mapperA1));
 				// Create another mapper
-				Map<String, Set<String>> mapperA2 = new HashMap<>();
-				mapperA2.put("15 à 19 ans", new HashSet<>(Arrays.asList("15 à 19 ans")));
-				mapperA2.put("20 à 24 ans", new HashSet<>(Arrays.asList("20 à 24 ans")));
-				mapperA2.put("25 à 39 ans", new HashSet<>(Arrays.asList("25 à 29 ans", "30 à 34 ans", "35 à 39 ans")));
-				mapperA2.put("40 à 54 ans", new HashSet<>(Arrays.asList("40 à 44 ans", "45 à 49 ans", "50 à 54 ans")));
-				mapperA2.put("55 à 64 ans", new HashSet<>(Arrays.asList("55 à 59 ans", "60 à 64 ans")));
-				mapperA2.put("65 ans ou plus", new HashSet<>(Arrays.asList("65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
-						"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus")));
+				Map<Set<String>, Set<String>> mapperA2 = new HashMap<>();
+				mapperA2.put(Stream.of("15 à 19 ans").collect(Collectors.toSet()), 
+						Stream.of("15 à 19 ans").collect(Collectors.toSet()));
+				mapperA2.put(Stream.of("20 à 24 ans").collect(Collectors.toSet()), 
+						Stream.of("20 à 24 ans").collect(Collectors.toSet()));
+				mapperA2.put(Stream.of("25 à 39 ans").collect(Collectors.toSet()), 
+						Stream.of("25 à 29 ans", "30 à 34 ans", "35 à 39 ans").collect(Collectors.toSet()));
+				mapperA2.put(Stream.of("40 à 54 ans").collect(Collectors.toSet()), 
+						Stream.of("40 à 44 ans", "45 à 49 ans", "50 à 54 ans").collect(Collectors.toSet()));
+				mapperA2.put(Stream.of("55 à 64 ans").collect(Collectors.toSet()),
+						Stream.of("55 à 59 ans", "60 à 64 ans").collect(Collectors.toSet()));
+				mapperA2.put(Stream.of("65 ans ou plus").collect(Collectors.toSet()), 
+						Stream.of("65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
+						"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus").collect(Collectors.toSet()));
 				indivAttributes.add(attf.createAttribute("Age_3", GSDataType.Integer,
-						new ArrayList<>(mapperA2.keySet()), GosplValueType.range, referentAgeAttribute,
-						mapperA2));		
-				indivAttributes.add(attf.createAttribute("Couple", GSDataType.String, 
+						mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
+						GosplValueType.range, referentAgeAttribute, mapperA2));		
+				
+				LinkedHashMap<String, String> age_selfMapper = new LinkedHashMap<>();
+				age_selfMapper.put("000", "0 à 4 ans");
+				age_selfMapper.put("005", "5 à 9 ans");
+				age_selfMapper.put("010", "10 à 14 ans");
+				age_selfMapper.put("015", "15 à 19 ans");
+				age_selfMapper.put("020", "20 à 24 ans");
+				age_selfMapper.put("025", "25 à 29 ans");
+				age_selfMapper.put("030", "30 à 34 ans");
+				age_selfMapper.put("035", "35 à 39 ans");
+				age_selfMapper.put("040", "40 à 44 ans");
+				age_selfMapper.put("045", "45 à 49 ans");
+				age_selfMapper.put("050", "50 à 54 ans");
+				age_selfMapper.put("055", "55 à 59 ans");
+				age_selfMapper.put("060", "60 à 64 ans");
+				age_selfMapper.put("065", "65 à 69 ans");
+				age_selfMapper.put("070", "70 à 74 ans");
+				age_selfMapper.put("075", "75 à 79 ans");
+				age_selfMapper.put("080", "80 à 84 ans");
+				age_selfMapper.put("085", "85 à 89 ans");
+				age_selfMapper.put("090", "90 à 94 ans");
+				age_selfMapper.put("095", "95 à 99 ans");
+				age_selfMapper.put("100", "100 à 104 ans");
+				age_selfMapper.put("105", "105 à 109 ans");
+				age_selfMapper.put("110", "110 à 114 ans");
+				age_selfMapper.put("115", "115 à 129 ans");
+				age_selfMapper.put("120", "120 ans");
+				sampleAttributes.add(attf.createAttribute("Age_y", GSDataType.Integer, 	
+						age_selfMapper, GosplValueType.range));
+				
+				IAttribute couple = attf.createAttribute("Couple", GSDataType.String, 
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
-						GosplValueType.unique));
+						GosplValueType.unique);
+				sampleAttributes.add(couple);
+				indivAttributes.add(couple);
+				IAttribute sexe = attf.createAttribute("Sexe", GSDataType.String,
+						Arrays.asList("Hommes", "Femmes"), GosplValueType.unique);
+				sampleAttributes.add(sexe);
+				indivAttributes.add(sexe);
 				indivAttributes.add(attf.createAttribute("CSP", GSDataType.String, 
 						Arrays.asList("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
 								"Cadres et professions intellectuelles supérieures", "Professions intermédiaires", 
 								"Employés", "Ouvriers", "Retraités", "Autres personnes sans activité professionnelle"), 
 						GosplValueType.unique));
-				indivAttributes.add(attf.createAttribute("Sexe", GSDataType.String,
-						Arrays.asList("Hommes", "Femmes"), GosplValueType.unique));
+				
+				Map<Set<String>, Set<String>> scp_mapper = new HashMap<>();
+				LinkedHashMap<String, String> scp_selfMapper = new LinkedHashMap<>();
+				scp_selfMapper.put("11", "Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré");
+				scp_selfMapper.put("12", "Chômeurs");
+				scp_selfMapper.put("21", "Retraités ou préretraités");
+				scp_selfMapper.put("22", "Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus");
+				scp_selfMapper.put("23", "Moins de 14 ans");
+				scp_selfMapper.put("24", "Femmes ou hommes au foyer");
+				scp_selfMapper.put("25", "Autres inactifs");
+				scp_mapper.put(Stream.of("Retraités ou préretraités").collect(Collectors.toSet()),
+						Stream.of("Retraités").collect(Collectors.toSet()));
+				scp_mapper.put(Stream.of("Autres inactifs", "Chômeurs", 
+						"Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus", "Femmes ou hommes au foyer").collect(Collectors.toSet()), 
+						Stream.of("Autres personnes sans activité professionnelle").collect(Collectors.toSet()));
+				scp_mapper.put(Stream.of("Moins de 14 ans").collect(Collectors.toSet()), 
+						Stream.of((String) null).collect(Collectors.toSet()));
+				scp_mapper.put(Stream.of("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré").collect(Collectors.toSet()), 
+						Stream.of("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
+								"Cadres et professions intellectuelles supérieures", "Professions intermédiaires", 
+								"Employés", "Ouvriers").collect(Collectors.toSet()));
+				
 				
 				householdAttributes.add(attf.createAttribute("Ménage", GSDataType.String, 
 						Arrays.asList("Couple sans enfant", "Couple avec enfant(s)", 
@@ -130,19 +205,25 @@ public class PopSynthesisRouenConfiguration {
 						Arrays.asList("Hommes", "Femmes"), GosplValueType.unique));
 				
 				// Another mapper
-				Map<String, Set<String>> mapper = new HashMap<>();
-				mapper.put("Moins de 20 ans", new HashSet<>(Arrays.asList("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans",
-						"15 à 19 ans")));
-				mapper.put("20 à 24 ans", new HashSet<>(Arrays.asList("20 à 24 ans")));
-				mapper.put("25 à 39 ans", new HashSet<>(Arrays.asList("25 à 29 ans", "30 à 34 ans", "35 à 39 ans")));
-				mapper.put("40 à 54 ans", new HashSet<>(Arrays.asList("40 à 44 ans", "45 à 49 ans", "50 à 54 ans")));
-				mapper.put("55 à 64 ans", new HashSet<>(Arrays.asList("55 à 59 ans", "60 à 64 ans")));
-				mapper.put("65 à 79 ans", new HashSet<>(Arrays.asList("65 à 69 ans", "70 à 74 ans", "75 à 79 ans")));
-				mapper.put("80 ans ou plus", new HashSet<>(Arrays.asList("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
-						"95 à 99 ans", "100 ans ou plus")));
+				Map<Set<String>, Set<String>> mapper = new HashMap<>();
+				mapper.put(Stream.of("Moins de 20 ans").collect(Collectors.toSet()), 
+						Stream.of("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("20 à 24 ans").collect(Collectors.toSet()), 
+						Stream.of("20 à 24 ans").collect(Collectors.toSet())); 
+				mapperA1.put(Stream.of("25 à 39 ans").collect(Collectors.toSet()), 
+						Stream.of("25 à 29 ans", "30 à 34 ans", "35 à 39 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("40 à 54 ans").collect(Collectors.toSet()), 
+						Stream.of("40 à 44 ans", "45 à 49 ans", "50 à 54 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("55 à 64 ans").collect(Collectors.toSet()),
+						Stream.of("55 à 59 ans", "60 à 64 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("65 à 79 ans").collect(Collectors.toSet()), 
+						Stream.of("65 à 69 ans", "70 à 74 ans", "75 à 79 ans").collect(Collectors.toSet()));
+				mapperA1.put(Stream.of("80 ans ou plus").collect(Collectors.toCollection(HashSet::new)),
+						Stream.of("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
+						"95 à 99 ans", "100 ans ou plus").collect(Collectors.toCollection(HashSet::new)));
 				householdAttributes.add(attf.createAttribute("Age référent", GSDataType.Integer, 
-						new ArrayList<>(mapper.keySet()), GosplValueType.range, referentAgeAttribute,
-						mapper));
+						mapperA1.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
+						GosplValueType.range, referentAgeAttribute, mapper));
 				
 			} catch (GSException | GSIllegalRangedData e1) {
 				// TODO Auto-generated catch block

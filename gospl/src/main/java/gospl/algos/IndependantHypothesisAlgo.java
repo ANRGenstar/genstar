@@ -31,7 +31,7 @@ import io.util.GSPerformanceUtil;
  * TODO: explain
  * 
  * TODO: find a way to choose the sampling algorithm, e.g. {@link GosplAliasSampler}, {@link GosplBasicSampler} or {@link GosplBinarySampler}
- * HINT: choose a builder that take a {@link IDistributionInferenceAlgo} and an empty {@link ISampler} to fill with
+ * HINT: choose a builder that take a {@link ADistributionInferenceAlgo} and an empty {@link ISampler} to fill with
  * 
  * @author kevinchapuis
  *

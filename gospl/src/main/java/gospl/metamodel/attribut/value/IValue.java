@@ -5,6 +5,8 @@ import io.data.GSDataType;
 
 public interface IValue {
 	
+	public String getStringValue();
+	
 	public String getInputStringValue();
 	
 	public IAttribute getAttribute();

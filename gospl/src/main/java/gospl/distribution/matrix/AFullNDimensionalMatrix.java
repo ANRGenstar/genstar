@@ -239,7 +239,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				else {
 					String val = coordVal.values()
 							.stream().filter(asp -> asp.getAttribute().equals(att))
-							.findFirst().get().getInputStringValue();
+							.findFirst().get().getStringValue();
 					if(val.isEmpty())
 						val = "empty value";
 					csvLine += val;

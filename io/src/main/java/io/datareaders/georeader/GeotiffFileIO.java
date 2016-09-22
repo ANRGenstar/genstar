@@ -16,6 +16,7 @@ import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.GeneralEnvelope;
+import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.feature.Feature;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
@@ -26,11 +27,13 @@ import com.vividsolutions.jts.geom.Point;
 
 import io.datareaders.georeader.geodat.GSPixel;
 
-public class GeotiffFileIO implements IGeoGSFileIO<GSPixel, Number, Double> {
+public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 
 	private final AbstractGridCoverage2DReader store;
-	private GridCoverage2D coverage;
-	private String[] bandId;
+	private final GridCoverage2D coverage;
+	private final String[] bandId;
+	
+	private List<GSPixel> pixels = new ArrayList<>();
 
 	/**
 	 * Basically convert each grid like data from tiff file to a {@link Feature} list: 
@@ -66,11 +69,13 @@ public class GeotiffFileIO implements IGeoGSFileIO<GSPixel, Number, Double> {
 	
 	@Override
 	public List<GSPixel> getGeoData() throws IOException, TransformException{
-		return extractFeatures(store, coverage);
+		if(pixels.isEmpty())
+			pixels = extractFeatures(); 
+		return pixels;
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(IGeoGSFileIO<GSPixel, Number, Double> file) {
+	public boolean isCoordinateCompliant(IGeoGSFileIO<Number, Double> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 	
@@ -128,33 +133,37 @@ public class GeotiffFileIO implements IGeoGSFileIO<GSPixel, Number, Double> {
 	// ------------------------- inner utilities ------------------------- //
 
 	/*
-	 * Code for this has been past from these stackexchange answers:
+	 * Code for this has been past from stackexchange:
+	 * http://gis.stackexchange.com/questions/106882/how-to-read-each-pixel-of-each-band-of-a-multiband-geotiff-with-geotools-java
 	 * 
-	 * 1) http://gis.stackexchange.com/questions/106882/how-to-read-each-pixel-of-each-band-of-a-multiband-geotiff-with-geotools-java
-	 * 2) http://gis.stackexchange.com/questions/114598/creating-point-in-shapefile-from-latitude-longitude-using-geotools
-	 * 
+	 * TODO: setup an iterator to process data as bufferReader does
 	 */
-	private List<GSPixel> extractFeatures(AbstractGridCoverage2DReader store, GridCoverage2D coverage) throws IOException, TransformException{
+	private List<GSPixel> extractFeatures() {
 		List<GSPixel> featureList = new ArrayList<>();
 		
-		int w = (int) coverage.getProperty("image_width");
-		int h = (int) coverage.getProperty("image_height");
-		int numBands = store.getGridCoverageCount();
+		int w = store.getOriginalGridRange().getHigh().getCoordinateValue(0)+1;
+		int h = store.getOriginalGridRange().getHigh().getCoordinateValue(1)+1;
 
 		int idx = 1;
 		
 		System.out.println("["+this.getClass().getSimpleName()+"] Theoretical space size to proceed raster file: width = "+w+" | heidth = "+h+" ("+(w*h)+")");
+		int outsideCoverageCount = 0;
 		
 		for (int i=0; i<w; i++){
 			for(int j=0; j<h; j++){
-				double[] vals = new double[numBands];
-				coverage.evaluate(new GridCoordinates2D(w, h), vals);
+				double[] vals = new double[store.getGridCoverageCount()];
+				try {
+					coverage.evaluate(new GridCoordinates2D(i, j), vals);
+				} catch (PointOutsideCoverageException e) {
+					//e.printStackTrace();
+					outsideCoverageCount++;
+					continue;
+				}
 				Double[] valsN = new Double[vals.length];
 				for(int k = 0; k < vals.length; k++)
 					valsN[k] = vals[k];
-
 				
-				featureList.add(new GSPixel(w, h, valsN));
+				featureList.add(new GSPixel(i, j, valsN, store.getCoordinateReferenceSystem()));
 				
 				if(DoubleStream.of(vals).mapToObj(Double::valueOf).anyMatch(val -> val.isNaN() || val <= 0d || val == null))
 					System.out.println("["+this.getClass().getSimpleName()+"] Strange value: "+Arrays.toString(vals).toString());
@@ -162,6 +171,7 @@ public class GeotiffFileIO implements IGeoGSFileIO<GSPixel, Number, Double> {
 					System.out.println("["+this.getClass().getSimpleName()+"] "+idx+" px transposed (vals = "+Arrays.toString(vals).toString()+")");
 			}
 		}
+		System.out.println("["+this.getClass().getSimpleName()+"]"+(w*h-outsideCoverageCount)+" proceed raster's pixels");
 		
 		return featureList;
 	}

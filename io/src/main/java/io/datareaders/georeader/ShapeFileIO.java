@@ -21,7 +21,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import io.datareaders.georeader.geodat.GSFeature;
 
-public class ShapeFileIO implements IGeoGSFileIO<GSFeature, Property, Object> {
+public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 
 	private List<GSFeature> features = null;
 	
@@ -69,7 +69,7 @@ public class ShapeFileIO implements IGeoGSFileIO<GSFeature, Property, Object> {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(IGeoGSFileIO<GSFeature, Property, Object> file) {
+	public boolean isCoordinateCompliant(IGeoGSFileIO<Property, Object> file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 

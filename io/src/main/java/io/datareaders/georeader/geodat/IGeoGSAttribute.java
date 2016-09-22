@@ -1,10 +1,10 @@
 package io.datareaders.georeader.geodat;
 
-import java.util.List;
+import java.util.Collection;
 
-public interface IGeoGSAttributes<A, D> {
+public interface IGeoGSAttribute<A, D> {
 
-	public List<A> getData();
+	public Collection<A> getProperties();
 	
 	public D getValue(A attribute);
 	

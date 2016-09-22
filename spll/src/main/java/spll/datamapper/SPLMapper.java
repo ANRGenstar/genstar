@@ -9,14 +9,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.opengis.feature.Feature;
+import org.opengis.feature.Property;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.ShapeFileIO;
 import io.datareaders.georeader.geodat.GSFeature;
-import io.datareaders.georeader.geodat.IGeoGSAttributes;
+import io.datareaders.georeader.geodat.IGeoGSAttribute;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
@@ -37,7 +37,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 
 	private ISPLRegressionAlgorithm<V, T> regFunction;
 	private ISPLMatcherFactory<V, T> matcherFactory;
-	
+
 	private ShapeFileIO mainSPLFile;
 	private Name targetProp;
 
@@ -52,25 +52,25 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 	protected void setRegAlgo(ISPLRegressionAlgorithm<V, T> regressionAlgorithm) {
 		this.regFunction = regressionAlgorithm;
 	}
-	
+
 	protected void setMatcherFactory(ISPLMatcherFactory<V, T> matcherFactory){
 		this.matcherFactory = matcherFactory;
 	}
-	
+
 	protected void setMainSPLFile(ShapeFileIO mainSPLFile){
 		this.mainSPLFile = mainSPLFile;
 	}
-	
+
 	protected void setMainProperty(Name propertyName){
 		this.targetProp = propertyName;
 	}
 
-	protected boolean insertMatchedVariable(IGeoGSFileIO regressorsFiles) throws IOException, TransformException{
+	protected boolean insertMatchedVariable(@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFiles) 
+			throws IOException, TransformException{
 		boolean result = true;
-		for(GSFeature feature : mainSPLFile.getGeoData())
-			for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(feature, regressorsFiles))
-				if(!insertMatchedVariable(matchedVariable) && result)
-					result = false;
+		for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(mainSPLFile.getGeoData(), regressorsFiles))
+			if(!insertMatchedVariable(matchedVariable) && result)
+				result = false;
 		return result;
 	}
 
@@ -89,7 +89,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		return regFunction;
 	}
 
-	public Map<GSFeature, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
+	public Map<IGeoGSAttribute<Property, Object>, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
 		return getAttributes().stream().collect(Collectors.toMap(
 				feat -> feat, 
 				feat -> mapper.parallelStream().filter(map -> map.getFeature().equals(feat))

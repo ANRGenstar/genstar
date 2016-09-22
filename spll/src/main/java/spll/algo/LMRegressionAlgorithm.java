@@ -9,8 +9,9 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
+import org.opengis.feature.Property;
 
-import io.datareaders.georeader.geodat.GSFeature;
+import io.datareaders.georeader.geodat.IGeoGSAttribute;
 import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
 import spll.datamapper.variable.SPLRawVariable;
 
@@ -19,7 +20,7 @@ public class LMRegressionAlgorithm extends OLSMultipleLinearRegression implement
 	private List<SPLRawVariable> regVars;
 	
 	@Override
-	public void setupData(Map<GSFeature, Double> observations,
+	public void setupData(Map<IGeoGSAttribute<Property, Object>, Double> observations,
 			Set<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> regressors){
 		this.regVars = new ArrayList<>(regressors
 				.parallelStream().map(varfm -> varfm.getVariable())
@@ -27,7 +28,7 @@ public class LMRegressionAlgorithm extends OLSMultipleLinearRegression implement
 		double[] y = new double[observations.size()];
 		double[][] x = new double[observations.size()][];
 		int yIdx = 0;
-		for(GSFeature feature : observations.keySet()){
+		for(IGeoGSAttribute<Property, Object> feature : observations.keySet()){
 			y[yIdx] = observations.get(feature);
 			x[yIdx] = new double[regVars.size()];
 			for(int i = 0; i < regVars.size(); i++){

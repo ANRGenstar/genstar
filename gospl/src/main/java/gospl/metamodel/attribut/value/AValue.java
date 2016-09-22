@@ -9,11 +9,22 @@ public abstract class AValue implements IValue {
 	private IAttribute attribute;
 	
 	private String inputStringValue;
+	private String mappedStringValue;
 	
-	public AValue(String inputStringValue, GSDataType dataType, IAttribute attribute) {
+	public AValue(String inputStringValue, String mappedStringValue, GSDataType dataType, IAttribute attribute){
 		this.inputStringValue = inputStringValue;
+		this.mappedStringValue = mappedStringValue;
 		this.dataType = dataType;
 		this.attribute = attribute;
+	}
+	
+	public AValue(String inputStringValue, GSDataType dataType, IAttribute attribute) {
+		this(inputStringValue, inputStringValue, dataType, attribute);
+	}
+	
+	@Override
+	public String getStringValue() {
+		return mappedStringValue;
 	}
 
 	@Override
@@ -33,7 +44,7 @@ public abstract class AValue implements IValue {
 	
 	@Override
 	public String toString(){
-		return inputStringValue+" ("+attribute.getName()+")";
+		return mappedStringValue+" ("+attribute.getName()+")";
 	}
 
 	/* (non-Javadoc)

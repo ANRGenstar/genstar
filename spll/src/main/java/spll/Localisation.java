@@ -60,12 +60,12 @@ public class Localisation {
 			e.printStackTrace();
 		}
 		Name propertyName = sfAdmin.getGeoData().stream().findFirst().get().getProperties(args[1]).stream().findFirst().get().getName();
-		
+
 		System.out.println("["+Localisation.class.getSimpleName()+"] import data: done");
 
 		ASPLMapperBuilder<SPLRawVariable, Double> mBuilder = new SPLAreaMapperBuilder(sfAdmin, propertyName, endogeneousVarFile);
 		System.out.println("["+Localisation.class.getSimpleName()+"] setup MapperBuilder: done");
-		
+
 		SPLMapper<SPLRawVariable, Double> splMapper = null;
 		try {
 			splMapper = mBuilder.buildMapper();
@@ -76,7 +76,15 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		System.out.println("["+Localisation.class.getSimpleName()+"] build mapper: done");
+
+		if(splMapper.getVariableSet().isEmpty()){
+			System.out.println("["+Localisation.class.getSimpleName()+"] build mapper: failled");
+			System.exit(1);
+		} else {
+			System.out.println("["+Localisation.class.getSimpleName()+"] build mapper: done");
+			System.out.println("\t contains "+splMapper.getAttributes().size()+" attributes");
+			System.out.println("\t contains "+splMapper.getVariableSet().stream().count()+" mapped variables");
+		}
 
 		// WARNING: often regression function can be customize using an "intercept", that is a specific value for coordinate [0;0]
 		// e.g. when area of a specific endogeneous variable is null, the population must be null
@@ -105,7 +113,7 @@ public class Localisation {
 		System.out.println("["+Localisation.class.getSimpleName()+"] "+coeffRegression.toString()+" of size "+coeffRegression.size());
 		coeffRegression.entrySet().stream().forEach(e -> System.out.println(e.getKey().getName()+" reg coeff = "+e.getValue()));
 		coeffCorrection.entrySet().stream().forEach(e -> System.out.println(e.getKey().getProperty(propertyName).getName()+" reg correction coeff = "+e.getValue()));
-		
+
 		// GeotiffFileIO geoOutput = computePopPerFeature(splMapper, coeffRegression, coeffCorrection);
 		// System.out.println(geoOutput.toString());
 

@@ -178,7 +178,7 @@ public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValu
 					if(line.isEmpty())
 						s += csvSeparator+coord.getMap().get(att);
 					else
-						s += csvSeparator+coord.getMap().get(att).getInputStringValue();
+						s += csvSeparator+coord.getMap().get(att).getStringValue();
 				} else {
 					if(line.isEmpty())
 						s += " ";

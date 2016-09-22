@@ -7,12 +7,19 @@ import java.util.Set;
 import gospl.metamodel.attribut.value.IValue;
 import io.data.GSDataType;
 
-public class AggregatedAttribute extends AbstractAttribute implements IAttribute {
+/**
+ * TODO: move to ConnectedAttribute to connect two attributes either to be aggregated or just partially linked
+ * WARNING: change disintegration to always keep the most disintegrated data
+ * 
+ * @author kevinchapuis
+ *
+ */
+public class MappedAttribute extends AbstractAttribute implements IAttribute {
 
-	private Map<String, Set<String>> mapper;
+	private Map<Set<String>, Set<String>> mapper;
 
-	public AggregatedAttribute(String name, GSDataType dataType, IAttribute referentAttribute,
-			Map<String, Set<String>> mapper) {
+	public MappedAttribute(String name, GSDataType dataType, IAttribute referentAttribute,
+			Map<Set<String>, Set<String>> mapper) {
 		super(name, dataType, referentAttribute);
 		this.mapper = mapper;
 	}
@@ -22,7 +29,7 @@ public class AggregatedAttribute extends AbstractAttribute implements IAttribute
 		return false;
 	}
 
-	public Map<String, Set<String>> getMapper(){
+	public Map<Set<String>, Set<String>> getMapper(){
 		return Collections.unmodifiableMap(mapper);
 	}
 

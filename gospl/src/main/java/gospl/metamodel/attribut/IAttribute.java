@@ -76,7 +76,7 @@ public interface IAttribute {
 
 	/**
 	 * Find the corresponding value. It either gives the {@code disVal} {@link IValue} given in argument or
-	 * a aggregated {@link IValue} given that the current {@link IAttribute} is a {@link AggregatedAttribute} 
+	 * a aggregated {@link IValue} given that the current {@link IAttribute} is a {@link MappedAttribute} 
 	 * and {@code disVal} pertain to its {@link #getReferentAttribute()}
 	 * 
 	 * @param disVal

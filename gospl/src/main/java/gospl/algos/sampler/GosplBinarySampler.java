@@ -141,7 +141,7 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 			for(IAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
-						line += coord.getMap().get(att).getInputStringValue();
+						line += coord.getMap().get(att).getStringValue();
 					else
 						line += csvSeparator + coord.getMap().get(att).getInputStringValue();
 				} else {

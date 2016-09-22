@@ -19,6 +19,7 @@ public abstract class AbstractAttribute implements IAttribute {
 	public AbstractAttribute(String name, GSDataType dataType, IAttribute referentAttribute) {
 		this.name = name;
 		this.dataType = dataType;
+		// WARNING: Referent attribute could not be of type AggregatedAttribute (call exception ?)
 		this.referentAttribute = referentAttribute;
 	}
 

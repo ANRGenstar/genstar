@@ -1,8 +1,6 @@
 package io.datareaders.georeader.geodat;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.opengis.feature.Feature;
@@ -15,7 +13,7 @@ import org.opengis.feature.type.Name;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.BoundingBox;
 
-public class GSFeature implements IGeoGSAttributes<Property, Object>, Feature {
+public class GSFeature implements IGeoGSAttribute<Property, Object>, Feature {
 
 	private final Feature innerFeature;
 	
@@ -26,12 +24,6 @@ public class GSFeature implements IGeoGSAttributes<Property, Object>, Feature {
 	@Override
 	public GSFeature transposeToGenstarFeature() {
 		return this;
-	}
-	
-	@Override
-	public List<Property> getData() {
-		List<Property> data = new ArrayList<>(innerFeature.getValue()); 
-		return data;
 	}
 	
 	@Override

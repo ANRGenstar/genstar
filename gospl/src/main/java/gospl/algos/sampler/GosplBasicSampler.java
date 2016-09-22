@@ -101,7 +101,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 			for(IAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
-						line += coord.getMap().get(att).getInputStringValue();
+						line += coord.getMap().get(att).getStringValue();
 					else
 						line += csvSeparator + coord.getMap().get(att).getInputStringValue();
 				} else {

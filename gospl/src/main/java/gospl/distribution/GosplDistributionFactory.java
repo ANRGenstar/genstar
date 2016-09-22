@@ -25,6 +25,8 @@ import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
+import gospl.metamodel.GosplEntity;
+import gospl.metamodel.GosplPopulation;
 import gospl.metamodel.IEntity;
 import gospl.metamodel.IPopulation;
 import gospl.metamodel.attribut.AbstractAttribute;
@@ -106,9 +108,11 @@ public class GosplDistributionFactory {
 	 * @return
 	 * 
 	 * TODO: implement sample parser
+	 * @throws IOException 
+	 * @throws InvalidFormatException 
 	 * 
 	 */
-	public void buildSamples() {
+	public void buildSamples() throws InvalidFormatException, IOException {
 		samples = new HashSet<>();
 		for(GosplDataFile file : this.configuration.getDataFiles())
 			if(file.getDataFileType().equals(GosplMetaDataType.Sample))
@@ -121,6 +125,9 @@ public class GosplDistributionFactory {
 	/////////////////////////////////////////////////////////////////////////////////
 
 
+	/*
+	 * Get the distribution matrix from data files
+	 */
 	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(
 			GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException, MatrixCoordinateException {
 		Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
@@ -184,6 +191,9 @@ public class GosplDistributionFactory {
 		return cTableSet;
 	}
 
+	/*
+	 * Transpose any matrix to a frequency based matrix
+	 */
 	private AFullNDimensionalMatrix<Double> getFrequency(AFullNDimensionalMatrix<? extends Number> matrix) throws IllegalControlTotalException, MatrixCoordinateException {
 		// returned matrix
 		AFullNDimensionalMatrix<Double> freqMatrix = null;
@@ -239,9 +249,23 @@ public class GosplDistributionFactory {
 		return freqMatrix;
 	}
 
-	private IPopulation getSample(GosplDataFile file, Set<IAttribute> attributes) {
-		// TODO Auto-generated method stub
-		return null;
+	private IPopulation getSample(GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException {
+		IPopulation sampleSet = new GosplPopulation();
+		
+		IGSSurvey survey = file.getSurvey();
+		//Read headers and store possible variables by column index
+		Map<Integer, Set<IValue>> columnHeaders = getColumnHeaders(file, survey, attributes);
+		
+		for(int i = file.getFirstRowDataIndex(); i <= survey.getLastRowIndex(); i++){
+			Map<IAttribute, IValue> entityAttributes = new HashMap<>();
+			List<String> indiVals = survey.readLine(i);
+			for(Integer idx : columnHeaders.keySet())
+				entityAttributes.put(columnHeaders.get(idx).iterator().next().getAttribute(), 
+						columnHeaders.get(idx).stream().filter(val -> val.getInputStringValue().equals(indiVals.get(idx))).findAny().get());
+			sampleSet.add(new GosplEntity(entityAttributes));
+		}
+		
+		return sampleSet;
 	}
 
 

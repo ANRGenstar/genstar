@@ -57,7 +57,15 @@ public class PopSynthesisRouen {
 		
 		// TRANSPOSE SAMPLES INTO IPOPULATION
 		// TODO: yet to implement
-		df.buildSamples();
+		try {
+			df.buildSamples();
+		} catch (InvalidFormatException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		} catch (IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
 		
 		// HERE IS A CHOICE TO MAKE BASED ON THE TYPE OF GENERATOR WE WANT:
 		// Choice is made here to use distribution based generator
@@ -127,7 +135,7 @@ public class PopSynthesisRouen {
 			for(IEntity e : population){
 				bw.write(String.valueOf((individual++)));
 				for(IAttribute attribute : attributes)
-					bw.write(csvSep+e.getValueForAttribute(attribute).getInputStringValue());
+					bw.write(csvSep+e.getValueForAttribute(attribute).getStringValue());
 				bw.write("\n");
 			}
 			gspu.sysoStempPerformance("\texport done: "+pathFolder+export, PopSynthesisRouen.class.getName());

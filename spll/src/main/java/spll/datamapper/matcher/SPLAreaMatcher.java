@@ -1,6 +1,9 @@
 package spll.datamapper.matcher;
 
+import org.opengis.feature.Property;
+
 import io.datareaders.georeader.geodat.GSFeature;
+import io.datareaders.georeader.geodat.IGeoGSAttribute;
 import spll.datamapper.variable.SPLRawVariable;
 
 public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable, Double> {
@@ -11,12 +14,12 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable
 
 	private GSFeature feature;
 	
-	protected SPLAreaMatcher(GSFeature feat, SPLRawVariable variable){
+	protected SPLAreaMatcher(IGeoGSAttribute<Property, Object> feat, SPLRawVariable variable){
 		this(feat, variable, 1d);
 	}
 	
-	protected SPLAreaMatcher(GSFeature feat, SPLRawVariable variable, double area){
-		this.feature = feat;
+	protected SPLAreaMatcher(IGeoGSAttribute<Property, Object> feat, SPLRawVariable variable, double area){
+		this.feature = (GSFeature) feat;
 		this.variable = variable;
 		this.area = area;
 	}
