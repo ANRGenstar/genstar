@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
 
 import org.opengis.feature.Feature;
 import org.opengis.feature.type.Name;
@@ -24,6 +25,18 @@ import spll.datamapper.variable.SPLRawVariable;
 public class Localisation {
 
 	static ShapeFileIO sfAdmin = null;
+	
+	// WARNING: list of regressor file should be transpose to the main CRS projection !!!
+	// Geo data could have divergent referent projection => transposed should be made with care
+	// 
+	// HINT: See what is made in GAMA
+	// get the right projection for data given long / lat
+	// 
+	// int idx = (int) (0.5 + (longitude + 186) / 6d);
+	// boolean north = latitude > 0;
+	// String newCode = "EPSG:"+(32600 + idx + (north ? 0 : 100));
+	// CoordinateReferentSystem crs = CRS.decode(newCode, true);
+	//
 	@SuppressWarnings("rawtypes")
 	static List<IGeoGSFileIO> endogeneousVarFile = new ArrayList<>();
 
@@ -59,7 +72,10 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		Name propertyName = sfAdmin.getGeoData().stream().findFirst().get().getProperties(args[1]).stream().findFirst().get().getName();
+		
+		Name propertyName = sfAdmin.getGeoData().stream()
+				.findFirst().get().getProperties(args[1])
+				.stream().findFirst().get().getName();
 
 		System.out.println("["+Localisation.class.getSimpleName()+"] import data: done");
 
@@ -73,6 +89,12 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (ExecutionException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}

@@ -2,6 +2,7 @@ package spll.datamapper;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
@@ -39,8 +40,8 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 	}
 	
 	public abstract void mapRegressorFile(@SuppressWarnings("rawtypes") IGeoGSFileIO regressorFile) 
-			throws IOException, TransformException;
+			throws IOException, TransformException, InterruptedException, ExecutionException;
 	
-	public abstract SPLMapper<V, T> buildMapper() throws IOException, TransformException;
+	public abstract SPLMapper<V, T> buildMapper() throws IOException, TransformException, InterruptedException, ExecutionException;
 	
 }

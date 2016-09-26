@@ -2,6 +2,7 @@ package spll.datamapper;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
@@ -25,7 +26,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Doub
 	}
 
 	@Override
-	public SPLMapper<SPLRawVariable, Double> buildMapper() throws IOException, TransformException {
+	public SPLMapper<SPLRawVariable, Double> buildMapper() throws IOException, TransformException, InterruptedException, ExecutionException {
 		mapper = new SPLMapper<>();
 		mapper.setMainSPLFile(mainFile);
 		mapper.setMainProperty(propertyName);
@@ -37,7 +38,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Doub
 	}
 
 	@Override
-	public void mapRegressorFile(IGeoGSFileIO regressorFile) throws IOException, TransformException {
+	public void mapRegressorFile(IGeoGSFileIO regressorFile) throws IOException, TransformException, InterruptedException, ExecutionException {
 		if(mapper != null)
 			mapper.insertMatchedVariable(regressorFile);
 	}

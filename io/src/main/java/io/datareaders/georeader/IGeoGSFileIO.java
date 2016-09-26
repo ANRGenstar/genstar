@@ -1,8 +1,10 @@
 package io.datareaders.georeader;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Collection;
+import java.util.Iterator;
 
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
@@ -13,13 +15,14 @@ public interface IGeoGSFileIO<A, D> {
 	public GeoGSFileType getGeoGSFileType();
 	
 	/**
-	 * Retrieve main spatial component of the file: of type {@code <G>} define as generics
+	 * Retrieve main spatial component of the file: the type of data implement {@link IGeoGSAttribute}.
+	 * This method could leads to store huge amount of data into collection and then not be quite efficient
 	 * 
 	 * @return
 	 * @throws TransformException 
 	 * @throws IOException 
 	 */
-	public List<? extends IGeoGSAttribute<A, D>> getGeoData() throws IOException, TransformException;
+	public Collection<? extends IGeoGSAttribute<A, D>> getGeoData() throws IOException, TransformException;
 
 	/**
 	 * Says if geographical information of the two files are congruent in term of space.
@@ -37,5 +40,22 @@ public interface IGeoGSFileIO<A, D> {
 	 * @return
 	 */
 	public CoordinateReferenceSystem getCoordRefSystem();
+	
+	/**
+	 * Access to file content without memory stored collection
+	 * 
+	 * @return
+	 */
+	public Iterator<? extends IGeoGSAttribute<A, D>> getGeoAttributeIterator();
+
+	/**
+	 * Access and transpose to the given crs of file content without any memory storage
+	 * 
+	 * @param crs
+	 * @return
+	 * @throws FactoryException 
+	 * @throws IOException 
+	 */
+	public Iterator<? extends IGeoGSAttribute<A, D>> getGeoAttributeIterator(CoordinateReferenceSystem crs) throws FactoryException, IOException;
 	
 }

@@ -2,6 +2,7 @@ package spll;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.opengis.feature.Feature;
@@ -48,7 +49,7 @@ public class SPLFileReader {
 
 		if(fileExtension.equals(".shp")){
 			String[] shapePathSplit = args[0].split("/");
-			List<GSFeature> featureList = shapeFile.getGeoData();
+			Collection<GSFeature> featureList = shapeFile.getGeoData();
 			System.out.println("["+SPLFileReader.class.getSimpleName()+"] Shape file named "+shapePathSplit[shapePathSplit.length-1]
 					+" contains "+featureList.size()
 					+"\nFeature descriptor: "+featureList.iterator().next().getDescriptor());

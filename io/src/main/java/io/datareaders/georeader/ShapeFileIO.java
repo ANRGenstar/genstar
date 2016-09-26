@@ -2,11 +2,13 @@ package io.datareaders.georeader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
@@ -17,13 +19,15 @@ import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import io.datareaders.georeader.geodat.GSFeature;
+import io.datareaders.georeader.iterator.GSFeatureIterator;
 
 public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 
-	private List<GSFeature> features = null;
+	private Set<GSFeature> features = null;
 	
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
@@ -46,7 +50,7 @@ public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 	            .getFeatureSource(dataStore.getTypeNames()[0]);
 	    Filter filter = Filter.INCLUDE; // ECQL.toFilter("BBOX(THE_GEOM, 10,20,30,40)")
 
-	    features = new ArrayList<>();
+	    features = new HashSet<>();
 	    FeatureCollection<SimpleFeatureType, SimpleFeature> collection = fSource.getFeatures(filter);
 	    FeatureIterator<SimpleFeature> fItt = collection.features();
 	    while (fItt.hasNext())
@@ -64,8 +68,8 @@ public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 	 * @return
 	 */
 	@Override
-	public List<GSFeature> getGeoData() {
-		return Collections.unmodifiableList(features);
+	public Collection<GSFeature> getGeoData() {
+		return Collections.unmodifiableSet(features);
 	}
 
 	@Override
@@ -76,6 +80,16 @@ public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 	@Override
 	public CoordinateReferenceSystem getCoordRefSystem() {
 		return crs;
+	}
+
+	@Override
+	public Iterator<GSFeature> getGeoAttributeIterator() {
+		return new GSFeatureIterator(dataStore);
+	}
+	
+	@Override
+	public Iterator<GSFeature> getGeoAttributeIterator(CoordinateReferenceSystem crs) throws FactoryException, IOException {
+		return new GSFeatureIterator(dataStore, crs);
 	}
 	
 }

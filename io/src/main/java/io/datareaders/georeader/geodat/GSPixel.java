@@ -12,11 +12,12 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 public class GSPixel implements IGeoGSAttribute<Number, Double> {
-
+	
 	int x, y;
 	
 	Number[] bandsData;
@@ -42,9 +43,19 @@ public class GSPixel implements IGeoGSAttribute<Number, Double> {
 	public int[] getCoordinate(){
 		return new int[]{x, y};
 	}
+
+	@Override
+	public Geometry getPosition() {
+		return new GeometryFactory().createPoint(new Coordinate(x, y));
+	}
 	
 	@Override
 	public GSFeature transposeToGenstarFeature() {
+		return transposeToGenstarFeature(this.crs);
+	}
+	
+	@Override
+	public GSFeature transposeToGenstarFeature(CoordinateReferenceSystem crs) {
 		SimpleFeatureTypeBuilder b = new SimpleFeatureTypeBuilder();
 		b.setName(this.getGenstarName());		
 		b.setCRS(crs); // set crs first

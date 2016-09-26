@@ -1,12 +1,13 @@
 package spll.datamapper;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import org.opengis.feature.Property;
@@ -66,7 +67,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 	}
 
 	protected boolean insertMatchedVariable(@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFiles) 
-			throws IOException, TransformException{
+			throws IOException, TransformException, InterruptedException, ExecutionException{
 		boolean result = true;
 		for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(mainSPLFile.getGeoData(), regressorsFiles))
 			if(!insertMatchedVariable(matchedVariable) && result)
@@ -81,7 +82,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 
 	// --------------------- Accessor --------------------- //
 
-	public List<GSFeature> getAttributes(){
+	public Collection<GSFeature> getAttributes(){
 		return mainSPLFile.getGeoData();
 	}
 

@@ -2,10 +2,18 @@ package spll.datamapper.matcher;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.geometry.BoundingBox;
+import org.opengis.geometry.DirectPosition;
 import org.opengis.referencing.operation.TransformException;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 import io.datareaders.georeader.IGeoGSFileIO;
 import io.datareaders.georeader.geodat.GSFeature;
@@ -18,21 +26,19 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLRawVariable,
 	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(GSFeature feature, 
 			@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFile) throws IOException, TransformException {
 		@SuppressWarnings("unchecked")
-		List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> list = 
-				getMatchers(feature, regressorsFile.getGeoData()); 
+		List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> list = getMatchers(feature, regressorsFile.getGeoAttributeIterator()); 
 		return list;
 	}
 
 	@Override
-	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(List<GSFeature> features,
-			@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFile) throws IOException, TransformException {
+	public List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(Collection<GSFeature> features,
+			@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFile) throws IOException, TransformException, InterruptedException, ExecutionException {
 		System.out.println("["+this.getClass().getSimpleName()+ "] Start processing regressors' data");
 		@SuppressWarnings({ "rawtypes", "unchecked" })
-		List<IGeoGSAttribute> geoData = regressorsFile.getGeoData();
-		System.out.println("["+this.getClass().getSimpleName()+ "] Start parallel processing "+geoData.size()+" regressor attributes");
+		Iterator<IGeoGSAttribute> geoDataIter = regressorsFile.getGeoAttributeIterator();
+
 		List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> varList = features
-				.parallelStream().map(feat -> getMatchers(feat, geoData))
-				.flatMap(list -> list.stream()).collect(Collectors.toList());
+				.parallelStream().flatMap(feat -> getMatchers(feat, geoDataIter).stream()).collect(Collectors.toList());
 		System.out.println("["+this.getClass().getSimpleName()+ "] end up with "+varList.size()+" collected matches");
 
 		System.out.println("["+this.getClass().getSimpleName()+ "] Setup aggregated variable-feature-matcher");
@@ -57,22 +63,14 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLRawVariable,
 
 	@SuppressWarnings("unchecked")
 	private List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> getMatchers(GSFeature feature,
-			@SuppressWarnings("rawtypes") List<IGeoGSAttribute> geoData) {
+			@SuppressWarnings("rawtypes") Iterator<IGeoGSAttribute> geoData) {
+		System.out.println("\tprocessing feature "+feature.getIdentifier().getID());
 		List<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> areaMatcherList = new ArrayList<>();
-		int nb = 0;
-		for(@SuppressWarnings("rawtypes") IGeoGSAttribute feat : geoData){
-			// WARNING: do something else 
-			// TODO: do not import direct ISPLFileIO but use a spectified (yet to implement) ISPLFileIORegressors
-//			if(!feature.getBounds().getCoordinateReferenceSystem().equals(feat.transposeToGenstarFeature().getBounds().getCoordinateReferenceSystem())){
-//				System.out.println("Coordinate referent systems effectively differ (after "
-//						+ nb +" matches):\n"
-//						+ "\tFeature has CRS: "+feature.getBounds().getCoordinateReferenceSystem().getName()
-//						+ "\n\tPixel has CRS: "+feat.transposeToGenstarFeature().getBounds().getCoordinateReferenceSystem().getName());
-//				System.exit(1);
-//			} else {
-//				nb++;
-//			}
-			if(feature.getBounds().contains(feat.transposeToGenstarFeature().getBounds())){
+		Geometry geofeat = (Geometry) feature.getDefaultGeometryProperty().getValue();
+		while(geoData.hasNext()){
+			@SuppressWarnings("rawtypes")
+			IGeoGSAttribute feat = geoData.next();
+			if(geofeat.contains(feat.getPosition())){
 				for(Object prop : feat.getProperties()){
 					if(areaMatcherList.stream().anyMatch(varMatcher -> varMatcher.getVariable().getName().equals(feat.getGenstarName()) &&
 							varMatcher.getVariable().equals(feat.getValue(prop)))){
@@ -87,6 +85,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLRawVariable,
 				}
 			}
 		}
+		System.out.println("\tfeature "+feature.getIdentifier().getID()+" proceeded & matched with "+areaMatcherList.size()+" regressor variable");
 		return areaMatcherList;
 	}
 

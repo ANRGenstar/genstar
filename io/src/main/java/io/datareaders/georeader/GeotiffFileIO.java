@@ -2,12 +2,12 @@ package io.datareaders.georeader;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.stream.DoubleStream;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 
-import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
@@ -16,24 +16,24 @@ import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.GeneralEnvelope;
-import org.opengis.coverage.PointOutsideCoverageException;
 import org.opengis.feature.Feature;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Point;
 
 import io.datareaders.georeader.geodat.GSPixel;
+import io.datareaders.georeader.geodat.IGeoGSAttribute;
+import io.datareaders.georeader.iterator.GSPixelIterator;
 
 public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 
 	private final AbstractGridCoverage2DReader store;
 	private final GridCoverage2D coverage;
 	private final String[] bandId;
-	
-	private List<GSPixel> pixels = new ArrayList<>();
 
 	/**
 	 * Basically convert each grid like data from tiff file to a {@link Feature} list: 
@@ -68,10 +68,10 @@ public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 	}
 	
 	@Override
-	public List<GSPixel> getGeoData() throws IOException, TransformException{
-		if(pixels.isEmpty())
-			pixels = extractFeatures(); 
-		return pixels;
+	public Collection<GSPixel> getGeoData() throws IOException, TransformException{
+		Set<GSPixel> collection = new HashSet<>(); 
+		getGeoAttributeIterator().forEachRemaining(collection::add);
+		return collection;
 	}
 
 	@Override
@@ -82,6 +82,17 @@ public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 	@Override
 	public CoordinateReferenceSystem getCoordRefSystem() {
 		return store.getCoordinateReferenceSystem();
+	}
+	
+	@Override
+	public Iterator<GSPixel> getGeoAttributeIterator() {
+		return new GSPixelIterator(store, coverage);
+	}
+	
+	@Override
+	public Iterator<? extends IGeoGSAttribute<Number, Double>> getGeoAttributeIterator(CoordinateReferenceSystem crs)
+			throws FactoryException, IOException {
+		return new GSPixelIterator(store, coverage, crs);
 	}
 	
 	public String[] getBandId(){
@@ -128,52 +139,6 @@ public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 			s += "vals: " + (Arrays.toString((byte[])vals))+"\n";
 		}	
 		return s;
-	}
-
-	// ------------------------- inner utilities ------------------------- //
-
-	/*
-	 * Code for this has been past from stackexchange:
-	 * http://gis.stackexchange.com/questions/106882/how-to-read-each-pixel-of-each-band-of-a-multiband-geotiff-with-geotools-java
-	 * 
-	 * TODO: setup an iterator to process data as bufferReader does
-	 */
-	private List<GSPixel> extractFeatures() {
-		List<GSPixel> featureList = new ArrayList<>();
-		
-		int w = store.getOriginalGridRange().getHigh().getCoordinateValue(0)+1;
-		int h = store.getOriginalGridRange().getHigh().getCoordinateValue(1)+1;
-
-		int idx = 1;
-		
-		System.out.println("["+this.getClass().getSimpleName()+"] Theoretical space size to proceed raster file: width = "+w+" | heidth = "+h+" ("+(w*h)+")");
-		int outsideCoverageCount = 0;
-		
-		for (int i=0; i<w; i++){
-			for(int j=0; j<h; j++){
-				double[] vals = new double[store.getGridCoverageCount()];
-				try {
-					coverage.evaluate(new GridCoordinates2D(i, j), vals);
-				} catch (PointOutsideCoverageException e) {
-					//e.printStackTrace();
-					outsideCoverageCount++;
-					continue;
-				}
-				Double[] valsN = new Double[vals.length];
-				for(int k = 0; k < vals.length; k++)
-					valsN[k] = vals[k];
-				
-				featureList.add(new GSPixel(i, j, valsN, store.getCoordinateReferenceSystem()));
-				
-				if(DoubleStream.of(vals).mapToObj(Double::valueOf).anyMatch(val -> val.isNaN() || val <= 0d || val == null))
-					System.out.println("["+this.getClass().getSimpleName()+"] Strange value: "+Arrays.toString(vals).toString());
-				if(idx % 1000000 == 0)
-					System.out.println("["+this.getClass().getSimpleName()+"] "+idx+" px transposed (vals = "+Arrays.toString(vals).toString()+")");
-			}
-		}
-		System.out.println("["+this.getClass().getSimpleName()+"]"+(w*h-outsideCoverageCount)+" proceed raster's pixels");
-		
-		return featureList;
 	}
 
 }

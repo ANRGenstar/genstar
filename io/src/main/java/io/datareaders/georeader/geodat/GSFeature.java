@@ -3,15 +3,23 @@ package io.datareaders.georeader.geodat;
 import java.util.Collection;
 import java.util.Map;
 
+import org.geotools.data.DataUtilities;
+import org.geotools.feature.SchemaException;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.opengis.feature.Feature;
 import org.opengis.feature.GeometryAttribute;
 import org.opengis.feature.IllegalAttributeException;
 import org.opengis.feature.Property;
+import org.opengis.feature.simple.SimpleFeature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeDescriptor;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.Name;
 import org.opengis.filter.identity.FeatureId;
 import org.opengis.geometry.BoundingBox;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 public class GSFeature implements IGeoGSAttribute<Property, Object>, Feature {
 
@@ -22,8 +30,27 @@ public class GSFeature implements IGeoGSAttribute<Property, Object>, Feature {
 	}
 	
 	@Override
+	public Geometry getPosition() {
+		return (Geometry) innerFeature.getDefaultGeometryProperty().getValue();
+	}
+	
+	@Override
 	public GSFeature transposeToGenstarFeature() {
 		return this;
+	}
+	
+	@Override
+	public GSFeature transposeToGenstarFeature(CoordinateReferenceSystem crs) {
+		SimpleFeatureType schema = null;
+		try {
+			schema = DataUtilities.createSubType((SimpleFeatureType) innerFeature, null, crs);
+		} catch (SchemaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		SimpleFeatureBuilder builder = new SimpleFeatureBuilder(schema);
+		builder.init((SimpleFeature) innerFeature);
+		return new GSFeature(builder.buildFeature(innerFeature.getIdentifier().getID()));
 	}
 	
 	@Override
