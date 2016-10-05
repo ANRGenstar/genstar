@@ -12,6 +12,7 @@ import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
 import org.geotools.coverage.grid.io.OverviewPolicy;
+import org.geotools.coverage.processing.operation.Crop;
 import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
@@ -19,17 +20,18 @@ import org.geotools.geometry.GeneralEnvelope;
 import org.opengis.feature.Feature;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
+import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Point;
 
+import io.datareaders.georeader.geodat.GSFeature;
 import io.datareaders.georeader.geodat.GSPixel;
-import io.datareaders.georeader.geodat.IGeoGSAttribute;
 import io.datareaders.georeader.iterator.GSPixelIterator;
 
-public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
+public class GeotiffFileIO implements IGeoGSFileIO {
 
 	private final AbstractGridCoverage2DReader store;
 	private final GridCoverage2D coverage;
@@ -60,6 +62,7 @@ public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 		this.store = new GeoTiffReader(new File(inputPath), new Hints(Hints.USE_JAI_IMAGEREAD, true));
 		this.coverage = store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});
 		this.bandId = this.store.getGridCoverageNames();
+		
 	}
 	
 	@Override
@@ -75,7 +78,7 @@ public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(IGeoGSFileIO<Number, Double> file) {
+	public boolean isCoordinateCompliant(IGeoGSFileIO file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 	
@@ -86,32 +89,29 @@ public class GeotiffFileIO implements IGeoGSFileIO<Number, Double> {
 	
 	@Override
 	public Iterator<GSPixel> getGeoAttributeIterator() {
-		return new GSPixelIterator(store, coverage);
+		return new GSPixelIterator(store.getGridCoverageCount(), coverage);
 	}
 	
 	@Override
-	public Iterator<? extends IGeoGSAttribute<Number, Double>> getGeoAttributeIterator(CoordinateReferenceSystem crs)
+	public Iterator<GSPixel> getGeoAttributeIterator(CoordinateReferenceSystem crs)
 			throws FactoryException, IOException {
-		return new GSPixelIterator(store, coverage, crs);
+		return new GSPixelIterator(store.getGridCoverageCount(), coverage, crs);
+	}
+
+	@Override
+	public Iterator<GSPixel> getGeoAttributeIterator(GSFeature feature){
+		Crop cropper = new Crop(); 
+		ParameterValueGroup param = cropper.getParameters();
+		param.parameter("Source").setValue(coverage); // Nul nul nul et si jamais il change le nom du parametre ???
+		param.parameter(Crop.PARAMNAME_ROI).setValue(feature.getDefaultGeometryProperty().getValue());
+		GridCoverage2D newCoverage = (GridCoverage2D) cropper.doOperation(param, null);
+		return new GSPixelIterator(store.getGridCoverageCount(), newCoverage);
 	}
 	
 	public String[] getBandId(){
 		return bandId;
 	}
-
-	// WARNING: not functional yet
-//	public void cropFile(GeneralEnvelope envelop) throws IOException, TransformException{
-//		CoverageProcessor processor = CoverageProcessor.getInstance();
-//		ParameterValueGroup param = processor.getOperation("CoverageCrop").getParameters();
-//		GeneralEnvelope crop = envelop;
-//		
-//		param.parameter("Source").setValue( coverage );
-//		param.parameter("Envelope").setValue( crop );
-//
-//		this.coverage = (GridCoverage2D) processor.doOperation(param);	
-//		this.featureList = extractFeatures(store, coverage);
-//	}
-
+	
 	@Override
 	public String toString(){
 		String s = "";

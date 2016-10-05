@@ -2,7 +2,6 @@ package gospl.algos;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +21,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
+import gospl.distribution.util.BasicDistribution;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetaDataType;
@@ -199,10 +199,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 //		if(wrongPr != 0)
 //			throw new IllegalDistributionCreation("Some sample indiv ("+( Math.round(Math.round(wrongPr * 1d / sampleDistribution.size() * 100)))+"%) have not all attributs (average attributs nb = "+avrSize+")");
 	
-		sampler.setDistribution(sampleDistribution.entrySet()
-				.parallelStream().sorted(Map.Entry.comparingByValue())
-				.collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey()), 
-						e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new)));
+		sampler.setDistribution(new BasicDistribution(sampleDistribution));
 		return sampler;
 	}
 

@@ -1,11 +1,11 @@
 package gospl.algos.sampler;
 
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
 import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.util.BasicDistribution;
 
 /**
  * The global contract for sampler --
@@ -25,7 +25,7 @@ public interface ISampler<T> {
 
 	public void setRandom(Random rand);
 	
-	public void setDistribution(LinkedHashMap<T, Double> distribution) throws GosplSamplerException;
+	public void setDistribution(BasicDistribution distribution) throws GosplSamplerException;
 	
 	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException;
 	

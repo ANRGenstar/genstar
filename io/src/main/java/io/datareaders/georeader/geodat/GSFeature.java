@@ -2,6 +2,7 @@ package io.datareaders.georeader.geodat;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.geotools.data.DataUtilities;
 import org.geotools.feature.SchemaException;
@@ -21,7 +22,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-public class GSFeature implements IGeoGSAttribute<Property, Object>, Feature {
+public class GSFeature implements IGeoGSAttribute, Feature {
 
 	private final Feature innerFeature;
 	
@@ -54,9 +55,15 @@ public class GSFeature implements IGeoGSAttribute<Property, Object>, Feature {
 	}
 	
 	@Override
-	public Object getValue(Property attribute) {
-		return attribute.getValue();
+	public IGeoData getValue(String attribute) {
+		return new GSGeoData(this.getProperty(attribute).getValue());
 	}
+	
+	@Override
+	public Collection<String> getPropertiesAttribute() {
+		return innerFeature.getProperties().stream().map(p -> p.getName().toString()).collect(Collectors.toList());
+	}
+
 	
 	@Override
 	public Collection<? extends Property> getValue() {
@@ -87,7 +94,7 @@ public class GSFeature implements IGeoGSAttribute<Property, Object>, Feature {
 	public Collection<Property> getProperties() {
 		return innerFeature.getProperties();
 	}
-
+	
 	@Override
 	public Property getProperty(String name) {
 		return innerFeature.getProperty(name);

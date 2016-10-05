@@ -1,9 +1,7 @@
 package gospl.algos.sampler;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
@@ -12,10 +10,11 @@ import java.util.stream.IntStream;
 
 import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.util.BasicDistribution;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
+
 
 public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValue>> {
 
@@ -34,7 +33,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 	}
 
 	@Override
-	public void setDistribution(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> distribution)
+	public void setDistribution(BasicDistribution distribution)
 			throws GosplSamplerException {
 		this.indexedKey = new ArrayList<>(distribution.size());
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
@@ -50,10 +49,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<IAttribute, IValu
 
 	@Override
 	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
-		this.setDistribution(distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
-                        (e1, e2) -> e1, LinkedHashMap::new)));
+		this.setDistribution(new BasicDistribution(distribution));
 	}
 
 	// -------------------- main contract -------------------- //

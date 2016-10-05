@@ -8,9 +8,10 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import io.datareaders.georeader.geodat.GSFeature;
 import io.datareaders.georeader.geodat.IGeoGSAttribute;
 
-public interface IGeoGSFileIO<A, D> {
+public interface IGeoGSFileIO {
 
 	public GeoGSFileType getGeoGSFileType();
 	
@@ -22,7 +23,7 @@ public interface IGeoGSFileIO<A, D> {
 	 * @throws TransformException 
 	 * @throws IOException 
 	 */
-	public Collection<? extends IGeoGSAttribute<A, D>> getGeoData() throws IOException, TransformException;
+	public Collection<? extends IGeoGSAttribute> getGeoData() throws IOException, TransformException;
 
 	/**
 	 * Says if geographical information of the two files are congruent in term of space.
@@ -32,7 +33,7 @@ public interface IGeoGSFileIO<A, D> {
 	 * @param file
 	 * @return
 	 */
-	public boolean isCoordinateCompliant(IGeoGSFileIO<A, D> file);
+	public boolean isCoordinateCompliant(IGeoGSFileIO file);
 
 	/**
 	 * The {@link CoordinateReferenceSystem} used by this file
@@ -46,7 +47,7 @@ public interface IGeoGSFileIO<A, D> {
 	 * 
 	 * @return
 	 */
-	public Iterator<? extends IGeoGSAttribute<A, D>> getGeoAttributeIterator();
+	public Iterator<? extends IGeoGSAttribute> getGeoAttributeIterator();
 
 	/**
 	 * Access and transpose to the given crs of file content without any memory storage
@@ -56,6 +57,14 @@ public interface IGeoGSFileIO<A, D> {
 	 * @throws FactoryException 
 	 * @throws IOException 
 	 */
-	public Iterator<? extends IGeoGSAttribute<A, D>> getGeoAttributeIterator(CoordinateReferenceSystem crs) throws FactoryException, IOException;
+	public Iterator<? extends IGeoGSAttribute> getGeoAttributeIterator(CoordinateReferenceSystem crs) throws FactoryException, IOException;
+	
+	/**
+	 * Access to file data but limited to geo data that match with the given GSFeature default geometry
+	 * 
+	 * @param feature
+	 * @return
+	 */
+	public Iterator<? extends IGeoGSAttribute> getGeoAttributeIterator(GSFeature feature);
 	
 }

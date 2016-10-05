@@ -14,9 +14,9 @@ import spll.datamapper.variable.ISPLVariable;
 public interface ISPLMatcherFactory<V extends ISPLVariable<?>, T> {
 
 	public List<ISPLVariableFeatureMatcher<V, T>> getMatchers(GSFeature geoData, 
-			@SuppressWarnings("rawtypes") IGeoGSFileIO ancillaryFile) throws IOException, TransformException;
+			IGeoGSFileIO ancillaryFile) throws IOException, TransformException;
 
 	public List<ISPLVariableFeatureMatcher<V, T>> getMatchers(Collection<GSFeature> geoData, 
-			@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFiles) throws IOException, TransformException, InterruptedException, ExecutionException;
+			IGeoGSFileIO regressorsFiles) throws IOException, TransformException, InterruptedException, ExecutionException;
 	
 }

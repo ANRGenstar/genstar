@@ -119,34 +119,16 @@ public class PopSynthesisRouenConfiguration {
 						mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
 						GosplValueType.range, referentAgeAttribute, mapperA2));		
 				
-				LinkedHashMap<String, String> age_selfMapper = new LinkedHashMap<>();
-				age_selfMapper.put("000", "0 à 4 ans");
-				age_selfMapper.put("005", "5 à 9 ans");
-				age_selfMapper.put("010", "10 à 14 ans");
-				age_selfMapper.put("015", "15 à 19 ans");
-				age_selfMapper.put("020", "20 à 24 ans");
-				age_selfMapper.put("025", "25 à 29 ans");
-				age_selfMapper.put("030", "30 à 34 ans");
-				age_selfMapper.put("035", "35 à 39 ans");
-				age_selfMapper.put("040", "40 à 44 ans");
-				age_selfMapper.put("045", "45 à 49 ans");
-				age_selfMapper.put("050", "50 à 54 ans");
-				age_selfMapper.put("055", "55 à 59 ans");
-				age_selfMapper.put("060", "60 à 64 ans");
-				age_selfMapper.put("065", "65 à 69 ans");
-				age_selfMapper.put("070", "70 à 74 ans");
-				age_selfMapper.put("075", "75 à 79 ans");
-				age_selfMapper.put("080", "80 à 84 ans");
-				age_selfMapper.put("085", "85 à 89 ans");
-				age_selfMapper.put("090", "90 à 94 ans");
-				age_selfMapper.put("095", "95 à 99 ans");
-				age_selfMapper.put("100", "100 à 104 ans");
-				age_selfMapper.put("105", "105 à 109 ans");
-				age_selfMapper.put("110", "110 à 114 ans");
-				age_selfMapper.put("115", "115 à 129 ans");
-				age_selfMapper.put("120", "120 ans");
+				List<String> ageInput = Arrays.asList("000", "005", "010", "015", "020", "025", "030",
+						"035", "040", "045", "050", "055", "060", "065", "070", "075", "080", "085",
+						"090", "095", "100", "105", "110", "115", "120");
+				List<String> ageModel = Arrays.asList("0 à 4 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans", 
+						"20 à 24 ans", "25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
+						"50 à 54 ans", "55 à 59 ans", "60 à 64 ans", "65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
+						"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 à 104 ans", "105 à 109 ans", 
+						"110 à 114 ans", "115 à 129 ans", "120 ans");
 				sampleAttributes.add(attf.createAttribute("Age_y", GSDataType.Integer, 	
-						age_selfMapper, GosplValueType.range));
+						ageInput, ageModel, GosplValueType.range));
 				
 				IAttribute couple = attf.createAttribute("Couple", GSDataType.String, 
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
@@ -164,14 +146,10 @@ public class PopSynthesisRouenConfiguration {
 						GosplValueType.unique));
 				
 				Map<Set<String>, Set<String>> scp_mapper = new HashMap<>();
-				LinkedHashMap<String, String> scp_selfMapper = new LinkedHashMap<>();
-				scp_selfMapper.put("11", "Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré");
-				scp_selfMapper.put("12", "Chômeurs");
-				scp_selfMapper.put("21", "Retraités ou préretraités");
-				scp_selfMapper.put("22", "Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus");
-				scp_selfMapper.put("23", "Moins de 14 ans");
-				scp_selfMapper.put("24", "Femmes ou hommes au foyer");
-				scp_selfMapper.put("25", "Autres inactifs");
+				List<String> scpInput = Arrays.asList("11", "12", "21", "22", "23", "24", "25");
+				List<String> scpModel = Arrays.asList("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré", 
+						"Chômeurs", "Retraités ou préretraités", "Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus", 
+						"Moins de 14 ans", "Femmes ou hommes au foyer", "Autres inactifs");
 				scp_mapper.put(Stream.of("Retraités ou préretraités").collect(Collectors.toSet()),
 						Stream.of("Retraités").collect(Collectors.toSet()));
 				scp_mapper.put(Stream.of("Autres inactifs", "Chômeurs", 
@@ -183,6 +161,8 @@ public class PopSynthesisRouenConfiguration {
 						Stream.of("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
 								"Cadres et professions intellectuelles supérieures", "Professions intermédiaires", 
 								"Employés", "Ouvriers").collect(Collectors.toSet()));
+				sampleAttributes.add(attf.createAttribute("SCP", GSDataType.String, 
+						scpInput, scpModel, GosplValueType.unique));
 				
 				
 				householdAttributes.add(attf.createAttribute("Ménage", GSDataType.String, 

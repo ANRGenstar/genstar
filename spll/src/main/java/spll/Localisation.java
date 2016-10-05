@@ -37,7 +37,6 @@ public class Localisation {
 	// String newCode = "EPSG:"+(32600 + idx + (north ? 0 : 100));
 	// CoordinateReferentSystem crs = CRS.decode(newCode, true);
 	//
-	@SuppressWarnings("rawtypes")
 	static List<IGeoGSFileIO> endogeneousVarFile = new ArrayList<>();
 
 	/**
@@ -144,6 +143,7 @@ public class Localisation {
 	// TODO: take 1.A) mapping between original features and variables 1.B) each variable coefficient from regression
 	//			1.C) correction coefficient for each features and then 2) compute overall population per "variable defined space geography"
 	// WARNING: from the beggining the output space geography must be define with variable space geography
+	@SuppressWarnings("unused")
 	private static GeotiffFileIO computePopPerFeature(SPLMapper<SPLRawVariable, Double> splMapper,
 			Map<SPLRawVariable, Double> coeffRegression, 
 			Map<Feature, Double> coeffCorrection) {

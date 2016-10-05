@@ -13,7 +13,6 @@ import spll.algo.LMRegressionAlgorithm;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
 import spll.datamapper.variable.SPLRawVariable;
 
-@SuppressWarnings("rawtypes")
 public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Double> {
 
 	private SPLMapper<SPLRawVariable, Double> mapper;

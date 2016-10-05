@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.opengis.feature.Property;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
@@ -66,7 +65,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		this.targetProp = propertyName;
 	}
 
-	protected boolean insertMatchedVariable(@SuppressWarnings("rawtypes") IGeoGSFileIO regressorsFiles) 
+	protected boolean insertMatchedVariable(IGeoGSFileIO regressorsFiles) 
 			throws IOException, TransformException, InterruptedException, ExecutionException{
 		boolean result = true;
 		for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(mainSPLFile.getGeoData(), regressorsFiles))
@@ -90,7 +89,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		return regFunction;
 	}
 
-	public Map<IGeoGSAttribute<Property, Object>, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
+	public Map<IGeoGSAttribute, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
 		return getAttributes().stream().collect(Collectors.toMap(
 				feat -> feat, 
 				feat -> mapper.parallelStream().filter(map -> map.getFeature().equals(feat))
@@ -106,10 +105,10 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 	public Map<V, Double> regression() throws IllegalRegressionException {
 		if(mapper.parallelStream().anyMatch(var -> var.getFeature().getProperties(this.targetProp).isEmpty()))
 			throw new IllegalRegressionException("Property "+this.targetProp+" is not present in each Feature of the main SPLMapper");
-		regFunction.setupData(mainSPLFile.getGeoData()
-				.parallelStream().collect(Collectors.toMap(feat -> feat, 
-						feat -> (Double) feat.getProperties(this.targetProp).iterator().next().getValue())),
-				mapper);
+		Collection<GSFeature> geoData = mainSPLFile.getGeoData();
+		System.out.println("["+this.getClass().getSimpleName()+"] main property to proceed is: "+geoData.iterator().next().getProperties(this.targetProp));
+		regFunction.setupData(geoData.parallelStream().collect(Collectors.toMap(feat -> feat, 
+						feat -> Double.valueOf(feat.getProperties(this.targetProp).iterator().next().getValue().toString()))), mapper);
 		return regFunction.regression();
 	}
 

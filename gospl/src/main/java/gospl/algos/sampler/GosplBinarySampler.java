@@ -14,6 +14,7 @@ import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.util.BasicDistribution;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import io.util.GSPerformanceUtil;
@@ -52,7 +53,7 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	}
 
 	@Override
-	public void setDistribution(LinkedHashMap<ACoordinate<IAttribute, IValue>, Double> distribution) throws GosplSamplerException {
+	public void setDistribution(BasicDistribution distribution) throws GosplSamplerException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
 				distribution.size(), DEBUG_SYSO);
 		gspu.sysoStempPerformance(0, this);
@@ -73,10 +74,7 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 
 	@Override
 	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
-		this.setDistribution(distribution.getMatrix().entrySet()
-				.parallelStream().sorted(Map.Entry.<ACoordinate<IAttribute, IValue>, AControl<Double>>comparingByValue())
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue(),
-                        (e1, e2) -> e1, LinkedHashMap::new)));
+		this.setDistribution(new BasicDistribution(distribution));
 	}
 	
 	// -------------------- main contract -------------------- //
@@ -108,11 +106,6 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	
 	@Override
 	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSamplerException{
-//		TODO: find a way to do it with streams and parallelism
-//		List<ACoordinate<IAttribute, IValue>> draws = new ArrayList<>();
-//		for(int i = 0; i < numberOfDraw; i++)
-//			draws.add(draw());
-//		return draws;
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> safeDraw()).collect(Collectors.toList());
 	}
 	

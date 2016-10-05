@@ -4,12 +4,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
-import org.opengis.feature.Property;
 
 import io.datareaders.georeader.geodat.IGeoGSAttribute;
 import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
@@ -20,7 +20,7 @@ public class LMRegressionAlgorithm extends OLSMultipleLinearRegression implement
 	private List<SPLRawVariable> regVars;
 	
 	@Override
-	public void setupData(Map<IGeoGSAttribute<Property, Object>, Double> observations,
+	public void setupData(Map<IGeoGSAttribute, Double> observations,
 			Set<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> regressors){
 		this.regVars = new ArrayList<>(regressors
 				.parallelStream().map(varfm -> varfm.getVariable())
@@ -28,14 +28,15 @@ public class LMRegressionAlgorithm extends OLSMultipleLinearRegression implement
 		double[] y = new double[observations.size()];
 		double[][] x = new double[observations.size()][];
 		int yIdx = 0;
-		for(IGeoGSAttribute<Property, Object> feature : observations.keySet()){
+		for(IGeoGSAttribute feature : observations.keySet()){
 			y[yIdx] = observations.get(feature);
 			x[yIdx] = new double[regVars.size()];
 			for(int i = 0; i < regVars.size(); i++){
 				int index = i;
-				x[yIdx][index] = regressors
-					.parallelStream().filter(varfm -> varfm.getFeature().equals(feature) 
-							&& varfm.getVariable().equals(regVars.get(index))).findFirst().get().getValue();
+				Optional<ISPLVariableFeatureMatcher<SPLRawVariable, Double>> optVar = regressors.parallelStream()
+					.filter(varfm -> varfm.getFeature().equals(feature) 
+					&& varfm.getVariable().equals(regVars.get(index))).findFirst();
+				x[yIdx][index] = optVar.isPresent() ? optVar.get().getValue() : 0d;
 			}
 			yIdx++;
 		}

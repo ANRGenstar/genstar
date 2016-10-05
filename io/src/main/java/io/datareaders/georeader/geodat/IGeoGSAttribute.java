@@ -7,11 +7,11 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Geometry;
 
 
-public interface IGeoGSAttribute<A, D> {
+public interface IGeoGSAttribute {
 
-	public Collection<A> getProperties();
+	public Collection<String> getPropertiesAttribute();
 	
-	public D getValue(A attribute);
+	public IGeoData getValue(String property);
 	
 	public String getGenstarName();
 	

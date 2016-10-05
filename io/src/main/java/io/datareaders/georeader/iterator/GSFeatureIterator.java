@@ -5,9 +5,11 @@ import java.util.Iterator;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataUtilities;
+import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.SchemaException;
 import org.geotools.feature.simple.SimpleFeatureBuilder;
+import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.GeometryCoordinateSequenceTransformer;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.simple.SimpleFeature;
@@ -45,6 +47,17 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 		morph.setMathTransform(CRS.findMathTransform(dataStore.getFeatureSource(dataStore.getTypeNames()[0]).getSchema().getCoordinateReferenceSystem(), crs));
 		this.transformer = morph;
 	}
+	
+	public GSFeatureIterator(DataStore dataStore, GSFeature feature) {
+		this.fItt = null;
+		Filter within = CommonFactoryFinder.getFilterFactory2().within(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME, (org.opengis.geometry.Geometry) feature.getDefaultGeometryProperty().getValue());
+		try {
+			this.fItt = dataStore.getFeatureSource(dataStore.getTypeNames()[0]).getFeatures(within).features();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public boolean hasNext() {
@@ -54,7 +67,7 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 	@Override
 	public GSFeature next() {
 		SimpleFeature feature = fItt.next();
-		if(transformer != null)
+		if(transformer == null)
 			return new GSFeature(feature);
 		SimpleFeatureType schema = null;
 		try {

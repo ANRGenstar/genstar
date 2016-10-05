@@ -28,6 +28,7 @@ import gospl.metamodel.IEntity;
 import gospl.metamodel.IPopulation;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
+
 import io.util.GSPerformanceUtil;
 
 public class PopSynthesisRouen {

@@ -14,7 +14,6 @@ import org.geotools.styling.Rule;
 import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
-import org.geotools.swing.JMapFrame;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.FilterFactory;
@@ -46,7 +45,7 @@ public class DisplayUtil {
 		map.addLayer(layer);
 
 		// Now display the map
-		JMapFrame.showMap(map);
+		//JMapFrame.showMap(map);
 	}
 	
 	private static Style createLineStyle() {

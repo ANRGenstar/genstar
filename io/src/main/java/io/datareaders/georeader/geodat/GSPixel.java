@@ -1,7 +1,8 @@
 package io.datareaders.georeader.geodat;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
@@ -16,15 +17,15 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
-public class GSPixel implements IGeoGSAttribute<Number, Double> {
+public class GSPixel implements IGeoGSAttribute {
 	
-	int x, y;
+	double x, y;
 	
 	Number[] bandsData;
 
 	private CoordinateReferenceSystem crs;
 	
-	public GSPixel(int x, int y, Number[] bandsData, CoordinateReferenceSystem crs) {
+	public GSPixel(double x, double y, Number[] bandsData, CoordinateReferenceSystem crs) {
 		this.x = x;
 		this.y = y;
 		this.bandsData = bandsData;
@@ -40,12 +41,13 @@ public class GSPixel implements IGeoGSAttribute<Number, Double> {
 	 * 
 	 * @return int[]
 	 */
-	public int[] getCoordinate(){
-		return new int[]{x, y};
+	public double[] getCoordinate(){
+		return new double[]{x, y};
 	}
 
 	@Override
 	public Geometry getPosition() {
+		//return new GeometryBuilder(crs).getPrimitiveFactory().createPoint(new double[]{x,y});
 		return new GeometryFactory().createPoint(new Coordinate(x, y));
 	}
 	
@@ -77,13 +79,13 @@ public class GSPixel implements IGeoGSAttribute<Number, Double> {
 	}
 	
 	@Override
-	public Collection<Number> getProperties(){
-		return Arrays.asList(bandsData);
+	public Collection<String> getPropertiesAttribute(){
+		return IntStream.range(0, bandsData.length).boxed().map(i -> i.toString()).collect(Collectors.toList());
 	}
 
 	@Override
-	public Double getValue(Number attribute) {
-		return attribute.doubleValue();
+	public IGeoData getValue(String attribute) {
+		return new GSGeoData(bandsData[Integer.valueOf(attribute)]);
 	}
 	
 }

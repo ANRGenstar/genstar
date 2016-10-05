@@ -82,10 +82,9 @@ public class AttributeFactory {
 	 * @throws GenstarIllegalRangedData
 	 */
 	public IAttribute createAttribute(String name, GSDataType dataType, List<String> values,
-			GosplValueType valueType, IAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSException, GSIllegalRangedData {
-		return createAttribute(name, dataType, 
-				values.stream().collect(Collectors.toMap(val -> val, val -> val, (v1, v2) -> v1, LinkedHashMap::new)),
-				valueType, referentAttribute, mapper);
+			GosplValueType valueType, IAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) 
+					throws GSException, GSIllegalRangedData {
+		return createAttribute(name, dataType, values, values, valueType, referentAttribute, mapper);
 	}
 	
 	/**
@@ -99,12 +98,12 @@ public class AttributeFactory {
 	 * @throws GSException
 	 * @throws GSIllegalRangedData
 	 */
-	public IAttribute createAttribute(String name, GSDataType dataType, LinkedHashMap<String, String> values,
-			GosplValueType valueType) throws GSException, GSIllegalRangedData {
-		return createAttribute(name, dataType, values, valueType, null, Collections.emptyMap());
+	public IAttribute createAttribute(String name, GSDataType dataType, List<String> inputValues, 
+			List<String> modelValues, GosplValueType valueType) throws GSException, GSIllegalRangedData {
+		return createAttribute(name, dataType, inputValues, modelValues, valueType, null, Collections.emptyMap());
 	}
 	
-	public IAttribute createAttribute(String name, GSDataType dataType, LinkedHashMap<String, String> values,
+	public IAttribute createAttribute(String name, GSDataType dataType, List<String> inputValues, List<String> modelValues,
 			GosplValueType valueType, IAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSException, GSIllegalRangedData {
 		IAttribute att = null;
 		switch (valueType) {
@@ -130,7 +129,7 @@ public class AttributeFactory {
 		default:
 			throw new GSException("The attribute meta data type "+valueType+" is not applicable !");
 		}
-		att.setValues(this.getValues(valueType, dataType, values, att));
+		att.setValues(this.getValues(valueType, dataType, inputValues, modelValues, att));
 		att.setEmptyValue(this.getEmptyValue(valueType, dataType, att));
 		return att;
 	}
@@ -150,58 +149,64 @@ public class AttributeFactory {
 	 * @throws GSException
 	 * @throws GenstarIllegalRangedData
 	 */
-	public IValue createValue(GosplValueType valueType, GSDataType dataType, LinkedHashMap<String, String> values, IAttribute attribute) 
-			throws GSException, GSIllegalRangedData{
-		if(values.isEmpty())
+	public IValue createValue(GosplValueType valueType, GSDataType dataType, List<String> inputValues, 
+			List<String> modelValues, IAttribute attribute) throws GSException, GSIllegalRangedData {
+		if(inputValues.isEmpty())
 			return getEmptyValue(valueType, dataType, attribute);
-		return getValues(valueType, dataType, values, attribute).iterator().next();
+		return getValues(valueType, dataType, inputValues, modelValues, attribute).iterator().next();
 	}
 
 	// ----------------------------- Back office ----------------------------- //
 
-	private Set<IValue> getValues(GosplValueType valueType, GSDataType dataType, LinkedHashMap<String, String> values, IAttribute attribute) 
-			throws GSException, GSIllegalRangedData{
+	private Set<IValue> getValues(GosplValueType valueType, GSDataType dataType, List<String> inputValues, 
+			List<String> modelValues, IAttribute attribute) throws GSException, GSIllegalRangedData{
+		if(inputValues.size() != modelValues.size())
+			throw new GSException("Attribute's value should not have divergent "
+					+ "input ("+inputValues.size()+") and model ("+modelValues.size()+") value");
 		Set<IValue> vals = new HashSet<>();
 		switch (valueType) {
 		case record:
-			vals.add(new UniqueValue(values.keySet().stream().iterator().next(), dataType, attribute));
+			vals.add(new UniqueValue(modelValues.get(0), dataType, attribute));
 		case unique:
-			for(String value : values.keySet())
+			for(int i = 0; i < inputValues.size(); i++)
 				if(dataType.isNumericValue())
-					vals.add(new UniqueValue(value.trim(), parser.getNumber(values.get(value).trim()).get(0), dataType, attribute));
+					vals.add(new UniqueValue(inputValues.get(i).trim(), 
+							parser.getNumber(modelValues.get(i).trim()).get(0), dataType, attribute));
 				else
-					vals.add(new UniqueValue(value.trim(), values.get(value), dataType, attribute));
+					vals.add(new UniqueValue(inputValues.get(i).trim(), modelValues.get(i).trim(), dataType, attribute));
 			return vals;
 		case range:
 			if(dataType.equals(GSDataType.Integer)){
 				List<Integer> valList = new ArrayList<>();
-				for(String range : values.keySet())
-					valList.addAll(parser.getRangedIntegerData(values.get(range), false));
+				for(String range : modelValues)
+					valList.addAll(parser.getRangedIntegerData(range, false));
 				Collections.sort(valList);
-				for(String val : values.keySet()){
-					List<Integer> intVal = parser.getRangedIntegerData(values.get(val), false);
+				for(String val : modelValues){
+					List<Integer> intVal = parser.getRangedIntegerData(val, false);
 					if(intVal.size() == 1){
 						if(intVal.get(0).equals(valList.get(0)))
 							intVal.add(0, minInt);
 						else
 							intVal.add(maxInt);
 					}
-					vals.add(new RangeValue(intVal.get(0).toString(), intVal.get(1).toString(), val, dataType, attribute));
+					vals.add(new RangeValue(intVal.get(0).toString(), intVal.get(1).toString(), 
+							inputValues.get(modelValues.indexOf(val)), dataType, attribute));
 				}
 			} else if(dataType.equals(GSDataType.Double)){
 				List<Double> valList = new ArrayList<>();
-				for(String range : values.keySet())
-					valList.addAll(parser.getRangedDoubleData(values.get(range), false));
+				for(String range : modelValues)
+					valList.addAll(parser.getRangedDoubleData(range, false));
 				Collections.sort(valList);
-				for(String val : values.keySet()){
-					List<Double> doublVal = parser.getRangedDoubleData(values.get(val), false);
+				for(String val : modelValues){
+					List<Double> doublVal = parser.getRangedDoubleData(val, false);
 					if(doublVal.size() == 1){
 						if(doublVal.get(0).equals(valList.get(0)))
 							doublVal.add(0, minDouble);
 						else
 							doublVal.add(maxDouble);
 					}
-					vals.add(new RangeValue(doublVal.get(0).toString(), doublVal.get(1).toString(), val, dataType, attribute));
+					vals.add(new RangeValue(doublVal.get(0).toString(), doublVal.get(1).toString(), 
+							inputValues.get(modelValues.indexOf(val)), dataType, attribute));
 				}
 			}
 			return vals;

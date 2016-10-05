@@ -15,7 +15,6 @@ import org.geotools.data.DataStoreFinder;
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -25,7 +24,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import io.datareaders.georeader.geodat.GSFeature;
 import io.datareaders.georeader.iterator.GSFeatureIterator;
 
-public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
+public class ShapeFileIO implements IGeoGSFileIO {
 
 	private Set<GSFeature> features = null;
 	
@@ -73,7 +72,7 @@ public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(IGeoGSFileIO<Property, Object> file) {
+	public boolean isCoordinateCompliant(IGeoGSFileIO file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 
@@ -90,6 +89,10 @@ public class ShapeFileIO implements IGeoGSFileIO<Property, Object> {
 	@Override
 	public Iterator<GSFeature> getGeoAttributeIterator(CoordinateReferenceSystem crs) throws FactoryException, IOException {
 		return new GSFeatureIterator(dataStore, crs);
+	}
+	
+	public Iterator<GSFeature> getGeoAttributeIterator(GSFeature feature) {
+		return new GSFeatureIterator(dataStore, feature);
 	}
 	
 }
