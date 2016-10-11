@@ -3,11 +3,9 @@ package gospl.metamodel.attribut;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.geotools.xml.schema.AttributeValue;
 
@@ -15,9 +13,9 @@ import gospl.exception.GSException;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.metamodel.attribut.value.RangeValue;
 import gospl.metamodel.attribut.value.UniqueValue;
-import io.data.GSDataParser;
-import io.data.GSDataType;
-import io.datareaders.surveyreader.exception.GSIllegalRangedData;
+import io.util.data.GSDataParser;
+import io.util.data.GSDataType;
+import io.util.excpetion.GSIllegalRangedData;
 
 public class AttributeFactory {
 

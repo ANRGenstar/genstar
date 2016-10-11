@@ -1,4 +1,4 @@
-package io.data;
+package io.util.data;
 
 public enum GSDataType {
 

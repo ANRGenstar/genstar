@@ -11,8 +11,8 @@ import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-import io.data.GSDataParser;
-import io.data.GSDataType;
+import io.util.data.GSDataParser;
+import io.util.data.GSDataType;
 
 public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<Double> {
 
@@ -40,17 +40,6 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			return false;
 		return jds.iterator().next().setValue(coordinates, value);
 	}
-
-	/*
-	@Override
-	public boolean removeValue(ACoordinate<IAttribute, IValue> coordinate) {
-		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
-				.stream().filter(jd -> jd.getDimensions().equals(coordinate.getDimensions())).collect(Collectors.toSet());
-		if(jds.size() != 1)
-			return false;
-		return jds.iterator().next().removeValue(coordinate);
-	}
-	*/
 	
 // ------------------ Side contract ------------------ //  
 	

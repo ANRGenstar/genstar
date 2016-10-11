@@ -1,17 +1,19 @@
 package spll.datamapper.variable;
 
-public class SPLRawVariable implements ISPLVariable<Object> {
+import io.geofile.data.IGeoData;
 
-	private Object value;
+public class SPLRawVariable implements ISPLVariable<IGeoData> {
+
+	private IGeoData value;
 	private String name;
 	
-	public SPLRawVariable(Object value, String name) {
+	public SPLRawVariable(IGeoData value, String name) {
 		this.value = value;
 		this.name = name;
 	}
 	
 	@Override
-	public Object getValue() {
+	public IGeoData getValue() {
 		return value;
 	}
 	

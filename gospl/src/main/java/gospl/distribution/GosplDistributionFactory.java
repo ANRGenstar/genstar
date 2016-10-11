@@ -36,9 +36,10 @@ import gospl.survey.GosplConfigurationFile;
 import gospl.survey.GosplMetaDataType;
 import gospl.survey.adapter.GosplDataFile;
 import gospl.survey.adapter.GosplXmlSerializer;
-import io.data.GSDataParser;
-import io.data.GSDataType;
-import io.datareaders.surveyreader.IGSSurvey;
+import io.datareaders.exception.InvalidFileTypeException;
+import io.surveyfile.IGSSurvey;
+import io.util.data.GSDataParser;
+import io.util.data.GSDataType;
 
 public class GosplDistributionFactory {
 
@@ -68,8 +69,9 @@ public class GosplDistributionFactory {
 	 * @throws IOException 
 	 * @throws InvalidFormatException 
 	 * @throws MatrixCoordinateException 
+	 * @throws InvalidFileTypeException 
 	 */
-	public void buildDistributions() throws InvalidFormatException, IOException, MatrixCoordinateException {
+	public void buildDistributions() throws InvalidFormatException, IOException, MatrixCoordinateException, InvalidFileTypeException {
 		this.distributions = new HashSet<>();
 		for(GosplDataFile file : this.configuration.getDataFiles())
 			if(!file.getDataFileType().equals(GosplMetaDataType.Sample))
@@ -110,9 +112,10 @@ public class GosplDistributionFactory {
 	 * TODO: implement sample parser
 	 * @throws IOException 
 	 * @throws InvalidFormatException 
+	 * @throws InvalidFileTypeException 
 	 * 
 	 */
-	public void buildSamples() throws InvalidFormatException, IOException {
+	public void buildSamples() throws InvalidFormatException, IOException, InvalidFileTypeException {
 		samples = new HashSet<>();
 		for(GosplDataFile file : this.configuration.getDataFiles())
 			if(file.getDataFileType().equals(GosplMetaDataType.Sample))
@@ -128,8 +131,8 @@ public class GosplDistributionFactory {
 	/*
 	 * Get the distribution matrix from data files
 	 */
-	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(
-			GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException, MatrixCoordinateException {
+	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(GosplDataFile file, Set<IAttribute> attributes) 
+					throws InvalidFormatException, IOException, MatrixCoordinateException, InvalidFileTypeException {
 		Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		//Load survey
 		IGSSurvey survey = file.getSurvey();
@@ -249,7 +252,7 @@ public class GosplDistributionFactory {
 		return freqMatrix;
 	}
 
-	private IPopulation getSample(GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException {
+	private IPopulation getSample(GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException, InvalidFileTypeException {
 		IPopulation sampleSet = new GosplPopulation();
 		
 		IGSSurvey survey = file.getSurvey();

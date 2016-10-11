@@ -1,6 +1,6 @@
 package gospl.metamodel.attribut;
 
-import io.data.GSDataType;
+import io.util.data.GSDataType;
 
 public enum GosplValueType {
 

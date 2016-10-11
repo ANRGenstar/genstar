@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import gospl.metamodel.attribut.value.IValue;
-import io.data.GSDataType;
+import io.util.data.GSDataType;
 
 /**
  * TODO: move to ConnectedAttribute to connect two attributes either to be aggregated or just partially linked

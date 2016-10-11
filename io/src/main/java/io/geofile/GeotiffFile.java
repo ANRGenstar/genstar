@@ -1,4 +1,4 @@
-package io.datareaders.georeader;
+package io.geofile;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,15 +27,16 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Point;
 
-import io.datareaders.georeader.geodat.GSFeature;
-import io.datareaders.georeader.geodat.GSPixel;
-import io.datareaders.georeader.iterator.GSPixelIterator;
+import io.datareaders.iterator.GSPixelIterator;
+import io.geofile.data.GSFeature;
+import io.geofile.data.GSPixel;
 
-public class GeotiffFileIO implements IGeoGSFileIO {
+public class GeotiffFile implements IGSGeofile {
 
-	private final AbstractGridCoverage2DReader store;
 	private final GridCoverage2D coverage;
-	private final String[] bandId;
+	private final AbstractGridCoverage2DReader store;
+	
+	public static Number DEF_NODATA = -9999;
 
 	/**
 	 * Basically convert each grid like data from tiff file to a {@link Feature} list: 
@@ -47,8 +48,9 @@ public class GeotiffFileIO implements IGeoGSFileIO {
 	 * @param inputPath
 	 * @throws IOException
 	 * @throws TransformException
+	 * @throws IllegalArgumentException 
 	 */
-	public GeotiffFileIO(String inputPath) throws IOException, TransformException {
+	public GeotiffFile(File file) throws TransformException, IllegalArgumentException, IOException {
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);
 
@@ -59,9 +61,8 @@ public class GeotiffFileIO implements IGeoGSFileIO {
 		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
 		useJaiRead.setValue(true);
 
-		this.store = new GeoTiffReader(new File(inputPath), new Hints(Hints.USE_JAI_IMAGEREAD, true));
-		this.coverage = store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});
-		this.bandId = this.store.getGridCoverageNames();
+		this.store = new GeoTiffReader(file, new Hints(Hints.USE_JAI_IMAGEREAD, true));
+		this.coverage = this.store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});
 		
 	}
 	
@@ -78,13 +79,13 @@ public class GeotiffFileIO implements IGeoGSFileIO {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(IGeoGSFileIO file) {
+	public boolean isCoordinateCompliant(IGSGeofile file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 	
 	@Override
 	public CoordinateReferenceSystem getCoordRefSystem() {
-		return store.getCoordinateReferenceSystem();
+		return coverage.getCoordinateReferenceSystem();
 	}
 	
 	@Override
@@ -109,7 +110,7 @@ public class GeotiffFileIO implements IGeoGSFileIO {
 	}
 	
 	public String[] getBandId(){
-		return bandId;
+		return store.getGridCoverageNames();
 	}
 	
 	@Override

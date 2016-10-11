@@ -1,4 +1,4 @@
-package io.datareaders.surveyreader.exception;
+package io.util.excpetion;
 
 public class GSIllegalRangedData extends Exception {
 

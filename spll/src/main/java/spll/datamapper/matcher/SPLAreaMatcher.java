@@ -1,7 +1,7 @@
 package spll.datamapper.matcher;
 
-import io.datareaders.georeader.geodat.GSFeature;
-import io.datareaders.georeader.geodat.IGeoGSAttribute;
+import io.geofile.data.GSFeature;
+import io.geofile.data.IGeoGSAttribute;
 import spll.datamapper.variable.SPLRawVariable;
 
 public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable, Double> {

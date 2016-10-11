@@ -14,18 +14,17 @@ import gospl.algos.sampler.GosplBasicSampler;
 import gospl.algos.sampler.GosplBinarySampler;
 import gospl.algos.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
-import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.distribution.util.BasicDistribution;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetaDataType;
 import io.util.GSPerformanceUtil;
+
 
 /**
  * TODO: explain
@@ -181,7 +180,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 		}
 
 		////////////////////////////////////
-		// 4th STEP: proceed the remaining matrices
+		// 3rd STEP: proceed the remaining matrices
 		////////////////////////////////////
 
 		for(AFullNDimensionalMatrix<Double> mat : unallocatedMatrices){
@@ -193,11 +192,6 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 
 			gspu.sysoStempPerformance(1, this);
 		}
-
-//		long wrongPr = sampleDistribution.keySet().parallelStream().filter(c -> c.size() != segmentedMatrix.getDimensions().size()).count();
-//		double avrSize =  sampleDistribution.keySet().parallelStream().mapToInt(c -> c.size()).average().getAsDouble();
-//		if(wrongPr != 0)
-//			throw new IllegalDistributionCreation("Some sample indiv ("+( Math.round(Math.round(wrongPr * 1d / sampleDistribution.size() * 100)))+"%) have not all attributs (average attributs nb = "+avrSize+")");
 	
 		sampler.setDistribution(new BasicDistribution(sampleDistribution));
 		return sampler;
@@ -208,18 +202,6 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 	// ------------------------------ inner utility methods ------------------------------ //
 
 	
-	// Fake methode in order to create coordinate in lambda java 8 stream operation
-	private ACoordinate<IAttribute, IValue> safeCoordinateCreation(Set<IValue> coordinate){
-		ACoordinate<IAttribute, IValue> coord = null;
-		try {
-			coord = new GosplCoordinate(coordinate);
-		} catch (MatrixCoordinateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return coord;
-	}
-
 	private Map<Set<IValue>, Double> updateGosplProbaMap(Map<Set<IValue>, Double> sampleDistribution, 
 			AFullNDimensionalMatrix<Double> matrix, GSPerformanceUtil gspu){
 		Map<Set<IValue>, Double> updatedSampleDistribution = new HashMap<>();

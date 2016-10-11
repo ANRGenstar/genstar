@@ -1,4 +1,4 @@
-package io.datareaders.georeader.geodat;
+package io.geofile.data;
 
 import java.util.Collection;
 import java.util.Map;
@@ -55,8 +55,15 @@ public class GSFeature implements IGeoGSAttribute, Feature {
 	}
 	
 	@Override
-	public IGeoData getValue(String attribute) {
-		return new GSGeoData(this.getProperty(attribute).getValue());
+	public IGeoData getValue(String property) {
+		return new GSGeoData(this.getProperty(property).getValue());
+	}
+	
+	@Override
+	public boolean isNoDataValue(String property) {
+		if(this.getProperty(property).getValue() == null)
+			return true;
+		return false;
 	}
 	
 	@Override
@@ -158,6 +165,11 @@ public class GSFeature implements IGeoGSAttribute, Feature {
 	@Override
 	public void setDefaultGeometryProperty(GeometryAttribute geometryAttribute) {
 		innerFeature.setDefaultGeometryProperty(geometryAttribute);
+	}
+	
+	@Override
+	public String toString() {
+		return "Feature of type: "+innerFeature.getType()+" with default geometry being "+this.getDefaultGeometryProperty().getType();
 	}
 
 }

@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 
-import io.datareaders.georeader.geodat.IGeoGSAttribute;
+import io.geofile.data.IGeoGSAttribute;
 import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
 import spll.datamapper.variable.SPLRawVariable;
 

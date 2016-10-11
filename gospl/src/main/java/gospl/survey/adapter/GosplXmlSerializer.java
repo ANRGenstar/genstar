@@ -24,6 +24,12 @@ import gospl.metamodel.attribut.value.UniqueValue;
 import gospl.survey.GosplConfigurationFile;
 import gospl.survey.GosplMetaDataType;
 
+/**
+ * TODO: move to a parametric and generic serializer
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class GosplXmlSerializer {
 
 private static final String GS_CONFIG_ALIAS = "GosplConfiguration";

@@ -3,7 +3,8 @@ package gospl.metamodel.attribut;
 import java.util.Set;
 
 import gospl.metamodel.attribut.value.IValue;
-import io.data.GSDataType;
+import io.util.data.GSDataType;
+
 
 /**
  * Attribute (of for instance an individual or household)

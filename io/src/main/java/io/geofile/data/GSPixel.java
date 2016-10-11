@@ -1,6 +1,9 @@
-package io.datareaders.georeader.geodat;
+package io.geofile.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,6 +20,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
+import io.geofile.GeotiffFile;
+
 public class GSPixel implements IGeoGSAttribute {
 	
 	double x, y;
@@ -24,16 +29,30 @@ public class GSPixel implements IGeoGSAttribute {
 	Number[] bandsData;
 
 	private CoordinateReferenceSystem crs;
+	private List<Number> noData = new ArrayList<>();
 	
-	public GSPixel(double x, double y, Number[] bandsData, CoordinateReferenceSystem crs) {
+	public GSPixel(double x, double y, Number[] bandsData, CoordinateReferenceSystem crs, double[] noDataValues){
 		this.x = x;
 		this.y = y;
 		this.bandsData = bandsData;
 		this.crs = crs;
+		this.noData.addAll(Arrays.stream(noDataValues).boxed().collect(Collectors.toList()));
+	}
+	
+	public GSPixel(double x, double y, Number[] bandsData, CoordinateReferenceSystem crs, Number noData){
+		this.x = x;
+		this.y = y;
+		this.bandsData = bandsData;
+		this.crs = crs;
+		this.noData.add(noData);
+	}
+	
+	public GSPixel(double x, double y, Number[] bandsData, CoordinateReferenceSystem crs) {
+		this(x, y, bandsData, crs, GeotiffFile.DEF_NODATA);
 	}
 	
 	public GSPixel(int x, int y, Number[] bandsData) {
-		this(x, y, bandsData, DefaultGeographicCRS.WGS84);
+		this(x, y, bandsData, DefaultGeographicCRS.WGS84, GeotiffFile.DEF_NODATA);
 	}
 
 	/**
@@ -47,7 +66,6 @@ public class GSPixel implements IGeoGSAttribute {
 
 	@Override
 	public Geometry getPosition() {
-		//return new GeometryBuilder(crs).getPrimitiveFactory().createPoint(new double[]{x,y});
 		return new GeometryFactory().createPoint(new Coordinate(x, y));
 	}
 	
@@ -85,7 +103,19 @@ public class GSPixel implements IGeoGSAttribute {
 
 	@Override
 	public IGeoData getValue(String attribute) {
+		if(!attribute.matches("\\d+"))
+			return new GSGeoData(noData.get(0));
 		return new GSGeoData(bandsData[Integer.valueOf(attribute)]);
+	}
+	
+	@Override
+	public boolean isNoDataValue(String attribute) {
+		return noData.stream().anyMatch(num -> bandsData[Integer.valueOf(attribute)].toString().equals(num.toString()));
+	}
+	
+	@Override
+	public String toString() {
+		return this.getGenstarName();
 	}
 	
 }

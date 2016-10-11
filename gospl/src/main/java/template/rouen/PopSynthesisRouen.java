@@ -28,7 +28,7 @@ import gospl.metamodel.IEntity;
 import gospl.metamodel.IPopulation;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
-
+import io.datareaders.exception.InvalidFileTypeException;
 import io.util.GSPerformanceUtil;
 
 public class PopSynthesisRouen {
@@ -54,18 +54,23 @@ public class PopSynthesisRouen {
 			e.printStackTrace();
 		} catch (MatrixCoordinateException e) {
 			e.printStackTrace();
+		} catch (InvalidFileTypeException e) {
+			e.printStackTrace();
 		} 
 		
 		// TRANSPOSE SAMPLES INTO IPOPULATION
-		// TODO: yet to implement
+		// TODO: yet to be tested
 		try {
 			df.buildSamples();
-		} catch (InvalidFormatException e2) {
+		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		} catch (IOException e2) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e2.printStackTrace();
+			e.printStackTrace();
+		} catch (InvalidFileTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		// HERE IS A CHOICE TO MAKE BASED ON THE TYPE OF GENERATOR WE WANT:
@@ -126,7 +131,7 @@ public class PopSynthesisRouen {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// TODO: export to util class or into io project (with the problem of import IPopulation)
+		// TODO: export to util of io project (with the problem of import IPopulation)
 		try {
 			CharSequence csvSep = ";";
 			int individual = 1;

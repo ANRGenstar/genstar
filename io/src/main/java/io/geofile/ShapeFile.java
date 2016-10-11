@@ -1,4 +1,4 @@
-package io.datareaders.georeader;
+package io.geofile;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,24 +21,22 @@ import org.opengis.filter.Filter;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import io.datareaders.georeader.geodat.GSFeature;
-import io.datareaders.georeader.iterator.GSFeatureIterator;
+import io.datareaders.iterator.GSFeatureIterator;
+import io.geofile.data.GSFeature;
 
-public class ShapeFileIO implements IGeoGSFileIO {
+public class ShapeFile implements IGSGeofile {
 
 	private Set<GSFeature> features = null;
 	
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
 	
-	/**
-	 * TODO: expend to enable more option at object creation (e.g. Filter and FeatureType)
-	 * 
-	 * @param path
-	 * @throws IOException
-	 */
-	public ShapeFileIO(String path) throws IOException{
-		File file = new File(path);
+	protected ShapeFile() {
+		this.dataStore = null;
+		this.crs = null;
+	}
+	
+	protected ShapeFile(File file) throws IOException{
 	    Map<String, Object> map = new HashMap<String, Object>();
 	    map.put("url", file.toURI().toURL());
 
@@ -72,7 +70,7 @@ public class ShapeFileIO implements IGeoGSFileIO {
 	}
 
 	@Override
-	public boolean isCoordinateCompliant(IGeoGSFileIO file) {
+	public boolean isCoordinateCompliant(IGSGeofile file) {
 		return file.getCoordRefSystem().equals(this.getCoordRefSystem());
 	}
 

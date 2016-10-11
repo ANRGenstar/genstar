@@ -7,24 +7,24 @@ import java.util.concurrent.ExecutionException;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.IGeoGSFileIO;
-import io.datareaders.georeader.ShapeFileIO;
+import io.geofile.IGSGeofile;
+import io.geofile.ShapeFile;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
 
 public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 	
-	protected final ShapeFileIO mainFile;
+	protected final ShapeFile mainFile;
 	protected final Name propertyName;
 	
-	protected List<IGeoGSFileIO> ancillaryFiles;
+	protected List<IGSGeofile> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
 	
 	protected ISPLRegressionAlgorithm<V, T> regressionAlgorithm;
 	
-	public ASPLMapperBuilder(ShapeFileIO mainFile, Name propertyName,
-			List<IGeoGSFileIO> ancillaryFiles) {
+	public ASPLMapperBuilder(ShapeFile mainFile, Name propertyName,
+			List<IGSGeofile> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.propertyName = propertyName;
 		this.ancillaryFiles = ancillaryFiles;
@@ -38,7 +38,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable<?>, T> {
 		this.matcherFactory = matcherFactory;
 	}
 	
-	public abstract void mapRegressorFile(IGeoGSFileIO regressorFile) 
+	public abstract void mapRegressorFile(IGSGeofile regressorFile) 
 			throws IOException, TransformException, InterruptedException, ExecutionException;
 	
 	public abstract SPLMapper<V, T> buildMapper() throws IOException, TransformException, InterruptedException, ExecutionException;

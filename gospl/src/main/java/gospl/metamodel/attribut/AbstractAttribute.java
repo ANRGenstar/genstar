@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import gospl.metamodel.attribut.value.IValue;
-import io.data.GSDataType;
+import io.util.data.GSDataType;
 
 public abstract class AbstractAttribute implements IAttribute {
 

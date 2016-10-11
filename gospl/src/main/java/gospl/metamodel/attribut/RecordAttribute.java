@@ -1,7 +1,7 @@
 package gospl.metamodel.attribut;
 
 import gospl.metamodel.attribut.value.IValue;
-import io.data.GSDataType;
+import io.util.data.GSDataType;
 
 public class RecordAttribute extends AbstractAttribute implements IAttribute {
 

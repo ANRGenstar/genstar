@@ -10,6 +10,8 @@ public class GSPerformanceUtil {
 	private String performanceTestDescription;
 
 	private boolean logSyso;
+	
+	private double objectif;
 
 	private GSPerformanceUtil(boolean logSyso){
 		resetStemp();
@@ -27,7 +29,7 @@ public class GSPerformanceUtil {
 		if(latestStemp != 0l)	
 			cumulStemp += timer;
 		this.latestStemp = thisStemp;
-		return message+" -> "+timer+" s / "+((double) Math.round(cumulStemp * 1000) / 1000)+" s)";
+		return message+" -> "+timer+" s / "+((double) Math.round(cumulStemp * 1000) / 1000)+" s";
 	}
 	
 	public String getStempPerformance(int stepFoward){
@@ -69,9 +71,12 @@ public class GSPerformanceUtil {
 	}
 	
 	private void sysoStempMessage(String message, Object caller){
+		String callerString = caller.getClass().getSimpleName();
+		if(caller.getClass().equals(String.class))
+			callerString = caller.toString();
 		if(logSyso){
 			if(firstSyso){
-				System.out.println("Method caller: "+caller.getClass().getSimpleName()+
+				System.out.println("Method caller: "+callerString+
 						"\n-------------------------\n"+
 						performanceTestDescription+
 						"\n-------------------------");
@@ -79,6 +84,14 @@ public class GSPerformanceUtil {
 			}
 			System.out.println(message);
 		}
+	}
+
+	public void setObjectif(double objectif) {
+		this.objectif = objectif;
+	}
+	
+	public double getObjectif(){
+		return objectif;
 	}
 
 }

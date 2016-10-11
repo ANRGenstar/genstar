@@ -1,4 +1,4 @@
-package io.datareaders.georeader;
+package io.geofile;
 
 public enum GeoGSFileType {
 

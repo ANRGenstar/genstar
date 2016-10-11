@@ -13,10 +13,11 @@ import java.util.stream.Collectors;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.IGeoGSFileIO;
-import io.datareaders.georeader.ShapeFileIO;
-import io.datareaders.georeader.geodat.GSFeature;
-import io.datareaders.georeader.geodat.IGeoGSAttribute;
+import io.datawriters.GSExportFactory;
+import io.geofile.IGSGeofile;
+import io.geofile.ShapeFile;
+import io.geofile.data.GSFeature;
+import io.geofile.data.IGeoGSAttribute;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
@@ -38,7 +39,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 	private ISPLRegressionAlgorithm<V, T> regFunction;
 	private ISPLMatcherFactory<V, T> matcherFactory;
 
-	private ShapeFileIO mainSPLFile;
+	private ShapeFile mainSPLFile;
 	private Name targetProp;
 
 	private Set<ISPLVariableFeatureMatcher<V, T>> mapper = new HashSet<>();
@@ -57,7 +58,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		this.matcherFactory = matcherFactory;
 	}
 
-	protected void setMainSPLFile(ShapeFileIO mainSPLFile){
+	protected void setMainSPLFile(ShapeFile mainSPLFile){
 		this.mainSPLFile = mainSPLFile;
 	}
 
@@ -65,7 +66,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 		this.targetProp = propertyName;
 	}
 
-	protected boolean insertMatchedVariable(IGeoGSFileIO regressorsFiles) 
+	protected boolean insertMatchedVariable(IGSGeofile regressorsFiles) 
 			throws IOException, TransformException, InterruptedException, ExecutionException{
 		boolean result = true;
 		for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory.getMatchers(mainSPLFile.getGeoData(), regressorsFiles))
@@ -102,11 +103,11 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 
 	// ------------------- Main Contract ------------------- //
 
-	public Map<V, Double> regression() throws IllegalRegressionException {
+	public Map<V, Double> getRegression() throws IllegalRegressionException {
 		if(mapper.parallelStream().anyMatch(var -> var.getFeature().getProperties(this.targetProp).isEmpty()))
 			throw new IllegalRegressionException("Property "+this.targetProp+" is not present in each Feature of the main SPLMapper");
 		Collection<GSFeature> geoData = mainSPLFile.getGeoData();
-		System.out.println("["+this.getClass().getSimpleName()+"] main property to proceed is: "+geoData.iterator().next().getProperties(this.targetProp));
+		System.out.println("\t["+this.getClass().getSimpleName()+"] main property to proceed is: "+geoData.iterator().next().getProperties(this.targetProp).iterator().next().getName());
 		regFunction.setupData(geoData.parallelStream().collect(Collectors.toMap(feat -> feat, 
 						feat -> Double.valueOf(feat.getProperties(this.targetProp).iterator().next().getValue().toString()))), mapper);
 		return regFunction.regression();
@@ -114,7 +115,7 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 
 	public Map<GSFeature, Double> getCorrectionCoefficient() throws IllegalRegressionException {
 		Map<GSFeature, Double> correcCoeff = new HashMap<>();
-		Map<V, Double> regCoeff = this.regression();
+		Map<V, Double> regCoeff = this.getRegression();
 		for(GSFeature attribute : this.getAttributes()){
 			double targetVal = Double.valueOf(attribute.getProperty(targetProp).getValue().toString());
 			double regressVal = mapper.parallelStream().filter(varMatcher -> varMatcher.getFeature().equals(attribute))
@@ -122,6 +123,12 @@ public class SPLMapper<V extends ISPLVariable<?>, T> {
 			correcCoeff.put(attribute, targetVal / regressVal);
 		}
 		return correcCoeff;
+	}
+	
+	public ShapeFile getMappedRegression() {
+		ShapeFile sfio = GSExportFactory.createEmptyShapeFile();
+		// TODO: export computed density content to sfio shape file
+		return sfio;
 	}
 
 	// ------------------- Inner utilities ------------------- //

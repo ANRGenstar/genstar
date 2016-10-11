@@ -1,4 +1,4 @@
-package io.datareaders.georeader;
+package io.geofile;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -8,10 +8,10 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.geodat.GSFeature;
-import io.datareaders.georeader.geodat.IGeoGSAttribute;
+import io.geofile.data.GSFeature;
+import io.geofile.data.IGeoGSAttribute;
 
-public interface IGeoGSFileIO {
+public interface IGSGeofile {
 
 	public GeoGSFileType getGeoGSFileType();
 	
@@ -33,7 +33,7 @@ public interface IGeoGSFileIO {
 	 * @param file
 	 * @return
 	 */
-	public boolean isCoordinateCompliant(IGeoGSFileIO file);
+	public boolean isCoordinateCompliant(IGSGeofile file);
 
 	/**
 	 * The {@link CoordinateReferenceSystem} used by this file
@@ -46,6 +46,7 @@ public interface IGeoGSFileIO {
 	 * Access to file content without memory stored collection
 	 * 
 	 * @return
+	 * @throws IOException 
 	 */
 	public Iterator<? extends IGeoGSAttribute> getGeoAttributeIterator();
 
@@ -64,7 +65,8 @@ public interface IGeoGSFileIO {
 	 * 
 	 * @param feature
 	 * @return
+	 * @throws IOException 
 	 */
-	public Iterator<? extends IGeoGSAttribute> getGeoAttributeIterator(GSFeature feature);
+	public Iterator<? extends IGeoGSAttribute> getGeoAttributeIterator(GSFeature feature) ;
 	
 }

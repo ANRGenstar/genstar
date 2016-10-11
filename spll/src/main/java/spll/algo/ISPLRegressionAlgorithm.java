@@ -3,7 +3,7 @@ package spll.algo;
 import java.util.Map;
 import java.util.Set;
 
-import io.datareaders.georeader.geodat.IGeoGSAttribute;
+import io.geofile.data.IGeoGSAttribute;
 import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
 import spll.datamapper.variable.ISPLVariable;
 

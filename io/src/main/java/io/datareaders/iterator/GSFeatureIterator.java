@@ -1,4 +1,4 @@
-package io.datareaders.georeader.iterator;
+package io.datareaders.iterator;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -21,7 +21,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import io.datareaders.georeader.geodat.GSFeature;
+import io.geofile.data.GSFeature;
 
 public class GSFeatureIterator implements Iterator<GSFeature> {
 

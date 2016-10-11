@@ -1,4 +1,4 @@
-package io.datareaders.surveyreader;
+package io.surveyfile;
 
 import java.io.File;
 import java.io.FileReader;

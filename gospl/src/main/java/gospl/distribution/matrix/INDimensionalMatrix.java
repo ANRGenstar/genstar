@@ -10,7 +10,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetaDataType;
-import io.data.GSDataParser;
+import io.util.data.GSDataParser;
+
 
 /**
  * Main interface that forces n dimensional matrix to specify: 

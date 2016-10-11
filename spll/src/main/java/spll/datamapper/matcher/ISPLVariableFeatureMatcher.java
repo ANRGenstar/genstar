@@ -1,6 +1,6 @@
 package spll.datamapper.matcher;
 
-import io.datareaders.georeader.geodat.GSFeature;
+import io.geofile.data.GSFeature;
 import spll.datamapper.variable.ISPLVariable;
 
 public interface ISPLVariableFeatureMatcher<V extends ISPLVariable<?>, T> {

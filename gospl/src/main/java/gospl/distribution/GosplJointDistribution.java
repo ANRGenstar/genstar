@@ -11,8 +11,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.attribut.IAttribute;
 import gospl.metamodel.attribut.value.IValue;
 import gospl.survey.GosplMetaDataType;
-import io.data.GSDataParser;
-import io.data.GSDataType;
+import io.util.data.GSDataParser;
+import io.util.data.GSDataType;
 
 /**
  * TODO: javadoc

@@ -7,16 +7,16 @@ import java.util.concurrent.ExecutionException;
 
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.IGeoGSFileIO;
-import io.datareaders.georeader.geodat.GSFeature;
+import io.geofile.IGSGeofile;
+import io.geofile.data.GSFeature;
 import spll.datamapper.variable.ISPLVariable;
 
 public interface ISPLMatcherFactory<V extends ISPLVariable<?>, T> {
 
 	public List<ISPLVariableFeatureMatcher<V, T>> getMatchers(GSFeature geoData, 
-			IGeoGSFileIO ancillaryFile) throws IOException, TransformException;
+			IGSGeofile ancillaryFile) throws IOException, TransformException;
 
 	public List<ISPLVariableFeatureMatcher<V, T>> getMatchers(Collection<GSFeature> geoData, 
-			IGeoGSFileIO regressorsFiles) throws IOException, TransformException, InterruptedException, ExecutionException;
+			IGSGeofile regressorsFiles) throws IOException, TransformException, InterruptedException, ExecutionException;
 	
 }

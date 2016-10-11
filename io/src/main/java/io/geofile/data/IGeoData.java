@@ -1,4 +1,4 @@
-package io.datareaders.georeader.geodat;
+package io.geofile.data;
 
 public interface IGeoData {
 

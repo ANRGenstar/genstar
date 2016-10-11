@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutionException;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.IGeoGSFileIO;
-import io.datareaders.georeader.ShapeFileIO;
+import io.geofile.IGSGeofile;
+import io.geofile.ShapeFile;
 import spll.algo.LMRegressionAlgorithm;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
 import spll.datamapper.variable.SPLRawVariable;
@@ -17,8 +17,8 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Doub
 
 	private SPLMapper<SPLRawVariable, Double> mapper;
 	
-	public SPLAreaMapperBuilder(ShapeFileIO mainFile, Name propertyName,
-			List<IGeoGSFileIO> ancillaryFiles) {
+	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
+			List<IGSGeofile> ancillaryFiles) {
 		super(mainFile, propertyName, ancillaryFiles);
 		super.setRegressionAlgorithm(new LMRegressionAlgorithm());
 		super.setMatcherFactory(new SPLAreaMatcherFactory());
@@ -31,13 +31,13 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLRawVariable, Doub
 		mapper.setMainProperty(propertyName);
 		mapper.setRegAlgo(regressionAlgorithm);
 		mapper.setMatcherFactory(matcherFactory);
-		for(IGeoGSFileIO file : ancillaryFiles)
+		for(IGSGeofile file : ancillaryFiles)
 			mapRegressorFile(file);
 		return mapper;
 	}
 
 	@Override
-	public void mapRegressorFile(IGeoGSFileIO regressorFile) throws IOException, TransformException, InterruptedException, ExecutionException {
+	public void mapRegressorFile(IGSGeofile regressorFile) throws IOException, TransformException, InterruptedException, ExecutionException {
 		if(mapper != null)
 			mapper.insertMatchedVariable(regressorFile);
 	}

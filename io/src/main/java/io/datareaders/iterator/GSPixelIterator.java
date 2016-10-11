@@ -1,4 +1,4 @@
-package io.datareaders.georeader.iterator;
+package io.datareaders.iterator;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -10,7 +10,7 @@ import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import io.datareaders.georeader.geodat.GSPixel;
+import io.geofile.data.GSPixel;
 
 public class GSPixelIterator implements Iterator<GSPixel> {
 
@@ -27,10 +27,10 @@ public class GSPixelIterator implements Iterator<GSPixel> {
 			CoordinateReferenceSystem crs) {
 		this.nbBands = nbBands;
 		this.originWidth = coverage.getGridGeometry().getGridRange2D().x;
-		this.maxWidth = w + coverage.getGridGeometry().getGridRange2D().width;
+		this.maxWidth = this.originWidth + coverage.getGridGeometry().getGridRange2D().width;
 		this.w = this.originWidth;
 		this.originHeight = coverage.getGridGeometry().getGridRange2D().y;
-		this.maxHeight = h + coverage.getGridGeometry().getGridRange2D().height;
+		this.maxHeight = this.originHeight + coverage.getGridGeometry().getGridRange2D().height;
 		this.h = this.originHeight;
 		this.crs = crs;
 		this.coverage = coverage;
@@ -71,7 +71,7 @@ public class GSPixelIterator implements Iterator<GSPixel> {
 			e.printStackTrace();
 		}
 
-		return new GSPixel(pixelEnvelop.getCenterX(), pixelEnvelop.getCenterY(), valsN, crs);
+		return new GSPixel(pixelEnvelop.getCenterX(), pixelEnvelop.getCenterY(), valsN, crs, coverage.getSampleDimension(0).getNoDataValues());
 	}
 
 }

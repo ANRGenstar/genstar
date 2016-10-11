@@ -1,4 +1,4 @@
-package io.data;
+package io.util.data;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -11,7 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import io.datareaders.surveyreader.exception.GSIllegalRangedData;
+import io.util.excpetion.GSIllegalRangedData;
 
 /**
  * 

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,13 +24,14 @@ import gospl.survey.GosplConfigurationFile;
 import gospl.survey.GosplMetaDataType;
 import gospl.survey.adapter.GosplDataFile;
 import gospl.survey.adapter.GosplXmlSerializer;
-import io.data.GSDataType;
-import io.datareaders.surveyreader.exception.GSIllegalRangedData;
+import io.util.data.GSDataType;
+import io.util.excpetion.GSIllegalRangedData;
 
 public class PopSynthesisRouenConfiguration {
 
 	public static String INDIV_CLASS_PATH = "data/Rouen/insee_indiv";
 	public static String HHOLD_CLASS_PATH = "data/Rouen/insee_ménage";
+	public static String SAMPLE_CLASS_PATH = "data/Rouen/insee_sample";
 
 	public static void main(String[] args) throws InvalidFormatException {
 		// TODO Auto-generated method stub
@@ -225,6 +225,13 @@ public class PopSynthesisRouenConfiguration {
 						+ " data with:\n"+
 						gsdHH.getAttributes().size()+" attributs\n"+
 						gsdHH.getDataFiles().size()+" data files");
+				
+				gxs.setMkdir(Paths.get(SAMPLE_CLASS_PATH));
+				GosplConfigurationFile gsdS = new GosplConfigurationFile(sampleDataFiles, sampleAttributes);
+				gxs.serializeGSConfig(gsdS, "GSC_RouenSample");
+				System.out.println("Serialize Genstar sampled data with:\n"+ 
+						gsdS.getAttributes().size()+" attributs\n"+
+						gsdS.getDataFiles().size()+" data files");
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
