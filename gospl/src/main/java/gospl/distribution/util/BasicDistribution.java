@@ -12,8 +12,8 @@ import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 
 public class BasicDistribution implements SortedMap<ACoordinate<IAttribute, IValue>, Double> {
 

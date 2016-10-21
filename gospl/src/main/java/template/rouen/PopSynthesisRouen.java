@@ -24,11 +24,11 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticPopGenerator;
-import gospl.metamodel.IEntity;
-import gospl.metamodel.IPopulation;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import io.datareaders.exception.InvalidFileTypeException;
+import io.data.readers.exception.InvalidFileTypeException;
+import io.metamodel.IEntity;
+import io.metamodel.IPopulation;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.GSPerformanceUtil;
 
 public class PopSynthesisRouen {

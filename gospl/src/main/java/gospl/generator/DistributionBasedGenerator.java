@@ -7,9 +7,9 @@ import gospl.algos.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
-import gospl.metamodel.IPopulation;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.IPopulation;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 
 /**
  * A generator that take a defined distribution and a given sampler

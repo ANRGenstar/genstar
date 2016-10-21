@@ -12,8 +12,8 @@ import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.BasicDistribution;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 
 /******************************************************************************
  * File: AliasMethod.java

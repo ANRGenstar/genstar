@@ -20,9 +20,9 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.BasicDistribution;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetaDataType;
+import io.data.survey.configuration.GSSurveyType;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.GSPerformanceUtil;
 
 
@@ -49,7 +49,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 			ISampler<ACoordinate<IAttribute, IValue>> sampler) throws IllegalDistributionCreation, GosplSamplerException {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
-		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable))
+		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))
 			throw new IllegalDistributionCreation("can't create a sampler using only one matrix of GosplMetaDataType#LocalFrequencyTable");
 
 		// Begin the algorithm (and performance utility)

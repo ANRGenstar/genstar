@@ -7,9 +7,9 @@ import java.util.Set;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetaDataType;
+import io.data.survey.configuration.GSSurveyType;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.data.GSDataParser;
 
 
@@ -143,14 +143,14 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public boolean isSegmented();
 	
 	/**
-	 * Gives the {@link GosplMetaDataType} that characterize "frame of referent" for this matrix. This in 
+	 * Gives the {@link GSSurveyType} that characterize "frame of referent" for this matrix. This in 
 	 * turn inform about the specific target of the {@link AControl} associated to coordinate.
 	 * 
 	 * {@see GosplMetatDataType}
 	 * 
 	 * @return
 	 */
-	public GosplMetaDataType getMetaDataType();
+	public GSSurveyType getMetaDataType();
 
 // ------------------------- coordinate management ------------------------- //
 

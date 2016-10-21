@@ -1,7 +1,7 @@
 package gospl.generator;
 
 import gospl.algos.exception.GosplSamplerException;
-import gospl.metamodel.IPopulation;
+import io.metamodel.IPopulation;
 
 public interface ISyntheticPopGenerator {
 

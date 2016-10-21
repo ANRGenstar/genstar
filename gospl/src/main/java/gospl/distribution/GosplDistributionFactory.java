@@ -27,19 +27,19 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
-import gospl.metamodel.IEntity;
-import gospl.metamodel.IPopulation;
-import gospl.metamodel.attribut.AbstractAttribute;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplConfigurationFile;
-import gospl.survey.GosplMetaDataType;
-import gospl.survey.adapter.GosplDataFile;
-import gospl.survey.adapter.GosplXmlSerializer;
-import io.datareaders.exception.InvalidFileTypeException;
-import io.surveyfile.IGSSurvey;
+import io.data.readers.exception.InvalidFileTypeException;
+import io.data.survey.IGSSurvey;
+import io.data.survey.configuration.GSSurveyFile;
+import io.data.survey.configuration.GSSurveyType;
+import io.data.survey.configuration.GosplConfigurationFile;
+import io.data.survey.configuration.GosplXmlSerializer;
+import io.metamodel.IEntity;
+import io.metamodel.IPopulation;
+import io.metamodel.attribut.AbstractAttribute;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.data.GSDataParser;
-import io.util.data.GSDataType;
+import io.util.data.GSEnumDataType;
 
 public class GosplDistributionFactory {
 
@@ -73,8 +73,8 @@ public class GosplDistributionFactory {
 	 */
 	public void buildDistributions() throws InvalidFormatException, IOException, MatrixCoordinateException, InvalidFileTypeException {
 		this.distributions = new HashSet<>();
-		for(GosplDataFile file : this.configuration.getDataFiles())
-			if(!file.getDataFileType().equals(GosplMetaDataType.Sample))
+		for(GSSurveyFile file : this.configuration.getDataFiles())
+			if(!file.getDataFileType().equals(GSSurveyType.Sample))
 				this.distributions.addAll(getDistribution(file, this.configuration.getAttributes()));
 	}
 
@@ -117,8 +117,8 @@ public class GosplDistributionFactory {
 	 */
 	public void buildSamples() throws InvalidFormatException, IOException, InvalidFileTypeException {
 		samples = new HashSet<>();
-		for(GosplDataFile file : this.configuration.getDataFiles())
-			if(file.getDataFileType().equals(GosplMetaDataType.Sample))
+		for(GSSurveyFile file : this.configuration.getDataFiles())
+			if(file.getDataFileType().equals(GSSurveyType.Sample))
 				samples.add(getSample(file, this.configuration.getAttributes()));
 	}
 
@@ -131,7 +131,7 @@ public class GosplDistributionFactory {
 	/*
 	 * Get the distribution matrix from data files
 	 */
-	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(GosplDataFile file, Set<IAttribute> attributes) 
+	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(GSSurveyFile file, Set<IAttribute> attributes) 
 					throws InvalidFormatException, IOException, MatrixCoordinateException, InvalidFileTypeException {
 		Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		//Load survey
@@ -162,7 +162,7 @@ public class GosplDistributionFactory {
 				Map<IAttribute, Set<IValue>> dimTable = Stream.concat(rSchema.stream(), cSchema.stream())
 						.collect(Collectors.toMap(a -> a, a -> a.getValues()));
 				//Instantiate either contingency (int and global frame of reference) or frequency (double and either global or local frame of reference) matrix
-				if(file.getDataFileType().equals(GosplMetaDataType.ContingencyTable))
+				if(file.getDataFileType().equals(GSSurveyType.ContingencyTable))
 					jDistribution = new GosplContingencyTable(dimTable);
 				else
 					jDistribution = new GosplJointDistribution(dimTable, file.getDataFileType());
@@ -178,12 +178,12 @@ public class GosplDistributionFactory {
 						//The value
 						String stringVal = survey.read(row, col);
 						//Value type
-						GSDataType dt = dataParser.getValueType(stringVal);
+						GSEnumDataType dt = dataParser.getValueType(stringVal);
 						//Store coordinate for the value. It is made of all line & column attribute's aspects
 						Set<IValue> coordSet = Stream.concat(rowHeaders.get(row).stream(), columnHeaders.get(col).stream()).collect(Collectors.toSet());
 						ACoordinate<IAttribute, IValue> coord = new GosplCoordinate(coordSet);
 						//Add the coordinate / parsed value pair into the matrix
-						if(dt == GSDataType.Integer || dt == GSDataType.Double)
+						if(dt == GSEnumDataType.Integer || dt == GSEnumDataType.Double)
 							if(!jDistribution.addValue(coord, jDistribution.parseVal(dataParser, stringVal)))
 								jDistribution.getVal(coord).add(jDistribution.parseVal(dataParser, stringVal));
 					}
@@ -201,7 +201,7 @@ public class GosplDistributionFactory {
 		// returned matrix
 		AFullNDimensionalMatrix<Double> freqMatrix = null;
 
-		if(matrix.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable)){
+		if(matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)){
 			// Identify local referent dimension
 			Map<IAttribute, List<AControl<? extends Number>>> mappedControls = matrix.getDimensions()
 					.stream().collect(Collectors.toMap(d -> d, d -> d.getValues()
@@ -212,14 +212,14 @@ public class GosplDistributionFactory {
 
 			// The most appropriate align referent matrix (the one that have most information about matrix to align, i.e. the highest number of shared dimensions)
 			Optional<AFullNDimensionalMatrix<? extends Number>> optionalRef = distributions
-					.stream().filter(ctFitter -> !ctFitter.getMetaDataType().equals(GosplMetaDataType.LocalFrequencyTable)
+					.stream().filter(ctFitter -> !ctFitter.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)
 							&& localReferentDimensions.stream().allMatch(d -> ctFitter.getDimensions().contains(d)))
 					.sorted((jd1, jd2) -> (int) jd2.getDimensions().stream().filter(d -> matrix.getDimensions().contains(d)).count() 
 							- (int) jd1.getDimensions().stream().filter(d -> matrix.getDimensions().contains(d)).count())
 					.findFirst();
 			if(optionalRef.isPresent()){
 				freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
-						GosplMetaDataType.GlobalFrequencyTable);
+						GSSurveyType.GlobalFrequencyTable);
 				AFullNDimensionalMatrix<? extends Number> matrixOfReference = optionalRef.get();
 				for(ACoordinate<IAttribute, IValue> controlKey : matrix.getMatrix().keySet()){
 					freqMatrix.addValue(controlKey, new ControlFrequency(matrix.getVal(controlKey).getRowProduct(matrixOfReference.getVal(controlKey.values()
@@ -231,9 +231,9 @@ public class GosplDistributionFactory {
 		} else {
 			// Init output matrix
 			freqMatrix = new GosplJointDistribution(matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
-					GosplMetaDataType.GlobalFrequencyTable);
+					GSSurveyType.GlobalFrequencyTable);
 
-			if(matrix.getMetaDataType().equals(GosplMetaDataType.GlobalFrequencyTable)){
+			if(matrix.getMetaDataType().equals(GSSurveyType.GlobalFrequencyTable)){
 				for(ACoordinate<IAttribute, IValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
 			} else {
@@ -252,7 +252,7 @@ public class GosplDistributionFactory {
 		return freqMatrix;
 	}
 
-	private IPopulation getSample(GosplDataFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException, InvalidFileTypeException {
+	private IPopulation getSample(GSSurveyFile file, Set<IAttribute> attributes) throws InvalidFormatException, IOException, InvalidFileTypeException {
 		IPopulation sampleSet = new GosplPopulation();
 		
 		IGSSurvey survey = file.getSurvey();
@@ -277,7 +277,7 @@ public class GosplDistributionFactory {
 	///////////////////////////////////////////////////////////////////////
 
 
-	private Map<Integer, Set<IValue>> getRowHeaders(GosplDataFile file, IGSSurvey survey,
+	private Map<Integer, Set<IValue>> getRowHeaders(GSSurveyFile file, IGSSurvey survey,
 			Set<IAttribute> attributes) {
 		List<Integer> attributeIdx = new ArrayList<>();
 		for(int line = 0; line < file.getFirstRowDataIndex(); line++){
@@ -333,7 +333,7 @@ public class GosplDistributionFactory {
 		return rowHeaders;
 	}
 
-	private Map<Integer, Set<IValue>> getColumnHeaders(GosplDataFile file, IGSSurvey survey, Set<IAttribute> attributes) {
+	private Map<Integer, Set<IValue>> getColumnHeaders(GSSurveyFile file, IGSSurvey survey, Set<IAttribute> attributes) {
 		Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		for(int i = file.getFirstColumnDataIndex(); i <= survey.getLastColumnIndex(); i++){
 			List<String> column = survey.readLines(0, file.getFirstRowDataIndex(), i);

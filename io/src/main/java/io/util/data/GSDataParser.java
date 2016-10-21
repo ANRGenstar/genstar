@@ -17,7 +17,7 @@ import io.util.excpetion.GSIllegalRangedData;
  * 
  * Object that can read data and: 
  * <p><ul>
- *  <li> {@link #getValueType(String)} give the implicit parsed data type ( {@link GSDataType} )
+ *  <li> {@link #getValueType(String)} give the implicit parsed data type ( {@link GSEnumDataType} )
  *  <li> {@link #getRangedDoubleData(String, boolean)} or {@link #getRangedIntegerData(String, boolean)}
  * </ul><p>
  * Can give explicit values from string ranged value data representation
@@ -32,21 +32,21 @@ public class GSDataParser {
 	public GSDataParser(){}
 	
 	/**
-	 * Methods that retrieve value type ({@link GSDataType}) through string parsing <br/>
-	 * Default type is {@value GSDataType#STRING}
+	 * Methods that retrieve value type ({@link GSEnumDataType}) through string parsing <br/>
+	 * Default type is {@value GSEnumDataType#STRING}
 	 * 
 	 * @param value
 	 * @return
 	 */
-	public GSDataType getValueType(String value){
+	public GSEnumDataType getValueType(String value){
 		value = value.trim();
 		if(value.matches("(\\-)?(\\d+\\.\\d+)(E(\\-)?\\d+)?") || value.matches("(\\-)?(\\d+\\,\\d+)(E(\\-)?\\d+)?"))
-			return GSDataType.Double;
+			return GSEnumDataType.Double;
 		if(value.matches("(\\-)?\\d+"))
-			return GSDataType.Integer;
+			return GSEnumDataType.Integer;
 		if(Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value))
-			return GSDataType.Boolean;
-		return GSDataType.String;
+			return GSEnumDataType.Boolean;
+		return GSEnumDataType.String;
 	}
 
 	/**

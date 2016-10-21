@@ -1,9 +1,9 @@
 package spll.datamapper.matcher;
 
-import io.geofile.data.GSFeature;
+import io.data.geo.attribute.GSFeature;
 import spll.datamapper.variable.ISPLVariable;
 
-public interface ISPLVariableFeatureMatcher<V extends ISPLVariable<?>, T> {
+public interface ISPLVariableFeatureMatcher<V extends ISPLVariable, T> {
 
 	public String getName();
 	

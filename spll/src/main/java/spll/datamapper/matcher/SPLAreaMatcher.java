@@ -1,22 +1,22 @@
 package spll.datamapper.matcher;
 
-import io.geofile.data.GSFeature;
-import io.geofile.data.IGeoGSAttribute;
-import spll.datamapper.variable.SPLRawVariable;
+import io.data.geo.attribute.GSFeature;
+import io.data.geo.attribute.IGeoGSAttribute;
+import spll.datamapper.variable.SPLVariable;
 
-public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable, Double> {
+public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLVariable, Double> {
 
 	private double area;
 	
-	private final SPLRawVariable variable;
+	private final SPLVariable variable;
 
 	private GSFeature feature;
 	
-	protected SPLAreaMatcher(IGeoGSAttribute feat, SPLRawVariable variable){
+	protected SPLAreaMatcher(IGeoGSAttribute feat, SPLVariable variable){
 		this(feat, variable, 1d);
 	}
 	
-	protected SPLAreaMatcher(IGeoGSAttribute feat, SPLRawVariable variable, double area){
+	protected SPLAreaMatcher(IGeoGSAttribute feat, SPLVariable variable, double area){
 		this.feature = (GSFeature) feat;
 		this.variable = variable;
 		this.area = area;
@@ -34,7 +34,7 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable
 	}
 	
 	@Override
-	public SPLRawVariable getVariable(){
+	public SPLVariable getVariable(){
 		return variable;
 	}
 
@@ -46,6 +46,13 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLRawVariable
 	@Override
 	public GSFeature getFeature() {
 		return feature;
+	}
+	
+	// -------------------------------------------------- //
+	
+	@Override
+	public String toString() {
+		return "["+getVariable()+"] => "+area;
 	}
 
 	/* (non-Javadoc)

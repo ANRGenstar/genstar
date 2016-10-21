@@ -16,9 +16,9 @@ import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetaDataType;
+import io.data.survey.configuration.GSSurveyType;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 
 /**
  * TODO: javadoc
@@ -29,7 +29,7 @@ import gospl.survey.GosplMetaDataType;
  */
 public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<IAttribute, IValue, T> {
 
-	private GosplMetaDataType dataType; 
+	private GSSurveyType dataType; 
 
 	private final Map<IAttribute, Set<IValue>> dimensions;
 	protected final Map<ACoordinate<IAttribute, IValue>, AControl<T>> matrix;
@@ -38,7 +38,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
-	public AFullNDimensionalMatrix(Map<IAttribute, Set<IValue>> dimensionAspectMap, GosplMetaDataType metaDataType) 
+	public AFullNDimensionalMatrix(Map<IAttribute, Set<IValue>> dimensionAspectMap, GSSurveyType metaDataType) 
 			throws MatrixCoordinateException {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
 		this.matrix = new HashMap<>(dimensions.entrySet().stream()
@@ -56,11 +56,11 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public GosplMetaDataType getMetaDataType() {
+	public GSSurveyType getMetaDataType() {
 		return dataType;
 	}
 
-	public boolean setMetaDataType(GosplMetaDataType metaDataType) {
+	public boolean setMetaDataType(GSSurveyType metaDataType) {
 		if(dataType == null || !dataType.equals(metaDataType))
 			dataType = metaDataType;
 		else 

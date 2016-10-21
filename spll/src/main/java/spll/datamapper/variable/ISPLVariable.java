@@ -1,8 +1,10 @@
 package spll.datamapper.variable;
 
-public interface ISPLVariable<T> {
+import io.data.geo.attribute.IGeoValue;
 
-	public T getValue();
+public interface ISPLVariable {
+
+	public IGeoValue getValue();
 	
 	public String getStringValue();
 	

@@ -76,7 +76,7 @@ public class GSPerformanceUtil {
 			callerString = caller.toString();
 		if(logSyso){
 			if(firstSyso){
-				System.out.println("Method caller: "+callerString+
+				System.out.println("\nMethod caller: "+callerString+
 						"\n-------------------------\n"+
 						performanceTestDescription+
 						"\n-------------------------");

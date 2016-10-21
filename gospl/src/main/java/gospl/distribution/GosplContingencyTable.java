@@ -8,11 +8,11 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import gospl.survey.GosplMetaDataType;
+import io.data.survey.configuration.GSSurveyType;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.data.GSDataParser;
-import io.util.data.GSDataType;
+import io.util.data.GSEnumDataType;
 
 
 /**
@@ -26,7 +26,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
 	protected GosplContingencyTable(Map<IAttribute, Set<IValue>> dimensionAspectMap) 
 			throws MatrixCoordinateException {
-		super(dimensionAspectMap, GosplMetaDataType.ContingencyTable);
+		super(dimensionAspectMap, GSSurveyType.ContingencyTable);
 	}
 		
 	// ----------------------- SETTER CONTRACT ----------------------- //
@@ -63,7 +63,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
 	@Override
 	public AControl<Integer> parseVal(GSDataParser parser, String val){
-		if(!parser.getValueType(val).equals(GSDataType.Integer))
+		if(!parser.getValueType(val).equals(GSEnumDataType.Integer))
 			return getNulVal();
 		return new ControlContingency(Integer.valueOf(val));
 	}

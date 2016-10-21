@@ -9,10 +9,10 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.data.GSDataParser;
-import io.util.data.GSDataType;
+import io.util.data.GSEnumDataType;
 
 public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<Double> {
 
@@ -62,7 +62,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	@Override
 	public AControl<Double> parseVal(GSDataParser parser, String val) {
-		if(parser.getValueType(val).equals(GSDataType.String) || parser.getValueType(val).equals(GSDataType.Boolean))
+		if(parser.getValueType(val).equals(GSEnumDataType.String) || parser.getValueType(val).equals(GSEnumDataType.Boolean))
 			return getNulVal();
 		return new ControlFrequency(Double.valueOf(val));
 	}

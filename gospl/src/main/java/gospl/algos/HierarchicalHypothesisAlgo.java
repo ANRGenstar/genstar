@@ -3,8 +3,8 @@ package gospl.algos;
 import gospl.algos.sampler.ISampler;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 import io.util.GSPerformanceUtil;
 
 public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IAttribute, IValue> {

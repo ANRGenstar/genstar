@@ -6,9 +6,9 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.attribut.MappedAttribute;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.MappedAttribute;
+import io.metamodel.attribut.value.IValue;
 
 public interface IDistributionInferenceAlgo<D, A> {
 

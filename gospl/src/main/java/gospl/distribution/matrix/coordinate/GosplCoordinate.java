@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import gospl.distribution.exception.MatrixCoordinateException;
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
 
 public class GosplCoordinate extends ACoordinate<IAttribute, IValue> {
 

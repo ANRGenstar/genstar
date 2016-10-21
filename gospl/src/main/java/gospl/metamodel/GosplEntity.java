@@ -4,9 +4,10 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import gospl.metamodel.attribut.IAttribute;
-import gospl.metamodel.attribut.value.IValue;
-import gospl.metamodel.exception.UndefinedAttributeException;
+import io.metamodel.IEntity;
+import io.metamodel.attribut.IAttribute;
+import io.metamodel.attribut.value.IValue;
+import io.metamodel.exception.UndefinedAttributeException;
 
 public class GosplEntity implements IEntity {
 
