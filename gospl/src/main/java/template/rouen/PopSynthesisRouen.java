@@ -11,36 +11,36 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import gospl.algos.IDistributionInferenceAlgo;
+import core.io.exception.InvalidFileTypeException;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.util.GSPerformanceUtil;
+import gospl.IDistributionInferenceAlgo;
+import gospl.INDimensionalMatrix;
+import gospl.ISampler;
+import gospl.ISyntheticGosplPopGenerator;
 import gospl.algos.IndependantHypothesisAlgo;
 import gospl.algos.exception.GosplSamplerException;
 import gospl.algos.sampler.GosplBasicSampler;
-import gospl.algos.sampler.ISampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplDSManager;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.MatrixCoordinateException;
-import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
-import gospl.generator.ISyntheticPopGenerator;
-import io.data.readers.exception.InvalidFileTypeException;
-import io.metamodel.IEntity;
-import io.metamodel.IPopulation;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.util.GSPerformanceUtil;
+import gospl.metamodel.GosplEntity;
+import gospl.metamodel.GosplPopulation;
 
 public class PopSynthesisRouen {
 
 	public static void main(String[] args) {
 		// THE POPULATION TO BE GENERATED
-		IPopulation population = null;
+		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionFactory df = null; 
+		GosplDSManager df = null; 
 		try {
-			df = new GosplDistributionFactory(Paths.get(args[0].trim()));
+			df = new GosplDSManager(Paths.get(args[0].trim()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -77,7 +77,7 @@ public class PopSynthesisRouen {
 		// Choice is made here to use distribution based generator
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<IAttribute, IValue, Double> distribution = null;
+		INDimensionalMatrix<ASurveyAttribute, AValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDistributions();
 		} catch (IllegalDistributionCreation e1) {
@@ -89,8 +89,8 @@ public class PopSynthesisRouen {
 		}
 		
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		IDistributionInferenceAlgo<IAttribute, IValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
-		ISampler<ACoordinate<IAttribute, IValue>> sampler = null;
+		IDistributionInferenceAlgo<ASurveyAttribute, AValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
+		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e1) {
@@ -103,7 +103,7 @@ public class PopSynthesisRouen {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+args[1], true);
 		
 		// BUILD THE GENERATOR
-		ISyntheticPopGenerator ispGenerator = null;
+		ISyntheticGosplPopGenerator ispGenerator = null;
 		try {
 			ispGenerator = new DistributionBasedGenerator(sampler);
 		} catch (GosplSamplerException e) {
@@ -136,11 +136,11 @@ public class PopSynthesisRouen {
 			CharSequence csvSep = ";";
 			int individual = 1;
 			BufferedWriter bw = Files.newBufferedWriter(Paths.get(pathFolder+export));
-			Collection<IAttribute> attributes = population.getPopulationAttributes();
-			bw.write("Individual"+csvSep+attributes.stream().map(att -> att.getName()).collect(Collectors.joining(csvSep))+"\n");
-			for(IEntity e : population){
+			Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
+			bw.write("Individual"+csvSep+attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))+"\n");
+			for(GosplEntity e : population){
 				bw.write(String.valueOf((individual++)));
-				for(IAttribute attribute : attributes)
+				for(ASurveyAttribute attribute : attributes)
 					bw.write(csvSep+e.getValueForAttribute(attribute).getStringValue());
 				bw.write("\n");
 			}

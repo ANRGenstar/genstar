@@ -1,7 +1,6 @@
 package spll.datamapper.matcher;
 
-import io.data.geo.attribute.GSFeature;
-import io.data.geo.attribute.IGeoGSAttribute;
+import core.io.geo.entity.GSFeature;
 import spll.datamapper.variable.SPLVariable;
 
 public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLVariable, Double> {
@@ -12,12 +11,12 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLVariable, D
 
 	private GSFeature feature;
 	
-	protected SPLAreaMatcher(IGeoGSAttribute feat, SPLVariable variable){
+	protected SPLAreaMatcher(GSFeature feat, SPLVariable variable){
 		this(feat, variable, 1d);
 	}
 	
-	protected SPLAreaMatcher(IGeoGSAttribute feat, SPLVariable variable, double area){
-		this.feature = (GSFeature) feat;
+	protected SPLAreaMatcher(GSFeature feat, SPLVariable variable, double area){
+		this.feature = feat;
 		this.variable = variable;
 		this.area = area;
 	}

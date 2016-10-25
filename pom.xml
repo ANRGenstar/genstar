@@ -20,7 +20,7 @@
 	</properties>
 
 	<modules>
-		<module>io</module>
+		<module>core</module>
 		<module>gospl</module>
 		<module>spll</module>
 	</modules>

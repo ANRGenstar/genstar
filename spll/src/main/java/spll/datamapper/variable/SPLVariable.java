@@ -1,19 +1,19 @@
 package spll.datamapper.variable;
 
-import io.data.geo.attribute.IGeoValue;
+import core.io.geo.entity.attribute.value.AGeoValue;
 
 public class SPLVariable implements ISPLVariable {
 
-	private IGeoValue value;
+	private AGeoValue value;
 	private String name;
 	
-	public SPLVariable(IGeoValue value, String name) {
+	public SPLVariable(AGeoValue value, String name) {
 		this.value = value;
 		this.name = name;
 	}
 	
 	@Override
-	public IGeoValue getValue() {
+	public AGeoValue getValue() {
 		return value;
 	}
 	

@@ -16,15 +16,15 @@ import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import io.data.survey.configuration.GSSurveyFile;
-import io.data.survey.configuration.GSSurveyType;
-import io.data.survey.configuration.GosplConfigurationFile;
-import io.data.survey.configuration.GosplXmlSerializer;
-import io.metamodel.attribut.AttributeFactory;
-import io.metamodel.attribut.GSEnumAttributeType;
-import io.metamodel.attribut.IAttribute;
-import io.util.data.GSEnumDataType;
-import io.util.excpetion.GSIllegalRangedData;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.AttributeFactory;
+import core.io.survey.attribut.GSEnumAttributeType;
+import core.io.survey.configuration.GSSurveyFile;
+import core.io.survey.configuration.GSSurveyType;
+import core.io.survey.configuration.GosplConfigurationFile;
+import core.io.survey.configuration.GosplXmlSerializer;
+import core.util.data.GSEnumDataType;
+import core.util.excpetion.GSIllegalRangedData;
 
 public class PopSynthesisRouenConfiguration {
 
@@ -47,14 +47,14 @@ public class PopSynthesisRouenConfiguration {
 		if(new ArrayList<>(Arrays.asList(args)).isEmpty()){
 
 			List<GSSurveyFile> individualDataFiles = new ArrayList<>();
-			Set<IAttribute> indivAttributes = new HashSet<>();
+			Set<ASurveyAttribute> indivAttributes = new HashSet<>();
 			
 			List<GSSurveyFile> householdDataFiles = new ArrayList<>();
-			Set<IAttribute> householdAttributes = new HashSet<>();
+			Set<ASurveyAttribute> householdAttributes = new HashSet<>();
 			
 			// TODO: setup the sample data file
 			List<GSSurveyFile> sampleDataFiles = new ArrayList<>();
-			Set<IAttribute> sampleAttributes = new HashSet<>();
+			Set<ASurveyAttribute> sampleAttributes = new HashSet<>();
 			
 			individualDataFiles.add(new GSSurveyFile(INDIV_CLASS_PATH+File.separator+"Age & Couple-Tableau 1.csv",
 					GSSurveyType.ContingencyTable, 1, 1, ';'));
@@ -72,7 +72,7 @@ public class PopSynthesisRouenConfiguration {
 
 			try {
 				// Instantiate a referent attribute
-				IAttribute referentAgeAttribute = attf.createAttribute("Age", GSEnumDataType.Integer, 
+				ASurveyAttribute referentAgeAttribute = attf.createAttribute("Age", GSEnumDataType.Integer, 
 						Arrays.asList("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans", "20 à 24 ans", 
 								"25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
 								"50 à 54 ans", "55 à 59 ans", "60 à 64 ans", "65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
@@ -129,12 +129,12 @@ public class PopSynthesisRouenConfiguration {
 				sampleAttributes.add(attf.createAttribute("Age_y", GSEnumDataType.Integer, 	
 						ageInput, ageModel, GSEnumAttributeType.range));
 				
-				IAttribute couple = attf.createAttribute("Couple", GSEnumDataType.String, 
+				ASurveyAttribute couple = attf.createAttribute("Couple", GSEnumDataType.String, 
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
 						GSEnumAttributeType.unique);
 				sampleAttributes.add(couple);
 				indivAttributes.add(couple);
-				IAttribute sexe = attf.createAttribute("Sexe", GSEnumDataType.String,
+				ASurveyAttribute sexe = attf.createAttribute("Sexe", GSEnumDataType.String,
 						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique);
 				sampleAttributes.add(sexe);
 				indivAttributes.add(sexe);

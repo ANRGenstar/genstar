@@ -7,8 +7,8 @@ import java.util.concurrent.ExecutionException;
 
 import org.opengis.referencing.operation.TransformException;
 
-import io.data.geo.IGSGeofile;
-import io.data.geo.attribute.GSFeature;
+import core.io.geo.IGSGeofile;
+import core.io.geo.entity.GSFeature;
 import spll.datamapper.variable.ISPLVariable;
 
 public interface ISPLMatcherFactory<V extends ISPLVariable, T> {

@@ -3,16 +3,16 @@ package gospl.distribution;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.util.data.GSDataParser;
+import core.util.data.GSEnumDataType;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.util.data.GSDataParser;
-import io.util.data.GSEnumDataType;
 
 public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<Double> {
 
@@ -25,7 +25,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	// ------------------ Setters ------------------ //
 
 	@Override
-	public boolean addValue(ACoordinate<IAttribute, IValue> coordinates, AControl<? extends Number> value) {
+	public boolean addValue(ACoordinate<ASurveyAttribute, AValue> coordinates, AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().equals(coordinates.getDimensions())).collect(Collectors.toSet());
 		return jds.iterator().next().addValue(coordinates, value);
@@ -33,7 +33,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	
 	@Override
-	public boolean setValue(ACoordinate<IAttribute, IValue> coordinates, AControl<? extends Number> value) {
+	public boolean setValue(ACoordinate<ASurveyAttribute, AValue> coordinates, AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().equals(coordinates.getDimensions())).collect(Collectors.toSet());
 		if(jds.size() != 1)
@@ -56,7 +56,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 // -------------------- Utilities -------------------- //
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<IAttribute, IValue> coordinate) {
+	public boolean isCoordinateCompliant(ACoordinate<ASurveyAttribute, AValue> coordinate) {
 		return jointDistributionSet.stream().anyMatch(jd -> jd.isCoordinateCompliant(coordinate));
 	}
 

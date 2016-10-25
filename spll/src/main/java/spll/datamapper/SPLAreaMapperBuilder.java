@@ -22,16 +22,16 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
-import io.data.geo.GeotiffFile;
-import io.data.geo.IGSGeofile;
-import io.data.geo.ShapeFile;
-import io.data.geo.attribute.GSFeature;
-import io.data.geo.attribute.GSPixel;
-import io.data.geo.attribute.IGeoGSAttribute;
-import io.data.geo.attribute.IGeoValue;
-import io.data.writers.GSExportFactory;
-import io.util.GSBasicStats;
-import io.util.GSPerformanceUtil;
+import core.io.GSExportFactory;
+import core.io.geo.GeotiffFile;
+import core.io.geo.IGSGeofile;
+import core.io.geo.ShapeFile;
+import core.io.geo.entity.AGeoEntity;
+import core.io.geo.entity.GSFeature;
+import core.io.geo.entity.GSPixel;
+import core.io.geo.entity.attribute.value.AGeoValue;
+import core.util.GSBasicStats;
+import core.util.GSPerformanceUtil;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.LMRegressionOLSAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
@@ -46,12 +46,12 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	private static int pixelRendered = 0;
 
 	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
-			List<IGSGeofile> ancillaryFiles, Collection<IGeoValue> variables) {
+			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables) {
 		this(mainFile, propertyName, ancillaryFiles, variables, new LMRegressionOLSAlgorithm());
 	}
 	
 	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
-			List<IGSGeofile> ancillaryFiles, Collection<IGeoValue> variables, 
+			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables, 
 			ISPLRegressionAlgorithm<SPLVariable, Double> regAlgo) {
 		super(mainFile, propertyName, ancillaryFiles);
 		super.setRegressionAlgorithm(regAlgo);
@@ -149,7 +149,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 				.findFirst();
 		if(!feat.isPresent())
 			return 0d;
-		Collection<IGeoValue> pixData = refPixel.getValues();
+		Collection<AGeoValue> pixData = refPixel.getValues();
 		double pixArea = refPixel.getArea();
 		double outputCoeff = corCoef.get(feat.get());
 
@@ -159,15 +159,12 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 		// Iterate over other explanatory variables to update pixels value
 		for(IGSGeofile otherExplanVarFile : ancillaries){
-			Iterator<? extends IGeoGSAttribute> otherItt = otherExplanVarFile
+			Iterator<? extends AGeoEntity> otherItt = otherExplanVarFile
 					.getGeoAttributeIteratorWithin(refPixel.getGeometry());
 			while(otherItt.hasNext()){
-				IGeoGSAttribute other = otherItt.next();
-				List<IGeoValue> otherData = other.getPropertiesAttribute()
-						.stream().map(prop -> other.getValue(prop))
-						.collect(Collectors.toList());
+				AGeoEntity other = otherItt.next();
 				Set<SPLVariable> otherValues = regCoef.keySet()
-						.stream().filter(var -> otherData.contains(var.getValue()))
+						.stream().filter(var -> other.getValues().contains(var.getValue()))
 						.collect(Collectors.toSet());
 				output += otherValues.stream().mapToDouble(val -> regCoef.get(val) * pixPosition.getArea()).sum();
 			}
@@ -204,7 +201,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 			return 0f;
 
 		// Get the values contain in the pixel bands
-		Collection<IGeoValue> pixData = refPixel.getValues();
+		Collection<AGeoValue> pixData = refPixel.getValues();
 		double pixArea = refPixel.getArea();
 
 		// Setup output value for the pixel based on pixels' band values
@@ -213,15 +210,12 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 		// Iterate over other explanatory variables to update pixels value
 		for(IGSGeofile otherExplanVarFile : ancillaries){
-			Iterator<? extends IGeoGSAttribute> otherItt = otherExplanVarFile
+			Iterator<? extends AGeoEntity> otherItt = otherExplanVarFile
 					.getGeoAttributeIteratorIntersect(pixGeom);
 			while(otherItt.hasNext()){
-				IGeoGSAttribute other = otherItt.next();
-				List<IGeoValue> otherData = other.getPropertiesAttribute()
-						.stream().map(prop -> other.getValue(prop))
-						.collect(Collectors.toList());
+				AGeoEntity other = otherItt.next();
 				Set<SPLVariable> otherValues = regCoef.keySet()
-						.stream().filter(var -> otherData.contains(var.getValue()))
+						.stream().filter(var -> other.getValues().contains(var.getValue()))
 						.collect(Collectors.toSet());
 				output += otherValues.stream().mapToDouble(val -> 
 				regCoef.get(val) * other.getGeometry().intersection(pixGeom).getArea()).sum();

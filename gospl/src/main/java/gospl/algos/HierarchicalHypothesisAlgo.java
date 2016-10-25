@@ -1,13 +1,14 @@
 package gospl.algos;
 
-import gospl.algos.sampler.ISampler;
-import gospl.distribution.matrix.INDimensionalMatrix;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.util.GSPerformanceUtil;
+import gospl.IDistributionInferenceAlgo;
+import gospl.INDimensionalMatrix;
+import gospl.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.util.GSPerformanceUtil;
 
-public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IAttribute, IValue> {
+public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<ASurveyAttribute, AValue> {
 
 	private boolean DEBUG_SYSO;
 
@@ -16,9 +17,9 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IA
 	}
 	
 	@Override
-	public ISampler<ACoordinate<IAttribute, IValue>> inferDistributionSampler(
-			INDimensionalMatrix<IAttribute, IValue, Double> matrix,
-			ISampler<ACoordinate<IAttribute, IValue>> sampler) {
+	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
+			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix,
+			ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) {
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute hierachical sampler from conditional distribution\nTheoretical size = "+
 				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), DEBUG_SYSO);

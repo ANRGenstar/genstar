@@ -4,31 +4,30 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-import io.metamodel.IEntity;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.metamodel.exception.UndefinedAttributeException;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.metamodel.IEntity;
 
-public class GosplEntity implements IEntity {
+public class GosplEntity implements IEntity<ASurveyAttribute, AValue> {
 
-	private Map<IAttribute, IValue> attributes;
+	private Map<ASurveyAttribute, AValue> attributes;
 
-	public GosplEntity(Map<IAttribute, IValue> attributes){
+	public GosplEntity(Map<ASurveyAttribute, AValue> attributes){
 		this.attributes = attributes;
 	}
 	
 	@Override
-	public Collection<IAttribute> getAttributes() {
+	public Collection<ASurveyAttribute> getAttributes() {
 		return attributes.keySet();
 	}
 
 	@Override
-	public IValue getValueForAttribute(IAttribute attribute) throws UndefinedAttributeException {
+	public AValue getValueForAttribute(ASurveyAttribute attribute) {
 		return attributes.get(attribute);
 	}
 
 	@Override
-	public Collection<IValue> getValues() {
+	public Collection<AValue> getValues() {
 		return Collections.unmodifiableCollection(attributes.values());
 	}
 

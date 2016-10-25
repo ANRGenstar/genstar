@@ -8,14 +8,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import io.metamodel.IEntity;
-import io.metamodel.IPopulation;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.metamodel.IPopulation;
 
-public class GosplPopulation implements IPopulation {
+public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribute, AValue> {
 
-	private final Collection<IEntity> population;
+	private final Collection<GosplEntity> population;
 	
 	/**
 	 * Default inner type collection is {@link Set}
@@ -33,7 +32,7 @@ public class GosplPopulation implements IPopulation {
 	 * 
 	 * @param population
 	 */
-	public GosplPopulation(Collection<IEntity> population){
+	public GosplPopulation(Collection<GosplEntity> population){
 		if(!population.isEmpty())
 			this.population = new HashSet<>();
 		else
@@ -56,7 +55,7 @@ public class GosplPopulation implements IPopulation {
 	}
 
 	@Override
-	public Iterator<IEntity> iterator() {
+	public Iterator<GosplEntity> iterator() {
 		return population.iterator();
 	}
 
@@ -71,7 +70,7 @@ public class GosplPopulation implements IPopulation {
 	}
 
 	@Override
-	public boolean add(IEntity e) {
+	public boolean add(GosplEntity e) {
 		return population.add(e);
 	}
 
@@ -86,7 +85,7 @@ public class GosplPopulation implements IPopulation {
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends IEntity> c) {
+	public boolean addAll(Collection<? extends GosplEntity> c) {
 		return population.addAll(c);
 	}
 
@@ -107,7 +106,7 @@ public class GosplPopulation implements IPopulation {
 	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
-	public Set<IAttribute> getPopulationAttributes(){
+	public Set<ASurveyAttribute> getPopulationAttributes(){
 		return population.parallelStream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
 	
@@ -115,16 +114,16 @@ public class GosplPopulation implements IPopulation {
 	
 	@Override
 	public String csvReport(CharSequence csvSep) {
-		Set<IAttribute> attributes = this.getPopulationAttributes();
-		String report = attributes.stream().map(att -> att.getName() + csvSep + "contingent" + csvSep + "pourcentage").collect(Collectors.joining(csvSep))+"\n";
+		Set<ASurveyAttribute> attributes = this.getPopulationAttributes();
+		String report = attributes.stream().map(att -> att.getAttributeName() + csvSep + "contingent" + csvSep + "pourcentage").collect(Collectors.joining(csvSep))+"\n";
 		List<String> lines = new ArrayList<>();
 		for(int i = 0; i < attributes.stream().mapToInt(att -> att.getValues().size()).max().getAsInt()+1; i++)
 			lines.add("");
-		for(IAttribute attribute : attributes){
+		for(ASurveyAttribute attribute : attributes){
 			int lineNumber = 0;
-			Set<IValue> vals = new HashSet<>(attribute.getValues());
+			Set<AValue> vals = new HashSet<>(attribute.getValues());
 			vals.add(attribute.getEmptyValue());
-			for(IValue value : vals){
+			for(AValue value : vals){
 				long valCount = this.population
 						.stream().filter(e -> e.getValues()
 								.stream().anyMatch(ea -> ea.equals(value))).count();

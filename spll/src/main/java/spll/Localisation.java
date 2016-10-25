@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.data.geo.GeotiffFile;
-import io.data.geo.IGSGeofile;
-import io.data.geo.ShapeFile;
-import io.data.geo.attribute.IGeoValue;
-import io.data.readers.GSImportFactory;
-import io.data.readers.exception.InvalidFileTypeException;
-import io.util.GSPerformanceUtil;
+import core.io.GSImportFactory;
+import core.io.exception.InvalidFileTypeException;
+import core.io.geo.GeotiffFile;
+import core.io.geo.IGSGeofile;
+import core.io.geo.ShapeFile;
+import core.io.geo.entity.attribute.value.AGeoValue;
+import core.util.GSPerformanceUtil;
 import spll.algo.LMRegressionGLSAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
@@ -59,7 +59,7 @@ public class Localisation {
 		// IMPORT DATA FILES
 		/////////////////////
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Bangkok based on Kwaeng (district) population", true);
+		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Bangkok based on Kwaeng (district) population", true);
 		ShapeFile sfAdmin = null;
 		try {
 			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
@@ -70,6 +70,7 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		// WARNING: list of regressor file should be transpose to the main CRS projection !!!
 		// Geo data could have divergent referent projection => transposed should be made with care
 		// 
@@ -94,18 +95,18 @@ public class Localisation {
 				.findFirst().get().getProperties(stringOfMainProperty)
 				.stream().findFirst().get().getName();
 
-		Collection<IGeoValue> regVariables;
+		Collection<AGeoValue> regVariables;
 		if(regVarName.isEmpty())
 			regVariables = Collections.emptyList();
 		else {
 			// TODO: move to utility method in spll.util
-			Collection<IGeoValue> vals = endogeneousVarFile.parallelStream()
+			Collection<AGeoValue> vals = endogeneousVarFile.parallelStream()
 					.flatMap(file -> file.getGeoValues().stream())
 					.collect(Collectors.toSet());
 			regVariables = vals.stream()
-				.filter(var -> var.isNumericalData() ? 
+				.filter(var -> var.isNumericalValue() ? 
 						regVarName.stream().anyMatch(v -> Double.valueOf(v) == var.getNumericalValue().doubleValue()) 
-						: regVarName.contains(var.getValue()))
+						: regVarName.contains(var.getStringValue()))
 				.collect(Collectors.toSet());
 		}
 		

@@ -15,8 +15,8 @@
 
 <dependencies>
 	<dependency>
-	    <groupId>genstar.io</groupId>
-	    <artifactId>io</artifactId>
+	    <groupId>genstar.core</groupId>
+	    <artifactId>core</artifactId>
 	    <version>1.0</version>
 	</dependency>
 	<dependency>

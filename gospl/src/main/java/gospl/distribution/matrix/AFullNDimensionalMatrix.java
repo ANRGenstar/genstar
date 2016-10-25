@@ -12,13 +12,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.io.survey.configuration.GSSurveyType;
+import gospl.INDimensionalMatrix;
 import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import io.data.survey.configuration.GSSurveyType;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
 
 /**
  * TODO: javadoc
@@ -27,25 +28,25 @@ import io.metamodel.attribut.value.IValue;
  *
  * @param <T>
  */
-public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<IAttribute, IValue, T> {
+public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<ASurveyAttribute, AValue, T> {
 
 	private GSSurveyType dataType; 
 
-	private final Map<IAttribute, Set<IValue>> dimensions;
-	protected final Map<ACoordinate<IAttribute, IValue>, AControl<T>> matrix;
+	private final Map<ASurveyAttribute, Set<AValue>> dimensions;
+	protected final Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> matrix;
 
-	private ACoordinate<IAttribute, IValue> emptyCoordinate = null;
+	private ACoordinate<ASurveyAttribute, AValue> emptyCoordinate = null;
 
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
-	public AFullNDimensionalMatrix(Map<IAttribute, Set<IValue>> dimensionAspectMap, GSSurveyType metaDataType) 
+	public AFullNDimensionalMatrix(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) 
 			throws MatrixCoordinateException {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
 		this.matrix = new HashMap<>(dimensions.entrySet().stream()
 				.mapToInt(d -> d.getValue().size())
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
-		this.emptyCoordinate = new GosplCoordinate(Collections.<IValue>emptySet());
+		this.emptyCoordinate = new GosplCoordinate(Collections.<AValue>emptySet());
 	}
 		
 	// ------------------------- META DATA ------------------------ //
@@ -77,12 +78,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<IAttribute> getDimensions(){
+	public Set<ASurveyAttribute> getDimensions(){
 		return Collections.unmodifiableSet(dimensions.keySet());
 	}
 
 	@Override
-	public IAttribute getDimension(IValue aspect) {
+	public ASurveyAttribute getDimension(AValue aspect) {
 		if(!dimensions.values().stream().flatMap(values -> values.stream()).collect(Collectors.toSet()).contains(aspect))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
 		return dimensions.entrySet()
@@ -91,24 +92,24 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<IValue> getAspects(){
+	public Set<AValue> getAspects(){
 		return Collections.unmodifiableSet(dimensions.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
 	}
 
 	@Override
-	public Set<IValue> getAspects(IAttribute dimension) {
+	public Set<AValue> getAspects(ASurveyAttribute dimension) {
 		if(!dimensions.containsKey(dimension))
 			throw new NullPointerException("dimension "+dimension+" is not present in the joint distribution");
 		return Collections.unmodifiableSet(dimensions.get(dimension));
 	}
 
 	@Override
-	public Map<ACoordinate<IAttribute, IValue>, AControl<T>> getMatrix(){
+	public Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> getMatrix(){
 		return Collections.unmodifiableMap(matrix);
 	}
 	
 	@Override
-	public ACoordinate<IAttribute, IValue> getEmptyCoordinate(){
+	public ACoordinate<ASurveyAttribute, AValue> getEmptyCoordinate(){
 		return emptyCoordinate;
 	}
 
@@ -117,14 +118,14 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////
 
 	@Override
-	public AControl<T> getVal(ACoordinate<IAttribute, IValue> coordinate) {
+	public AControl<T> getVal(ACoordinate<ASurveyAttribute, AValue> coordinate) {
 		if(!matrix.containsKey(coordinate))
 			throw new NullPointerException("Coordinate "+coordinate+" is absent from this control table ("+this.hashCode()+")");
 		return this.matrix.get(coordinate);
 	}
 
 	@Override
-	public AControl<T> getVal(IValue aspect) {
+	public AControl<T> getVal(AValue aspect) {
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
 			throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
 		AControl<T> result = getNulVal();
@@ -136,17 +137,17 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public AControl<T> getVal(Collection<IValue> aspects) {
+	public AControl<T> getVal(Collection<AValue> aspects) {
 		if(aspects.stream().allMatch(a -> !matrix.keySet().stream().anyMatch(coord -> coord.contains(a))))
 			throw new NullPointerException("Aspect "+aspects+" is absent from this control table ("+this.getClass().getSimpleName()+" - "+this.hashCode()+")");
 
-		Map<IAttribute, Set<IValue>> attAsp = new HashMap<>();
-		for(IValue val : aspects){
-			IAttribute att = val.getAttribute();
+		Map<ASurveyAttribute, Set<AValue>> attAsp = new HashMap<>();
+		for(AValue val : aspects){
+			ASurveyAttribute att = val.getAttribute();
 			if(attAsp.containsKey(att))
 				attAsp.get(att).add(val);
 			else {
-				Set<IValue> valSet = new HashSet<>();
+				Set<AValue> valSet = new HashSet<>();
 				valSet.add(val);
 				attAsp.put(att, valSet);
 			}
@@ -167,10 +168,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////////////
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<IAttribute, IValue> coordinate) {
-		List<IAttribute> dimensionsAspects = new ArrayList<>();
-		for(IValue aspect : coordinate.values()){
-			for(IAttribute dim : dimensions.keySet()){
+	public boolean isCoordinateCompliant(ACoordinate<ASurveyAttribute, AValue> coordinate) {
+		List<ASurveyAttribute> dimensionsAspects = new ArrayList<>();
+		for(AValue aspect : coordinate.values()){
+			for(ASurveyAttribute dim : dimensions.keySet()){
 				if(dimensions.containsKey(dim)) {
 					if(dimensions.get(dim).contains(aspect))
 						dimensionsAspects.add(dim);
@@ -184,7 +185,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 					.collect(Collectors.toList()));
 					*/
 		}
-		Set<IAttribute> dimSet = new HashSet<>(dimensionsAspects);
+		Set<ASurveyAttribute> dimSet = new HashSet<>(dimensionsAspects);
 		if(dimensionsAspects.size() == dimSet.size())
 			return true;
 		System.out.println(Arrays.toString(dimensionsAspects.toArray()));
@@ -203,9 +204,9 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		String s = "-- Matrix: "+dimensions.size()+" dimensions and "+dimensions.values().stream().mapToInt(Collection::size).sum()
 				+" aspects (theoretical size:"+theoreticalSpaceSize+")--\n";
 		AControl<T> empty = getNulVal();
-		for(IAttribute dimension : dimensions.keySet()){
-			s += " -- dimension: "+dimension.getName()+" with "+dimensions.get(dimension).size()+" aspects -- \n";
-			for(IValue aspect : dimensions.get(dimension))
+		for(ASurveyAttribute dimension : dimensions.keySet()){
+			s += " -- dimension: "+dimension.getAttributeName()+" with "+dimensions.get(dimension).size()+" aspects -- \n";
+			for(AValue aspect : dimensions.get(dimension))
 				try {
 					s += "| "+aspect+": "+getVal(aspect)+"\n";
 				} catch (NullPointerException e) {
@@ -219,18 +220,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public String toCsv(char csvSeparator) {
-		List<IAttribute> atts = new ArrayList<>(getDimensions());
+		List<ASurveyAttribute> atts = new ArrayList<>(getDimensions());
 		AControl<T> emptyVal = getNulVal();
 		String csv = "";
-		for(IAttribute att :atts){
+		for(ASurveyAttribute att :atts){
 			if(!csv.isEmpty())
 				csv += csvSeparator;
-			csv+=att.getName();
+			csv+=att.getAttributeName();
 		}
 		csv += csvSeparator+"value\n";
-		for(ACoordinate<IAttribute, IValue> coordVal : matrix.keySet()){
+		for(ACoordinate<ASurveyAttribute, AValue> coordVal : matrix.keySet()){
 			String csvLine = "";
-			for(IAttribute att :atts){
+			for(ASurveyAttribute att :atts){
 				if(!csvLine.isEmpty())
 					csvLine += csvSeparator;
 				if(!coordVal.values()

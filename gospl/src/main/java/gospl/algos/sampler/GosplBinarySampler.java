@@ -8,13 +8,14 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.util.GSPerformanceUtil;
+import gospl.ISampler;
 import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.BasicDistribution;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.util.GSPerformanceUtil;
 
 /**
  * Sample method to draw from a discrete distribution, based on binary search algorithm
@@ -31,11 +32,11 @@ import io.util.GSPerformanceUtil;
  *
  * @param <T>
  */
-public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IValue>> {
+public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
 	
 	private static boolean DEBUG_SYSO = true;
 	
-	private List<ACoordinate<IAttribute, IValue>> indexedKey;
+	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 	
 	private Random random = ThreadLocalRandom.current();
@@ -58,7 +59,7 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
 		int count = 1;
-		for(Entry<ACoordinate<IAttribute, IValue>, Double> entry : distribution.entrySet()){
+		for(Entry<ACoordinate<ASurveyAttribute, AValue>, Double> entry : distribution.entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
@@ -77,7 +78,7 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	// -------------------- main contract -------------------- //
 		
 	@Override
-	public ACoordinate<IAttribute, IValue> draw() throws GosplSamplerException {
+	public ACoordinate<ASurveyAttribute, AValue> draw() throws GosplSamplerException {
 		double rand = random.nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
@@ -102,12 +103,12 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	}
 	
 	@Override
-	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw) throws GosplSamplerException{
+	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) throws GosplSamplerException{
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> safeDraw()).collect(Collectors.toList());
 	}
 	
-	private ACoordinate<IAttribute, IValue> safeDraw(){
-		ACoordinate<IAttribute, IValue> draw = null;
+	private ACoordinate<ASurveyAttribute, AValue> safeDraw(){
+		ACoordinate<ASurveyAttribute, AValue> draw = null;
 		try {
 			draw = draw();
 		} catch (GosplSamplerException e) {
@@ -120,15 +121,15 @@ public class GosplBinarySampler implements ISampler<ACoordinate<IAttribute, IVal
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<IAttribute> attributs = new ArrayList<>(indexedKey
+		List<ASurveyAttribute> attributs = new ArrayList<>(indexedKey
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
-		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getName()).collect(Collectors.toList()));
+		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
 		double formerProba = 0d;
-		for(ACoordinate<IAttribute, IValue> coord : indexedKey){
+		for(ACoordinate<ASurveyAttribute, AValue> coord : indexedKey){
 			String line = "";
-			for(IAttribute att : attributs){
+			for(ASurveyAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
 						line += coord.getMap().get(att).getStringValue();

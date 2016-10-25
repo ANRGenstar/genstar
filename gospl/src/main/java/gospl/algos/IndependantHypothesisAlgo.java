@@ -8,22 +8,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.io.survey.configuration.GSSurveyType;
+import core.util.GSPerformanceUtil;
+import gospl.IDistributionInferenceAlgo;
+import gospl.INDimensionalMatrix;
+import gospl.ISampler;
 import gospl.algos.exception.GosplSamplerException;
 import gospl.algos.sampler.GosplAliasSampler;
 import gospl.algos.sampler.GosplBasicSampler;
 import gospl.algos.sampler.GosplBinarySampler;
-import gospl.algos.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
-import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.BasicDistribution;
-import io.data.survey.configuration.GSSurveyType;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.util.GSPerformanceUtil;
 
 
 /**
@@ -35,7 +36,7 @@ import io.util.GSPerformanceUtil;
  * @author kevinchapuis
  *
  */
-public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAttribute, IValue> {
+public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASurveyAttribute, AValue> {
 
 	private boolean DEBUG_SYSO;
 
@@ -44,9 +45,9 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 	}
 
 	@Override
-	public ISampler<ACoordinate<IAttribute, IValue>> inferDistributionSampler(
-			INDimensionalMatrix<IAttribute, IValue, Double> matrix,
-			ISampler<ACoordinate<IAttribute, IValue>> sampler) throws IllegalDistributionCreation, GosplSamplerException {
+	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
+			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix,
+			ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) throws IllegalDistributionCreation, GosplSamplerException {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
 		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))
@@ -72,10 +73,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 		ASegmentedNDimensionalMatrix<Double> segmentedMatrix = (ASegmentedNDimensionalMatrix<Double>) matrix;
 
 		// Init sample distribution simple expression
-		Map<Set<IValue>, Double> sampleDistribution = new HashMap<>();
+		Map<Set<AValue>, Double> sampleDistribution = new HashMap<>();
 
 		// Init collection to store processed attributes & matrix
-		Set<IAttribute> allocatedAttributes = new HashSet<>();
+		Set<ASurveyAttribute> allocatedAttributes = new HashSet<>();
 		Set<AFullNDimensionalMatrix<Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
 
 		/////////////////////////////////////
@@ -83,20 +84,20 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 		/////////////////////////////////////
 
 		// First identify referent & aggregated attributes
-		Set<IAttribute> aggAtts = segmentedMatrix.getDimensions()
+		Set<ASurveyAttribute> aggAtts = segmentedMatrix.getDimensions()
 				.stream().filter(d -> !d.isRecordAttribute() && !d.getReferentAttribute().equals(d))
 				.collect(Collectors.toSet());
-		Set<IAttribute> refAtts = aggAtts.stream().map(att -> att.getReferentAttribute())
+		Set<ASurveyAttribute> refAtts = aggAtts.stream().map(att -> att.getReferentAttribute())
 				.collect(Collectors.toSet());
 		// Then disintegrated attribute -> to aggregated attributes relationships
-		Map<IAttribute, Set<IAttribute>> aggAttributeMap = refAtts
+		Map<ASurveyAttribute, Set<ASurveyAttribute>> aggAttributeMap = refAtts
 				.stream().collect(Collectors.toMap(refDim -> refDim, refDim -> segmentedMatrix.getDimensions()
 						.stream().filter(aggDim -> aggDim.getReferentAttribute().equals(refDim) 
 								&& !aggDim.equals(refDim)).collect(Collectors.toSet())));
 		
 		// And disintegrated value -> to aggregated values relationships:
-		Map<IValue, Set<IValue>> aggToRefValues = new HashMap<>();
-		for(IValue val : aggAtts.stream().flatMap(att -> att.getValues().stream()).collect(Collectors.toSet()))
+		Map<AValue, Set<AValue>> aggToRefValues = new HashMap<>();
+		for(AValue val : aggAtts.stream().flatMap(att -> att.getValues().stream()).collect(Collectors.toSet()))
 			aggToRefValues.put(val, val.getAttribute().getReferentAttribute().getValues()
 					.stream().filter(disVal -> val.getAttribute().findMatchingAttributeValue(disVal).equals(val))
 					.collect(Collectors.toSet()));
@@ -123,8 +124,8 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 				.collect(Collectors.toList());
 		
 		for(AFullNDimensionalMatrix<Double> mat : aggMatrices){
-			Map<Set<IValue>, Double> updatedSampleDistribution = new HashMap<>();
-			Map<Set<IValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
+			Map<Set<AValue>, Double> updatedSampleDistribution = new HashMap<>();
+			Map<Set<AValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
 			
 			// Corresponding disintegrated control total of aggregated values
 			double oControl = sampleDistribution.entrySet()
@@ -135,10 +136,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 					.mapToDouble(indiv -> indiv.getValue()).sum();
 			
 			// Iterate over the old sampleDistribution to had new disaggregate values
-			for(ACoordinate<IAttribute, IValue> aggCoord : mat.getMatrix().keySet()){
+			for(ACoordinate<ASurveyAttribute, AValue> aggCoord : mat.getMatrix().keySet()){
 				
 				// Identify all individual in the distribution that have disintegrated information about aggregated data
-				Map<Set<IValue>, Double> targetedIndiv = sampleDistribution.entrySet()
+				Map<Set<AValue>, Double> targetedIndiv = sampleDistribution.entrySet()
 						.stream().filter(indiv -> aggCoord.getDimensions()
 								.stream().filter(d -> allocatedAttributes.contains(d)).map(d -> aggCoord.getMap().get(d))
 								.allMatch(v -> indiv.getKey().contains(v))
@@ -148,7 +149,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 								
 				// Retain new values from aggregated coordinate
-				Set<IValue> newVals = aggCoord.getMap().entrySet()
+				Set<AValue> newVals = aggCoord.getMap().entrySet()
 						.stream().filter(e -> !aggAtts.contains(e.getKey()) 
 								&& !allocatedAttributes.contains(e.getKey()))
 						.map(e -> e.getValue()).collect(Collectors.toSet());
@@ -156,7 +157,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 				// Identify targeted probability: sum of proba for tageted disintegrated values and proba for aggregated values
 				double mControl = targetedIndiv.values().stream().reduce(0d, (d1, d2) -> d1 + d2);
 				double aControl = mat.getMatrix().get(aggCoord).getValue();
-				for(Set<IValue> indiv : targetedIndiv.keySet()){
+				for(Set<AValue> indiv : targetedIndiv.keySet()){
 					updatedSampleDistribution.put(Stream.concat(indiv.stream(), newVals.stream()).collect(Collectors.toSet()), 
 							targetedIndiv.get(indiv) / mControl * aControl * oControl);
 
@@ -165,10 +166,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 			}
 			
 			// Iterate over non updated individual to add new attribute empty value (no info in aggregated data)
-			Set<IValue> newVals = mat.getDimensions()
+			Set<AValue> newVals = mat.getDimensions()
 					.stream().filter(d -> !allocatedAttributes.contains(d) && !aggAtts.contains(d))
 					.map(d -> d.getEmptyValue()).collect(Collectors.toSet());
-			for(Set<IValue> indiv : untargetedIndiv.keySet())
+			for(Set<AValue> indiv : untargetedIndiv.keySet())
 				updatedSampleDistribution.put(Stream.concat(indiv.stream(), newVals.stream()).collect(Collectors.toSet()), 
 						sampleDistribution.get(indiv));
 			
@@ -202,28 +203,28 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IAt
 	// ------------------------------ inner utility methods ------------------------------ //
 
 	
-	private Map<Set<IValue>, Double> updateGosplProbaMap(Map<Set<IValue>, Double> sampleDistribution, 
+	private Map<Set<AValue>, Double> updateGosplProbaMap(Map<Set<AValue>, Double> sampleDistribution, 
 			AFullNDimensionalMatrix<Double> matrix, GSPerformanceUtil gspu){
-		Map<Set<IValue>, Double> updatedSampleDistribution = new HashMap<>();
+		Map<Set<AValue>, Double> updatedSampleDistribution = new HashMap<>();
 		if(sampleDistribution.isEmpty()){
 			updatedSampleDistribution.putAll(matrix.getMatrix().entrySet()
 					.parallelStream().collect(Collectors.toMap(e -> new HashSet<>(e.getKey().values()), e -> e.getValue().getValue())));
 		} else {
 			int j = 1;
-			Set<IAttribute> allocatedAttributes = sampleDistribution.keySet()
+			Set<ASurveyAttribute> allocatedAttributes = sampleDistribution.keySet()
 					.parallelStream().flatMap(set -> set.stream()).map(a -> a.getAttribute()).collect(Collectors.toSet());
-			Set<IAttribute> hookAtt = matrix.getDimensions()
+			Set<ASurveyAttribute> hookAtt = matrix.getDimensions()
 					.stream().filter(att -> allocatedAttributes.contains(att)).collect(Collectors.toSet());
-			for(Set<IValue> indiv : sampleDistribution.keySet()){
-				Set<IValue> hookVal = indiv.stream().filter(val -> hookAtt.contains(val.getAttribute()))
+			for(Set<AValue> indiv : sampleDistribution.keySet()){
+				Set<AValue> hookVal = indiv.stream().filter(val -> hookAtt.contains(val.getAttribute()))
 						.collect(Collectors.toSet());
-				Map<ACoordinate<IAttribute, IValue>, AControl<Double>> coordsHooked = matrix.getMatrix().entrySet()
+				Map<ACoordinate<ASurveyAttribute, AValue>, AControl<Double>> coordsHooked = matrix.getMatrix().entrySet()
 						.parallelStream().filter(e -> e.getKey().containsAll(hookVal))
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 				double summedProba = coordsHooked.values()
 						.stream().reduce(matrix.getNulVal(), (v1, v2) -> v1.add(v2)).getValue();
-				for(ACoordinate<IAttribute, IValue> newIndivVal : coordsHooked.keySet()){
-					Set<IValue> newIndiv = Stream.concat(indiv.stream(), newIndivVal.values().stream()).collect(Collectors.toSet());
+				for(ACoordinate<ASurveyAttribute, AValue> newIndivVal : coordsHooked.keySet()){
+					Set<AValue> newIndiv = Stream.concat(indiv.stream(), newIndivVal.values().stream()).collect(Collectors.toSet());
 					double newProba = sampleDistribution.get(indiv) * coordsHooked.get(newIndivVal).getValue() / summedProba;
 					if(newProba > 0d)
 						updatedSampleDistribution.put(newIndiv, newProba);

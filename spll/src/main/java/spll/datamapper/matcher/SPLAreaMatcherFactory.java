@@ -14,11 +14,11 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import io.data.geo.IGSGeofile;
-import io.data.geo.attribute.GSFeature;
-import io.data.geo.attribute.IGeoGSAttribute;
-import io.data.geo.attribute.IGeoValue;
-import io.util.GSPerformanceUtil;
+import core.io.geo.IGSGeofile;
+import core.io.geo.entity.AGeoEntity;
+import core.io.geo.entity.GSFeature;
+import core.io.geo.entity.attribute.value.AGeoValue;
+import core.util.GSPerformanceUtil;
 import spll.datamapper.variable.SPLVariable;
 
 public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Double> {
@@ -26,9 +26,9 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	public static boolean LOGSYSO = true;
 	private int matcherCount = 0;
 	
-	private Collection<IGeoValue> variables;
+	private Collection<AGeoValue> variables;
 
-	public SPLAreaMatcherFactory(Collection<IGeoValue> variables) {
+	public SPLAreaMatcherFactory(Collection<AGeoValue> variables) {
 		this.variables = variables;
 	}
 
@@ -54,27 +54,28 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	}
 
 	private List<ISPLVariableFeatureMatcher<SPLVariable, Double>> getMatchers(GSFeature feature,
-			Iterator<? extends IGeoGSAttribute> geoData, Collection<IGeoValue> variables, 
+			Iterator<? extends AGeoEntity> geoData, Collection<AGeoValue> variables, 
 			GSPerformanceUtil gspu) {
 		List<ISPLVariableFeatureMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
-		Geometry geofeat = feature.getGeometry();
+		Geometry geometry = feature.getGeometry();
 		while(geoData.hasNext()){
-			IGeoGSAttribute feat = geoData.next();
-			if(feat.getPosition().within(geofeat)){
-				for(String prop : feat.getPropertiesAttribute()){
-					if(!variables.isEmpty() && !variables.contains(feat.getValue(prop)))
+			AGeoEntity geoEntity = geoData.next();
+			if(geoEntity.getPosition().within(geometry)){
+				for(String prop : geoEntity.getPropertiesAttribute()){
+					AGeoValue value = geoEntity.getValueForAttribute(prop);
+					if(!variables.isEmpty() && !variables.contains(value))
 						continue;
 					Optional<ISPLVariableFeatureMatcher<SPLVariable, Double>> potentialMatch = areaMatcherList
 							.stream().filter(varMatcher -> varMatcher.getVariable().getName().equals(prop.toString()) &&
-							varMatcher.getVariable().getValue().equals(feat.getValue(prop))).findFirst();
+							varMatcher.getVariable().getValue().equals(value)).findFirst();
 					if(potentialMatch.isPresent()){
 						// IF Variable is already matched, update area
-						potentialMatch.get().expandValue(feat.getArea());
+						potentialMatch.get().expandValue(geoEntity.getArea());
 					} else {
 						// ELSE create Variable based on the feature and create SPLAreaMatcher with basic area
-						if(!feat.isNoDataValue(prop))
+						if(!geoEntity.getPropertyAttribute(prop).equals(value))
 							areaMatcherList.add(new SPLAreaMatcher(feature, 
-								new SPLVariable(feat.getValue(prop), prop.toString()), feat.getArea()));
+								new SPLVariable(value, prop.toString()), geoEntity.getArea()));
 					}
 				}
 			}

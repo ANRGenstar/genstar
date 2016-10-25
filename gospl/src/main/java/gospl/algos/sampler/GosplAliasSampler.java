@@ -8,12 +8,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import gospl.ISampler;
 import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.BasicDistribution;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
 
 /******************************************************************************
  * File: AliasMethod.java
@@ -31,9 +32,9 @@ import io.metamodel.attribut.value.IValue;
  *                 http://www.keithschwarz.com/darts-dice-coins/
  * 
  */
-public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValue>> {
+public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
 
-	private List<ACoordinate<IAttribute, IValue>> indexedKey;
+	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> initProba;
 	
 	/* The random number generator used to sample from the distribution. */
@@ -144,7 +145,7 @@ public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValu
 	 * @return A random value sampled from the underlying distribution.
 	 */
 	@Override
-	public ACoordinate<IAttribute, IValue> draw() {
+	public ACoordinate<ASurveyAttribute, AValue> draw() {
 		/* Generate a fair die roll to determine which column to inspect. */
 		int column = random.nextInt(probability.length);
 
@@ -155,20 +156,20 @@ public class GosplAliasSampler implements ISampler<ACoordinate<IAttribute, IValu
 	}
 	
 	@Override
-	public List<ACoordinate<IAttribute, IValue>> draw(int numberOfDraw){
+	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw){
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<IAttribute> attributs = new ArrayList<>(indexedKey
+		List<ASurveyAttribute> attributs = new ArrayList<>(indexedKey
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
-		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getName()).collect(Collectors.toList()));
+		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
-		for(ACoordinate<IAttribute, IValue> coord : indexedKey){
+		for(ACoordinate<ASurveyAttribute, AValue> coord : indexedKey){
 			String line = "";
-			for(IAttribute att : attributs){
+			for(ASurveyAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
 						s += csvSeparator+coord.getMap().get(att);

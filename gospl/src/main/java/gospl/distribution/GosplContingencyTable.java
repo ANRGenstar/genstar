@@ -3,16 +3,16 @@ package gospl.distribution;
 import java.util.Map;
 import java.util.Set;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+import core.io.survey.configuration.GSSurveyType;
+import core.util.data.GSDataParser;
+import core.util.data.GSEnumDataType;
 import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import io.data.survey.configuration.GSSurveyType;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
-import io.util.data.GSDataParser;
-import io.util.data.GSEnumDataType;
 
 
 /**
@@ -24,7 +24,7 @@ import io.util.data.GSEnumDataType;
  */
 public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
-	protected GosplContingencyTable(Map<IAttribute, Set<IValue>> dimensionAspectMap) 
+	protected GosplContingencyTable(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap) 
 			throws MatrixCoordinateException {
 		super(dimensionAspectMap, GSSurveyType.ContingencyTable);
 	}
@@ -33,14 +33,14 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 
 	
 	@Override
-	public boolean addValue(ACoordinate<IAttribute, IValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<ASurveyAttribute, AValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
 	}
 
 	@Override
-	public boolean setValue(ACoordinate<IAttribute, IValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<ASurveyAttribute, AValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size()+1+matrix.hashCode());
 			matrix.put(coordinate, new ControlContingency(value.getValue().intValue()));

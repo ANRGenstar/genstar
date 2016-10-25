@@ -8,9 +8,9 @@ import java.util.concurrent.ExecutionException;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.data.geo.GeotiffFile;
-import io.data.geo.IGSGeofile;
-import io.data.geo.ShapeFile;
+import core.io.geo.GeotiffFile;
+import core.io.geo.IGSGeofile;
+import core.io.geo.ShapeFile;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.matcher.ISPLMatcherFactory;

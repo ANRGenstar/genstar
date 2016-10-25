@@ -8,35 +8,35 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
 import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import io.metamodel.attribut.IAttribute;
-import io.metamodel.attribut.value.IValue;
 
-public class BasicDistribution implements SortedMap<ACoordinate<IAttribute, IValue>, Double> {
+public class BasicDistribution implements SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> {
 
-	private final SortedMap<ACoordinate<IAttribute, IValue>, Double> innermap; 
+	private final SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> innermap; 
 	
 	public BasicDistribution() {
-		this.innermap = new TreeMap<ACoordinate<IAttribute, IValue>, Double>(
-				new Comparator<ACoordinate<IAttribute, IValue>>(){
-					public int compare(ACoordinate<IAttribute, IValue> coord1, ACoordinate<IAttribute, IValue> coord2 ){
+		this.innermap = new TreeMap<ACoordinate<ASurveyAttribute, AValue>, Double>(
+				new Comparator<ACoordinate<ASurveyAttribute, AValue>>(){
+					public int compare(ACoordinate<ASurveyAttribute, AValue> coord1, ACoordinate<ASurveyAttribute, AValue> coord2 ){
 			            return innermap.get(coord1).compareTo(innermap.get(coord2));
 			        }
 				}
 			);
 	}
 
-	public BasicDistribution(Map<Set<IValue>, Double> sampleDistribution) {
+	public BasicDistribution(Map<Set<AValue>, Double> sampleDistribution) {
 		this();
 		innermap.putAll(sampleDistribution.entrySet()
 				.parallelStream().collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey()), Entry::getValue)));
 	}
 
-	private ACoordinate<IAttribute, IValue> safeCoordinateCreation(Set<IValue> coordValues) {
-		ACoordinate<IAttribute, IValue> coordinate = null;
+	private ACoordinate<ASurveyAttribute, AValue> safeCoordinateCreation(Set<AValue> coordValues) {
+		ACoordinate<ASurveyAttribute, AValue> coordinate = null;
 		try {
 			coordinate = new GosplCoordinate(coordValues);
 		} catch (MatrixCoordinateException e) {
@@ -78,7 +78,7 @@ public class BasicDistribution implements SortedMap<ACoordinate<IAttribute, IVal
 	}
 
 	@Override
-	public Double put(ACoordinate<IAttribute, IValue> key, Double value) {
+	public Double put(ACoordinate<ASurveyAttribute, AValue> key, Double value) {
 		return innermap.put(key, value);
 	}
 
@@ -88,7 +88,7 @@ public class BasicDistribution implements SortedMap<ACoordinate<IAttribute, IVal
 	}
 
 	@Override
-	public void putAll(Map<? extends ACoordinate<IAttribute, IValue>, ? extends Double> m) {
+	public void putAll(Map<? extends ACoordinate<ASurveyAttribute, AValue>, ? extends Double> m) {
 		innermap.putAll(m);
 	}
 
@@ -98,38 +98,38 @@ public class BasicDistribution implements SortedMap<ACoordinate<IAttribute, IVal
 	}
 
 	@Override
-	public Comparator<? super ACoordinate<IAttribute, IValue>> comparator() {
+	public Comparator<? super ACoordinate<ASurveyAttribute, AValue>> comparator() {
 		return innermap.comparator();
 	}
 
 	@Override
-	public SortedMap<ACoordinate<IAttribute, IValue>, Double> subMap(ACoordinate<IAttribute, IValue> fromKey,
-			ACoordinate<IAttribute, IValue> toKey) {
+	public SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> subMap(ACoordinate<ASurveyAttribute, AValue> fromKey,
+			ACoordinate<ASurveyAttribute, AValue> toKey) {
 		return innermap.subMap(fromKey, toKey);
 	}
 
 	@Override
-	public SortedMap<ACoordinate<IAttribute, IValue>, Double> headMap(ACoordinate<IAttribute, IValue> toKey) {
+	public SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> headMap(ACoordinate<ASurveyAttribute, AValue> toKey) {
 		return innermap.headMap(toKey);
 	}
 
 	@Override
-	public SortedMap<ACoordinate<IAttribute, IValue>, Double> tailMap(ACoordinate<IAttribute, IValue> fromKey) {
+	public SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> tailMap(ACoordinate<ASurveyAttribute, AValue> fromKey) {
 		return innermap.tailMap(fromKey);
 	}
 
 	@Override
-	public ACoordinate<IAttribute, IValue> firstKey() {
+	public ACoordinate<ASurveyAttribute, AValue> firstKey() {
 		return innermap.firstKey();
 	}
 
 	@Override
-	public ACoordinate<IAttribute, IValue> lastKey() {
+	public ACoordinate<ASurveyAttribute, AValue> lastKey() {
 		return innermap.lastKey();
 	}
 
 	@Override
-	public Set<ACoordinate<IAttribute, IValue>> keySet() {
+	public Set<ACoordinate<ASurveyAttribute, AValue>> keySet() {
 		return innermap.keySet();
 	}
 
@@ -139,7 +139,7 @@ public class BasicDistribution implements SortedMap<ACoordinate<IAttribute, IVal
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<ACoordinate<IAttribute, IValue>, Double>> entrySet() {
+	public Set<java.util.Map.Entry<ACoordinate<ASurveyAttribute, AValue>, Double>> entrySet() {
 		return innermap.entrySet();
 	}
 

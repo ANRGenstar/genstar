@@ -14,10 +14,10 @@ import java.util.stream.Stream;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import io.data.geo.IGSGeofile;
-import io.data.geo.ShapeFile;
-import io.data.geo.attribute.GSFeature;
-import io.data.geo.attribute.IGeoGSAttribute;
+import core.io.geo.IGSGeofile;
+import core.io.geo.ShapeFile;
+import core.io.geo.entity.AGeoEntity;
+import core.io.geo.entity.GSFeature;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
@@ -91,7 +91,7 @@ public class SPLMapper<V extends ISPLVariable, T> {
 		return regFunction;
 	}
 
-	public Map<IGeoGSAttribute, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
+	public Map<AGeoEntity, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
 		return getAttributes().stream().collect(Collectors.toMap(
 				feat -> feat, 
 				feat -> mapper.parallelStream().filter(map -> map.getFeature().equals(feat))
