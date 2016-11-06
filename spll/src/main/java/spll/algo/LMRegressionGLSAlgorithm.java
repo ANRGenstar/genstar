@@ -16,6 +16,12 @@ import core.io.geo.entity.AGeoEntity;
 import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
 import spll.datamapper.variable.SPLVariable;
 
+/**
+ * WARNING: not functional
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implements ISPLRegressionAlgorithm<SPLVariable, Double> {
 
 	private List<SPLVariable> regVars;
@@ -27,7 +33,7 @@ public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implem
 		this.regVars = new ArrayList<>(regressors
 				.parallelStream().map(varfm -> varfm.getVariable())
 				.collect(Collectors.toSet()));
-		double[] instances = new double[regVars.size() * observations.size()];
+		double[] instances = new double[regVars.size() * observations.size() + observations.size()];
 		int instanceCount = 0;
 		for(AGeoEntity geoEntity : observations.keySet()){
 			instances[instanceCount++] = observations.get(geoEntity);

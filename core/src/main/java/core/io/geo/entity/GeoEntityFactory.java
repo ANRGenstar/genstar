@@ -43,7 +43,7 @@ public class GeoEntityFactory {
 		return new GSFeature(values, feature);
 	}
 
-	public GSPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel) {
+	public GSPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
 		Set<AGeoValue> values = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+"_"+i;
@@ -62,7 +62,7 @@ public class GeoEntityFactory {
 				attribute.addValue(value);
 			values.add(value);
 		}
-		return new GSPixel(values, pixel);
+		return new GSPixel(values, pixel, gridX, gridY);
 	}
 
 }

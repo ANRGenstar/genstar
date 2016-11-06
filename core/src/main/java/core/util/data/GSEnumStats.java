@@ -2,7 +2,7 @@ package core.util.data;
 
 public enum GSEnumStats {
 
-	average, median, minimum, maximum, sum,
-	quartil_one, quartil_two, quartil_three, quartil_four;
+	av, med, min, max, sum,
+	q_one, q_two, q_three, q_four;
 	
 }

@@ -26,7 +26,7 @@ import core.util.data.GSEnumStats;
 public class GSBasicStats<T extends Number> {
 	
 	private EnumMap<GSEnumStats, Double> map;
-	private double floatPrecision;
+	private double floatPrecision = 0.0001;
 	
 	public GSBasicStats(List<T> list){
 		List<T> tempList = new ArrayList<>(list);
@@ -35,28 +35,30 @@ public class GSBasicStats<T extends Number> {
 				.collect(DoubleSummaryStatistics::new, 
 				DoubleSummaryStatistics::accept, 
 				DoubleSummaryStatistics::combine);
-		map.put(GSEnumStats.average, Math.round(stats.getAverage() / floatPrecision) * floatPrecision);
-		map.put(GSEnumStats.minimum, Math.round(stats.getMin() / floatPrecision) * floatPrecision);
-		map.put(GSEnumStats.maximum, Math.round(stats.getMax() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.av, Math.round(stats.getAverage() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.min, Math.round(stats.getMin() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.max, Math.round(stats.getMax() / floatPrecision) * floatPrecision);
 		map.put(GSEnumStats.sum, Math.round(stats.getSum() / floatPrecision) * floatPrecision);
 		
 		tempList.sort((n1, n2) -> Double.valueOf(n1.doubleValue()).compareTo(Double.valueOf(n2.doubleValue())));
-		map.put(GSEnumStats.median, Math.round(list.get(list.size() % 2 == 0 ? list.size() / 2 : (list.size() + 1) / 2).doubleValue() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.med, Math.round(list.get(list.size() % 2 == 0 ? list.size() / 2 : (list.size() + 1) / 2).doubleValue() / floatPrecision) * floatPrecision);
 		
 		int rest = tempList.size() % 5;
 		int quartil = tempList.size() % 5 == 0 ? tempList.size() / 5 : (tempList.size() - rest) / 5;
-		map.put(GSEnumStats.quartil_one, Math.round(tempList.get(quartil).doubleValue() / floatPrecision) * floatPrecision); 
-		map.put(GSEnumStats.quartil_two, Math.round(tempList.get(quartil*2).doubleValue() / floatPrecision) * floatPrecision);
-		map.put(GSEnumStats.quartil_three, Math.round(tempList.get(quartil*3).doubleValue() / floatPrecision) * floatPrecision);
-		map.put(GSEnumStats.quartil_four, Math.round(tempList.get(quartil*4).doubleValue() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.q_one, Math.round(tempList.get(quartil).doubleValue() / floatPrecision) * floatPrecision); 
+		map.put(GSEnumStats.q_two, Math.round(tempList.get(quartil*2).doubleValue() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.q_three, Math.round(tempList.get(quartil*3).doubleValue() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.q_four, Math.round(tempList.get(quartil*4).doubleValue() / floatPrecision) * floatPrecision);
 	}
 	
 	public void setFloatingPrecision(double floatPrecision){
 		this.floatPrecision = floatPrecision;
 	}
 	
-	public double getStat(GSEnumStats stat){
-		return map.get(stat);
+	public double[] getStat(GSEnumStats... stats){
+		double[] output = new double[stats.length];
+		IntStream.range(0, stats.length).forEach(i -> output[i] = map.get(stats[i]));
+		return output;
 	}
 	
 	public String getStatReport() {

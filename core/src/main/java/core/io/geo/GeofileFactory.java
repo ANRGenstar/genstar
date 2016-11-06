@@ -11,8 +11,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.FilenameUtils;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
+import org.geotools.coverage.grid.io.AbstractGridCoverageWriter;
 import org.geotools.data.DefaultTransaction;
 import org.geotools.data.Transaction;
 import org.geotools.data.collection.ListFeatureCollection;
@@ -20,8 +22,10 @@ import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.data.shapefile.ShapefileDataStoreFactory;
 import org.geotools.data.simple.SimpleFeatureCollection;
 import org.geotools.data.simple.SimpleFeatureStore;
+import org.geotools.factory.Hints;
 import org.geotools.feature.SchemaException;
 import org.geotools.gce.geotiff.GeoTiffWriter;
+import org.geotools.gce.arcgrid.ArcGridWriter;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
 import org.opengis.feature.simple.SimpleFeature;
@@ -35,6 +39,7 @@ import core.io.geo.entity.GSFeature;
 public class GeofileFactory {
 
 	private static String SHAPEFILE_EXT = ".shp";
+	private static String ARC_EXT = ".asc";
 	private static String GEOTIFF_EXT = ".tif";
 	
 	private final List<String> supportedFileFormat;
@@ -97,7 +102,11 @@ public class GeofileFactory {
 		ReferencedEnvelope envelope = new ReferencedEnvelope(0, pixels.length, 0, pixels[0].length, crs);
 		
 		GridCoverage2D coverage = new GridCoverageFactory().create(rasterfile.getName(), pixels, envelope);
-		GeoTiffWriter writer = new GeoTiffWriter(rasterfile);
+		AbstractGridCoverageWriter writer;
+		if(FilenameUtils.getExtension(rasterfile.getName()).contains(ARC_EXT))
+			writer = new ArcGridWriter(rasterfile.getAbsolutePath(), new Hints(Hints.USE_JAI_IMAGEREAD, true));
+		else
+			writer = new GeoTiffWriter(rasterfile); 
 		writer.write(coverage, null);
 		return new GeotiffFile(rasterfile);
 	}

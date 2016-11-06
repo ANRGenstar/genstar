@@ -45,6 +45,7 @@ public class GeotiffFile implements IGSGeofile {
 	private final GeoEntityFactory gef;
 	
 	public static Number DEF_NODATA = -9999; 
+	private Number noData;
 
 	/**
 	 * Basically convert each grid like data from tiff file to a {@link Feature} list: 
@@ -71,6 +72,7 @@ public class GeotiffFile implements IGSGeofile {
 
 		this.gef = new GeoEntityFactory(new HashSet<>());
 		this.store = new GeoTiffReader(file, new Hints(Hints.USE_JAI_IMAGEREAD, true));
+		this.noData = store.getMetadata().getNoData();
 		this.coverage = this.store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});	
 	}
 	
@@ -144,6 +146,10 @@ public class GeotiffFile implements IGSGeofile {
 		return store;
 	}
 	
+	public double getNoDataValue() {
+		return noData.doubleValue();
+	}
+	
 	public String[] getBandId(){
 		return store.getGridCoverageNames();
 	}
@@ -164,7 +170,7 @@ public class GeotiffFile implements IGSGeofile {
 		Double[] valsN = new Double[vals.length];
 		for(int k = 0; k < vals.length; k++)
 			valsN[k] = vals[k];
-		return gef.createGeoEntity(valsN, coverage.getGridGeometry().gridToWorld(new GridEnvelope2D(x, y, 1, 1)));
+		return gef.createGeoEntity(valsN, coverage.getGridGeometry().gridToWorld(new GridEnvelope2D(x, y, 1, 1)), x, y);
 	}
 
 	// --------------------------- Utilities --------------------------- // 

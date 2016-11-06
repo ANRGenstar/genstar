@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
+import core.io.GSExportFactory;
 import core.io.GSImportFactory;
 import core.io.exception.InvalidFileTypeException;
 import core.io.geo.GeotiffFile;
@@ -21,11 +22,14 @@ import core.io.geo.IGSGeofile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.attribute.value.AGeoValue;
 import core.util.GSPerformanceUtil;
-import spll.algo.LMRegressionGLSAlgorithm;
+import spll.algo.ISPLRegressionAlgorithm;
+import spll.algo.LMRegressionOLSAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
 import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.SPLMapper;
+import spll.datamapper.normalizer.ASPLNormalizer;
+import spll.datamapper.normalizer.SPLUniformNormalizer;
 import spll.datamapper.variable.SPLVariable;
 
 public class Localisation {
@@ -36,12 +40,13 @@ public class Localisation {
 	 * args[2] = The name (String) of the targeted dependent variable
 	 * args[3] = String of variables to exclude from regression, using ';' to separate from one another
 	 * args[4...] = Shape or raster files that contain explanatory variables (e.g. 30 x 30m raster image of land use or cover)
+	 * First ancillary file define output format
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		
-		String outputFileName = "spll_output.tif";
+		String outputFileName = "spll_output.asc";
 		
 		///////////////////////
 		// INIT VARS FROM ARGS
@@ -117,9 +122,11 @@ public class Localisation {
 		//////////////////////////////////
 		
 		// Choice have been made to regress from areal data count
+		ISPLRegressionAlgorithm<SPLVariable, Double> regressionAlgo = new LMRegressionOLSAlgorithm();
+		
 		ASPLMapperBuilder<SPLVariable, Double> mBuilder = new SPLAreaMapperBuilder(
 				sfAdmin, propertyName, endogeneousVarFile, regVariables,
-				new LMRegressionGLSAlgorithm());
+				regressionAlgo);
 		gspu.sysoStempPerformance("Setup MapperBuilder to proceed regression: done\n", "Main");
 
 		// Setup main regressor class: SPLMapper
@@ -162,9 +169,11 @@ public class Localisation {
 			e2.printStackTrace();
 		}
 		gspu.sysoStempMessage(reg.entrySet().stream().map(e -> "Var_"+e.getKey()+" = "+e.getValue()).reduce("", (s1, s2) -> s1+"\n"+s2));
-			
+		
+		GeotiffFile outputFormat = (GeotiffFile) endogeneousVarFile.get(0);
+		float[][] pixelOutput = null;
 		try { 
-			mBuilder.buildOutput(new File(stringPath+File.separator+outputFileName), (GeotiffFile) endogeneousVarFile.get(0));
+			pixelOutput = mBuilder.buildOutput(outputFormat, false);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -172,6 +181,26 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IndexOutOfBoundsException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		// Normalize output to fit integer population number 
+		ASPLNormalizer normalizer = new SPLUniformNormalizer(0, true);
+		float objectif = (float) sfAdmin.getGeoData()
+				.parallelStream().mapToDouble(feature -> Double.valueOf(feature.getProperty(propertyName).getValue().toString())).sum();
+		System.out.println("\nComputed output is: "+objectif);
+		normalizer.normalize(pixelOutput, objectif);
+		
+		try {
+			GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, outputFormat.getCoordRefSystem());
+		} catch (IllegalArgumentException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (TransformException e1) {

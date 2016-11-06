@@ -14,8 +14,13 @@ public class GSPixel extends AGeoEntity {
 	
 	private Envelope2D pixel;
 	
-	protected GSPixel(Set<AGeoValue> bandsData, Envelope2D pixel) {
+	private int gridX;
+	private int gridY;
+	
+	protected GSPixel(Set<AGeoValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
 		super(bandsData, "px ["+pixel.getCenterX()+";"+pixel.getCenterY()+"]");
+		this.gridX = gridX;
+		this.gridY = gridY;
 		this.pixel = pixel;
 	}
 	
@@ -39,12 +44,12 @@ public class GSPixel extends AGeoEntity {
 				pixel.getMaxX(), pixel.getMaxY());
 	}
 	
-	public double getMaxX() {
-		return pixel.getMaxX();
+	public int getGridX() {
+		return gridX;
 	}
 	
-	public double getMaxY() {
-		return pixel.getMaxY();
+	public int getGridY() {
+		return gridY;
 	}
 	
 	@Override

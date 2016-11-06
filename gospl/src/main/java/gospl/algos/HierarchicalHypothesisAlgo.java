@@ -24,6 +24,9 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<AS
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute hierachical sampler from conditional distribution\nTheoretical size = "+
 				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), DEBUG_SYSO);
 		gspu.getStempPerformance(0);
+		
+		// TODO: algo
+		// First define a standard hierarchical setup (e.g. sorted map, custom object)
 			
 		return sampler;
 	}

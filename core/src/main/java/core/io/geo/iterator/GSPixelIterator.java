@@ -66,7 +66,7 @@ public class GSPixelIterator implements Iterator<GSPixel> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		return gef.createGeoEntity(valsN, pixelEnvelop);
+		return gef.createGeoEntity(valsN, pixelEnvelop, w, h);
 	}
 
 }

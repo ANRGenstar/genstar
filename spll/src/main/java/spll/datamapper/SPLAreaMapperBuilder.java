@@ -22,7 +22,6 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
-import core.io.GSExportFactory;
 import core.io.geo.GeotiffFile;
 import core.io.geo.IGSGeofile;
 import core.io.geo.ShapeFile;
@@ -73,7 +72,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	}
 
 	@Override
-	public GeotiffFile buildOutput(File outputFile, GeotiffFile outputFormat) throws IllegalRegressionException, TransformException, IndexOutOfBoundsException, IOException {
+	public float[][] buildOutput(GeotiffFile outputFormat, boolean intersect) throws IllegalRegressionException, TransformException, IndexOutOfBoundsException, IOException {
 		if(mapper == null)
 			throw new IllegalAccessError("Cannot create output before a SPLMapper has been built and regression done");
 		if(!ancillaryFiles.contains(outputFormat))
@@ -91,44 +90,41 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		Map<GSFeature, Double> corCoef = mapper.getCorrectionCoefficient();
 
 		// Define utilities
-		Collection<GSFeature> mainFeatures = super.mainFile.getGeoData(); 
 		Collection<IGSGeofile> ancillaries = new ArrayList<>(super.ancillaryFiles);
+		Collection<GSFeature> mainGeoData = super.mainFile.getGeoData();
 		ancillaries.remove(outputFormat);
 
 		// Iterate over pixels
-		gspu.sysoStempPerformance("Start iterating over pixels", this);
 		IntStream.range(0, columns).parallel().forEach(
 				x -> IntStream.range(0, rows).forEach(
 						y -> pixels[x][y] = (float) this.computePixelWithinOutput(x, y, outputFormat,  ancillaries,
-								mainFeatures, regCoef, corCoef, gspu)
+								mainGeoData, regCoef, corCoef, gspu, intersect)
 						)
 				);
 		pixelRendered = 0;
 		
-		gspu.sysoStempMessage("End processing pixels - start processing some statistics on them");
+		gspu.sysoStempMessage("End processing pixels - start processing some statistics:");
 		
 		GSBasicStats<Double> bs = new GSBasicStats<>(GSBasicStats.transpose(pixels));
 		
-		gspu.sysoStempMessage("Some statistics: \n"+bs.getStatReport());
+		gspu.sysoStempMessage(bs.getStatReport());
 		
-		return GSExportFactory.createGeotiffFile(outputFile, pixels, outputFormat.getCoordRefSystem());
+		return pixels;
 	}
 
 	@Override
-	public ShapeFile buildOutput(File outputFile, ShapeFile formatFile) {
+	public Map<GSFeature, Double> buildOutput(File outputFile, ShapeFile formatFile) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-
 	/////////////////////////////////////////////////////////////////////////////
 	// --------------------------- INNER UTILITIES --------------------------- //
 	/////////////////////////////////////////////////////////////////////////////
-
+	
 	private double computePixelWithinOutput(int x, int y, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
 			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef,
-			GSPerformanceUtil gspu){
-
+			GSPerformanceUtil gspu, boolean intersect) {
 		// Output progression
 		int prop10for100 = Math.round(Math.round(geotiff.getRowNumber() * geotiff.getColumnNumber() * 0.1d));
 		if((++pixelRendered+1) % prop10for100 == 0)
@@ -142,16 +138,33 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		// Get the related feature in main space features
+		Point pixelLocation = refPixel.getPosition();
+		Optional<GSFeature> opFeature = mainFeatures.stream().filter(ft -> pixelLocation.within(ft.getGeometry())).findFirst();
+		
+		if(opFeature.isPresent()){
+			if(intersect)
+				return computePixelIntersectOutput(refPixel, geotiff, ancillaries, mainFeatures, regCoef, corCoef);
+			return computePixelWithin(refPixel, geotiff, ancillaries, opFeature.get(), regCoef, corCoef);
+		}
+		return geotiff.getNoDataValue();
+	}
+	
+	// --------------------------- INNER ALGORITHM --------------------------- //
+	
+	/*
+	 * WARNING: the within function used define inclusion as: 
+	 * centroide of {@code refPixel} geometry is within the referent geometry
+	 */
+	private double computePixelWithin(GSPixel refPixel, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
+			GSFeature feat, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef){
 
 		// Retain info about pixel and his context
 		Point pixPosition = refPixel.getPosition();
-		Optional<GSFeature> feat = mainFeatures.stream().filter(ft -> ft.getGeometry().contains(pixPosition))
-				.findFirst();
-		if(!feat.isPresent())
-			return 0d;
 		Collection<AGeoValue> pixData = refPixel.getValues();
 		double pixArea = refPixel.getArea();
-		double outputCoeff = corCoef.get(feat.get());
+		double outputCoeff = corCoef.get(feat);
 
 		// Setup output value for the pixel based on pixels' band values
 		double output = regCoef.entrySet().stream().filter(var -> pixData.contains(var.getKey().getValue()))
@@ -173,24 +186,11 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		return output * outputCoeff;
 	}
 
-	@SuppressWarnings("unused")
-	private double computePixelIntersectOutput(int x, int y, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
-			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef,
-			GSPerformanceUtil gspu) {
-
-		// Output progression
-		int prop10for100 = Math.round(Math.round(geotiff.getRowNumber() * geotiff.getColumnNumber() * 0.1d));
-		if((++pixelRendered + 1) % prop10for100 == 0)
-			gspu.sysoStempPerformance(pixelRendered+1 / (prop10for100 * 10.0), this);
-
-		// Get the current pixel value
-		GSPixel refPixel = null;
-		try {
-			refPixel = geotiff.getPixel(x, y);
-		} catch (TransformException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+	/*
+	 * WARNING: intersection area calculation is very computation demanding, so this method is pretty slow 
+	 */
+	private double computePixelIntersectOutput(GSPixel refPixel, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
+			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef) {
 
 		// Retain main feature the pixel is within
 		Geometry pixGeom = refPixel.getGeometry(); 
