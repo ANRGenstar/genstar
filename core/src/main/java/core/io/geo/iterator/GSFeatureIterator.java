@@ -33,15 +33,20 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 	private GeometryCoordinateSequenceTransformer transformer;
 	private CoordinateReferenceSystem crs;
 
-	public GSFeatureIterator(DataStore dataStore) {
+	public GSFeatureIterator(DataStore dataStore, Filter filter) {
 		this.fItt = null;
 		try {
-			this.fItt = dataStore.getFeatureSource(dataStore.getTypeNames()[0]).getFeatures(Filter.INCLUDE).features();
+			this.fItt = DataUtilities.collection(dataStore.getFeatureSource(dataStore.getTypeNames()[0])
+					.getFeatures(filter)).features();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		this.factory = new GeoEntityFactory(new HashSet<AGeoAttribute>());
+	}
+	
+	public GSFeatureIterator(DataStore dataStore) {
+		this(dataStore, Filter.INCLUDE);
 	}
 
 	public GSFeatureIterator(DataStore dataStore, CoordinateReferenceSystem crs) throws FactoryException, IOException {
@@ -51,16 +56,6 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 		morph.setMathTransform(CRS.findMathTransform(dataStore.getFeatureSource(dataStore.getTypeNames()[0])
 				.getSchema().getCoordinateReferenceSystem(), crs));
 		this.transformer = morph;
-	}
-
-	public GSFeatureIterator(DataStore dataStore, Filter filter) {
-		this.fItt = null;
-		try {
-			this.fItt = dataStore.getFeatureSource(dataStore.getTypeNames()[0]).getFeatures(filter).features();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 	}
 
 	@Override

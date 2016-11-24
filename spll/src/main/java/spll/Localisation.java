@@ -9,7 +9,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
@@ -17,20 +16,31 @@ import org.opengis.referencing.operation.TransformException;
 import core.io.GSExportFactory;
 import core.io.GSImportFactory;
 import core.io.exception.InvalidFileTypeException;
-import core.io.geo.GeotiffFile;
+import core.io.geo.GeoGSFileType;
 import core.io.geo.IGSGeofile;
+import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.attribute.value.AGeoValue;
+import core.metamodel.IAttribute;
+import core.metamodel.IEntity;
+import core.metamodel.IPopulation;
+import core.metamodel.IValue;
+import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
+import core.util.data.GSEnumStats;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.LMRegressionOLSAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
 import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.SPLMapper;
+import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.normalizer.ASPLNormalizer;
 import spll.datamapper.normalizer.SPLUniformNormalizer;
 import spll.datamapper.variable.SPLVariable;
+import spll.popmatcher.ISpllPopulationMatcher;
+import spll.popmatcher.SpllUniformPopulationMatcher;
+import spll.util.SpllUtil;
 
 public class Localisation {
 
@@ -46,7 +56,8 @@ public class Localisation {
 	 */
 	public static void main(String[] args) {
 		
-		String outputFileName = "spll_output.asc";
+		// TODO: to args
+		String outputFileName = "spll_output.tif";
 		
 		///////////////////////
 		// INIT VARS FROM ARGS
@@ -56,6 +67,8 @@ public class Localisation {
 		String stringPathToMainShapefile = args[1];
 		String stringOfMainProperty = args[2];
 		Collection<String> regVarName = Arrays.asList(args[3].split(";"));
+		if(regVarName.size() == 1 && regVarName.iterator().next().isEmpty())
+			regVarName = Collections.emptyList();
 		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
 		for(int i = 4; i < args.length; i++)
 			stringPathToAncilaryGeofiles.add(args[i]);
@@ -100,20 +113,7 @@ public class Localisation {
 				.findFirst().get().getProperties(stringOfMainProperty)
 				.stream().findFirst().get().getName();
 
-		Collection<AGeoValue> regVariables;
-		if(regVarName.isEmpty())
-			regVariables = Collections.emptyList();
-		else {
-			// TODO: move to utility method in spll.util
-			Collection<AGeoValue> vals = endogeneousVarFile.parallelStream()
-					.flatMap(file -> file.getGeoValues().stream())
-					.collect(Collectors.toSet());
-			regVariables = vals.stream()
-				.filter(var -> var.isNumericalValue() ? 
-						regVarName.stream().anyMatch(v -> Double.valueOf(v) == var.getNumericalValue().doubleValue()) 
-						: regVarName.contains(var.getStringValue()))
-				.collect(Collectors.toSet());
-		}
+		Collection<AGeoValue> regVariables = SpllUtil.getMeaningfullValues(regVarName, endogeneousVarFile);
 		
 		gspu.sysoStempPerformance("Input files data import: done\n", "Main");
 
@@ -124,15 +124,21 @@ public class Localisation {
 		// Choice have been made to regress from areal data count
 		ISPLRegressionAlgorithm<SPLVariable, Double> regressionAlgo = new LMRegressionOLSAlgorithm();
 		
-		ASPLMapperBuilder<SPLVariable, Double> mBuilder = new SPLAreaMapperBuilder(
+		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
 				sfAdmin, propertyName, endogeneousVarFile, regVariables,
 				regressionAlgo);
 		gspu.sysoStempPerformance("Setup MapperBuilder to proceed regression: done\n", "Main");
 
 		// Setup main regressor class: SPLMapper
-		SPLMapper<SPLVariable, Double> splMapper = null;
+		SPLMapper<SPLVariable,Double> spl = null;
+		boolean syso = false;
 		try {
-			splMapper = mBuilder.buildMapper();
+			spl = spllBuilder.buildMapper();
+			if(syso){
+				Map<SPLVariable, Double> regMap = spl.getRegression();
+				gspu.sysoStempMessage("Regression parameter: \n"+Arrays.toString(regMap.entrySet().stream().map(e -> e.getKey()+" = "+e.getValue()+"\n").toArray()));
+				gspu.sysoStempMessage("Intersect = "+spl.getIntercept());
+			}
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -145,35 +151,22 @@ public class Localisation {
 		} catch (ExecutionException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (IllegalRegressionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
-		if(splMapper.getVariableSet().isEmpty()){
-			gspu.sysoStempMessage("build mapper has failed because no geo-variable has been recognized and encoded");
-			System.exit(1);
-		} else {
-			gspu.sysoStempPerformance("Mapper build: done", Localisation.class);
-			gspu.sysoStempMessage("\t contains "+splMapper.getAttributes().size()+" attributes");
-			gspu.sysoStempMessage("\t contains "+splMapper.getVariableSet().stream().count()+" mapped variables");
-			//gspu.sysoStempMessage(splMapper.getVarMatrix().values().parallelStream().map(vM -> vM.toString()).reduce("", (s1, s2) -> s1+"\n"+s2));
-		}
+		// ---------------------------------
+		// Apply regression function
+		// ---------------------------------
 		
-		////////////////////
-		// START REGRESSION
-		////////////////////
-		
-		Map<SPLVariable, Double> reg = null;
-		try {
-			reg = splMapper.getRegression();
-		} catch (IllegalRegressionException e2) {
-			// TODO Auto-generated catch block
-			e2.printStackTrace();
-		}
-		gspu.sysoStempMessage(reg.entrySet().stream().map(e -> "Var_"+e.getKey()+" = "+e.getValue()).reduce("", (s1, s2) -> s1+"\n"+s2));
-		
-		GeotiffFile outputFormat = (GeotiffFile) endogeneousVarFile.get(0);
+		// WARNING: not generic at all - or define 1st ancillary data file to be the one for output format
+		RasterFile outputFormat = (RasterFile) endogeneousVarFile
+				.stream().filter(file -> file.getGeoGSFileType().equals(GeoGSFileType.RASTER))
+				.findFirst().get();
 		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = mBuilder.buildOutput(outputFormat, false);
+			pixelOutput = spllBuilder.buildOutput(outputFormat, false);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -186,17 +179,36 @@ public class Localisation {
 		} catch (TransformException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
+		} catch (GSMapperException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
-		// Normalize output to fit integer population number 
-		ASPLNormalizer normalizer = new SPLUniformNormalizer(0, true);
+		List<Double> outList = GSBasicStats.transpose(pixelOutput);
+		GSBasicStats<Double> bs = new GSBasicStats<>(outList, Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
+		gspu.sysoStempMessage("\nStatistics on output:\n"+bs.getStatReport());
+		
+		/////////////////////////
+		// NORMALIZE OUTPUT
+		////////////////////////
+		
+		ASPLNormalizer normalizer = new SPLUniformNormalizer(0, RasterFile.DEF_NODATA);
 		float objectif = (float) sfAdmin.getGeoData()
 				.parallelStream().mapToDouble(feature -> Double.valueOf(feature.getProperty(propertyName).getValue().toString())).sum();
-		System.out.println("\nComputed output is: "+objectif);
-		normalizer.normalize(pixelOutput, objectif);
 		
+		normalizer.normalize(pixelOutput, objectif);
+		normalizer.round(pixelOutput, objectif);
+		GSBasicStats<Double> newBs = new GSBasicStats<>(GSBasicStats.transpose(pixelOutput), 
+				Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
+		gspu.sysoStempMessage("Re-evaluated statistics on output:\n"+newBs.getStatReport());
+		
+		/////////////////////////
+		// EXPORT OUTPUT
+		////////////////////////
+		
+		IGSGeofile outputFile = null;
 		try {
-			GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, outputFormat.getCoordRefSystem());
+			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, outputFormat.getCoordRefSystem());
 		} catch (IllegalArgumentException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -207,6 +219,19 @@ public class Localisation {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		///////////////////////
+		// MATCH TO POPULATION
+		///////////////////////
+		
+		// Propose a static import (in core pkg) of exported gospl generated population
+		IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> pop = null;
+		
+		if(pop.size() > newBs.getStat(GSEnumStats.sum)[0])
+			System.exit(1);
+		
+		ISpllPopulationMatcher iSpllPopMatcher = new SpllUniformPopulationMatcher(pop, sfAdmin, outputFile);
+		
 	}
 
 }

@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.io.survey.configuration.GSSurveyType;
-import gospl.INDimensionalMatrix;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;

@@ -14,5 +14,7 @@ public interface ISPLVariableFeatureMatcher<V extends ISPLVariable, T> {
 	public V getVariable();
 
 	public GSFeature getFeature();
+	
+	public String toString();
 
 }

@@ -3,9 +3,8 @@ package gospl.algos;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
-import gospl.IDistributionInferenceAlgo;
-import gospl.INDimensionalMatrix;
-import gospl.ISampler;
+import gospl.algos.sampler.ISampler;
+import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
 public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<ASurveyAttribute, AValue> {

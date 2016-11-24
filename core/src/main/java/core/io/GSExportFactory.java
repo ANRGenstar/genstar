@@ -9,7 +9,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.geo.GeofileFactory;
-import core.io.geo.GeotiffFile;
+import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.GSFeature;
 
@@ -17,12 +17,12 @@ public class GSExportFactory {
 	
 	public static ShapeFile createShapeFile(File shapefile, Collection<GSFeature> features) 
 			throws IOException, SchemaException {
-		return new GeofileFactory().getShapeFile(shapefile, features);
+		return new GeofileFactory().createShapeFile(shapefile, features);
 	}
 	
-	public static GeotiffFile createGeotiffFile(File geotiffile, float[][] pixels, CoordinateReferenceSystem crs) 
+	public static RasterFile createGeotiffFile(File geotiffile, float[][] pixels, CoordinateReferenceSystem crs) 
 			throws IllegalArgumentException, IOException, TransformException{
-		return new GeofileFactory().getGeofile(geotiffile, pixels, crs);
+		return new GeofileFactory().createRasterfile(geotiffile, pixels, RasterFile.DEF_NODATA.floatValue(), crs);
 	}
 
 }

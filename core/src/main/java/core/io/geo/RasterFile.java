@@ -8,19 +8,19 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.apache.commons.io.FilenameUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.coverage.grid.io.AbstractGridCoverage2DReader;
 import org.geotools.coverage.grid.io.AbstractGridFormat;
+import org.geotools.coverage.grid.io.GridFormatFinder;
 import org.geotools.coverage.grid.io.OverviewPolicy;
-import org.geotools.coverage.grid.io.imageio.geotiff.GeoKeyEntry;
 import org.geotools.coverage.processing.operation.Crop;
 import org.geotools.factory.Hints;
 import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.GeneralEnvelope;
-import org.opengis.feature.Feature;
 import org.opengis.geometry.Envelope;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
@@ -30,17 +30,27 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 import core.io.geo.entity.GSPixel;
 import core.io.geo.entity.GeoEntityFactory;
 import core.io.geo.entity.attribute.value.AGeoValue;
 import core.io.geo.iterator.GSPixelIterator;
 
-public class GeotiffFile implements IGSGeofile {
+/**
+ * 
+ * File that represent generic raster data. 
+ * 
+ * <p>
+ * Available input format can be found at
+ * {@link GeofileFactory#getSupportedFileFormat()} 
+ * 
+ * @author kevinchapuis
+ *
+ */
+public class RasterFile implements IGSGeofile {
 
 	private final GridCoverage2D coverage;
-	private final GeoTiffReader store;
+	private final AbstractGridCoverage2DReader store;
 	
 	private final GeoEntityFactory gef;
 	
@@ -48,8 +58,6 @@ public class GeotiffFile implements IGSGeofile {
 	private Number noData;
 
 	/**
-	 * Basically convert each grid like data from tiff file to a {@link Feature} list: 
-	 * pixels are change into {@link Point} with values stored as "band" array of double
 	 * 
 	 * INFO: implementation partially rely on stackexchange answer below:
 	 * {@link http://gis.stackexchange.com/questions/106882/how-to-read-each-pixel-of-each-band-of-a-multiband-geotiff-with-geotools-java}
@@ -59,7 +67,7 @@ public class GeotiffFile implements IGSGeofile {
 	 * @throws TransformException
 	 * @throws IllegalArgumentException 
 	 */
-	public GeotiffFile(File file) throws TransformException, IllegalArgumentException, IOException {
+	public RasterFile(File file) throws TransformException, IllegalArgumentException, IOException {
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);
 
@@ -71,8 +79,16 @@ public class GeotiffFile implements IGSGeofile {
 		useJaiRead.setValue(true);
 
 		this.gef = new GeoEntityFactory(new HashSet<>());
-		this.store = new GeoTiffReader(file, new Hints(Hints.USE_JAI_IMAGEREAD, true));
-		this.noData = store.getMetadata().getNoData();
+
+		if(FilenameUtils.getExtension(file.getName()).equals(GeofileFactory.ARC_EXT)){
+			this.store = GridFormatFinder.findFormat(file).getReader(file);
+		} else if(FilenameUtils.getExtension(file.getName()).equals(GeofileFactory.GEOTIFF_EXT)){
+			this.store = new GeoTiffReader(file, new Hints(Hints.USE_JAI_IMAGEREAD, true));
+			this.noData = ((GeoTiffReader) store).getMetadata().getNoData();
+		} else
+			throw new IOException("File format "+FilenameUtils.getExtension(file.getName())+" is not supported "
+					+ "\nSupported file type are: "+Arrays.toString(GeofileFactory.getSupportedFileFormat().toArray()));
+		 
 		this.coverage = this.store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});	
 	}
 	
@@ -82,21 +98,7 @@ public class GeotiffFile implements IGSGeofile {
 	}
 	
 	@Override
-	public Collection<GSPixel> getGeoData() throws IOException, TransformException{
-		Set<GSPixel> collection = new HashSet<>(); 
-		getGeoAttributeIterator().forEachRemaining(collection::add);
-		return collection;
-	}
-	
-	@Override
-	public Collection<AGeoValue> getGeoValues() {
-		Set<AGeoValue> values = new HashSet<>();
-		getGeoAttributeIterator().forEachRemaining(pix -> values.addAll(pix.getValues()));
-		return values;
-	}
-	
-	@Override
-	public Envelope getEnvelope() throws IOException {
+	public Envelope getEnvelope() {
 		return coverage.getEnvelope2D();
 	}
 
@@ -111,22 +113,59 @@ public class GeotiffFile implements IGSGeofile {
 	}
 	
 	@Override
+	public Collection<AGeoValue> getGeoValues() {
+		Set<AGeoValue> values = new HashSet<>();
+		getGeoAttributeIterator().forEachRemaining(pix -> values.addAll(pix.getValues()));
+		return values;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * Collection of geo data could lead to overload memory. Iterators should be use
+	 * to save memory 
+	 * 
+	 */
+	@Override
+	public Collection<GSPixel> getGeoData() throws TransformException{
+		Set<GSPixel> collection = new HashSet<>(); 
+		getGeoAttributeIterator().forEachRemaining(collection::add);
+		return collection;
+	}
+	
+	@Override
+	public Collection<GSPixel> getGeoDataWithin(Geometry geom) {
+		Set<GSPixel> collection = new HashSet<>(); 
+		getGeoAttributeIteratorWithin(geom).forEachRemaining(collection::add);
+		return collection;
+	}
+	
+	@Override
+	public Collection<GSPixel> getGeoDataIntersect(Geometry geom) {
+		Set<GSPixel> collection = new HashSet<>(); 
+		getGeoAttributeIteratorIntersect(geom).forEachRemaining(collection::add);
+		return collection;
+	}
+	
+	@Override
 	public Iterator<GSPixel> getGeoAttributeIterator() {
 		return new GSPixelIterator(store.getGridCoverageCount(), coverage);
 	}
 	
 	/**
+	 * {@inheritDoc}
+	 * <p/>
 	 * WARNING: fools method, because it does not operate any transposition according to 
 	 * argument crs
 	 */
 	@Override
 	public Iterator<GSPixel> getGeoAttributeIterator(CoordinateReferenceSystem crs)
-			throws FactoryException, IOException {
+			throws FactoryException {
 		return new GSPixelIterator(store.getGridCoverageCount(), coverage);
 	}
 
 	@Override
-	public Iterator<GSPixel> getGeoAttributeIteratorWithin(Geometry geom){
+	public Iterator<GSPixel> getGeoAttributeIteratorWithin(Geometry geom) {
 		Crop cropper = new Crop(); 
 		ParameterValueGroup param = cropper.getParameters();
 		param.parameter("Source").setValue(coverage); // Nul nul nul et si jamais il change le nom du parametre ???
@@ -136,7 +175,7 @@ public class GeotiffFile implements IGSGeofile {
 	}
 	
 	@Override 
-	public Iterator<GSPixel> getGeoAttributeIteratorIntersect(Geometry geom){
+	public Iterator<GSPixel> getGeoAttributeIteratorIntersect(Geometry geom) {
 		return getGeoAttributeIteratorWithin(geom);
 	}
 	
@@ -148,6 +187,10 @@ public class GeotiffFile implements IGSGeofile {
 	
 	public double getNoDataValue() {
 		return noData.doubleValue();
+	}
+	
+	public boolean isNoDataValue(AGeoValue var) {
+		return var.getNumericalValue().equals(noData);
 	}
 	
 	public String[] getBandId(){
@@ -206,8 +249,8 @@ public class GeotiffFile implements IGSGeofile {
 	@Override
 	public String toString(){
 		String s = "";
-		for(GeoKeyEntry key : store.getMetadata().getGeoKeys()){
-			s += key.toString()+"\n";
+		for(String key : store.getMetadataNames()){
+			s += key+": "+store.getMetadataValue(key)+"\n";
 		}
 		return s;
 	}

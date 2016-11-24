@@ -23,10 +23,16 @@ public class GSPixel extends AGeoEntity {
 		this.gridY = gridY;
 		this.pixel = pixel;
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * Get pixel's area in square meter 
+	 * 
+	 */
 	@Override
 	public double getArea() {
-		return pixel.getWidth() * pixel.getHeight();
+		return Math.sqrt(pixel.getWidth() * pixel.getHeight());
 	}
 
 	@Override

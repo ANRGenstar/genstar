@@ -1,12 +1,14 @@
-package gospl;
+package gospl.algos;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.MappedAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.metamodel.IValue;
 import gospl.algos.exception.GosplSamplerException;
+import gospl.algos.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
+import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
 public interface IDistributionInferenceAlgo<D, A> {

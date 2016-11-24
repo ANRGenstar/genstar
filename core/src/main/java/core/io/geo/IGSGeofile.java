@@ -24,7 +24,6 @@ public interface IGSGeofile {
 	 * 
 	 * @return
 	 * @throws TransformException 
-	 * @throws IOException 
 	 */
 	public Collection<? extends AGeoEntity> getGeoData() throws IOException, TransformException;
 	
@@ -32,9 +31,9 @@ public interface IGSGeofile {
 	 * Retrieve all possible variable within spatial component.
 	 * This method could leads to store huge amount of data into collection and then not be quite efficient
 	 * 
-	 * @return
+	 * @return 
 	 */
-	public Collection<AGeoValue> getGeoValues();
+	public Collection<AGeoValue> getGeoValues() ;
 
 	/**
 	 * Says if geographical information of the two files are congruent in term of space.
@@ -57,9 +56,8 @@ public interface IGSGeofile {
 	 * Access to file content without memory stored collection
 	 * 
 	 * @return
-	 * @throws IOException 
 	 */
-	public Iterator<? extends AGeoEntity> getGeoAttributeIterator();
+	public Iterator<? extends AGeoEntity> getGeoAttributeIterator() ;
 
 	/**
 	 * Access and transpose to the given crs of file content without any memory storage
@@ -72,27 +70,42 @@ public interface IGSGeofile {
 	public Iterator<? extends AGeoEntity> getGeoAttributeIterator(CoordinateReferenceSystem crs) throws FactoryException, IOException;
 	
 	/**
-	 * Access to file data but limited to geo data within the given Geometry
+	 * Access to file data but limited to geo data within the given Geometry.
 	 * 
 	 * @param feature
-	 * @return
-	 * @throws IOException 
+	 * @return Iterator 
 	 */
-	public Iterator<? extends AGeoEntity> getGeoAttributeIteratorWithin(Geometry geom) ;
+	public Iterator<? extends AGeoEntity> getGeoAttributeIteratorWithin(Geometry geom);
+	
+	/**
+	 * Access to file data but limited to geo data within the given Geometry.
+	 * 
+	 * @param geom
+	 * @return Collection 
+	 */
+	public Collection<? extends AGeoEntity> getGeoDataWithin(Geometry geom);
 	
 	/**
 	 * Access to file data but limited to geo data intersected with the given Geometry
 	 * 
 	 * @param feature
-	 * @return
+	 * @return Iterator 
 	 */
-	public Iterator<? extends AGeoEntity> getGeoAttributeIteratorIntersect(Geometry geom) ;
+	public Iterator<? extends AGeoEntity> getGeoAttributeIteratorIntersect(Geometry geom);
 
+	/**
+	 * Access to file data but limited to geo data intersected with the given Geometry
+	 * 
+	 * @param geom
+	 * @return Collection 
+	 */
+	public Collection<? extends AGeoEntity> getGeoDataIntersect(Geometry geom);
+	
 	/**
 	 * Gives the envelope that bounds this geofile
 	 * 
 	 * @return
-	 * @throws IOException
+	 * @throws IOException 
 	 */
 	public Envelope getEnvelope() throws IOException;
 	

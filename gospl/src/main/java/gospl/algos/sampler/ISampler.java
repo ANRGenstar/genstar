@@ -1,4 +1,4 @@
-package gospl;
+package gospl.algos.sampler;
 
 import java.util.List;
 import java.util.Random;

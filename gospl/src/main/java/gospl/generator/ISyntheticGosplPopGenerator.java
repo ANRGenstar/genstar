@@ -1,4 +1,4 @@
-package gospl;
+package gospl.generator;
 
 import gospl.algos.exception.GosplSamplerException;
 import gospl.metamodel.GosplPopulation;

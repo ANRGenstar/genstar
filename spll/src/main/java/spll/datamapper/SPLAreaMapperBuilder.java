@@ -3,6 +3,7 @@ package spll.datamapper;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -22,18 +23,18 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
-import core.io.geo.GeotiffFile;
 import core.io.geo.IGSGeofile;
+import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.AGeoEntity;
 import core.io.geo.entity.GSFeature;
 import core.io.geo.entity.GSPixel;
 import core.io.geo.entity.attribute.value.AGeoValue;
-import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.LMRegressionOLSAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
+import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
 import spll.datamapper.variable.SPLVariable;
 
@@ -71,8 +72,17 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		return mapper;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: for performance purpose parallel stream are used !
+	 * @throws GSMapperException 
+	 * 
+	 */
 	@Override
-	public float[][] buildOutput(GeotiffFile outputFormat, boolean intersect) throws IllegalRegressionException, TransformException, IndexOutOfBoundsException, IOException {
+	public float[][] buildOutput(RasterFile outputFormat, boolean intersect) 
+			throws IllegalRegressionException, TransformException, 
+			IndexOutOfBoundsException, IOException, GSMapperException {
 		if(mapper == null)
 			throw new IllegalAccessError("Cannot create output before a SPLMapper has been built and regression done");
 		if(!ancillaryFiles.contains(outputFormat))
@@ -87,28 +97,31 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 		// Store regression result
 		Map<SPLVariable, Double> regCoef = mapper.getRegression();
-		Map<GSFeature, Double> corCoef = mapper.getCorrectionCoefficient();
-
+		double intercept = mapper.getIntercept();
+		
+		// Correction for each pixel (does not exclude noData pixels)
+		Map<AGeoEntity, Double> pixCorrection = mapper.getResidual().entrySet()
+				.stream().collect(Collectors.toMap(e -> e.getKey(), 
+					e -> (e.getValue() + intercept) / outputFormat.getGeoDataWithin(e.getKey().getGeometry()).size()));
+		
+		if(pixCorrection.values().stream().anyMatch(value -> value.isInfinite() || value.isNaN()))
+			throw new GSMapperException(outputFormat.toString()+" output format file does not cover all geographical entity !\n"+
+					Arrays.toString(pixCorrection.entrySet().stream().filter(e -> e.getValue().isInfinite() || e.getValue().isNaN())
+					.map(e -> e.getKey().getGenstarName()+" - "+e.getValue()).toArray()));
+			
 		// Define utilities
 		Collection<IGSGeofile> ancillaries = new ArrayList<>(super.ancillaryFiles);
 		Collection<GSFeature> mainGeoData = super.mainFile.getGeoData();
 		ancillaries.remove(outputFormat);
 
-		// Iterate over pixels
+		// Iterate over pixels to apply regression coefficient
 		IntStream.range(0, columns).parallel().forEach(
 				x -> IntStream.range(0, rows).forEach(
 						y -> pixels[x][y] = (float) this.computePixelWithinOutput(x, y, outputFormat,  ancillaries,
-								mainGeoData, regCoef, corCoef, gspu, intersect)
+								mainGeoData, regCoef, pixCorrection, gspu, intersect)
 						)
 				);
 		pixelRendered = 0;
-		
-		gspu.sysoStempMessage("End processing pixels - start processing some statistics:");
-		
-		GSBasicStats<Double> bs = new GSBasicStats<>(GSBasicStats.transpose(pixels));
-		
-		gspu.sysoStempMessage(bs.getStatReport());
-		
 		return pixels;
 	}
 
@@ -122,8 +135,8 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	// --------------------------- INNER UTILITIES --------------------------- //
 	/////////////////////////////////////////////////////////////////////////////
 	
-	private double computePixelWithinOutput(int x, int y, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
-			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef,
+	private double computePixelWithinOutput(int x, int y, RasterFile geotiff, Collection<IGSGeofile> ancillaries,
+			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual,
 			GSPerformanceUtil gspu, boolean intersect) {
 		// Output progression
 		int prop10for100 = Math.round(Math.round(geotiff.getRowNumber() * geotiff.getColumnNumber() * 0.1d));
@@ -142,13 +155,13 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		// Get the related feature in main space features
 		Point pixelLocation = refPixel.getPosition();
 		Optional<GSFeature> opFeature = mainFeatures.stream().filter(ft -> pixelLocation.within(ft.getGeometry())).findFirst();
+
+		if(!opFeature.isPresent())
+			return RasterFile.DEF_NODATA.floatValue();
+		if(intersect)
+			return computePixelIntersectOutput(refPixel, geotiff, ancillaries, mainFeatures, regCoef, pixResidual);
+		return computePixelWithin(refPixel, geotiff, ancillaries, opFeature.get(), regCoef, pixResidual.get(opFeature.get()));
 		
-		if(opFeature.isPresent()){
-			if(intersect)
-				return computePixelIntersectOutput(refPixel, geotiff, ancillaries, mainFeatures, regCoef, corCoef);
-			return computePixelWithin(refPixel, geotiff, ancillaries, opFeature.get(), regCoef, corCoef);
-		}
-		return geotiff.getNoDataValue();
 	}
 	
 	// --------------------------- INNER ALGORITHM --------------------------- //
@@ -157,14 +170,17 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * WARNING: the within function used define inclusion as: 
 	 * centroide of {@code refPixel} geometry is within the referent geometry
 	 */
-	private double computePixelWithin(GSPixel refPixel, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
-			GSFeature feat, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef){
+	private double computePixelWithin(GSPixel refPixel, RasterFile geotiff, Collection<IGSGeofile> ancillaries,
+			GSFeature feat, Map<SPLVariable, Double> regCoef, double corCoef){
 
 		// Retain info about pixel and his context
-		Point pixPosition = refPixel.getPosition();
+		Geometry pixGeom = refPixel.getGeometry();
 		Collection<AGeoValue> pixData = refPixel.getValues();
+		Collection<AGeoValue> coefVal = regCoef.keySet()
+				.stream().map(var -> var.getValue()).collect(Collectors.toSet());
+		if(pixData.stream().allMatch(val -> geotiff.isNoDataValue(val) || !coefVal.contains(val)) && ancillaries.isEmpty())
+			return RasterFile.DEF_NODATA.floatValue();
 		double pixArea = refPixel.getArea();
-		double outputCoeff = corCoef.get(feat);
 
 		// Setup output value for the pixel based on pixels' band values
 		double output = regCoef.entrySet().stream().filter(var -> pixData.contains(var.getKey().getValue()))
@@ -173,24 +189,24 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		// Iterate over other explanatory variables to update pixels value
 		for(IGSGeofile otherExplanVarFile : ancillaries){
 			Iterator<? extends AGeoEntity> otherItt = otherExplanVarFile
-					.getGeoAttributeIteratorWithin(refPixel.getGeometry());
+					.getGeoAttributeIteratorWithin(pixGeom);
 			while(otherItt.hasNext()){
 				AGeoEntity other = otherItt.next();
 				Set<SPLVariable> otherValues = regCoef.keySet()
 						.stream().filter(var -> other.getValues().contains(var.getValue()))
 						.collect(Collectors.toSet());
-				output += otherValues.stream().mapToDouble(val -> regCoef.get(val) * pixPosition.getArea()).sum();
+				output += otherValues.stream().mapToDouble(val -> regCoef.get(val) * pixArea).sum();
 			}
 		}
 
-		return output * outputCoeff;
+		return output + corCoef;
 	}
 
 	/*
 	 * WARNING: intersection area calculation is very computation demanding, so this method is pretty slow 
 	 */
-	private double computePixelIntersectOutput(GSPixel refPixel, GeotiffFile geotiff, Collection<IGSGeofile> ancillaries,
-			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<GSFeature, Double> corCoef) {
+	private double computePixelIntersectOutput(GSPixel refPixel, RasterFile geotiff, Collection<IGSGeofile> ancillaries,
+			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual) {
 
 		// Retain main feature the pixel is within
 		Geometry pixGeom = refPixel.getGeometry(); 
@@ -198,7 +214,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 				.filter(ft -> ft.getGeometry().intersects(pixGeom))
 				.collect(Collectors.toList());
 		if(feats.isEmpty())
-			return 0f;
+			return RasterFile.DEF_NODATA.floatValue();
 
 		// Get the values contain in the pixel bands
 		Collection<AGeoValue> pixData = refPixel.getValues();
@@ -247,7 +263,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 					}
 				}
 			}
-			correctedOutput += Math.round(output * intersectGeom.getArea() / pixGeom.getArea() * corCoef.get(f));
+			correctedOutput += Math.round(output * intersectGeom.getArea() / pixGeom.getArea() + pixResidual.get(f));
 		}
 		return correctedOutput;
 	}

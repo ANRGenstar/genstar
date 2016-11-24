@@ -1,105 +1,197 @@
 package spll.datamapper.normalizer;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import core.io.geo.entity.GSFeature;
-import core.util.GSPerformanceUtil;
+import core.util.GSBasicStats;
+import core.util.data.GSEnumStats;
 
 public class SPLUniformNormalizer extends ASPLNormalizer {
-	
-	private double overload = 0d;
-	private int adjustableValue = 0;
 
-	private GSPerformanceUtil gspu;
-	private int countPerformance = 0;
-	
-	public SPLUniformNormalizer(double floorValue, boolean isInteger) {
-		super(floorValue, isInteger);
-		this.gspu = new GSPerformanceUtil("Normalize regression data to fit output format", LOGSYSO);
+	public SPLUniformNormalizer(double floorValue, Number noData) {
+		super(floorValue, noData);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Two step upscale:
+	 * <ul>
+	 * <li>up values below floor
+	 * <li>normalize to fit targeted total output
+	 * </ul>
+	 * <p>
+	 * WARNING: {@code pixelOutput} must be a complete matrix <br>
+	 * WARNING: parallel implementation
+	 * 
+	 */
 	@Override
-	public float[][] normalize(float[][] pixelOutput, float output) {
-		gspu.setObjectif(output);
-		// floor normalization: values below floorValue are up scale and residue are summed
-		IntStream.range(0, pixelOutput.length).parallel()
-			.forEach(col -> IntStream.range(0, pixelOutput[col].length)
-				.forEach(row -> pixelOutput[col][row] = normalizedFloor(pixelOutput[col][row]))
-		);
-		// summed residue is spread to all non floor value
-		IntStream.range(0, pixelOutput.length).unordered().parallel()
-			.forEach(col -> IntStream.range(0, pixelOutput[col].length).unordered()
-					.forEach(row -> pixelOutput[col][row] = normalizedOverload(pixelOutput[col][row]))
-		);
-		countPerformance = 0;
-		return pixelOutput;
+	public float[][] normalize(float[][] matrix, float output) {
+		if((float) new GSBasicStats<>(GSBasicStats.transpose(matrix), 
+				Arrays.asList(noData.doubleValue())).getStat(GSEnumStats.min)[0] < floorValue){
+			IntStream.range(0, matrix.length).parallel()
+				.forEach(col -> IntStream.range(0, matrix[col].length)
+					.forEach(row -> matrix[col][row] = normalizedFloor(matrix[col][row]))
+			);
+
+			float floorSum = GSBasicStats.transpose(matrix)
+					.parallelStream().filter(val -> val == floorValue)
+					.reduce(0d, Double::sum).floatValue();
+			float nonFloorSum = GSBasicStats.transpose(matrix)
+					.parallelStream().filter(val -> val > floorValue && val != noData.floatValue())
+					.reduce(0d, Double::sum).floatValue();
+			float normalizer = (output - floorSum) / nonFloorSum;
+
+			IntStream.range(0, matrix.length).parallel()
+				.forEach(col -> IntStream.range(0, matrix[col].length)
+					.forEach(row -> matrix[col][row] = normalizedFactor(matrix[col][row], normalizer))
+			);
+		}
+		return matrix;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: {@code pixelOutput} must be a complete matrix <br>
+	 * WARNING: parallel implementation
+	 * 
+	 */
+	@Override
+	public float[][] round(float[][] matrix, float output){
+		// normalize to int: values are rounded to feet most proximal integer & overload are summed
+		IntStream.range(0, matrix.length).parallel()
+			.forEach(col -> IntStream.range(0, matrix[col].length)
+				.forEach(row -> matrix[col][row] = normalizedToInt(matrix[col][row]))
+		);
+
+		double errorload = output - new GSBasicStats<>(GSBasicStats.transpose(matrix), 
+				Arrays.asList(noData.doubleValue())).getStat(GSEnumStats.sum)[0];
+		
+		// uniformally spread errorload (can visit pixel multiple time)
+		int iter = 0;
+		while(Math.round(errorload) != 0 || iter++ > ITER_LIMIT + Math.abs(errorload)){
+			int intX, intY;
+			float currentVal;
+			int update = errorload < 0 ? -1 : 1;
+			do {
+				intX = ThreadLocalRandom.current().nextInt(matrix.length);
+				intY = ThreadLocalRandom.current().nextInt(matrix[intX].length);
+				currentVal = matrix[intX][intY];
+			} while(currentVal == noData.floatValue()
+					|| currentVal == floorValue && errorload < 0);
+			matrix[intX][intY] = currentVal + update;
+			errorload -= update;
+		}
+		return matrix;
+	}
+
+	/**
+	 * 
+	 */
 	@Override
 	public Map<GSFeature, Double> normalize(Map<GSFeature, Double> featureOutput, double output) {
-		// floor normalization: values below floorValue are up scale and residue are summed
-		featureOutput.keySet().parallelStream()
-			.forEach(feature -> featureOutput.put(feature, normalizedFloor(featureOutput.get(feature))));
-		// summed residue is spread to all non floor value
-		featureOutput.keySet().parallelStream()
-			.forEach(feature -> featureOutput.put(feature, normalizedOverload(featureOutput.get(feature))));
+
+		// Two step upscale: (1) up values below floor (2) normalize to fit targeted total output
+		if(featureOutput.values()
+				.parallelStream().min((v1, v2) -> v1.compareTo(v2)).get() < floorValue){
+			featureOutput.keySet().parallelStream()
+			.forEach(feature -> featureOutput.put(feature, 
+					normalizedFloor(featureOutput.get(feature))));
+			
+			float floorSum = featureOutput.values()
+					.parallelStream().filter(val -> val == floorValue)
+					.reduce(0d, Double::sum).floatValue();
+			float nonFloorSum = featureOutput.values()
+					.parallelStream().filter(val -> val > floorValue && val != noData.floatValue())
+					.reduce(0d, Double::sum).floatValue();
+			double normalizer = (output - floorSum) / nonFloorSum;
+
+			featureOutput.keySet().parallelStream()
+				.forEach(feature -> featureOutput.put(feature, normalizedFactor(featureOutput.get(feature), normalizer)));
+
+		}
+
 		return featureOutput;
 	}
 	
+	/**
+	 * 
+	 */
+	@Override
+	public Map<GSFeature, Integer> round(Map<GSFeature, Double> featureOutput, double output) {
+		Map<GSFeature, Integer> featOut = new HashMap<>();
+		// summed residue is spread to all non floor value
+		featureOutput.keySet().parallelStream()
+			.forEach(feature -> featOut.put(feature, (int) normalizedToInt(featureOutput.get(feature))));
+
+		double errorload = output - new GSBasicStats<>(new ArrayList<>(featOut.values()), 
+				Arrays.asList(noData.doubleValue())).getStat(GSEnumStats.sum)[0];
+		
+		// uniformally spread overload (can visit pixel multiple time)
+		int iter = 0;
+		List<GSFeature> feats = featureOutput.entrySet()
+				.parallelStream().filter(e -> e.getValue() != noData.doubleValue())
+				.map(e -> e.getKey())
+				.collect(Collectors.toList());
+		while(Math.round(errorload) != 0 || iter++ > ITER_LIMIT + Math.abs(errorload)){
+			GSFeature feat = feats.get(ThreadLocalRandom.current().nextInt(feats.size()));
+			int update = errorload < 0 ? -1 : 1;
+			featureOutput.put(feat, featureOutput.get(feat) + update);
+			errorload -= update;
+		}
+		return featOut;
+	}
+
 	// ---------------------- inner utility ---------------------- //
 
 	private float normalizedFloor(float value) {
-		if(value < floorValue){
-			this.overload += Math.abs(value - floorValue);
+		if(value < floorValue && value != noData.floatValue())
 			return (float) floorValue;
-		} else
-			this.adjustableValue++;
 		return value;
 	}
-	
+
 	private double normalizedFloor(double value) {
-		if(value < floorValue){
-			overload += Math.abs(value - floorValue);
+		if(value < floorValue && value != noData.floatValue())
 			return floorValue;
-		} else
-			this.adjustableValue++;
 		return value;
 	}
 	
-	private float normalizedOverload(float value){
-		//syso performance
-		if(++countPerformance % (gspu.getObjectif() * 0.1) == 0d)
-			gspu.sysoStempPerformance(0.1, this);
-		//algo
-		if(super.equalEpsilon(value, super.floorValue))
-			return value;
-		float newVal;
-		if(isInteger){
-			if(overload > 0d)
-				newVal = (int) value + 1;
-			else
-				newVal = (int) value;
-			this.overload -= newVal - value;
-		} else {
-			newVal = (float) (value + overload / adjustableValue);
-		}
-		return newVal;
+	private float normalizedFactor(float value, float factor){
+		if(value > floorValue && value != noData.floatValue())
+			return value * factor;
+		return value;
 	}
 	
-	private double normalizedOverload(double value){
-		if(super.equalEpsilon(value, super.floorValue))
-			return value;
-		double newVal;
-		if(isInteger){
-			if(overload > 0)
-				newVal = (int) value + 1d;
-			else
-				newVal = (int) value;
-		} else {
-			newVal = value + overload / adjustableValue;
-		}
-		return newVal;
+	private double normalizedFactor(double value, double factor){
+		if(value > floorValue && value != noData.floatValue())
+			return value * factor;
+		return value;
 	}
-	
+
+	private float normalizedToInt(float value){
+		if(value == noData.floatValue())
+			return value;
+		float newValue = Math.round(value); 
+		if(newValue < floorValue)
+			newValue = (int) value + 1;
+		return newValue;
+	}
+
+	private double normalizedToInt(double value){
+		if(value == noData.doubleValue())
+			return value;
+		double newValue = Math.round(value); 
+		if(newValue < floorValue)
+			newValue = (int) value + 1;
+		return newValue;
+	}
+
 }

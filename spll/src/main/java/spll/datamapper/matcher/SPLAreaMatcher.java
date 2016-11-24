@@ -51,7 +51,7 @@ public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLVariable, D
 	
 	@Override
 	public String toString() {
-		return "["+getVariable()+"] => "+area;
+		return feature.getGenstarName()+" => ["+getVariable()+" = "+area+"]";
 	}
 
 	/* (non-Javadoc)

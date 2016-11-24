@@ -15,9 +15,9 @@ import java.util.stream.Stream;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
+import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
-import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.opengis.feature.simple.SimpleFeature;
@@ -42,6 +42,9 @@ public class ShapeFile implements IGSGeofile {
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
 	
+	/*
+	 * Protected constructor to ensure file are created through the provided factory
+	 */
 	protected ShapeFile(DataStore dataStore) throws IOException {
 		this.dataStore = dataStore;
 		this.crs = dataStore.getSchema(dataStore.getTypeNames()[0]).getCoordinateReferenceSystem();
@@ -49,8 +52,7 @@ public class ShapeFile implements IGSGeofile {
 	            .getFeatureSource(dataStore.getTypeNames()[0]);
 		Filter filter = Filter.INCLUDE;
 		features = new HashSet<>();
-	    FeatureCollection<SimpleFeatureType, SimpleFeature> collection = fSource.getFeatures(filter);
-	    FeatureIterator<SimpleFeature> fItt = collection.features();
+	    FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(filter)).features();
 	    GeoEntityFactory gef = new GeoEntityFactory(new HashSet<AGeoAttribute>());
 	    while (fItt.hasNext())
 	    	features.add(gef.createGeoEntity(fItt.next()));
@@ -113,12 +115,27 @@ public class ShapeFile implements IGSGeofile {
 		return new GSFeatureIterator(dataStore, filter);
 	}
 	
+
+	@Override
+	public Collection<GSFeature> getGeoDataWithin(Geometry geom) {
+		Set<GSFeature> collection = new HashSet<>(); 
+		getGeoAttributeIteratorWithin(geom).forEachRemaining(collection::add);
+		return collection;
+	}
+	
 	@Override
 	public Iterator<GSFeature> getGeoAttributeIteratorIntersect(Geometry geom) {
 		Filter filter = CommonFactoryFinder.getFilterFactory2()
 				.intersects(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME, 
 						(org.opengis.geometry.Geometry) geom);
 		return new GSFeatureIterator(dataStore, filter);
+	}
+	
+	@Override
+	public Collection<GSFeature> getGeoDataIntersect(Geometry geom) {
+		Set<GSFeature> collection = new HashSet<>(); 
+		getGeoAttributeIteratorIntersect(geom).forEachRemaining(collection::add);
+		return collection;
 	}
 	
 	public DataStore getStore() {

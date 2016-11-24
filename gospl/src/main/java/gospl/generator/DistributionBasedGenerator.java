@@ -4,9 +4,8 @@ import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import gospl.ISampler;
-import gospl.ISyntheticGosplPopGenerator;
 import gospl.algos.exception.GosplSamplerException;
+import gospl.algos.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;

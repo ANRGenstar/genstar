@@ -3,13 +3,11 @@ package spll.datamapper;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
@@ -37,6 +35,8 @@ import spll.datamapper.variable.ISPLVariable;
 public class SPLMapper<V extends ISPLVariable, T> {
 
 	private ISPLRegressionAlgorithm<V, T> regFunction;
+	private boolean setupReg;
+	
 	private ISPLMatcherFactory<V, T> matcherFactory;
 
 	private ShapeFile mainSPLFile;
@@ -87,10 +87,6 @@ public class SPLMapper<V extends ISPLVariable, T> {
 		return mainSPLFile.getGeoData();
 	}
 
-	public ISPLRegressionAlgorithm<V, T> getRegFunction(){
-		return regFunction;
-	}
-
 	public Map<AGeoEntity, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
 		return getAttributes().stream().collect(Collectors.toMap(
 				feat -> feat, 
@@ -105,49 +101,50 @@ public class SPLMapper<V extends ISPLVariable, T> {
 	// ------------------- Main Contract ------------------- //
 
 	/**
+	 * Gives the intercept of the regression
+	 * 
+	 * @return
+	 * @throws IllegalRegressionException
+	 */
+	public double getIntercept() throws IllegalRegressionException {
+		this.setupRegression();
+		return regFunction.getIntercept();
+	}
+	
+	/**
 	 * Operate regression given the data that have been setup for this mapper
-	 * WARNING: make use of {@link Stream#parallel()}
 	 * 
 	 * @return
 	 * @throws IllegalRegressionException
 	 */
 	public Map<V, Double> getRegression() throws IllegalRegressionException {
-		if(mapper.parallelStream().anyMatch(var -> var.getFeature().getProperties(this.targetProp).isEmpty()))
-			throw new IllegalRegressionException("Property "+this.targetProp+" is not present in each Feature of the main SPLMapper");
-		Collection<GSFeature> geoData = mainSPLFile.getGeoData();
-		regFunction.setupData(geoData.parallelStream().collect(Collectors.toMap(feat -> feat, 
-						feat -> Double.valueOf(feat.getProperties(this.targetProp).iterator().next().getValue().toString()))), mapper);
-		return regFunction.regression();
+		this.setupRegression();
+		return regFunction.getRegressionParameter();
 	}
-
+	
 	/**
-	 * Compute coefficient to adjust regression relsults
-	 * WARNING: make use of {@link Stream#parallel()} 
+	 * 
+	 * TODO javadoc
 	 * 
 	 * @return
 	 * @throws IllegalRegressionException
 	 */
-	public Map<GSFeature, Double> getCorrectionCoefficient() throws IllegalRegressionException {
-		Map<GSFeature, Double> correcCoeff = new HashMap<>();
-		Map<V, Double> regCoeff = this.getRegression();
-		for(GSFeature attribute : this.getAttributes()){
-			double targetVal = Double.valueOf(attribute.getProperty(targetProp).getValue().toString());
-			double regressVal = mapper.parallelStream().filter(varMatcher -> varMatcher.getFeature().equals(attribute))
-					.mapToDouble(map -> getComputedRegressValue(regCoeff.get(map.getVariable()), map.getValue())).sum();
-			correcCoeff.put(attribute, targetVal / regressVal);
-		}
-		return correcCoeff;
+	public Map<AGeoEntity, Double> getResidual() throws IllegalRegressionException {
+		this.setupRegression();
+		return regFunction.getResidual();
 	}
 
 	// ------------------- Inner utilities ------------------- //
-
-	// TODO: one of the most challenging methods, hence matchedValue could be of type Number or boolean
-	// WARNING: ugly algo
-	private double getComputedRegressValue(Double regCoeff, T matchedValue) {
-		if(matchedValue.toString().compareToIgnoreCase("true") == 0)
-			return regCoeff;
-		else if(matchedValue.toString().compareToIgnoreCase("false") == 0)
-			return 0d;
-		return regCoeff * Double.valueOf(matchedValue.toString());
+	
+	private void setupRegression() throws IllegalRegressionException{
+		if(mapper.stream().anyMatch(var -> var.getFeature().getProperties(this.targetProp).isEmpty()))
+			throw new IllegalRegressionException("Property "+this.targetProp+" is not present in each Feature of the main SPLMapper");
+		if(!setupReg){
+			Collection<GSFeature> geoData = mainSPLFile.getGeoData();
+			regFunction.setupData(geoData.stream().collect(Collectors.toMap(feat -> feat, 
+					feat -> Double.valueOf(feat.getProperties(this.targetProp).iterator().next().getValue().toString()))), mapper);
+			setupReg = true;
+		}
 	}
+	
 }

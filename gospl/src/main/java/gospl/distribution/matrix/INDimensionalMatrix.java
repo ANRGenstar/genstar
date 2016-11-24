@@ -1,4 +1,4 @@
-package gospl;
+package gospl.distribution.matrix;
 
 import java.util.Collection;
 import java.util.Map;

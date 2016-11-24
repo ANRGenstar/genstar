@@ -3,10 +3,9 @@ package core.io.geo.entity.attribute.value;
 import core.io.geo.entity.attribute.AGeoAttribute;
 import core.metamodel.IValue;
 import core.util.data.GSDataParser;
-import core.util.data.GSEnumDataType;
 
 /**
- * TODO: move to generic IValue
+ * TODO: javadoc
  * 
  * @author kevinchapuis
  *
@@ -39,14 +38,32 @@ public abstract class AGeoValue implements IValue {
 		return attribute;
 	}
 	
+	/**
+	 * Retrieve the inner value as a Numerical one. If the value is not inherently numerical
+	 * returns Double.NaN
+	 * 
+	 * @return the value as a {@link Number} type value
+	 */
 	public Number getNumericalValue(){
-		GSDataParser gsdp = new GSDataParser();
-		GSEnumDataType dataType = gsdp.getValueType(stringVal); 
-		if(dataType.equals(GSEnumDataType.Integer) || dataType.equals(GSEnumDataType.Double))
+		GSDataParser gsdp = new GSDataParser(); 
+		if(gsdp.getValueType(stringVal).isNumericValue())
 			return gsdp.parseNumber(stringVal);
 		return Double.NaN;
 	}
 	
-	public abstract boolean isNumericalValue();
+	/**
+	 * Compare this string value with this variable value. Can proceed to a numerical comparison or
+	 * a string based comparison depend on value and variable type. In the second case, make use of
+	 * {@link String#equalsIgnoreCase(String)} method
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public boolean valueEquals(String value) {
+		if(new GSDataParser().getValueType(value).isNumericValue() && this.isNumericalValue())
+			return Double.valueOf(value) == getNumericalValue().doubleValue();
+		return value.equalsIgnoreCase(inputStringVal);
+	}
 	
+	public abstract boolean isNumericalValue();	
 }

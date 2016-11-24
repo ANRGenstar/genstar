@@ -47,6 +47,11 @@ public class GSFeature extends AGeoEntity implements Feature {
 		return (Geometry) innerFeature.getDefaultGeometryProperty().getValue();
 	}
 	
+	@Override
+	public String getGenstarName(){
+		return this.getIdentifier().getID();
+	}
+	
 	////////////////////////////////////////////////////////////
 	// --------------- Feature implementation --------------- //
 	////////////////////////////////////////////////////////////

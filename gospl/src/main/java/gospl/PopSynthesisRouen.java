@@ -1,4 +1,4 @@
-package template.rouen;
+package gospl;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -15,19 +15,19 @@ import core.io.exception.InvalidFileTypeException;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
-import gospl.IDistributionInferenceAlgo;
-import gospl.INDimensionalMatrix;
-import gospl.ISampler;
-import gospl.ISyntheticGosplPopGenerator;
+import gospl.algos.IDistributionInferenceAlgo;
 import gospl.algos.IndependantHypothesisAlgo;
 import gospl.algos.exception.GosplSamplerException;
 import gospl.algos.sampler.GosplBasicSampler;
+import gospl.algos.sampler.ISampler;
 import gospl.distribution.GosplDSManager;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.MatrixCoordinateException;
+import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
+import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 

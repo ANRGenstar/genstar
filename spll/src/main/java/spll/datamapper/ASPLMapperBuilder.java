@@ -10,12 +10,13 @@ import java.util.concurrent.ExecutionException;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
-import core.io.geo.GeotiffFile;
 import core.io.geo.IGSGeofile;
+import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.GSFeature;
 import spll.algo.ISPLRegressionAlgorithm;
 import spll.algo.exception.IllegalRegressionException;
+import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
 
@@ -83,8 +84,6 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * build the output of spll regression based localization as pixel based format output.
 	 * Format file argument {@code formatFile} must be an ancillaryFiles, see {@link #getAncillaryFiles()}
 	 * 
-	 * WARNING: for performance purpose parallel stream are used !
-	 * 
 	 * @param outputFile
 	 * @param formatFile
 	 * @return
@@ -92,9 +91,11 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws TransformException
 	 * @throws IndexOutOfBoundsException
 	 * @throws IOException
+	 * @throws GSMapperException 
 	 */
-	public abstract float[][] buildOutput(GeotiffFile formatFile, boolean intersect) 
-			throws IllegalRegressionException, TransformException, IndexOutOfBoundsException, IOException;
+	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect) 
+			throws IllegalRegressionException, TransformException, 
+			IndexOutOfBoundsException, IOException, GSMapperException;
 	
 	/**
 	 * build the output of Spll regression based localization as vector based format output.

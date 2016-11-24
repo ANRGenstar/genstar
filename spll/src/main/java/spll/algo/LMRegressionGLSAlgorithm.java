@@ -25,7 +25,10 @@ import spll.datamapper.variable.SPLVariable;
 public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implements ISPLRegressionAlgorithm<SPLVariable, Double> {
 
 	private List<SPLVariable> regVars;
+	private List<AGeoEntity> observation;
+	
 	private Map<SPLVariable, Double> regression;
+	private double intercept;
 
 	@Override
 	public void setupData(Map<AGeoEntity, Double> observations,
@@ -33,9 +36,11 @@ public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implem
 		this.regVars = new ArrayList<>(regressors
 				.parallelStream().map(varfm -> varfm.getVariable())
 				.collect(Collectors.toSet()));
+		this.observation = new ArrayList<>(observations.size());
 		double[] instances = new double[regVars.size() * observations.size() + observations.size()];
 		int instanceCount = 0;
 		for(AGeoEntity geoEntity : observations.keySet()){
+			observation.add(geoEntity);
 			instances[instanceCount++] = observations.get(geoEntity);
 			for(int i = 0; i < regVars.size(); i++){
 				int idx = i;
@@ -46,19 +51,34 @@ public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implem
 				instances[instanceCount++] = optVar.isPresent() ? optVar.get().getValue() : 0d;
 			}
 		}
-		
+
 		super.newSampleData(instances, observations.size(), regVars.size());
 	}
 
 	@Override
-	public Map<SPLVariable, Double> regression() {
+	public Map<SPLVariable, Double> getRegressionParameter() {
 		if(regression == null){
 			regression = new HashMap<>();
 			double[] rVec = super.estimateRegressionParameters();
+			intercept = rVec[0];
 			for(int i = 0; i < regVars.size(); i++)
-				regression.put(regVars.get(i), rVec[i]);
+				regression.put(regVars.get(i), rVec[i+1]);
 		}
 		return regression;
+	}
+
+	@Override
+	public Map<AGeoEntity, Double> getResidual() {
+		Map<AGeoEntity, Double> residual = new HashMap<>();
+		double[] rVec = super.estimateResiduals();
+		for(int i = 0; i < observation.size(); i++)
+			residual.put(observation.get(i), rVec[i]);
+		return residual;
+	}
+	
+	@Override
+	public double getIntercept(){
+		return intercept;
 	}
 
 	public RealVector getSampleData(){
