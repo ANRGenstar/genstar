@@ -31,8 +31,8 @@ import core.io.geo.entity.GSFeature;
 import core.io.geo.entity.GSPixel;
 import core.io.geo.entity.attribute.value.AGeoValue;
 import core.util.GSPerformanceUtil;
-import spll.algo.ISPLRegressionAlgorithm;
-import spll.algo.LMRegressionOLSAlgorithm;
+import spll.algo.ISPLRegressionAlgo;
+import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
@@ -47,12 +47,12 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
 			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables) {
-		this(mainFile, propertyName, ancillaryFiles, variables, new LMRegressionOLSAlgorithm());
+		this(mainFile, propertyName, ancillaryFiles, variables, new LMRegressionOLS());
 	}
 	
 	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
 			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables, 
-			ISPLRegressionAlgorithm<SPLVariable, Double> regAlgo) {
+			ISPLRegressionAlgo<SPLVariable, Double> regAlgo) {
 		super(mainFile, propertyName, ancillaryFiles);
 		super.setRegressionAlgorithm(regAlgo);
 		super.setMatcherFactory(new SPLAreaMatcherFactory(variables));
@@ -80,7 +80,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * 
 	 */
 	@Override
-	public float[][] buildOutput(RasterFile outputFormat, boolean intersect) 
+	public float[][] buildOutput(RasterFile outputFormat, boolean intersect, boolean integer) 
 			throws IllegalRegressionException, TransformException, 
 			IndexOutOfBoundsException, IOException, GSMapperException {
 		if(mapper == null)
@@ -121,7 +121,16 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 								mainGeoData, regCoef, pixCorrection, gspu, intersect)
 						)
 				);
+		
+		// syso purpose
 		pixelRendered = 0;
+		
+		// Normalize output
+		float output = (float) mainFile.getGeoData().parallelStream()
+				.mapToDouble(feature -> Double.valueOf(feature.getProperty(propertyName).getValue().toString()))
+				.sum();
+		super.normalizer.process(pixels, output, integer);
+		
 		return pixels;
 	}
 

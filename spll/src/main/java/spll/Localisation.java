@@ -21,25 +21,17 @@ import core.io.geo.IGSGeofile;
 import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.attribute.value.AGeoValue;
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
-import core.metamodel.IPopulation;
-import core.metamodel.IValue;
 import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
-import core.util.data.GSEnumStats;
-import spll.algo.ISPLRegressionAlgorithm;
-import spll.algo.LMRegressionOLSAlgorithm;
+import spll.algo.ISPLRegressionAlgo;
+import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
 import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.SPLMapper;
 import spll.datamapper.exception.GSMapperException;
-import spll.datamapper.normalizer.ASPLNormalizer;
-import spll.datamapper.normalizer.SPLUniformNormalizer;
 import spll.datamapper.variable.SPLVariable;
-import spll.popmatcher.ISpllPopulationMatcher;
-import spll.popmatcher.SpllUniformPopulationMatcher;
+import spll.popmapper.normalizer.SPLUniformNormalizer;
 import spll.util.SpllUtil;
 
 public class Localisation {
@@ -122,7 +114,7 @@ public class Localisation {
 		//////////////////////////////////
 		
 		// Choice have been made to regress from areal data count
-		ISPLRegressionAlgorithm<SPLVariable, Double> regressionAlgo = new LMRegressionOLSAlgorithm();
+		ISPLRegressionAlgo<SPLVariable, Double> regressionAlgo = new LMRegressionOLS();
 		
 		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
 				sfAdmin, propertyName, endogeneousVarFile, regVariables,
@@ -157,16 +149,17 @@ public class Localisation {
 		}
 
 		// ---------------------------------
-		// Apply regression function
+		// Apply regression function to output
 		// ---------------------------------
 		
 		// WARNING: not generic at all - or define 1st ancillary data file to be the one for output format
 		RasterFile outputFormat = (RasterFile) endogeneousVarFile
 				.stream().filter(file -> file.getGeoGSFileType().equals(GeoGSFileType.RASTER))
 				.findFirst().get();
+		spllBuilder.setNormalizer(new SPLUniformNormalizer(0, RasterFile.DEF_NODATA));
 		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = spllBuilder.buildOutput(outputFormat, false);
+			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -189,23 +182,10 @@ public class Localisation {
 		gspu.sysoStempMessage("\nStatistics on output:\n"+bs.getStatReport());
 		
 		/////////////////////////
-		// NORMALIZE OUTPUT
-		////////////////////////
-		
-		ASPLNormalizer normalizer = new SPLUniformNormalizer(0, RasterFile.DEF_NODATA);
-		float objectif = (float) sfAdmin.getGeoData()
-				.parallelStream().mapToDouble(feature -> Double.valueOf(feature.getProperty(propertyName).getValue().toString())).sum();
-		
-		normalizer.normalize(pixelOutput, objectif);
-		normalizer.round(pixelOutput, objectif);
-		GSBasicStats<Double> newBs = new GSBasicStats<>(GSBasicStats.transpose(pixelOutput), 
-				Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
-		gspu.sysoStempMessage("Re-evaluated statistics on output:\n"+newBs.getStatReport());
-		
-		/////////////////////////
 		// EXPORT OUTPUT
 		////////////////////////
 		
+		@SuppressWarnings("unused")
 		IGSGeofile outputFile = null;
 		try {
 			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, outputFormat.getCoordRefSystem());
@@ -224,13 +204,7 @@ public class Localisation {
 		// MATCH TO POPULATION
 		///////////////////////
 		
-		// Propose a static import (in core pkg) of exported gospl generated population
-		IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> pop = null;
-		
-		if(pop.size() > newBs.getStat(GSEnumStats.sum)[0])
-			System.exit(1);
-		
-		ISpllPopulationMatcher iSpllPopMatcher = new SpllUniformPopulationMatcher(pop, sfAdmin, outputFile);
+		// TODO
 		
 	}
 

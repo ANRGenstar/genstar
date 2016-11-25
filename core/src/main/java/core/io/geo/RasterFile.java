@@ -78,6 +78,7 @@ public class RasterFile implements IGSGeofile {
 		ParameterValue<Boolean> useJaiRead = AbstractGridFormat.USE_JAI_IMAGEREAD.createValue();
 		useJaiRead.setValue(true);
 
+		// TODO: fill in the factory with all possible attribute for this file
 		this.gef = new GeoEntityFactory(new HashSet<>());
 
 		if(FilenameUtils.getExtension(file.getName()).equals(GeofileFactory.ARC_EXT)){

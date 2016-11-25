@@ -5,4 +5,4 @@
  * @author gospl-team
  *
  */
-package gospl.algos;
+package gospl.algo;

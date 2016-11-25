@@ -13,7 +13,7 @@ import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.GLSMultipleLinearRegression;
 
 import core.io.geo.entity.AGeoEntity;
-import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
+import spll.datamapper.matcher.ISPLMatcher;
 import spll.datamapper.variable.SPLVariable;
 
 /**
@@ -22,7 +22,7 @@ import spll.datamapper.variable.SPLVariable;
  * @author kevinchapuis
  *
  */
-public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implements ISPLRegressionAlgorithm<SPLVariable, Double> {
+public class LMRegressionGLS extends GLSMultipleLinearRegression implements ISPLRegressionAlgo<SPLVariable, Double> {
 
 	private List<SPLVariable> regVars;
 	private List<AGeoEntity> observation;
@@ -32,7 +32,7 @@ public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implem
 
 	@Override
 	public void setupData(Map<AGeoEntity, Double> observations,
-			Set<ISPLVariableFeatureMatcher<SPLVariable, Double>> regressors){
+			Set<ISPLMatcher<SPLVariable, Double>> regressors){
 		this.regVars = new ArrayList<>(regressors
 				.parallelStream().map(varfm -> varfm.getVariable())
 				.collect(Collectors.toSet()));
@@ -44,7 +44,7 @@ public class LMRegressionGLSAlgorithm extends GLSMultipleLinearRegression implem
 			instances[instanceCount++] = observations.get(geoEntity);
 			for(int i = 0; i < regVars.size(); i++){
 				int idx = i;
-				Optional<ISPLVariableFeatureMatcher<SPLVariable, Double>> optVar = regressors.parallelStream()
+				Optional<ISPLMatcher<SPLVariable, Double>> optVar = regressors.parallelStream()
 						.filter(varfm -> varfm.getFeature().equals(geoEntity) 
 								&& varfm.getVariable().equals(regVars.get(idx)))
 						.findFirst();

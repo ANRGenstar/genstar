@@ -1,4 +1,4 @@
-package gospl.algos;
+package gospl.algo;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,25 +12,30 @@ import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.io.survey.configuration.GSSurveyType;
 import core.util.GSPerformanceUtil;
-import gospl.algos.exception.GosplSamplerException;
-import gospl.algos.sampler.GosplAliasSampler;
-import gospl.algos.sampler.GosplBasicSampler;
-import gospl.algos.sampler.GosplBinarySampler;
-import gospl.algos.sampler.ISampler;
+import gospl.algo.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.BasicDistribution;
+import gospl.distribution.util.GosplBasicDistribution;
 
 
 /**
- * TODO: explain
- * 
- * TODO: find a way to choose the sampling algorithm, e.g. {@link GosplAliasSampler}, {@link GosplBasicSampler} or {@link GosplBinarySampler}
- * HINT: choose a builder that take a {@link ADistributionInferenceAlgo} and an empty {@link ISampler} to fill with
+ * Infer a complete distribution based on a n-dimension matrix (either partial or complete) and setup a sampler 
+ * based on it. 
+ * <p>
+ * The algorithme make several assumptions:
+ * <p><ul>
+ * <li> All variables of two dimension with no relation in the {@link INDimensionalMatrix} are supposed to be independent
+ * <li> When several dimensions refer to only one main dimension: Aggregated dimensions are disband following 
+ * the same principle. For ex., the value "75 and more" is broke down into several equals category like 
+ * "75-79", "80-84", "85-89", etc.
+ * <li> When several dimensions refer to only one main dimension: unmentioned variable refer to as empty variable. For ex.,
+ * people under the age of 15' are usually not consider in job category, so in this algorithm they will be attached with
+ * variable 'empty' for dimension 'job'
+ * </ul><p>
  * 
  * @author kevinchapuis
  *
@@ -46,7 +51,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASu
 	@Override
 	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
 			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix,
-			ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) throws IllegalDistributionCreation, GosplSamplerException {
+			ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
 		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))
@@ -193,7 +198,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASu
 			gspu.sysoStempPerformance(1, this);
 		}
 	
-		sampler.setDistribution(new BasicDistribution(sampleDistribution));
+		sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
 		return sampler;
 	}
 

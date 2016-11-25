@@ -14,11 +14,12 @@ import core.io.geo.IGSGeofile;
 import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.GSFeature;
-import spll.algo.ISPLRegressionAlgorithm;
+import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
+import spll.popmapper.normalizer.ASPLNormalizer;
 
 /**
  * The mapper is the main concept of SPLL algorithm. It matches main geographical features
@@ -39,7 +40,9 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	protected List<IGSGeofile> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
 	
-	protected ISPLRegressionAlgorithm<V, T> regressionAlgorithm;
+	protected ISPLRegressionAlgo<V, T> regressionAlgorithm;
+	
+	protected ASPLNormalizer normalizer;
 	
 	public ASPLMapperBuilder(ShapeFile mainFile, Name propertyName,
 			List<IGSGeofile> ancillaryFiles) {
@@ -53,7 +56,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * 
 	 * @param regressionAlgorithm
 	 */
-	public void setRegressionAlgorithm(ISPLRegressionAlgorithm<V, T> regressionAlgorithm){
+	public void setRegressionAlgorithm(ISPLRegressionAlgo<V, T> regressionAlgorithm){
 		this.regressionAlgorithm = regressionAlgorithm;
 	}
 	
@@ -64,6 +67,15 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 */
 	public void setMatcherFactory(ISPLMatcherFactory<V, T> matcherFactory){
 		this.matcherFactory = matcherFactory;
+	}
+	
+	/**
+	 * Setup the object that will ensure output value format to fit built-in normalizer requirements
+	 * 
+	 * @param normalizer
+	 */
+	public void setNormalizer(ASPLNormalizer normalizer){
+		this.normalizer = normalizer;
 	}
 	
 	/**
@@ -93,7 +105,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws IOException
 	 * @throws GSMapperException 
 	 */
-	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect) 
+	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect, boolean integer) 
 			throws IllegalRegressionException, TransformException, 
 			IndexOutOfBoundsException, IOException, GSMapperException;
 	

@@ -4,8 +4,7 @@ import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import gospl.algos.exception.GosplSamplerException;
-import gospl.algos.sampler.ISampler;
+import gospl.algo.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
@@ -22,12 +21,12 @@ public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	
 	private ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler;
 	
-	public DistributionBasedGenerator(ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) throws GosplSamplerException {
+	public DistributionBasedGenerator(ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) {
 		this.sampler = sampler;
 	}
 	
 	@Override
-	public GosplPopulation generate(int numberOfIndividual) throws GosplSamplerException {
+	public GosplPopulation generate(int numberOfIndividual) {
 		GosplPopulation pop = new GosplPopulation();
 		pop.addAll(sampler.draw(numberOfIndividual).parallelStream().map(coord -> new GosplEntity(coord.getMap())).collect(Collectors.toSet()));
 		return pop;

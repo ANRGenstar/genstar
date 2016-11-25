@@ -3,7 +3,7 @@ package spll.datamapper.matcher;
 import core.io.geo.entity.GSFeature;
 import spll.datamapper.variable.SPLVariable;
 
-public class SPLAreaMatcher implements ISPLVariableFeatureMatcher<SPLVariable, Double> {
+public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 
 	private double area;
 	

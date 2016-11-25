@@ -3,7 +3,7 @@ package spll.datamapper.matcher;
 import core.io.geo.entity.GSFeature;
 import spll.datamapper.variable.ISPLVariable;
 
-public interface ISPLVariableFeatureMatcher<V extends ISPLVariable, T> {
+public interface ISPLMatcher<V extends ISPLVariable, T> {
 
 	public String getName();
 	

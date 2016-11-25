@@ -15,11 +15,11 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
-public class BasicDistribution implements SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> {
+public class GosplBasicDistribution implements SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> {
 
 	private final SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> innermap; 
 	
-	public BasicDistribution() {
+	public GosplBasicDistribution() {
 		this.innermap = new TreeMap<ACoordinate<ASurveyAttribute, AValue>, Double>(
 				new Comparator<ACoordinate<ASurveyAttribute, AValue>>(){
 					public int compare(ACoordinate<ASurveyAttribute, AValue> coord1, ACoordinate<ASurveyAttribute, AValue> coord2 ){
@@ -29,7 +29,7 @@ public class BasicDistribution implements SortedMap<ACoordinate<ASurveyAttribute
 			);
 	}
 
-	public BasicDistribution(Map<Set<AValue>, Double> sampleDistribution) {
+	public GosplBasicDistribution(Map<Set<AValue>, Double> sampleDistribution) {
 		this();
 		innermap.putAll(sampleDistribution.entrySet()
 				.parallelStream().collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey()), Entry::getValue)));
@@ -46,7 +46,7 @@ public class BasicDistribution implements SortedMap<ACoordinate<ASurveyAttribute
 		return coordinate;
 	}
 
-	public BasicDistribution(AFullNDimensionalMatrix<Double> distribution) {
+	public GosplBasicDistribution(AFullNDimensionalMatrix<Double> distribution) {
 		this();
 		innermap.putAll(distribution.getMatrix().entrySet()
 				.parallelStream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getValue())));

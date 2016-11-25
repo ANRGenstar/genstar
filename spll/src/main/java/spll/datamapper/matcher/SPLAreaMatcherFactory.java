@@ -31,7 +31,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	}
 
 	@Override
-	public List<ISPLVariableFeatureMatcher<SPLVariable, Double>> getMatchers(GSFeature feature, 
+	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(GSFeature feature, 
 			IGSGeofile regressorsFile) throws IOException, TransformException, InterruptedException, ExecutionException { 
 		return getMatchers(Arrays.asList(feature), regressorsFile);
 	}
@@ -44,12 +44,12 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	 * 
 	 */
 	@Override
-	public List<ISPLVariableFeatureMatcher<SPLVariable, Double>> getMatchers(Collection<GSFeature> features,
+	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<GSFeature> features,
 			IGSGeofile regressorsFile) 
 					throws IOException, TransformException, InterruptedException, ExecutionException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regressors' data", LOGSYSO);
 		gspu.setObjectif(features.size());
-		List<ISPLVariableFeatureMatcher<SPLVariable, Double>> varList = features
+		List<ISPLMatcher<SPLVariable, Double>> varList = features
 				.parallelStream().map(feat -> getMatchers(feat, 
 						regressorsFile.getGeoAttributeIteratorWithin(feat.getGeometry()), 
 						this.variables, gspu))
@@ -64,17 +64,17 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	/*
 	 * TODO: could be optimise
 	 */
-	private List<ISPLVariableFeatureMatcher<SPLVariable, Double>> getMatchers(GSFeature feature,
+	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(GSFeature feature,
 			Iterator<? extends AGeoEntity> geoData, Collection<AGeoValue> variables, 
 			GSPerformanceUtil gspu) {
-		List<ISPLVariableFeatureMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
+		List<ISPLMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
 		while(geoData.hasNext()){
 			AGeoEntity geoEntity = geoData.next();  
 			for(String prop : geoEntity.getPropertiesAttribute()){
 				AGeoValue value = geoEntity.getValueForAttribute(prop);
 				if(!variables.isEmpty() && !variables.contains(value))
 					continue;
-				Optional<ISPLVariableFeatureMatcher<SPLVariable, Double>> potentialMatch = areaMatcherList
+				Optional<ISPLMatcher<SPLVariable, Double>> potentialMatch = areaMatcherList
 						.stream().filter(varMatcher -> varMatcher.getVariable().getName().equals(prop.toString()) &&
 								varMatcher.getVariable().getValue().equals(value)).findFirst();
 				if(potentialMatch.isPresent()){

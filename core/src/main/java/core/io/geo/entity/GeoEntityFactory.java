@@ -23,6 +23,12 @@ public class GeoEntityFactory {
 		this.attributes = attributes;
 	}
 
+	/**
+	 * WARNING: could lead to concurrent access exception in case of parallel call
+	 * 
+	 * @param feature
+	 * @return
+	 */
 	public GSFeature createGeoEntity(Feature feature) {
 		Set<AGeoValue> values = new HashSet<>();
 		for(Property property : feature.getProperties()){
@@ -43,6 +49,15 @@ public class GeoEntityFactory {
 		return new GSFeature(values, feature);
 	}
 
+	/**
+	 * WARNING: could lead to concurrent access exception in case of parallel call
+	 * 
+	 * @param pixelBands
+	 * @param pixel
+	 * @param gridX
+	 * @param gridY
+	 * @return
+	 */
 	public GSPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
 		Set<AGeoValue> values = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){

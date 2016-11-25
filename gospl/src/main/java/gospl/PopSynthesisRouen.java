@@ -15,12 +15,11 @@ import core.io.exception.InvalidFileTypeException;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
-import gospl.algos.IDistributionInferenceAlgo;
-import gospl.algos.IndependantHypothesisAlgo;
-import gospl.algos.exception.GosplSamplerException;
-import gospl.algos.sampler.GosplBasicSampler;
-import gospl.algos.sampler.ISampler;
-import gospl.distribution.GosplDSManager;
+import gospl.algo.IDistributionInferenceAlgo;
+import gospl.algo.IndependantHypothesisAlgo;
+import gospl.algo.sampler.GosplBasicSampler;
+import gospl.algo.sampler.ISampler;
+import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.MatrixCoordinateException;
@@ -38,9 +37,9 @@ public class PopSynthesisRouen {
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDSManager df = null; 
+		GosplDistributionFactory df = null; 
 		try {
-			df = new GosplDSManager(Paths.get(args[0].trim()));
+			df = new GosplDistributionFactory(Paths.get(args[0].trim()));
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -95,28 +94,19 @@ public class PopSynthesisRouen {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e1) {
 			e1.printStackTrace();
-		} catch (GosplSamplerException e1) {
-			e1.printStackTrace();
 		}
 		
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+args[1], true);
 		
 		// BUILD THE GENERATOR
-		ISyntheticGosplPopGenerator ispGenerator = null;
-		try {
-			ispGenerator = new DistributionBasedGenerator(sampler);
-		} catch (GosplSamplerException e) {
-			e.printStackTrace();
-		}
+		ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
 		
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(Integer.parseInt(args[1]));
 			gspu.sysoStempPerformance("End generating synthetic population: elapse time", PopSynthesisRouen.class.getName());
 		} catch (NumberFormatException e) {
-			e.printStackTrace();
-		} catch (GosplSamplerException e) {
 			e.printStackTrace();
 		}
 		

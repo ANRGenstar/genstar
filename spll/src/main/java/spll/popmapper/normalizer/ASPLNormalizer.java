@@ -1,4 +1,4 @@
-package spll.datamapper.normalizer;
+package spll.popmapper.normalizer;
 
 import java.util.Map;
 
@@ -29,6 +29,36 @@ public abstract class ASPLNormalizer {
 	public ASPLNormalizer(double floorValue, Number noData){
 		this.floorValue = floorValue;
 		this.noData = noData;
+	}
+	
+	/**
+	 * Compound method to fit matrix requirement, i.e. floor value, integer value and sum output
+	 * 
+	 * @param matrix
+	 * @param output
+	 * @param integer
+	 * @return
+	 */
+	public float[][] process(float[][] matrix, float output, boolean integer){
+		this.normalize(matrix, output);
+		if(integer)
+			this.round(matrix, output);
+		return matrix;
+	}
+	
+	/**
+	 * Compound method to fit map requirement, i.e. floor value, integer value and sum output
+	 * 
+	 * @param featureOutput
+	 * @param output
+	 * @param integer
+	 * @return
+	 */
+	public Map<GSFeature, ? extends Number> process(Map<GSFeature, Double> featureOutput, double output, boolean integer){
+		Map<GSFeature, Double> outputMap = this.normalize(featureOutput, output);
+		if(integer)
+			return this.round(featureOutput, output);
+		return outputMap;
 	}
 	
 	/**

@@ -13,10 +13,10 @@ import spll.datamapper.variable.ISPLVariable;
 
 public interface ISPLMatcherFactory<V extends ISPLVariable, T> {
 
-	public List<ISPLVariableFeatureMatcher<V, T>> getMatchers(GSFeature geoData, 
+	public List<ISPLMatcher<V, T>> getMatchers(GSFeature geoData, 
 			IGSGeofile ancillaryFile) throws IOException, TransformException, InterruptedException, ExecutionException;
 
-	public List<ISPLVariableFeatureMatcher<V, T>> getMatchers(Collection<GSFeature> geoData, 
+	public List<ISPLMatcher<V, T>> getMatchers(Collection<GSFeature> geoData, 
 			IGSGeofile regressorsFiles) throws IOException, TransformException, InterruptedException, ExecutionException;
 	
 }

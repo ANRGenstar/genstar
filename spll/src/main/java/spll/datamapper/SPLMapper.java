@@ -16,10 +16,10 @@ import core.io.geo.IGSGeofile;
 import core.io.geo.ShapeFile;
 import core.io.geo.entity.AGeoEntity;
 import core.io.geo.entity.GSFeature;
-import spll.algo.ISPLRegressionAlgorithm;
+import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;
+import spll.datamapper.matcher.ISPLMatcher;
 import spll.datamapper.matcher.ISPLMatcherFactory;
-import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
 import spll.datamapper.variable.ISPLVariable;
 
 /**
@@ -34,7 +34,7 @@ import spll.datamapper.variable.ISPLVariable;
  */
 public class SPLMapper<V extends ISPLVariable, T> {
 
-	private ISPLRegressionAlgorithm<V, T> regFunction;
+	private ISPLRegressionAlgo<V, T> regFunction;
 	private boolean setupReg;
 	
 	private ISPLMatcherFactory<V, T> matcherFactory;
@@ -42,7 +42,7 @@ public class SPLMapper<V extends ISPLVariable, T> {
 	private ShapeFile mainSPLFile;
 	private Name targetProp;
 
-	private Set<ISPLVariableFeatureMatcher<V, T>> mapper = new HashSet<>();
+	private Set<ISPLMatcher<V, T>> mapper = new HashSet<>();
 
 	// --------------------- Constructor --------------------- //
 
@@ -50,7 +50,7 @@ public class SPLMapper<V extends ISPLVariable, T> {
 
 	// --------------------- Modifier --------------------- //
 
-	protected void setRegAlgo(ISPLRegressionAlgorithm<V, T> regressionAlgorithm) {
+	protected void setRegAlgo(ISPLRegressionAlgo<V, T> regressionAlgorithm) {
 		this.regFunction = regressionAlgorithm;
 	}
 
@@ -69,14 +69,14 @@ public class SPLMapper<V extends ISPLVariable, T> {
 	protected boolean insertMatchedVariable(IGSGeofile regressorsFiles) 
 			throws IOException, TransformException, InterruptedException, ExecutionException{
 		boolean result = true;
-		for(ISPLVariableFeatureMatcher<V, T> matchedVariable : matcherFactory
+		for(ISPLMatcher<V, T> matchedVariable : matcherFactory
 				.getMatchers(mainSPLFile.getGeoData(), regressorsFiles))
 			if(!insertMatchedVariable(matchedVariable) && result)
 				result = false;
 		return result;
 	}
 
-	protected boolean insertMatchedVariable(ISPLVariableFeatureMatcher<V, T> matchedVariable) {
+	protected boolean insertMatchedVariable(ISPLMatcher<V, T> matchedVariable) {
 		return mapper.add(matchedVariable);
 	}
 
@@ -87,14 +87,14 @@ public class SPLMapper<V extends ISPLVariable, T> {
 		return mainSPLFile.getGeoData();
 	}
 
-	public Map<AGeoEntity, Set<ISPLVariableFeatureMatcher<V, T>>> getVarMatrix() {
+	public Map<AGeoEntity, Set<ISPLMatcher<V, T>>> getVarMatrix() {
 		return getAttributes().stream().collect(Collectors.toMap(
 				feat -> feat, 
 				feat -> mapper.parallelStream().filter(map -> map.getFeature().equals(feat))
 				.collect(Collectors.toSet())));
 	}
 
-	public Set<ISPLVariableFeatureMatcher<V, T>> getVariableSet() {
+	public Set<ISPLMatcher<V, T>> getVariableSet() {
 		return Collections.unmodifiableSet(mapper);
 	}
 

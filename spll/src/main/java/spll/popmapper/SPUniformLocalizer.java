@@ -1,17 +1,17 @@
-package spll.popmatcher;
+package spll.popmapper;
 
 import core.io.geo.IGSGeofile;
 import core.io.geo.ShapeFile;
 import core.metamodel.IPopulation;
 
-public class SpllUniformPopulationMatcher implements ISpllPopulationMatcher {
+public class SPUniformLocalizer implements ISPLocalizer {
 
 	@SuppressWarnings("rawtypes")
 	private IPopulation population;
 	private ShapeFile match;
 	private IGSGeofile localisation;
 
-	public SpllUniformPopulationMatcher(@SuppressWarnings("rawtypes") IPopulation population, ShapeFile match, IGSGeofile localisation) {
+	public SPUniformLocalizer(@SuppressWarnings("rawtypes") IPopulation population, ShapeFile match, IGSGeofile localisation) {
 		this.population = population;
 		this.match = match;
 		this.localisation = localisation;

@@ -41,7 +41,7 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
-public class GosplDSManager {
+public class GosplDistributionFactory {
 
 	private final double EPSILON = Math.pow(10d, -6);
 
@@ -51,7 +51,7 @@ public class GosplDSManager {
 	private Set<AFullNDimensionalMatrix<? extends Number>> distributions;
 	private Set<GosplPopulation> samples;
 
-	public GosplDSManager(Path configurationFilePath) throws FileNotFoundException {
+	public GosplDistributionFactory(Path configurationFilePath) throws FileNotFoundException {
 		this.configuration = new GosplXmlSerializer().deserializeGSConfig(configurationFilePath);
 		this.dataParser = new GSDataParser();
 	}

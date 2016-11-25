@@ -1,9 +1,9 @@
-package gospl.algos;
+package gospl.algo;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
-import gospl.algos.sampler.ISampler;
+import gospl.algo.sampler.ISampler;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 

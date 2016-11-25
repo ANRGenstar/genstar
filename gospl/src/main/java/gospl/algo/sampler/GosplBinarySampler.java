@@ -1,4 +1,4 @@
-package gospl.algos.sampler;
+package gospl.algo.sampler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,14 +7,14 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
-import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.BasicDistribution;
+import gospl.distribution.util.GosplBasicDistribution;
 
 /**
  * Sample method to draw from a discrete distribution, based on binary search algorithm
@@ -50,7 +50,7 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 	}
 
 	@Override
-	public void setDistribution(BasicDistribution distribution) throws GosplSamplerException {
+	public void setDistribution(GosplBasicDistribution distribution){
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
 				distribution.size(), DEBUG_SYSO);
 		gspu.sysoStempPerformance(0, this);
@@ -66,18 +66,18 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 				gspu.sysoStempPerformance(count * 1d / distribution.size(), this);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
-			throw new GosplSamplerException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
+			throw new IllegalArgumentException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
 
 	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
-		this.setDistribution(new BasicDistribution(distribution));
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 	
 	// -------------------- main contract -------------------- //
 		
 	@Override
-	public ACoordinate<ASurveyAttribute, AValue> draw() throws GosplSamplerException {
+	public ACoordinate<ASurveyAttribute, AValue> draw(){
 		double rand = random.nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
@@ -96,24 +96,19 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 		if (floor - 1 == top)
 			if(indexedProbabilitySum.get(top) <= rand && rand < indexedProbabilitySum.get(floor))
 				return indexedKey.get(floor);
-		throw new GosplSamplerException("Sample engine has not been able to draw one coordinate !!!\n"
+		throw new RuntimeException("Sample engine has not been able to draw one coordinate !!!\n"
 				+ "random ("+rand+"), floor ("+floor+" = "+indexedProbabilitySum.get(floor)+") and top ("+top+" = "+indexedProbabilitySum.get(top)+") could not draw index\n"
 						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of {@link Stream#parallel()}
+	 */
 	@Override
-	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) throws GosplSamplerException{
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> safeDraw()).collect(Collectors.toList());
-	}
-	
-	private ACoordinate<ASurveyAttribute, AValue> safeDraw(){
-		ACoordinate<ASurveyAttribute, AValue> draw = null;
-		try {
-			draw = draw();
-		} catch (GosplSamplerException e) {
-			e.printStackTrace();
-		}
-		return draw;
+	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
+		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	
 	// -------------------- utility -------------------- //

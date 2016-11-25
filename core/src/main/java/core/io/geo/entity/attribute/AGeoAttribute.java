@@ -10,8 +10,6 @@ import core.metamodel.IAttribute;
 /**
  * TODO: javadoc
  * 
- * TODO: move to an abstraction to extends {@link IAttribute} interface requirement
- * 
  * @author kevinchapuis
  *
  */

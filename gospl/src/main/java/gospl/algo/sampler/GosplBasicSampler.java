@@ -1,4 +1,4 @@
-package gospl.algos.sampler;
+package gospl.algo.sampler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,13 +7,13 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.BasicDistribution;
+import gospl.distribution.util.GosplBasicDistribution;
 
 
 public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
@@ -33,8 +33,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public void setDistribution(BasicDistribution distribution)
-			throws GosplSamplerException {
+	public void setDistribution(GosplBasicDistribution distribution) {
 		this.indexedKey = new ArrayList<>(distribution.size());
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
@@ -44,18 +43,18 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 			indexedProbabilitySum.add(sumOfProbabilities);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
-			throw new GosplSamplerException("Sum of probabilities for this sampler is not equal to 1 (SOP = "+sumOfProbabilities+")");
+			throw new IllegalArgumentException("Sum of probabilities for this sampler is not equal to 1 (SOP = "+sumOfProbabilities+")");
 	}
 
 	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
-		this.setDistribution(new BasicDistribution(distribution));
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 
 	// -------------------- main contract -------------------- //
 	
 	@Override
-	public ACoordinate<ASurveyAttribute, AValue> draw() throws GosplSamplerException {
+	public ACoordinate<ASurveyAttribute, AValue> draw() {
 		double rand = random.nextDouble();
 		int idx = -1;
 		for(double proba : indexedProbabilitySum){
@@ -63,25 +62,20 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 			if(proba >= rand)
 				return indexedKey.get(idx);
 		}
-		throw new GosplSamplerException("Sample engine has not been able to draw one coordinate !!!\n"
-				+ "Max probability is: "+indexedProbabilitySum.get(indexedKey.size() - 1)+" and random double is: "+rand);
+		throw new RuntimeException("Sampler fail to draw an "+ACoordinate.class.getName()+" from the distribution:\n"
+				+ "drawn random "+rand+" | probability bounds ["+indexedProbabilitySum.get(0)+" : "+indexedProbabilitySum.get(indexedProbabilitySum.size()-1)+"]");
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of {@link Stream#parallel()}
+	 */
 	@Override
-	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) throws GosplSamplerException{
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> safeDraw()).collect(Collectors.toList());
+	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
+		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
-	
-	private ACoordinate<ASurveyAttribute, AValue> safeDraw(){
-		ACoordinate<ASurveyAttribute, AValue> draw = null;
-		try {
-			draw = draw();
-		} catch (GosplSamplerException e) {
-			e.printStackTrace();
-		}
-		return draw;
-	}
-	
+		
 	// -------------------- utility -------------------- //
 
 	@Override

@@ -1,4 +1,4 @@
-package gospl.algos.sampler;
+package gospl.algo.sampler;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -10,10 +10,9 @@ import java.util.stream.IntStream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import gospl.algos.exception.GosplSamplerException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.BasicDistribution;
+import gospl.distribution.util.GosplBasicDistribution;
 
 /******************************************************************************
  * File: AliasMethod.java
@@ -51,8 +50,7 @@ public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public void setDistribution(BasicDistribution distribution)
-			throws GosplSamplerException {
+	public void setDistribution(GosplBasicDistribution distribution){
 		if(distribution == null)
 			throw new NullPointerException();
 		if(distribution.isEmpty())
@@ -132,14 +130,15 @@ public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) throws GosplSamplerException {
-		this.setDistribution(new BasicDistribution(distribution));
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 
 	// -------------------- main contract -------------------- //
 
 	/**
-	 * Samples a value from the underlying distribution.
+	 * {@inheritDoc}
+	 * <p>
 	 *
 	 * @return A random value sampled from the underlying distribution.
 	 */

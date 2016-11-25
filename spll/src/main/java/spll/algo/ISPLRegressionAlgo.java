@@ -4,10 +4,10 @@ import java.util.Map;
 import java.util.Set;
 
 import core.io.geo.entity.AGeoEntity;
-import spll.datamapper.matcher.ISPLVariableFeatureMatcher;
+import spll.datamapper.matcher.ISPLMatcher;
 import spll.datamapper.variable.ISPLVariable;
 
-public interface ISPLRegressionAlgorithm<V extends ISPLVariable, T> {
+public interface ISPLRegressionAlgo<V extends ISPLVariable, T> {
 	
 	public Map<V, Double> getRegressionParameter();
 	
@@ -16,6 +16,6 @@ public interface ISPLRegressionAlgorithm<V extends ISPLVariable, T> {
 	public double getIntercept();
 	
 	public void setupData(Map<AGeoEntity, Double> observations,
-			Set<ISPLVariableFeatureMatcher<V, T>> regressors);
+			Set<ISPLMatcher<V, T>> regressors);
 	
 }
