@@ -13,7 +13,7 @@ import core.io.survey.IGSSurvey;
 
 /**
  * 
- * TODO: move to io project and be more generic
+ * TODO: javadoc
  * 
  * @author kevinchapuis
  *
@@ -28,6 +28,23 @@ public class GSSurveyFile {
 	private final int firstRowDataIndex;
 	private final int firstColumnDataIndex;
 
+	/**
+	 * Construct a survey file to store and parse survey data and info. 
+	 * <p>
+	 * Stored properties are:
+	 * <ul>
+	 * <li> data file type as a {@link GSSurveyType} 
+	 * <li> zero based row ({@code firstRowDataIndex}) and column ({@code firstColumnDataIndex}) headers index 
+	 * <li> data file name
+	 * </ul>
+	 * <p> 
+	 * Default csv separator is ',' to setup a different one choose {@link #GSSurveyFile(String, GSSurveyType, int, int, char)} 
+	 * 
+	 * @param surveyFilePath
+	 * @param dataFileType
+	 * @param firstRowDataIndex which is zero based
+	 * @param firstColumnDataIndex which is zero based
+	 */
 	public GSSurveyFile(String surveyFilePath, GSSurveyType dataFileType,  int firstRowDataIndex, int firstColumnDataIndex){
 		this.surveyFilePath = surveyFilePath;
 		this.dataFileType = dataFileType;
@@ -35,26 +52,59 @@ public class GSSurveyFile {
 		this.firstColumnDataIndex = firstColumnDataIndex;
 	}
 
+	/**
+	 * work as {@link #GSSurveyFile(File, GSSurveyType, int, int)} but with {@link File} type argument
+	 * 
+	 * @see #GSSurveyFile(File, GSSurveyType, int, int)
+	 * 
+	 * @param survey
+	 * @param dataFileType
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 */
 	public GSSurveyFile(File survey, GSSurveyType dataFileType, int firstRowDataIndex, int firstColumnDataIndex){
 		this(survey.getAbsolutePath(), dataFileType, firstRowDataIndex, firstColumnDataIndex);
 	}
 
+	/**
+	 * work as {@link #GSSurveyFile(File, GSSurveyType, int, int)} but with a specified {@code csvSeparator}
+	 * 
+	 * @see #GSSurveyFile(File, GSSurveyType, int, int)
+	 * 
+	 * @param survey
+	 * @param dataFileType
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param csvSeparator
+	 */
 	public GSSurveyFile(String survey, GSSurveyType dataFileType,  int firstRowDataIndex, int firstColumnDataIndex, char csvSeparator){
 		this(survey, dataFileType, firstRowDataIndex, firstColumnDataIndex);
 		this.csvSeparator = csvSeparator;
 	}
 
+	/**
+	 * work as {@link #GSSurveyFile(File, GSSurveyType, int, int)} but with {@link File} type argument
+	 * and a specified {@code csvSeparator}
+	 * 
+	 * @see #GSSurveyFile(File, GSSurveyType, int, int)
+	 * 
+	 * @param survey
+	 * @param dataFileType
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param csvSeparator
+	 */
 	public GSSurveyFile(File survey, GSSurveyType dataFileType, int firstRowDataIndex, int firstColumnDataIndex, char csvSeparator){
 		this(survey.getAbsolutePath(), dataFileType, firstRowDataIndex, firstColumnDataIndex);
 		this.csvSeparator = csvSeparator;
 	}
 
-// --------------------------- ACCESSOR --------------------------- //
+	// --------------------------- ACCESSOR --------------------------- //
 
 	public String getSurveyFilePath(){
 		return surveyFilePath;
 	}
-	
+
 	public String getSurveyFileName() {
 		return Paths.get(surveyFilePath).getFileName().toString();
 	}
@@ -79,7 +129,7 @@ public class GSSurveyFile {
 		this.csvSeparator = csvSeparator;
 	}
 
-// --------------------------- MAIN CONTRACT --------------------------- //
+	// --------------------------- MAIN CONTRACT --------------------------- //
 
 	/**
 	 * Give the survey associated with this file
@@ -93,15 +143,15 @@ public class GSSurveyFile {
 	public IGSSurvey getSurvey() throws InvalidFormatException, IOException, InvalidFileTypeException {
 		return GSImportFactory.getSurvey(new File(surveyFilePath), csvSeparator);
 	}
-	
-// --------------------------- utility methods --------------------------- //
-	
+
+	// --------------------------- utility methods --------------------------- //
+
 	@Override
 	public String toString(){
 		return getSurveyFileName()+" ("+getDataFileType()+")";
 	}
-	
-// --------------------------- inner methods --------------------------- //
+
+	// --------------------------- inner methods --------------------------- //
 
 	/*
 	 * Method that enable a safe serialization / deserialization of this java class <br/>

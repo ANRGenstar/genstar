@@ -30,7 +30,7 @@ import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
-public class PopSynthesisRouen {
+public class GosplRouen {
 
 	public static void main(String[] args) {
 		// THE POPULATION TO BE GENERATED
@@ -105,7 +105,7 @@ public class PopSynthesisRouen {
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(Integer.parseInt(args[1]));
-			gspu.sysoStempPerformance("End generating synthetic population: elapse time", PopSynthesisRouen.class.getName());
+			gspu.sysoStempPerformance("End generating synthetic population: elapse time", GosplRouen.class.getName());
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -117,7 +117,7 @@ public class PopSynthesisRouen {
 		try {
 			gspu.sysoStempMessage("Start processing population to output files");
 			Files.write(Paths.get(pathFolder+report), population.csvReport(";").getBytes());
-			gspu.sysoStempPerformance("\treport done: "+pathFolder+report, PopSynthesisRouen.class.getName());
+			gspu.sysoStempPerformance("\treport done: "+pathFolder+report, GosplRouen.class.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -134,7 +134,7 @@ public class PopSynthesisRouen {
 					bw.write(csvSep+e.getValueForAttribute(attribute).getStringValue());
 				bw.write("\n");
 			}
-			gspu.sysoStempPerformance("\texport done: "+pathFolder+export, PopSynthesisRouen.class.getName());
+			gspu.sysoStempPerformance("\texport done: "+pathFolder+export, GosplRouen.class.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
