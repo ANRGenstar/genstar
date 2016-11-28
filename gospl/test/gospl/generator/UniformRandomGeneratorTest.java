@@ -26,7 +26,6 @@ public class UniformRandomGeneratorTest {
 	@Test
 	public void test() {
 		IPopulation<GosplEntity, ASurveyAttribute, AValue> pop = urg.generate(popSize);
-		System.out.println(pop.csvReport(";"));
 		assertEquals(popSize, pop.size());
 	}
 
