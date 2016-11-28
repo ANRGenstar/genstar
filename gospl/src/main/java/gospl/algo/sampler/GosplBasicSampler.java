@@ -1,5 +1,6 @@
 package gospl.algo.sampler;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
@@ -24,6 +25,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	private Random random = ThreadLocalRandom.current();
 
 	private final double EPSILON = Math.pow(10, -6);
+	private final double EPS_ADJUST = Math.pow(10, -3);
 
 	// -------------------- setup methods -------------------- //
 
@@ -42,8 +44,22 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
 		}
-		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
-			throw new IllegalArgumentException("Sum of probabilities for this sampler is not equal to 1 (SOP = "+sumOfProbabilities+")");
+		if(Math.abs(sumOfProbabilities - 1d) > EPS_ADJUST){
+			// TODO: move to a BigDecimal distribution requirement
+			System.out.println(sumOfProbabilities);
+			if(Math.abs(sumOfProbabilities - 1d) < EPS_ADJUST){
+				int maxIter = 10000;
+				List<BigDecimal> bdProbaSum = indexedProbabilitySum.stream().map(val -> new BigDecimal(val))
+						.collect(Collectors.toList());
+				while(maxIter-- > 0 || Math.abs(sumOfProbabilities - 1d) < EPSILON){
+					BigDecimal bd = new BigDecimal((1d - sumOfProbabilities) / indexedProbabilitySum.size());
+					bdProbaSum.stream().forEach(val -> val.add(bd));
+					sumOfProbabilities = bdProbaSum.get(indexedProbabilitySum.size()-1).doubleValue();
+				}
+			}
+			if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
+				throw new IllegalArgumentException("Sum of probabilities for this sampler is not equal to 1 (SOP = "+sumOfProbabilities+")");
+		}
 	}
 
 	@Override

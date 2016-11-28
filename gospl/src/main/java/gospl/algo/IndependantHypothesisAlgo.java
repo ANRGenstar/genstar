@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import core.io.survey.configuration.GSSurveyType;
 import core.util.GSPerformanceUtil;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -20,6 +19,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
+import gospl.metamodel.GSSurveyType;
 
 
 /**
@@ -101,10 +101,17 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASu
 		
 		// And disintegrated value -> to aggregated values relationships:
 		Map<AValue, Set<AValue>> aggToRefValues = new HashMap<>();
-		for(AValue val : aggAtts.stream().flatMap(att -> att.getValues().stream()).collect(Collectors.toSet()))
-			aggToRefValues.put(val, val.getAttribute().getReferentAttribute().getValues()
-					.stream().filter(disVal -> val.getAttribute().findMatchingAttributeValue(disVal).equals(val))
-					.collect(Collectors.toSet()));
+		for(ASurveyAttribute asa : aggAtts){
+			Map<AValue, Set<AValue>> tmpMap = new HashMap<>();
+			Set<AValue> values = asa.getValues();
+			for(AValue val : values)
+				tmpMap.put(val, val.getAttribute().findMappedAttributeValues(val));
+			Set<AValue> matchedValue = tmpMap.values().stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
+			Set<AValue> refValue = asa.getReferentAttribute().getValues();
+			Set<AValue> unmatchedValue = refValue.stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
+			tmpMap.put(asa.getEmptyValue(), unmatchedValue);
+			aggToRefValues.putAll(tmpMap);
+		}
 
 		// Iterate over matrices that have referent attributes and no aggregated attributes
 		List<AFullNDimensionalMatrix<Double>> refMatrices = segmentedMatrix.getMatrices().stream()

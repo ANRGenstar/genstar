@@ -1,4 +1,4 @@
-package core.io.survey.configuration;
+package gospl.metamodel.configuration;
 
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import core.io.survey.attribut.ASurveyAttribute;
+import gospl.metamodel.GSSurveyFile;
 
 /**
  * 

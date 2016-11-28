@@ -3,10 +3,11 @@ package core.io.survey.attribut;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import core.io.survey.attribut.value.AValue;
 import core.metamodel.IAttribute;
-import core.metamodel.IValue;
 import core.util.data.GSEnumDataType;
 
 public abstract class ASurveyAttribute implements IAttribute<AValue> {
@@ -14,10 +15,10 @@ public abstract class ASurveyAttribute implements IAttribute<AValue> {
 	private ASurveyAttribute referentAttribute;
 	private String name;
 	private GSEnumDataType dataType;
-	
+
 	private Set<AValue> values = new HashSet<>();
 	private AValue emptyValue;
-	
+
 	public ASurveyAttribute(String name, GSEnumDataType dataType, ASurveyAttribute referentAttribute) {
 		this.name = name;
 		this.dataType = dataType;
@@ -60,7 +61,7 @@ public abstract class ASurveyAttribute implements IAttribute<AValue> {
 			return this.values.addAll(values);
 		return false;
 	}
-	
+
 	@Override
 	public AValue getEmptyValue() {
 		return emptyValue;
@@ -70,34 +71,39 @@ public abstract class ASurveyAttribute implements IAttribute<AValue> {
 	public void setEmptyValue(AValue emptyValue) {
 		this.emptyValue = emptyValue;
 	}	
-	
+
 	/**
 	 * A record attribute represents a purely utility attribute (for instance, the number of agent of age 10)
 	 * 
 	 * @return
 	 */
 	public abstract boolean isRecordAttribute();
-	
+
 	/**
-	 * Find the corresponding value. It either gives the {@code disVal} {@link IValue} given in argument or
-	 * a aggregated {@link IValue} given that the current {@link IAttribute} is a {@link MappedAttribute} 
-	 * and {@code disVal} pertain to its {@link #getReferentAttribute()}
+	 * Find a value that fit with the one in argument according to attribute state. It
+	 * either can return: 
+	 * <p><ul> 
+	 * <li> a set of mapped value, with {@link MappedAttribute}
+	 * <li> the empty value, with {@link RecordAttribute}
+	 * <li> the value itself or the empty value if not any matches, 
+	 * with all other type of {@link IAttribute}
+	 * </ul><p>
 	 * 
 	 * @param disVal
-	 * @return
+	 * @return a set of values
 	 */
-	public IValue findMatchingAttributeValue(IValue val) {
+	public Set<AValue> findMappedAttributeValues(AValue val) {
 		if(values.contains(val))
-			return val;
-		return null;
+			Stream.of(val).collect(Collectors.toSet());
+		return Stream.of(this.getEmptyValue()).collect(Collectors.toSet());
 	}
-	
-	
+
+
 	////////////////////////////////////////////////////////////////
 	// ------------------------- UTILITY ------------------------ //
 	////////////////////////////////////////////////////////////////
-	
-	
+
+
 	@Override
 	public String toString(){
 		return name+" ("+dataType+") - "+values.size()+" values";

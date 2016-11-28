@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -22,7 +23,6 @@ import gospl.algo.sampler.ISampler;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
-import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
@@ -30,16 +30,21 @@ import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
-public class GosplRouen {
+public class GosplSPTemplate {
 
 	public static void main(String[] args) {
+		
+		// INPUT ARGS
+		int targetPopulation = Integer.parseInt(args[0]);
+		Path confFile = Paths.get(args[1].trim());
+		
 		// THE POPULATION TO BE GENERATED
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
 		GosplDistributionFactory df = null; 
 		try {
-			df = new GosplDistributionFactory(Paths.get(args[0].trim()));
+			df = new GosplDistributionFactory(confFile);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -50,8 +55,6 @@ public class GosplRouen {
 		} catch (InvalidFormatException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (MatrixCoordinateException e) {
 			e.printStackTrace();
 		} catch (InvalidFileTypeException e) {
 			e.printStackTrace();
@@ -83,8 +86,6 @@ public class GosplRouen {
 			e1.printStackTrace();
 		} catch (IllegalControlTotalException e1) {
 			e1.printStackTrace();
-		} catch (MatrixCoordinateException e1) {
-			e1.printStackTrace();
 		}
 		
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
@@ -97,31 +98,31 @@ public class GosplRouen {
 		}
 		
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+args[1], true);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+targetPopulation, true);
 		
 		// BUILD THE GENERATOR
 		ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
 		
 		// BUILD THE POPULATION
 		try {
-			population = ispGenerator.generate(Integer.parseInt(args[1]));
-			gspu.sysoStempPerformance("End generating synthetic population: elapse time", GosplRouen.class.getName());
+			population = ispGenerator.generate(targetPopulation);
+			gspu.sysoStempPerformance("End generating synthetic population: elapse time", GosplSPTemplate.class.getName());
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
 		
 		// MAKE REPORT
-		String pathFolder = Paths.get(args[0].trim()).getParent().toString()+File.separator;
-		String report = "RouenPopReport.csv";
-		String export = "RouenPopExport.csv";
+		String pathFolder = confFile.getParent().toString()+File.separator;
+		String report = "PopReport.csv";
+		String export = "PopExport.csv";
 		try {
-			gspu.sysoStempMessage("Start processing population to output files");
+			gspu.sysoStempMessage("\nStart processing population to output files");
 			Files.write(Paths.get(pathFolder+report), population.csvReport(";").getBytes());
-			gspu.sysoStempPerformance("\treport done: "+pathFolder+report, GosplRouen.class.getName());
+			gspu.sysoStempPerformance("\treport done: "+pathFolder+report, GosplSPTemplate.class.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		// TODO: export to util of io project (with the problem of import IPopulation)
+		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
 		try {
 			CharSequence csvSep = ";";
 			int individual = 1;
@@ -134,7 +135,7 @@ public class GosplRouen {
 					bw.write(csvSep+e.getValueForAttribute(attribute).getStringValue());
 				bw.write("\n");
 			}
-			gspu.sysoStempPerformance("\texport done: "+pathFolder+export, GosplRouen.class.getName());
+			gspu.sysoStempPerformance("\texport done: "+pathFolder+export, GosplSPTemplate.class.getName());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

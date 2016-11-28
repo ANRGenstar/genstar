@@ -1,4 +1,4 @@
-package core.io.survey.configuration;
+package gospl.metamodel;
 
 /**
  * This {@link Enum} represents the types of data a synthetic population generation could input. Each refer to 

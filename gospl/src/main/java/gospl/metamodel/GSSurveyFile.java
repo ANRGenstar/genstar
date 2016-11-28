@@ -1,4 +1,4 @@
-package core.io.survey.configuration;
+package gospl.metamodel;
 
 import java.io.File;
 import java.io.IOException;

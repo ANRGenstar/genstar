@@ -6,11 +6,10 @@ import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import gospl.distribution.exception.MatrixCoordinateException;
 
 public class GosplCoordinate extends ACoordinate<ASurveyAttribute, AValue> {
 
-	public GosplCoordinate(Set<AValue> coordinate) throws MatrixCoordinateException {
+	public GosplCoordinate(Set<AValue> coordinate) {
 		super(coordinate);
 	}
 

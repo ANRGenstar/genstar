@@ -1,4 +1,4 @@
-package core.io.survey.configuration;
+package gospl.metamodel.configuration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -21,6 +21,8 @@ import core.io.survey.attribut.UniqueAttribute;
 import core.io.survey.attribut.value.RangeValue;
 import core.io.survey.attribut.value.UniqueValue;
 import core.metamodel.IAttribute;
+import gospl.metamodel.GSSurveyFile;
+import gospl.metamodel.GSSurveyType;
 
 /**
  * TODO: move to a parametric and generic serializer
@@ -104,7 +106,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		return xs;
 	}
 	
-	public void setMkdir(Path filePath) throws FileNotFoundException{
+	public void setMkdir(Path filePath) throws FileNotFoundException {
 		this.mkdir = new File(filePath.toString());
 		if(!mkdir.exists()){
 			throw new FileNotFoundException("the file "+mkdir+" does not exist");

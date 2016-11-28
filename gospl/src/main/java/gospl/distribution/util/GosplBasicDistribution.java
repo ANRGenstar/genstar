@@ -1,57 +1,37 @@
 package gospl.distribution.util;
 
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
-public class GosplBasicDistribution implements SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> {
+public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute, AValue>, Double> {
 
-	private final SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> innermap; 
-	
-	public GosplBasicDistribution() {
-		this.innermap = new TreeMap<ACoordinate<ASurveyAttribute, AValue>, Double>(
-				new Comparator<ACoordinate<ASurveyAttribute, AValue>>(){
-					public int compare(ACoordinate<ASurveyAttribute, AValue> coord1, ACoordinate<ASurveyAttribute, AValue> coord2 ){
-			            return innermap.get(coord1).compareTo(innermap.get(coord2));
-			        }
-				}
-			);
-	}
+	private final Map<ACoordinate<ASurveyAttribute, AValue>, Double> innermap; 
 
 	public GosplBasicDistribution(Map<Set<AValue>, Double> sampleDistribution) {
-		this();
-		innermap.putAll(sampleDistribution.entrySet()
-				.parallelStream().collect(Collectors.toMap(e -> safeCoordinateCreation(e.getKey()), Entry::getValue)));
-	}
-
-	private ACoordinate<ASurveyAttribute, AValue> safeCoordinateCreation(Set<AValue> coordValues) {
-		ACoordinate<ASurveyAttribute, AValue> coordinate = null;
-		try {
-			coordinate = new GosplCoordinate(coordValues);
-		} catch (MatrixCoordinateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return coordinate;
+		if(sampleDistribution.isEmpty())
+			throw new IllegalArgumentException("Sample distribution cannot be empty");
+		innermap = sampleDistribution.entrySet().parallelStream()
+				.sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(e -> new GosplCoordinate(e.getKey()), e -> e.getValue(), 
+						(e1, e2) -> e1, LinkedHashMap::new));
 	}
 
 	public GosplBasicDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this();
-		innermap.putAll(distribution.getMatrix().entrySet()
-				.parallelStream().collect(Collectors.toMap(Entry::getKey, e -> e.getValue().getValue())));
+		innermap = distribution.getMatrix().entrySet().stream()
+				.sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue(), 
+						(e1, e2) -> e1, LinkedHashMap::new));
 	}
-	
+
 	@Override
 	public int size() {
 		return innermap.size();
@@ -95,37 +75,6 @@ public class GosplBasicDistribution implements SortedMap<ACoordinate<ASurveyAttr
 	@Override
 	public void clear() {
 		innermap.clear();
-	}
-
-	@Override
-	public Comparator<? super ACoordinate<ASurveyAttribute, AValue>> comparator() {
-		return innermap.comparator();
-	}
-
-	@Override
-	public SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> subMap(ACoordinate<ASurveyAttribute, AValue> fromKey,
-			ACoordinate<ASurveyAttribute, AValue> toKey) {
-		return innermap.subMap(fromKey, toKey);
-	}
-
-	@Override
-	public SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> headMap(ACoordinate<ASurveyAttribute, AValue> toKey) {
-		return innermap.headMap(toKey);
-	}
-
-	@Override
-	public SortedMap<ACoordinate<ASurveyAttribute, AValue>, Double> tailMap(ACoordinate<ASurveyAttribute, AValue> fromKey) {
-		return innermap.tailMap(fromKey);
-	}
-
-	@Override
-	public ACoordinate<ASurveyAttribute, AValue> firstKey() {
-		return innermap.firstKey();
-	}
-
-	@Override
-	public ACoordinate<ASurveyAttribute, AValue> lastKey() {
-		return innermap.lastKey();
 	}
 
 	@Override

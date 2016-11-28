@@ -4,7 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import gospl.distribution.exception.MatrixCoordinateException;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
 
 /**
  * Represent the coordinate system of a coordinate matrix. Coordinates represent correlation between 
@@ -25,9 +26,9 @@ public abstract class ACoordinate<D, A> {
 	private Set<A> coordinate;
 	private int hashIndex = -1;
 	
-	protected ACoordinate(Set<A> coordinate) throws MatrixCoordinateException{
+	protected ACoordinate(Set<A> coordinate) {
 		if(!isCoordinateSetComplient(coordinate))
-			throw new MatrixCoordinateException("Coordinate must complies to the moto: One attribute, one value");
+			throw new IllegalArgumentException("Coordinate must complies to the moto: One attribute, one value");
 		this.coordinate = coordinate;
 	}
 	

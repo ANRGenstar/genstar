@@ -19,28 +19,28 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.AttributeFactory;
 import core.io.survey.attribut.GSEnumAttributeType;
-import core.io.survey.configuration.GSSurveyFile;
-import core.io.survey.configuration.GSSurveyType;
-import core.io.survey.configuration.GosplConfigurationFile;
-import core.io.survey.configuration.GosplXmlSerializer;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
+import gospl.metamodel.GSSurveyFile;
+import gospl.metamodel.GSSurveyType;
+import gospl.metamodel.configuration.GosplConfigurationFile;
+import gospl.metamodel.configuration.GosplXmlSerializer;
 
 public class GosplRouenConf {
 
-	public static String INDIV_CLASS_PATH = "../genstar/template/Rouen/Rouen_insee_indiv";
+	public static String INDIV_CLASS_PATH = "../template/Rouen/Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
 	public static String indiv1 = "Age & Couple-Tableau 1.csv";
 	public static String indiv2 = "Age & Sexe & CSP-Tableau 1.csv";
 	public static String indiv3 = "Age & Sexe-Tableau 1.csv";
 	
-	public static String HHOLD_CLASS_PATH = "../genstar/template/Rouen/Rouen_insee_menage";
+	public static String HHOLD_CLASS_PATH = "../template/Rouen/Rouen_insee_menage";
 	public static String HHOLD_EXPORT = "GSC_RouenHoushold";
 	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
 	public static String menage2 = "Taille ménage & CSP référent-Tableau 1.csv";
 	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
 	
-	public static String SAMPLE_CLASS_PATH = "../genstar/template/Rouen/Rouen_sample";
+	public static String SAMPLE_CLASS_PATH = "../template/Rouen/Rouen_sample";
 	public static String SAMPLE_EXPORT = "GSC_RouenSample";
 	public static String sample1 = "Rouen_sample_IRIS.csv";
 
@@ -158,11 +158,11 @@ public class GosplRouenConf {
 				// Setup "COUPLE" attribute: INDIVIDUAL
 				// --------------------------
 				
-				sampleAttributes.add(attf.createAttribute("Couple", GSEnumDataType.Integer, 
-						Arrays.asList("1", "2"),
+				indivAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
 						GSEnumAttributeType.unique));
-				indivAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
+				sampleAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
+						Arrays.asList("1", "2"),
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
 						GSEnumAttributeType.unique));
 				
@@ -170,9 +170,9 @@ public class GosplRouenConf {
 				// Setup "SEXE" attribute: INDIVIDUAL
 				// -------------------------
 				
-				sampleAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
-						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
 				indivAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
+						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
+				sampleAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
 						Arrays.asList("1", "2"),
 						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
 				
@@ -228,7 +228,8 @@ public class GosplRouenConf {
 				// --------------------------
 				
 				householdAttributes.add(attf.createAttribute("Taille", GSEnumDataType.Integer, 
-						Arrays.asList("1 personne", "2 personnes", "3 personnes", "4 personnes", "5 personnes", "6 personnes ou plus"), 
+						Arrays.asList("1 personne", "2 personnes", "3 personnes", "4 personnes", "5 personnes", "6 personnes ou plus"),
+						Arrays.asList("1", "2", "3", "4", "5", "6"),
 						GSEnumAttributeType.unique));
 				
 				// --------------------------

@@ -14,11 +14,10 @@ import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import core.io.survey.configuration.GSSurveyType;
-import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
+import gospl.metamodel.GSSurveyType;
 
 /**
  * TODO: javadoc
@@ -38,8 +37,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
-	public AFullNDimensionalMatrix(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) 
-			throws MatrixCoordinateException {
+	public AFullNDimensionalMatrix(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
 		this.matrix = new HashMap<>(dimensions.entrySet().stream()
 				.mapToInt(d -> d.getValue().size())

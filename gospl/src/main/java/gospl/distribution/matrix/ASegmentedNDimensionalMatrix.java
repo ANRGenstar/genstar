@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import core.io.survey.configuration.GSSurveyType;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.metamodel.GSSurveyType;
 
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		INDimensionalMatrix<ASurveyAttribute, AValue, T> {
@@ -32,7 +32,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	public ASegmentedNDimensionalMatrix(Set<AFullNDimensionalMatrix<T>> jointDistributionSet) throws IllegalDistributionCreation {
 		this();
 		if(jointDistributionSet.isEmpty())
-			throw new IllegalDistributionCreation("Not any distributions to fill in the conditional distribution"); 
+			throw new IllegalArgumentException("Not any distributions to fill in the conditional distribution"); 
 		this.jointDistributionSet.addAll(jointDistributionSet);
 		if(jointDistributionSet.stream().map(jd -> jd.getMetaDataType()).collect(Collectors.toSet()).size() > 1)
 			throw new IllegalDistributionCreation("Divergent frame of reference among sub joint distribution");

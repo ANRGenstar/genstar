@@ -2,9 +2,13 @@ package core.io.survey.attribut;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import core.metamodel.IValue;
+import core.io.survey.attribut.value.AValue;
 import core.util.data.GSEnumDataType;
 
 /**
@@ -15,6 +19,9 @@ import core.util.data.GSEnumDataType;
  */
 public class MappedAttribute extends ASurveyAttribute {
 
+	/*
+	 * Keys refer to this attribute values, and values refer to referent attribute values
+	 */
 	private Map<Set<String>, Set<String>> mapper;
 
 	public MappedAttribute(String name, GSEnumDataType dataType, ASurveyAttribute referentAttribute,
@@ -22,7 +29,7 @@ public class MappedAttribute extends ASurveyAttribute {
 		super(name, dataType, referentAttribute);
 		this.mapper = mapper;
 	}
-	
+
 	@Override
 	public boolean isRecordAttribute() {
 		return false;
@@ -33,17 +40,14 @@ public class MappedAttribute extends ASurveyAttribute {
 	}
 
 	@Override
-	public IValue findMatchingAttributeValue(IValue val) {
-		if(mapper.values().stream().anyMatch(set -> set.contains(val.getInputStringValue())))
-			return mapper.entrySet().stream().filter(e -> e.getValue()
-					.stream().anyMatch(s -> s.equals(val.getInputStringValue())))
-					.map(e -> getValues().stream().filter(av -> av.getInputStringValue().equals(e.getKey())).findFirst().get())
-					.findFirst().get();
-		if(mapper.keySet().stream().anyMatch(set -> set.contains(val.getInputStringValue())))
-			return mapper.keySet().stream().filter(s -> s.contains(val.getInputStringValue()))
-					.map(s -> getValues().stream().filter(av -> s.contains(av.getInputStringValue())).findFirst().get())
-					.findFirst().get();
-		return getEmptyValue();
+	public Set<AValue> findMappedAttributeValues(AValue val) {
+		Optional<Entry<Set<String>, Set<String>>> optMap = mapper.entrySet().stream()
+				.filter(e -> e.getKey().contains(val.getInputStringValue())).findFirst();
+		if(optMap.isPresent())
+			return this.getReferentAttribute().getValues().stream()
+					.filter(refVal -> optMap.get().getValue().contains(refVal.getInputStringValue()))
+					.collect(Collectors.toSet());
+		return Stream.of(this.getEmptyValue()).collect(Collectors.toSet());
 	}
-	
+
 }

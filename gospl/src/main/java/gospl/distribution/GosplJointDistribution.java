@@ -5,14 +5,13 @@ import java.util.Set;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
-import core.io.survey.configuration.GSSurveyType;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
-import gospl.distribution.exception.MatrixCoordinateException;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.metamodel.GSSurveyType;
 
 /**
  * TODO: javadoc
@@ -22,7 +21,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 
-	protected GosplJointDistribution(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) throws MatrixCoordinateException {
+	protected GosplJointDistribution(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) {
 		super(dimensionAspectMap, metaDataType);
 	}
 		

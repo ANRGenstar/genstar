@@ -63,7 +63,7 @@ public class AttributeFactory {
 	}
 
 	/**
-	 * Method that permit to instantiate specific case of {@link ASurveyAttribute}: {@link RecordAttribute} and {@link MappedAttribute}
+	 * Method that permit to instantiate specific case of {@link ASurveyAttribute}: that is {@link MappedAttribute}
 	 * <p>
 	 * TODO: explain how
 	 * 
@@ -102,6 +102,19 @@ public class AttributeFactory {
 		return createAttribute(name, dataType, inputValues, modelValues, attributeType, null, Collections.emptyMap());
 	}
 	
+	/**
+	 * TODO: javadoc
+	 * 
+	 * @param name
+	 * @param dataType
+	 * @param inputValues
+	 * @param modelValues
+	 * @param attributeType
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
 	public ASurveyAttribute createAttribute(String name, GSEnumDataType dataType, List<String> inputValues, List<String> modelValues,
 			GSEnumAttributeType attributeType, ASurveyAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSIllegalRangedData {
 		ASurveyAttribute att = null;
@@ -166,6 +179,7 @@ public class AttributeFactory {
 		switch (attributeType) {
 		case record:
 			vals.add(new UniqueValue(modelValues.get(0), dataType, attribute));
+			return vals;
 		case unique:
 			for(int i = 0; i < inputValues.size(); i++)
 				if(dataType.isNumericValue())
