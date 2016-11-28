@@ -1,9 +1,15 @@
 package spin.algo;
 
-/** Interface de générateur de réseau, 
+import spin.objects.NetworkEntity;
+
+/** Interface de générateur de réseau, commun a tous les générateurs.
  * 
  *
  */
-public interface INetworkGenerator {
+public interface INetworkGenerator <T extends NetworkEntity, NetworkValue>{
+
+	
+	
+	
 	
 }
