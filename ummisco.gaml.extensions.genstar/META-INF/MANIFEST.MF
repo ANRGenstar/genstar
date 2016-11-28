@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Genstar
+Bundle-SymbolicName: ummisco.gaml.extensions.genstar;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Require-Bundle: msi.gama.core;bundle-version="1.7.0",
+ core;bundle-version="1.0.0",
+ genstar;bundle-version="1.0.0",
+ gospl;bundle-version="1.0.0"
