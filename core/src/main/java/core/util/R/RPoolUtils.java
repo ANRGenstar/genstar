@@ -95,6 +95,9 @@ public final class RPoolUtils {
 	
 
 	public static void returnRSession(Rsession session) {
+		// clean the session
+		session.eval("rm(list=ls())"); // all=TRUE
+		// return it to the pool
 		synchronized (poolLocker) {
 			poolRunning.remove(session);
 			poolAvailable.add(session);
