@@ -119,14 +119,14 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 		List<String> lines = new ArrayList<>();
 		for(int i = 0; i < attributes.stream().mapToInt(att -> att.getValues().size()).max().getAsInt()+1; i++)
 			lines.add("");
+		System.out.println("Headers done !");
 		for(ASurveyAttribute attribute : attributes){
 			int lineNumber = 0;
 			Set<AValue> vals = new HashSet<>(attribute.getValues());
 			vals.add(attribute.getEmptyValue());
 			for(AValue value : vals){
-				long valCount = this.population
-						.stream().filter(e -> e.getValues()
-								.stream().anyMatch(ea -> ea.equals(value))).count();
+				long valCount = this.population.parallelStream()
+						.filter(e -> e.getValueForAttribute(attribute).equals(value)).count();
 				double valProp =  Math.round(Math.round(((valCount * 1d / this.population.size()) * 10000))) / 100d;
 				if(lines.get(lineNumber).isEmpty())
 					lines.set(lineNumber, value.getStringValue() + csvSep + valCount + csvSep + valProp);
@@ -139,7 +139,9 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 					lines.set(i, lines.get(i) + csvSep + "" + csvSep + "");
 				else
 					lines.set(i, lines.get(i) + csvSep + "" + csvSep + "" + csvSep + "");
+			System.out.println("Attribute "+attribute+" done !");
 		}
+		System.out.println("Start joining lines to one another");
 		report += String.join("\n", lines);
 		return report;
 	}
