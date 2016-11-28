@@ -29,6 +29,26 @@ public final class RPoolUtils {
 	 * Closes all the R sessions. Should be called before leaving the program.
 	 */
 	public static void closeAllSessions() {
+
+		try {
+			logger.debug("closing all the R connections...");
+			for (Rsession r: poolAvailable) {
+				try {
+					r.end();
+				} catch (RuntimeException e) {
+					logger.warn("error while closing a R connection, some resources might not be cleaned.", e);
+				}
+			}
+			for (Rsession r: poolRunning) {
+				try {
+					r.end();
+				} catch (RuntimeException e) {
+					logger.warn("error while closing a R connection, some resources might not be cleaned.", e);
+				}
+			}
+		} catch (RuntimeException e) {
+			logger.warn("error while closing the R connections, some resources might not be cleaned.", e);
+		}
 		
 	}
 

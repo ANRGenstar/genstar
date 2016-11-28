@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.hsqldb.lib.HashSet;
 import org.junit.Test;
 import org.math.R.Rsession;
 
