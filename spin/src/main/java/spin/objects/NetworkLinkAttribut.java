@@ -4,13 +4,12 @@ import java.util.Set;
 
 import core.metamodel.IAttribute;
 
-/** correspond aux attributs from et to
- * d'un lien
+/** Les attributs d'un lien. a savoir les noeuds FROM et TO, LE POIDS, l'orientation
  * 
  * @author Felix
  *
  */
-public class NetworkAttribut implements IAttribute<NetworkValue>{
+public class NetworkLinkAttribut implements IAttribute<NetworkLinkValue>{
 
 	@Override
 	public String getAttributeName() {
@@ -19,25 +18,25 @@ public class NetworkAttribut implements IAttribute<NetworkValue>{
 	}
 
 	@Override
-	public Set<NetworkValue> getValues() {
+	public Set<NetworkLinkValue> getValues() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public boolean setValues(Set<NetworkValue> values) {
+	public boolean setValues(Set<NetworkLinkValue> values) {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
-	public NetworkValue getEmptyValue() {
+	public NetworkLinkValue getEmptyValue() {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void setEmptyValue(NetworkValue emptyValue) {
+	public void setEmptyValue(NetworkLinkValue emptyValue) {
 		// TODO Auto-generated method stub
 		
 	}
