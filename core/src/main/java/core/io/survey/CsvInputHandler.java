@@ -16,37 +16,41 @@ class CsvInputHandler implements IGSSurvey {
 	
 	private final char DEFAULT_SEPARATOR = ',';
 	private List<String[]> dataTable;
-	private CSVReader reader;
 	private String surveyFileName;
 	
 	protected CsvInputHandler(String fileName) throws IOException{
-		reader = new CSVReader(new FileReader(fileName), DEFAULT_SEPARATOR);
+		CSVReader reader = new CSVReader(new FileReader(fileName), DEFAULT_SEPARATOR);
 		dataTable = reader.readAll();
 		surveyFileName = fileName;
+		reader.close();
 	}
 	
 	protected CsvInputHandler(String fileName, char csvSeparator) throws IOException{
-		reader = new CSVReader(new FileReader(fileName), csvSeparator);
+		CSVReader reader = new CSVReader(new FileReader(fileName), csvSeparator);
 		dataTable = reader.readAll();
 		surveyFileName = fileName;
+		reader.close();
 	}
 	
 	protected CsvInputHandler(File file) throws IOException {
-		reader = new CSVReader(new FileReader(file), DEFAULT_SEPARATOR);
+		CSVReader reader = new CSVReader(new FileReader(file), DEFAULT_SEPARATOR);
 		dataTable = reader.readAll();
 		surveyFileName = file.getName();
+		reader.close();
 	}
 	
 	protected CsvInputHandler(File file, char csvSeparator) throws IOException {
-		reader = new CSVReader(new FileReader(file), csvSeparator);
+		CSVReader reader = new CSVReader(new FileReader(file), csvSeparator);
 		dataTable = reader.readAll();
 		surveyFileName = file.getName();
+		reader.close();
 	}
 
 	protected CsvInputHandler(String fileName, InputStream surveyIS) throws IOException {
-		reader = new CSVReader(new InputStreamReader(surveyIS), DEFAULT_SEPARATOR);
+		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS), DEFAULT_SEPARATOR);
 		dataTable = reader.readAll();
 		surveyFileName = fileName;
+		reader.close();
 	}
 
 // ------------------------ unique value parser ------------------------ //
