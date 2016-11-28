@@ -23,6 +23,7 @@
 		<module>core</module>
 		<module>gospl</module>
 		<module>spll</module>
+		<module>spin</module>
 	</modules>
 
 	<build>
