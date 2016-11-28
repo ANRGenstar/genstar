@@ -14,6 +14,7 @@ import core.io.geo.ShapeFile;
 import core.io.geo.entity.GSFeature;
 
 public class GSExportFactory {
+	/** djshklkfhdsl*/
 	
 	public static ShapeFile createShapeFile(File shapefile, Collection<GSFeature> features) 
 			throws IOException, SchemaException {
