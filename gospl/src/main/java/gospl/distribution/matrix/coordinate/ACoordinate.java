@@ -4,9 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
-
 /**
  * Represent the coordinate system of a coordinate matrix. Coordinates represent correlation between 
  * parametric aspect {@code <A>}: there must be only one aspect per matrix dimension, but could have from 2 to
