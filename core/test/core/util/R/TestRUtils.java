@@ -1,4 +1,4 @@
-package test.util.R;
+package core.util.R;
 
 import static org.junit.Assert.*;
 

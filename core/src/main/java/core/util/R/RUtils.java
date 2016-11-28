@@ -11,11 +11,11 @@ import org.rosuda.REngine.REXPMismatchException;
  * 
  * Basic features include:
  * <ul>
- * <li>Test if R is available: TODO </li>
- * <li>Obtain an Rsession object to run R commands directly: TODO</li>
+ * <li>Test if R is available: isRAvailable()</li>
+ * <li>Obtain an Rsession object to run R commands directly: createNewLocalRSession()</li>
  * </ul>
  * 
- * If you intend to do an intensive usage of R, have a look to RPollUtils TODO.
+ * If you intend to do an intensive usage of R, have a look to RPollUtils .
  * 
  * @author Samuel Thiriot
  */
@@ -29,7 +29,7 @@ public final class RUtils {
 	/**
 	 * The logger used for Utils.
 	 */
-	private static Logger logger = LogManager.getLogger("RUtils");
+	private static Logger logger = LogManager.getLogger();
 	
 	/**
 	 * Defines after how long - in milliseconds - an R session will be considered as not reactive anymore/
@@ -193,6 +193,23 @@ public final class RUtils {
 		
 	}
 	
+
+	/**
+	 * tests the R session by asking for the R.version.
+	 * Returns true if the command was evaluated with no error.
+	 * @param r
+	 * @return
+	 */
+	public static boolean isResponsive(Rsession r) {
+		try {
+			r.eval("R.version");
+			final String lastError = r.connection.getLastError();
+			return lastError == null || lastError.equals("OK");
+		} catch (Exception e) {
+			return false;
+		}
+		
+	}
 	
 	public static Integer evalAsInteger(Rsession session, String cmd) {
 		
