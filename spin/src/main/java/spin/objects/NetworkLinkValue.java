@@ -3,13 +3,11 @@ package spin.objects;
 import core.metamodel.IAttribute;
 import core.metamodel.IValue;
 
-/** La valeur associé au couple attribut, valeur
- * de l'entite lien d'un réseau est
- * l'entité from et l'entité two 
- * 
- *
+/** La valeur d'attribut pour les attributs de la classe networkLien
+ * par exemple, la valeur de l'attribut FROM sera noeud 1
+ * ou encore attrivut POIDS aura une valeur 10
  */
-public class NetworkValue implements IValue {
+public class NetworkLinkValue implements IValue {
 
 	@Override
 	public String getStringValue() {
