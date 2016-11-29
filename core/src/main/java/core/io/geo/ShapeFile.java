@@ -1,13 +1,21 @@
 package core.io.geo;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.AbstractMap;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,10 +37,13 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import au.com.bytecode.opencsv.CSVReader;
 import core.io.geo.entity.GSFeature;
 import core.io.geo.entity.GeoEntityFactory;
 import core.io.geo.entity.attribute.AGeoAttribute;
+import core.io.geo.entity.attribute.RawGeoAttribute;
 import core.io.geo.entity.attribute.value.AGeoValue;
+import core.io.geo.entity.attribute.value.RawGeoData;
 import core.io.geo.iterator.GSFeatureIterator;
 
 public class ShapeFile implements IGSGeofile {
@@ -140,6 +151,68 @@ public class ShapeFile implements IGSGeofile {
 	
 	public DataStore getStore() {
 		return dataStore;
+	}
+	
+	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, List<String> newAttributes) {
+		if (features== null && features.isEmpty()) return;
+		if (!csvFile.exists()) return;
+		
+		try {
+			CSVReader reader = new CSVReader(new FileReader(csvFile), seperator);
+			List<String[]> dataTable = reader.readAll();
+			reader.close();
+			Map<String, Map<String, String>> values = new Hashtable<String, Map<String, String>>();
+			List<String> names = Arrays.asList(dataTable.get(0));
+			int keyCSVind = names.contains(keyCSV) ? names.indexOf(keyCSV) : -1;
+			if (keyCSVind == -1) return;
+			Map<String, Integer> attIndexTmp = newAttributes.stream().collect(Collectors.toMap(s -> s, s -> names.contains(s) ? names.indexOf(s) : - 1));
+			Map<String, Integer> attIndex = new Hashtable<String, Integer>();
+			Map<String, AGeoAttribute> attAGeo = new Hashtable<String, AGeoAttribute>();
+			for (String n : attIndexTmp.keySet()) {
+				int id = attIndexTmp.get(n);
+				if (id != -1) {
+					attIndex.put(n, id);
+					attAGeo.put(n, new RawGeoAttribute(n));
+				}
+			}
+			
+			for (String[] data : dataTable) {
+				String id = data[keyCSVind];
+				Map<String, String> vals = new Hashtable<String, String>();
+				for (String name : attIndex.keySet()) {
+					int idat = attIndex.get(name);
+					vals.put(name, data[idat]);
+				}
+				values.put(id, vals);
+			}
+			NumberFormat defaultFormat = NumberFormat.getInstance();
+					
+			for (GSFeature ft : features) {
+				Collection<String> properties = ft.getPropertiesAttribute();
+				if (!properties.contains(keyAttribute)) continue;
+				String objid = ft.getValueForAttribute(keyAttribute).getStringValue();
+				
+				Map<String, String> vals = values.get(objid);
+				if (vals == null) continue;
+				for (String vN : vals.keySet()) {
+					AGeoAttribute attri = attAGeo.get(vN);
+					
+					String v = vals.get(vN);
+					try {
+						Number value = defaultFormat.parse(v);
+						ft.addAttribute(attri, new RawGeoData(attri,value));
+					} catch (ParseException e){
+						ft.addAttribute(attri, new RawGeoData(attri,  v));
+					}
+					
+					
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public String toString() {

@@ -1,8 +1,10 @@
 package spll.popmapper.normalizer;
 
 import java.util.Map;
+import java.util.Random;
 
 import core.io.geo.entity.GSFeature;
+import core.util.random.GenstarRandom;
 
 /**
  * TODO: make top value control, not just floor value 
@@ -19,6 +21,8 @@ public abstract class ASPLNormalizer {
 	protected double floorValue;
 	
 	protected Number noData;
+	
+	protected final Random random = GenstarRandom.getInstance();
 	
 	/**
 	 * TODO: javadoc

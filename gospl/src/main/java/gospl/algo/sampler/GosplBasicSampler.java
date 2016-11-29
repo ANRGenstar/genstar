@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
@@ -50,9 +51,9 @@ public class GosplBasicSampler extends GosplAbstractSampler {
 	
 	@Override
 	public ACoordinate<ASurveyAttribute, AValue> draw() {
-		double rand = random.nextDouble();
+		double rand = GenstarRandom.getInstance().nextDouble();
 		while(rand > upperBoundRng)
-			rand = random.nextDouble();
+			rand = GenstarRandom.getInstance().nextDouble();
 		int idx = -1;
 		for(double proba : indexedProbabilitySum){
 			idx++;
@@ -63,6 +64,7 @@ public class GosplBasicSampler extends GosplAbstractSampler {
 				+ "drawn random "+rand+" | probability bounds ["+indexedProbabilitySum.get(0)+" : "+indexedProbabilitySum.get(indexedProbabilitySum.size()-1)+"]");
 	}
 
+	
 		
 	// -------------------- utility -------------------- //
 

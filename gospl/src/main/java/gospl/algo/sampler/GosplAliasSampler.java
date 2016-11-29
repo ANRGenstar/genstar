@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
@@ -35,6 +36,7 @@ public class GosplAliasSampler extends GosplAbstractSampler {
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> initProba;
 	
+
 	/* The probability and alias tables. */
 	private int[] alias;
 	private double[] probability;
@@ -121,6 +123,10 @@ public class GosplAliasSampler extends GosplAbstractSampler {
 			probability[large.removeLast()] = 1.0;
 	}
 
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.setDistribution(new GosplBasicDistribution(distribution));
+	}
 
 	// -------------------- main contract -------------------- //
 
@@ -133,10 +139,10 @@ public class GosplAliasSampler extends GosplAbstractSampler {
 	@Override
 	public ACoordinate<ASurveyAttribute, AValue> draw() {
 		/* Generate a fair die roll to determine which column to inspect. */
-		int column = random.nextInt(probability.length);
+		int column =  GenstarRandom.getInstance().nextInt(probability.length);
 
 		/* Generate a biased coin toss to determine which option to pick. */
-		boolean coinToss = random.nextDouble() < probability[column];
+		boolean coinToss = GenstarRandom.getInstance().nextDouble() < probability[column];
 		
 		return indexedKey.get(coinToss ? column : alias[column]);
 	}

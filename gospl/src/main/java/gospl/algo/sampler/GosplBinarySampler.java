@@ -6,10 +6,14 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandom;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
@@ -34,7 +38,7 @@ public class GosplBinarySampler extends GosplAbstractSampler {
 	
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
-		
+	
 	private final double EPSILON = Math.pow(10, -6);
 	
 	// -------------------- setup methods -------------------- //
@@ -64,7 +68,7 @@ public class GosplBinarySampler extends GosplAbstractSampler {
 		
 	@Override
 	public ACoordinate<ASurveyAttribute, AValue> draw(){
-		double rand = random.nextDouble();
+		double rand = GenstarRandom.getInstance().nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
 		int mid;
@@ -86,7 +90,6 @@ public class GosplBinarySampler extends GosplAbstractSampler {
 				+ "random ("+rand+"), floor ("+floor+" = "+indexedProbabilitySum.get(floor)+") and top ("+top+" = "+indexedProbabilitySum.get(top)+") could not draw index\n"
 						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
 	}
-	
 	
 	// -------------------- utility -------------------- //
 	

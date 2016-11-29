@@ -2,6 +2,10 @@ package core.metamodel;
 
 import java.util.Collection;
 
+import com.vividsolutions.jts.geom.Point;
+
+import core.io.geo.entity.attribute.value.AGeoValue;
+
 /**
  * An entity might represent an household, an individual, or even a geographical entity etc.
  * 
@@ -30,5 +34,17 @@ public interface IEntity<A extends IAttribute<V>, V extends IValue> {
 	 * @return
 	 */
 	public Collection<V> getValues();
+	 
+	public Point getLocation();
+	
+	public IEntity<?,?> getNest();
+	
+	public void setLocation(Point location);
+	
+	public void setNest(IEntity<?,?> entity);
+	
+	public V getValueForAttribute(String property);
+	
+	
 	
 }

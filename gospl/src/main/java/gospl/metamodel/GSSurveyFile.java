@@ -22,7 +22,7 @@ import core.io.survey.IGSSurvey;
 
 /**
  * 
- * TODO: javadoc
+ * A survey 
  * 
  * @author kevinchapuis
  *

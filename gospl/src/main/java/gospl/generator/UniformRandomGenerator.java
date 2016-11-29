@@ -1,11 +1,9 @@
 package gospl.generator;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -15,16 +13,27 @@ import core.io.survey.attribut.GSEnumAttributeType;
 import core.io.survey.attribut.value.AValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
+import core.util.random.GenstarRandom;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
+/**
+ * 
+ * Fully random generator: attribute and they values are randomly init. i.e. number of attribute,
+ * number of value for each attribute, attribute name and value are choose randomly <p>
+ * 
+ * Use intended to supply any localization and / or interaction
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 
 	private int maxAtt;
 	private int maxVal;
 	
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-	Random random = ThreadLocalRandom.current();
+	Random random = GenstarRandom.getInstance();
 
 	public UniformRandomGenerator(int maxAtt, int maxVal) {
 		this.maxAtt = maxAtt;
@@ -39,15 +48,9 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		
 		// Attribute Factory
 		AttributeFactory attF = new AttributeFactory();
-		Set<ASurveyAttribute> attSet = new HashSet<>();
-		for(int i = 0; i < random.nextInt(maxAtt)+1; i++){
-			ASurveyAttribute asa;
-			if(random.nextDouble() > 0.5)
-				asa = createStringAtt(attF);
-			else
-				asa = createIntegerAtt(attF);
-			attSet.add(asa);
-		}
+		Set<ASurveyAttribute> attSet = IntStream.range(0, random.nextInt(maxAtt)+1)
+				.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
+				.collect(Collectors.toSet());
 		
 		IntStream.range(0, numberOfIndividual).forEach(i -> gosplPop.add(
 				new GosplEntity(attSet.stream().collect(Collectors.toMap(att -> att, 

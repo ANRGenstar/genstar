@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -45,12 +44,12 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 	private static int pixelRendered = 0;
 
-	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
+	public SPLAreaMapperBuilder(ShapeFile mainFile, String propertyName,
 			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables) {
 		this(mainFile, propertyName, ancillaryFiles, variables, new LMRegressionOLS());
 	}
 	
-	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
+	public SPLAreaMapperBuilder(ShapeFile mainFile, String propertyName,
 			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables, 
 			ISPLRegressionAlgo<SPLVariable, Double> regAlgo) {
 		super(mainFile, propertyName, ancillaryFiles);
@@ -80,7 +79,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * 
 	 */
 	@Override
-	public float[][] buildOutput(RasterFile outputFormat, boolean intersect, boolean integer) 
+	public float[][] buildOutput(RasterFile outputFormat, boolean intersect, boolean integer, Double targetPop) 
 			throws IllegalRegressionException, TransformException, 
 			IndexOutOfBoundsException, IOException, GSMapperException {
 		if(mapper == null)
@@ -126,8 +125,8 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		pixelRendered = 0;
 		
 		// Normalize output
-		float output = (float) mainFile.getGeoData().parallelStream()
-				.mapToDouble(feature -> Double.valueOf(feature.getProperty(propertyName).getValue().toString()))
+		float output = targetPop != null ? targetPop.floatValue() : (float) mainFile.getGeoData().parallelStream()
+				.mapToDouble(feature -> feature.getValueForAttribute(propertyName).getNumericalValue().doubleValue())
 				.sum();
 		super.normalizer.process(pixels, output, integer);
 		
@@ -162,7 +161,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		}
 		
 		// Get the related feature in main space features
-		Point pixelLocation = refPixel.getPosition();
+		Point pixelLocation = refPixel.getLocation();
 		Optional<GSFeature> opFeature = mainFeatures.stream().filter(ft -> pixelLocation.within(ft.getGeometry())).findFirst();
 
 		if(!opFeature.isPresent())

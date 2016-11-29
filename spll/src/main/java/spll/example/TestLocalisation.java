@@ -1,15 +1,18 @@
-package spll;
+package spll.example;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.operation.TransformException;
 
@@ -20,9 +23,23 @@ import core.io.geo.GeoGSFileType;
 import core.io.geo.IGSGeofile;
 import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
-import core.io.geo.entity.attribute.value.AGeoValue;
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
 import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
+import gospl.GosplSPTemplate;
+import gospl.algo.IDistributionInferenceAlgo;
+import gospl.algo.IndependantHypothesisAlgo;
+import gospl.algo.sampler.GosplBasicSampler;
+import gospl.algo.sampler.ISampler;
+import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.exception.IllegalControlTotalException;
+import gospl.distribution.exception.IllegalDistributionCreation;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.generator.DistributionBasedGenerator;
+import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.metamodel.GosplPopulation;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
@@ -31,48 +48,41 @@ import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.SPLMapper;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.variable.SPLVariable;
+import spll.popmapper.SPUniformLocalizer;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
-import spll.util.SpllUtil;
 
-public class Localisation {
+public class TestLocalisation {
 
-	/**
-	 * args[0] = The path to available dir to put created files in
-	 * args[1] = Main shape file that contains geometry for the dependent variable
-	 * args[2] = The name (String) of the targeted dependent variable
-	 * args[3] = String of variables to exclude from regression, using ';' to separate from one another
-	 * args[4...] = Shape or raster files that contain explanatory variables (e.g. 30 x 30m raster image of land use or cover)
-	 * First ancillary file define output format
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
+	
+	private static GosplPopulation generatePopulation(int targetPopulation ) {
+		// INPUT ARGS
 		
-		// TODO: to args
-		String outputFileName = "spll_output.tif";
+		Path confFile = Paths.get("sample/Rouen/Rouen_insee_indiv/GSC_RouenIndividual.xml");
 		
-		///////////////////////
-		// INIT VARS FROM ARGS
-		///////////////////////
-		
-		String stringPath = args[0];
-		String stringPathToMainShapefile = args[1];
-		String stringOfMainProperty = args[2];
-		Collection<String> regVarName = Arrays.asList(args[3].split(";"));
-		if(regVarName.size() == 1 && regVarName.iterator().next().isEmpty())
-			regVarName = Collections.emptyList();
-		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
-		for(int i = 4; i < args.length; i++)
-			stringPathToAncilaryGeofiles.add(args[i]);
-		
-		/////////////////////
-		// IMPORT DATA FILES
-		/////////////////////
-		
-		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Bangkok based on Kwaeng (district) population", true);
-		ShapeFile sfAdmin = null;
+		// THE POPULATION TO BE GENERATED
+		GosplPopulation population = null;
+
+		// INSTANCIATE FACTORY
+		GosplDistributionFactory df = null; 
 		try {
-			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
+			df = new GosplDistributionFactory(confFile);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+
+		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS 
+		try {
+			df.buildDistributions();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (InvalidFileTypeException e) {
+			e.printStackTrace();
+		} 
+		
+		// TRANSPOSE SAMPLES INTO IPOPULATION
+		// TODO: yet to be tested
+		try {
+			df.buildSamples();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,6 +91,82 @@ public class Localisation {
 			e.printStackTrace();
 		}
 		
+		// HERE IS A CHOICE TO MAKE BASED ON THE TYPE OF GENERATOR WE WANT:
+		// Choice is made here to use distribution based generator
+		
+		// so we collapse all distribution build from the data
+		INDimensionalMatrix<ASurveyAttribute, AValue, Double> distribution = null;
+		try {
+			distribution = df.collapseDistributions();
+		} catch (IllegalDistributionCreation e1) {
+			e1.printStackTrace();
+		} catch (IllegalControlTotalException e1) {
+			e1.printStackTrace();
+		}
+		
+		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
+		IDistributionInferenceAlgo<ASurveyAttribute, AValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
+		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
+		try {
+			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
+		} catch (IllegalDistributionCreation e1) {
+			e1.printStackTrace();
+		}
+		
+		
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+targetPopulation, true);
+		
+		// BUILD THE GENERATOR
+		ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
+		
+		// BUILD THE POPULATION
+		try {
+			population = ispGenerator.generate(targetPopulation);
+			gspu.sysoStempPerformance("End generating synthetic population: elapse time", GosplSPTemplate.class.getName());
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		}
+		
+		return population;
+	}
+	
+	public static void main(String[] args) {
+		int targetPopulation = 1000;
+		GosplPopulation population = generatePopulation(targetPopulation);
+		
+		///////////////////////
+		// INIT VARS FROM ARGS
+		///////////////////////
+		
+		String stringPathToMainShapefile = "sample/Rouen/Rouen_shp/Rouen_iris.shp";
+		String stringOfMainProperty = "P13_POP";
+		
+		/////////////////////
+		// IMPORT DATA FILES
+		/////////////////////
+		
+		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Rouen based on Iris population", true);
+		ShapeFile sfAdmin = null;
+		try {
+			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
+			List<String> att = new ArrayList<String>();
+			att.add("P13_POP");
+			sfAdmin.addAttributes(new File("sample/Rouen/Rouen_shp/Rouen_iris.csv"), ',', "CODE_IRIS", "IRIS", att);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidFileTypeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
+		stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/CLC12_D076_RGF_S.tif");
+	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B2_rouen.tif");
+	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B3_rouen.tif");
+	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B4_rouen.tif");
+		
+
 		// WARNING: list of regressor file should be transpose to the main CRS projection !!!
 		// Geo data could have divergent referent projection => transposed should be made with care
 		// 
@@ -100,12 +186,6 @@ public class Localisation {
 				e2.printStackTrace();
 			}
 		}
-		
-		String propertyName = sfAdmin.getGeoData().iterator().next()
-				.getPropertyAttribute(stringOfMainProperty).getAttributeName();
-
-		Collection<AGeoValue> regVariables = SpllUtil.getMeaningfullValues(regVarName, endogeneousVarFile);
-		
 		gspu.sysoStempPerformance("Input files data import: done\n", "Main");
 
 		//////////////////////////////////
@@ -116,10 +196,10 @@ public class Localisation {
 		ISPLRegressionAlgo<SPLVariable, Double> regressionAlgo = new LMRegressionOLS();
 		
 		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
-				sfAdmin, propertyName.toString(), endogeneousVarFile, regVariables,
+				sfAdmin, stringOfMainProperty, endogeneousVarFile, new ArrayList<>(),
 				regressionAlgo);
 		gspu.sysoStempPerformance("Setup MapperBuilder to proceed regression: done\n", "Main");
-
+ 
 		// Setup main regressor class: SPLMapper
 		SPLMapper<SPLVariable,Double> spl = null;
 		boolean syso = false;
@@ -158,7 +238,7 @@ public class Localisation {
 		spllBuilder.setNormalizer(new SPLUniformNormalizer(0, RasterFile.DEF_NODATA));
 		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true, null);
+			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true, new Double(targetPopulation));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -180,16 +260,12 @@ public class Localisation {
 		GSBasicStats<Double> bs = new GSBasicStats<>(outList, Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
 		gspu.sysoStempMessage("\nStatistics on output:\n"+bs.getStatReport());
 		
-		/////////////////////////
-		// EXPORT OUTPUT
-		////////////////////////
-		
-		@SuppressWarnings("unused")
+
 		IGSGeofile outputFile = null;
 		try {
 			ReferencedEnvelope env = new ReferencedEnvelope( endogeneousVarFile.get(0).getEnvelope());
 			
-			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, env,outputFormat.getCoordRefSystem());
+			outputFile = GSExportFactory.createGeotiffFile(new File("sample/Rouen/result.tif"), pixelOutput, env,outputFormat.getCoordRefSystem());
 		} catch (IllegalArgumentException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -201,12 +277,21 @@ public class Localisation {
 			e1.printStackTrace();
 		}
 		
+		
 		///////////////////////
 		// MATCH TO POPULATION
 		///////////////////////
 		
-		// TODO
+		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null, outputFile, "Band_0");
+		localizer.localisePopulation();
+		try {
+			GSExportFactory.createShapeFile(new File("sample/Rouen/result.shp"), population, outputFormat.getCoordRefSystem());
+		} catch (IOException | SchemaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
+
 	}
 
 }

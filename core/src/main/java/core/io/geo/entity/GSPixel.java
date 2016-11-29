@@ -36,9 +36,8 @@ public class GSPixel extends AGeoEntity {
 	}
 
 	@Override
-	public Point getPosition() {
+	public Point getLocation() {
 		return new GeometryBuilder().point(pixel.getCenterX(), pixel.getCenterY());
-		//return JTSFactoryFinder.getGeometryFactory().createPoint(new Coordinate(pixel.getCenterX(), pixel.getCenterY()));
 	}
 	
 	@Override
@@ -46,8 +45,8 @@ public class GSPixel extends AGeoEntity {
 		return new GeometryBuilder().polygon(
 				pixel.getMinX(), pixel.getMinY(),
 				pixel.getMinX(), pixel.getMaxY(),
-				pixel.getMaxX(), pixel.getMinY(),
-				pixel.getMaxX(), pixel.getMaxY());
+				pixel.getMaxX(), pixel.getMaxY(),
+				pixel.getMaxX(), pixel.getMinY());
 	}
 	
 	public int getGridX() {
