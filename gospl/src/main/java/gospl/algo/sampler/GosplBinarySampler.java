@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
@@ -38,16 +39,11 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 	
-	private Random random = ThreadLocalRandom.current();
+	private Random random = GenstarRandom.getInstance();
 	
 	private final double EPSILON = Math.pow(10, -6);
 	
 	// -------------------- setup methods -------------------- //
-	
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){

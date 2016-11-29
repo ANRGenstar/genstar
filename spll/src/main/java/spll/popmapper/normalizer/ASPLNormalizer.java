@@ -1,6 +1,7 @@
 package spll.popmapper.normalizer;
 
 import java.util.Map;
+import java.util.Random;
 
 import core.io.geo.entity.GSFeature;
 
@@ -20,13 +21,16 @@ public abstract class ASPLNormalizer {
 	
 	protected Number noData;
 	
+	private final Random random;
+	
 	/**
 	 * TODO: javadoc
 	 * 
 	 * @param floorValue
 	 * @param noData
 	 */
-	public ASPLNormalizer(double floorValue, Number noData){
+	public ASPLNormalizer(Random random, double floorValue, Number noData){
+		this.random = random;
 		this.floorValue = floorValue;
 		this.noData = noData;
 	}
@@ -107,6 +111,10 @@ public abstract class ASPLNormalizer {
 
 	protected boolean equalEpsilon(double value, double target) {
 		return Math.abs(value - target) < EPSILON ? true : false;
+	}
+	
+	protected Random getRandomEngine(){
+		return this.random;
 	}
 	
 }

@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,6 +13,7 @@ import core.io.survey.attribut.GSEnumAttributeType;
 import core.io.survey.attribut.value.AValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
+import core.util.random.GenstarRandom;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
@@ -33,7 +33,7 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 	private int maxVal;
 	
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
-	Random random = ThreadLocalRandom.current();
+	Random random = GenstarRandom.getInstance();
 
 	public UniformRandomGenerator(int maxAtt, int maxVal) {
 		this.maxAtt = maxAtt;

@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,9 +14,9 @@ import core.util.GSBasicStats;
 import core.util.data.GSEnumStats;
 
 public class SPLUniformNormalizer extends ASPLNormalizer {
-
-	public SPLUniformNormalizer(double floorValue, Number noData) {
-		super(floorValue, noData);
+	
+	public SPLUniformNormalizer(Random random, double floorValue, Number noData) {
+		super(random, floorValue, noData);
 	}
 
 	/**
@@ -82,8 +82,8 @@ public class SPLUniformNormalizer extends ASPLNormalizer {
 			float currentVal;
 			int update = errorload < 0 ? -1 : 1;
 			do {
-				intX = ThreadLocalRandom.current().nextInt(matrix.length);
-				intY = ThreadLocalRandom.current().nextInt(matrix[intX].length);
+				intX = super.getRandomEngine().nextInt(matrix.length);
+				intY = super.getRandomEngine().nextInt(matrix[intX].length);
 				currentVal = matrix[intX][intY];
 			} while(currentVal == noData.floatValue()
 					|| currentVal == floorValue && errorload < 0);
@@ -142,7 +142,7 @@ public class SPLUniformNormalizer extends ASPLNormalizer {
 				.map(e -> e.getKey())
 				.collect(Collectors.toList());
 		while(Math.round(errorload) != 0 || iter++ > ITER_LIMIT + Math.abs(errorload)){
-			GSFeature feat = feats.get(ThreadLocalRandom.current().nextInt(feats.size()));
+			GSFeature feat = feats.get(super.getRandomEngine().nextInt(feats.size()));
 			int update = errorload < 0 ? -1 : 1;
 			featureOutput.put(feat, featureOutput.get(feat) + update);
 			errorload -= update;
