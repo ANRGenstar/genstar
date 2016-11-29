@@ -153,7 +153,7 @@ public class ShapeFile implements IGSGeofile {
 		return dataStore;
 	}
 	
-	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, Map<String,String> newAttributes) {
+	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, List<String> newAttributes) {
 		if (features== null && features.isEmpty()) return;
 		if (!csvFile.exists()) return;
 		
@@ -165,7 +165,7 @@ public class ShapeFile implements IGSGeofile {
 			List<String> names = Arrays.asList(dataTable.get(0));
 			int keyCSVind = names.contains(keyCSV) ? names.indexOf(keyCSV) : -1;
 			if (keyCSVind == -1) return;
-			Map<String, Integer> attIndexTmp = newAttributes.keySet().stream().collect(Collectors.toMap(s -> s, s -> names.contains(s) ? names.indexOf(s) : - 1));
+			Map<String, Integer> attIndexTmp = newAttributes.stream().collect(Collectors.toMap(s -> s, s -> names.contains(s) ? names.indexOf(s) : - 1));
 			Map<String, Integer> attIndex = new Hashtable<String, Integer>();
 			Map<String, AGeoAttribute> attAGeo = new Hashtable<String, AGeoAttribute>();
 			for (String n : attIndexTmp.keySet()) {
