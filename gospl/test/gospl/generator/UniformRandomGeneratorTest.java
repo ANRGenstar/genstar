@@ -1,8 +1,6 @@
 package gospl.generator;
 
-import static org.junit.Assert.*;
-
-import java.util.concurrent.ThreadLocalRandom;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -22,7 +20,7 @@ public class UniformRandomGeneratorTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		urg = new UniformRandomGenerator(ThreadLocalRandom.current(), maxAtt, maxVal);
+		urg = new UniformRandomGenerator(maxAtt, maxVal);
 	}
 
 	@Test
