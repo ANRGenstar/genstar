@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.GSExportFactory;
@@ -160,6 +161,7 @@ public class TestLocalisation {
 			e.printStackTrace();
 		}
 		
+		
 		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
 		stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/CLC12_D076_RGF_S.tif");
 	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B2_rouen.tif");
@@ -282,7 +284,7 @@ public class TestLocalisation {
 		// MATCH TO POPULATION
 		///////////////////////
 		
-		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null, outputFile, "Band_0");
+		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null, outputFile, "Band_0", null, null);
 		localizer.localisePopulation();
 		try {
 			GSExportFactory.createShapeFile(new File("sample/Rouen/result.shp"), population, outputFormat.getCoordRefSystem());
@@ -290,8 +292,8 @@ public class TestLocalisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-
 	}
+	
+	
 
 }
