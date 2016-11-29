@@ -27,4 +27,4 @@ bin/
 .idea/
 
 # Mac os
-*.DS_store
+**/.DS_store
