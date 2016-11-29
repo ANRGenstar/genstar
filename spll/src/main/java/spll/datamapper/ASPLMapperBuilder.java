@@ -104,7 +104,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws IOException
 	 * @throws GSMapperException 
 	 */
-	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect, boolean integer) 
+	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect, boolean integer, Double targetPopulation) 
 			throws IllegalRegressionException, TransformException, 
 			IndexOutOfBoundsException, IOException, GSMapperException;
 	

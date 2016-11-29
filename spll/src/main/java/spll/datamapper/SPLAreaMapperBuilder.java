@@ -79,7 +79,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * 
 	 */
 	@Override
-	public float[][] buildOutput(RasterFile outputFormat, boolean intersect, boolean integer) 
+	public float[][] buildOutput(RasterFile outputFormat, boolean intersect, boolean integer, Double targetPop) 
 			throws IllegalRegressionException, TransformException, 
 			IndexOutOfBoundsException, IOException, GSMapperException {
 		if(mapper == null)
@@ -125,7 +125,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		pixelRendered = 0;
 		
 		// Normalize output
-		float output = (float) mainFile.getGeoData().parallelStream()
+		float output = targetPop != null ? targetPop.floatValue() : (float) mainFile.getGeoData().parallelStream()
 				.mapToDouble(feature -> feature.getValueForAttribute(propertyName).getNumericalValue().doubleValue())
 				.sum();
 		super.normalizer.process(pixels, output, integer);

@@ -158,7 +158,7 @@ public class Localisation {
 		spllBuilder.setNormalizer(new SPLUniformNormalizer(0, RasterFile.DEF_NODATA));
 		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true);
+			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true, null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -54,9 +54,9 @@ import spll.popmapper.normalizer.SPLUniformNormalizer;
 public class TestLocalisation {
 
 	
-	private static GosplPopulation generatePopulation() {
+	private static GosplPopulation generatePopulation(int targetPopulation ) {
 		// INPUT ARGS
-		int targetPopulation = 1000;
+		
 		Path confFile = Paths.get("sample/Rouen/Rouen_insee_indiv/GSC_RouenIndividual.xml");
 		
 		// THE POPULATION TO BE GENERATED
@@ -131,7 +131,8 @@ public class TestLocalisation {
 	}
 	
 	public static void main(String[] args) {
-		GosplPopulation population = generatePopulation();
+		int targetPopulation = 1000;
+		GosplPopulation population = generatePopulation(targetPopulation);
 		
 		///////////////////////
 		// INIT VARS FROM ARGS
@@ -237,7 +238,7 @@ public class TestLocalisation {
 		spllBuilder.setNormalizer(new SPLUniformNormalizer(0, RasterFile.DEF_NODATA));
 		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true);
+			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true, new Double(targetPopulation));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
