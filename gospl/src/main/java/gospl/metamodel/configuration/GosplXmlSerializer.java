@@ -97,8 +97,18 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 			throw new FileNotFoundException(valideXmlFile.toString());
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))
 			throw new FileNotFoundException("The file "+valideXmlFile.getName()+" is not an xml file");  
-		else
-			return (GosplConfigurationFile) xs.fromXML(valideXmlFile);
+		
+		String baseDirectory = valideXmlFile.getParentFile().getName();
+
+		GosplConfigurationFile res = (GosplConfigurationFile) xs.fromXML(valideXmlFile);
+		for (GSSurveyFile sf : res.getDataFiles()) {
+			File f = new File(sf.getSurveyFilePath());
+			if (!f.isAbsolute()) {
+				sf._setSurveyFilePath(baseDirectory+File.separator+sf.getSurveyFileName());
+			}
+		}
+
+		return res;
 	}
 	
 	public GosplConfigurationFile deserializeGSConfig(Path xmlFilePath) throws FileNotFoundException{

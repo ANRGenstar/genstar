@@ -29,7 +29,7 @@ import core.io.survey.IGSSurvey;
  */
 public class GSSurveyFile {
 
-	private final String surveyFilePath;
+	private String surveyFilePath;
 	private char csvSeparator = ',';
 
 	private final GSSurveyType dataFileType;
@@ -119,6 +119,14 @@ public class GSSurveyFile {
 
 	public String getSurveyFilePath() {
 		return surveyFilePath;
+	}
+	
+	/**
+	 * for internal usage only (deserialization)
+	 * @param s
+	 */
+	public void _setSurveyFilePath(String s) {
+		surveyFilePath = s;
 	}
 
 	public String getSurveyFileName() {
