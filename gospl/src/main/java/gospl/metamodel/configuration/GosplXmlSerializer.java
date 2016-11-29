@@ -98,7 +98,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))
 			throw new FileNotFoundException("The file "+valideXmlFile.getName()+" is not an xml file");  
 		
-		String baseDirectory = valideXmlFile.getParentFile().getName();
+		String baseDirectory = valideXmlFile.getParentFile().getAbsolutePath();
 
 		GosplConfigurationFile res = (GosplConfigurationFile) xs.fromXML(valideXmlFile);
 		for (GSSurveyFile sf : res.getDataFiles()) {
