@@ -16,6 +16,17 @@
 	<dependencies>
 	
 		<dependency>
+		    <groupId>org.apache.logging.log4j</groupId>
+		    <artifactId>log4j-api</artifactId>
+		    <version>2.7</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.logging.log4j</groupId>
+		    <artifactId>log4j-core</artifactId>
+		    <version>2.7</version>
+		</dependency>
+
+		<dependency>
 			<groupId>net.sf.opencsv</groupId>
 			<artifactId>opencsv</artifactId>
 			<version>2.3</version>
@@ -97,6 +108,14 @@
 		
 		<!-- END OF GEOTOOLS -->
 		
+		<!--  BEGIN OF R -->
+		<dependency>
+	      	<groupId>com.github.yannrichet</groupId>
+	      	<artifactId>Rsession</artifactId>
+	      	<version>1.8.3</version>
+	    </dependency>
+	    <!--  END OF R -->
+	    
 		<!-- 	
 
 		<dependency>
