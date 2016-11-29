@@ -1,5 +1,7 @@
 package spin.objects;
 
+import java.util.Set;
+
 import core.metamodel.IEntity;
 
 /** Noeud du réseau du réseau contenant un individu
@@ -9,5 +11,11 @@ import core.metamodel.IEntity;
  * @param <E>
  */
 public abstract class NetworkNode <E extends IEntity> {
-	E monIndividu;
+	// Entity associated 
+	E individuAssociated;
+	
+	// Connected node
+	Set<NetworkNode<E>> connectedNodes;
+	
+	
 }
