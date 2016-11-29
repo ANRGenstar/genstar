@@ -35,7 +35,7 @@ import spll.popmapper.normalizer.ASPLNormalizer;
 public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
 	protected final ShapeFile mainFile;
-	protected final Name propertyName;
+	protected final String propertyName;
 	
 	protected List<IGSGeofile> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
@@ -44,7 +44,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
 	protected ASPLNormalizer normalizer;
 	
-	public ASPLMapperBuilder(ShapeFile mainFile, Name propertyName,
+	public ASPLMapperBuilder(ShapeFile mainFile, String propertyName,
 			List<IGSGeofile> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.propertyName = propertyName;
@@ -129,7 +129,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 		return mainFile;
 	}
 	
-	public Name getMainPropertyName(){
+	public String getMainPropertyName(){
 		return propertyName;
 	}
 	

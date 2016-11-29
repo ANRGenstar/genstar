@@ -115,9 +115,9 @@ public class Localisation {
 		
 		// Choice have been made to regress from areal data count
 		ISPLRegressionAlgo<SPLVariable, Double> regressionAlgo = new LMRegressionOLS();
-		
+		 
 		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
-				sfAdmin, propertyName, endogeneousVarFile, regVariables,
+				sfAdmin, propertyName.toString(), endogeneousVarFile, regVariables,
 				regressionAlgo);
 		gspu.sysoStempPerformance("Setup MapperBuilder to proceed regression: done\n", "Main");
 

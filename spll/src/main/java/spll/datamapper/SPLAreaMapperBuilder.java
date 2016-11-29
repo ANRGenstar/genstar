@@ -14,7 +14,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -45,12 +44,12 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 	private static int pixelRendered = 0;
 
-	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
+	public SPLAreaMapperBuilder(ShapeFile mainFile, String propertyName,
 			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables) {
 		this(mainFile, propertyName, ancillaryFiles, variables, new LMRegressionOLS());
 	}
 	
-	public SPLAreaMapperBuilder(ShapeFile mainFile, Name propertyName,
+	public SPLAreaMapperBuilder(ShapeFile mainFile, String propertyName,
 			List<IGSGeofile> ancillaryFiles, Collection<AGeoValue> variables, 
 			ISPLRegressionAlgo<SPLVariable, Double> regAlgo) {
 		super(mainFile, propertyName, ancillaryFiles);

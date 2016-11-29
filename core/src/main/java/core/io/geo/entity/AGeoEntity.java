@@ -34,6 +34,10 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 		return values.get(attribute);
 	}
 	
+	public void addAttribute(AGeoAttribute attribute, AGeoValue value) {
+		values.put(attribute, value);
+	}
+	
 	
 	/**
 	 * The value associated with this attribute. 

@@ -9,7 +9,6 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.geo.IGSGeofile;
@@ -40,7 +39,7 @@ public class SPLMapper<V extends ISPLVariable, T> {
 	private ISPLMatcherFactory<V, T> matcherFactory;
 
 	private ShapeFile mainSPLFile;
-	private Name targetProp;
+	private String targetProp;
 
 	private Set<ISPLMatcher<V, T>> mapper = new HashSet<>();
 
@@ -62,7 +61,7 @@ public class SPLMapper<V extends ISPLVariable, T> {
 		this.mainSPLFile = mainSPLFile;
 	}
 
-	protected void setMainProperty(Name propertyName){
+	protected void setMainProperty(String propertyName){
 		this.targetProp = propertyName;
 	}
 
@@ -137,7 +136,10 @@ public class SPLMapper<V extends ISPLVariable, T> {
 	// ------------------- Inner utilities ------------------- //
 	
 	private void setupRegression() throws IllegalRegressionException{
-		if(mapper.stream().anyMatch(var -> var.getFeature().getProperties(this.targetProp).isEmpty()))
+		for (ISPLMatcher map : mapper) {
+			System.out.println("map.getFeature():" + map.getFeature());
+		}
+		if(mapper.stream().anyMatch(var -> var.getFeature().getProperties (this.targetProp).isEmpty()))
 			throw new IllegalRegressionException("Property "+this.targetProp+" is not present in each Feature of the main SPLMapper");
 		if(!setupReg){
 			Collection<GSFeature> geoData = mainSPLFile.getGeoData();
