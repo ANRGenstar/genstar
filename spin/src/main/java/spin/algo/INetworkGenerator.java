@@ -6,7 +6,7 @@ import spin.objects.NetworkLink;
  * 
  *
  */
-public interface INetworkGenerator <T extends NetworkLink, NetworkValue>{
+public interface INetworkGenerator <T extends NetworkLink, NetworkNode>{
 
 	
 	
