@@ -11,9 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,15 +56,11 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import core.io.exception.InvalidFileTypeException;
-import core.io.geo.entity.AGeoEntity;
 import core.io.geo.entity.GSFeature;
-import core.io.geo.entity.attribute.AGeoAttribute;
-import core.io.geo.entity.attribute.value.AGeoValue;
 import core.metamodel.IAttribute;
 import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.util.GSBasicStats;
-import core.util.Keywords;
 import core.util.data.GSEnumStats;
 
 public class GeofileFactory {

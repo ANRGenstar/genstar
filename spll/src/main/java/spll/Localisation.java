@@ -10,11 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-<<<<<<< Updated upstream
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.feature.type.Name;
-=======
->>>>>>> Stashed changes
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.GSExportFactory;
