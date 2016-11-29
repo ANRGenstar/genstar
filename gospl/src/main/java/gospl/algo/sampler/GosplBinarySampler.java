@@ -6,13 +6,10 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
@@ -31,23 +28,17 @@ import gospl.distribution.util.GosplBasicDistribution;
  *
  * @param <T>
  */
-public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
+public class GosplBinarySampler extends GosplAbstractSampler {
 	
 	private static boolean DEBUG_SYSO = true;
 	
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
-	
-	private Random random = ThreadLocalRandom.current();
-	
+		
 	private final double EPSILON = Math.pow(10, -6);
 	
 	// -------------------- setup methods -------------------- //
 	
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
@@ -69,11 +60,6 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 			throw new IllegalArgumentException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
 
-	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.setDistribution(new GosplBasicDistribution(distribution));
-	}
-	
 	// -------------------- main contract -------------------- //
 		
 	@Override
@@ -101,15 +87,6 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * WARNING: make use of {@link Stream#parallel()}
-	 */
-	@Override
-	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
-	}
 	
 	// -------------------- utility -------------------- //
 	

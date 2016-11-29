@@ -30,24 +30,16 @@ import gospl.distribution.util.GosplBasicDistribution;
  *                 http://www.keithschwarz.com/darts-dice-coins/
  * 
  */
-public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
+public class GosplAliasSampler extends GosplAbstractSampler {
 
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> initProba;
 	
-	/* The random number generator used to sample from the distribution. */
-	private Random random;
-
 	/* The probability and alias tables. */
 	private int[] alias;
 	private double[] probability;
 
 	// -------------------- setup methods -------------------- //
-
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
@@ -129,10 +121,6 @@ public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute,
 			probability[large.removeLast()] = 1.0;
 	}
 
-	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.setDistribution(new GosplBasicDistribution(distribution));
-	}
 
 	// -------------------- main contract -------------------- //
 
@@ -153,10 +141,6 @@ public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute,
 		return indexedKey.get(coinToss ? column : alias[column]);
 	}
 	
-	@Override
-	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw){
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
-	}
 	
 	@Override
 	public String toCsv(String csvSeparator){
