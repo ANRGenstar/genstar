@@ -53,7 +53,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 	private XStream xs = null;
 	private File mkdir = null;
 	
-	public GosplXmlSerializer() throws FileNotFoundException{
+	public GosplXmlSerializer() throws FileNotFoundException {
 		this.mkdir = new File(System.getProperty("user.dir"));
 		this.xs = new XStream(new DomDriver());
 		
@@ -92,14 +92,17 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		Files.write(Paths.get(mkdir+FileSystems.getDefault().getSeparator()+xmlName+".xml"), w.toString().getBytes());
 	}
 	
-	public GosplConfigurationFile deserializeGSConfig(Path xmlFilePath) throws FileNotFoundException{
-		File valideXmlFile = xmlFilePath.toFile();
+	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException{
 		if(!valideXmlFile.exists())
-			throw new FileNotFoundException(xmlFilePath.toString());
-		else if(!xmlFilePath.toString().toLowerCase().endsWith(".xml"))
-			throw new FileNotFoundException("The file "+xmlFilePath+" is not an xml file");  
+			throw new FileNotFoundException(valideXmlFile.toString());
+		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))
+			throw new FileNotFoundException("The file "+valideXmlFile.getName()+" is not an xml file");  
 		else
 			return (GosplConfigurationFile) xs.fromXML(valideXmlFile);
+	}
+	
+	public GosplConfigurationFile deserializeGSConfig(Path xmlFilePath) throws FileNotFoundException{
+		return this.deserializeGSConfig(xmlFilePath.toFile());
 	}
 	
 	public XStream getXStream(){
