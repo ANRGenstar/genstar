@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
@@ -21,7 +21,7 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 
-	private Random random = ThreadLocalRandom.current();
+	private Random random = GenstarRandom.getInstance();
 
 	private final double EPSILON = Math.pow(10, -6);
 	private final double EPS_ADJUST = Math.pow(10, -3);
@@ -29,11 +29,6 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	private double upperBoundRng = 1d;
 
 	// -------------------- setup methods -------------------- //
-
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution) {
@@ -47,9 +42,9 @@ public class GosplBasicSampler implements ISampler<ACoordinate<ASurveyAttribute,
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON){
 			// TODO: move to a BigDecimal distribution requirement
-			if(Math.abs(sumOfProbabilities - 1d) < EPS_ADJUST){
+			if(Math.abs(sumOfProbabilities - 1d) < EPS_ADJUST)
 				upperBoundRng = sumOfProbabilities;
-			} else 
+			else 
 				throw new IllegalArgumentException("Sum of probabilities for this sampler is not equal to 1 (SOP = "+sumOfProbabilities+")");
 		}
 	}

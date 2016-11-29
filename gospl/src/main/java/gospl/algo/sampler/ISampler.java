@@ -21,13 +21,6 @@ import gospl.distribution.util.GosplBasicDistribution;
 public interface ISampler<T> {
 	
 	// ---------------- setup methods ---------------- //
-
-	/**
-	 * Set the pseudo-random engine
-	 * 
-	 * @param rand
-	 */
-	public void setRandom(Random rand);
 	
 	/**
 	 * Set the distribution to draw within

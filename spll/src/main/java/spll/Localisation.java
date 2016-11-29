@@ -101,10 +101,13 @@ public class Localisation {
 				e2.printStackTrace();
 			}
 		}
+<<<<<<< Updated upstream
 		
 		Name propertyName = sfAdmin.getGeoData().iterator().next()
 				.getInnerFeature().getProperties(stringOfMainProperty)
 				.stream().findFirst().get().getName();
+=======
+>>>>>>> Stashed changes
 
 		Collection<AGeoValue> regVariables = SpllUtil.getMeaningfullValues(regVarName, endogeneousVarFile);
 		

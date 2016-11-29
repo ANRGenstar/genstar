@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
@@ -36,18 +37,13 @@ public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	private List<Double> initProba;
 	
 	/* The random number generator used to sample from the distribution. */
-	private Random random;
+	private Random random = GenstarRandom.getInstance();
 
 	/* The probability and alias tables. */
 	private int[] alias;
 	private double[] probability;
 
 	// -------------------- setup methods -------------------- //
-
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
