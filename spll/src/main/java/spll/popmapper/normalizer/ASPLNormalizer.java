@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Random;
 
 import core.io.geo.entity.GSFeature;
+import core.util.random.GenstarRandom;
 
 /**
  * TODO: make top value control, not just floor value 
@@ -21,7 +22,7 @@ public abstract class ASPLNormalizer {
 	
 	protected Number noData;
 	
-	private final Random random;
+	protected final Random random = GenstarRandom.getInstance();
 	
 	/**
 	 * TODO: javadoc
@@ -29,8 +30,7 @@ public abstract class ASPLNormalizer {
 	 * @param floorValue
 	 * @param noData
 	 */
-	public ASPLNormalizer(Random random, double floorValue, Number noData){
-		this.random = random;
+	public ASPLNormalizer(double floorValue, Number noData){
 		this.floorValue = floorValue;
 		this.noData = noData;
 	}
@@ -111,10 +111,6 @@ public abstract class ASPLNormalizer {
 
 	protected boolean equalEpsilon(double value, double target) {
 		return Math.abs(value - target) < EPSILON ? true : false;
-	}
-	
-	protected Random getRandomEngine(){
-		return this.random;
 	}
 	
 }
