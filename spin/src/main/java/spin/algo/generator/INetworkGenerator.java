@@ -5,20 +5,22 @@ import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.metamodel.IAttribute;
 import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
+import core.metamodel.IValue;
 
 /** Interface de générateur de réseau, commun a tous les générateurs.
  * 
  *
  */
-public interface INetworkGenerator <E extends IEntity, L extends NetworkLink, N extends NetworkNode<E>>{
+public interface INetworkGenerator <E extends IEntity<A,V>, L extends NetworkLink, N extends NetworkNode<E>,V extends IValue, A extends IAttribute<V> >{
 	/** Methode de création d'un réseau prenant une population générique et créant
 	 * le réseau associé. 
 	 * 
 	 * @param population population en paramètre, implementant l'interface IPopulation 
 	 * @return un SpinNetwork
 	 */
-	public SpinNetwork<E, N, L> generateNetwork(IPopulation<IEntity<ASurveyAttribute, AValue>, ASurveyAttribute, AValue> population);
+	public SpinNetwork<E, N, L> generateNetwork(IPopulation<IEntity<A, V>, A, V> population);
 	
 }
