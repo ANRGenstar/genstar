@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
@@ -31,23 +32,17 @@ import gospl.distribution.util.GosplBasicDistribution;
  *
  * @param <T>
  */
-public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
+public class GosplBinarySampler extends GosplAbstractSampler {
 	
 	private static boolean DEBUG_SYSO = true;
 	
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 	
-	private Random random = ThreadLocalRandom.current();
-	
 	private final double EPSILON = Math.pow(10, -6);
 	
 	// -------------------- setup methods -------------------- //
 	
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
@@ -69,16 +64,11 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 			throw new IllegalArgumentException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
 	}
 
-	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.setDistribution(new GosplBasicDistribution(distribution));
-	}
-	
 	// -------------------- main contract -------------------- //
 		
 	@Override
 	public ACoordinate<ASurveyAttribute, AValue> draw(){
-		double rand = random.nextDouble();
+		double rand = GenstarRandom.getInstance().nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
 		int mid;
@@ -99,16 +89,6 @@ public class GosplBinarySampler implements ISampler<ACoordinate<ASurveyAttribute
 		throw new RuntimeException("Sample engine has not been able to draw one coordinate !!!\n"
 				+ "random ("+rand+"), floor ("+floor+" = "+indexedProbabilitySum.get(floor)+") and top ("+top+" = "+indexedProbabilitySum.get(top)+") could not draw index\n"
 						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * WARNING: make use of {@link Stream#parallel()}
-	 */
-	@Override
-	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	
 	// -------------------- utility -------------------- //

@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
@@ -30,24 +31,17 @@ import gospl.distribution.util.GosplBasicDistribution;
  *                 http://www.keithschwarz.com/darts-dice-coins/
  * 
  */
-public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute, AValue>> {
+public class GosplAliasSampler extends GosplAbstractSampler {
 
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> initProba;
 	
-	/* The random number generator used to sample from the distribution. */
-	private Random random;
 
 	/* The probability and alias tables. */
 	private int[] alias;
 	private double[] probability;
 
 	// -------------------- setup methods -------------------- //
-
-	@Override
-	public void setRandom(Random random) {
-		this.random = random;
-	}
 
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
@@ -145,18 +139,14 @@ public class GosplAliasSampler implements ISampler<ACoordinate<ASurveyAttribute,
 	@Override
 	public ACoordinate<ASurveyAttribute, AValue> draw() {
 		/* Generate a fair die roll to determine which column to inspect. */
-		int column = random.nextInt(probability.length);
+		int column =  GenstarRandom.getInstance().nextInt(probability.length);
 
 		/* Generate a biased coin toss to determine which option to pick. */
-		boolean coinToss = random.nextDouble() < probability[column];
+		boolean coinToss = GenstarRandom.getInstance().nextDouble() < probability[column];
 		
 		return indexedKey.get(coinToss ? column : alias[column]);
 	}
 	
-	@Override
-	public List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw){
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
-	}
 	
 	@Override
 	public String toCsv(String csvSeparator){

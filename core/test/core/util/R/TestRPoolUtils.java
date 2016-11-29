@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.hsqldb.lib.HashSet;
 import org.junit.Test;
 import org.math.R.Rsession;
+import org.rosuda.REngine.REXP;
 
 import core.util.R.RPoolUtils;
 
@@ -120,5 +120,27 @@ public class TestRPoolUtils {
 		assertEquals(6, uniqueSessions.size());
 		
 	}
+
+	@Test
+	/**
+	 * Ensure the session is cleaned after being returned to the pool. 
+	 */
+	public void testSessionsReset() {
+		
+		// take a session, assign a value, return it. 
+		Rsession session = RPoolUtils.getRSession();
+		session.eval("a <- 42");		
+		RPoolUtils.returnRSession(session);
+		
+		// take a session again (it should be the same)
+		Rsession novelSession = RPoolUtils.getRSession();
+		assertEquals(session, novelSession);
+		REXP res = novelSession.eval("a");		
+		assertNull(
+				"the variable should have been deleted", 
+				res 
+				);
+	}
+	
 
 }

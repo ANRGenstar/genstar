@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.opengis.feature.type.Name;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.GSExportFactory;
@@ -101,9 +101,8 @@ public class Localisation {
 			}
 		}
 		
-		Name propertyName = sfAdmin.getGeoData().stream()
-				.findFirst().get().getProperties(stringOfMainProperty)
-				.stream().findFirst().get().getName();
+		String propertyName = sfAdmin.getGeoData().iterator().next()
+				.getPropertyAttribute(stringOfMainProperty).getAttributeName();
 
 		Collection<AGeoValue> regVariables = SpllUtil.getMeaningfullValues(regVarName, endogeneousVarFile);
 		
@@ -117,7 +116,7 @@ public class Localisation {
 		ISPLRegressionAlgo<SPLVariable, Double> regressionAlgo = new LMRegressionOLS();
 		
 		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
-				sfAdmin, propertyName, endogeneousVarFile, regVariables,
+				sfAdmin, propertyName.toString(), endogeneousVarFile, regVariables,
 				regressionAlgo);
 		gspu.sysoStempPerformance("Setup MapperBuilder to proceed regression: done\n", "Main");
 
@@ -159,7 +158,7 @@ public class Localisation {
 		spllBuilder.setNormalizer(new SPLUniformNormalizer(0, RasterFile.DEF_NODATA));
 		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true);
+			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true, null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -188,7 +187,9 @@ public class Localisation {
 		@SuppressWarnings("unused")
 		IGSGeofile outputFile = null;
 		try {
-			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, outputFormat.getCoordRefSystem());
+			ReferencedEnvelope env = new ReferencedEnvelope( endogeneousVarFile.get(0).getEnvelope());
+			
+			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, env,outputFormat.getCoordRefSystem());
 		} catch (IllegalArgumentException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

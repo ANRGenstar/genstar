@@ -56,7 +56,7 @@ public class SurveyFactory {
 			return new XlsxInputHandler(file);
 		if (file.getName().contains(XLS_EXT))
 			return new XlsInputHandler(file);
-		if (file.getName().contains("csv"))
+		if (file.getName().contains(CSV_EXT))
 			return new CsvInputHandler(file, csvSeparator);
 		final String[] pathArray = file.getPath().split(File.separator);
 		throw new InvalidFileTypeException(pathArray[pathArray.length - 1], supportedFileFormat);

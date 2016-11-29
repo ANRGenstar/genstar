@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.geo.IGSGeofile;
@@ -35,7 +34,7 @@ import spll.popmapper.normalizer.ASPLNormalizer;
 public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
 	protected final ShapeFile mainFile;
-	protected final Name propertyName;
+	protected final String propertyName;
 	
 	protected List<IGSGeofile> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
@@ -44,7 +43,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
 	protected ASPLNormalizer normalizer;
 	
-	public ASPLMapperBuilder(ShapeFile mainFile, Name propertyName,
+	public ASPLMapperBuilder(ShapeFile mainFile, String propertyName,
 			List<IGSGeofile> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.propertyName = propertyName;
@@ -105,7 +104,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws IOException
 	 * @throws GSMapperException 
 	 */
-	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect, boolean integer) 
+	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect, boolean integer, Double targetPopulation) 
 			throws IllegalRegressionException, TransformException, 
 			IndexOutOfBoundsException, IOException, GSMapperException;
 	
@@ -129,7 +128,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 		return mainFile;
 	}
 	
-	public Name getMainPropertyName(){
+	public String getMainPropertyName(){
 		return propertyName;
 	}
 	
