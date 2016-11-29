@@ -63,6 +63,11 @@ public class GosplDistributionFactory {
 		this.configuration = new GosplXmlSerializer().deserializeGSConfig(configurationFilePath);
 		this.dataParser = new GSDataParser();
 	}
+	
+	public GosplDistributionFactory(final GosplConfigurationFile configurationFile) {
+		this.configuration = configurationFile;
+		this.dataParser = new GSDataParser();
+	}
 
 	/**
 	 * 
