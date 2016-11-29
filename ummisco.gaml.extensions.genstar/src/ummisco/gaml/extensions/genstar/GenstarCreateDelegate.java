@@ -60,12 +60,15 @@ public class GenstarCreateDelegate implements ICreateDelegate {
 	@Override
 	public boolean createFrom(final IScope scope, final List<Map<String, Object>> inits, final Integer max,
 			final Object source, final Arguments init, final CreateStatement statement) {
+
 		final GamaXMLFile file = (GamaXMLFile) source;
 
 		// INPUT ARGS
 		// If no population size is specified, 1 is taken as a default.
 		// TODO See if it is possible to infer a default population number from the data.
 		final int targetPopulation = max == null ? 1 : max;
+
+		scope.getGui().getStatus().beginSubStatus("Generating " + targetPopulation + " agents");
 		final Path confFile = Paths.get(file.getPath(scope));
 
 		// THE POPULATION TO BE GENERATED
@@ -126,15 +129,19 @@ public class GenstarCreateDelegate implements ICreateDelegate {
 		}
 
 		final Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
+		double index = 0;
 		for (final GosplEntity e : population) {
+			scope.getGui().getStatus().setSubStatusCompletion(index++ / targetPopulation);
 			final Map<String, Object> agent = new HashMap<String, Object>();
 			for (final ASurveyAttribute attribute : attributes) {
 				final String name = attribute.getAttributeName();
 				agent.put(name, getAttributeValue(scope, e, attribute));
 			}
+			// scope.getSimulation().getProjectionFactory().agent.put(IKeyword.SHAPE, new GamaShape(e.getLocation()));
 			statement.fillWithUserInit(scope, agent);
 			inits.add(agent);
 		}
+		scope.getGui().getStatus().endSubStatus("Generating " + targetPopulation + " agents");
 		return true;
 
 	}
