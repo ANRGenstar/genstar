@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
@@ -188,7 +189,9 @@ public class Localisation {
 		@SuppressWarnings("unused")
 		IGSGeofile outputFile = null;
 		try {
-			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, outputFormat.getCoordRefSystem());
+			ReferencedEnvelope env = new ReferencedEnvelope( endogeneousVarFile.get(0).getEnvelope());
+			
+			outputFile = GSExportFactory.createGeotiffFile(new File(stringPath+File.separator+outputFileName), pixelOutput, env,outputFormat.getCoordRefSystem());
 		} catch (IllegalArgumentException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

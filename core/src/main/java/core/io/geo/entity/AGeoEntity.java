@@ -16,8 +16,9 @@ import core.metamodel.IEntity;
 
 public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 
-	private Map<AGeoAttribute, AGeoValue> values;
+	private Map<AGeoAttribute, AGeoValue> values; 
 	private String gsName;
+	private IEntity<?, ?> nest;
 	
 	public AGeoEntity(Set<AGeoValue> values, String gsName) {
 		this.values = values.stream().collect(Collectors.toMap(AGeoValue::getAttribute, val -> val));
@@ -103,12 +104,6 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 		return getGeometry().getArea();
 	}
 	
-	/**
-	 * The point characterizes the attribute position
-	 * 
-	 * @return {@link Point}
-	 */
-	public abstract Point getPosition();
 	
 	/**
 	 * The geometry charcaterizes the attribute
@@ -116,5 +111,30 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 	 * @return {@link Geometry}
 	 */
 	public abstract Geometry getGeometry();
+	
+	/**
+	 * The point characterizes the attribute location
+	 * 
+	 * @return {@link Point}
+	 */
+	@Override
+	public Point getLocation() {
+		return getGeometry().getCentroid();
+	}
+
+	@Override
+	public IEntity<?, ?> getNest() {
+		return nest;
+	}
+
+	//do nothing - it is not possible to modify the location of an agent
+	@Override
+	public void setLocation(Point location) {}
+
+	
+	@Override
+	public void setNest(IEntity<?, ?> entity) {
+		this.nest = entity;
+	}
 	
 }

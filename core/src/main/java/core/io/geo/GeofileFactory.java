@@ -5,11 +5,15 @@ import java.awt.image.DataBuffer;
 import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -23,7 +27,9 @@ import org.geotools.coverage.GridSampleDimension;
 import org.geotools.coverage.grid.GridCoverage2D;
 import org.geotools.coverage.grid.GridCoverageFactory;
 import org.geotools.coverage.grid.io.AbstractGridCoverageWriter;
+import org.geotools.data.DataUtilities;
 import org.geotools.data.DefaultTransaction;
+import org.geotools.data.FeatureWriter;
 import org.geotools.data.Transaction;
 import org.geotools.data.collection.ListFeatureCollection;
 import org.geotools.data.shapefile.ShapefileDataStore;
@@ -43,9 +49,24 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPoint;
+import com.vividsolutions.jts.geom.MultiPolygon;
+import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
+
 import core.io.exception.InvalidFileTypeException;
+import core.io.geo.entity.AGeoEntity;
 import core.io.geo.entity.GSFeature;
+import core.io.geo.entity.attribute.AGeoAttribute;
+import core.io.geo.entity.attribute.value.AGeoValue;
+import core.metamodel.IAttribute;
+import core.metamodel.IEntity;
+import core.metamodel.IPopulation;
 import core.util.GSBasicStats;
+import core.util.Keywords;
 import core.util.data.GSEnumStats;
 
 public class GeofileFactory {
@@ -127,11 +148,10 @@ public class GeofileFactory {
 	 * @throws IllegalArgumentException
 	 * @throws TransformException
 	 */
-	public RasterFile createRasterfile(File rasterfile, float[][] pixels, float noData, CoordinateReferenceSystem crs) 
+	public RasterFile createRasterfile(File rasterfile, float[][] pixels, float noData, ReferencedEnvelope envelope, CoordinateReferenceSystem crs) 
 			throws IOException, IllegalArgumentException, TransformException {
 		// Create image options based on pixels' characteristics
-		ReferencedEnvelope envelope = new ReferencedEnvelope(0, pixels.length, 0, pixels[0].length, crs);
-
+		
 		GSBasicStats<Double> gsbs = new GSBasicStats<Double>(GSBasicStats.transpose(pixels), Arrays.asList(new Double(noData)));
 
 		Category nan = new Category(Vocabulary.formatInternational(VocabularyKeys.NODATA), 
@@ -186,6 +206,93 @@ public class GeofileFactory {
 		return writeRasterFile(rasterfile, 
 				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
 	}
+	
+	public String getGeometryType(final Collection<Geometry> geoms) {
+		String geomType = "";
+		for (final Geometry geom : geoms) {
+			if (geom != null) {
+				geomType = geom.getClass().getSimpleName();
+				if (geom.getNumGeometries() > 1) {
+					if (geom.getGeometryN(0).getClass() == Point.class) {
+						geomType = MultiPoint.class.getSimpleName();
+					} else if (geom.getGeometryN(0).getClass() == LineString.class) {
+						geomType = MultiLineString.class.getSimpleName();
+					} else if (geom.getGeometryN(0).getClass() == Polygon.class) {
+						geomType = MultiPolygon.class.getSimpleName();
+					}
+					break;
+				}
+			}
+		}
+
+		if ("DynamicLineString".equals(geomType))
+			geomType = LineString.class.getSimpleName();
+		return geomType;
+	}
+
+	
+	public ShapeFile createShapeFile(File shapefile, IPopulation population, CoordinateReferenceSystem crs) throws IOException, SchemaException {
+		if(population.isEmpty()) 
+			throw new IllegalStateException("Population ("+Arrays.toString(population.toArray())+") in methode createShapeFile cannot be empty");
+		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
+
+		Map<String, Serializable> params = new HashMap<>();
+		params.put("url", shapefile.toURI().toURL());
+		params.put("create spatial index", Boolean.TRUE);
+		
+
+		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
+		for (Object ent : population){
+			System.out.println("location: " + ((IEntity) ent).getLocation());
+		}
+		Map<IEntity, Geometry> geoms = (Map<IEntity,Geometry>) population.stream().collect(Collectors.toMap(e -> ((IEntity) e),e -> ((IEntity) e).getLocation()));
+		final StringBuilder specs = new StringBuilder(population.size() * 20);
+		final String geomType = getGeometryType(geoms.values());
+
+		specs.append("geometry:" + geomType);
+		List<String> atts = new ArrayList<>();
+			for (final Object e : population.getPopulationAttributes()) {
+				IAttribute at = (IAttribute) e;
+				atts.add(at.getAttributeName());
+				String name = at.getAttributeName().replaceAll("\"", "");
+				name = name.replaceAll("'", "");
+				final String type = "String";
+				specs.append(',').append(name).append(':').append(type);
+			}
+		final SimpleFeatureType type = DataUtilities.createType(newDataStore.getFeatureSource().getEntry().getTypeName(),
+					specs.toString());
+		
+		newDataStore.createSchema(type);
+	
+
+		try (FeatureWriter fw = newDataStore.getFeatureWriter(Transaction.AUTO_COMMIT)) {
+
+			final List<Object> values = new ArrayList<>();
+			for (final Object obj : population) {
+				IEntity entity = (IEntity) obj;
+				values.clear();
+				final SimpleFeature ff = (SimpleFeature) fw.next();
+				values.add(geoms.get(entity));
+				for (final String att : atts) {
+					values.add(entity.getValueForAttribute(att));
+				}
+				ff.setAttributes(values);
+				fw.write();
+			}
+			// store.dispose();
+			if (crs != null) {
+				try (FileWriter fwz = new FileWriter(shapefile.getAbsolutePath().replace(".shp", ".prj"))) {
+					fwz.write(crs.toString());
+				} catch (final IOException e) {
+					e.printStackTrace();
+				}
+			}
+		} 	
+		
+
+		return new ShapeFile(newDataStore);
+	}
+	
 
 	/**
 	 * Create a shapefile based on a collection of feature 

@@ -161,7 +161,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		}
 		
 		// Get the related feature in main space features
-		Point pixelLocation = refPixel.getPosition();
+		Point pixelLocation = refPixel.getLocation();
 		Optional<GSFeature> opFeature = mainFeatures.stream().filter(ft -> pixelLocation.within(ft.getGeometry())).findFirst();
 
 		if(!opFeature.isPresent())

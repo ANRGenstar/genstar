@@ -12,8 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.geotools.feature.SchemaException;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.operation.TransformException;
 
+import core.io.GSExportFactory;
 import core.io.GSImportFactory;
 import core.io.exception.InvalidFileTypeException;
 import core.io.geo.GeoGSFileType;
@@ -45,6 +48,7 @@ import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.SPLMapper;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.variable.SPLVariable;
+import spll.popmapper.SPUniformLocalizer;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 
 public class TestLocalisation {
@@ -156,7 +160,7 @@ public class TestLocalisation {
 		}
 		
 		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
-		stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/CLC12_D076_RGF.tif");
+		stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/CLC12_D076_RGF_S.tif");
 	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B2_rouen.tif");
 	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B3_rouen.tif");
 	//	stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/LC82000262015181LGN00_B4_rouen.tif");
@@ -255,12 +259,36 @@ public class TestLocalisation {
 		GSBasicStats<Double> bs = new GSBasicStats<>(outList, Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
 		gspu.sysoStempMessage("\nStatistics on output:\n"+bs.getStatReport());
 		
+
+		IGSGeofile outputFile = null;
+		try {
+			ReferencedEnvelope env = new ReferencedEnvelope( endogeneousVarFile.get(0).getEnvelope());
+			
+			outputFile = GSExportFactory.createGeotiffFile(new File("sample/Rouen/result.tif"), pixelOutput, env,outputFormat.getCoordRefSystem());
+		} catch (IllegalArgumentException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (TransformException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 		
 		///////////////////////
 		// MATCH TO POPULATION
 		///////////////////////
 		
-		
+		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null, outputFile, "Band_0");
+		localizer.localisePopulation();
+		try {
+			GSExportFactory.createShapeFile(new File("sample/Rouen/result.shp"), population, outputFormat.getCoordRefSystem());
+		} catch (IOException | SchemaException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 
 	}

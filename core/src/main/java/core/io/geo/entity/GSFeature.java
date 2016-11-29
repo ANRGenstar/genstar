@@ -5,12 +5,11 @@ import java.util.Set;
 import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
 
 import core.io.geo.entity.attribute.value.AGeoValue;
 
 public class GSFeature extends AGeoEntity {
-
+ 
 	private final Feature innerFeature;
 	
 	protected GSFeature(Set<AGeoValue> values, Feature innerFeature) {
@@ -25,11 +24,6 @@ public class GSFeature extends AGeoEntity {
 	@Override
 	public double getArea() {
 		return this.getGeometry().getArea();
-	}
-	
-	@Override
-	public Point getPosition() {
-		return this.getGeometry().getCentroid();
 	}
 	
 	@Override
