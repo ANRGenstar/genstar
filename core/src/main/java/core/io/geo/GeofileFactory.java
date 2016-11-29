@@ -236,9 +236,6 @@ public class GeofileFactory {
 		
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
-		for (Object ent : population){
-			System.out.println("location: " + ((IEntity) ent).getLocation());
-		}
 		Map<IEntity, Geometry> geoms = (Map<IEntity,Geometry>) population.stream().collect(Collectors.toMap(e -> ((IEntity) e),e -> ((IEntity) e).getLocation()));
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		final String geomType = getGeometryType(geoms.values());
