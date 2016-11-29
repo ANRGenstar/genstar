@@ -101,8 +101,8 @@ public class Localisation {
 			}
 		}
 		
-		Name propertyName = sfAdmin.getGeoData().stream()
-				.findFirst().get().getProperties(stringOfMainProperty)
+		Name propertyName = sfAdmin.getGeoData().iterator().next()
+				.getInnerFeature().getProperties(stringOfMainProperty)
 				.stream().findFirst().get().getName();
 
 		Collection<AGeoValue> regVariables = SpllUtil.getMeaningfullValues(regVarName, endogeneousVarFile);
@@ -115,7 +115,7 @@ public class Localisation {
 		
 		// Choice have been made to regress from areal data count
 		ISPLRegressionAlgo<SPLVariable, Double> regressionAlgo = new LMRegressionOLS();
-		 
+		
 		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
 				sfAdmin, propertyName.toString(), endogeneousVarFile, regVariables,
 				regressionAlgo);

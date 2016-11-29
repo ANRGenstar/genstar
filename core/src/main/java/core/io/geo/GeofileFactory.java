@@ -208,7 +208,7 @@ public class GeofileFactory {
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
 
 		Set<SimpleFeatureType> featTypeSet = features
-				.parallelStream().map(feat -> (SimpleFeatureType) feat.getType()).collect(Collectors.toSet());
+				.parallelStream().map(feat -> (SimpleFeatureType) feat.getInnerFeature().getType()).collect(Collectors.toSet());
 		if(featTypeSet.size() > 1)
 			throw new SchemaException("Multiple feature type to instantiate schema:\n"+Arrays.toString(featTypeSet.toArray()));
 		SimpleFeatureType featureType = featTypeSet.iterator().next();

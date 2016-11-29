@@ -126,7 +126,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		
 		// Normalize output
 		float output = (float) mainFile.getGeoData().parallelStream()
-				.mapToDouble(feature -> Double.valueOf(feature.getProperty(propertyName).getValue().toString()))
+				.mapToDouble(feature -> feature.getValueForAttribute(propertyName).getNumericalValue().doubleValue())
 				.sum();
 		super.normalizer.process(pixels, output, integer);
 		

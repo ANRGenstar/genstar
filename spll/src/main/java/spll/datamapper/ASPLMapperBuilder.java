@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.opengis.feature.type.Name;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.geo.IGSGeofile;
