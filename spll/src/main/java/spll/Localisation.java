@@ -10,8 +10,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+<<<<<<< Updated upstream
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.feature.type.Name;
+=======
+>>>>>>> Stashed changes
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.GSExportFactory;
@@ -101,13 +104,9 @@ public class Localisation {
 				e2.printStackTrace();
 			}
 		}
-<<<<<<< Updated upstream
 		
-		Name propertyName = sfAdmin.getGeoData().iterator().next()
-				.getInnerFeature().getProperties(stringOfMainProperty)
-				.stream().findFirst().get().getName();
-=======
->>>>>>> Stashed changes
+		String propertyName = sfAdmin.getGeoData().iterator().next()
+				.getPropertyAttribute(stringOfMainProperty).getAttributeName();
 
 		Collection<AGeoValue> regVariables = SpllUtil.getMeaningfullValues(regVarName, endogeneousVarFile);
 		
