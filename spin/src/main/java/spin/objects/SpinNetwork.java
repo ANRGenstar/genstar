@@ -3,16 +3,17 @@ package spin.objects;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.IEntity;
+import core.metamodel.IAttribute;
+import core.metamodel.IValue;
 
 
 /** Network composé de noeud et de lien
  * 
  */
-public class SpinNetwork <E extends IEntity, N extends NetworkNode<E>, L extends NetworkLink> {
+public class SpinNetwork <V extends IValue, A extends IAttribute<V>> {
 
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
-	Map<N, Set<L>> networkRepresentation;
+	public Map<NetworkNode<V,A>, Set<NetworkLink>> networkRepresentation;
 	
 	// Methode de calcul quelconque
 	
