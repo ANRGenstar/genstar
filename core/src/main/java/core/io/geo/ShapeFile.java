@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collection;
@@ -151,7 +153,7 @@ public class ShapeFile implements IGSGeofile {
 		return dataStore;
 	}
 	
-	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, Collection<String> newAttributes) {
+	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, Map<String,String> newAttributes) {
 		if (features== null && features.isEmpty()) return;
 		if (!csvFile.exists()) return;
 		
@@ -163,7 +165,7 @@ public class ShapeFile implements IGSGeofile {
 			List<String> names = Arrays.asList(dataTable.get(0));
 			int keyCSVind = names.contains(keyCSV) ? names.indexOf(keyCSV) : -1;
 			if (keyCSVind == -1) return;
-			Map<String, Integer> attIndexTmp = newAttributes.stream().collect(Collectors.toMap(s -> s, s -> names.contains(s) ? names.indexOf(s) : - 1));
+			Map<String, Integer> attIndexTmp = newAttributes.keySet().stream().collect(Collectors.toMap(s -> s, s -> names.contains(s) ? names.indexOf(s) : - 1));
 			Map<String, Integer> attIndex = new Hashtable<String, Integer>();
 			Map<String, AGeoAttribute> attAGeo = new Hashtable<String, AGeoAttribute>();
 			for (String n : attIndexTmp.keySet()) {
@@ -183,7 +185,8 @@ public class ShapeFile implements IGSGeofile {
 				}
 				values.put(id, vals);
 			}
-			
+			NumberFormat defaultFormat = NumberFormat.getInstance();
+					
 			for (GSFeature ft : features) {
 				Collection<String> properties = ft.getPropertiesAttribute();
 				if (!properties.contains(keyAttribute)) continue;
@@ -193,8 +196,15 @@ public class ShapeFile implements IGSGeofile {
 				if (vals == null) continue;
 				for (String vN : vals.keySet()) {
 					AGeoAttribute attri = attAGeo.get(vN);
+					
 					String v = vals.get(vN);
-					ft.addAttribute(attri, new RawGeoData(attri, v));
+					try {
+						Number value = defaultFormat.parse(v);
+						ft.addAttribute(attri, new RawGeoData(attri,value));
+					} catch (ParseException e){
+						ft.addAttribute(attri, new RawGeoData(attri,  v));
+					}
+					
 					
 				}
 			}

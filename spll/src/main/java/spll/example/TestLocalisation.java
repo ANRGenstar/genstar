@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -144,8 +145,8 @@ public class TestLocalisation {
 		ShapeFile sfAdmin = null;
 		try {
 			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
-			List<String> att = new ArrayList<String>();
-			att.add("P13_POP");
+			Map<String,String> att = new Hashtable<String, String>();
+			att.put("P13_POP", "Double");
 			sfAdmin.addAttributes(new File("sample/Rouen/Rouen_shp/Rouen_iris.csv"), ',', "CODE_IRIS", "IRIS", att);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
