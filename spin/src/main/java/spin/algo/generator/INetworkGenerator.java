@@ -1,4 +1,4 @@
-package spin.algo;
+package spin.algo.generator;
 
 import spin.objects.NetworkLink;
 

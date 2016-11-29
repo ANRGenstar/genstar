@@ -1,4 +1,4 @@
-package spin.algo;
+package spin.algo.generator;
 
 public class SWGenerator implements INetworkGenerator {
 	
