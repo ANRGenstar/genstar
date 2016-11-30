@@ -220,7 +220,7 @@ public class GeofileFactory {
 		
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
-		Map<IEntity, Geometry> geoms = (Map<IEntity,Geometry>) population.stream().collect(Collectors.toMap(e -> ((IEntity) e),e -> ((IEntity) e).getLocation()));
+		Map<IEntity, Geometry> geoms = (Map<IEntity,Geometry>) population.stream().filter(g -> g != null && ((IEntity) g).getLocation() != null).collect(Collectors.toMap(e -> ((IEntity) e),e -> ((IEntity) e).getLocation()));
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		final String geomType = getGeometryType(geoms.values());
 
@@ -245,6 +245,7 @@ public class GeofileFactory {
 			final List<Object> values = new ArrayList<>();
 			for (final Object obj : population) {
 				IEntity entity = (IEntity) obj;
+				if (entity == null || entity.getLocation() == null) continue;
 				values.clear();
 				final SimpleFeature ff = (SimpleFeature) fw.next();
 				values.add(geoms.get(entity));
