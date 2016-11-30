@@ -12,16 +12,16 @@ import core.metamodel.IValue;
 /** Network composé de noeud et de lien
  * 
  */
-public class SpinNetwork <V extends IValue, A extends IAttribute<V>> {
+public class SpinNetwork <A extends IAttribute<V>,V extends IValue> {
 
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
-	private Map<NetworkNode<V,A>, Set<NetworkLink>> networkRepresentation;
+	private Map<NetworkNode<A,V>, Set<NetworkLink>> networkRepresentation;
 	
 	/** Constructeur sans param. 
 	 * 
 	 */
 	public SpinNetwork(){
-		networkRepresentation = new HashMap<NetworkNode<V,A>, Set<NetworkLink>>();
+		networkRepresentation = new HashMap<NetworkNode<A,V>, Set<NetworkLink>>();
 	}
 	
 	/**
@@ -29,11 +29,11 @@ public class SpinNetwork <V extends IValue, A extends IAttribute<V>> {
 	 * An new set of NetworkLink is associated.
 	 * @param node the NetworkNode to add
 	 */
-	public void putNode(NetworkNode<V, A> node) {
+	public void putNode(NetworkNode<A, V> node) {
 		networkRepresentation.put(node, new HashSet<NetworkLink>());		
 	}
 
-	public Set<NetworkNode<V, A>> getNodes() {
+	public Set<NetworkNode<A, V>> getNodes() {
 		return networkRepresentation.keySet();
 	}
 	

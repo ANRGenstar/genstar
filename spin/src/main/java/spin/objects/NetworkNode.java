@@ -13,12 +13,12 @@ import core.metamodel.IValue;
  *
  * @param <E>
  */
-public class NetworkNode <V extends IValue, A extends IAttribute<V>> {
+public class NetworkNode <A extends IAttribute<V>,V extends IValue > {
 	// Entity associated 
 	public IEntity<A,V> individuAssociated;
 	
 	// Connected node
-	public Set<NetworkNode<V, A> > connectedNodes;
+	public Set<NetworkNode<A, V> > connectedNodes;
 
 	/** Constructeur de networkNode prenant une interface d'entité
 	 * 
@@ -26,7 +26,7 @@ public class NetworkNode <V extends IValue, A extends IAttribute<V>> {
 	 */
 	public NetworkNode(IEntity<A,V> entite){
 		individuAssociated = entite;
-		connectedNodes = new HashSet<NetworkNode<V, A>>();
+		connectedNodes = new HashSet<NetworkNode<A, V>>();
 	}
 	
 	

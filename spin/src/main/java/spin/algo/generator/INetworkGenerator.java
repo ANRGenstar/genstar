@@ -15,13 +15,13 @@ import core.metamodel.IValue;
  * @param <V> IValue 
  * @param <A> IAttribute<V>, avec une valeur IValue
  */
-public interface INetworkGenerator <V extends IValue, A extends IAttribute<V>>{
+public interface INetworkGenerator <A extends IAttribute<V>,V extends IValue>{
 	/** Methode de création d'un réseau prenant une population générique et créant
 	 * le réseau associé. 
 	 * 
 	 * @param population population en paramètre, implementant l'interface IPopulation 
 	 * @return un SpinNetwork
 	 */
-	public SpinNetwork<V, A> generateNetwork(IPopulation<IEntity<A,V>, A, V> population);
+	public SpinNetwork<A, V> generateNetwork(IPopulation<IEntity<A,V>, A, V> population);
 	
 }

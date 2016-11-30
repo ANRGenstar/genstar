@@ -1,7 +1,5 @@
 package spin.algo.generator;
 
-
-
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Random;
@@ -14,19 +12,19 @@ import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 
-public class SWGenerator<V extends IValue, A extends IAttribute<V>> implements INetworkGenerator<V, A> 
+public class SWGenerator<A extends IAttribute<V>,V extends IValue> implements INetworkGenerator<A, V> 
 {
 	/** pour le moment algorithmie bidon.
 	 * 
 	 */
 	@Override
-	public SpinNetwork<V, A> generateNetwork(IPopulation<IEntity<A,V>, A, V> population) {
+	public SpinNetwork<A, V> generateNetwork(IPopulation<IEntity<A,V>, A, V> population) {
 		// table temporaire pour garder une référence indexé sur les noeuds créés
-		Hashtable<Integer, NetworkNode<V, A>> nodeCreated = new Hashtable<Integer, NetworkNode<V, A>>();
+		Hashtable<Integer, NetworkNode<A,V>> nodeCreated = new Hashtable<Integer, NetworkNode<A, V>>();
 		int i = 0;
 		
 		// crée un objet spinNetwork
-		SpinNetwork<V,A> myNetwork = new SpinNetwork<V,A>();
+		SpinNetwork<A,V> myNetwork = new SpinNetwork<A,V>();
 		
 		// cyclé sur la pop
 		for (IEntity<A,V> entity : population) {
@@ -36,7 +34,7 @@ public class SWGenerator<V extends IValue, A extends IAttribute<V>> implements I
 //			N node = new N(entity);
 			
 //			 new NetworkNode<E, V, A>(entity);
-			NetworkNode<V, A> node =  new NetworkNode<V, A>(entity);
+			NetworkNode<A,V> node =  new NetworkNode<A,V>(entity);
 			nodeCreated.put(i++, node);
 			myNetwork.putNode(node);
 		}
@@ -62,7 +60,7 @@ public class SWGenerator<V extends IValue, A extends IAttribute<V>> implements I
 			}
 		}
 		
-		for (NetworkNode<V,A> node : myNetwork.getNodes()) {
+		for (NetworkNode<A,V> node : myNetwork.getNodes()) {
 			
 			
 			// créer un lien vers d'autre noeud puis ajouter les liens a spin ET mettre a jour la liste des noeuds connectés a un noeud

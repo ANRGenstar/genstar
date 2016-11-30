@@ -14,7 +14,7 @@ import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 
-public class RandomNetworkGenerator<V extends IValue, A extends IAttribute<V>> implements INetworkGenerator<V, A> 
+public class RandomNetworkGenerator<A extends IAttribute<V>,V extends IValue> implements INetworkGenerator<A, V> 
 //implements INetworkGenerator<E, L, N, V, A> 
 {
 	
@@ -23,16 +23,16 @@ public class RandomNetworkGenerator<V extends IValue, A extends IAttribute<V>> i
 	/** generateur aléatoire
 	 * 
 	 */
-	public SpinNetwork<V,A> generateNetwork(IPopulation<IEntity<A,V>,A, V> population) {
+	public SpinNetwork<A,V> generateNetwork(IPopulation<IEntity<A,V>,A, V> population) {
 		// TODO: check random generator 
 		Random rand = new Random();
 		
 		// List the created nodes
-		List<NetworkNode<V, A>> nodesCreated = new ArrayList<NetworkNode<V, A>>();
+		List<NetworkNode<A, V>> nodesCreated = new ArrayList<NetworkNode<A, V>>();
 		int nbNodes;
 		
 		// create the spinNetwork
-		SpinNetwork<V,A> myNetwork = new SpinNetwork<V,A>();
+		SpinNetwork<A,V> myNetwork = new SpinNetwork<A,V>();
 
 		// create all the nodes 
 		for (IEntity<A,V> entity : population) {
@@ -41,7 +41,7 @@ public class RandomNetworkGenerator<V extends IValue, A extends IAttribute<V>> i
 //			N node = new N(entity);
 			
 //			 new NetworkNode<E, V, A>(entity);
-			NetworkNode<V, A> node =  new NetworkNode<V, A>(entity);
+			NetworkNode<A,V> node =  new NetworkNode<A,V>(entity);
 			nodesCreated.add(node);
 			myNetwork.putNode(node);
 		}		
@@ -65,7 +65,7 @@ public class RandomNetworkGenerator<V extends IValue, A extends IAttribute<V>> i
 		// old 
 		
 		for (IEntity<A, V> entity : population) {
-			NetworkNode<V,A> node = new NetworkNode<V, A>(entity);
+			NetworkNode<A,V> node = new NetworkNode<A,V>(entity);
 		}
 		
 		
