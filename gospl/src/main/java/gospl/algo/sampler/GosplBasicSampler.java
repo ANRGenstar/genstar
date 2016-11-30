@@ -3,18 +3,19 @@ package gospl.algo.sampler;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.random.GenstarRandom;
+import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
 
-public class GosplBasicSampler extends GosplAbstractSampler {
+public class GosplBasicSampler implements IDistributionSampler {
 
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
@@ -46,6 +47,11 @@ public class GosplBasicSampler extends GosplAbstractSampler {
 		}
 	}
 
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.setDistribution(new GosplBasicDistribution(distribution));
+	}
+	
 
 	// -------------------- main contract -------------------- //
 	
@@ -64,7 +70,16 @@ public class GosplBasicSampler extends GosplAbstractSampler {
 				+ "drawn random "+rand+" | probability bounds ["+indexedProbabilitySum.get(0)+" : "+indexedProbabilitySum.get(indexedProbabilitySum.size()-1)+"]");
 	}
 
-	
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of {@link Stream#parallel()}
+	 */
+	@Override
+	public final List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
+		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
+	}
 		
 	// -------------------- utility -------------------- //
 

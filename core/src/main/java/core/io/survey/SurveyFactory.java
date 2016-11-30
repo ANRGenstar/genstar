@@ -41,22 +41,22 @@ public class SurveyFactory {
 	}
 
 	public IGSSurvey getSurvey(final File file) throws IOException, InvalidFileTypeException, InvalidFormatException {
-		if (file.getName().contains(XLSX_EXT))
+		if (file.getName().endsWith(XLSX_EXT))
 			return new XlsxInputHandler(file);
-		if (file.getName().contains(XLS_EXT))
+		if (file.getName().endsWith(XLS_EXT))
 			return new XlsInputHandler(file);
-		if (file.getName().contains(CSV_EXT))
+		if (file.getName().endsWith(CSV_EXT))
 			return new CsvInputHandler(file);
 		final String[] pathArray = file.getPath().split(File.separator);
 		throw new InvalidFileTypeException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}
 
 	public IGSSurvey getSurvey(final File file, final char csvSeparator) throws IOException, InvalidFileTypeException {
-		if (file.getName().contains(XLSX_EXT))
+		if (file.getName().endsWith(XLSX_EXT))
 			return new XlsxInputHandler(file);
-		if (file.getName().contains(XLS_EXT))
+		if (file.getName().endsWith(XLS_EXT))
 			return new XlsInputHandler(file);
-		if (file.getName().contains(CSV_EXT))
+		if (file.getName().endsWith(CSV_EXT))
 			return new CsvInputHandler(file, csvSeparator);
 		final String[] pathArray = file.getPath().split(File.separator);
 		throw new InvalidFileTypeException(pathArray[pathArray.length - 1], supportedFileFormat);
@@ -64,11 +64,11 @@ public class SurveyFactory {
 
 	public IGSSurvey getSurvey(final String fileName, final InputStream surveyIS)
 			throws IOException, InvalidFileTypeException {
-		if (fileName.contains(XLSX_EXT))
+		if (fileName.endsWith(XLSX_EXT))
 			return new XlsxInputHandler(surveyIS);
-		if (fileName.contains(XLS_EXT))
+		if (fileName.endsWith(XLS_EXT))
 			return new XlsInputHandler(surveyIS);
-		if (fileName.contains(CSV_EXT))
+		if (fileName.endsWith(CSV_EXT))
 			return new CsvInputHandler(fileName, surveyIS);
 		throw new InvalidFileTypeException(fileName, supportedFileFormat);
 	}

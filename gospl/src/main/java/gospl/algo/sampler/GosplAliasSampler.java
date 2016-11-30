@@ -4,9 +4,12 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
@@ -31,8 +34,10 @@ import gospl.distribution.util.GosplBasicDistribution;
  *                 http://www.keithschwarz.com/darts-dice-coins/
  * 
  */
-public class GosplAliasSampler extends GosplAbstractSampler {
+public class GosplAliasSampler implements IDistributionSampler {
 
+	protected Logger logger = LogManager.getLogger();
+	
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> initProba;
 	
@@ -43,6 +48,8 @@ public class GosplAliasSampler extends GosplAbstractSampler {
 
 	// -------------------- setup methods -------------------- //
 
+
+	
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
 		if(distribution == null)
@@ -127,9 +134,20 @@ public class GosplAliasSampler extends GosplAbstractSampler {
 	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
 		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
+	
 
 	// -------------------- main contract -------------------- //
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of {@link Stream#parallel()}
+	 */
+	@Override
+	public final List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
+		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 * <p>

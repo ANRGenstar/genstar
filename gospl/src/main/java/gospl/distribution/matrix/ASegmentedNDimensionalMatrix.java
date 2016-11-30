@@ -99,6 +99,22 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return matrix;
 	}
 	
+
+	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
+		return controlOne.add(controlTwo);
+	}
+	
+	@Override
+	public AControl<T> getVal() {
+		AControl<T> result = getNulVal();
+		for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet) {
+			for (AControl<T> control: distribution.matrix.values()) {
+				getSummedControl(result, control);	
+			}
+		}
+		return result;
+	}
+	
 	@Override
 	public AControl<T> getVal(ACoordinate<ASurveyAttribute, AValue> coordinate) {
 		return getVal(coordinate.values());

@@ -21,7 +21,6 @@ import spll.datamapper.variable.SPLVariable;
 
 public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Double> {
 
-	public static boolean LOGSYSO = true;
 	private int matcherCount = 0;
 
 	private Collection<AGeoValue> variables;
@@ -47,7 +46,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<GSFeature> features,
 			IGSGeofile regressorsFile) 
 					throws IOException, TransformException, InterruptedException, ExecutionException {
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regressors' data", LOGSYSO);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regressors' data");
 		gspu.setObjectif(features.size());
 		List<ISPLMatcher<SPLVariable, Double>> varList = features
 				.parallelStream().map(feat -> getMatchers(feat, 

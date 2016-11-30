@@ -89,10 +89,11 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 	public void serializeGSConfig(GosplConfigurationFile gcf, String xmlName) throws IOException{
 		Writer w = new StringWriter();
 		xs.toXML(gcf, w);
-		Files.write(Paths.get(mkdir+FileSystems.getDefault().getSeparator()+xmlName+".xml"), w.toString().getBytes());
+		Files.write(Paths.get(mkdir+File.separator+xmlName+".xml"), w.toString().getBytes());
 	}
 	
-	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException{
+	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException {
+		
 		if(!valideXmlFile.exists())
 			throw new FileNotFoundException(valideXmlFile.toString());
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))

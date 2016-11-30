@@ -18,7 +18,7 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 
 	private Map<AGeoAttribute, AGeoValue> values; 
 	private String gsName;
-	private IEntity<?, ?> nest;
+	private AGeoEntity nest;
 	
 	public AGeoEntity(Set<AGeoValue> values, String gsName) {
 		this.values = values.stream().collect(Collectors.toMap(AGeoValue::getAttribute, val -> val));
@@ -123,7 +123,7 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 	}
 
 	@Override
-	public IEntity<?, ?> getNest() {
+	public AGeoEntity getNest() {
 		return nest;
 	}
 
@@ -133,7 +133,7 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 
 	
 	@Override
-	public void setNest(IEntity<?, ?> entity) {
+	public void setNest(AGeoEntity entity) {
 		this.nest = entity;
 	}
 	

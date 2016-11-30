@@ -17,6 +17,7 @@ import core.util.GSPerformanceUtil;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
 import gospl.algo.sampler.GosplBasicSampler;
+import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalControlTotalException;
@@ -87,8 +88,7 @@ public class GosplSPTemplate {
 		}
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		final IDistributionInferenceAlgo<ASurveyAttribute, AValue> distributionInfAlgo =
-				new IndependantHypothesisAlgo(true);
+		final IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
 		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
@@ -97,7 +97,7 @@ public class GosplSPTemplate {
 		}
 
 		final GSPerformanceUtil gspu =
-				new GSPerformanceUtil("Start generating synthetic population of size " + targetPopulation, true);
+				new GSPerformanceUtil("Start generating synthetic population of size " + targetPopulation);
 
 		// BUILD THE GENERATOR
 		final ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);

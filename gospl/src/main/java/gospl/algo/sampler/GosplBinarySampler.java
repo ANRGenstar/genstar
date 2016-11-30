@@ -32,10 +32,8 @@ import gospl.distribution.util.GosplBasicDistribution;
  *
  * @param <T>
  */
-public class GosplBinarySampler extends GosplAbstractSampler {
-	
-	private static boolean DEBUG_SYSO = true;
-	
+public class GosplBinarySampler implements IDistributionSampler {
+		
 	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 	
@@ -47,7 +45,7 @@ public class GosplBinarySampler extends GosplAbstractSampler {
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
-				distribution.size(), DEBUG_SYSO);
+				distribution.size());
 		gspu.sysoStempPerformance(0, this);
 		this.indexedKey = new ArrayList<>(distribution.size());
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
@@ -62,6 +60,11 @@ public class GosplBinarySampler extends GosplAbstractSampler {
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
 			throw new IllegalArgumentException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
+	}
+
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 
 	// -------------------- main contract -------------------- //
@@ -90,6 +93,17 @@ public class GosplBinarySampler extends GosplAbstractSampler {
 				+ "random ("+rand+"), floor ("+floor+" = "+indexedProbabilitySum.get(floor)+") and top ("+top+" = "+indexedProbabilitySum.get(top)+") could not draw index\n"
 						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
 	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of {@link Stream#parallel()}
+	 */
+	@Override
+	public final List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
+		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
+	}
+		
 	
 	// -------------------- utility -------------------- //
 	

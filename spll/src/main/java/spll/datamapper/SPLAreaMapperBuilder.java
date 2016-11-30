@@ -39,7 +39,6 @@ import spll.datamapper.variable.SPLVariable;
 
 public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double> {
 
-	private static final boolean LOGSYSO = true;
 	private SPLMapper<SPLVariable, Double> mapper;
 
 	private static int pixelRendered = 0;
@@ -87,7 +86,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		if(!ancillaryFiles.contains(outputFormat))
 			throw new IllegalArgumentException("output format file must be one of ancillary files use to proceed regression");
 
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regression data to output raster", LOGSYSO);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regression data to output raster");
 
 		// Define output format
 		int rows = outputFormat.getRowNumber();

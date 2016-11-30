@@ -110,7 +110,7 @@ public class TestLocalisation {
 		}
 		
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		IDistributionInferenceAlgo<ASurveyAttribute, AValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
+		IDistributionInferenceAlgo distributionInfAlgo = new IndependantHypothesisAlgo();
 		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
@@ -119,7 +119,7 @@ public class TestLocalisation {
 		}
 		
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+targetPopulation, true);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+targetPopulation);
 		
 		// BUILD THE GENERATOR
 		ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
@@ -148,18 +148,18 @@ public class TestLocalisation {
 		
 		String stringPathToBuildingFile = "sample/Rouen/Rouen_shp/buildings.shp";
 		
-		List<String> atts = Arrays.asList();
+		List<String> atts_buildings = Arrays.asList();
 		
 		/////////////////////
 		// IMPORT DATA FILES
 		/////////////////////
 		
-		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Rouen based on Iris population", true);
+		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Rouen based on Iris population");
 		ShapeFile sfAdmin = null;
 		ShapeFile sfBuildings = null;
 		try {
+			sfBuildings = GSImportFactory.getShapeFile(stringPathToBuildingFile, atts_buildings);
 			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
-			sfBuildings = GSImportFactory.getShapeFile(stringPathToMainShapefile, atts);
 			List<String> att = new ArrayList<String>();
 			att.add("P13_POP");
 			sfAdmin.addAttributes(new File("sample/Rouen/Rouen_insee_indiv/Rouen_iris.csv"), ',', "CODE_IRIS", "IRIS", att);
@@ -295,11 +295,16 @@ public class TestLocalisation {
 		///////////////////////
 		
  		@SuppressWarnings("unchecked")
- 		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, sfBuildings, "Band_0", "IRIS", "CODE_IRIS");
+ 		SPUniformLocalizer localizer = new SPUniformLocalizer(sfBuildings);
+ 		
+ 		// use of the regression grid
+ 		localizer.setEntityNbAreas(outputFile, "Band_0");
 		
-		// Normal used, based on the regression grid
- 		//SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, outputFile, "Band_0", "IRIS", "CODE_IRIS");
-		localizer.localisePopulation();
+ 		// use of the IRIS attribute of the population
+ 		//localizer.setMatch(sfAdmin, "IRIS", "IRIS");
+ 		
+ 		//localize the population
+ 		localizer.localisePopulation(population);
 		try {
 			GSExportFactory.createShapeFile(new File("sample/Rouen/result.shp"), population, outputFormat.getCoordRefSystem());
 		} catch (IOException | SchemaException e) {

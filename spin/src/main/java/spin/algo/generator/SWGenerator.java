@@ -38,7 +38,7 @@ public class SWGenerator<V extends IValue, A extends IAttribute<V>> implements I
 //			 new NetworkNode<E, V, A>(entity);
 			NetworkNode<V, A> node =  new NetworkNode<V, A>(entity);
 			nodeCreated.put(i++, node);
-			myNetwork.networkRepresentation.put(node, new HashSet<NetworkLink>());
+			myNetwork.putNode(node);
 		}
 		
 		
@@ -62,7 +62,7 @@ public class SWGenerator<V extends IValue, A extends IAttribute<V>> implements I
 			}
 		}
 		
-		for (NetworkNode<V,A> node : myNetwork.networkRepresentation.keySet()) {
+		for (NetworkNode<V,A> node : myNetwork.getNodes()) {
 			
 			
 			// créer un lien vers d'autre noeud puis ajouter les liens a spin ET mettre a jour la liste des noeuds connectés a un noeud

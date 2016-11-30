@@ -14,6 +14,6 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> localisePopulation();
+	public IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> localisePopulation(IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> population);
 	
 }
