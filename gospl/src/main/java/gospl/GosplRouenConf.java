@@ -35,13 +35,13 @@ public class GosplRouenConf {
 	public static String indiv3 = "Age & Sexe-Tableau 1.csv";
 	public static String indiv4 = "Rouen_iris.csv";
 	
-	public static String HHOLD_CLASS_PATH = "../template/Rouen/Rouen_insee_menage";
-	public static String HHOLD_EXPORT = "GSC_RouenHoushold";
+	public static String HHOLD_CLASS_PATH = "Rouen_insee_menage";
 	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
 	public static String menage2 = "Taille ménage & CSP référent-Tableau 1.csv";
 	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
+	public static String HHOLD_EXPORT = "GSC_RouenHoushold";
 	
-	public static String SAMPLE_CLASS_PATH = "../template/Rouen/Rouen_sample";
+	public static String SAMPLE_CLASS_PATH = "Rouen_sample";
 	public static String SAMPLE_EXPORT = "GSC_RouenSample";
 	public static String sample1 = "Rouen_sample_IRIS.csv";
 
@@ -76,25 +76,17 @@ public class GosplRouenConf {
 			// Setup input files' configuration for household aggregated data
 			List<GSSurveyFile> householdDataFiles = new ArrayList<>();
 			Set<ASurveyAttribute> householdAttributes = new HashSet<>();
-			householdDataFiles.add(new GSSurveyFile(HHOLD_CLASS_PATH+File.separator+menage1,
-					GSSurveyType.ContingencyTable, 1, 1, ';'));
-			householdDataFiles.add(new GSSurveyFile(HHOLD_CLASS_PATH+File.separator+menage2, 
-					GSSurveyType.ContingencyTable, 1, 1, ';'));
-			householdDataFiles.add(new GSSurveyFile(HHOLD_CLASS_PATH+File.separator+menage3, 
-					GSSurveyType.ContingencyTable, 2, 1, ';'));
+			householdDataFiles.add(new GSSurveyFile(menage1,GSSurveyType.ContingencyTable, 1, 1, ';'));
+			householdDataFiles.add(new GSSurveyFile(menage2,GSSurveyType.ContingencyTable, 1, 1, ';'));
+			householdDataFiles.add(new GSSurveyFile(menage3,GSSurveyType.ContingencyTable, 2, 1, ';'));
 
 			
 			// Setup input files' configuration for sample data
 			List<GSSurveyFile> sampleDataFiles = new ArrayList<>();
 			Set<ASurveyAttribute> sampleAttributes = new HashSet<>();
-			sampleDataFiles.add(new GSSurveyFile(SAMPLE_CLASS_PATH+File.separator+sample1, 
-					GSSurveyType.Sample, 1, 0));
+			sampleDataFiles.add(new GSSurveyFile(sample1,GSSurveyType.Sample, 1, 0));
 			
 			try {
-				
-
-				
-
 				
 				// --------------------------
 				// Setupe "AGE" attribute: INDIVIDUAL
@@ -179,48 +171,15 @@ public class GosplRouenConf {
 				// --------------------------
 				
 				indivAttributes.add(attf.createAttribute("IRIS", GSEnumDataType.String, 
-						Arrays.asList("765400602",
-								"765400104",
-								"765400306",
-								"765400201",
-								"765400601",
-								"765400901",
-								"765400302",
-								"765400604",
-								"765400304",
-								"765400305",
-								"765400801",
-								"765400301",
-								"765401004",
-								"765401003",
-								"765400402",
-								"765400603",
-								"765400303",
-								"765400103",
-								"765400504",
-								"765401006",
-								"765400702",
-								"765400401",
-								"765400202",
-								"765400802",
-								"765400502",
-								"765400106",
-								"765400701",
-								"765401005",
-								"765400204",
-								"765401001",
-								"765400405",
-								"765400501",
-								"765400102",
-								"765400503",
-								"765400404",
-								"765400105",
-								"765401002",
-								"765400902",
-								"765400403",
-								"765400203",
-								"765400101",
-								"765400205"), 
+						Arrays.asList("765400602", "765400104","765400306","765400201",
+								"765400601","765400901","765400302","765400604","765400304",
+								"765400305","765400801","765400301","765401004","765401003",
+								"765400402","765400603","765400303","765400103","765400504",
+								"765401006","765400702","765400401","765400202","765400802",
+								"765400502","765400106","765400701","765401005","765400204",
+								"765401001","765400405","765400501","765400102","765400503",
+								"765400404","765400105","765401002","765400902","765400403",
+								"765400203","765400101","765400205"), 
 						GSEnumAttributeType.unique));
 				
 				indivAttributes.add(attf.createAttribute("POP", GSEnumDataType.Integer,

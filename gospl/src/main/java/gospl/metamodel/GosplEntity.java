@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.vividsolutions.jts.geom.Point;
 
+import core.io.geo.entity.AGeoEntity;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.metamodel.IEntity;
@@ -14,7 +15,7 @@ import core.metamodel.IEntity;
 public class GosplEntity implements IEntity<ASurveyAttribute, AValue> {
 
 	private Point location = null;
-	private IEntity<?,?> nest = null;
+	private AGeoEntity nest = null;
 	private Map<ASurveyAttribute, AValue> attributes;
 
 	public GosplEntity(Map<ASurveyAttribute, AValue> attributes){
@@ -42,7 +43,7 @@ public class GosplEntity implements IEntity<ASurveyAttribute, AValue> {
 	}
 
 	@Override
-	public IEntity<?, ?> getNest() {
+	public AGeoEntity getNest() {
 		return nest;
 	}
 
@@ -52,7 +53,7 @@ public class GosplEntity implements IEntity<ASurveyAttribute, AValue> {
 	}
 
 	@Override
-	public void setNest(IEntity<?, ?> entity) {
+	public void setNest(AGeoEntity entity) {
 		this.nest = entity;
 	}
 	
