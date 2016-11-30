@@ -1,6 +1,7 @@
 package spin.objects;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -22,6 +23,16 @@ public class SpinNetwork <V extends IValue, A extends IAttribute<V>> {
 	public SpinNetwork(){
 		networkRepresentation = new HashMap<NetworkNode<V,A>, Set<NetworkLink>>();
 	}
+	
+	/**
+	 * Put a new NetworkNode in the graph. 
+	 * An new set of NetworkLink is associated.
+	 * @param node the NetworkNode to add
+	 */
+	public void putNode(NetworkNode<V, A> node) {
+		networkRepresentation.put(node, new HashSet<NetworkLink>());		
+	}
+
 	
 	// Methode de calcul quelconque
 	
