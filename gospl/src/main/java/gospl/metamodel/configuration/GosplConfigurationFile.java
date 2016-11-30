@@ -3,6 +3,7 @@ package gospl.metamodel.configuration;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,7 +23,7 @@ public class GosplConfigurationFile {
 	private final List<GSSurveyFile> dataFileList = new ArrayList<>();
 	
 	private final Set<ASurveyAttribute> attributeSet = new HashSet<>();
-	
+		
 	public GosplConfigurationFile(List<GSSurveyFile> dataFiles, Set<ASurveyAttribute> attributes){
 		this.dataFileList.addAll(dataFiles);
 		this.attributeSet.addAll(attributes);

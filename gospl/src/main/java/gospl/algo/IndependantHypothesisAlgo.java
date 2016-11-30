@@ -8,9 +8,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.util.GSPerformanceUtil;
+import gospl.algo.sampler.IDistributionSampler;
+import gospl.algo.sampler.IHierarchicalSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -40,18 +45,18 @@ import gospl.metamodel.GSSurveyType;
  * @author kevinchapuis
  *
  */
-public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASurveyAttribute, AValue> {
+public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDistributionSampler> {
 
-	private boolean DEBUG_SYSO;
+	private Logger logger = LogManager.getLogger();
+	
+	public IndependantHypothesisAlgo() {
 
-	public IndependantHypothesisAlgo(boolean DEBUG_SYSO) {
-		this.DEBUG_SYSO = DEBUG_SYSO;
 	}
 
 	@Override
 	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
 			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix,
-			ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) throws IllegalDistributionCreation {
+			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
 		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))
@@ -59,7 +64,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASu
 
 		// Begin the algorithm (and performance utility)
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
-				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), DEBUG_SYSO);
+				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
 		gspu.getStempPerformance(0);
 
 		// Stop the algorithm and exit the unique matrix if there is only one

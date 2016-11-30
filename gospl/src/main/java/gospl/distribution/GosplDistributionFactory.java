@@ -91,6 +91,14 @@ public class GosplDistributionFactory {
 	}
 
 	/**
+	 * Returns the raw distributions, without any prior checking
+	 * @return
+	 */
+	public Set<AFullNDimensionalMatrix<? extends Number>> getRawDistributions() {
+		return this.distributions;
+	}
+	
+	/**
 	 * 
 	 * Create a matrix from all matrices build with this factory
 	 * 
@@ -175,6 +183,7 @@ public class GosplDistributionFactory {
 					jDistribution = new GosplContingencyTable(dimTable);
 				else
 					jDistribution = new GosplJointDistribution(dimTable, file.getDataFileType());
+				jDistribution.setLabel(file.getSurveyFileName());
 				// Fill in the matrix through line & column
 				for (final Integer row : rowHeaders.entrySet().stream()
 						.filter(e -> e.getValue().stream().allMatch(v -> rSchema.contains(v.getAttribute())))
@@ -239,7 +248,7 @@ public class GosplDistributionFactory {
 				freqMatrix = new GosplJointDistribution(
 						matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
 						GSSurveyType.GlobalFrequencyTable);
-
+				freqMatrix.setLabel((matrix.getLabel()==null?"?/joint":matrix.getLabel()+"/joint"));
 				final AFullNDimensionalMatrix<? extends Number> matrixOfReference = optionalRef.get();
 				final double totalControl =
 						matrixOfReference.getVal(localReferentDimension.getValues()).getValue().doubleValue();
@@ -261,6 +270,7 @@ public class GosplDistributionFactory {
 			freqMatrix = new GosplJointDistribution(
 					matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
 					GSSurveyType.GlobalFrequencyTable);
+			freqMatrix.setLabel((matrix.getLabel()==null?"?/joint":matrix.getLabel()+"/joint"));
 
 			if (matrix.getMetaDataType().equals(GSSurveyType.GlobalFrequencyTable)) {
 				for (final ACoordinate<ASurveyAttribute, AValue> coord : matrix.getMatrix().keySet())

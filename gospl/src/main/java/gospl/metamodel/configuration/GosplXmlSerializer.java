@@ -92,7 +92,8 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		Files.write(Paths.get(mkdir+FileSystems.getDefault().getSeparator()+xmlName+".xml"), w.toString().getBytes());
 	}
 	
-	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException{
+	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException {
+		
 		if(!valideXmlFile.exists())
 			throw new FileNotFoundException(valideXmlFile.toString());
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))

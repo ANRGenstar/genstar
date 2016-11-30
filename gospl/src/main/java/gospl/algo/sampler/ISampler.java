@@ -20,22 +20,6 @@ import gospl.distribution.util.GosplBasicDistribution;
  */
 public interface ISampler<T> {
 	
-	// ---------------- setup methods ---------------- //
-	
-	/**
-	 * Set the distribution to draw within
-	 * 
-	 * @param distribution
-	 */
-	public void setDistribution(GosplBasicDistribution distribution);
-	
-	/**
-	 * Set the distribution to draw within in form of a n-dimensional matrix
-	 * 
-	 * @param distribution
-	 */
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution);
-	
 	// ---------------- main contract ---------------- //
 	
 	/**

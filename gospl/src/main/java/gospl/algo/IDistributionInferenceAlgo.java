@@ -10,7 +10,7 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
-public interface IDistributionInferenceAlgo<D, A> {
+public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordinate<ASurveyAttribute, AValue>>> {
 
 	/**
 	 * 
@@ -33,7 +33,9 @@ public interface IDistributionInferenceAlgo<D, A> {
 	 */
 	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
 			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix, 
-			ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) 
+			SamplerType sampler) 
 			throws IllegalDistributionCreation;
+	
+	
 	
 }

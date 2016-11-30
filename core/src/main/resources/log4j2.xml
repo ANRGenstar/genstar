@@ -9,7 +9,7 @@
     <Logger name="test.util.R" level="trace" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Root level="error">
+    <Root level="debug">
       <AppenderRef ref="Console"/>
     </Root>
   </Loggers>
