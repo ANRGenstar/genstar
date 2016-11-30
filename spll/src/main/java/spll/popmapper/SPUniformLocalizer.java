@@ -105,7 +105,13 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	private void randomLocalizationInNestWithNumbers(List<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? entityNbAreas.getGeoData() : entityNbAreas.getGeoDataWithin(spatialBounds);
 		for (AGeoEntity feature: areas) {
-			Object[] locTab = localisation.getGeoDataWithin(feature.getGeometry()).toArray();
+			Object[] locTab = null;
+			if (localisation == entityNbAreas) {
+				locTab = new Object[1];
+				locTab[0] = feature;
+			} else {
+				locTab = localisation.getGeoDataWithin(feature.getGeometry()).toArray();
+			}
 			int nb = locTab.length;
 			if (nb == 0) continue;
 			double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
@@ -117,8 +123,6 @@ public class SPUniformLocalizer implements ISPLocalizer {
 				AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
 				entity.setNest(nest);
 				entity.setLocation(pointInGeom(nest.getGeometry(),rand));
-				
-				
 			}
 		}
 	}
