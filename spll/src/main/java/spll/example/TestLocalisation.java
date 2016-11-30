@@ -110,7 +110,7 @@ public class TestLocalisation {
 		}
 		
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		IDistributionInferenceAlgo<ASurveyAttribute, AValue> distributionInfAlgo = new IndependantHypothesisAlgo(true);
+		IDistributionInferenceAlgo distributionInfAlgo = new IndependantHypothesisAlgo();
 		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
