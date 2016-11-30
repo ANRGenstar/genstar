@@ -1,6 +1,7 @@
 package core.io.geo.entity;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -29,17 +30,19 @@ public class GeoEntityFactory {
 	 * @param feature
 	 * @return
 	 */
-	public GSFeature createGeoEntity(Feature feature) {
+	public GSFeature createGeoEntity(Feature feature, List<String> atts) {
 		Set<AGeoValue> values = new HashSet<>();
 		for(Property property : feature.getProperties()){
+			String name = property.getName().getLocalPart();
+			if ("the_geom".equals(name) || ((atts != null) && !atts.contains(name))) continue;
 			Optional<AGeoAttribute> opAtt = attributes
-					.stream().filter(att -> att.getAttributeName().equals(property.getName().getLocalPart()))
+					.stream().filter(att -> att.getAttributeName().equals(name))
 					.findFirst();
-			AGeoAttribute attribute = opAtt.isPresent() ? opAtt.get() : new RawGeoAttribute(property.getName().getLocalPart());
+			AGeoAttribute attribute = opAtt.isPresent() ? opAtt.get() : new RawGeoAttribute(name);
 			if(!opAtt.isPresent())
 				attributes.add(attribute);
 			Optional<AGeoValue> opVal = attribute.getValues()
-					.stream().filter(val -> val.getInputStringValue().equals(property.getValue().toString()))
+					.stream().filter(val -> val.getInputStringValue().equals(name))
 					.findFirst();
 			AGeoValue value = opVal.isPresent() ? opVal.get() : new RawGeoData(attribute, property.getValue());
 			if(!opVal.isPresent())

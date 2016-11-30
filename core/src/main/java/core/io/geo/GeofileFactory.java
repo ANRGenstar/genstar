@@ -108,6 +108,13 @@ public class GeofileFactory {
 		throw new InvalidFileTypeException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
 	
+	public ShapeFile getShapeFile(File shapefile,List<String> attributes) throws IOException, InvalidFileTypeException {
+		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
+			return new ShapeFile(shapefile);
+		String[] pathArray = shapefile.getPath().split(File.separator);
+		throw new InvalidFileTypeException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
+	}
+	
 	
 	// ------------------------------------------------------------ //
 	//						CREATE GEOFILE							//
@@ -281,7 +288,7 @@ public class GeofileFactory {
 		} 	
 		
 
-		return new ShapeFile(newDataStore);
+		return new ShapeFile(newDataStore, null);
 	}
 	
 
@@ -328,7 +335,7 @@ public class GeofileFactory {
 			transaction.close();
 		}
 
-		return new ShapeFile(newDataStore);
+		return new ShapeFile(newDataStore, null);
 	}
 	
 	// ------------------- INNER UTILITIES ------------------- //
