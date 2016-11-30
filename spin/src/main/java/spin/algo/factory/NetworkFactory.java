@@ -14,13 +14,12 @@ import core.metamodel.IPopulation;
  *
  */
 public class NetworkFactory {
-	public static SpinNetwork getNetwork(NetworkEnumGenerator typeGenerator, 
-			IPopulation<? extends IEntity<ASurveyAttribute, AValue>, ASurveyAttribute, AValue> population){
+	public static SpinNetwork getNetwork(NetworkEnumGenerator typeGenerator, IPopulation<? extends IEntity<ASurveyAttribute, AValue>, ASurveyAttribute, AValue> population){
 		if(typeGenerator.equals(NetworkEnumGenerator.SmallWorld))
-			return null;
-//			return new SWGenerator().generateNetwork(population);
-		if(typeGenerator.equals(NetworkEnumGenerator.ScaleFree))
-			return new SFGenerator().generateNetwork(population);
+//			return null;
+			return new SWGenerator().generateNetwork(population);
+//		if(typeGenerator.equals(NetworkEnumGenerator.ScaleFree))
+//			return new SFGenerator().generateNetwork(population);
 		return null;
 	}
 }

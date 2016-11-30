@@ -12,6 +12,8 @@ import core.metamodel.IEntity;
  */
 public class NetworkLink implements IEntity<NetworkLinkAttribut, NetworkLinkValue> {
 
+//	NetworkNode<>
+	
 	@Override
 	public Collection<NetworkLinkAttribut> getAttributes() {
 		// TODO Auto-generated method stub
