@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.opengis.referencing.operation.TransformException;
@@ -101,20 +102,24 @@ public class GSImportFactory {
 
 	// ------------------- shapefile import ------------------- //
 
-	public static ShapeFile getShapeFile(final File shapefile) throws IOException, InvalidFileTypeException {
-		return gf.getShapeFile(shapefile);
+	public static ShapeFile getShapeFile(final File shapefile,  List<String> atts) throws IOException, InvalidFileTypeException {
+		return gf.getShapeFile(shapefile, atts);
 	}
 
-	public static ShapeFile getShapeFile(final Path shapefilePath) throws IOException, InvalidFileTypeException {
+	public static ShapeFile getShapeFile(final Path shapefilePath,  List<String> atts) throws IOException, InvalidFileTypeException {
 		final File file = shapefilePath.toFile();
 		if (file.exists())
-			return getShapeFile(file);
+			return getShapeFile(file, atts);
 		throw new FileNotFoundException("The path " + shapefilePath.toString() + " does not represent a valid path");
 	}
 
+	public static ShapeFile getShapeFile(final String shapefileStringPath, List<String> atts)
+			throws IOException, InvalidFileTypeException {
+		return getShapeFile(Paths.get(shapefileStringPath), atts);
+	}
 	public static ShapeFile getShapeFile(final String shapefileStringPath)
 			throws IOException, InvalidFileTypeException {
-		return getShapeFile(Paths.get(shapefileStringPath));
+		return getShapeFile(Paths.get(shapefileStringPath), null);
 	}
 
 }

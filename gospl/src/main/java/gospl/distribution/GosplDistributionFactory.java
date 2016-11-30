@@ -116,10 +116,21 @@ public class GosplDistributionFactory {
 		if (distributions.size() == 1)
 			return getFrequency(distributions.iterator().next());
 		final Set<AFullNDimensionalMatrix<Double>> fullMatrices = new HashSet<>();
+		
+		// Matrices that do not contain any record attribute
 		for (final AFullNDimensionalMatrix<? extends Number> mat : distributions.stream()
 				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !d.isRecordAttribute()))
 				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
+		
+		// Matrices that contain an attribute
+		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : distributions.stream()
+				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> d.isRecordAttribute()))
+				.collect(Collectors.toSet())){
+			if(recordMatrices.getDimensions().stream().filter(d -> !d.isRecordAttribute())
+					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
+				fullMatrices.add(getTransposedRecord(recordMatrices));
+		}
 		return new GosplConditionalDistribution(fullMatrices);
 	}
 
@@ -218,7 +229,9 @@ public class GosplDistributionFactory {
 	private AFullNDimensionalMatrix<Double> getFrequency(final AFullNDimensionalMatrix<? extends Number> matrix)
 			throws IllegalControlTotalException {
 		// returned matrix
-		AFullNDimensionalMatrix<Double> freqMatrix = null;
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
+				matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
+				GSSurveyType.GlobalFrequencyTable);
 
 		if (matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
 			// Identify local referent dimension
@@ -311,6 +324,30 @@ public class GosplDistributionFactory {
 		}
 
 		return sampleSet;
+	}
+	
+	private AFullNDimensionalMatrix<Double> getTransposedRecord(
+			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
+		
+		Set<ASurveyAttribute> dims = recordMatrices.getDimensions().stream().filter(d -> !d.isRecordAttribute())
+				.collect(Collectors.toSet());
+		
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
+				recordMatrices.getDimensions().stream().filter(d -> dims.contains(d))
+				.collect(Collectors.toMap(d -> d, d -> d.getValues())),
+				GSSurveyType.GlobalFrequencyTable);
+		
+		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal(dims.iterator().next().getValues());
+		
+		for(ACoordinate<ASurveyAttribute, AValue> oldCoord : recordMatrices.getMatrix().keySet()){
+			Set<AValue> newCoord = new HashSet<>(oldCoord.values());
+			newCoord.retainAll(dims.stream().flatMap(dim -> dim.getValues().stream()).collect(Collectors.toSet()));
+			freqMatrix.addValue(new GosplCoordinate(newCoord), 
+					new ControlFrequency(recordMatrices.getVal(oldCoord).getValue().doubleValue() 
+							/ recordMatrixControl.getValue().doubleValue()));
+		}
+		
+		return freqMatrix;
 	}
 
 	///////////////////////////////////////////////////////////////////////

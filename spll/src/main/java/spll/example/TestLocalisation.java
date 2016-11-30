@@ -14,6 +14,7 @@ import java.util.concurrent.ExecutionException;
 
 import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import core.io.GSExportFactory;
@@ -23,8 +24,11 @@ import core.io.geo.GeoGSFileType;
 import core.io.geo.IGSGeofile;
 import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
+import core.io.geo.entity.GSFeature;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
+import core.metamodel.IEntity;
+import core.metamodel.IPopulation;
 import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
 import gospl.GosplSPTemplate;
@@ -39,6 +43,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
@@ -132,7 +137,7 @@ public class TestLocalisation {
 	
 	public static void main(String[] args) {
 		int targetPopulation = 1000;
-		GosplPopulation population = generatePopulation(targetPopulation);
+		IPopulation population = generatePopulation(targetPopulation);
 		
 		///////////////////////
 		// INIT VARS FROM ARGS
@@ -141,17 +146,23 @@ public class TestLocalisation {
 		String stringPathToMainShapefile = "sample/Rouen/Rouen_shp/Rouen_iris.shp";
 		String stringOfMainProperty = "P13_POP";
 		
+		String stringPathToBuildingFile = "sample/Rouen/Rouen_shp/buildings.shp";
+		
+		List<String> atts_buildings = Arrays.asList();
+		
 		/////////////////////
 		// IMPORT DATA FILES
 		/////////////////////
 		
 		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Rouen based on Iris population");
 		ShapeFile sfAdmin = null;
+		ShapeFile sfBuildings = null;
 		try {
+			sfBuildings = GSImportFactory.getShapeFile(stringPathToBuildingFile, atts_buildings);
 			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
 			List<String> att = new ArrayList<String>();
 			att.add("P13_POP");
-			sfAdmin.addAttributes(new File("sample/Rouen/Rouen_shp/Rouen_iris.csv"), ',', "CODE_IRIS", "IRIS", att);
+			sfAdmin.addAttributes(new File("sample/Rouen/Rouen_insee_indiv/Rouen_iris.csv"), ',', "CODE_IRIS", "IRIS", att);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -159,6 +170,7 @@ public class TestLocalisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		
 		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
 		stringPathToAncilaryGeofiles.add("sample/Rouen/Rouen_raster/CLC12_D076_RGF_S.tif");
@@ -276,13 +288,17 @@ public class TestLocalisation {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-		
+		 
 		
 		///////////////////////
 		// MATCH TO POPULATION
 		///////////////////////
 		
-		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null, outputFile, "Band_0");
+ 		@SuppressWarnings("unchecked")
+ 		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, sfBuildings, null, "IRIS", "CODE_IRIS");
+		
+		// Normal used, based on the regression grid
+ 		//SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, outputFile, "Band_0", "IRIS", "CODE_IRIS");
 		localizer.localisePopulation();
 		try {
 			GSExportFactory.createShapeFile(new File("sample/Rouen/result.shp"), population, outputFormat.getCoordRefSystem());
@@ -290,8 +306,8 @@ public class TestLocalisation {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-
 	}
+	
+	
 
 }

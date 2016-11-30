@@ -23,9 +23,7 @@ import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.io.survey.attribut.value.RangeValue;
 import core.io.survey.attribut.value.UniqueValue;
-import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
-import core.util.excpetion.GSIllegalRangedData;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
 import gospl.algo.sampler.GosplBasicSampler;
@@ -42,12 +40,17 @@ import gospl.metamodel.GosplPopulation;
 import msi.gama.common.interfaces.ICreateDelegate;
 import msi.gama.runtime.IScope;
 import msi.gama.util.file.GamaXMLFile;
+import msi.gaml.operators.Cast;
 import msi.gaml.statements.Arguments;
 import msi.gaml.statements.CreateStatement;
 import msi.gaml.types.IType;
 import msi.gaml.types.Types;
 
 public class GenstarCreateDelegate implements ICreateDelegate {
+
+	public GenstarCreateDelegate() {
+		System.out.println("Delegate created");
+	}
 
 	@Override
 	public boolean acceptSource(final IScope scope, final Object source) {
@@ -57,10 +60,15 @@ public class GenstarCreateDelegate implements ICreateDelegate {
 	@Override
 	public boolean createFrom(final IScope scope, final List<Map<String, Object>> inits, final Integer max,
 			final Object source, final Arguments init, final CreateStatement statement) {
+
 		final GamaXMLFile file = (GamaXMLFile) source;
 
 		// INPUT ARGS
-		final int targetPopulation = max;
+		// If no population size is specified, 1 is taken as a default.
+		// TODO See if it is possible to infer a default population number from the data.
+		final int targetPopulation = max == null ? 1 : max;
+
+		scope.getGui().getStatus().beginSubStatus("Generating " + targetPopulation + " agents");
 		final Path confFile = Paths.get(file.getPath(scope));
 
 		// THE POPULATION TO BE GENERATED
@@ -68,6 +76,7 @@ public class GenstarCreateDelegate implements ICreateDelegate {
 
 		// INSTANCIATE FACTORY
 		GosplDistributionFactory df = null;
+
 		try {
 			df = new GosplDistributionFactory(confFile);
 		} catch (final FileNotFoundException e) {
@@ -120,15 +129,19 @@ public class GenstarCreateDelegate implements ICreateDelegate {
 		}
 
 		final Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
+		double index = 0;
 		for (final GosplEntity e : population) {
+			scope.getGui().getStatus().setSubStatusCompletion(index++ / targetPopulation);
 			final Map<String, Object> agent = new HashMap<String, Object>();
 			for (final ASurveyAttribute attribute : attributes) {
 				final String name = attribute.getAttributeName();
 				agent.put(name, getAttributeValue(scope, e, attribute));
 			}
+			// scope.getSimulation().getProjectionFactory().agent.put(IKeyword.SHAPE, new GamaShape(e.getLocation()));
 			statement.fillWithUserInit(scope, agent);
 			inits.add(agent);
 		}
+		scope.getGui().getStatus().endSubStatus("Generating " + targetPopulation + " agents");
 		return true;
 
 	}
@@ -146,23 +159,16 @@ public class GenstarCreateDelegate implements ICreateDelegate {
 	}
 
 	private Object drawValue(final IScope scope, final IType<?> type, final RangeValue value) {
-		final GSDataParser parser = new GSDataParser();
 		switch (type.id()) {
 			case IType.INT: {
-				try {
-					final List<Integer> bounds = parser.getRangedIntegerData(value.getInputStringValue(), false);
-					return scope.getRandom().between(bounds.get(0), bounds.get(1));
-				} catch (final GSIllegalRangedData e) {
-					return 0;
-				}
+				final int lower = Cast.asInt(scope, value.getInputStringLowerBound());
+				final int upper = Cast.asInt(scope, value.getInputStringUpperBound());
+				return scope.getRandom().between(lower, upper);
 			}
 			case IType.FLOAT: {
-				try {
-					final List<Double> bounds = parser.getRangedDoubleData(value.getInputStringValue(), false);
-					return scope.getRandom().between(bounds.get(0), bounds.get(1));
-				} catch (final GSIllegalRangedData e) {
-					return 0d;
-				}
+				final double lower = Cast.asFloat(scope, value.getInputStringLowerBound());
+				final double upper = Cast.asFloat(scope, value.getInputStringUpperBound());
+				return scope.getRandom().between(lower, upper);
 			}
 			default:
 				return null;

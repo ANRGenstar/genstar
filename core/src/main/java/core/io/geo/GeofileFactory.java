@@ -108,6 +108,13 @@ public class GeofileFactory {
 		throw new InvalidFileTypeException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
 	
+	public ShapeFile getShapeFile(File shapefile,List<String> attributes) throws IOException, InvalidFileTypeException {
+		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
+			return new ShapeFile(shapefile, attributes);
+		String[] pathArray = shapefile.getPath().split(File.separator);
+		throw new InvalidFileTypeException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
+	}
+	
 	
 	// ------------------------------------------------------------ //
 	//						CREATE GEOFILE							//
@@ -200,29 +207,6 @@ public class GeofileFactory {
 		return writeRasterFile(rasterfile, 
 				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
 	}
-	
-	public String getGeometryType(final Collection<Geometry> geoms) {
-		String geomType = "";
-		for (final Geometry geom : geoms) {
-			if (geom != null) {
-				geomType = geom.getClass().getSimpleName();
-				if (geom.getNumGeometries() > 1) {
-					if (geom.getGeometryN(0).getClass() == Point.class) {
-						geomType = MultiPoint.class.getSimpleName();
-					} else if (geom.getGeometryN(0).getClass() == LineString.class) {
-						geomType = MultiLineString.class.getSimpleName();
-					} else if (geom.getGeometryN(0).getClass() == Polygon.class) {
-						geomType = MultiPolygon.class.getSimpleName();
-					}
-					break;
-				}
-			}
-		}
-
-		if ("DynamicLineString".equals(geomType))
-			geomType = LineString.class.getSimpleName();
-		return geomType;
-	}
 
 	
 	public ShapeFile createShapeFile(File shapefile, IPopulation population, CoordinateReferenceSystem crs) throws IOException, SchemaException {
@@ -281,7 +265,7 @@ public class GeofileFactory {
 		} 	
 		
 
-		return new ShapeFile(newDataStore);
+		return new ShapeFile(newDataStore, null);
 	}
 	
 
@@ -328,12 +312,11 @@ public class GeofileFactory {
 			transaction.close();
 		}
 
-		return new ShapeFile(newDataStore);
+		return new ShapeFile(newDataStore, null);
 	}
 	
 	// ------------------- INNER UTILITIES ------------------- //
 	
-
 	private RasterFile writeRasterFile(File rasterfile, GridCoverage2D coverage) 
 			throws IllegalArgumentException, TransformException, IOException {
 		AbstractGridCoverageWriter writer;
@@ -345,4 +328,26 @@ public class GeofileFactory {
 		return new RasterFile(rasterfile);
 	}
 
+	private String getGeometryType(final Collection<Geometry> geoms) {
+		String geomType = "";
+		for (final Geometry geom : geoms) {
+			if (geom != null) {
+				geomType = geom.getClass().getSimpleName();
+				if (geom.getNumGeometries() > 1) {
+					if (geom.getGeometryN(0).getClass() == Point.class) {
+						geomType = MultiPoint.class.getSimpleName();
+					} else if (geom.getGeometryN(0).getClass() == LineString.class) {
+						geomType = MultiLineString.class.getSimpleName();
+					} else if (geom.getGeometryN(0).getClass() == Polygon.class) {
+						geomType = MultiPolygon.class.getSimpleName();
+					}
+					break;
+				}
+			}
+		}
+
+		if ("DynamicLineString".equals(geomType))
+			geomType = LineString.class.getSimpleName();
+		return geomType;
+	}
 }

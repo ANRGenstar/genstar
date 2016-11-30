@@ -8,12 +8,16 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import core.metamodel.IPopulation;
 
 public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribute, AValue> {
 
+	CoordinateReferenceSystem crs = null;
+	
 	private final Collection<GosplEntity> population;
 	
 	/**
@@ -146,4 +150,13 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 		return report;
 	}
 
+	public CoordinateReferenceSystem getCrs() {
+		return crs;
+	}
+
+	public void setCrs(CoordinateReferenceSystem crs) {
+		this.crs = crs;
+	}
+
+	
 }
