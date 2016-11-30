@@ -295,11 +295,16 @@ public class TestLocalisation {
 		///////////////////////
 		
  		@SuppressWarnings("unchecked")
- 		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, sfBuildings, null, "IRIS", "CODE_IRIS");
+ 		SPUniformLocalizer localizer = new SPUniformLocalizer(sfBuildings);
+ 		
+ 		// use of the regression grid
+ 		localizer.setEntityNbAreas(outputFile, "Band_0");
 		
-		// Normal used, based on the regression grid
- 		//SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, outputFile, "Band_0", "IRIS", "CODE_IRIS");
-		localizer.localisePopulation();
+ 		// use of the IRIS attribute of the population
+ 		//localizer.setMatch(sfAdmin, "IRIS", "IRIS");
+ 		
+ 		//localize the population
+ 		localizer.localisePopulation(population);
 		try {
 			GSExportFactory.createShapeFile(new File("sample/Rouen/result.shp"), population, outputFormat.getCoordRefSystem());
 		} catch (IOException | SchemaException e) {

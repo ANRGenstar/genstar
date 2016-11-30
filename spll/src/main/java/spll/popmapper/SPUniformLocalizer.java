@@ -2,12 +2,11 @@ package spll.popmapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.apache.commons.collections.IteratorUtils;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -24,38 +23,35 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 import core.io.geo.IGSGeofile;
-import core.io.geo.ShapeFile;
 import core.io.geo.entity.AGeoEntity;
-import core.io.geo.entity.attribute.AGeoAttribute;
+import core.metamodel.IAttribute;
 import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
+import core.metamodel.IValue;
+import spll.constraint.SpatialConstraint;
 public class SPUniformLocalizer implements ISPLocalizer {
 
 	@SuppressWarnings("rawtypes")
-	private IPopulation<IEntity,?,?> population;
-	private ShapeFile match;
-	private IGSGeofile localisation;
-	private String numberProperty;
-	private Random rand;
-	private String keyAttPop;
-	private String keyAttMatch;
+	private IGSGeofile match; //main referenced area for placing the agents (ex: Iris)
+	private IGSGeofile localisation; //possible nest for agents (ex: buildings)
+	private IGSGeofile entityNbAreas; //gives the number of entities per area (ex: regression cells)
+	private List<SpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest
+	private Random rand;  
+	
+	private String numberProperty; //name of the attribute that contains the number of entities in the entityNbAreas file
+	private String keyAttPop; //name of the attribute that is used to store the id of the referenced area  in the population
+	private String keyAttMatch; //name of the attribute that is used to store the id of the referenced area in the entityNbAreas file
 	
 	public static GeometryFactory FACTORY = new GeometryFactory();
 	
-	public SPUniformLocalizer(IPopulation<IEntity,?,?> population, ShapeFile match, IGSGeofile localisation, String numberProperty, String keyAttPop, String keyAttMatch ) {
-		this.population = population;
-		this.match = match;
+	public SPUniformLocalizer(IGSGeofile localisation) {
 		this.localisation = localisation;
-		this.numberProperty = numberProperty;
-		this.keyAttPop = keyAttPop;
-		this.keyAttMatch = keyAttMatch;
 		rand = new Random();
 	}
 	
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public IPopulation localisePopulation() {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> localisePopulation(IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> population) {
 		// TODO Auto-generated method stub
 		
 		// TODO: how to match attribute feature and attribute individual, both are IEntity
@@ -63,68 +59,71 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		// TODO: for each feature, randomly spread individual with a fitness (reproduce in each cells the feature distribution)
 		population.setCrs(localisation.getCoordRefSystem());
 		try {
-			if (match != null) {
+			//case where the referenced file is not defined
+			if (match == null) {
+				List<IEntity> entities = new ArrayList<IEntity>(population);
+				
+				//case where there is no information about the number of entities in specific spatial areas
+				if (numberProperty == null || entityNbAreas == null) {
+					randomLocalizationInNest(entities, null);
+				}
+				//case where we have information about the number of entities per specific areas (entityNbAreas)
+				else {
+					randomLocalizationInNestWithNumbers(entities, null);
+				}
+			}
+			//case where the referenced file is defined
+			else {
 				for (AGeoEntity globalfeature : match.getGeoData()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
 					List<IEntity> entities = population.stream().filter(s -> s.getValueForAttribute(keyAttPop).toString().equals(valKeyAtt)).collect(Collectors.toList());
-					if (numberProperty == null) {
-						Object[] locTab = IteratorUtils.toArray(localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry()));
-						int nb = locTab.length;
-						for (IEntity entity : population) {
-							AGeoEntity feature = (AGeoEntity) locTab[rand.nextInt(nb)];
-							entity.setNest(feature);
-							entity.setLocation(pointInGeom(feature.getGeometry(),rand));
-						}
-					} else {
-						Iterator<? extends AGeoEntity> itr = localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry());
-						while(itr.hasNext()) {
-							AGeoEntity feature = itr.next();
-							List<String> atts = new ArrayList();
-							for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
-							double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
-							for (int i = 0; i < val; i++) {
-								if (entities.isEmpty()) break;
-								int index = rand.nextInt(entities.size());
-								IEntity entity = (IEntity) entities.remove(index);
-								entity.setNest(feature);
-								entity.setLocation(pointInGeom(feature.getGeometry(),rand));
-							}
-						}
+					if (numberProperty == null || entityNbAreas == null) {
+						randomLocalizationInNest(entities, globalfeature.getGeometry());
+					}
+					else {
+						randomLocalizationInNestWithNumbers(entities, globalfeature.getGeometry());
 					}
 				}
-			} else {
-				List<IEntity> entities = new ArrayList<IEntity>(population);
-				if (numberProperty == null) {
-					Object[] locTab = localisation.getGeoData().toArray();
-					int nb = locTab.length;
-					for (IEntity entity : population) {
-						AGeoEntity feature = (AGeoEntity) locTab[rand.nextInt(nb)];
-						entity.setNest(feature);
-						entity.setLocation(pointInGeom(feature.getGeometry(),rand));
-					}
-				} else {
-					for (AGeoEntity feature: localisation.getGeoData()) {
-						List<String> atts = new ArrayList();
-						for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
-						double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
-						for (int i = 0; i < val; i++) {
-							if (entities.isEmpty()) break;
-							int index = rand.nextInt(entities.size());
-							IEntity entity = (IEntity) entities.remove(index);
-							entity.setNest(feature);
-							entity.setLocation(pointInGeom(feature.getGeometry(),rand));
-						}
-					}
-				}
+			} 
 				
-			}
 		} catch (IOException | TransformException e) {
 			e.printStackTrace();
 		} 
 		return population;
 	}
+
+	private void randomLocalizationInNest(Collection<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
+		Object[] locTab = spatialBounds == null ? localisation.getGeoData().toArray() : localisation.getGeoDataWithin(spatialBounds).toArray();
+		int nb = locTab.length;
+		for (IEntity entity : entities) {
+			AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
+			entity.setNest(nest);
+			entity.setLocation(pointInGeom(nest.getGeometry(),rand));
+		}
+	}
 	
-	public static Point pointInGeom(final Geometry geom, final Random rand) {
+	private void randomLocalizationInNestWithNumbers(List<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
+		Collection<? extends AGeoEntity> areas = spatialBounds == null ? entityNbAreas.getGeoData() : entityNbAreas.getGeoDataWithin(spatialBounds);
+		for (AGeoEntity feature: areas) {
+			Object[] locTab = localisation.getGeoDataWithin(feature.getGeometry()).toArray();
+			int nb = locTab.length;
+			if (nb == 0) continue;
+			double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
+			for (int i = 0; i < val; i++) {
+				if (entities.isEmpty()) break;
+				int index = rand.nextInt(entities.size());
+				IEntity entity = entities.remove(index);
+				
+				AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
+				entity.setNest(nest);
+				entity.setLocation(pointInGeom(nest.getGeometry(),rand));
+				
+				
+			}
+		}
+	}
+		
+	private static Point pointInGeom(final Geometry geom, final Random rand) {
 		GeometryFactory fact = new GeometryFactory();
 		if (geom == null || geom.getCoordinate() == null) {
 			return null;
@@ -216,7 +215,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	}
 	
 	
-	public static Integer opRndChoice(final List<Double> distribution, final Random rand) {
+	private static Integer opRndChoice(final List<Double> distribution, final Random rand) {
 		Double sumElt = 0.0;
 		List<Double> normalizedDistribution = new ArrayList<Double>();
 		for (final Double eltDistrib : distribution) {
@@ -240,5 +239,33 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		return -1;
 	}
 
+	public void setMatch(IGSGeofile match, String keyAttPop, String keyAttMatch) {
+		this.match = match;
+		this.keyAttPop = keyAttPop;
+		this.keyAttMatch = keyAttMatch;
+	}
 
+	public void setLocalisation(IGSGeofile localisation) {
+		this.localisation = localisation;
+	}
+	public void setEntityNbAreas(IGSGeofile entityNbAreas, String numberProperty) {
+		this.entityNbAreas = entityNbAreas;
+		this.numberProperty = numberProperty;
+	}
+
+	public List<SpatialConstraint> getConstraints() {
+		return constraints;
+	}
+	public void setConstraints(List<SpatialConstraint> constraints) {
+		this.constraints = constraints;
+	}
+
+
+	public Random getRand() {
+		return rand;
+	}
+
+	public void setRand(Random rand) {
+		this.rand = rand;
+	}
 }
