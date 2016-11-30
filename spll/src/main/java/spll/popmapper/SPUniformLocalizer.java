@@ -132,6 +132,22 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			}
 		}
 		if (geom instanceof Polygon) {
+			if (geom.getArea() > 0) {
+				final Envelope env = geom.getEnvelopeInternal();
+				final double xMin = env.getMinX();
+				final double xMax = env.getMaxX();
+				final double yMin = env.getMinY();
+				final double yMax = env.getMaxY();
+				double newX = xMin + rand.nextDouble() * (xMax - xMin);
+				double newY= yMin + rand.nextDouble() * (yMax - yMin);
+				Point pt = fact.createPoint(new Coordinate(newX, newY)); 
+				while (!geom.intersects(pt)) {
+					newX = xMin + rand.nextDouble() * (xMax - xMin);
+					newY= yMin + rand.nextDouble() * (yMax - yMin);
+					pt = fact.createPoint(new Coordinate(newX, newY)); 
+				}
+				return pt;
+			}
 			final Envelope env = geom.getEnvelopeInternal();
 			final double xMin = env.getMinX();
 			final double xMax = env.getMaxX();
