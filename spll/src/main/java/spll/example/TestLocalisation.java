@@ -148,7 +148,7 @@ public class TestLocalisation {
 		
 		String stringPathToBuildingFile = "sample/Rouen/Rouen_shp/buildings.shp";
 		
-		List<String> atts = Arrays.asList();
+		List<String> atts_buildings = Arrays.asList();
 		
 		/////////////////////
 		// IMPORT DATA FILES
@@ -158,8 +158,8 @@ public class TestLocalisation {
 		ShapeFile sfAdmin = null;
 		ShapeFile sfBuildings = null;
 		try {
+			sfBuildings = GSImportFactory.getShapeFile(stringPathToBuildingFile, atts_buildings);
 			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
-			sfBuildings = GSImportFactory.getShapeFile(stringPathToMainShapefile, atts);
 			List<String> att = new ArrayList<String>();
 			att.add("P13_POP");
 			sfAdmin.addAttributes(new File("sample/Rouen/Rouen_insee_indiv/Rouen_iris.csv"), ',', "CODE_IRIS", "IRIS", att);
@@ -295,7 +295,7 @@ public class TestLocalisation {
 		///////////////////////
 		
  		@SuppressWarnings("unchecked")
- 		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, sfBuildings, "Band_0", "IRIS", "CODE_IRIS");
+ 		SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, sfBuildings, null, "IRIS", "CODE_IRIS");
 		
 		// Normal used, based on the regression grid
  		//SPUniformLocalizer localizer = new SPUniformLocalizer(population, null/*sfAdmin*/, outputFile, "Band_0", "IRIS", "CODE_IRIS");

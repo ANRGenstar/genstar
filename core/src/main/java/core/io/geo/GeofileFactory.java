@@ -110,7 +110,7 @@ public class GeofileFactory {
 	
 	public ShapeFile getShapeFile(File shapefile,List<String> attributes) throws IOException, InvalidFileTypeException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
-			return new ShapeFile(shapefile);
+			return new ShapeFile(shapefile, attributes);
 		String[] pathArray = shapefile.getPath().split(File.separator);
 		throw new InvalidFileTypeException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
