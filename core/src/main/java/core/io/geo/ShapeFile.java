@@ -56,7 +56,7 @@ public class ShapeFile implements IGSGeofile {
 	/*
 	 * Protected constructor to ensure file are created through the provided factory
 	 */
-	protected ShapeFile(DataStore dataStore) throws IOException {
+	protected ShapeFile(DataStore dataStore, List<String> attributes) throws IOException {
 		this.dataStore = dataStore;
 		this.crs = dataStore.getSchema(dataStore.getTypeNames()[0]).getCoordinateReferenceSystem();
 		FeatureSource<SimpleFeatureType,SimpleFeature> fSource = dataStore
@@ -66,14 +66,22 @@ public class ShapeFile implements IGSGeofile {
 	    FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(filter)).features();
 	    GeoEntityFactory gef = new GeoEntityFactory(new HashSet<AGeoAttribute>());
 	    while (fItt.hasNext())
-	    	features.add(gef.createGeoEntity(fItt.next()));
+	    	features.add(gef.createGeoEntity(fItt.next(), attributes));
+	}
+	
+	protected ShapeFile(File file, List<String> attributes) throws IOException{
+		this(DataStoreFinder.getDataStore(
+				Stream.of(
+						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), attributes
+		);
 	}
 	
 	protected ShapeFile(File file) throws IOException{
 		this(DataStoreFinder.getDataStore(
 				Stream.of(
 						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue)))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), null
 		);
 	}
 	
@@ -156,7 +164,6 @@ public class ShapeFile implements IGSGeofile {
 	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, List<String> newAttributes) {
 		if (features== null && features.isEmpty()) return;
 		if (!csvFile.exists()) return;
-		
 		try {
 			CSVReader reader = new CSVReader(new FileReader(csvFile), seperator);
 			List<String[]> dataTable = reader.readAll();
@@ -186,7 +193,6 @@ public class ShapeFile implements IGSGeofile {
 				values.put(id, vals);
 			}
 			NumberFormat defaultFormat = NumberFormat.getInstance();
-					
 			for (GSFeature ft : features) {
 				Collection<String> properties = ft.getPropertiesAttribute();
 				if (!properties.contains(keyAttribute)) continue;
@@ -204,8 +210,6 @@ public class ShapeFile implements IGSGeofile {
 					} catch (ParseException e){
 						ft.addAttribute(attri, new RawGeoData(attri,  v));
 					}
-					
-					
 				}
 			}
 		} catch (FileNotFoundException e) {

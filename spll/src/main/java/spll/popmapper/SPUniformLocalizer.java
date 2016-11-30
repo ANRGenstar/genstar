@@ -2,11 +2,12 @@ package spll.popmapper;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections.IteratorUtils;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -31,7 +32,7 @@ import core.metamodel.IPopulation;
 public class SPUniformLocalizer implements ISPLocalizer {
 
 	@SuppressWarnings("rawtypes")
-	private IPopulation population;
+	private IPopulation<IEntity,?,?> population;
 	private ShapeFile match;
 	private IGSGeofile localisation;
 	private String numberProperty;
@@ -41,7 +42,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	
 	public static GeometryFactory FACTORY = new GeometryFactory();
 	
-	public SPUniformLocalizer(@SuppressWarnings("rawtypes") IPopulation population, ShapeFile match, IGSGeofile localisation, String numberProperty, String keyAttPop, String keyAttMatch ) {
+	public SPUniformLocalizer(IPopulation<IEntity,?,?> population, ShapeFile match, IGSGeofile localisation, String numberProperty, String keyAttPop, String keyAttMatch ) {
 		this.population = population;
 		this.match = match;
 		this.localisation = localisation;
@@ -65,10 +66,44 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			if (match != null) {
 				for (AGeoEntity globalfeature : match.getGeoData()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
-					List<IEntity> entities = new ArrayList<IEntity>((Collection<? extends IEntity>) population.stream().filter(s -> ((IEntity) s).getValueForAttribute(keyAttPop).toString().equals(valKeyAtt)));
-					Iterator<? extends AGeoEntity> itr = localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry());
-					while(itr.hasNext()) {
-						AGeoEntity feature = itr.next();
+					List<IEntity> entities = population.stream().filter(s -> s.getValueForAttribute(keyAttPop).toString().equals(valKeyAtt)).collect(Collectors.toList());
+					if (numberProperty == null) {
+						Object[] locTab = IteratorUtils.toArray(localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry()));
+						int nb = locTab.length;
+						for (IEntity entity : population) {
+							AGeoEntity feature = (AGeoEntity) locTab[rand.nextInt(nb)];
+							entity.setNest(feature);
+							entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+						}
+					} else {
+						Iterator<? extends AGeoEntity> itr = localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry());
+						while(itr.hasNext()) {
+							AGeoEntity feature = itr.next();
+							List<String> atts = new ArrayList();
+							for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
+							double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
+							for (int i = 0; i < val; i++) {
+								if (entities.isEmpty()) break;
+								int index = rand.nextInt(entities.size());
+								IEntity entity = (IEntity) entities.remove(index);
+								entity.setNest(feature);
+								entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+							}
+						}
+					}
+				}
+			} else {
+				List<IEntity> entities = new ArrayList<IEntity>(population);
+				if (numberProperty == null) {
+					Object[] locTab = localisation.getGeoData().toArray();
+					int nb = locTab.length;
+					for (IEntity entity : population) {
+						AGeoEntity feature = (AGeoEntity) locTab[rand.nextInt(nb)];
+						entity.setNest(feature);
+						entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+					}
+				} else {
+					for (AGeoEntity feature: localisation.getGeoData()) {
 						List<String> atts = new ArrayList();
 						for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
 						double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
@@ -81,21 +116,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 						}
 					}
 				}
-			} else {
-				List<IEntity> entities = new ArrayList<IEntity>(population);
 				
-				for (AGeoEntity feature: localisation.getGeoData()) {
-					List<String> atts = new ArrayList();
-					for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
-					double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
-					for (int i = 0; i < val; i++) {
-						if (entities.isEmpty()) break;
-						int index = rand.nextInt(entities.size());
-						IEntity entity = (IEntity) entities.remove(index);
-						entity.setNest(feature);
-						entity.setLocation(pointInGeom(feature.getGeometry(),rand));
-					}
-				}
 			}
 		} catch (IOException | TransformException e) {
 			e.printStackTrace();
@@ -132,6 +153,22 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			}
 		}
 		if (geom instanceof Polygon) {
+			if (geom.getArea() > 0) {
+				final Envelope env = geom.getEnvelopeInternal();
+				final double xMin = env.getMinX();
+				final double xMax = env.getMaxX();
+				final double yMin = env.getMinY();
+				final double yMax = env.getMaxY();
+				double newX = xMin + rand.nextDouble() * (xMax - xMin);
+				double newY= yMin + rand.nextDouble() * (yMax - yMin);
+				Point pt = fact.createPoint(new Coordinate(newX, newY)); 
+				while (!geom.intersects(pt)) {
+					newX = xMin + rand.nextDouble() * (xMax - xMin);
+					newY= yMin + rand.nextDouble() * (yMax - yMin);
+					pt = fact.createPoint(new Coordinate(newX, newY)); 
+				}
+				return pt;
+			}
 			final Envelope env = geom.getEnvelopeInternal();
 			final double xMin = env.getMinX();
 			final double xMax = env.getMaxX();

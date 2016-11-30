@@ -83,7 +83,7 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 				e.printStackTrace();
 			}
 		}
-		return factory.createGeoEntity(feature);
+		return factory.createGeoEntity(feature, null);
 	}
 
 }

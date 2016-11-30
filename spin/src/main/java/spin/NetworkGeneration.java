@@ -4,8 +4,6 @@ import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UniformRandomGenerator;
 import spin.algo.factory.NetworkFactory;
 import spin.algo.generator.NetworkEnumGenerator;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
@@ -37,7 +35,6 @@ public class NetworkGeneration {
 //		// 3 la factory choisit un générator grace a une unum
 //		// 4 le générator renvoi le réseau obtenu sur la population
 		SpinNetwork<IValue,IAttribute<IValue>> NEPASCOMMIT =
-//		SpinNetwork<IEntity, NetworkNode<IEntity, IValue, IAttribute<IValue>>>, NetworkLink> network = 
 		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
  		
 	}
