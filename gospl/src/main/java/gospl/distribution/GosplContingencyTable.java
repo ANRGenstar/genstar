@@ -1,6 +1,7 @@
 package gospl.distribution;
 
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import core.io.survey.attribut.ASurveyAttribute;
@@ -8,6 +9,7 @@ import core.io.survey.attribut.value.AValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -65,5 +67,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 			return getNulVal();
 		return new ControlContingency(Integer.valueOf(val));
 	}
-				
+
+
+	
 }

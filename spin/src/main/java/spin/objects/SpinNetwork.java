@@ -15,7 +15,7 @@ import core.metamodel.IValue;
 public class SpinNetwork <V extends IValue, A extends IAttribute<V>> {
 
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
-	public Map<NetworkNode<V,A>, Set<NetworkLink>> networkRepresentation;
+	private Map<NetworkNode<V,A>, Set<NetworkLink>> networkRepresentation;
 	
 	/** Constructeur sans param. 
 	 * 
@@ -33,6 +33,10 @@ public class SpinNetwork <V extends IValue, A extends IAttribute<V>> {
 		networkRepresentation.put(node, new HashSet<NetworkLink>());		
 	}
 
+	public Set<NetworkNode<V, A>> getNodes() {
+		return networkRepresentation.keySet();
+	}
+	
 	
 	// Methode de calcul quelconque
 	

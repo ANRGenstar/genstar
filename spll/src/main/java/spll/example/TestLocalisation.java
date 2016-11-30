@@ -119,7 +119,7 @@ public class TestLocalisation {
 		}
 		
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+targetPopulation, true);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start generating synthetic population of size "+targetPopulation);
 		
 		// BUILD THE GENERATOR
 		ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
@@ -154,7 +154,7 @@ public class TestLocalisation {
 		// IMPORT DATA FILES
 		/////////////////////
 		
-		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Rouen based on Iris population", true);
+		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Rouen based on Iris population");
 		ShapeFile sfAdmin = null;
 		ShapeFile sfBuildings = null;
 		try {

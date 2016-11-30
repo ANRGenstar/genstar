@@ -91,5 +91,17 @@ public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute,
 	public Set<java.util.Map.Entry<ACoordinate<ASurveyAttribute, AValue>, Double>> entrySet() {
 		return innermap.entrySet();
 	}
+	
+	@Override
+	public String toString() {
+		StringBuffer sb = new StringBuffer(); 
+		sb.append("[");
+		sb.append(GosplBasicDistribution.class.getSimpleName());
+		sb.append("] ");
+		sb.append(innermap.entrySet().parallelStream().map(sc -> sc.getKey().getDimensions()).collect(Collectors.toSet()));
+		sb.append(" card=");
+		sb.append(innermap.size());
+		return sb.toString();
+	}
 
 }

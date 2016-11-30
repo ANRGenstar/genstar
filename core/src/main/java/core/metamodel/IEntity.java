@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.vividsolutions.jts.geom.Point;
 
-import core.io.geo.entity.attribute.value.AGeoValue;
+import core.io.geo.entity.AGeoEntity;
 
 /**
  * An entity might represent an household, an individual, or even a geographical entity etc.
@@ -35,13 +35,15 @@ public interface IEntity<A extends IAttribute<V>, V extends IValue> {
 	 */
 	public Collection<V> getValues();
 	 
+	// SPLL CONNECTOR
+	
 	public Point getLocation();
 	
-	public IEntity<?,?> getNest();
+	public AGeoEntity getNest();
 	
 	public void setLocation(Point location);
 	
-	public void setNest(IEntity<?,?> entity);
+	public void setNest(AGeoEntity entity);
 	
 	public V getValueForAttribute(String property);
 	

@@ -14,6 +14,11 @@ import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
+/**
+ * A set of joint distributions with links of dependancy between them. 
+ * 
+ * @author Kevin Chapuis
+ */
 public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<Double> {
 
 	//private static boolean DEBUG_SYSO = true;

@@ -1,5 +1,14 @@
 package core.util;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+/**
+ * 
+ * 
+ * @author Kevin Chapuis
+ *
+ */
 public class GSPerformanceUtil {
 
 	private int stempCalls;
@@ -9,17 +18,33 @@ public class GSPerformanceUtil {
 	private boolean firstSyso;
 	private String performanceTestDescription;
 
-	private boolean logSyso;
+	private Logger logger;
 	
 	private double objectif;
 
-	private GSPerformanceUtil(boolean logSyso){
+	private GSPerformanceUtil(Logger logger){
 		resetStemp();
-		this.logSyso = logSyso;
+		this.logger = logger;
 	}
 
-	public GSPerformanceUtil(String performanceTestDescription, boolean logSyso) {
-		this(logSyso);
+	/**
+	 * Should be called with the logger of the caller; for instance if the caller logger is "gospl.sampler.hierarchical", 
+	 * performance will be logged into "gospl.sampler.hierarchical.performance" with an INFO level of verbosity. 
+	 * @param performanceTestDescription
+	 * @param logger
+	 */
+	public GSPerformanceUtil(String performanceTestDescription, Logger logger) {
+		this(LogManager.getLogger(logger.getName()+"."+GSPerformanceUtil.class.getSimpleName()));
+		this.performanceTestDescription = performanceTestDescription;
+	}
+	
+
+	/**
+	 * Information will be logged into "<calledclassname>.GSPerformanceUtil"
+	 * @param performanceTestDescription
+	 */
+	public GSPerformanceUtil(String performanceTestDescription) {
+		this(LogManager.getLogger());
 		this.performanceTestDescription = performanceTestDescription;
 	}
 
@@ -54,8 +79,7 @@ public class GSPerformanceUtil {
 	}
 	
 	public void sysoStempMessage(String message){
-		if(logSyso)
-			System.out.println(message);
+		logger.info(message);
 	}
 	
 	public void resetStemp(){
@@ -74,16 +98,15 @@ public class GSPerformanceUtil {
 		String callerString = caller.getClass().getSimpleName();
 		if(caller.getClass().equals(String.class))
 			callerString = caller.toString();
-		if(logSyso){
-			if(firstSyso){
-				System.out.println("\nMethod caller: "+callerString+
-						"\n-------------------------\n"+
-						performanceTestDescription+
-						"\n-------------------------");
-				firstSyso = false;
-			}
-			System.out.println(message);
+		
+		if(firstSyso){
+			logger.info("\nMethod caller: "+callerString+
+					"\n-------------------------\n"+
+					performanceTestDescription+
+					"\n-------------------------");
+			firstSyso = false;
 		}
+		logger.info(message);
 	}
 
 	public void setObjectif(double objectif) {

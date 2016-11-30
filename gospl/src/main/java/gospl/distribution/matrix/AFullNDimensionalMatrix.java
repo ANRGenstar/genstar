@@ -30,11 +30,13 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	private GSSurveyType dataType; 
 
-	private final Map<ASurveyAttribute, Set<AValue>> dimensions;
+	protected final Map<ASurveyAttribute, Set<AValue>> dimensions;
 	protected final Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> matrix;
 
 	private ACoordinate<ASurveyAttribute, AValue> emptyCoordinate = null;
 
+	protected String label = null;
+	
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
 	public AFullNDimensionalMatrix(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) {
@@ -66,7 +68,22 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return true;
 	}
 
-
+	/**
+	 * Returns a human readable label, or null if undefined.
+	 * @return
+	 */
+	public String getLabel() {
+		return this.label;
+	}
+	
+	/**
+	 * Sets the label which describes the table.
+	 * @param label
+	 */
+	public void setLabel(String label) {
+		this.label = label;
+	}
+	
 	// ---------------------- GLOBAL ACCESSORS ---------------------- //
 
 	@Override
@@ -160,6 +177,15 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return result;
 	}
 
+
+	@Override
+	public AControl<T> getVal() {
+		AControl<T> result = getNulVal();
+		for(AControl<T> control : this.matrix.values())
+			getSummedControl(result, control);
+		return result;
+	}
+	
 	///////////////////////////////////////////////////////////////////////////
 	// ----------------------- COORDINATE MANAGEMENT ----------------------- //
 	///////////////////////////////////////////////////////////////////////////
@@ -192,6 +218,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
 		return controlOne.add(controlTwo);
 	}
+
+
 
 	// -------------------------- UTILITY -------------------------- //
 

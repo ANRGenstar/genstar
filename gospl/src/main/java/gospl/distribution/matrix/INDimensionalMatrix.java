@@ -59,6 +59,13 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(Collection<A> aspects);
 	
 	/**
+	 * Returns the total sum of the entire matrix
+	 * @return
+	 */
+	public AControl<T> getVal();
+
+	
+	/**
 	 * Add a new value associated with a new coordinate. The add can fails if the specified coordinate in parameter
 	 * has already be binding with another value
 	 * 
