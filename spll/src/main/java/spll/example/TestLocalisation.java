@@ -295,7 +295,7 @@ public class TestLocalisation {
 		///////////////////////
 		
  		@SuppressWarnings("unchecked")
- 		SPUniformLocalizer localizer = new SPUniformLocalizer(sfBuildings);
+ 		SPUniformLocalizer localizer = new SPUniformLocalizer(outputFile);
  		
  		// use of the regression grid
  		localizer.setEntityNbAreas(outputFile, "Band_0");
