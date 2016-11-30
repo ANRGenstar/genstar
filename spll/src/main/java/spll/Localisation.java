@@ -69,7 +69,7 @@ public class Localisation {
 		// IMPORT DATA FILES
 		/////////////////////
 		
-		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Bangkok based on Kwaeng (district) population", true);
+		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Bangkok based on Kwaeng (district) population");
 		ShapeFile sfAdmin = null;
 		try {
 			sfAdmin = GSImportFactory.getShapeFile(stringPathToMainShapefile);
