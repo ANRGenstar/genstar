@@ -76,7 +76,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			else {
 				for (AGeoEntity globalfeature : match.getGeoData()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
-					List<IEntity> entities = population.stream().filter(s -> s.getValueForAttribute(keyAttPop).toString().equals(valKeyAtt)).collect(Collectors.toList());
+					List<IEntity> entities = population.stream().filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt)).collect(Collectors.toList());
 					if (numberProperty == null || entityNbAreas == null) {
 						randomLocalizationInNest(entities, globalfeature.getGeometry());
 					}

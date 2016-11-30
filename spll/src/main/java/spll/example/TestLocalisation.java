@@ -136,7 +136,7 @@ public class TestLocalisation {
 	}
 	
 	public static void main(String[] args) {
-		int targetPopulation = 1000;
+		int targetPopulation = 10000;
 		IPopulation population = generatePopulation(targetPopulation);
 		
 		///////////////////////
@@ -294,14 +294,14 @@ public class TestLocalisation {
 		// MATCH TO POPULATION
 		///////////////////////
 		
- 		@SuppressWarnings("unchecked")
- 		SPUniformLocalizer localizer = new SPUniformLocalizer(outputFile);
+ 		@SuppressWarnings("unchecked") //sfBuildings
+ 		SPUniformLocalizer localizer = new SPUniformLocalizer(sfBuildings);
  		
  		// use of the regression grid
  		localizer.setEntityNbAreas(outputFile, "Band_0");
 		
  		// use of the IRIS attribute of the population
- 		//localizer.setMatch(sfAdmin, "IRIS", "IRIS");
+ 		localizer.setMatch(sfAdmin, "IRIS", "CODE_IRIS");
  		
  		//localize the population
  		localizer.localisePopulation(population);
