@@ -19,18 +19,15 @@ public class NetworkNode <V extends IValue, A extends IAttribute<V>> {
 	
 	// Connected node
 	public Set<NetworkNode<V, A> > connectedNodes;
-	
-//	public NetworkNode(IEntity<A,V> entite){
-//		individuAssociated = entite;
-//		connectedNodes = new HashSet<NetworkNode<E, V, A>>();
-//	}
-	
+
+	/** Constructeur de networkNode prenant une interface d'entité
+	 * 
+	 * @param entite
+	 */
 	public NetworkNode(IEntity<A,V> entite){
 		individuAssociated = entite;
 		connectedNodes = new HashSet<NetworkNode<V, A>>();
 	}
-	
-	
 	
 	
 }
