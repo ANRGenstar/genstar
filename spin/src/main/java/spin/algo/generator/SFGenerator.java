@@ -2,8 +2,6 @@ package spin.algo.generator;
 
 import spin.objects.SpinNetwork;
 import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
-import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 import gospl.metamodel.GosplPopulation;
 

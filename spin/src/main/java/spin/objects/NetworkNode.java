@@ -33,6 +33,10 @@ public class NetworkNode {
 		links.add(link);
 	}
 	
+	public GosplEntity getEntity() {
+		return entity;
+	}
+	
 	public Set<NetworkLink> getLinks(){
 		return links;
 	}

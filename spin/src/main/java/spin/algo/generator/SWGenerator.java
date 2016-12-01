@@ -1,7 +1,6 @@
 package spin.algo.generator;
 
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,10 +9,6 @@ import gospl.metamodel.GosplPopulation;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
-import core.metamodel.IPopulation;
-import core.metamodel.IValue;
 
 public class SWGenerator implements INetworkGenerator
 {
@@ -30,8 +25,8 @@ public class SWGenerator implements INetworkGenerator
 		SpinNetwork myNetwork = (new RegularNetworkGenerator()).generateNetwork(population,k);
 				
 		//parcourir tous les liens
-		HashSet<NetworkLink> links = new HashSet(myNetwork.getLinks());
-		List<NetworkNode> nodes = new ArrayList(myNetwork.getNodes());
+		HashSet<NetworkLink> links = new HashSet<>(myNetwork.getLinks());
+		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
 		int nbNodes = nodes.size();
 		
 		//pour chacun si proba < beta ; supprimer (des deux cotés) et rebrancher aléatoirement 

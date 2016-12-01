@@ -7,7 +7,6 @@ import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
@@ -26,7 +25,7 @@ public class RandomNetworkGenerator implements INetworkGenerator
 		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
 		
 		// List the created nodes
-		List<NetworkNode> nodes = new ArrayList(myNetwork.getNodes());
+		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
 		
 		// Compute the number of links to generate
 		// TODO: revoir le type de réseau à générer (diriger ou non ?) 

@@ -1,8 +1,5 @@
 package spin.objects;
 
-import core.metamodel.IAttribute;
-import core.metamodel.IValue;
-
 /** Objet pour un network
  * Combien des informations sur le type de lien entre des nodes
  *
