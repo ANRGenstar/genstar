@@ -25,6 +25,7 @@ import gospl.distribution.util.GosplBasicDistribution;
 public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
+	@SuppressWarnings("unused")
 	private GosplBasicDistribution gosplBasicDistribution = null;
 	private Collection<List<AGenstarAttribute>> explorationOrder = null;
 	
@@ -54,6 +55,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	@Override
 	public ACoordinate<AGenstarAttribute, AGenstarValue> draw() {
 
+		@SuppressWarnings("unused")
 		Map<AGenstarAttribute,AGenstarValue> att2value = new HashMap<>();
 		
 		logger.info("starting hierarchical sampling...");

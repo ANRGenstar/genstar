@@ -36,6 +36,7 @@ public class NetworkGeneration {
 //		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
 //		SpinNetwork NEPASCOMMIT =
 //				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
+		@SuppressWarnings("unused")
 		SpinNetwork NEPASCOMMIT =
 				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
  		

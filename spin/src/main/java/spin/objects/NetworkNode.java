@@ -1,11 +1,9 @@
 package spin.objects;
 
 import java.util.HashSet;
-
 import java.util.Set;
 
 import core.io.survey.entity.AGenstarEntity;
-import gospl.metamodel.GosplEntity;
 
 /** Node of the SpinNetwork, linked to a GosplEntity (an individual from population generation module)
  * 

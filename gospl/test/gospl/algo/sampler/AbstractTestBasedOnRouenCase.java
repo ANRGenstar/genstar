@@ -69,7 +69,8 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		 }
 		
 		 // Setup the factory that build attribute
-		 AttributeFactory attf = new AttributeFactory();
+		 @SuppressWarnings("unused")
+		AttributeFactory attf = new AttributeFactory();
 		
 		 GosplConfigurationFile gcf = null;
 		 try {
@@ -94,6 +95,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		GosplConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
+		@SuppressWarnings("unused")
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
