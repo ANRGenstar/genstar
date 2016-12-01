@@ -3,11 +3,14 @@ package spin.algo.factory;
 import spin.algo.generator.NetworkEnumGenerator;
 import spin.algo.generator.SWGenerator;
 import spin.objects.SpinNetwork;
+<<<<<<< HEAD
 import core.io.survey.entity.attribut.ASurveyAttribute;
 import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.ASurveyEntity;
 import core.metamodel.IEntity;
-import core.metamodel.IPopulation;
+=======
 import gospl.metamodel.GosplPopulation;
+>>>>>>> e7dec7c28394d3a75dbbd57d1eb1b41b2f66b463
 
 /** Propose de générer des réseaux 
  * 
@@ -17,11 +20,7 @@ public class NetworkFactory {
 //	public static SpinNetwork getNetwork(NetworkEnumGenerator typeGenerator, 
 //			IPopulation<? extends IEntity<ASurveyAttribute, AValue>, ASurveyAttribute, AValue> population){
 	public static SpinNetwork getNetwork(NetworkEnumGenerator typeGenerator, 
-<<<<<<< Updated upstream
-			GosplPopulation population){
-=======
-			IPopulation<? extends IEntity<ASurveyAttribute, ASurveyValue>, ASurveyAttribute, ASurveyValue> population){
->>>>>>> Stashed changes
+			IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population){
 		if(typeGenerator.equals(NetworkEnumGenerator.SmallWorld))
 			return new SWGenerator().generateNetwork(population);
 //		if(typeGenerator.equals(NetworkEnumGenerator.ScaleFree))

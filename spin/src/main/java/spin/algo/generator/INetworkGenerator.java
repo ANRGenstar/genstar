@@ -14,7 +14,7 @@ import gospl.metamodel.GosplPopulation;
  * @param <V> IValue 
  * @param <A> IAttribute<V>, avec une valeur IValue
  */
-public abstract class NetworkGenerator {
+public interface INetworkGenerator {
 	/** Methode de création d'un réseau prenant une population générique et créant
 	 * le réseau associé. 
 	 * 
@@ -23,7 +23,7 @@ public abstract class NetworkGenerator {
 	 */
 	public abstract SpinNetwork generateNetwork(GosplPopulation population);
 	
-	public SpinNetwork loadPopulation(GosplPopulation population){
+	public static SpinNetwork loadPopulation(GosplPopulation population){
 	//Create a SpinNetwork with nodes linked to population entities
 	//The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();

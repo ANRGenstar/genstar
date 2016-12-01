@@ -1,7 +1,6 @@
 package spin.algo.generator;
 
 import gospl.metamodel.GosplPopulation;
-import gospl.metamodel.GosplEntity;
 
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
@@ -12,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class RegularNetworkGenerator extends NetworkGenerator{
+public class RegularNetworkGenerator implements INetworkGenerator{
 
 	
 public SpinNetwork generateNetwork(GosplPopulation population) {
@@ -25,8 +24,8 @@ public SpinNetwork generateNetwork(GosplPopulation population, int k) {
 		//TODO: traiter le cas de conectivity pas paire ... 
 		
 		// create the spinNetwork
-		SpinNetwork myNetwork = this.loadPopulation(population);
-		List<NetworkNode> nodes = new ArrayList(myNetwork.getNodes());
+		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
+		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
 		
 		// for each node i, create a link to i+1 ... i+k/2
 		for (int i=0; i<nodes.size();i++){
