@@ -1,7 +1,9 @@
-package core.util.random;
+package core.util.random.roulette;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import core.util.random.GenstarRandom;
 
 public class DoubleRouletteWheelSelection extends ARouletteWheelSelection<Double> {
 

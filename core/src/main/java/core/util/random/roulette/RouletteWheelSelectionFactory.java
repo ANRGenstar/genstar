@@ -1,4 +1,4 @@
-package core.util.random;
+package core.util.random.roulette;
 
 import java.util.List;
 
@@ -11,6 +11,8 @@ import java.util.List;
  */
 public final class RouletteWheelSelectionFactory {
 
+
+	
 	@SuppressWarnings("unchecked")
 	public static <X extends Number> ARouletteWheelSelection<X> getRouletteWheel(List<X> distribution) {
 		

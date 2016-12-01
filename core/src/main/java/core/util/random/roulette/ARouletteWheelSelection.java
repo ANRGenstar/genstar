@@ -1,4 +1,4 @@
-package core.util.random;
+package core.util.random.roulette;
 
 import java.util.List;
 
