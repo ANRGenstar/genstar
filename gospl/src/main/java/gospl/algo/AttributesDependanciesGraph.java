@@ -181,7 +181,12 @@ public class AttributesDependanciesGraph {
 		if (count == 1) {
 			// quick exit
 			LinkedList<Set<ASurveyAttribute>> res = new LinkedList<>();
-			res.add(graph.getNodeSet().parallelStream().map(node -> (ASurveyAttribute)node.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE)).collect(Collectors.toSet()));
+			res.add(
+					graph.getNodeSet()
+						.parallelStream()
+						.map(node -> (ASurveyAttribute)node.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE))
+						.collect(Collectors.toSet()));
+			
 			return res;
 		}
 		
