@@ -7,10 +7,10 @@ import core.metamodel.IValue;
  * Combien des informations sur le type de lien entre des nodes
  *
  */
-public class NetworkLink <A extends NetworkLinkAttribut<V>, V extends NetworkLinkValue>{
-	NetworkNode from;
-	NetworkNode to;
-	boolean oriented=false;
+public class NetworkLink{
+	private NetworkNode from;
+	private NetworkNode to;
+	private boolean oriented=false;
 	
 	public NetworkLink(NetworkNode f, NetworkNode t){
 		this.from=f;

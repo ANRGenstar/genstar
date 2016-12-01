@@ -3,7 +3,10 @@ package spin.algo.generator;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Random;
+import java.util.ArrayList;
+import java.util.List;
 
+import gospl.metamodel.GosplPopulation;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
@@ -12,19 +15,56 @@ import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 
-public class SWGenerator<A extends IAttribute<V>,V extends IValue> implements INetworkGenerator<A, V> 
+public class SWGenerator extends NetworkGenerator
 {
-	/** pour le moment algorithmie bidon.
-	 * 
-	 */
+	
 	@Override
-	public SpinNetwork<A, V> generateNetwork(IPopulation<IEntity<A,V>, A, V> population) {
+	public SpinNetwork generateNetwork(GosplPopulation population) {
+		return this.generateNetwork(population,4,0.1D);
+	}
+	
+	public SpinNetwork generateNetwork(GosplPopulation population, int k, double beta){
+		//int k connectivity of the network
+		//double beta noise introduced on the regular network
+		// crée un réseau régulier 
+		SpinNetwork myNetwork = (new RegularNetworkGenerator()).generateNetwork(population,k);
+				
+		//parcourir tous les liens
+		HashSet<NetworkLink> links = new HashSet(myNetwork.getLinks());
+		List<NetworkNode> nodes = new ArrayList(myNetwork.getNodes());
+		int nbNodes = nodes.size();
+		
+		//pour chacun si proba < beta ; supprimer (des deux cotés) et rebrancher aléatoirement 
+		Random rand = new Random();
+		for(NetworkLink l : links){
+			if(rand.nextDouble()<beta){
+				l.getFrom().removeLink(l);
+				l.getTo().removeLink(l);
+				
+				NetworkNode nodeFrom, nodeTo;
+				NetworkLink link;
+				boolean linkCreated=false;
+				// create the links
+				while (!linkCreated) {
+					nodeFrom = nodes.get(rand.nextInt(nbNodes));
+					nodeTo = nodes.get(rand.nextInt(nbNodes));
+					link = new NetworkLink(nodeFrom,nodeTo,false);//link is not oriented
+					
+					if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
+						linkCreated=true;
+						nodeFrom.addLink(link);
+						nodeTo.addLink(link);
+					}					
+				}
+				
+			}
+		}
+		
+		/** A Suppr ???
 		// table temporaire pour garder une référence indexé sur les noeuds créés
-		Hashtable<Integer, NetworkNode<A,V>> nodeCreated = new Hashtable<Integer, NetworkNode<A, V>>();
+		Hashtable<Integer, NetworkNode> nodeCreated = new Hashtable<Integer, NetworkNode>();
 		int i = 0;
 		
-		// crée un objet spinNetwork
-		SpinNetwork<A,V> myNetwork = new SpinNetwork<A,V>();
 		
 		// cyclé sur la pop
 		for (IEntity<A,V> entity : population) {
@@ -34,7 +74,7 @@ public class SWGenerator<A extends IAttribute<V>,V extends IValue> implements IN
 //			N node = new N(entity);
 			
 //			 new NetworkNode<E, V, A>(entity);
-			NetworkNode<A,V> node =  new NetworkNode<A,V>(entity);
+			NetworkNode node =  new NetworkNode(entity);
 			nodeCreated.put(i++, node);
 			myNetwork.putNode(node);
 		}
@@ -44,7 +84,9 @@ public class SWGenerator<A extends IAttribute<V>,V extends IValue> implements IN
 		// fin de création de tous les noeuds du réseau 
 		
 		// Cycle sur les noeuds du réseau
-		for (int j = 0; j < nodeCreated.size(); j++) {
+		/** FA: creer des Liens puis les ajouter aux links de chaque Node
+		 for (int j = 0; j < nodeCreated.size(); j++) {
+		 
 			int indexDestination = j;
 			while (indexDestination == j)
 				indexDestination = new Random().nextInt(nodeCreated.size() - 1);
@@ -58,9 +100,10 @@ public class SWGenerator<A extends IAttribute<V>,V extends IValue> implements IN
 			nodeCreated.get(j).connectedNodes.add(nodeCreated.get(indexDestination));
 			nodeCreated.get(indexDestination).connectedNodes.add(nodeCreated.get(j));
 			}
-		}
+		}*/
 		
-		for (NetworkNode<A,V> node : myNetwork.getNodes()) {
+		/**
+		for (NetworkNode node : myNetwork.getNodes()) {
 			
 			
 			// créer un lien vers d'autre noeud puis ajouter les liens a spin ET mettre a jour la liste des noeuds connectés a un noeud
@@ -69,7 +112,7 @@ public class SWGenerator<A extends IAttribute<V>,V extends IValue> implements IN
 		//for
 				
 		// fin de création des liens
-		
+		*/
 		
 		return myNetwork;
 	}
