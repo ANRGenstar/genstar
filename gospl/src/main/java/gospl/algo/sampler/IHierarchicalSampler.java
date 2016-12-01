@@ -6,6 +6,7 @@ import java.util.List;
 import core.io.survey.attribut.ASurveyAttribute;
 import core.io.survey.attribut.value.AValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
@@ -14,7 +15,9 @@ public interface IHierarchicalSampler extends ISampler<ACoordinate<ASurveyAttrib
 
 	public void setDistribution(
 			GosplBasicDistribution gosplBasicDistribution,
-			Collection<List<ASurveyAttribute>> explorationOrder);
+			Collection<List<ASurveyAttribute>> explorationOrder, 
+			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
+			);
 	
 	
 }

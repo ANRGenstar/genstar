@@ -130,7 +130,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 			vals.add(attribute.getEmptyValue());
 			for(AValue value : vals){
 				long valCount = this.population.parallelStream()
-						.filter(e -> e.getValueForAttribute(attribute).equals(value)).count();
+						.filter(e -> e.getValueForAttribute(attribute) != null && e.getValueForAttribute(attribute).equals(value)).count();
 				double valProp =  Math.round(Math.round(((valCount * 1d / this.population.size()) * 10000))) / 100d;
 				if(lines.get(lineNumber).isEmpty())
 					lines.set(lineNumber, value.getStringValue() + csvSep + valCount + csvSep + valProp);

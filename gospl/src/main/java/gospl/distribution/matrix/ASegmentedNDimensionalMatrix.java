@@ -145,18 +145,23 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		Set<AValue> includedProbaDimension = new HashSet<>();
 		for(ASurveyAttribute att : coordinates.keySet()){
 			AControl<T> localProba = getNulVal();
-			for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
-					.stream().filter(jd -> jd.getDimensions().contains(att)).collect(Collectors.toList())){
+			for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet.stream()
+																				.filter(jd -> jd.getDimensions().contains(att))
+																				.collect(Collectors.toList())
+																				) {
 				Set<ASurveyAttribute> hookAtt = distribution.getDimensions()
-						.stream().filter(d -> includedProbaDimension.contains(d)).collect(Collectors.toSet());
-				if(hookAtt.isEmpty()){
+															.stream()
+															.filter(d -> includedProbaDimension.contains(d))
+															.collect(Collectors.toSet());
+				if (hookAtt.isEmpty()){
 					localProba = distribution.getVal(coordinates.get(att));  
 				} else {
-					Set<AValue> hookVals = hookAtt.stream().flatMap(a -> a.getValues().stream()).collect(Collectors.toSet());
+					Set<AValue> hookVals = hookAtt.stream()
+													.flatMap(a -> a.getValues().stream())
+													.collect(Collectors.toSet());
 					Set<AValue> localVals = new HashSet<>(hookVals);
 					localVals.addAll(coordinates.get(att));
-					localProba.multiply(distribution.getVal(localVals)
-							.getRowProduct(new ControlFrequency(1d / distribution.getVal(hookVals).getValue().doubleValue())));
+					localProba.multiply(distribution.getVal(localVals).getRowProduct(new ControlFrequency(1d / distribution.getVal(hookVals).getValue().doubleValue())));
 				}
 			}	
 			includedProbaDimension.addAll(coordinates.get(att));

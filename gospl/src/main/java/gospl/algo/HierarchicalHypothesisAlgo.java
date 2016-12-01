@@ -230,12 +230,15 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IH
 		AttributesDependanciesGraph dependancyGraph = AttributesDependanciesGraph.constructDependancies(segmentedMatrix);
 		//File dotFile = graph.printDotRepresentationToFile();
 		//logger.info("a dot file was stored into "+dotFile.getAbsolutePath());
-		dependancyGraph.generateDotRepresentationInPNG(true);
+		
+		// Use this to visualize the dependancy graph in png 
+		// dependancyGraph.generateDotRepresentationInPNG(true);
 		
 		// TODO sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
 		Collection<List<ASurveyAttribute>> explorationOrder = proposeExplorationOrder(dependancyGraph);
 		
-		sampler.setDistribution(new GosplBasicDistribution(sampleDistribution), explorationOrder);
+		logger.debug("sample distribution {}", sampleDistribution);
+		sampler.setDistribution(new GosplBasicDistribution(sampleDistribution), explorationOrder, segmentedMatrix);
 		
 		return sampler;
 	}
