@@ -1,34 +1,60 @@
 package spin.objects;
 
 import java.util.HashSet;
+
 import java.util.Set;
 
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
-import core.metamodel.IValue;
+import gospl.metamodel.GosplEntity;
 
-/** Noeud du réseau du réseau contenant un individu
+/** Node of the SpinNetwork, linked to a GosplEntity (an individual from population generation module)
  * 
- * @author Felix
+ * @author Felix, FredA722
  *
  * @param <E>
  */
-public class NetworkNode <V extends IValue, A extends IAttribute<V>> {
+public class NetworkNode {
 	// Entity associated 
-	public IEntity<A,V> individuAssociated;
+	private GosplEntity entity;
 	
 	// Connected node
-	public Set<NetworkNode<V, A> > connectedNodes;
-
-	/** Constructeur de networkNode prenant une interface d'entité
+	private Set<NetworkLink> links;
+	
+	/** Constructeur de networkNode prenant une entité
 	 * 
 	 * @param entite
 	 */
-	public NetworkNode(IEntity<A,V> entite){
-		individuAssociated = entite;
-		connectedNodes = new HashSet<NetworkNode<V, A>>();
+	
+	public NetworkNode(GosplEntity entite){
+		entity = entite;
+		links = new HashSet<NetworkLink>();
 	}
 	
+	public void addLink(NetworkLink link){
+		links.add(link);
+	}
+	
+	public Set<NetworkLink> getLinks(){
+		return links;
+	}
+	
+	public void removeLink(NetworkLink l){
+		links.remove(l);
+	}
+	
+	public boolean hasLink(NetworkLink l){
+		return links.contains(l);
+	}
+	
+	public Set<NetworkNode> getNeighbours(){
+		Set<NetworkNode> neighb = new HashSet<NetworkNode>();
+		for(NetworkLink l : links){
+			if(this.equals(l.getFrom()))
+				neighb.add(l.getTo());
+			else
+				neighb.add(l.getFrom());
+		}
+		return neighb;
+	}
 	
 }
 

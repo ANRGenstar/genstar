@@ -9,7 +9,7 @@ import core.metamodel.IAttribute;
  * @author Felix
  *
  */
-public class NetworkLinkAttribut implements IAttribute<NetworkLinkValue>{
+public class NetworkLinkAttribut<V extends NetworkLinkValue> implements IAttribute<NetworkLinkValue>{
 
 	@Override
 	public String getAttributeName() {

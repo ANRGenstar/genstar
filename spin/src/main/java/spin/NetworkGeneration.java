@@ -34,7 +34,7 @@ public class NetworkGeneration {
 //		
 //		// 3 la factory choisit un générator grace a une unum
 //		// 4 le générator renvoi le réseau obtenu sur la population
-		SpinNetwork<IValue,IAttribute<IValue>> NEPASCOMMIT =
+		SpinNetwork<IAttribute<IValue>,IValue> NEPASCOMMIT =
 		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
  		
 	}
