@@ -2,6 +2,7 @@ package spin;
 
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UniformRandomGenerator;
+import gospl.metamodel.GosplPopulation;
 import spin.algo.factory.NetworkFactory;
 import spin.algo.generator.NetworkEnumGenerator;
 import spin.objects.SpinNetwork;
@@ -29,13 +30,19 @@ public class NetworkGeneration {
 //		// 1 instancier la factory
 //		// 2 prendre une population en param
 		ISyntheticGosplPopGenerator populationGenerator = new UniformRandomGenerator(4,2);
-		IPopulation<? extends IEntity<ASurveyAttribute, AValue>, ASurveyAttribute, AValue> population =
-				populationGenerator.generate(nbNode);
+		GosplPopulation population = populationGenerator.generate(nbNode);
+
+//		IPopulation<? extends IEntity<ASurveyAttribute, AValue>, ASurveyAttribute, AValue> population =
+//				populationGenerator.generate(nbNode);
 //		
 //		// 3 la factory choisit un générator grace a une unum
 //		// 4 le générator renvoi le réseau obtenu sur la population
-		SpinNetwork<IAttribute<IValue>,IValue> NEPASCOMMIT =
-		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
+//		SpinNetwork<IAttribute<IValue>,IValue> NEPASCOMMIT =
+//		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
+//		SpinNetwork NEPASCOMMIT =
+//				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
+		SpinNetwork NEPASCOMMIT =
+				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
  		
 	}
 }
