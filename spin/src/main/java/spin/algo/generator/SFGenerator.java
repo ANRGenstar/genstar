@@ -7,7 +7,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 import gospl.metamodel.GosplPopulation;
 
-public class SFGenerator<A extends IAttribute<V>,V extends IValue> extends NetworkGenerator
+public class SFGenerator<A extends IAttribute<V>,V extends IValue> implements INetworkGenerator
 {
 
 	@Override

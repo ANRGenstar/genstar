@@ -15,7 +15,7 @@ import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 
-public class SWGenerator extends NetworkGenerator
+public class SWGenerator implements INetworkGenerator
 {
 	
 	@Override
