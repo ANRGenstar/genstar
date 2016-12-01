@@ -10,7 +10,7 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
-public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>>> {
+public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>>> {
 
 	/**
 	 * 
