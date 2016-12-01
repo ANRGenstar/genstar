@@ -1,0 +1,56 @@
+package gospl.metamodel;
+
+import java.util.Map;
+
+import com.vividsolutions.jts.geom.Point;
+
+import core.io.geo.entity.AGeoEntity;
+<<<<<<< Updated upstream
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+
+public class GosplEntity extends AGenstarEntity {
+=======
+import core.io.survey.entity.ASurveyEntity;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
+
+public class GosplEntity extends ASurveyEntity {
+>>>>>>> Stashed changes
+
+	private Point location = null;
+	private AGeoEntity nest = null;
+
+<<<<<<< Updated upstream
+	public GosplEntity(Map<AGenstarAttribute, AGenstarValue> attributes){
+=======
+	public GosplEntity(Map<ASurveyAttribute, ASurveyValue> attributes){
+>>>>>>> Stashed changes
+		super(attributes);
+	}
+
+	@Override
+	public Point getLocation() {
+		return location;
+	}
+
+	@Override
+	public AGeoEntity getNest() {
+		return nest;
+	}
+
+	@Override
+	public void setLocation(Point location) {
+		this.location = location;
+	}
+
+	@Override
+	public void setNest(AGeoEntity entity) {
+		this.nest = entity;
+	}
+
+
+	
+
+}

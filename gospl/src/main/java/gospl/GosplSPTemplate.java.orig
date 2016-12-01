@@ -9,8 +9,13 @@ import java.nio.file.Paths;
 
 import core.io.GSExportFactory;
 import core.io.exception.InvalidFileTypeException;
+<<<<<<< Updated upstream
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+=======
 import core.io.survey.entity.attribut.ASurveyAttribute;
 import core.io.survey.entity.attribut.value.ASurveyValue;
+>>>>>>> Stashed changes
 import core.util.GSPerformanceUtil;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
@@ -75,7 +80,11 @@ public class GosplSPTemplate {
 		// Choice is made here to use distribution based generator
 
 		// so we collapse all distribution build from the data
+<<<<<<< Updated upstream
+		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> distribution = null;
+=======
 		INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> distribution = null;
+>>>>>>> Stashed changes
 		try {
 			distribution = df.collapseDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -87,7 +96,7 @@ public class GosplSPTemplate {
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 <<<<<<< Updated upstream
 		final IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
-		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
+		ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> sampler = null;
 =======
 		final IDistributionInferenceAlgo<ASurveyAttribute, ASurveyValue> distributionInfAlgo =
 				new IndependantHypothesisAlgo(true);
