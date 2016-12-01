@@ -25,10 +25,14 @@ import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import core.io.configuration.GosplConfigurationFile;
+import core.io.configuration.GosplXmlSerializer;
 import core.io.exception.InvalidFileTypeException;
+import core.io.survey.GSSurveyFile;
+import core.io.survey.GSSurveyType;
 import core.io.survey.IGSSurvey;
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
@@ -42,12 +46,8 @@ import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.metamodel.GSSurveyFile;
-import gospl.metamodel.GSSurveyType;
 import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
-import gospl.metamodel.configuration.GosplConfigurationFile;
-import gospl.metamodel.configuration.GosplXmlSerializer;
 
 public class GosplDistributionFactory {
 
@@ -108,7 +108,7 @@ public class GosplDistributionFactory {
 	 * @throws MatrixCoordinateException
 	 *
 	 */
-	public INDimensionalMatrix<ASurveyAttribute, AValue, Double> collapseDistributions()
+	public INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> collapseDistributions()
 			throws IllegalDistributionCreation, IllegalControlTotalException {
 		if (distributions.isEmpty())
 			throw new IllegalArgumentException(
@@ -163,13 +163,15 @@ public class GosplDistributionFactory {
 	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(final GSSurveyFile file,
 			final Set<ASurveyAttribute> attributes) throws IOException, InvalidFileTypeException {
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
-		// Load survey
-		final IGSSurvey survey = file.getSurvey();
 
+		IGSSurvey survey = file.getSurvey();
+		
 		// Read headers and store possible variables by line index
-		final Map<Integer, Set<AValue>> rowHeaders = getRowHeaders(file, survey, attributes);
+		final Map<Integer, Set<ASurveyValue>> rowHeaders = getRowHeaders(survey, 
+				file.getFirstRowDataIndex(), file.getFirstColumnDataIndex(), attributes);
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<AValue>> columnHeaders = getColumnHeaders(file, survey, attributes);
+		final Map<Integer, Set<ASurveyValue>> columnHeaders = getColumnHeaders(survey, 
+				file.getFirstRowDataIndex(), file.getFirstColumnDataIndex(), attributes);
 
 		// Store column related attributes while keeping unrelated attributes separated
 		final Set<Set<ASurveyAttribute>> columnSchemas = columnHeaders.values().stream()
@@ -186,7 +188,7 @@ public class GosplDistributionFactory {
 				// Create a matrix for each set of related attribute
 				AFullNDimensionalMatrix<? extends Number> jDistribution;
 				// Matrix 'dimension / aspect' map
-				final Map<ASurveyAttribute, Set<AValue>> dimTable = Stream.concat(rSchema.stream(), cSchema.stream())
+				final Map<ASurveyAttribute, Set<ASurveyValue>> dimTable = Stream.concat(rSchema.stream(), cSchema.stream())
 						.collect(Collectors.toMap(a -> a, a -> a.getValues()));
 				// Instantiate either contingency (int and global frame of reference) or frequency (double and either
 				// global or local frame of reference) matrix
@@ -207,10 +209,10 @@ public class GosplDistributionFactory {
 						// Value type
 						final GSEnumDataType dt = dataParser.getValueType(stringVal);
 						// Store coordinate for the value. It is made of all line & column attribute's aspects
-						final Set<AValue> coordSet =
+						final Set<ASurveyValue> coordSet =
 								Stream.concat(rowHeaders.get(row).stream(), columnHeaders.get(col).stream())
 										.collect(Collectors.toSet());
-						final ACoordinate<ASurveyAttribute, AValue> coord = new GosplCoordinate(coordSet);
+						final ACoordinate<ASurveyAttribute, ASurveyValue> coord = new GosplCoordinate(coordSet);
 						// Add the coordinate / parsed value pair into the matrix
 						if (dt == GSEnumDataType.Integer || dt == GSEnumDataType.Double)
 							if (!jDistribution.addValue(coord, jDistribution.parseVal(dataParser, stringVal)))
@@ -265,11 +267,11 @@ public class GosplDistributionFactory {
 				final AFullNDimensionalMatrix<? extends Number> matrixOfReference = optionalRef.get();
 				final double totalControl =
 						matrixOfReference.getVal(localReferentDimension.getValues()).getValue().doubleValue();
-				final Map<AValue, Double> freqControls =
+				final Map<ASurveyValue, Double> freqControls =
 						localReferentDimension.getValues().stream().collect(Collectors.toMap(lrv -> lrv,
 								lrv -> matrixOfReference.getVal(lrv).getValue().doubleValue() / totalControl));
 
-				for (final ACoordinate<ASurveyAttribute, AValue> controlKey : matrix.getMatrix().keySet()) {
+				for (final ACoordinate<ASurveyAttribute, ASurveyValue> controlKey : matrix.getMatrix().keySet()) {
 					freqMatrix.addValue(controlKey,
 							new ControlFrequency(matrix.getVal(controlKey).getValue().doubleValue()
 									/ localReferentControl.getValue().doubleValue()
@@ -286,7 +288,7 @@ public class GosplDistributionFactory {
 			freqMatrix.setLabel((matrix.getLabel()==null?"?/joint":matrix.getLabel()+"/joint"));
 
 			if (matrix.getMetaDataType().equals(GSSurveyType.GlobalFrequencyTable)) {
-				for (final ACoordinate<ASurveyAttribute, AValue> coord : matrix.getMatrix().keySet())
+				for (final ACoordinate<ASurveyAttribute, ASurveyValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
 			} else {
 				final List<ASurveyAttribute> attributes = new ArrayList<>(matrix.getDimensions());
@@ -298,7 +300,7 @@ public class GosplDistributionFactory {
 							/ controlAtt.getValue().doubleValue() > this.EPSILON)
 						throw new IllegalControlTotalException(total, controlAtt);
 				}
-				for (final ACoordinate<ASurveyAttribute, AValue> coord : matrix.getMatrix().keySet())
+				for (final ACoordinate<ASurveyAttribute, ASurveyValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(
 							matrix.getVal(coord).getValue().doubleValue() / total.getValue().doubleValue()));
 			}
@@ -306,16 +308,19 @@ public class GosplDistributionFactory {
 		return freqMatrix;
 	}
 
-	private GosplPopulation getSample(final GSSurveyFile file, final Set<ASurveyAttribute> attributes)
+	private GosplPopulation getSample(final GSSurveyFile file, 
+			final Set<ASurveyAttribute> attributes)
 			throws IOException, InvalidFileTypeException {
 		final GosplPopulation sampleSet = new GosplPopulation();
 
-		final IGSSurvey survey = file.getSurvey();
+		IGSSurvey survey = file.getSurvey(); 
+		
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<AValue>> columnHeaders = getColumnHeaders(file, survey, attributes);
+		final Map<Integer, Set<ASurveyValue>> columnHeaders = getColumnHeaders(survey, 
+				file.getFirstRowDataIndex(), file.getFirstColumnDataIndex(), attributes);
 
 		for (int i = file.getFirstRowDataIndex(); i <= survey.getLastRowIndex(); i++) {
-			final Map<ASurveyAttribute, AValue> entityAttributes = new HashMap<>();
+			final Map<ASurveyAttribute, ASurveyValue> entityAttributes = new HashMap<>();
 			final List<String> indiVals = survey.readLine(i);
 			for (final Integer idx : columnHeaders.keySet())
 				entityAttributes.put(columnHeaders.get(idx).iterator().next().getAttribute(), columnHeaders.get(idx)
@@ -339,8 +344,8 @@ public class GosplDistributionFactory {
 		
 		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal(dims.iterator().next().getValues());
 		
-		for(ACoordinate<ASurveyAttribute, AValue> oldCoord : recordMatrices.getMatrix().keySet()){
-			Set<AValue> newCoord = new HashSet<>(oldCoord.values());
+		for(ACoordinate<ASurveyAttribute, ASurveyValue> oldCoord : recordMatrices.getMatrix().keySet()){
+			Set<ASurveyValue> newCoord = new HashSet<>(oldCoord.values());
 			newCoord.retainAll(dims.stream().flatMap(dim -> dim.getValues().stream()).collect(Collectors.toSet()));
 			freqMatrix.addValue(new GosplCoordinate(newCoord), 
 					new ControlFrequency(recordMatrices.getVal(oldCoord).getValue().doubleValue() 
@@ -354,12 +359,13 @@ public class GosplDistributionFactory {
 	// -------------------------- back office -------------------------- //
 	///////////////////////////////////////////////////////////////////////
 
-	private Map<Integer, Set<AValue>> getRowHeaders(final GSSurveyFile file, final IGSSurvey survey,
+	private Map<Integer, Set<ASurveyValue>> getRowHeaders(
+			final IGSSurvey survey, int firstRow, int firstColumn,
 			final Set<ASurveyAttribute> attributes) {
 		final List<Integer> attributeIdx = new ArrayList<>();
-		for (int line = 0; line < file.getFirstRowDataIndex(); line++) {
+		for (int line = 0; line < firstRow; line++) {
 			final List<String> sLine = survey.readLine(line);
-			for (int idx = 0; idx < file.getFirstColumnDataIndex(); idx++) {
+			for (int idx = 0; idx < firstColumn; idx++) {
 				final String headAtt = sLine.get(idx);
 				if (attributes.stream().map(att -> att.getAttributeName()).anyMatch(attName -> attName.equals(headAtt)))
 					attributeIdx.add(idx);
@@ -372,21 +378,21 @@ public class GosplDistributionFactory {
 			}
 		}
 
-		final Map<Integer, Set<AValue>> rowHeaders = new HashMap<>();
-		for (int i = file.getFirstRowDataIndex(); i <= survey.getLastRowIndex(); i++) {
-			final List<String> rawLine = survey.readColumns(0, file.getFirstColumnDataIndex(), i);
+		final Map<Integer, Set<ASurveyValue>> rowHeaders = new HashMap<>();
+		for (int i = firstRow; i <= survey.getLastRowIndex(); i++) {
+			final List<String> rawLine = survey.readColumns(0, firstColumn, i);
 			final List<String> line = attributeIdx.stream().map(idx -> rawLine.get(idx)).collect(Collectors.toList());
 			for (int j = 0; j < line.size(); j++) {
 				final String lineVal = line.get(j);
-				final Set<AValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
+				final Set<ASurveyValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
 						.filter(asp -> asp.getInputStringValue().equals(lineVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
 					final Set<ASurveyAttribute> inferedHeads = new HashSet<>();
-					final List<String> headList = survey.readLines(0, file.getFirstRowDataIndex(), j);
+					final List<String> headList = survey.readLines(0, firstRow, j);
 					if (headList.stream().allMatch(s -> s.isEmpty())) {
-						for (final List<String> column : survey.readColumns(0, file.getFirstColumnDataIndex()))
+						for (final List<String> column : survey.readColumns(0, firstColumn))
 							inferedHeads.addAll(attributes.stream()
 									.filter(a -> a.getValues().stream()
 											.allMatch(av -> column.contains(av.getInputStringValue())))
@@ -396,7 +402,7 @@ public class GosplDistributionFactory {
 								.flatMap(s -> attributes.stream().filter(a -> a.getAttributeName().equals(s)))
 								.collect(Collectors.toSet()));
 					}
-					final Set<AValue> vals2 = new HashSet<>(vals);
+					final Set<ASurveyValue> vals2 = new HashSet<>(vals);
 					for (final IValue val : vals2)
 						if (!inferedHeads.contains(val.getAttribute()))
 							vals.remove(val);
@@ -410,19 +416,20 @@ public class GosplDistributionFactory {
 		return rowHeaders;
 	}
 
-	private Map<Integer, Set<AValue>> getColumnHeaders(final GSSurveyFile file, final IGSSurvey survey,
+	private Map<Integer, Set<ASurveyValue>> getColumnHeaders(
+			final IGSSurvey survey, int firstRow, int firstColumn,
 			final Set<ASurveyAttribute> attributes) {
-		final Map<Integer, Set<AValue>> columnHeaders = new HashMap<>();
-		for (int i = file.getFirstColumnDataIndex(); i <= survey.getLastColumnIndex(); i++) {
-			final List<String> column = survey.readLines(0, file.getFirstRowDataIndex(), i);
+		final Map<Integer, Set<ASurveyValue>> columnHeaders = new HashMap<>();
+		for (int i = firstColumn; i <= survey.getLastColumnIndex(); i++) {
+			final List<String> column = survey.readLines(0, firstRow, i);
 			for (int j = 0; j < column.size(); j++) {
 				final String columnVal = column.get(j);
-				Set<AValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
+				Set<ASurveyValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
 						.filter(asp -> asp.getInputStringValue().equals(columnVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
-					final Set<AValue> vals2 = new HashSet<>(vals);
+					final Set<ASurveyValue> vals2 = new HashSet<>(vals);
 					vals = column.stream()
 							.flatMap(s -> attributes.stream().filter(att -> att.getAttributeName().equals(s)))
 							.flatMap(att -> vals2.stream().filter(v -> v.getAttribute().equals(att)))

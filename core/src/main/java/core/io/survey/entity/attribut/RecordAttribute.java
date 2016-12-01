@@ -1,10 +1,10 @@
-package core.io.survey.attribut;
+package core.io.survey.entity.attribut;
 
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.util.data.GSEnumDataType;
 
 public class RecordAttribute extends ASurveyAttribute {
@@ -19,7 +19,7 @@ public class RecordAttribute extends ASurveyAttribute {
 	}
 
 	@Override
-	public Set<AValue> findMappedAttributeValues(AValue val) {
+	public Set<ASurveyValue> findMappedAttributeValues(ASurveyValue val) {
 		return Stream.of(this.getEmptyValue()).collect(Collectors.toSet());
 	}
 

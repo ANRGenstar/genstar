@@ -8,11 +8,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+<<<<<<< Updated upstream
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.attribut.value.AValue;
+=======
+import core.io.survey.GSSurveyType;
 import core.io.survey.entity.attribut.ASurveyAttribute;
 import core.io.survey.entity.attribut.value.ASurveyValue;
+>>>>>>> Stashed changes
 import core.util.GSPerformanceUtil;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.IHierarchicalSampler;
@@ -24,7 +30,6 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
-import gospl.metamodel.GSSurveyType;
 
 
 /**
@@ -45,7 +50,11 @@ import gospl.metamodel.GSSurveyType;
  * @author kevinchapuis
  *
  */
+<<<<<<< Updated upstream
 public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDistributionSampler> {
+=======
+public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<ASurveyAttribute, ASurveyValue> {
+>>>>>>> Stashed changes
 
 	private Logger logger = LogManager.getLogger();
 	
@@ -54,9 +63,15 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 	}
 
 	@Override
+<<<<<<< Updated upstream
+	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
+			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix,
+			IDistributionSampler sampler) throws IllegalDistributionCreation {
+=======
 	public ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> inferDistributionSampler(
 			INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> matrix,
 			ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> sampler) throws IllegalDistributionCreation {
+>>>>>>> Stashed changes
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
 		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))

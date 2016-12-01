@@ -1,4 +1,4 @@
-package core.io.survey.attribut;
+package core.io.survey.entity.attribut;
 
 import core.util.data.GSEnumDataType;
 

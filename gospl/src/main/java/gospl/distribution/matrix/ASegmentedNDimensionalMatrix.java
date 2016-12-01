@@ -9,17 +9,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.GSSurveyType;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.GSSurveyType;
 
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
-		INDimensionalMatrix<ASurveyAttribute, AValue, T> {
+		INDimensionalMatrix<ASurveyAttribute, ASurveyValue, T> {
 
 	protected final Set<AFullNDimensionalMatrix<T>> jointDistributionSet;
 	
@@ -61,17 +61,17 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	@Override
-	public ASurveyAttribute getDimension(AValue aspect) {
+	public ASurveyAttribute getDimension(ASurveyValue aspect) {
 		return getDimensions().stream().filter(d -> d.getValues().contains(aspect)).findFirst().get();
 	}
 	
 	@Override
-	public Set<AValue> getAspects() {
+	public Set<ASurveyValue> getAspects() {
 		return getDimensions().stream().flatMap(d -> d.getValues().stream()).collect(Collectors.toSet());
 	}
 
 	@Override
-	public Set<AValue> getAspects(ASurveyAttribute dimension) {
+	public Set<ASurveyValue> getAspects(ASurveyAttribute dimension) {
 		return Collections.unmodifiableSet(dimension.getValues());
 	}
 
@@ -81,7 +81,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	@Override
-	public ACoordinate<ASurveyAttribute, AValue> getEmptyCoordinate() {
+	public ACoordinate<ASurveyAttribute, ASurveyValue> getEmptyCoordinate() {
 		return jointDistributionSet.iterator().next().getEmptyCoordinate();
 	}
 	
@@ -92,8 +92,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	@Override
-	public Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> getMatrix(){
-		Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> matrix = new HashMap<>();
+	public Map<ACoordinate<ASurveyAttribute, ASurveyValue>, AControl<T>> getMatrix(){
+		Map<ACoordinate<ASurveyAttribute, ASurveyValue>, AControl<T>> matrix = new HashMap<>();
 		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
 			matrix.putAll(jd.getMatrix());
 		return matrix;
@@ -116,12 +116,12 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	@Override
-	public AControl<T> getVal(ACoordinate<ASurveyAttribute, AValue> coordinate) {
+	public AControl<T> getVal(ACoordinate<ASurveyAttribute, ASurveyValue> coordinate) {
 		return getVal(coordinate.values());
 	}
 
 	@Override
-	public AControl<T> getVal(AValue aspect) throws IllegalNDimensionalMatrixAccess {
+	public AControl<T> getVal(ASurveyValue aspect) throws IllegalNDimensionalMatrixAccess {
 		AControl<T> val = null;
 		for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().contains(aspect.getAttribute())).collect(Collectors.toList()))
@@ -133,16 +133,16 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 
 	@Override
-	public AControl<T> getVal(Collection<AValue> aspects) {
-		Map<ASurveyAttribute, Collection<AValue>> coordinates = new HashMap<>();
-		for(AValue val : aspects){
+	public AControl<T> getVal(Collection<ASurveyValue> aspects) {
+		Map<ASurveyAttribute, Collection<ASurveyValue>> coordinates = new HashMap<>();
+		for(ASurveyValue val : aspects){
 			if(coordinates.containsKey(val.getAttribute()))
 				coordinates.get(val.getAttribute()).add(val);
 			else
 				coordinates.put(val.getAttribute(), new HashSet<>(Arrays.asList(val)));
 		}
 		AControl<T> conditionalProba = getIdentityProductVal();
-		Set<AValue> includedProbaDimension = new HashSet<>();
+		Set<ASurveyValue> includedProbaDimension = new HashSet<>();
 		for(ASurveyAttribute att : coordinates.keySet()){
 			AControl<T> localProba = getNulVal();
 			for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
@@ -152,8 +152,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 				if(hookAtt.isEmpty()){
 					localProba = distribution.getVal(coordinates.get(att));  
 				} else {
-					Set<AValue> hookVals = hookAtt.stream().flatMap(a -> a.getValues().stream()).collect(Collectors.toSet());
-					Set<AValue> localVals = new HashSet<>(hookVals);
+					Set<ASurveyValue> hookVals = hookAtt.stream().flatMap(a -> a.getValues().stream()).collect(Collectors.toSet());
+					Set<ASurveyValue> localVals = new HashSet<>(hookVals);
 					localVals.addAll(coordinates.get(att));
 					localProba.multiply(distribution.getVal(localVals)
 							.getRowProduct(new ControlFrequency(1d / distribution.getVal(hookVals).getValue().doubleValue())));

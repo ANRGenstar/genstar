@@ -5,14 +5,17 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.stream.Collectors;
+<<<<<<< Updated upstream
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+=======
+>>>>>>> Stashed changes
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -36,9 +39,13 @@ import gospl.distribution.util.GosplBasicDistribution;
  */
 public class GosplAliasSampler implements IDistributionSampler {
 
+<<<<<<< Updated upstream
 	protected Logger logger = LogManager.getLogger();
 	
+	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
+=======
 	private List<ACoordinate<ASurveyAttribute, ASurveyValue>> indexedKey;
+>>>>>>> Stashed changes
 	private List<Double> initProba;
 	
 
@@ -48,6 +55,8 @@ public class GosplAliasSampler implements IDistributionSampler {
 
 	// -------------------- setup methods -------------------- //
 
+
+	
 	@Override
 	public void setDistribution(GosplBasicDistribution distribution){
 		if(distribution == null)
@@ -142,7 +151,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<ASurveyAttribute, ASurveyValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	

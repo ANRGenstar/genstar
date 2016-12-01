@@ -1,4 +1,4 @@
-package core.io.survey.attribut;
+package core.io.survey.entity.attribut;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -6,18 +6,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.metamodel.IAttribute;
 import core.util.data.GSEnumDataType;
 
-public abstract class ASurveyAttribute implements IAttribute<AValue> {
+public abstract class ASurveyAttribute implements IAttribute<ASurveyValue> {
 
 	private ASurveyAttribute referentAttribute;
 	private String name;
 	private GSEnumDataType dataType;
 
-	private Set<AValue> values = new HashSet<>();
-	private AValue emptyValue;
+	private Set<ASurveyValue> values = new HashSet<>();
+	private ASurveyValue emptyValue;
 
 	public ASurveyAttribute(String name, GSEnumDataType dataType, ASurveyAttribute referentAttribute) {
 		this.name = name;
@@ -51,24 +51,24 @@ public abstract class ASurveyAttribute implements IAttribute<AValue> {
 	}
 
 	@Override
-	public Set<AValue> getValues() {
+	public Set<ASurveyValue> getValues() {
 		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
-	public boolean setValues(Set<AValue> values) {
+	public boolean setValues(Set<ASurveyValue> values) {
 		if(this.values.isEmpty())
 			return this.values.addAll(values);
 		return false;
 	}
 
 	@Override
-	public AValue getEmptyValue() {
+	public ASurveyValue getEmptyValue() {
 		return emptyValue;
 	}
 
 	@Override
-	public void setEmptyValue(AValue emptyValue) {
+	public void setEmptyValue(ASurveyValue emptyValue) {
 		this.emptyValue = emptyValue;
 	}	
 
@@ -92,7 +92,7 @@ public abstract class ASurveyAttribute implements IAttribute<AValue> {
 	 * @param disVal
 	 * @return a set of values
 	 */
-	public Set<AValue> findMappedAttributeValues(AValue val) {
+	public Set<ASurveyValue> findMappedAttributeValues(ASurveyValue val) {
 		if(values.contains(val))
 			Stream.of(val).collect(Collectors.toSet());
 		return Stream.of(this.getEmptyValue()).collect(Collectors.toSet());

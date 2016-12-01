@@ -1,10 +1,10 @@
-package core.io.survey.attribut.value;
+package core.io.survey.entity.attribut.value;
 
-import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.ASurveyAttribute;
 import core.metamodel.IValue;
 import core.util.data.GSEnumDataType;
 
-public abstract class AValue implements IValue {
+public abstract class ASurveyValue implements IValue {
 
 	private GSEnumDataType dataType;
 	private ASurveyAttribute attribute;
@@ -12,14 +12,14 @@ public abstract class AValue implements IValue {
 	private String inputStringValue;
 	private String mappedStringValue;
 	
-	public AValue(String inputStringValue, String mappedStringValue, GSEnumDataType dataType, ASurveyAttribute attribute){
+	public ASurveyValue(String inputStringValue, String mappedStringValue, GSEnumDataType dataType, ASurveyAttribute attribute){
 		this.inputStringValue = inputStringValue;
 		this.mappedStringValue = mappedStringValue;
 		this.dataType = dataType;
 		this.attribute = attribute;
 	}
 	
-	public AValue(String inputStringValue, GSEnumDataType dataType, ASurveyAttribute attribute) {
+	public ASurveyValue(String inputStringValue, GSEnumDataType dataType, ASurveyAttribute attribute) {
 		this(inputStringValue, inputStringValue, dataType, attribute);
 	}
 	
@@ -72,7 +72,7 @@ public abstract class AValue implements IValue {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AValue other = (AValue) obj;
+		ASurveyValue other = (ASurveyValue) obj;
 		if (attribute == null) {
 			if (other.attribute != null)
 				return false;

@@ -1,7 +1,6 @@
 package gospl.algo.sampler;
 
 import java.util.List;
-import java.util.Random;
 
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.util.GosplBasicDistribution;

@@ -1,11 +1,11 @@
 package gospl;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,37 +16,32 @@ import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.AttributeFactory;
-import core.io.survey.attribut.GSEnumAttributeType;
+import core.io.configuration.GosplConfigurationFile;
+import core.io.configuration.GosplXmlSerializer;
+import core.io.survey.GSSurveyFile;
+import core.io.survey.GSSurveyType;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AttributeFactory;
+import core.io.survey.entity.attribut.GSEnumAttributeType;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.metamodel.GSSurveyFile;
-import gospl.metamodel.GSSurveyType;
-import gospl.metamodel.configuration.GosplConfigurationFile;
-import gospl.metamodel.configuration.GosplXmlSerializer;
 
 public class GosplRouenConf {
 
-	public static String INDIV_CLASS_PATH = "../spll/sample/Rouen/Rouen_insee_indiv";
-	public static String INDIV_EXPORT = "GSC_RouenIndividual";
+	public static String CONF_CLASS_PATH = "../spll/sample/Rouen/";
+	public static String CONF_EXPORT = "GSC_Rouen";
+	
 	public static String indiv1 = "Age & Couple-Tableau 1.csv";
 	public static String indiv2 = "Age & Sexe & CSP-Tableau 1.csv";
 	public static String indiv3 = "Age & Sexe-Tableau 1.csv";
 	public static String indiv4 = "Rouen_iris.csv";
-	
-	public static String HHOLD_CLASS_PATH = "Rouen_insee_menage";
 	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
 	public static String menage2 = "Taille ménage & CSP référent-Tableau 1.csv";
 	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
-	public static String HHOLD_EXPORT = "GSC_RouenHoushold";
-	
-	public static String SAMPLE_CLASS_PATH = "Rouen_sample";
-	public static String SAMPLE_EXPORT = "GSC_RouenSample";
 	public static String sample1 = "Rouen_sample_IRIS.csv";
 
 	public static void main(String[] args) throws InvalidFormatException {
-
+		
 		// Setup the serializer that save configuration file
 		GosplXmlSerializer gxs = null;
 		try {
@@ -64,21 +59,17 @@ public class GosplRouenConf {
 			// Setup input files' configuration for individual aggregated data
 			List<GSSurveyFile> individualDataFiles = new ArrayList<>();
 			Set<ASurveyAttribute> indivAttributes = new HashSet<>();
-			individualDataFiles.add(new GSSurveyFile(INDIV_CLASS_PATH+File.separator+indiv1,
-					GSSurveyType.ContingencyTable, 1, 1, ';'));
-			individualDataFiles.add(new GSSurveyFile(INDIV_CLASS_PATH+File.separator+indiv2,
-					GSSurveyType.ContingencyTable, 2, 1, ';'));
-			individualDataFiles.add(new GSSurveyFile(INDIV_CLASS_PATH+File.separator+indiv3,
-					GSSurveyType.ContingencyTable, 1, 1, ';'));
-			individualDataFiles.add(new GSSurveyFile(INDIV_CLASS_PATH+File.separator+indiv4,
-					GSSurveyType.ContingencyTable, 1, 1, ','));
+			individualDataFiles.add(new GSSurveyFile(indiv1, GSSurveyType.ContingencyTable, 1, 1, ';'));
+			individualDataFiles.add(new GSSurveyFile(indiv2, GSSurveyType.ContingencyTable, 2, 1, ';'));
+			individualDataFiles.add(new GSSurveyFile(indiv3, GSSurveyType.ContingencyTable, 1, 1, ';'));
+			individualDataFiles.add(new GSSurveyFile(indiv4, GSSurveyType.ContingencyTable, 1, 1, ','));
 			
 			// Setup input files' configuration for household aggregated data
 			List<GSSurveyFile> householdDataFiles = new ArrayList<>();
 			Set<ASurveyAttribute> householdAttributes = new HashSet<>();
-			householdDataFiles.add(new GSSurveyFile(menage1,GSSurveyType.ContingencyTable, 1, 1, ';'));
-			householdDataFiles.add(new GSSurveyFile(menage2,GSSurveyType.ContingencyTable, 1, 1, ';'));
-			householdDataFiles.add(new GSSurveyFile(menage3,GSSurveyType.ContingencyTable, 2, 1, ';'));
+			householdDataFiles.add(new GSSurveyFile(menage1, GSSurveyType.ContingencyTable, 1, 1, ';'));
+			householdDataFiles.add(new GSSurveyFile(menage2, GSSurveyType.ContingencyTable, 1, 1, ';'));
+			householdDataFiles.add(new GSSurveyFile(menage3, GSSurveyType.ContingencyTable, 2, 1, ';'));
 
 			
 			// Setup input files' configuration for sample data
@@ -302,29 +293,20 @@ public class GosplRouenConf {
 			// SERIALIZE CONFIGURATION FILES
 			// ------------------------------
 
+			Set<ASurveyAttribute> attList = Stream.concat(Stream.concat(indivAttributes.stream(), sampleAttributes.stream()), 
+					householdAttributes.stream()).collect(Collectors.toSet());
+			List<GSSurveyFile> surveyFiles = Stream.concat(Stream.concat(individualDataFiles.stream(), sampleDataFiles.stream()), 
+					householdDataFiles.stream()).collect(Collectors.toList());
+			
 			try {
-				gxs.setMkdir(Paths.get(INDIV_CLASS_PATH));
-				GosplConfigurationFile gsdI = new GosplConfigurationFile(individualDataFiles, indivAttributes);
-				gxs.serializeGSConfig(gsdI, INDIV_EXPORT);
-				System.out.println("Serialize Genstar individual data with:\n"+
+				gxs.setMkdir(Paths.get(CONF_CLASS_PATH));
+				GosplConfigurationFile gsdI = new GosplConfigurationFile(surveyFiles, attList,
+						Collections.emptyMap());
+				gxs.serializeGSConfig(gsdI, CONF_EXPORT);
+				System.out.println("Serialize Genstar input data with:\n"+
 						gsdI.getAttributes().size()+" attributs\n"+
 						gsdI.getDataFiles().size()+" data files");
-				
-				gxs.setMkdir(Paths.get(HHOLD_CLASS_PATH));
-				GosplConfigurationFile gsdHH = new GosplConfigurationFile(householdDataFiles, householdAttributes);
-				gxs.serializeGSConfig(gsdHH, HHOLD_EXPORT);
-				System.out.println("Serialize Genstar household"
-						+ " data with:\n"+
-						gsdHH.getAttributes().size()+" attributs\n"+
-						gsdHH.getDataFiles().size()+" data files");
-				
-				gxs.setMkdir(Paths.get(SAMPLE_CLASS_PATH));
-				GosplConfigurationFile gsdS = new GosplConfigurationFile(sampleDataFiles, sampleAttributes);
-				gxs.serializeGSConfig(gsdS, SAMPLE_EXPORT);
-				System.out.println("Serialize Genstar sampled data with:\n"+ 
-						gsdS.getAttributes().size()+" attributs\n"+
-						gsdS.getDataFiles().size()+" data files");
-				
+								
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

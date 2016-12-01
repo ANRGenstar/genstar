@@ -1,10 +1,10 @@
-package core.io.survey.attribut.value;
+package core.io.survey.entity.attribut.value;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.GSEnumAttributeType;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.GSEnumAttributeType;
 import core.util.data.GSEnumDataType;
 
-public class RangeValue extends AValue {
+public class RangeValue extends ASurveyValue {
 	
 	private String inputStringLowerBound;
 	private String inputStringUpperBound;

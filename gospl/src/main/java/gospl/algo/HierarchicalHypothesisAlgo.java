@@ -51,8 +51,8 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IH
 
 
 	@Override
-	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
-			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix, 
+	public ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> inferDistributionSampler(
+			INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> matrix, 
 			IHierarchicalSampler sampler)
 					throws IllegalDistributionCreation {
 		

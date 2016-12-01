@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.AttributeFactory;
-import core.io.survey.attribut.GSEnumAttributeType;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AttributeFactory;
+import core.io.survey.entity.attribut.GSEnumAttributeType;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
@@ -97,8 +97,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return sb.toString();
 	}
 	
-	private AValue randomVal(Set<AValue> values){
-		List<AValue> vals = new ArrayList<>(values);
+	private ASurveyValue randomVal(Set<ASurveyValue> values){
+		List<ASurveyValue> vals = new ArrayList<>(values);
 		return vals.get(random.nextInt(vals.size()));
 	}
 

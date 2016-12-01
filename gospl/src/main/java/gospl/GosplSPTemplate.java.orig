@@ -85,8 +85,14 @@ public class GosplSPTemplate {
 		}
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
+<<<<<<< Updated upstream
 		final IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
 		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
+=======
+		final IDistributionInferenceAlgo<ASurveyAttribute, ASurveyValue> distributionInfAlgo =
+				new IndependantHypothesisAlgo(true);
+		ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> sampler = null;
+>>>>>>> Stashed changes
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
 		} catch (final IllegalDistributionCreation e1) {

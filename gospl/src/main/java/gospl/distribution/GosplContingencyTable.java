@@ -4,8 +4,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.GSSurveyType;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -13,7 +14,6 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.GSSurveyType;
 
 
 /**
@@ -25,7 +25,7 @@ import gospl.metamodel.GSSurveyType;
  */
 public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
-	protected GosplContingencyTable(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap) {
+	protected GosplContingencyTable(Map<ASurveyAttribute, Set<ASurveyValue>> dimensionAspectMap) {
 		super(dimensionAspectMap, GSSurveyType.ContingencyTable);
 	}
 		
@@ -33,14 +33,14 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 
 	
 	@Override
-	public boolean addValue(ACoordinate<ASurveyAttribute, AValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<ASurveyAttribute, ASurveyValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
 	}
 
 	@Override
-	public boolean setValue(ACoordinate<ASurveyAttribute, AValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<ASurveyAttribute, ASurveyValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size()+1+matrix.hashCode());
 			matrix.put(coordinate, new ControlContingency(value.getValue().intValue()));

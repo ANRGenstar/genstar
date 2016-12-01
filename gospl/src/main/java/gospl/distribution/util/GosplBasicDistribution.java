@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
-public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute, AValue>, Double> {
+public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute, ASurveyValue>, Double> {
 
-	private final Map<ACoordinate<ASurveyAttribute, AValue>, Double> innermap; 
+	private final Map<ACoordinate<ASurveyAttribute, ASurveyValue>, Double> innermap; 
 
-	public GosplBasicDistribution(Map<Set<AValue>, Double> sampleDistribution) {
+	public GosplBasicDistribution(Map<Set<ASurveyValue>, Double> sampleDistribution) {
 		if(sampleDistribution.isEmpty())
 			throw new IllegalArgumentException("Sample distribution cannot be empty");
 		innermap = sampleDistribution.entrySet().parallelStream()
@@ -58,7 +58,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public Double put(ACoordinate<ASurveyAttribute, AValue> key, Double value) {
+	public Double put(ACoordinate<ASurveyAttribute, ASurveyValue> key, Double value) {
 		return innermap.put(key, value);
 	}
 
@@ -68,7 +68,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public void putAll(Map<? extends ACoordinate<ASurveyAttribute, AValue>, ? extends Double> m) {
+	public void putAll(Map<? extends ACoordinate<ASurveyAttribute, ASurveyValue>, ? extends Double> m) {
 		innermap.putAll(m);
 	}
 
@@ -78,7 +78,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public Set<ACoordinate<ASurveyAttribute, AValue>> keySet() {
+	public Set<ACoordinate<ASurveyAttribute, ASurveyValue>> keySet() {
 		return innermap.keySet();
 	}
 
@@ -88,7 +88,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<ASurveyAttribute,
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<ACoordinate<ASurveyAttribute, AValue>, Double>> entrySet() {
+	public Set<java.util.Map.Entry<ACoordinate<ASurveyAttribute, ASurveyValue>, Double>> entrySet() {
 		return innermap.entrySet();
 	}
 	

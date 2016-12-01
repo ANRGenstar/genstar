@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.media.jai.RasterFactory;
@@ -57,8 +58,9 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import core.io.exception.InvalidFileTypeException;
 import core.io.geo.entity.GSFeature;
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
+import core.io.survey.entity.ASurveyEntity;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.metamodel.IPopulation;
 import core.util.GSBasicStats;
 import core.util.data.GSEnumStats;
@@ -208,8 +210,21 @@ public class GeofileFactory {
 				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
 	}
 
-	
-	public ShapeFile createShapeFile(File shapefile, IPopulation population, CoordinateReferenceSystem crs) throws IOException, SchemaException {
+	/**
+	 * Export a population in a shapefile
+	 * 
+	 * TODO: explain more
+	 * 
+	 * @param shapefile
+	 * @param population
+	 * @param crs
+	 * @return
+	 * @throws IOException
+	 * @throws SchemaException
+	 */
+	public ShapeFile createShapeFile(File shapefile, 
+			IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population, 
+			CoordinateReferenceSystem crs) throws IOException, SchemaException {
 		if(population.isEmpty()) 
 			throw new IllegalStateException("Population ("+Arrays.toString(population.toArray())+") in methode createShapeFile cannot be empty");
 		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
@@ -217,17 +232,20 @@ public class GeofileFactory {
 		Map<String, Serializable> params = new HashMap<>();
 		params.put("url", shapefile.toURI().toURL());
 		params.put("create spatial index", Boolean.TRUE);
-		
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
+<<<<<<< Updated upstream
 		Map<IEntity, Geometry> geoms = (Map<IEntity,Geometry>) population.stream().filter(g -> g != null && ((IEntity) g).getLocation() != null).collect(Collectors.toMap(e -> ((IEntity) e),e -> ((IEntity) e).getLocation()));
+=======
+		Map<ASurveyEntity, Geometry> geoms = population.stream()
+				.collect(Collectors.toMap(Function.identity(), ASurveyEntity::getLocation));
+>>>>>>> Stashed changes
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		final String geomType = getGeometryType(geoms.values());
 
 		specs.append("geometry:" + geomType);
 		List<String> atts = new ArrayList<>();
-			for (final Object e : population.getPopulationAttributes()) {
-				IAttribute at = (IAttribute) e;
+			for (final ASurveyAttribute at : population.getPopulationAttributes()) {
 				atts.add(at.getAttributeName());
 				String name = at.getAttributeName().replaceAll("\"", "");
 				name = name.replaceAll("'", "");
@@ -240,12 +258,17 @@ public class GeofileFactory {
 		newDataStore.createSchema(type);
 	
 
-		try (FeatureWriter fw = newDataStore.getFeatureWriter(Transaction.AUTO_COMMIT)) {
+		try (@SuppressWarnings("rawtypes")
+		FeatureWriter fw = newDataStore.getFeatureWriter(Transaction.AUTO_COMMIT)) {
 
 			final List<Object> values = new ArrayList<>();
+<<<<<<< Updated upstream
 			for (final Object obj : population) {
 				IEntity entity = (IEntity) obj;
 				if (entity == null || entity.getLocation() == null) continue;
+=======
+			for (final ASurveyEntity entity : population) {
+>>>>>>> Stashed changes
 				values.clear();
 				final SimpleFeature ff = (SimpleFeature) fw.next();
 				values.add(geoms.get(entity));

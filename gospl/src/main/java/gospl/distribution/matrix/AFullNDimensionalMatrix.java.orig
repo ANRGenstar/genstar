@@ -30,8 +30,13 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	private GSSurveyType dataType; 
 
+<<<<<<< Updated upstream
+	protected final Map<ASurveyAttribute, Set<AValue>> dimensions;
+	protected final Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> matrix;
+=======
 	private final Map<ASurveyAttribute, Set<ASurveyValue>> dimensions;
 	protected final Map<ACoordinate<ASurveyAttribute, ASurveyValue>, AControl<T>> matrix;
+>>>>>>> Stashed changes
 
 	private ACoordinate<ASurveyAttribute, ASurveyValue> emptyCoordinate = null;
 
@@ -218,6 +223,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
 		return controlOne.add(controlTwo);
 	}
+
+
 
 	// -------------------------- UTILITY -------------------------- //
 

@@ -13,17 +13,33 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.io.geo.IGSGeofile;
 import core.io.geo.entity.AGeoEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+<<<<<<< Updated upstream
+import core.metamodel.IAttribute;
+import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 import spll.popmapper.constraint.SpatialConstraint;
 import spll.popmapper.pointInalgo.PointInLocalizer;
 import spll.popmapper.pointInalgo.RandomPointInLocalizer;
+public class SPUniformLocalizer implements ISPLocalizer {
 
+=======
+import core.io.geo.entity.attribute.AGeoAttribute;
+import core.io.survey.entity.ASurveyEntity;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.metamodel.IPopulation;
 
 public class SPUniformLocalizer implements ISPLocalizer {
 
+	private IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population;
+	private ShapeFile match;
+	private IGSGeofile localisation;
+	private String numberProperty;
+	private Random rand;
+	private String keyAttPop;
+	private String keyAttMatch;
+>>>>>>> Stashed changes
 	
 	private IGSGeofile match; //main referenced area for placing the agents (ex: Iris)
 	private IGSGeofile localisation; //possible nest for agents (ex: buildings)
@@ -32,11 +48,18 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	private Random rand;  
 	private PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
 	
+<<<<<<< Updated upstream
 	private String numberProperty; //name of the attribute that contains the number of entities in the entityNbAreas file
 	private String keyAttPop; //name of the attribute that is used to store the id of the referenced area  in the population
 	private String keyAttMatch; //name of the attribute that is used to store the id of the referenced area in the entityNbAreas file
 	
 	public SPUniformLocalizer(IGSGeofile localisation) {
+=======
+	public SPUniformLocalizer(IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population, 
+			ShapeFile match, IGSGeofile localisation, String numberProperty, String keyAttPop, String keyAttMatch ) {
+		this.population = population;
+		this.match = match;
+>>>>>>> Stashed changes
 		this.localisation = localisation;
 		rand = new Random();
 		pointInLocalizer = new RandomPointInLocalizer(rand);
@@ -44,7 +67,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> localisePopulation(IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population) {
+	public IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> localisePopulation(IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> population) {
 		//define the crs of the population
 		population.setCrs(localisation.getCoordRefSystem());
 		try {
@@ -65,14 +88,65 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			else {
 				for (AGeoEntity globalfeature : match.getGeoData()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
-					List<ASurveyEntity> entities = population.stream()
-						.filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt))
-						.collect(Collectors.toList());
+<<<<<<< Updated upstream
+					List<IEntity> entities = population.stream().filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt)).collect(Collectors.toList());
 					if (numberProperty == null || entityNbAreas == null) {
 						randomLocalizationInNest(entities, globalfeature.getGeometry());
 					}
 					else {
 						randomLocalizationInNestWithNumbers(entities, globalfeature.getGeometry());
+=======
+					List<ASurveyEntity> entities = population.stream()
+							.filter(s -> s.getValueForAttribute(keyAttPop).toString().equals(valKeyAtt))
+							.collect(Collectors.toList());
+					if (numberProperty == null) {
+						Object[] locTab = IteratorUtils.toArray(localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry()));
+						int nb = locTab.length;
+						for (ASurveyEntity entity : population) {
+							AGeoEntity feature = (AGeoEntity) locTab[rand.nextInt(nb)];
+							entity.setNest(feature);
+							entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+						}
+					} else {
+						Iterator<? extends AGeoEntity> itr = localisation.getGeoAttributeIteratorWithin(globalfeature.getGeometry());
+						while(itr.hasNext()) {
+							AGeoEntity feature = itr.next();
+							List<String> atts = new ArrayList();
+							for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
+							double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
+							for (int i = 0; i < val; i++) {
+								if (entities.isEmpty()) break;
+								int index = rand.nextInt(entities.size());
+								ASurveyEntity entity = entities.remove(index);
+								entity.setNest(feature);
+								entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+							}
+						}
+					}
+				}
+			} else {
+				List<ASurveyEntity> entities = new ArrayList<>(population);
+				if (numberProperty == null) {
+					Object[] locTab = localisation.getGeoData().toArray();
+					int nb = locTab.length;
+					for (ASurveyEntity entity : population) {
+						AGeoEntity feature = (AGeoEntity) locTab[rand.nextInt(nb)];
+						entity.setNest(feature);
+						entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+					}
+				} else {
+					for (AGeoEntity feature: localisation.getGeoData()) {
+						List<String> atts = new ArrayList();
+						for (AGeoAttribute at: feature.getAttributes())atts.add(at.getAttributeName());
+						double val = feature.getValueForAttribute(numberProperty).getNumericalValue().doubleValue();
+						for (int i = 0; i < val; i++) {
+							if (entities.isEmpty()) break;
+							int index = rand.nextInt(entities.size());
+							ASurveyEntity entity = entities.remove(index);
+							entity.setNest(feature);
+							entity.setLocation(pointInGeom(feature.getGeometry(),rand));
+						}
+>>>>>>> Stashed changes
 					}
 				}
 			} 
@@ -85,7 +159,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 
 	//set to all the entities given as argument, a given nest chosen randomly in the possible geoEntities 
 	//of the localisation shapefile (all if not bounds is defined, only the one in the bounds if the one is not null)
-	private void randomLocalizationInNest(Collection<ASurveyEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
+	private void randomLocalizationInNest(Collection<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
 		Object[] locTab = spatialBounds == null ? localisation.getGeoData().toArray() : localisation.getGeoDataWithin(spatialBounds).toArray();
 		int nb = locTab.length;
 		for (IEntity entity : entities) {
@@ -98,7 +172,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	// For each area concerned of the entityNbAreas shapefile  (all if not bounds is defined, only the one in the bounds if the one is not null),
 	//define the number of entities from the entities list to locate inside, then try to set a nest to this randomly chosen number of entities.
 	// NOTE: if no nest is located inside the area, not entities will be located inside.
-	private void randomLocalizationInNestWithNumbers(List<ASurveyEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
+	private void randomLocalizationInNestWithNumbers(List<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? entityNbAreas.getGeoData() : entityNbAreas.getGeoDataWithin(spatialBounds);
 		for (AGeoEntity feature: areas) {
 			Object[] locTab = null;
@@ -114,7 +188,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			for (int i = 0; i < val; i++) {
 				if (entities.isEmpty()) break;
 				int index = rand.nextInt(entities.size());
-				ASurveyEntity entity = entities.remove(index);
+				IEntity entity = entities.remove(index);
 				
 				AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
 				entity.setNest(nest);

@@ -6,14 +6,11 @@ import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import core.io.survey.entity.attribut.ASurveyAttribute;
 import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
@@ -32,9 +29,17 @@ import gospl.distribution.util.GosplBasicDistribution;
  *
  * @param <T>
  */
+<<<<<<< Updated upstream
 public class GosplBinarySampler implements IDistributionSampler {
 		
+	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
+=======
+public class GosplBinarySampler extends GosplAbstractSampler {
+	
+	private static boolean DEBUG_SYSO = true;
+	
 	private List<ACoordinate<ASurveyAttribute, ASurveyValue>> indexedKey;
+>>>>>>> Stashed changes
 	private List<Double> indexedProbabilitySum;
 	
 	private final double EPSILON = Math.pow(10, -6);
@@ -100,7 +105,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<ASurveyAttribute, ASurveyValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 		

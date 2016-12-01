@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -17,7 +17,7 @@ import gospl.distribution.util.GosplBasicDistribution;
 
 public class GosplBasicSampler implements IDistributionSampler {
 
-	private List<ACoordinate<ASurveyAttribute, AValue>> indexedKey;
+	private List<ACoordinate<ASurveyAttribute, ASurveyValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 
 	private final double EPSILON = Math.pow(10, -6);
@@ -33,7 +33,7 @@ public class GosplBasicSampler implements IDistributionSampler {
 		this.indexedKey = new ArrayList<>(distribution.size());
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
-		for(Entry<ACoordinate<ASurveyAttribute, AValue>, Double> entry : distribution.entrySet()){
+		for(Entry<ACoordinate<ASurveyAttribute, ASurveyValue>, Double> entry : distribution.entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
@@ -56,7 +56,7 @@ public class GosplBasicSampler implements IDistributionSampler {
 	// -------------------- main contract -------------------- //
 	
 	@Override
-	public ACoordinate<ASurveyAttribute, AValue> draw() {
+	public ACoordinate<ASurveyAttribute, ASurveyValue> draw() {
 		double rand = GenstarRandom.getInstance().nextDouble();
 		while(rand > upperBoundRng)
 			rand = GenstarRandom.getInstance().nextDouble();
@@ -91,7 +91,7 @@ public class GosplBasicSampler implements IDistributionSampler {
 		String s = "Basic sampler: "+indexedKey.size()+" discret probabilities\n";
 		s += String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()))+"; Probability\n";
 		double formerProba = 0d;
-		for(ACoordinate<ASurveyAttribute, AValue> coord : indexedKey){
+		for(ACoordinate<ASurveyAttribute, ASurveyValue> coord : indexedKey){
 			String line = "";
 			for(ASurveyAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){

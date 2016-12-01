@@ -10,7 +10,7 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
-public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>>> {
+public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordinate<ASurveyAttribute, AValue>>> {
 
 	/**
 	 * 
@@ -31,9 +31,17 @@ public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordi
 	 * @throws IllegalDistributionCreation
 	 * @throws GosplSamplerException
 	 */
+<<<<<<< Updated upstream
+	public ISampler<ACoordinate<ASurveyAttribute, AValue>> inferDistributionSampler(
+			INDimensionalMatrix<ASurveyAttribute, AValue, Double> matrix, 
+			SamplerType sampler) 
+=======
 	public ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> inferDistributionSampler(
 			INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> matrix, 
-			SamplerType sampler) 
+			ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> sampler) 
+>>>>>>> Stashed changes
 			throws IllegalDistributionCreation;
+	
+	
 	
 }

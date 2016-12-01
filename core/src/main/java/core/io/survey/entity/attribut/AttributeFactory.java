@@ -1,4 +1,4 @@
-package core.io.survey.attribut;
+package core.io.survey.entity.attribut;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,9 +9,9 @@ import java.util.Set;
 
 import org.geotools.xml.schema.AttributeValue;
 
-import core.io.survey.attribut.value.AValue;
-import core.io.survey.attribut.value.RangeValue;
-import core.io.survey.attribut.value.UniqueValue;
+import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.value.RangeValue;
+import core.io.survey.entity.attribut.value.UniqueValue;
 import core.metamodel.IAttribute;
 import core.metamodel.IValue;
 import core.util.data.GSDataParser;
@@ -170,12 +170,12 @@ public class AttributeFactory {
 
 	// ----------------------------- Back office ----------------------------- //
 
-	private Set<AValue> getValues(GSEnumAttributeType attributeType, GSEnumDataType dataType, List<String> inputValues, 
+	private Set<ASurveyValue> getValues(GSEnumAttributeType attributeType, GSEnumDataType dataType, List<String> inputValues, 
 			List<String> modelValues, ASurveyAttribute attribute) throws GSIllegalRangedData{
 		if(inputValues.size() != modelValues.size())
 			throw new IllegalArgumentException("Attribute's value should not have divergent "
 					+ "input ("+inputValues.size()+") and model ("+modelValues.size()+") value");
-		Set<AValue> vals = new HashSet<>();
+		Set<ASurveyValue> vals = new HashSet<>();
 		switch (attributeType) {
 		case record:
 			vals.add(new UniqueValue(modelValues.get(0), dataType, attribute));
@@ -228,7 +228,7 @@ public class AttributeFactory {
 		}
 	}
 
-	private AValue getEmptyValue(GSEnumAttributeType attributeType, GSEnumDataType dataType, ASurveyAttribute attribute) {
+	private ASurveyValue getEmptyValue(GSEnumAttributeType attributeType, GSEnumDataType dataType, ASurveyAttribute attribute) {
 		switch (attributeType) {
 		case unique:
 			return new UniqueValue(dataType, attribute);

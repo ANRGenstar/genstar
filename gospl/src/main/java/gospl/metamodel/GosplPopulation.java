@@ -10,15 +10,16 @@ import java.util.stream.Collectors;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.ASurveyEntity;
+import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.value.ASurveyValue;
 import core.metamodel.IPopulation;
 
-public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribute, AValue> {
+public class GosplPopulation implements IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> {
 
 	CoordinateReferenceSystem crs = null;
 	
-	private final Collection<GosplEntity> population;
+	private final Collection<ASurveyEntity> population;
 	
 	/**
 	 * Default inner type collection is {@link Set}
@@ -36,7 +37,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	 * 
 	 * @param population
 	 */
-	public GosplPopulation(Collection<GosplEntity> population){
+	public GosplPopulation(Collection<ASurveyEntity> population){
 		if(!population.isEmpty())
 			this.population = new HashSet<>();
 		else
@@ -59,7 +60,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	}
 
 	@Override
-	public Iterator<GosplEntity> iterator() {
+	public Iterator<ASurveyEntity> iterator() {
 		return population.iterator();
 	}
 
@@ -74,7 +75,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	}
 
 	@Override
-	public boolean add(GosplEntity e) {
+	public boolean add(ASurveyEntity e) {
 		return population.add(e);
 	}
 
@@ -89,7 +90,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends GosplEntity> c) {
+	public boolean addAll(Collection<? extends ASurveyEntity> c) {
 		return population.addAll(c);
 	}
 
@@ -126,9 +127,9 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 		System.out.println("Headers done !");
 		for(ASurveyAttribute attribute : attributes){
 			int lineNumber = 0;
-			Set<AValue> vals = new HashSet<>(attribute.getValues());
+			Set<ASurveyValue> vals = new HashSet<>(attribute.getValues());
 			vals.add(attribute.getEmptyValue());
-			for(AValue value : vals){
+			for(ASurveyValue value : vals){
 				long valCount = this.population.parallelStream()
 						.filter(e -> e.getValueForAttribute(attribute).equals(value)).count();
 				double valProp =  Math.round(Math.round(((valCount * 1d / this.population.size()) * 10000))) / 100d;
