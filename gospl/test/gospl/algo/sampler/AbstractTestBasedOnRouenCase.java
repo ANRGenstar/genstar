@@ -2,11 +2,17 @@ package gospl.algo.sampler;
 
 import static org.junit.Assert.fail;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import core.io.exception.InvalidFileTypeException;
 import core.io.survey.attribut.ASurveyAttribute;
@@ -22,6 +28,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 import gospl.metamodel.configuration.GosplConfigurationFile;
 import gospl.metamodel.configuration.GosplXmlSerializer;
@@ -166,8 +173,54 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();
 		}
+		
+		TemporaryFolder tmpDir = new TemporaryFolder();
+		
 
-		fail("Not yet implemented - yet.");
+		// MAKE REPORT
+
+		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
+		final String export = "PopExport.csv";
+		try {
+			tmpDir.create();
+
+			final CharSequence csvSep = ";";
+			int individual = 1;
+			File reportFile = tmpDir.newFile("PopExport.csv");
+
+			final BufferedWriter bw = Files.newBufferedWriter(reportFile.toPath());
+			final Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
+			bw.write("Individual" + csvSep
+					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))
+					+ "\n");
+			for (final GosplEntity e : population) {
+				bw.write(String.valueOf(individual++));
+				for (final ASurveyAttribute attribute : attributes) {
+					AValue av = e.getValueForAttribute(attribute); 
+					bw.write(csvSep + (av == null?"":e.getValueForAttribute(attribute).getStringValue()));
+				}
+				bw.write("\n");
+			}
+			bw.close();
+			gspu.sysoStempPerformance("\texport done: " + reportFile.getAbsolutePath(), GosplSPTemplate.class.getName());
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+
+			
+			gspu.sysoStempMessage("\nStart processing population to output files");
+			File reportFile = tmpDir.newFile("PopReport.csv");
+			Files.write(reportFile.toPath(), population.csvReport(";").getBytes());
+			gspu.sysoStempPerformance("\treport done: " + reportFile.getAbsolutePath(), GosplSPTemplate.class.getName());
+		} catch (final IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+
+//		fail("Not yet implemented - yet.");
 		
 	}
 

@@ -161,7 +161,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 // ------------------------- coordinate management ------------------------- //
 
 	/**
-	 * Check if this coordinate feet the matrix requirement
+	 * Check if this coordinate fits the matrix requirement
 	 * 
 	 * @param coordinate
 	 * @return
