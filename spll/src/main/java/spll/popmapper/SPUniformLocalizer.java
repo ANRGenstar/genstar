@@ -28,7 +28,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	private IGSGeofile entityNbAreas; //gives the number of entities per area (ex: regression cells)
 	private List<SpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest
 	private Random rand;  
-	private PointInLocalizer pointInLocalizer;
+	private PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
 	
 	private String numberProperty; //name of the attribute that contains the number of entities in the entityNbAreas file
 	private String keyAttPop; //name of the attribute that is used to store the id of the referenced area  in the population
@@ -43,11 +43,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> localisePopulation(IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> population) {
-		// TODO Auto-generated method stub
-		
-		// TODO: how to match attribute feature and attribute individual, both are IEntity
-		
-		// TODO: for each feature, randomly spread individual with a fitness (reproduce in each cells the feature distribution)
+		//define the crs of the population
 		population.setCrs(localisation.getCoordRefSystem());
 		try {
 			//case where the referenced file is not defined
@@ -83,6 +79,8 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		return population;
 	}
 
+	//set to all the entities given as argument, a given nest chosen randomly in the possible geoEntities 
+	//of the localisation shapefile (all if not bounds is defined, only the one in the bounds if the one is not null)
 	private void randomLocalizationInNest(Collection<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
 		Object[] locTab = spatialBounds == null ? localisation.getGeoData().toArray() : localisation.getGeoDataWithin(spatialBounds).toArray();
 		int nb = locTab.length;
@@ -93,6 +91,9 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		}
 	}
 	
+	// For each area concerned of the entityNbAreas shapefile  (all if not bounds is defined, only the one in the bounds if the one is not null),
+	//define the number of entities from the entities list to locate inside, then try to set a nest to this randomly chosen number of entities.
+	// NOTE: if no nest is located inside the area, not entities will be located inside.
 	private void randomLocalizationInNestWithNumbers(List<IEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? entityNbAreas.getGeoData() : entityNbAreas.getGeoDataWithin(spatialBounds);
 		for (AGeoEntity feature: areas) {
