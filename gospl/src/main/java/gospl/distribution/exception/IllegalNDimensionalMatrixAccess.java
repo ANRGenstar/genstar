@@ -1,6 +1,6 @@
 package gospl.distribution.exception;
 
-public class IllegalNDimensionalMatrixAccess extends Exception {
+public class IllegalNDimensionalMatrixAccess extends RuntimeException {
 
 	/**
 	 * 
