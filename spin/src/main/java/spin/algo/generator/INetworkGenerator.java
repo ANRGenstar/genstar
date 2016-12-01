@@ -1,9 +1,11 @@
 package spin.algo.generator;
 
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.IPopulation;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
-import gospl.metamodel.GosplEntity;
-import gospl.metamodel.GosplPopulation;
 
 /** Interface de générateur de réseau, commun a tous les générateurs. 
  * 
@@ -21,15 +23,15 @@ public interface INetworkGenerator {
 	 * @param population population en paramètre, implementant l'interface IPopulation 
 	 * @return un SpinNetwork
 	 */
-	public abstract SpinNetwork generateNetwork(GosplPopulation population);
+	public abstract SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population);
 	
-	public static SpinNetwork loadPopulation(GosplPopulation population){
+	public static SpinNetwork loadPopulation(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population){
 	//Create a SpinNetwork with nodes linked to population entities
 	//The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
 				
 		// create all the nodes 
-		for (GosplEntity entity : population) 
+		for (AGenstarEntity entity : population) 
 					myNetwork.putNode(new NetworkNode(entity));
 		return myNetwork;
 	}

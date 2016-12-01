@@ -3,8 +3,8 @@ package gospl.distribution;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -30,7 +30,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	// ------------------ Setters ------------------ //
 
 	@Override
-	public boolean addValue(ACoordinate<ASurveyAttribute, ASurveyValue> coordinates, AControl<? extends Number> value) {
+	public boolean addValue(ACoordinate<AGenstarAttribute, AGenstarValue> coordinates, AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().equals(coordinates.getDimensions())).collect(Collectors.toSet());
 		return jds.iterator().next().addValue(coordinates, value);
@@ -38,7 +38,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	
 	@Override
-	public boolean setValue(ACoordinate<ASurveyAttribute, ASurveyValue> coordinates, AControl<? extends Number> value) {
+	public boolean setValue(ACoordinate<AGenstarAttribute, AGenstarValue> coordinates, AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().equals(coordinates.getDimensions())).collect(Collectors.toSet());
 		if(jds.size() != 1)
@@ -61,7 +61,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 // -------------------- Utilities -------------------- //
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<ASurveyAttribute, ASurveyValue> coordinate) {
+	public boolean isCoordinateCompliant(ACoordinate<AGenstarAttribute, AGenstarValue> coordinate) {
 		return jointDistributionSet.stream().anyMatch(jd -> jd.isCoordinateCompliant(coordinate));
 	}
 

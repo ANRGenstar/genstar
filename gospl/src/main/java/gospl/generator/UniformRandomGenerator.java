@@ -7,10 +7,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.AttributeFactory;
 import core.io.survey.entity.attribut.GSEnumAttributeType;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
@@ -48,7 +48,7 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		
 		// Attribute Factory
 		AttributeFactory attF = new AttributeFactory();
-		Set<ASurveyAttribute> attSet = IntStream.range(0, random.nextInt(maxAtt)+1)
+		Set<AGenstarAttribute> attSet = IntStream.range(0, random.nextInt(maxAtt)+1)
 				.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
 				.collect(Collectors.toSet());
 		
@@ -59,8 +59,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return gosplPop;
 	}
 
-	private ASurveyAttribute createIntegerAtt(AttributeFactory factory) {
-		ASurveyAttribute asa = null;
+	private AGenstarAttribute createIntegerAtt(AttributeFactory factory) {
+		AGenstarAttribute asa = null;
 		try {
 			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Integer, 
@@ -73,8 +73,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return asa;
 	}
 	
-	private ASurveyAttribute createStringAtt(AttributeFactory factory){
-		ASurveyAttribute asa = null;
+	private AGenstarAttribute createStringAtt(AttributeFactory factory){
+		AGenstarAttribute asa = null;
 		try {
 			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.String, 
@@ -97,8 +97,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return sb.toString();
 	}
 	
-	private ASurveyValue randomVal(Set<ASurveyValue> values){
-		List<ASurveyValue> vals = new ArrayList<>(values);
+	private AGenstarValue randomVal(Set<AGenstarValue> values){
+		List<AGenstarValue> vals = new ArrayList<>(values);
 		return vals.get(random.nextInt(vals.size()));
 	}
 

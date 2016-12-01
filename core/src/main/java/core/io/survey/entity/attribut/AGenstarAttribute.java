@@ -6,27 +6,27 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IAttribute;
 import core.util.data.GSEnumDataType;
 
-public abstract class ASurveyAttribute implements IAttribute<ASurveyValue> {
+public abstract class AGenstarAttribute implements IAttribute<AGenstarValue> {
 
-	private ASurveyAttribute referentAttribute;
+	private AGenstarAttribute referentAttribute;
 	private String name;
 	private GSEnumDataType dataType;
 
-	private Set<ASurveyValue> values = new HashSet<>();
-	private ASurveyValue emptyValue;
+	private Set<AGenstarValue> values = new HashSet<>();
+	private AGenstarValue emptyValue;
 
-	public ASurveyAttribute(String name, GSEnumDataType dataType, ASurveyAttribute referentAttribute) {
+	public AGenstarAttribute(String name, GSEnumDataType dataType, AGenstarAttribute referentAttribute) {
 		this.name = name;
 		this.dataType = dataType;
 		// WARNING: Referent attribute could not be of type AggregatedAttribute (call exception ?)
 		this.referentAttribute = referentAttribute;
 	}
 
-	public ASurveyAttribute(String name, GSEnumDataType dataType) {
+	public AGenstarAttribute(String name, GSEnumDataType dataType) {
 		this.name = name;
 		this.dataType = dataType;
 		this.referentAttribute = this;
@@ -46,29 +46,29 @@ public abstract class ASurveyAttribute implements IAttribute<ASurveyValue> {
 	 * 
 	 * @return
 	 */
-	public ASurveyAttribute getReferentAttribute() {
+	public AGenstarAttribute getReferentAttribute() {
 		return referentAttribute;
 	}
 
 	@Override
-	public Set<ASurveyValue> getValues() {
+	public Set<AGenstarValue> getValues() {
 		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
-	public boolean setValues(Set<ASurveyValue> values) {
+	public boolean setValues(Set<AGenstarValue> values) {
 		if(this.values.isEmpty())
 			return this.values.addAll(values);
 		return false;
 	}
 
 	@Override
-	public ASurveyValue getEmptyValue() {
+	public AGenstarValue getEmptyValue() {
 		return emptyValue;
 	}
 
 	@Override
-	public void setEmptyValue(ASurveyValue emptyValue) {
+	public void setEmptyValue(AGenstarValue emptyValue) {
 		this.emptyValue = emptyValue;
 	}	
 
@@ -92,7 +92,7 @@ public abstract class ASurveyAttribute implements IAttribute<ASurveyValue> {
 	 * @param disVal
 	 * @return a set of values
 	 */
-	public Set<ASurveyValue> findMappedAttributeValues(ASurveyValue val) {
+	public Set<AGenstarValue> findMappedAttributeValues(AGenstarValue val) {
 		if(values.contains(val))
 			Stream.of(val).collect(Collectors.toSet());
 		return Stream.of(this.getEmptyValue()).collect(Collectors.toSet());
@@ -133,7 +133,7 @@ public abstract class ASurveyAttribute implements IAttribute<ASurveyValue> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		ASurveyAttribute other = (ASurveyAttribute) obj;
+		AGenstarAttribute other = (AGenstarAttribute) obj;
 		if (dataType != other.dataType)
 			return false;
 		if (name == null) {

@@ -8,36 +8,36 @@ import java.util.Optional;
 import com.vividsolutions.jts.geom.Point;
 
 import core.io.geo.entity.AGeoEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IEntity;
 
-public abstract class ASurveyEntity implements IEntity<ASurveyAttribute, ASurveyValue> {
+public abstract class AGenstarEntity implements IEntity<AGenstarAttribute, AGenstarValue> {
 
-	private Map<ASurveyAttribute, ASurveyValue> attributes;
+	private Map<AGenstarAttribute, AGenstarValue> attributes;
 	
-	public ASurveyEntity(Map<ASurveyAttribute, ASurveyValue> attributes) {
+	public AGenstarEntity(Map<AGenstarAttribute, AGenstarValue> attributes) {
 		this.attributes = attributes;
 	}
 
 	@Override
-	public Collection<ASurveyAttribute> getAttributes() {
+	public Collection<AGenstarAttribute> getAttributes() {
 		return attributes.keySet();
 	}
 	
 	@Override
-	public Collection<ASurveyValue> getValues() {
+	public Collection<AGenstarValue> getValues() {
 		return Collections.unmodifiableCollection(attributes.values());
 	}
 
 	@Override
-	public ASurveyValue getValueForAttribute(ASurveyAttribute attribute) {
+	public AGenstarValue getValueForAttribute(AGenstarAttribute attribute) {
 		return attributes.get(attribute);
 	}
 	
 	@Override
-	public ASurveyValue getValueForAttribute(String property){
-		Optional<ASurveyAttribute> opAtt = attributes.keySet()
+	public AGenstarValue getValueForAttribute(String property){
+		Optional<AGenstarAttribute> opAtt = attributes.keySet()
 				.stream().filter(att -> att.getAttributeName().equals(property)).findFirst();
 		if(opAtt.isPresent())
 			return attributes.get(opAtt.get());

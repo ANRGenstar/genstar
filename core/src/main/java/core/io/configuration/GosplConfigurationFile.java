@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import core.io.survey.GSSurveyFile;
-import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.metamodel.IAttribute;
 import core.metamodel.IValue;
 
@@ -31,12 +31,12 @@ public class GosplConfigurationFile {
 
 	private final List<GSSurveyFile> dataFileList = new ArrayList<>();
 
-	private final Set<ASurveyAttribute> attributeSet = new HashSet<>();
+	private final Set<AGenstarAttribute> attributeSet = new HashSet<>();
 
 	private final Map<String, IAttribute<? extends IValue>> keyAttribute = new HashMap<>();
 
 	public GosplConfigurationFile(List<GSSurveyFile> dataFiles, 
-			Set<ASurveyAttribute> attributes, Map<String, IAttribute<? extends IValue>> keyAttribute){
+			Set<AGenstarAttribute> attributes, Map<String, IAttribute<? extends IValue>> keyAttribute){
 		this.dataFileList.addAll(dataFiles);
 		this.attributeSet.addAll(attributes);
 		this.keyAttribute.putAll(keyAttribute);
@@ -46,7 +46,7 @@ public class GosplConfigurationFile {
 		return dataFileList;
 	}
 
-	public Set<ASurveyAttribute> getAttributes(){
+	public Set<AGenstarAttribute> getAttributes(){
 		return attributeSet;
 	}
 
@@ -61,7 +61,7 @@ public class GosplConfigurationFile {
 	 */
 	protected Object readResolve() throws ObjectStreamException {
 		List<GSSurveyFile> dataFiles = getDataFiles();
-		Set<ASurveyAttribute> attributes = getAttributes();
+		Set<AGenstarAttribute> attributes = getAttributes();
 		Map<String, IAttribute<? extends IValue>> keyAttribute = getKeyAttributes();
 		return new GosplConfigurationFile(dataFiles, attributes, keyAttribute);
 	}

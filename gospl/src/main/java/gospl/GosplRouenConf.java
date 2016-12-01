@@ -20,7 +20,7 @@ import core.io.configuration.GosplConfigurationFile;
 import core.io.configuration.GosplXmlSerializer;
 import core.io.survey.GSSurveyFile;
 import core.io.survey.GSSurveyType;
-import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.AttributeFactory;
 import core.io.survey.entity.attribut.GSEnumAttributeType;
 import core.util.data.GSEnumDataType;
@@ -58,7 +58,7 @@ public class GosplRouenConf {
 			
 			// Setup input files' configuration for individual aggregated data
 			List<GSSurveyFile> individualDataFiles = new ArrayList<>();
-			Set<ASurveyAttribute> indivAttributes = new HashSet<>();
+			Set<AGenstarAttribute> indivAttributes = new HashSet<>();
 			individualDataFiles.add(new GSSurveyFile(indiv1, GSSurveyType.ContingencyTable, 1, 1, ';'));
 			individualDataFiles.add(new GSSurveyFile(indiv2, GSSurveyType.ContingencyTable, 2, 1, ';'));
 			individualDataFiles.add(new GSSurveyFile(indiv3, GSSurveyType.ContingencyTable, 1, 1, ';'));
@@ -66,7 +66,7 @@ public class GosplRouenConf {
 			
 			// Setup input files' configuration for household aggregated data
 			List<GSSurveyFile> householdDataFiles = new ArrayList<>();
-			Set<ASurveyAttribute> householdAttributes = new HashSet<>();
+			Set<AGenstarAttribute> householdAttributes = new HashSet<>();
 			householdDataFiles.add(new GSSurveyFile(menage1, GSSurveyType.ContingencyTable, 1, 1, ';'));
 			householdDataFiles.add(new GSSurveyFile(menage2, GSSurveyType.ContingencyTable, 1, 1, ';'));
 			householdDataFiles.add(new GSSurveyFile(menage3, GSSurveyType.ContingencyTable, 2, 1, ';'));
@@ -74,7 +74,7 @@ public class GosplRouenConf {
 			
 			// Setup input files' configuration for sample data
 			List<GSSurveyFile> sampleDataFiles = new ArrayList<>();
-			Set<ASurveyAttribute> sampleAttributes = new HashSet<>();
+			Set<AGenstarAttribute> sampleAttributes = new HashSet<>();
 			sampleDataFiles.add(new GSSurveyFile(sample1,GSSurveyType.Sample, 1, 0));
 			
 			try {
@@ -84,7 +84,7 @@ public class GosplRouenConf {
 				// --------------------------
 				
 				// Instantiate a referent attribute
-				ASurveyAttribute referentAgeAttribute = attf.createAttribute("Age", GSEnumDataType.Integer, 
+				AGenstarAttribute referentAgeAttribute = attf.createAttribute("Age", GSEnumDataType.Integer, 
 						Arrays.asList("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans", "20 à 24 ans", 
 								"25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
 								"50 à 54 ans", "55 à 59 ans", "60 à 64 ans", "65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
@@ -293,7 +293,7 @@ public class GosplRouenConf {
 			// SERIALIZE CONFIGURATION FILES
 			// ------------------------------
 
-			Set<ASurveyAttribute> attList = Stream.concat(Stream.concat(indivAttributes.stream(), sampleAttributes.stream()), 
+			Set<AGenstarAttribute> attList = Stream.concat(Stream.concat(indivAttributes.stream(), sampleAttributes.stream()), 
 					householdAttributes.stream()).collect(Collectors.toSet());
 			List<GSSurveyFile> surveyFiles = Stream.concat(Stream.concat(individualDataFiles.stream(), sampleDataFiles.stream()), 
 					householdDataFiles.stream()).collect(Collectors.toList());

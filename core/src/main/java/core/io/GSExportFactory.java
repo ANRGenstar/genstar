@@ -19,9 +19,9 @@ import core.io.geo.ShapeFile;
 import core.io.geo.entity.GSFeature;
 import core.io.survey.IGSSurvey;
 import core.io.survey.SurveyFactory;
-import core.io.survey.entity.ASurveyEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
 
 /**
@@ -37,20 +37,20 @@ public class GSExportFactory {
 	// ----------------------------------------------------------------------- //
 
 	public static IGSSurvey createSurvey(File surveyFile, 
-			IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population) 
+			IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) 
 					throws IOException, InvalidFileTypeException{
 		SurveyFactory sf = new SurveyFactory();
 		final char csvSep = ';';
 		try {
 			int individual = 1;
 			final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
-			final Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
+			final Collection<AGenstarAttribute> attributes = population.getPopulationAttributes();
 			bw.write("Individual" + csvSep
 					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(csvSep)))
 					+ "\n");
-			for (final ASurveyEntity e : population) {
+			for (final AGenstarEntity e : population) {
 				bw.write(String.valueOf(individual++));
-				for (final ASurveyAttribute attribute : attributes)
+				for (final AGenstarAttribute attribute : attributes)
 					bw.write(csvSep + e.getValueForAttribute(attribute).getStringValue());
 				bw.write("\n");
 			}
@@ -66,7 +66,7 @@ public class GSExportFactory {
 	// -------------------------------------------------------------------- //
 	
 	public static ShapeFile createShapeFile(File shapefile, 
-			IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population, 
+			IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, 
 			CoordinateReferenceSystem crs) 
 			throws IOException, SchemaException {
 		return new GeofileFactory().createShapeFile(shapefile, population, crs);  

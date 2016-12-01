@@ -11,8 +11,8 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -38,7 +38,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 
 	protected Logger logger = LogManager.getLogger();
 	
-	private List<ACoordinate<ASurveyAttribute, ASurveyValue>> indexedKey;
+	private List<ACoordinate<AGenstarAttribute, AGenstarValue>> indexedKey;
 	private List<Double> initProba;
 	
 
@@ -142,7 +142,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<ASurveyAttribute, ASurveyValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<AGenstarAttribute, AGenstarValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	
@@ -153,7 +153,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 	 * @return A random value sampled from the underlying distribution.
 	 */
 	@Override
-	public ACoordinate<ASurveyAttribute, ASurveyValue> draw() {
+	public ACoordinate<AGenstarAttribute, AGenstarValue> draw() {
 		/* Generate a fair die roll to determine which column to inspect. */
 		int column =  GenstarRandom.getInstance().nextInt(probability.length);
 
@@ -166,14 +166,14 @@ public class GosplAliasSampler implements IDistributionSampler {
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<ASurveyAttribute> attributs = new ArrayList<>(indexedKey
+		List<AGenstarAttribute> attributs = new ArrayList<>(indexedKey
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
 		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
-		for(ACoordinate<ASurveyAttribute, ASurveyValue> coord : indexedKey){
+		for(ACoordinate<AGenstarAttribute, AGenstarValue> coord : indexedKey){
 			String line = "";
-			for(ASurveyAttribute att : attributs){
+			for(AGenstarAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
 						s += csvSeparator+coord.getMap().get(att);

@@ -1,23 +1,25 @@
 package spin.algo.generator;
 
-import gospl.metamodel.GosplPopulation;
-
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
-import spin.objects.SpinNetwork;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.IPopulation;
+import spin.objects.NetworkLink;
+import spin.objects.NetworkNode;
+import spin.objects.SpinNetwork;
+
 public class RandomNetworkGenerator implements INetworkGenerator 
 {
 	
-	public SpinNetwork generateNetwork(GosplPopulation population) {
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
 		return this.generateNetwork(population,0D);
 	}
 	
-	public SpinNetwork generateNetwork(GosplPopulation population, double proba){
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
 		

@@ -18,7 +18,7 @@ import core.io.configuration.GosplConfigurationFile;
 import core.io.configuration.GosplXmlSerializer;
 import core.io.survey.GSSurveyFile;
 import core.io.survey.GSSurveyType;
-import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.AttributeFactory;
 import core.io.survey.entity.attribut.GSEnumAttributeType;
 import core.util.data.GSEnumDataType;
@@ -55,7 +55,7 @@ public class GosplBangkokConf {
 			
 			// Setup input files' configuration for individual aggregated data
 			List<GSSurveyFile> individualDataFiles = new ArrayList<>();
-			Set<ASurveyAttribute> indivAttributes = new HashSet<>();
+			Set<AGenstarAttribute> indivAttributes = new HashSet<>();
 			individualDataFiles.add(new GSSurveyFile(indiv1, GSSurveyType.ContingencyTable, 1, 4, ';'));
 			individualDataFiles.add(new GSSurveyFile(indiv2, GSSurveyType.LocalFrequencyTable, 1, 4, ';'));
 			individualDataFiles.add(new GSSurveyFile(indiv3, GSSurveyType.LocalFrequencyTable, 1, 4, ';'));
@@ -64,7 +64,7 @@ public class GosplBangkokConf {
 			
 			// Setup input files' configuration for household aggregated data
 			List<GSSurveyFile> householdDataFiles = new ArrayList<>();
-			Set<ASurveyAttribute> householdAttributes = new HashSet<>();
+			Set<AGenstarAttribute> householdAttributes = new HashSet<>();
 			householdDataFiles.add(new GSSurveyFile(menage1, GSSurveyType.ContingencyTable, 1, 4, ';'));
 			householdDataFiles.add(new GSSurveyFile(menage2, GSSurveyType.LocalFrequencyTable, 1, 4, ';'));
 			
@@ -74,7 +74,7 @@ public class GosplBangkokConf {
 				// Setup "PAT" attribute: INDIVIDUAL & MENAGE
 				// -------------------------
 				
-				ASurveyAttribute khwaeng = attf.createAttribute("PAT", GSEnumDataType.String,
+				AGenstarAttribute khwaeng = attf.createAttribute("PAT", GSEnumDataType.String,
 						Arrays.asList("100101", "100102", "100103", "100104", "100105", "100106", "100107", "100108", "100109", "100110", "100111", "100112",
 								"100201", "100202", "100203", "100204", "100206", "100301", "100302", "100303", "100304", "100305", "100306", "100307", 
 								"100308", "100401", "100402", "100403", "100404", "100405", "100502", "100508", "100601", "100608", "100701", "100702",
@@ -100,7 +100,7 @@ public class GosplBangkokConf {
 				
 				// TODO: make 'khet' an aggregated attribute of 'khwaeng' 
 				
-				ASurveyAttribute khet = attf.createAttribute("PA", GSEnumDataType.String, 
+				AGenstarAttribute khet = attf.createAttribute("PA", GSEnumDataType.String, 
 						Arrays.asList("1001", "1002", "1003", "1004", "1005", "1006", "1007", "1008", "1009", "1010", "1011", "1012", "1013", "1014", "1015",
 								"1016", "1017", "1018", "1019", "1020", "1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029", "1030",
 								"1031", "1032", "1033", "1034", "1035", "1036", "1037", "1038", "1039", "1040", "1041", "1042", "1043", "1044", "1045",

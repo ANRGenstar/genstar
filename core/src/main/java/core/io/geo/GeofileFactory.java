@@ -58,9 +58,9 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import core.io.exception.InvalidFileTypeException;
 import core.io.geo.entity.GSFeature;
-import core.io.survey.entity.ASurveyEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
 import core.util.GSBasicStats;
 import core.util.data.GSEnumStats;
@@ -223,7 +223,7 @@ public class GeofileFactory {
 	 * @throws SchemaException
 	 */
 	public ShapeFile createShapeFile(File shapefile, 
-			IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population, 
+			IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, 
 			CoordinateReferenceSystem crs) throws IOException, SchemaException {
 		if(population.isEmpty()) 
 			throw new IllegalStateException("Population ("+Arrays.toString(population.toArray())+") in methode createShapeFile cannot be empty");
@@ -234,18 +234,16 @@ public class GeofileFactory {
 		params.put("create spatial index", Boolean.TRUE);
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
-<<<<<<< Updated upstream
-		Map<IEntity, Geometry> geoms = (Map<IEntity,Geometry>) population.stream().filter(g -> g != null && ((IEntity) g).getLocation() != null).collect(Collectors.toMap(e -> ((IEntity) e),e -> ((IEntity) e).getLocation()));
-=======
-		Map<ASurveyEntity, Geometry> geoms = population.stream()
-				.collect(Collectors.toMap(Function.identity(), ASurveyEntity::getLocation));
->>>>>>> Stashed changes
+
+		Map<AGenstarEntity, Geometry> geoms = population.stream()
+				.collect(Collectors.toMap(Function.identity(), AGenstarEntity::getLocation));
+
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		final String geomType = getGeometryType(geoms.values());
 
 		specs.append("geometry:" + geomType);
 		List<String> atts = new ArrayList<>();
-			for (final ASurveyAttribute at : population.getPopulationAttributes()) {
+			for (final AGenstarAttribute at : population.getPopulationAttributes()) {
 				atts.add(at.getAttributeName());
 				String name = at.getAttributeName().replaceAll("\"", "");
 				name = name.replaceAll("'", "");
@@ -262,13 +260,8 @@ public class GeofileFactory {
 		FeatureWriter fw = newDataStore.getFeatureWriter(Transaction.AUTO_COMMIT)) {
 
 			final List<Object> values = new ArrayList<>();
-<<<<<<< Updated upstream
-			for (final Object obj : population) {
-				IEntity entity = (IEntity) obj;
-				if (entity == null || entity.getLocation() == null) continue;
-=======
-			for (final ASurveyEntity entity : population) {
->>>>>>> Stashed changes
+
+			for (final AGenstarEntity entity : population) {
 				values.clear();
 				final SimpleFeature ff = (SimpleFeature) fw.next();
 				values.add(geoms.get(entity));

@@ -1,6 +1,7 @@
 package gospl.metamodel.configuration;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,7 +12,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import core.io.survey.attribut.ASurveyAttribute;
+import core.io.configuration.GosplConfigurationFile;
+import core.io.configuration.GosplXmlSerializer;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 
 public class TestGosplXmlSerializer {
 
@@ -48,7 +51,7 @@ public class TestGosplXmlSerializer {
 															Arrays.asList("CSP", "Age_2", "Age_3", "Couple", "Sexe", "Age"))
 															);
 		Set<String> foundAttributesNames = new HashSet<>();
-		for (ASurveyAttribute a : cf.getAttributes()) {
+		for (AGenstarAttribute a : cf.getAttributes()) {
 			foundAttributesNames.add(a.getAttributeName());
 		}
 		assertEquals(

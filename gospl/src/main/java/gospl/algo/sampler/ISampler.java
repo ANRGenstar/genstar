@@ -2,9 +2,6 @@ package gospl.algo.sampler;
 
 import java.util.List;
 
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
-import gospl.distribution.util.GosplBasicDistribution;
-
 /**
  * The global contract for sampler --
  * 

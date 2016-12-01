@@ -23,9 +23,9 @@ import core.io.geo.GeoGSFileType;
 import core.io.geo.IGSGeofile;
 import core.io.geo.RasterFile;
 import core.io.geo.ShapeFile;
-import core.io.survey.entity.ASurveyEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
 import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
@@ -33,6 +33,7 @@ import gospl.GosplSPTemplate;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
 import gospl.algo.sampler.GosplBasicSampler;
+import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalControlTotalException;
@@ -81,6 +82,7 @@ public class TestLocalisation {
 		String stringPathAdditionaryDataToCensusFile = "sample/Rouen/Rouen_insee_indiv/Rouen_iris.csv";
 				
 		//path to the result files
+		@SuppressWarnings("unused")
 		String stringPathToRegressionGrid = "sample/Rouen/regression_grid.tif";
 		String stringPathToPopulationShapefile = "sample/Rouen/population.shp";
 		
@@ -100,7 +102,7 @@ public class TestLocalisation {
 		// GENERATE THE POPULATION (GOSPL)
 		/////////////////////
 		
-		IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population = generatePopulation(targetPopulation,stringPathToXMLConfFile);
+		IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population = generatePopulation(targetPopulation,stringPathToXMLConfFile);
 				
 		/////////////////////
 		// IMPORT DATA FILES
@@ -205,9 +207,10 @@ public class TestLocalisation {
 		GSBasicStats<Double> bs = new GSBasicStats<>(outList, Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
 		gspu.sysoStempMessage("\nStatistics on output:\n"+bs.getStatReport());
 		
+		IGSGeofile outputFile = null;
 		try {
 			ReferencedEnvelope env = new ReferencedEnvelope( endogeneousVarFile.get(0).getEnvelope());
-			GSExportFactory.createGeotiffFile(new File("sample/Rouen/result.tif"), pixelOutput, env,outputFormat.getCoordRefSystem());
+			outputFile = GSExportFactory.createGeotiffFile(new File("sample/Rouen/result.tif"), pixelOutput, env,outputFormat.getCoordRefSystem());
 		} catch (IllegalArgumentException e1) {
 			e1.printStackTrace();
 		} catch (IOException e1) {
@@ -243,13 +246,13 @@ public class TestLocalisation {
 		}
 	}
 	
-	private static GosplPopulation generatePopulation(int targetPopulation, String xmlFilePath ) {
+	private static IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> generatePopulation(int targetPopulation, String xmlFilePath ) {
 		// INPUT ARGS
 		
 		Path confFile = Paths.get(xmlFilePath);
 		
 		// THE POPULATION TO BE GENERATED
-		GosplPopulation population = null;
+		IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population = null;
 
 		// INSTANCIATE FACTORY
 		GosplDistributionFactory df = null; 
@@ -281,7 +284,7 @@ public class TestLocalisation {
 		// Choice is made here to use distribution based generator
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> distribution = null;
+		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDistributions();
 		} catch (IllegalDistributionCreation e1) {
@@ -291,8 +294,8 @@ public class TestLocalisation {
 		}
 		
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		IDistributionInferenceAlgo distributionInfAlgo = new IndependantHypothesisAlgo();
-		ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> sampler = null;
+		IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
+		ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e1) {

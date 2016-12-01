@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.geotools.xml.schema.AttributeValue;
 
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.io.survey.entity.attribut.value.RangeValue;
 import core.io.survey.entity.attribut.value.UniqueValue;
 import core.metamodel.IAttribute;
@@ -36,7 +36,7 @@ public class AttributeFactory {
 	}
 
 	/**
-	 * Main method to instantiate {@link ASurveyAttribute}. Concrete type depend on {@link GSAttDataType} passed in argument.
+	 * Main method to instantiate {@link AGenstarAttribute}. Concrete type depend on {@link GSAttDataType} passed in argument.
 	 * <p> <ul>
 	 * <li>If {@code valueType.equals({@link GSEnumAttributeType#range})} then return a {@link RangeAttribute}
 	 * <li>If {@code valueType.equals({@link GSEnumAttributeType#unique})} then return a {@link UniqueAttribute}
@@ -57,13 +57,13 @@ public class AttributeFactory {
 	 * @throws GSException
 	 * @throws GenstarIllegalRangedData
 	 */
-	public ASurveyAttribute createAttribute(String name, GSEnumDataType dataType, List<String> values,
+	public AGenstarAttribute createAttribute(String name, GSEnumDataType dataType, List<String> values,
 			GSEnumAttributeType attributeType) throws GSIllegalRangedData {
 		return createAttribute(name, dataType, values, attributeType, null, Collections.emptyMap());
 	}
 
 	/**
-	 * Method that permit to instantiate specific case of {@link ASurveyAttribute}: that is {@link MappedAttribute}
+	 * Method that permit to instantiate specific case of {@link AGenstarAttribute}: that is {@link MappedAttribute}
 	 * <p>
 	 * TODO: explain how
 	 * 
@@ -80,8 +80,8 @@ public class AttributeFactory {
 	 * @throws GSIllegalRangedData 
 	 * @throws GenstarIllegalRangedData
 	 */
-	public ASurveyAttribute createAttribute(String name, GSEnumDataType dataType, List<String> values,
-			GSEnumAttributeType attributeType, ASurveyAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) 
+	public AGenstarAttribute createAttribute(String name, GSEnumDataType dataType, List<String> values,
+			GSEnumAttributeType attributeType, AGenstarAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) 
 					throws GSIllegalRangedData {
 		return createAttribute(name, dataType, values, values, attributeType, referentAttribute, mapper);
 	}
@@ -97,7 +97,7 @@ public class AttributeFactory {
 	 * @throws GSException
 	 * @throws GSIllegalRangedData
 	 */
-	public ASurveyAttribute createAttribute(String name, GSEnumDataType dataType, List<String> inputValues, 
+	public AGenstarAttribute createAttribute(String name, GSEnumDataType dataType, List<String> inputValues, 
 			List<String> modelValues, GSEnumAttributeType attributeType) throws GSIllegalRangedData {
 		return createAttribute(name, dataType, inputValues, modelValues, attributeType, null, Collections.emptyMap());
 	}
@@ -115,9 +115,9 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	public ASurveyAttribute createAttribute(String name, GSEnumDataType dataType, List<String> inputValues, List<String> modelValues,
-			GSEnumAttributeType attributeType, ASurveyAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSIllegalRangedData {
-		ASurveyAttribute att = null;
+	public AGenstarAttribute createAttribute(String name, GSEnumDataType dataType, List<String> inputValues, List<String> modelValues,
+			GSEnumAttributeType attributeType, AGenstarAttribute referentAttribute, Map<Set<String>, Set<String>> mapper) throws GSIllegalRangedData {
+		AGenstarAttribute att = null;
 		switch (attributeType) {
 		case unique:
 			if(referentAttribute == null)
@@ -156,13 +156,13 @@ public class AttributeFactory {
 	 * @param {@link GSAttDataType} valueType
 	 * @param {@link GSEnumDataType} dataType
 	 * @param {@code List<String>} values
-	 * @param {@link ASurveyAttribute} attribute
+	 * @param {@link AGenstarAttribute} attribute
 	 * @return a value with {@link AttributeValue} type
 	 * @throws GSException
 	 * @throws GenstarIllegalRangedData
 	 */
 	public IValue createValue(GSEnumAttributeType valueType, GSEnumDataType dataType, List<String> inputValues, 
-			List<String> modelValues, ASurveyAttribute attribute) throws GSIllegalRangedData {
+			List<String> modelValues, AGenstarAttribute attribute) throws GSIllegalRangedData {
 		if(inputValues.isEmpty())
 			return getEmptyValue(valueType, dataType, attribute);
 		return getValues(valueType, dataType, inputValues, modelValues, attribute).iterator().next();
@@ -170,12 +170,12 @@ public class AttributeFactory {
 
 	// ----------------------------- Back office ----------------------------- //
 
-	private Set<ASurveyValue> getValues(GSEnumAttributeType attributeType, GSEnumDataType dataType, List<String> inputValues, 
-			List<String> modelValues, ASurveyAttribute attribute) throws GSIllegalRangedData{
+	private Set<AGenstarValue> getValues(GSEnumAttributeType attributeType, GSEnumDataType dataType, List<String> inputValues, 
+			List<String> modelValues, AGenstarAttribute attribute) throws GSIllegalRangedData{
 		if(inputValues.size() != modelValues.size())
 			throw new IllegalArgumentException("Attribute's value should not have divergent "
 					+ "input ("+inputValues.size()+") and model ("+modelValues.size()+") value");
-		Set<ASurveyValue> vals = new HashSet<>();
+		Set<AGenstarValue> vals = new HashSet<>();
 		switch (attributeType) {
 		case record:
 			vals.add(new UniqueValue(modelValues.get(0), dataType, attribute));
@@ -228,7 +228,7 @@ public class AttributeFactory {
 		}
 	}
 
-	private ASurveyValue getEmptyValue(GSEnumAttributeType attributeType, GSEnumDataType dataType, ASurveyAttribute attribute) {
+	private AGenstarValue getEmptyValue(GSEnumAttributeType attributeType, GSEnumDataType dataType, AGenstarAttribute attribute) {
 		switch (attributeType) {
 		case unique:
 			return new UniqueValue(dataType, attribute);

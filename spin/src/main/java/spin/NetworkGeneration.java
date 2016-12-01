@@ -1,17 +1,14 @@
 package spin;
 
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.IPopulation;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UniformRandomGenerator;
 import spin.algo.factory.NetworkFactory;
 import spin.algo.generator.NetworkEnumGenerator;
 import spin.objects.SpinNetwork;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
-import core.io.survey.entity.ASurveyEntity;
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
-import core.metamodel.IPopulation;
-import core.metamodel.IValue;
 
 
 /** Classe de main pour la génération de réseau sur une population
@@ -30,7 +27,7 @@ public class NetworkGeneration {
 //		// 1 instancier la factory
 //		// 2 prendre une population en param
 		ISyntheticGosplPopGenerator populationGenerator = new UniformRandomGenerator(4,2);
-		IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> population =
+		IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population =
 				populationGenerator.generate(nbNode);
 //		
 //		// 3 la factory choisit un générator grace a une unum

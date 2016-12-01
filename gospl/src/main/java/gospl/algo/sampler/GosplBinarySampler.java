@@ -9,8 +9,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -34,7 +34,7 @@ import gospl.distribution.util.GosplBasicDistribution;
  */
 public class GosplBinarySampler implements IDistributionSampler {
 		
-	private List<ACoordinate<ASurveyAttribute, ASurveyValue>> indexedKey;
+	private List<ACoordinate<AGenstarAttribute, AGenstarValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 	
 	private final double EPSILON = Math.pow(10, -6);
@@ -51,7 +51,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
 		int count = 1;
-		for(Entry<ACoordinate<ASurveyAttribute, ASurveyValue>, Double> entry : distribution.entrySet()){
+		for(Entry<ACoordinate<AGenstarAttribute, AGenstarValue>, Double> entry : distribution.entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
@@ -70,7 +70,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 	// -------------------- main contract -------------------- //
 		
 	@Override
-	public ACoordinate<ASurveyAttribute, ASurveyValue> draw(){
+	public ACoordinate<AGenstarAttribute, AGenstarValue> draw(){
 		double rand = GenstarRandom.getInstance().nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
@@ -100,7 +100,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<ASurveyAttribute, ASurveyValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<AGenstarAttribute, AGenstarValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 		
@@ -109,15 +109,15 @@ public class GosplBinarySampler implements IDistributionSampler {
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<ASurveyAttribute> attributs = new ArrayList<>(indexedKey
+		List<AGenstarAttribute> attributs = new ArrayList<>(indexedKey
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
 		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
 		double formerProba = 0d;
-		for(ACoordinate<ASurveyAttribute, ASurveyValue> coord : indexedKey){
+		for(ACoordinate<AGenstarAttribute, AGenstarValue> coord : indexedKey){
 			String line = "";
-			for(ASurveyAttribute att : attributs){
+			for(AGenstarAttribute att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
 						line += coord.getMap().get(att).getStringValue();

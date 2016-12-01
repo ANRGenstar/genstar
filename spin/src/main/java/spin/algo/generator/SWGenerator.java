@@ -1,11 +1,14 @@
 package spin.algo.generator;
 
-import java.util.HashSet;
-import java.util.Random;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
-import gospl.metamodel.GosplPopulation;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.IPopulation;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
@@ -14,11 +17,11 @@ public class SWGenerator implements INetworkGenerator
 {
 	
 	@Override
-	public SpinNetwork generateNetwork(GosplPopulation population) {
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
 		return this.generateNetwork(population,4,0.1D);
 	}
 	
-	public SpinNetwork generateNetwork(GosplPopulation population, int k, double beta){
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, int k, double beta){
 		//int k connectivity of the network
 		//double beta noise introduced on the regular network
 		// crée un réseau régulier 

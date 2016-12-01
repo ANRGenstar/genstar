@@ -8,10 +8,12 @@ import java.io.IOException;
 
 import org.junit.Test;
 
+import core.io.configuration.GosplConfigurationFile;
+import core.io.configuration.GosplXmlSerializer;
 import core.io.exception.InvalidFileTypeException;
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.AttributeFactory;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.AttributeFactory;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.GSPerformanceUtil;
 import gospl.GosplSPTemplate;
 import gospl.algo.IDistributionInferenceAlgo;
@@ -23,10 +25,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.metamodel.GosplPopulation;
-import gospl.metamodel.configuration.GosplConfigurationFile;
-import gospl.metamodel.configuration.GosplXmlSerializer;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<ASurveyAttribute, AValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -129,7 +129,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// Choice is made here to use distribution based generator
 
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<ASurveyAttribute, AValue, Double> distribution = null;
+		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -140,7 +140,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final IDistributionInferenceAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<ASurveyAttribute,AValue>> sampler = null;
+		ISampler<ACoordinate<AGenstarAttribute,AGenstarValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(
 					distribution, 

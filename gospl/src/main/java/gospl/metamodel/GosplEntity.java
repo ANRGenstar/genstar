@@ -5,16 +5,16 @@ import java.util.Map;
 import com.vividsolutions.jts.geom.Point;
 
 import core.io.geo.entity.AGeoEntity;
-import core.io.survey.entity.ASurveyEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 
-public class GosplEntity extends ASurveyEntity {
+public class GosplEntity extends AGenstarEntity {
 
 	private Point location = null;
 	private AGeoEntity nest = null;
 
-	public GosplEntity(Map<ASurveyAttribute, ASurveyValue> attributes){
+	public GosplEntity(Map<AGenstarAttribute, AGenstarValue> attributes){
 		super(attributes);
 	}
 

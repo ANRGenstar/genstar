@@ -5,9 +5,9 @@ import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import core.io.survey.entity.ASurveyEntity;
-import core.io.survey.entity.attribut.ASurveyAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
 
 public class UniformRandomGeneratorTest {
@@ -25,7 +25,7 @@ public class UniformRandomGeneratorTest {
 
 	@Test
 	public void test() {
-		IPopulation<ASurveyEntity, ASurveyAttribute, ASurveyValue> pop = urg.generate(popSize);
+		IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> pop = urg.generate(popSize);
 		assertEquals(popSize, pop.size());
 	}
 

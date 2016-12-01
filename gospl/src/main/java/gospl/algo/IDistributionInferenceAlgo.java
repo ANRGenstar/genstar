@@ -1,8 +1,8 @@
 package gospl.algo;
 
-import core.io.survey.entity.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.MappedAttribute;
-import core.io.survey.entity.attribut.value.ASurveyValue;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IValue;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -31,8 +31,8 @@ public interface IDistributionInferenceAlgo<SamplerType extends ISampler<ACoordi
 	 * @throws IllegalDistributionCreation
 	 * @throws GosplSamplerException
 	 */
-	public ISampler<ACoordinate<ASurveyAttribute, ASurveyValue>> inferDistributionSampler(
-			INDimensionalMatrix<ASurveyAttribute, ASurveyValue, Double> matrix, 
+	public ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> inferDistributionSampler(
+			INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> matrix, 
 			SamplerType sampler) 
 			throws IllegalDistributionCreation;
 	
