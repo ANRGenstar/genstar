@@ -1,11 +1,10 @@
-package gospl.metamodel.configuration;
+package core.io.configuration;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,25 +13,27 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.extended.NamedMapConverter;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import core.io.survey.attribut.MappedAttribute;
-import core.io.survey.attribut.RangeAttribute;
-import core.io.survey.attribut.RecordAttribute;
-import core.io.survey.attribut.UniqueAttribute;
-import core.io.survey.attribut.value.RangeValue;
-import core.io.survey.attribut.value.UniqueValue;
+import core.io.survey.GSSurveyFile;
+import core.io.survey.GSSurveyType;
+import core.io.survey.entity.attribut.MappedAttribute;
+import core.io.survey.entity.attribut.RangeAttribute;
+import core.io.survey.entity.attribut.RecordAttribute;
+import core.io.survey.entity.attribut.UniqueAttribute;
+import core.io.survey.entity.attribut.value.RangeValue;
+import core.io.survey.entity.attribut.value.UniqueValue;
 import core.metamodel.IAttribute;
-import gospl.metamodel.GSSurveyFile;
-import gospl.metamodel.GSSurveyType;
 
 /**
- * TODO: move to a parametric and generic serializer
+ * TODO: javadoc
+ * 
+ * TODO: test relative file path
  * 
  * @author kevinchapuis
  *
  */
 public class GosplXmlSerializer {
 
-private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
+	private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 	
 	private static final String GS_METADATA_FILE_ALIAS = "SurveyMetaDataType";		
 	private static final String GS_FILE_ALIAS = "GosplDataFile";
@@ -92,8 +93,7 @@ private static final String GS_CONFIG_ALIAS = "GosplConfiguration";
 		Files.write(Paths.get(mkdir+File.separator+xmlName+".xml"), w.toString().getBytes());
 	}
 	
-	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException {
-		
+	public GosplConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException{
 		if(!valideXmlFile.exists())
 			throw new FileNotFoundException(valideXmlFile.toString());
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))

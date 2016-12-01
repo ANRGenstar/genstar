@@ -10,15 +10,16 @@ import java.util.stream.Collectors;
 
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
 
-public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribute, AValue> {
+public class GosplPopulation implements IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> {
 
 	CoordinateReferenceSystem crs = null;
 	
-	private final Collection<GosplEntity> population;
+	private final Collection<AGenstarEntity> population;
 	
 	/**
 	 * Default inner type collection is {@link Set}
@@ -36,7 +37,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	 * 
 	 * @param population
 	 */
-	public GosplPopulation(Collection<GosplEntity> population){
+	public GosplPopulation(Collection<AGenstarEntity> population){
 		if(!population.isEmpty())
 			this.population = new HashSet<>();
 		else
@@ -59,7 +60,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	}
 
 	@Override
-	public Iterator<GosplEntity> iterator() {
+	public Iterator<AGenstarEntity> iterator() {
 		return population.iterator();
 	}
 
@@ -74,7 +75,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	}
 
 	@Override
-	public boolean add(GosplEntity e) {
+	public boolean add(AGenstarEntity e) {
 		return population.add(e);
 	}
 
@@ -89,7 +90,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends GosplEntity> c) {
+	public boolean addAll(Collection<? extends AGenstarEntity> c) {
 		return population.addAll(c);
 	}
 
@@ -110,7 +111,7 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
-	public Set<ASurveyAttribute> getPopulationAttributes(){
+	public Set<AGenstarAttribute> getPopulationAttributes(){
 		return population.parallelStream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
 	
@@ -118,17 +119,17 @@ public class GosplPopulation implements IPopulation<GosplEntity, ASurveyAttribut
 	
 	@Override
 	public String csvReport(CharSequence csvSep) {
-		Set<ASurveyAttribute> attributes = this.getPopulationAttributes();
+		Set<AGenstarAttribute> attributes = this.getPopulationAttributes();
 		String report = attributes.stream().map(att -> att.getAttributeName() + csvSep + "contingent" + csvSep + "pourcentage").collect(Collectors.joining(csvSep))+"\n";
 		List<String> lines = new ArrayList<>();
 		for(int i = 0; i < attributes.stream().mapToInt(att -> att.getValues().size()).max().getAsInt()+1; i++)
 			lines.add("");
 		System.out.println("Headers done !");
-		for(ASurveyAttribute attribute : attributes){
+		for(AGenstarAttribute attribute : attributes){
 			int lineNumber = 0;
-			Set<AValue> vals = new HashSet<>(attribute.getValues());
+			Set<AGenstarValue> vals = new HashSet<>(attribute.getValues());
 			vals.add(attribute.getEmptyValue());
-			for(AValue value : vals){
+			for(AGenstarValue value : vals){
 				long valCount = this.population.parallelStream()
 						.filter(e -> e.getValueForAttribute(attribute) != null && e.getValueForAttribute(attribute).equals(value)).count();
 				double valProp =  Math.round(Math.round(((valCount * 1d / this.population.size()) * 10000))) / 100d;

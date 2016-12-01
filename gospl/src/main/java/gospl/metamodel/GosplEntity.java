@@ -1,40 +1,21 @@
 package gospl.metamodel;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 import com.vividsolutions.jts.geom.Point;
 
 import core.io.geo.entity.AGeoEntity;
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
-import core.metamodel.IEntity;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 
-public class GosplEntity implements IEntity<ASurveyAttribute, AValue> {
+public class GosplEntity extends AGenstarEntity {
 
 	private Point location = null;
 	private AGeoEntity nest = null;
-	private Map<ASurveyAttribute, AValue> attributes;
 
-	public GosplEntity(Map<ASurveyAttribute, AValue> attributes){
-		this.attributes = attributes;
-	}
-	
-	@Override
-	public Collection<ASurveyAttribute> getAttributes() {
-		return attributes.keySet();
-	}
-
-	@Override
-	public AValue getValueForAttribute(ASurveyAttribute attribute) {
-		return attributes.get(attribute);
-	}
-
-	@Override
-	public Collection<AValue> getValues() {
-		return Collections.unmodifiableCollection(attributes.values());
+	public GosplEntity(Map<AGenstarAttribute, AGenstarValue> attributes){
+		super(attributes);
 	}
 
 	@Override
@@ -56,14 +37,7 @@ public class GosplEntity implements IEntity<ASurveyAttribute, AValue> {
 	public void setNest(AGeoEntity entity) {
 		this.nest = entity;
 	}
-	
-	public AValue getValueForAttribute(String property){
-		Optional<ASurveyAttribute> opAtt = attributes.keySet()
-				.stream().filter(att -> att.getAttributeName().equals(property)).findFirst();
-		if(opAtt.isPresent())
-			return attributes.get(opAtt.get());
-		throw new NullPointerException("Attribute "+property+" does not exist in "+this.getClass().getSimpleName());
-	}
+
 
 	
 

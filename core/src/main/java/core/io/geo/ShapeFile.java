@@ -26,11 +26,13 @@ import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
 import org.geotools.factory.CommonFactoryFinder;
+import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
+import org.opengis.filter.FilterFactory2;
 import org.opengis.geometry.Envelope;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
@@ -128,9 +130,8 @@ public class ShapeFile implements IGSGeofile {
 	
 	@Override
 	public Iterator<GSFeature> getGeoAttributeIteratorWithin(Geometry geom) {
-		Filter filter = CommonFactoryFinder.getFilterFactory2()
-				.within(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME, 
-						(org.opengis.geometry.Geometry) geom);
+		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
+		Filter filter = ff.within(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
 	}
 	
@@ -144,9 +145,8 @@ public class ShapeFile implements IGSGeofile {
 	
 	@Override
 	public Iterator<GSFeature> getGeoAttributeIteratorIntersect(Geometry geom) {
-		Filter filter = CommonFactoryFinder.getFilterFactory2()
-				.intersects(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME, 
-						(org.opengis.geometry.Geometry) geom);
+		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
+		Filter filter = ff.intersects(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
 	}
 	

@@ -14,18 +14,11 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.crypto.RuntimeCryptoException;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
-import core.util.random.GenstarRandom;
-import core.util.random.GenstarRandomUtils;
-import core.util.random.roulette.RouletteWheelSelectionFactory;
-import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
-import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
 /**
@@ -38,8 +31,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
 	private GosplBasicDistribution gosplBasicDistribution = null;
-	private Collection<List<ASurveyAttribute>> explorationOrder = null;
-	private ASegmentedNDimensionalMatrix<Double> segmentedMatrix;
+	private Collection<List<AGenstarAttribute>> explorationOrder = null;
 	
 	public GosplHierarchicalSampler() {
 		// TODO Auto-generated constructor stub
@@ -54,32 +46,23 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	@Override
 	public void setDistribution(
 			GosplBasicDistribution gosplBasicDistribution,
-			Collection<List<ASurveyAttribute>> explorationOrder,
-			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
+			Collection<List<AGenstarAttribute>> explorationOrder
 			) {
 		this.gosplBasicDistribution = gosplBasicDistribution;
 		this.explorationOrder = explorationOrder;
-		this.segmentedMatrix = segmentedMatrix;
 		
 	}
 
-	private Collection<AValue> getListOfValues(Set<AValue> alreadyDrawn, AValue tested) {
-		Collection<AValue> res = new LinkedList<>(alreadyDrawn);
-		res.add(tested);
-		return res;
-	}
 	
 	// -------------------- main contract -------------------- //
 
 	@Override
-	public ACoordinate<ASurveyAttribute, AValue> draw() {
+	public ACoordinate<AGenstarAttribute, AGenstarValue> draw() {
 
 		Map<ASurveyAttribute,AValue> att2value = new HashMap<>();
 		
-		//GosplCoordinate coord = new GosplCoordinate(coordinate);
-		
 		logger.info("starting hierarchical sampling...");
-		for (List<ASurveyAttribute> subgraph : explorationOrder) {
+		for (List<AGenstarAttribute> subgraph : explorationOrder) {
 			logger.info("starting hierarchical sampling for the first subgraph {}", subgraph);
 			for (ASurveyAttribute att: subgraph) {
 			
@@ -174,7 +157,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<ASurveyAttribute, AValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<AGenstarAttribute, AGenstarValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 

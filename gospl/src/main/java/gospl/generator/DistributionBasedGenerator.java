@@ -2,8 +2,8 @@ package gospl.generator;
 
 import java.util.stream.Collectors;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.metamodel.GosplEntity;
@@ -19,9 +19,9 @@ import gospl.metamodel.GosplPopulation;
  */
 public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	
-	private ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler;
+	private ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> sampler;
 	
-	public DistributionBasedGenerator(ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler) {
+	public DistributionBasedGenerator(ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> sampler) {
 		this.sampler = sampler;
 	}
 	

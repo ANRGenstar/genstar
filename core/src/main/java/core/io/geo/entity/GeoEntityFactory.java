@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
@@ -34,7 +35,7 @@ public class GeoEntityFactory {
 		Set<AGeoValue> values = new HashSet<>();
 		for(Property property : feature.getProperties()){
 			String name = property.getName().getLocalPart();
-			if ("the_geom".equals(name) || ((atts != null) && !atts.contains(name))) continue;
+			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) || ((atts != null) && !atts.contains(name))) continue;
 			Optional<AGeoAttribute> opAtt = attributes
 					.stream().filter(att -> att.getAttributeName().equals(name))
 					.findFirst();

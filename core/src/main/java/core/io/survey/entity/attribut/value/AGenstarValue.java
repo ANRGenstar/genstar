@@ -1,25 +1,25 @@
-package core.io.survey.attribut.value;
+package core.io.survey.entity.attribut.value;
 
-import core.io.survey.attribut.ASurveyAttribute;
+import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.metamodel.IValue;
 import core.util.data.GSEnumDataType;
 
-public abstract class AValue implements IValue {
+public abstract class AGenstarValue implements IValue {
 
 	private GSEnumDataType dataType;
-	private ASurveyAttribute attribute;
+	private AGenstarAttribute attribute;
 	
 	private String inputStringValue;
 	private String mappedStringValue;
 	
-	public AValue(String inputStringValue, String mappedStringValue, GSEnumDataType dataType, ASurveyAttribute attribute){
+	public AGenstarValue(String inputStringValue, String mappedStringValue, GSEnumDataType dataType, AGenstarAttribute attribute){
 		this.inputStringValue = inputStringValue;
 		this.mappedStringValue = mappedStringValue;
 		this.dataType = dataType;
 		this.attribute = attribute;
 	}
 	
-	public AValue(String inputStringValue, GSEnumDataType dataType, ASurveyAttribute attribute) {
+	public AGenstarValue(String inputStringValue, GSEnumDataType dataType, AGenstarAttribute attribute) {
 		this(inputStringValue, inputStringValue, dataType, attribute);
 	}
 	
@@ -34,7 +34,7 @@ public abstract class AValue implements IValue {
 	}
 
 	@Override
-	public ASurveyAttribute getAttribute() {
+	public AGenstarAttribute getAttribute() {
 		return attribute;
 	}
 
@@ -72,7 +72,7 @@ public abstract class AValue implements IValue {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		AValue other = (AValue) obj;
+		AGenstarValue other = (AGenstarValue) obj;
 		if (attribute == null) {
 			if (other.attribute != null)
 				return false;

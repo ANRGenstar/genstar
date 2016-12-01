@@ -12,12 +12,12 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.GSSurveyType;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.metamodel.GSSurveyType;
 
 /**
  * TODO: javadoc
@@ -26,26 +26,26 @@ import gospl.metamodel.GSSurveyType;
  *
  * @param <T>
  */
-public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<ASurveyAttribute, AValue, T> {
+public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<AGenstarAttribute, AGenstarValue, T> {
 
 	private GSSurveyType dataType; 
 
-	protected final Map<ASurveyAttribute, Set<AValue>> dimensions;
-	protected final Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> matrix;
+	private final Map<AGenstarAttribute, Set<AGenstarValue>> dimensions;
+	protected final Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<T>> matrix;
 
-	private ACoordinate<ASurveyAttribute, AValue> emptyCoordinate = null;
+	private ACoordinate<AGenstarAttribute, AGenstarValue> emptyCoordinate = null;
 
 	protected String label = null;
 	
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
-	public AFullNDimensionalMatrix(Map<ASurveyAttribute, Set<AValue>> dimensionAspectMap, GSSurveyType metaDataType) {
+	public AFullNDimensionalMatrix(Map<AGenstarAttribute, Set<AGenstarValue>> dimensionAspectMap, GSSurveyType metaDataType) {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
 		this.matrix = new HashMap<>(dimensions.entrySet().stream()
 				.mapToInt(d -> d.getValue().size())
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
-		this.emptyCoordinate = new GosplCoordinate(Collections.<AValue>emptySet());
+		this.emptyCoordinate = new GosplCoordinate(Collections.<AGenstarValue>emptySet());
 	}
 		
 	// ------------------------- META DATA ------------------------ //
@@ -92,12 +92,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<ASurveyAttribute> getDimensions(){
+	public Set<AGenstarAttribute> getDimensions(){
 		return Collections.unmodifiableSet(dimensions.keySet());
 	}
 
 	@Override
-	public ASurveyAttribute getDimension(AValue aspect) {
+	public AGenstarAttribute getDimension(AGenstarValue aspect) {
 		if(!dimensions.values().stream().flatMap(values -> values.stream()).collect(Collectors.toSet()).contains(aspect))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
 		return dimensions.entrySet()
@@ -106,24 +106,24 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<AValue> getAspects(){
+	public Set<AGenstarValue> getAspects(){
 		return Collections.unmodifiableSet(dimensions.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
 	}
 
 	@Override
-	public Set<AValue> getAspects(ASurveyAttribute dimension) {
+	public Set<AGenstarValue> getAspects(AGenstarAttribute dimension) {
 		if(!dimensions.containsKey(dimension))
 			throw new NullPointerException("dimension "+dimension+" is not present in the joint distribution");
 		return Collections.unmodifiableSet(dimensions.get(dimension));
 	}
 
 	@Override
-	public Map<ACoordinate<ASurveyAttribute, AValue>, AControl<T>> getMatrix(){
+	public Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<T>> getMatrix(){
 		return Collections.unmodifiableMap(matrix);
 	}
 	
 	@Override
-	public ACoordinate<ASurveyAttribute, AValue> getEmptyCoordinate(){
+	public ACoordinate<AGenstarAttribute, AGenstarValue> getEmptyCoordinate(){
 		return emptyCoordinate;
 	}
 
@@ -132,14 +132,14 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////
 
 	@Override
-	public AControl<T> getVal(ACoordinate<ASurveyAttribute, AValue> coordinate) {
+	public AControl<T> getVal(ACoordinate<AGenstarAttribute, AGenstarValue> coordinate) {
 		if(!matrix.containsKey(coordinate))
 			throw new NullPointerException("Coordinate "+coordinate+" is absent from this control table ("+this.hashCode()+")");
 		return this.matrix.get(coordinate);
 	}
 
 	@Override
-	public AControl<T> getVal(AValue aspect) {
+	public AControl<T> getVal(AGenstarValue aspect) {
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
 			throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
 		AControl<T> result = getNulVal();
@@ -151,17 +151,17 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public AControl<T> getVal(Collection<AValue> aspects) {
+	public AControl<T> getVal(Collection<AGenstarValue> aspects) {
 		if(aspects.stream().allMatch(a -> !matrix.keySet().stream().anyMatch(coord -> coord.contains(a))))
 			throw new NullPointerException("Aspect "+aspects+" is absent from this control table ("+this.getClass().getSimpleName()+" - "+this.hashCode()+")");
 
-		Map<ASurveyAttribute, Set<AValue>> attAsp = new HashMap<>();
-		for(AValue val : aspects){
-			ASurveyAttribute att = val.getAttribute();
+		Map<AGenstarAttribute, Set<AGenstarValue>> attAsp = new HashMap<>();
+		for(AGenstarValue val : aspects){
+			AGenstarAttribute att = val.getAttribute();
 			if(attAsp.containsKey(att))
 				attAsp.get(att).add(val);
 			else {
-				Set<AValue> valSet = new HashSet<>();
+				Set<AGenstarValue> valSet = new HashSet<>();
 				valSet.add(val);
 				attAsp.put(att, valSet);
 			}
@@ -191,10 +191,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////////////
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<ASurveyAttribute, AValue> coordinate) {
-		List<ASurveyAttribute> dimensionsAspects = new ArrayList<>();
-		for(AValue aspect : coordinate.values()){
-			for(ASurveyAttribute dim : dimensions.keySet()){
+	public boolean isCoordinateCompliant(ACoordinate<AGenstarAttribute, AGenstarValue> coordinate) {
+		List<AGenstarAttribute> dimensionsAspects = new ArrayList<>();
+		for(AGenstarValue aspect : coordinate.values()){
+			for(AGenstarAttribute dim : dimensions.keySet()){
 				if(dimensions.containsKey(dim)) {
 					if(dimensions.get(dim).contains(aspect))
 						dimensionsAspects.add(dim);
@@ -208,7 +208,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 					.collect(Collectors.toList()));
 					*/
 		}
-		Set<ASurveyAttribute> dimSet = new HashSet<>(dimensionsAspects);
+		Set<AGenstarAttribute> dimSet = new HashSet<>(dimensionsAspects);
 		if(dimensionsAspects.size() == dimSet.size())
 			return true;
 		System.out.println(Arrays.toString(dimensionsAspects.toArray()));
@@ -219,8 +219,6 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return controlOne.add(controlTwo);
 	}
 
-
-
 	// -------------------------- UTILITY -------------------------- //
 
 	@Override
@@ -229,9 +227,9 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		String s = "-- Matrix: "+dimensions.size()+" dimensions and "+dimensions.values().stream().mapToInt(Collection::size).sum()
 				+" aspects (theoretical size:"+theoreticalSpaceSize+")--\n";
 		AControl<T> empty = getNulVal();
-		for(ASurveyAttribute dimension : dimensions.keySet()){
+		for(AGenstarAttribute dimension : dimensions.keySet()){
 			s += " -- dimension: "+dimension.getAttributeName()+" with "+dimensions.get(dimension).size()+" aspects -- \n";
-			for(AValue aspect : dimensions.get(dimension))
+			for(AGenstarValue aspect : dimensions.get(dimension))
 				try {
 					s += "| "+aspect+": "+getVal(aspect)+"\n";
 				} catch (NullPointerException e) {
@@ -245,18 +243,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public String toCsv(char csvSeparator) {
-		List<ASurveyAttribute> atts = new ArrayList<>(getDimensions());
+		List<AGenstarAttribute> atts = new ArrayList<>(getDimensions());
 		AControl<T> emptyVal = getNulVal();
 		String csv = "";
-		for(ASurveyAttribute att :atts){
+		for(AGenstarAttribute att :atts){
 			if(!csv.isEmpty())
 				csv += csvSeparator;
 			csv+=att.getAttributeName();
 		}
 		csv += csvSeparator+"value\n";
-		for(ACoordinate<ASurveyAttribute, AValue> coordVal : matrix.keySet()){
+		for(ACoordinate<AGenstarAttribute, AGenstarValue> coordVal : matrix.keySet()){
 			String csvLine = "";
-			for(ASurveyAttribute att :atts){
+			for(AGenstarAttribute att :atts){
 				if(!csvLine.isEmpty())
 					csvLine += csvSeparator;
 				if(!coordVal.values()

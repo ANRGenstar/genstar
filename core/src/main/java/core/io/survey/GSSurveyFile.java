@@ -7,7 +7,7 @@
  * 
  *
  **********************************************************************************************/
-package gospl.metamodel;
+package core.io.survey;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.io.GSImportFactory;
 import core.io.exception.InvalidFileTypeException;
-import core.io.survey.IGSSurvey;
 
 /**
  * 

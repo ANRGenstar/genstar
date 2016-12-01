@@ -1,4 +1,4 @@
-package core.io.survey.attribut;
+package core.io.survey.entity.attribut;
 
 import java.util.Collections;
 import java.util.Map;
@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.data.GSEnumDataType;
 
 /**
@@ -17,14 +17,14 @@ import core.util.data.GSEnumDataType;
  * @author kevinchapuis
  *
  */
-public class MappedAttribute extends ASurveyAttribute {
+public class MappedAttribute extends AGenstarAttribute {
 
 	/*
 	 * Keys refer to this attribute values, and values refer to referent attribute values
 	 */
 	private Map<Set<String>, Set<String>> mapper;
 
-	public MappedAttribute(String name, GSEnumDataType dataType, ASurveyAttribute referentAttribute,
+	public MappedAttribute(String name, GSEnumDataType dataType, AGenstarAttribute referentAttribute,
 			Map<Set<String>, Set<String>> mapper) {
 		super(name, dataType, referentAttribute);
 		this.mapper = mapper;
@@ -40,7 +40,7 @@ public class MappedAttribute extends ASurveyAttribute {
 	}
 
 	@Override
-	public Set<AValue> findMappedAttributeValues(AValue val) {
+	public Set<AGenstarValue> findMappedAttributeValues(AGenstarValue val) {
 		Optional<Entry<Set<String>, Set<String>>> optMap = mapper.entrySet().stream()
 				.filter(e -> e.getKey().contains(val.getInputStringValue())).findFirst();
 		if(optMap.isPresent())

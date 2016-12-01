@@ -19,11 +19,11 @@
 	    <artifactId>core</artifactId>
 	    <version>1.0</version>
 	</dependency>
-	<dependency>
-		<groupId>genstar.gospl</groupId>
-		<artifactId>gospl</artifactId>
-	    <version>1.0</version> 
-	 </dependency>
+		<dependency>
+	    <groupId>genstar.gospl</groupId>
+	    <artifactId>gospl</artifactId>
+	    <version>1.0</version>
+	</dependency>
 	<dependency>
 	    <groupId>org.apache.commons</groupId>
 	    <artifactId>commons-math3</artifactId>

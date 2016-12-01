@@ -1,9 +1,9 @@
 package spll.popmapper;
 
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
-import core.metamodel.IValue;
 
 public interface ISPLocalizer {
 
@@ -14,6 +14,7 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<IEntity<IAttribute<IValue>, IValue>, IAttribute<IValue>, IValue> localisePopulation();
+	public IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> localisePopulation(
+			IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population);
 	
 }

@@ -1,18 +1,16 @@
 package gospl;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
+import core.io.GSExportFactory;
 import core.io.exception.InvalidFileTypeException;
-import core.io.survey.attribut.ASurveyAttribute;
-import core.io.survey.attribut.value.AValue;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.GSPerformanceUtil;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
@@ -26,7 +24,6 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
 public class GosplSPTemplate {
@@ -78,7 +75,7 @@ public class GosplSPTemplate {
 		// Choice is made here to use distribution based generator
 
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<ASurveyAttribute, AValue, Double> distribution = null;
+		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -89,7 +86,7 @@ public class GosplSPTemplate {
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
-		ISampler<ACoordinate<ASurveyAttribute, AValue>> sampler = null;
+		ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
 		} catch (final IllegalDistributionCreation e1) {
@@ -115,29 +112,17 @@ public class GosplSPTemplate {
 		final String pathFolder = confFile.getParent().toString() + File.separator;
 		final String report = "PopReport.csv";
 		final String export = "PopExport.csv";
+		
+		try {
+			GSExportFactory.createSurvey(new File(pathFolder+export), population);
+		} catch (IOException | InvalidFileTypeException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			gspu.sysoStempMessage("\nStart processing population to output files");
 			Files.write(Paths.get(pathFolder + report), population.csvReport(";").getBytes());
 			gspu.sysoStempPerformance("\treport done: " + pathFolder + report, GosplSPTemplate.class.getName());
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
-		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
-		try {
-			final CharSequence csvSep = ";";
-			int individual = 1;
-			final BufferedWriter bw = Files.newBufferedWriter(Paths.get(pathFolder + export));
-			final Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
-			bw.write("Individual" + csvSep
-					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))
-					+ "\n");
-			for (final GosplEntity e : population) {
-				bw.write(String.valueOf(individual++));
-				for (final ASurveyAttribute attribute : attributes)
-					bw.write(csvSep + e.getValueForAttribute(attribute).getStringValue());
-				bw.write("\n");
-			}
-			gspu.sysoStempPerformance("\texport done: " + pathFolder + export, GosplSPTemplate.class.getName());
 		} catch (final IOException e) {
 			e.printStackTrace();
 		}

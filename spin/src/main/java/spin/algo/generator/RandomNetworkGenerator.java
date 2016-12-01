@@ -1,75 +1,56 @@
 package spin.algo.generator;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.IPopulation;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-
-import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
-import core.metamodel.IPopulation;
-import core.metamodel.IValue;
-
-public class RandomNetworkGenerator<V extends IValue, A extends IAttribute<V>> implements INetworkGenerator<V, A> 
-//implements INetworkGenerator<E, L, N, V, A> 
+public class RandomNetworkGenerator implements INetworkGenerator 
 {
 	
-	double proba;
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
+		return this.generateNetwork(population,0D);
+	}
 	
-	/** generateur aléatoire
-	 * 
-	 */
-	public SpinNetwork<V,A> generateNetwork(IPopulation<IEntity<A,V>,A, V> population) {
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
 		
-		// List the created nodes
-		List<NetworkNode<V, A>> nodesCreated = new ArrayList<NetworkNode<V, A>>();
-		int nbNodes;
-		
 		// create the spinNetwork
-		SpinNetwork<V,A> myNetwork = new SpinNetwork<V,A>();
-
-		// create all the nodes 
-		for (IEntity<A,V> entity : population) {
-			// créer un objet noeud et lui associer l'entité, puis ajouter le node a spinNetwork
-			// on crée un objet noeud et un set de lien vide qui sera rempli apres
-//			N node = new N(entity);
-			
-//			 new NetworkNode<E, V, A>(entity);
-			NetworkNode<V, A> node =  new NetworkNode<V, A>(entity);
-			nodesCreated.add(node);
-			myNetwork.putNode(node);
-		}		
-		nbNodes = nodesCreated.size();
+		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
+		
+		// List the created nodes
+		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
 		
 		// Compute the number of links to generate
 		// TODO: revoir le type de réseau à générer (diriger ou non ?) 
-		int ndLink = (int) Math.round(population.size()*population.size()*proba);
+		int nbLink = (int) Math.round(population.size()*(population.size()-1)*proba);
+		int nbNodes = nodes.size();
+		NetworkNode nodeFrom, nodeTo;
+		NetworkLink link;
 		
 		// create the links
-		int i = 0;
-		while (i < ndLink) {
-			NetworkNode nodeOrigin = nodesCreated.get(rand.nextInt(nbNodes));
-			NetworkNode nodeTarget = nodesCreated.get(rand.nextInt(nbNodes));
-		
+		while (nbLink>0) {
+			nodeFrom = nodes.get(rand.nextInt(nbNodes));
+			nodeTo = nodes.get(rand.nextInt(nbNodes));
+			link = new NetworkLink(nodeFrom,nodeTo,false);//link is not oriented
+			
+			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
+				nbLink--;
+				nodeFrom.addLink(link);
+				nodeTo.addLink(link);
+			}
 			// TODO : create links
 			
 		}
-
-		
-		// old 
-		
-		for (IEntity<A, V> entity : population) {
-			NetworkNode<V,A> node = new NetworkNode<V, A>(entity);
-		}
-		
-		
-		return null;
+		return myNetwork;
 	}
 
 }

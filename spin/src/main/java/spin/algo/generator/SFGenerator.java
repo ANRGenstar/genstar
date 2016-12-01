@@ -1,20 +1,20 @@
 package spin.algo.generator;
 
-import spin.objects.SpinNetwork;
+import core.io.survey.entity.AGenstarEntity;
+import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IAttribute;
-import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
+import spin.objects.SpinNetwork;
 
-public class SFGenerator<V extends IValue, A extends IAttribute<V> > implements INetworkGenerator<V,A> 
+public class SFGenerator<A extends IAttribute<V>,V extends IValue> implements INetworkGenerator
 {
 
 	@Override
-	public SpinNetwork<V, A> generateNetwork(IPopulation<IEntity<A, V>, A, V> population) {
+	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-
 
 }

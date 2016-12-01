@@ -1,0 +1,1446 @@
+<GosplConfiguration>
+  <dataFileList>
+    <GosplDataFile>
+      <surveyFilePath>Age &amp; Couple-Tableau 1.csv</surveyFilePath>
+      <csvSeparator>;</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>1</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Age &amp; Sexe &amp; CSP-Tableau 1.csv</surveyFilePath>
+      <csvSeparator>;</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>2</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Age &amp; Sexe-Tableau 1.csv</surveyFilePath>
+      <csvSeparator>;</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>1</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Rouen_iris.csv</surveyFilePath>
+      <csvSeparator>,</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>1</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Rouen_sample_IRIS.csv</surveyFilePath>
+      <csvSeparator>,</csvSeparator>
+      <dataFileType>Sample</dataFileType>
+      <firstRowDataIndex>1</firstRowDataIndex>
+      <firstColumnDataIndex>0</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Ménage &amp; Enfants-Tableau 1.csv</surveyFilePath>
+      <csvSeparator>;</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>1</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Taille ménage &amp; CSP référent-Tableau 1.csv</surveyFilePath>
+      <csvSeparator>;</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>1</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+    <GosplDataFile>
+      <surveyFilePath>Taille ménage &amp; Sex &amp; Age-Tableau 1.csv</surveyFilePath>
+      <csvSeparator>;</csvSeparator>
+      <dataFileType>ContingencyTable</dataFileType>
+      <firstRowDataIndex>2</firstRowDataIndex>
+      <firstColumnDataIndex>1</firstColumnDataIndex>
+    </GosplDataFile>
+  </dataFileList>
+  <attributeSet>
+    <aggregatedAttribute>
+      <referentAttribute class="rangeAttribute">
+        <referentAttribute class="rangeAttribute" reference=".."/>
+        <name>Age</name>
+        <dataType>Integer</dataType>
+        <values>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>35 à 39 ans</inputStringValue>
+            <mappedStringValue>35 à 39 ans</mappedStringValue>
+            <inputStringLowerBound>35</inputStringLowerBound>
+            <inputStringUpperBound>39</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>85 à 89 ans</inputStringValue>
+            <mappedStringValue>85 à 89 ans</mappedStringValue>
+            <inputStringLowerBound>85</inputStringLowerBound>
+            <inputStringUpperBound>89</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>50 à 54 ans</inputStringValue>
+            <mappedStringValue>50 à 54 ans</mappedStringValue>
+            <inputStringLowerBound>50</inputStringLowerBound>
+            <inputStringUpperBound>54</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>25 à 29 ans</inputStringValue>
+            <mappedStringValue>25 à 29 ans</mappedStringValue>
+            <inputStringLowerBound>25</inputStringLowerBound>
+            <inputStringUpperBound>29</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>75 à 79 ans</inputStringValue>
+            <mappedStringValue>75 à 79 ans</mappedStringValue>
+            <inputStringLowerBound>75</inputStringLowerBound>
+            <inputStringUpperBound>79</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>40 à 44 ans</inputStringValue>
+            <mappedStringValue>40 à 44 ans</mappedStringValue>
+            <inputStringLowerBound>40</inputStringLowerBound>
+            <inputStringUpperBound>44</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>90 à 94 ans</inputStringValue>
+            <mappedStringValue>90 à 94 ans</mappedStringValue>
+            <inputStringLowerBound>90</inputStringLowerBound>
+            <inputStringUpperBound>94</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>20 à 24 ans</inputStringValue>
+            <mappedStringValue>20 à 24 ans</mappedStringValue>
+            <inputStringLowerBound>20</inputStringLowerBound>
+            <inputStringUpperBound>24</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>70 à 74 ans</inputStringValue>
+            <mappedStringValue>70 à 74 ans</mappedStringValue>
+            <inputStringLowerBound>70</inputStringLowerBound>
+            <inputStringUpperBound>74</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>5 à 9 ans</inputStringValue>
+            <mappedStringValue>5 à 9 ans</mappedStringValue>
+            <inputStringLowerBound>5</inputStringLowerBound>
+            <inputStringUpperBound>9</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>Moins de 5 ans</inputStringValue>
+            <mappedStringValue>Moins de 5 ans</mappedStringValue>
+            <inputStringLowerBound>0</inputStringLowerBound>
+            <inputStringUpperBound>5</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>30 à 34 ans</inputStringValue>
+            <mappedStringValue>30 à 34 ans</mappedStringValue>
+            <inputStringLowerBound>30</inputStringLowerBound>
+            <inputStringUpperBound>34</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>80 à 84 ans</inputStringValue>
+            <mappedStringValue>80 à 84 ans</mappedStringValue>
+            <inputStringLowerBound>80</inputStringLowerBound>
+            <inputStringUpperBound>84</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>15 à 19 ans</inputStringValue>
+            <mappedStringValue>15 à 19 ans</mappedStringValue>
+            <inputStringLowerBound>15</inputStringLowerBound>
+            <inputStringUpperBound>19</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>65 à 69 ans</inputStringValue>
+            <mappedStringValue>65 à 69 ans</mappedStringValue>
+            <inputStringLowerBound>65</inputStringLowerBound>
+            <inputStringUpperBound>69</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>100 ans ou plus</inputStringValue>
+            <mappedStringValue>100 ans ou plus</mappedStringValue>
+            <inputStringLowerBound>100</inputStringLowerBound>
+            <inputStringUpperBound>120</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>60 à 64 ans</inputStringValue>
+            <mappedStringValue>60 à 64 ans</mappedStringValue>
+            <inputStringLowerBound>60</inputStringLowerBound>
+            <inputStringUpperBound>64</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>10 à 14 ans</inputStringValue>
+            <mappedStringValue>10 à 14 ans</mappedStringValue>
+            <inputStringLowerBound>10</inputStringLowerBound>
+            <inputStringUpperBound>14</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>45 à 49 ans</inputStringValue>
+            <mappedStringValue>45 à 49 ans</mappedStringValue>
+            <inputStringLowerBound>45</inputStringLowerBound>
+            <inputStringUpperBound>49</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>95 à 99 ans</inputStringValue>
+            <mappedStringValue>95 à 99 ans</mappedStringValue>
+            <inputStringLowerBound>95</inputStringLowerBound>
+            <inputStringUpperBound>99</inputStringUpperBound>
+          </rangeValue>
+          <rangeValue>
+            <dataType>Integer</dataType>
+            <attribute class="rangeAttribute" reference="../../.."/>
+            <inputStringValue>55 à 59 ans</inputStringValue>
+            <mappedStringValue>55 à 59 ans</mappedStringValue>
+            <inputStringLowerBound>55</inputStringLowerBound>
+            <inputStringUpperBound>59</inputStringUpperBound>
+          </rangeValue>
+        </values>
+        <emptyValue class="rangeValue">
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../.."/>
+          <inputStringValue></inputStringValue>
+          <mappedStringValue></mappedStringValue>
+          <inputStringLowerBound>0</inputStringLowerBound>
+          <inputStringUpperBound>0</inputStringUpperBound>
+        </emptyValue>
+      </referentAttribute>
+      <name>Age_2</name>
+      <dataType>Integer</dataType>
+      <values>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>20 à 24 ans</inputStringValue>
+          <mappedStringValue>20 à 24 ans</mappedStringValue>
+          <inputStringLowerBound>20</inputStringLowerBound>
+          <inputStringUpperBound>24</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>25 à 39 ans</inputStringValue>
+          <mappedStringValue>25 à 39 ans</mappedStringValue>
+          <inputStringLowerBound>25</inputStringLowerBound>
+          <inputStringUpperBound>39</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>65 à 79 ans</inputStringValue>
+          <mappedStringValue>65 à 79 ans</mappedStringValue>
+          <inputStringLowerBound>65</inputStringLowerBound>
+          <inputStringUpperBound>79</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>15 à 19 ans</inputStringValue>
+          <mappedStringValue>15 à 19 ans</mappedStringValue>
+          <inputStringLowerBound>15</inputStringLowerBound>
+          <inputStringUpperBound>19</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>55 à 64 ans</inputStringValue>
+          <mappedStringValue>55 à 64 ans</mappedStringValue>
+          <inputStringLowerBound>55</inputStringLowerBound>
+          <inputStringUpperBound>64</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>80 ans ou plus</inputStringValue>
+          <mappedStringValue>80 ans ou plus</mappedStringValue>
+          <inputStringLowerBound>80</inputStringLowerBound>
+          <inputStringUpperBound>120</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>40 à 54 ans</inputStringValue>
+          <mappedStringValue>40 à 54 ans</mappedStringValue>
+          <inputStringLowerBound>40</inputStringLowerBound>
+          <inputStringUpperBound>54</inputStringUpperBound>
+        </rangeValue>
+      </values>
+      <emptyValue class="rangeValue">
+        <dataType>Integer</dataType>
+        <attribute class="aggregatedAttribute" reference="../.."/>
+        <inputStringValue></inputStringValue>
+        <mappedStringValue></mappedStringValue>
+        <inputStringLowerBound>0</inputStringLowerBound>
+        <inputStringUpperBound>0</inputStringUpperBound>
+      </emptyValue>
+      <mapper>
+        <Relative__path class="set">
+          <string>20 à 24 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>20 à 24 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>65 à 79 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>70 à 74 ans</string>
+          <string>75 à 79 ans</string>
+          <string>65 à 69 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>80 ans ou plus</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>85 à 89 ans</string>
+          <string>90 à 94 ans</string>
+          <string>100 ans ou plus</string>
+          <string>95 à 99 ans</string>
+          <string>80 à 84 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>55 à 64 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>55 à 59 ans</string>
+          <string>60 à 64 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>40 à 54 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>50 à 54 ans</string>
+          <string>40 à 44 ans</string>
+          <string>45 à 49 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>15 à 19 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>15 à 19 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>25 à 39 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>35 à 39 ans</string>
+          <string>25 à 29 ans</string>
+          <string>30 à 34 ans</string>
+        </Meta__data__type>
+      </mapper>
+    </aggregatedAttribute>
+    <aggregatedAttribute>
+      <referentAttribute class="rangeAttribute" reference="../../aggregatedAttribute/referentAttribute"/>
+      <name>Age_3</name>
+      <dataType>Integer</dataType>
+      <values>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>20 à 24 ans</inputStringValue>
+          <mappedStringValue>20 à 24 ans</mappedStringValue>
+          <inputStringLowerBound>20</inputStringLowerBound>
+          <inputStringUpperBound>24</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>25 à 39 ans</inputStringValue>
+          <mappedStringValue>25 à 39 ans</mappedStringValue>
+          <inputStringLowerBound>25</inputStringLowerBound>
+          <inputStringUpperBound>39</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>15 à 19 ans</inputStringValue>
+          <mappedStringValue>15 à 19 ans</mappedStringValue>
+          <inputStringLowerBound>15</inputStringLowerBound>
+          <inputStringUpperBound>19</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>65 ans ou plus</inputStringValue>
+          <mappedStringValue>65 ans ou plus</mappedStringValue>
+          <inputStringLowerBound>65</inputStringLowerBound>
+          <inputStringUpperBound>120</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>55 à 64 ans</inputStringValue>
+          <mappedStringValue>55 à 64 ans</mappedStringValue>
+          <inputStringLowerBound>55</inputStringLowerBound>
+          <inputStringUpperBound>64</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>40 à 54 ans</inputStringValue>
+          <mappedStringValue>40 à 54 ans</mappedStringValue>
+          <inputStringLowerBound>40</inputStringLowerBound>
+          <inputStringUpperBound>54</inputStringUpperBound>
+        </rangeValue>
+      </values>
+      <emptyValue class="rangeValue">
+        <dataType>Integer</dataType>
+        <attribute class="aggregatedAttribute" reference="../.."/>
+        <inputStringValue></inputStringValue>
+        <mappedStringValue></mappedStringValue>
+        <inputStringLowerBound>0</inputStringLowerBound>
+        <inputStringUpperBound>0</inputStringUpperBound>
+      </emptyValue>
+      <mapper>
+        <Relative__path class="set">
+          <string>65 ans ou plus</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>85 à 89 ans</string>
+          <string>70 à 74 ans</string>
+          <string>90 à 94 ans</string>
+          <string>75 à 79 ans</string>
+          <string>100 ans ou plus</string>
+          <string>65 à 69 ans</string>
+          <string>95 à 99 ans</string>
+          <string>80 à 84 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>20 à 24 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>20 à 24 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>55 à 64 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>55 à 59 ans</string>
+          <string>60 à 64 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>40 à 54 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>50 à 54 ans</string>
+          <string>40 à 44 ans</string>
+          <string>45 à 49 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>15 à 19 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>15 à 19 ans</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>25 à 39 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>35 à 39 ans</string>
+          <string>25 à 29 ans</string>
+          <string>30 à 34 ans</string>
+        </Meta__data__type>
+      </mapper>
+    </aggregatedAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>Taille</name>
+      <dataType>Integer</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>1 personne</inputStringValue>
+          <mappedStringValue>1</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>3 personnes</inputStringValue>
+          <mappedStringValue>3</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>5 personnes</inputStringValue>
+          <mappedStringValue>5</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>2 personnes</inputStringValue>
+          <mappedStringValue>2</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>4 personnes</inputStringValue>
+          <mappedStringValue>4</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>6 personnes ou plus</inputStringValue>
+          <mappedStringValue>6</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>Integer</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>0</inputStringValue>
+        <mappedStringValue>0</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>CSP référent</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Agriculteurs exploitants</inputStringValue>
+          <mappedStringValue>Agriculteurs exploitants</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Artisans. commerçants. chefs d&apos;entreprise</inputStringValue>
+          <mappedStringValue>Artisans. commerçants. chefs d&apos;entreprise</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Retraités</inputStringValue>
+          <mappedStringValue>Retraités</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Employés</inputStringValue>
+          <mappedStringValue>Employés</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Professions intermédiaires</inputStringValue>
+          <mappedStringValue>Professions intermédiaires</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Cadres et professions intellectuelles supérieures</inputStringValue>
+          <mappedStringValue>Cadres et professions intellectuelles supérieures</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Ouvriers</inputStringValue>
+          <mappedStringValue>Ouvriers</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Autres personnes sans activité professionnelle</inputStringValue>
+          <mappedStringValue>Autres personnes sans activité professionnelle</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>Sexe référent</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Hommes</inputStringValue>
+          <mappedStringValue>Hommes</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Femmes</inputStringValue>
+          <mappedStringValue>Femmes</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <rangeAttribute reference="../aggregatedAttribute/referentAttribute"/>
+    <aggregatedAttribute>
+      <referentAttribute class="rangeAttribute" reference="../../aggregatedAttribute/referentAttribute"/>
+      <name>Age référent</name>
+      <dataType>Integer</dataType>
+      <values>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>20 à 24 ans</inputStringValue>
+          <mappedStringValue>20 à 24 ans</mappedStringValue>
+          <inputStringLowerBound>20</inputStringLowerBound>
+          <inputStringUpperBound>24</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>25 à 39 ans</inputStringValue>
+          <mappedStringValue>25 à 39 ans</mappedStringValue>
+          <inputStringLowerBound>25</inputStringLowerBound>
+          <inputStringUpperBound>39</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>65 à 79 ans</inputStringValue>
+          <mappedStringValue>65 à 79 ans</mappedStringValue>
+          <inputStringLowerBound>65</inputStringLowerBound>
+          <inputStringUpperBound>79</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>15 à 19 ans</inputStringValue>
+          <mappedStringValue>15 à 19 ans</mappedStringValue>
+          <inputStringLowerBound>15</inputStringLowerBound>
+          <inputStringUpperBound>19</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>55 à 64 ans</inputStringValue>
+          <mappedStringValue>55 à 64 ans</mappedStringValue>
+          <inputStringLowerBound>55</inputStringLowerBound>
+          <inputStringUpperBound>64</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>80 ans ou plus</inputStringValue>
+          <mappedStringValue>80 ans ou plus</mappedStringValue>
+          <inputStringLowerBound>80</inputStringLowerBound>
+          <inputStringUpperBound>120</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="aggregatedAttribute" reference="../../.."/>
+          <inputStringValue>40 à 54 ans</inputStringValue>
+          <mappedStringValue>40 à 54 ans</mappedStringValue>
+          <inputStringLowerBound>40</inputStringLowerBound>
+          <inputStringUpperBound>54</inputStringUpperBound>
+        </rangeValue>
+      </values>
+      <emptyValue class="rangeValue">
+        <dataType>Integer</dataType>
+        <attribute class="aggregatedAttribute" reference="../.."/>
+        <inputStringValue></inputStringValue>
+        <mappedStringValue></mappedStringValue>
+        <inputStringLowerBound>0</inputStringLowerBound>
+        <inputStringUpperBound>0</inputStringUpperBound>
+      </emptyValue>
+      <mapper>
+        <Relative__path class="set">
+          <string>Moins de 20 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>Moins de 5 ans</string>
+          <string>5 à 9 ans</string>
+          <string>10 à 14 ans</string>
+          <string>15 à 19 ans</string>
+        </Meta__data__type>
+      </mapper>
+    </aggregatedAttribute>
+    <recordAttribute>
+      <name>POP</name>
+      <dataType>Integer</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>Integer</dataType>
+          <attribute class="recordAttribute" reference="../../.."/>
+          <inputStringValue>P13_POP</inputStringValue>
+          <mappedStringValue>P13_POP</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>Integer</dataType>
+        <attribute class="recordAttribute" reference="../.."/>
+        <inputStringValue>0</inputStringValue>
+        <mappedStringValue>0</mappedStringValue>
+      </emptyValue>
+    </recordAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>SCP</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>24</inputStringValue>
+          <mappedStringValue>Femmes ou hommes au foyer</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>12</inputStringValue>
+          <mappedStringValue>Chômeurs</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>23</inputStringValue>
+          <mappedStringValue>Moins de 14 ans</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>25</inputStringValue>
+          <mappedStringValue>Autres inactifs</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>11</inputStringValue>
+          <mappedStringValue>Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>22</inputStringValue>
+          <mappedStringValue>Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>21</inputStringValue>
+          <mappedStringValue>Retraités ou préretraités</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>Couple</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Vivant en couple</inputStringValue>
+          <mappedStringValue>Vivant en couple</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Ne vivant pas en couple</inputStringValue>
+          <mappedStringValue>Ne vivant pas en couple</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>Enfants</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>1 enfant de moins de 25 ans</inputStringValue>
+          <mappedStringValue>1 enfant de moins de 25 ans</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Aucun enfant de moins de 25 ans</inputStringValue>
+          <mappedStringValue>Aucun enfant de moins de 25 ans</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>2 enfants de moins de 25 ans</inputStringValue>
+          <mappedStringValue>2 enfants de moins de 25 ans</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>3 enfants de moins de 25 ans</inputStringValue>
+          <mappedStringValue>3 enfants de moins de 25 ans</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>4 enfants ou plus de moins de 25 ans</inputStringValue>
+          <mappedStringValue>4 enfants ou plus de moins de 25 ans</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>Sexe</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Hommes</inputStringValue>
+          <mappedStringValue>Hommes</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Femmes</inputStringValue>
+          <mappedStringValue>Femmes</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>Ménage</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Couple sans enfant</inputStringValue>
+          <mappedStringValue>Couple sans enfant</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Couple avec enfant(s)</inputStringValue>
+          <mappedStringValue>Couple avec enfant(s)</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Famille monoparentale composée d&apos;un homme avec enfant(s)</inputStringValue>
+          <mappedStringValue>Famille monoparentale composée d&apos;un homme avec enfant(s)</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Famille monoparentale composée d&apos;une femme avec enfant(s)</inputStringValue>
+          <mappedStringValue>Famille monoparentale composée d&apos;une femme avec enfant(s)</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>CSP</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Agriculteurs exploitants</inputStringValue>
+          <mappedStringValue>Agriculteurs exploitants</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Artisans. commerçants. chefs d&apos;entreprise</inputStringValue>
+          <mappedStringValue>Artisans. commerçants. chefs d&apos;entreprise</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Retraités</inputStringValue>
+          <mappedStringValue>Retraités</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Employés</inputStringValue>
+          <mappedStringValue>Employés</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Professions intermédiaires</inputStringValue>
+          <mappedStringValue>Professions intermédiaires</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Cadres et professions intellectuelles supérieures</inputStringValue>
+          <mappedStringValue>Cadres et professions intellectuelles supérieures</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Ouvriers</inputStringValue>
+          <mappedStringValue>Ouvriers</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>Autres personnes sans activité professionnelle</inputStringValue>
+          <mappedStringValue>Autres personnes sans activité professionnelle</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <uniqueAttribute>
+      <referentAttribute class="uniqueAttribute" reference=".."/>
+      <name>IRIS</name>
+      <dataType>String</dataType>
+      <values>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401006</inputStringValue>
+          <mappedStringValue>765401006</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401004</inputStringValue>
+          <mappedStringValue>765401004</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401005</inputStringValue>
+          <mappedStringValue>765401005</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401002</inputStringValue>
+          <mappedStringValue>765401002</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401003</inputStringValue>
+          <mappedStringValue>765401003</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401001</inputStringValue>
+          <mappedStringValue>765401001</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400104</inputStringValue>
+          <mappedStringValue>765400104</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400302</inputStringValue>
+          <mappedStringValue>765400302</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400401</inputStringValue>
+          <mappedStringValue>765400401</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400203</inputStringValue>
+          <mappedStringValue>765400203</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400402</inputStringValue>
+          <mappedStringValue>765400402</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400303</inputStringValue>
+          <mappedStringValue>765400303</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400204</inputStringValue>
+          <mappedStringValue>765400204</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400501</inputStringValue>
+          <mappedStringValue>765400501</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400105</inputStringValue>
+          <mappedStringValue>765400105</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400201</inputStringValue>
+          <mappedStringValue>765400201</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400102</inputStringValue>
+          <mappedStringValue>765400102</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400301</inputStringValue>
+          <mappedStringValue>765400301</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400103</inputStringValue>
+          <mappedStringValue>765400103</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400202</inputStringValue>
+          <mappedStringValue>765400202</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400306</inputStringValue>
+          <mappedStringValue>765400306</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400801</inputStringValue>
+          <mappedStringValue>765400801</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400603</inputStringValue>
+          <mappedStringValue>765400603</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400504</inputStringValue>
+          <mappedStringValue>765400504</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400702</inputStringValue>
+          <mappedStringValue>765400702</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400405</inputStringValue>
+          <mappedStringValue>765400405</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400901</inputStringValue>
+          <mappedStringValue>765400901</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400604</inputStringValue>
+          <mappedStringValue>765400604</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400802</inputStringValue>
+          <mappedStringValue>765400802</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400601</inputStringValue>
+          <mappedStringValue>765400601</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400304</inputStringValue>
+          <mappedStringValue>765400304</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400502</inputStringValue>
+          <mappedStringValue>765400502</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400106</inputStringValue>
+          <mappedStringValue>765400106</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400403</inputStringValue>
+          <mappedStringValue>765400403</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400205</inputStringValue>
+          <mappedStringValue>765400205</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400602</inputStringValue>
+          <mappedStringValue>765400602</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400305</inputStringValue>
+          <mappedStringValue>765400305</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400701</inputStringValue>
+          <mappedStringValue>765400701</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400503</inputStringValue>
+          <mappedStringValue>765400503</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400404</inputStringValue>
+          <mappedStringValue>765400404</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400902</inputStringValue>
+          <mappedStringValue>765400902</mappedStringValue>
+        </uniqueValue>
+        <uniqueValue>
+          <dataType>String</dataType>
+          <attribute class="uniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400101</inputStringValue>
+          <mappedStringValue>765400101</mappedStringValue>
+        </uniqueValue>
+      </values>
+      <emptyValue class="uniqueValue">
+        <dataType>String</dataType>
+        <attribute class="uniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </uniqueAttribute>
+    <rangeAttribute>
+      <referentAttribute class="rangeAttribute" reference=".."/>
+      <name>Age_y</name>
+      <dataType>Integer</dataType>
+      <values>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>055</inputStringValue>
+          <mappedStringValue>055</mappedStringValue>
+          <inputStringLowerBound>55</inputStringLowerBound>
+          <inputStringUpperBound>59</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>110</inputStringValue>
+          <mappedStringValue>110</mappedStringValue>
+          <inputStringLowerBound>110</inputStringLowerBound>
+          <inputStringUpperBound>114</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>010</inputStringValue>
+          <mappedStringValue>010</mappedStringValue>
+          <inputStringLowerBound>10</inputStringLowerBound>
+          <inputStringUpperBound>14</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>075</inputStringValue>
+          <mappedStringValue>075</mappedStringValue>
+          <inputStringLowerBound>75</inputStringLowerBound>
+          <inputStringUpperBound>79</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>115</inputStringValue>
+          <mappedStringValue>115</mappedStringValue>
+          <inputStringLowerBound>115</inputStringLowerBound>
+          <inputStringUpperBound>129</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>015</inputStringValue>
+          <mappedStringValue>015</mappedStringValue>
+          <inputStringLowerBound>15</inputStringLowerBound>
+          <inputStringUpperBound>19</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>035</inputStringValue>
+          <mappedStringValue>035</mappedStringValue>
+          <inputStringLowerBound>35</inputStringLowerBound>
+          <inputStringUpperBound>39</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>070</inputStringValue>
+          <mappedStringValue>070</mappedStringValue>
+          <inputStringLowerBound>70</inputStringLowerBound>
+          <inputStringUpperBound>74</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>090</inputStringValue>
+          <mappedStringValue>090</mappedStringValue>
+          <inputStringLowerBound>90</inputStringLowerBound>
+          <inputStringUpperBound>94</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>030</inputStringValue>
+          <mappedStringValue>030</mappedStringValue>
+          <inputStringLowerBound>30</inputStringLowerBound>
+          <inputStringUpperBound>34</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>095</inputStringValue>
+          <mappedStringValue>095</mappedStringValue>
+          <inputStringLowerBound>95</inputStringLowerBound>
+          <inputStringUpperBound>99</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>050</inputStringValue>
+          <mappedStringValue>050</mappedStringValue>
+          <inputStringLowerBound>50</inputStringLowerBound>
+          <inputStringUpperBound>54</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>105</inputStringValue>
+          <mappedStringValue>105</mappedStringValue>
+          <inputStringLowerBound>105</inputStringLowerBound>
+          <inputStringUpperBound>109</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>045</inputStringValue>
+          <mappedStringValue>045</mappedStringValue>
+          <inputStringLowerBound>45</inputStringLowerBound>
+          <inputStringUpperBound>49</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>100</inputStringValue>
+          <mappedStringValue>100</mappedStringValue>
+          <inputStringLowerBound>100</inputStringLowerBound>
+          <inputStringUpperBound>104</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>000</inputStringValue>
+          <mappedStringValue>000</mappedStringValue>
+          <inputStringLowerBound>0</inputStringLowerBound>
+          <inputStringUpperBound>4</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>065</inputStringValue>
+          <mappedStringValue>065</mappedStringValue>
+          <inputStringLowerBound>65</inputStringLowerBound>
+          <inputStringUpperBound>69</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>120</inputStringValue>
+          <mappedStringValue>120</mappedStringValue>
+          <inputStringLowerBound>120</inputStringLowerBound>
+          <inputStringUpperBound>120</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>020</inputStringValue>
+          <mappedStringValue>020</mappedStringValue>
+          <inputStringLowerBound>20</inputStringLowerBound>
+          <inputStringUpperBound>24</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>005</inputStringValue>
+          <mappedStringValue>005</mappedStringValue>
+          <inputStringLowerBound>5</inputStringLowerBound>
+          <inputStringUpperBound>9</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>025</inputStringValue>
+          <mappedStringValue>025</mappedStringValue>
+          <inputStringLowerBound>25</inputStringLowerBound>
+          <inputStringUpperBound>29</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>080</inputStringValue>
+          <mappedStringValue>080</mappedStringValue>
+          <inputStringLowerBound>80</inputStringLowerBound>
+          <inputStringUpperBound>84</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>085</inputStringValue>
+          <mappedStringValue>085</mappedStringValue>
+          <inputStringLowerBound>85</inputStringLowerBound>
+          <inputStringUpperBound>89</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>040</inputStringValue>
+          <mappedStringValue>040</mappedStringValue>
+          <inputStringLowerBound>40</inputStringLowerBound>
+          <inputStringUpperBound>44</inputStringUpperBound>
+        </rangeValue>
+        <rangeValue>
+          <dataType>Integer</dataType>
+          <attribute class="rangeAttribute" reference="../../.."/>
+          <inputStringValue>060</inputStringValue>
+          <mappedStringValue>060</mappedStringValue>
+          <inputStringLowerBound>60</inputStringLowerBound>
+          <inputStringUpperBound>64</inputStringUpperBound>
+        </rangeValue>
+      </values>
+      <emptyValue class="rangeValue">
+        <dataType>Integer</dataType>
+        <attribute class="rangeAttribute" reference="../.."/>
+        <inputStringValue></inputStringValue>
+        <mappedStringValue></mappedStringValue>
+        <inputStringLowerBound>0</inputStringLowerBound>
+        <inputStringUpperBound>0</inputStringUpperBound>
+      </emptyValue>
+    </rangeAttribute>
+  </attributeSet>
+  <keyAttribute/>
+</GosplConfiguration>

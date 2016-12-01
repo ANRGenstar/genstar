@@ -18,7 +18,6 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 
 	private Map<AGeoAttribute, AGeoValue> values; 
 	private String gsName;
-	private AGeoEntity nest;
 	
 	public AGeoEntity(Set<AGeoValue> values, String gsName) {
 		this.values = values.stream().collect(Collectors.toMap(AGeoValue::getAttribute, val -> val));
@@ -117,24 +116,8 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 	 * 
 	 * @return {@link Point}
 	 */
-	@Override
 	public Point getLocation() {
 		return getGeometry().getCentroid();
-	}
-
-	@Override
-	public AGeoEntity getNest() {
-		return nest;
-	}
-
-	//do nothing - it is not possible to modify the location of an agent
-	@Override
-	public void setLocation(Point location) {}
-
-	
-	@Override
-	public void setNest(AGeoEntity entity) {
-		this.nest = entity;
 	}
 	
 }
