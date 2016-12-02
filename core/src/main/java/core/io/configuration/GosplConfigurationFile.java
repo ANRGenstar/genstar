@@ -36,7 +36,8 @@ public class GosplConfigurationFile {
 	private final Map<String, IAttribute<? extends IValue>> keyAttribute = new HashMap<>();
 
 	public GosplConfigurationFile(List<GSSurveyFile> dataFiles, 
-			Set<AGenstarAttribute> attributes, Map<String, IAttribute<? extends IValue>> keyAttribute){
+			Set<AGenstarAttribute> attributes, 
+			Map<String, IAttribute<? extends IValue>> keyAttribute){
 		this.dataFileList.addAll(dataFiles);
 		this.attributeSet.addAll(attributes);
 		this.keyAttribute.putAll(keyAttribute);

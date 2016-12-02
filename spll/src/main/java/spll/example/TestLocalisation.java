@@ -67,7 +67,7 @@ public class TestLocalisation {
 		int targetPopulation = 10000; 
 		
 		//path to the configuration file for the population generation (GOSPL)
-		String stringPathToXMLConfFile = "sample/Rouen/Rouen_insee_indiv/GSC_RouenIndividual.xml";
+		String stringPathToXMLConfFile = "sample/Rouen/Rouen_insee_indiv/GSC_Rouen.xml";
 		
 		//path to the main census shapefile - the entities are generated at this level
 		String stringPathToCensusShapefile = "sample/Rouen/Rouen_shp/Rouen_iris.shp";
