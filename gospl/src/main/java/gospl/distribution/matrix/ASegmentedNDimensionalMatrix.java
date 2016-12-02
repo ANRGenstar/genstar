@@ -17,7 +17,6 @@ import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.GSSurveyType;
 
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, T> {

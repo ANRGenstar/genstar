@@ -5,6 +5,7 @@ import java.util.List;
 
 import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.value.AGenstarValue;
+import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 

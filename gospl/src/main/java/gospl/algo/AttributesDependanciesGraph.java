@@ -375,7 +375,8 @@ public class AttributesDependanciesGraph {
 		
  	   	try {
  	   		File temp = File.createTempFile("gospl-dependancy-graph-", ".dot");
-	 	   	PrintStream ps = new PrintStream(temp);
+	 	   	@SuppressWarnings("resource")
+			PrintStream ps = new PrintStream(temp);
 
 	 	   	ps.print(this.toDotRepresentation());
 	 	   	

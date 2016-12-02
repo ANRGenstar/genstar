@@ -1,13 +1,10 @@
 package gospl.algo.sampler;
 
-import static org.junit.Assert.fail;
-
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -17,6 +14,7 @@ import org.junit.rules.TemporaryFolder;
 import core.io.configuration.GosplConfigurationFile;
 import core.io.configuration.GosplXmlSerializer;
 import core.io.exception.InvalidFileTypeException;
+import core.io.survey.entity.AGenstarEntity;
 import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.AttributeFactory;
 import core.io.survey.entity.attribut.value.AGenstarValue;
@@ -30,7 +28,6 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.metamodel.GosplEntity;
 import gospl.metamodel.GosplPopulation;
 
 public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>>> {
@@ -102,7 +99,6 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		GosplConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
-		@SuppressWarnings("unused")
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
@@ -182,7 +178,6 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// MAKE REPORT
 
 		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
-		final String export = "PopExport.csv";
 		try {
 			tmpDir.create();
 
@@ -191,14 +186,14 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			File reportFile = tmpDir.newFile("PopExport.csv");
 
 			final BufferedWriter bw = Files.newBufferedWriter(reportFile.toPath());
-			final Collection<ASurveyAttribute> attributes = population.getPopulationAttributes();
+			final Collection<AGenstarAttribute> attributes = population.getPopulationAttributes();
 			bw.write("Individual" + csvSep
 					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))
 					+ "\n");
-			for (final GosplEntity e : population) {
+			for (final AGenstarEntity e : population) {
 				bw.write(String.valueOf(individual++));
-				for (final ASurveyAttribute attribute : attributes) {
-					AValue av = e.getValueForAttribute(attribute); 
+				for (final AGenstarAttribute attribute : attributes) {
+					AGenstarValue av = e.getValueForAttribute(attribute); 
 					bw.write(csvSep + (av == null?"":e.getValueForAttribute(attribute).getStringValue()));
 				}
 				bw.write("\n");
