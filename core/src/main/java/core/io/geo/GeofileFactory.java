@@ -235,7 +235,7 @@ public class GeofileFactory {
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
 
-		Map<AGenstarEntity, Geometry> geoms = population.stream()
+		Map<AGenstarEntity, Geometry> geoms = population.stream().filter(p -> p.getLocation() != null)
 				.collect(Collectors.toMap(Function.identity(), AGenstarEntity::getLocation));
 
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
