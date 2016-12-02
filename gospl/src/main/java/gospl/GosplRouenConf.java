@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,22 +22,24 @@ import core.io.survey.GSSurveyType;
 import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.AttributeFactory;
 import core.io.survey.entity.attribut.GSEnumAttributeType;
+import core.metamodel.IAttribute;
+import core.metamodel.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 
 public class GosplRouenConf {
 
-	public static String CONF_CLASS_PATH = "../spll/sample/Rouen/";
+	public static String CONF_CLASS_PATH = "../spll/sample/Rouen/Rouen_insee_indiv/";
 	public static String CONF_EXPORT = "GSC_Rouen";
 	
-	public static String indiv1 = "Age & Couple-Tableau 1.csv";
-	public static String indiv2 = "Age & Sexe & CSP-Tableau 1.csv";
-	public static String indiv3 = "Age & Sexe-Tableau 1.csv";
+	public static String indiv1 = "AgeCouple-Tableau 1.csv";
+	public static String indiv2 = "AgeSexeCSP-Tableau 1.csv";
+	public static String indiv3 = "AgeSexe-Tableau 1.csv";
 	public static String indiv4 = "Rouen_iris.csv";
-	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
-	public static String menage2 = "Taille ménage & CSP référent-Tableau 1.csv";
-	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
-	public static String sample1 = "Rouen_sample_IRIS.csv";
+//	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
+//	public static String menage2 = "Taille ménage & CSP référent-Tableau 1.csv";
+//	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
+//	public static String sample1 = "Rouen_sample_IRIS.csv";
 
 	public static void main(String[] args) throws InvalidFormatException {
 		
@@ -64,6 +65,7 @@ public class GosplRouenConf {
 			individualDataFiles.add(new GSSurveyFile(indiv3, GSSurveyType.ContingencyTable, 1, 1, ';'));
 			individualDataFiles.add(new GSSurveyFile(indiv4, GSSurveyType.ContingencyTable, 1, 1, ','));
 			
+			/*
 			// Setup input files' configuration for household aggregated data
 			List<GSSurveyFile> householdDataFiles = new ArrayList<>();
 			Set<AGenstarAttribute> householdAttributes = new HashSet<>();
@@ -76,6 +78,7 @@ public class GosplRouenConf {
 			List<GSSurveyFile> sampleDataFiles = new ArrayList<>();
 			Set<AGenstarAttribute> sampleAttributes = new HashSet<>();
 			sampleDataFiles.add(new GSSurveyFile(sample1,GSSurveyType.Sample, 1, 0));
+			*/
 			
 			try {
 				
@@ -133,6 +136,7 @@ public class GosplRouenConf {
 						mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
 						GSEnumAttributeType.range, referentAgeAttribute, mapperA2));		
 				
+				/*
 				// Create another "age" attribute with diverging data and model modalities
 				sampleAttributes.add(attf.createAttribute("Age_y", GSEnumDataType.Integer, 	
 						Arrays.asList("000", "005", "010", "015", "020", "025", "030",
@@ -144,6 +148,7 @@ public class GosplRouenConf {
 								"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 à 104 ans", "105 à 109 ans", 
 								"110 à 114 ans", "115 à 129 ans", "120 ans"), 
 						GSEnumAttributeType.range));
+						*/
 				
 				// --------------------------
 				// Setup "COUPLE" attribute: INDIVIDUAL
@@ -152,10 +157,13 @@ public class GosplRouenConf {
 				indivAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
 						GSEnumAttributeType.unique));
+				
+				/*
 				sampleAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
 						Arrays.asList("1", "2"),
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
 						GSEnumAttributeType.unique));
+						*/
 				
 				// --------------------------
 				// Setup "IRIS" attribute: INDIVIDUAL
@@ -182,9 +190,12 @@ public class GosplRouenConf {
 				
 				indivAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
 						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
+				
+				/*
 				sampleAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
 						Arrays.asList("1", "2"),
 						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
+						*/
 				
 				// -------------------------
 				// Setup "CSP" attribute: INDIVIDUAL
@@ -196,6 +207,7 @@ public class GosplRouenConf {
 								"Employés", "Ouvriers", "Retraités", "Autres personnes sans activité professionnelle"), 
 						GSEnumAttributeType.unique));
 				
+				/*
 				Map<Set<String>, Set<String>> scp_mapper = new HashMap<>();
 				List<String> scpInput = Arrays.asList("11", "12", "21", "22", "23", "24", "25");
 				List<String> scpModel = Arrays.asList("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré", 
@@ -212,13 +224,17 @@ public class GosplRouenConf {
 						Stream.of("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
 								"Cadres et professions intellectuelles supérieures", "Professions intermédiaires", 
 								"Employés", "Ouvriers").collect(Collectors.toSet()));
+				
+				
 				sampleAttributes.add(attf.createAttribute("SCP", GSEnumDataType.String, 
 						scpInput, scpModel, GSEnumAttributeType.unique));
+						*/
 				
 				// --------------------------
 				// Setup "MENAGE" attribute: MENAGE
 				// --------------------------
 				
+				/*
 				householdAttributes.add(attf.createAttribute("Ménage", GSEnumDataType.String, 
 						Arrays.asList("Couple sans enfant", "Couple avec enfant(s)", 
 								"Famille monoparentale composée d'un homme avec enfant(s)", "Famille monoparentale composée d'une femme avec enfant(s)"), 
@@ -232,6 +248,7 @@ public class GosplRouenConf {
 						Arrays.asList("Aucun enfant de moins de 25 ans", "1 enfant de moins de 25 ans", 
 								"2 enfants de moins de 25 ans", "3 enfants de moins de 25 ans", 
 								"4 enfants ou plus de moins de 25 ans"), GSEnumAttributeType.unique));
+								
 				
 				// --------------------------
 				// Setup "TAILLE" attribute: MENAGE
@@ -283,6 +300,7 @@ public class GosplRouenConf {
 				householdAttributes.add(attf.createAttribute("Age référent", GSEnumDataType.Integer, 
 						mapperA1.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
 						GSEnumAttributeType.range, referentAgeAttribute, mapper));
+						*/
 				
 			} catch (GSIllegalRangedData e) {
 				// TODO Auto-generated catch block
@@ -293,15 +311,18 @@ public class GosplRouenConf {
 			// SERIALIZE CONFIGURATION FILES
 			// ------------------------------
 
-			Set<AGenstarAttribute> attList = Stream.concat(Stream.concat(indivAttributes.stream(), sampleAttributes.stream()), 
-					householdAttributes.stream()).collect(Collectors.toSet());
-			List<GSSurveyFile> surveyFiles = Stream.concat(Stream.concat(individualDataFiles.stream(), sampleDataFiles.stream()), 
-					householdDataFiles.stream()).collect(Collectors.toList());
+			// The whole set of attributes
+			Set<AGenstarAttribute> attList = indivAttributes; /*Stream.concat(Stream.concat(indivAttributes.stream(), sampleAttributes.stream()), 
+					householdAttributes.stream()).collect(Collectors.toSet());*/
+			// The list of input files
+			List<GSSurveyFile> surveyFiles = individualDataFiles; /*Stream.concat(Stream.concat(individualDataFiles.stream(), sampleDataFiles.stream()), 
+					householdDataFiles.stream()).collect(Collectors.toList());*/
+			// The key-attribute mapping
+			Map<String, IAttribute<? extends IValue>> keyMap = new HashMap<>();
 			
 			try {
-				gxs.setMkdir(Paths.get(CONF_CLASS_PATH));
-				GosplConfigurationFile gsdI = new GosplConfigurationFile(surveyFiles, attList,
-						Collections.emptyMap());
+				gxs.setMkdir(Paths.get(CONF_CLASS_PATH).toAbsolutePath());
+				GosplConfigurationFile gsdI = new GosplConfigurationFile(surveyFiles, attList, keyMap);
 				gxs.serializeGSConfig(gsdI, CONF_EXPORT);
 				System.out.println("Serialize Genstar input data with:\n"+
 						gsdI.getAttributes().size()+" attributs\n"+
