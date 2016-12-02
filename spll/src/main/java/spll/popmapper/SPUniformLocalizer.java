@@ -17,6 +17,7 @@ import core.io.survey.entity.AGenstarEntity;
 import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
+import core.util.random.GenstarRandom;
 import spll.popmapper.constraint.SpatialConstraint;
 import spll.popmapper.pointInalgo.PointInLocalizer;
 import spll.popmapper.pointInalgo.RandomPointInLocalizer;
@@ -38,7 +39,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	
 	public SPUniformLocalizer(IGSGeofile localisation) {
 		this.localisation = localisation;
-		rand = new Random();
+		rand = GenstarRandom.getInstance();
 		pointInLocalizer = new RandomPointInLocalizer(rand);
 	}
 	
