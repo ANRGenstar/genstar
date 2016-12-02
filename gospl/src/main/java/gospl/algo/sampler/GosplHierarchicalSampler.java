@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.value.AGenstarValue;
@@ -32,10 +34,9 @@ import gospl.distribution.util.GosplBasicDistribution;
 public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
-	@SuppressWarnings("unused")
 	private GosplBasicDistribution gosplBasicDistribution = null;
 	private Collection<List<AGenstarAttribute>> explorationOrder = null;
-	private ASegmentedNDimensionalMatrix<Double> segmentedMatrix;
+	private ASegmentedNDimensionalMatrix<Double> segmentedMatrix = null;
 	
 	public GosplHierarchicalSampler() {
 		// TODO Auto-generated constructor stub
@@ -56,7 +57,6 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 		this.gosplBasicDistribution = gosplBasicDistribution;
 		this.explorationOrder = explorationOrder;
 		this.segmentedMatrix = segmentedMatrix;
-		
 	}
 
 	

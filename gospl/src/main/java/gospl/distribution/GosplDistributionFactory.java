@@ -46,7 +46,7 @@ import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.metamodel.GosplEntity;
+import gospl.metamodel.GenstarEntity;
 import gospl.metamodel.GosplPopulation;
 
 public class GosplDistributionFactory {
@@ -325,7 +325,7 @@ public class GosplDistributionFactory {
 			for (final Integer idx : columnHeaders.keySet())
 				entityAttributes.put(columnHeaders.get(idx).iterator().next().getAttribute(), columnHeaders.get(idx)
 						.stream().filter(val -> val.getInputStringValue().equals(indiVals.get(idx))).findAny().get());
-			sampleSet.add(new GosplEntity(entityAttributes));
+			sampleSet.add(new GenstarEntity(entityAttributes));
 		}
 
 		return sampleSet;

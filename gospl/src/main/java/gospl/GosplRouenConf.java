@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -136,8 +137,8 @@ public class GosplRouenConf {
 						mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
 						GSEnumAttributeType.range, referentAgeAttribute, mapperA2));		
 				
-				/*
 				// Create another "age" attribute with diverging data and model modalities
+				/*
 				sampleAttributes.add(attf.createAttribute("Age_y", GSEnumDataType.Integer, 	
 						Arrays.asList("000", "005", "010", "015", "020", "025", "030",
 								"035", "040", "045", "050", "055", "060", "065", "070", "075", "080", "085",

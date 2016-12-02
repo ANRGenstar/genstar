@@ -2,6 +2,7 @@ package core.io.configuration;
 
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -40,7 +41,7 @@ public class GosplConfigurationFile {
 			Map<String, IAttribute<? extends IValue>> keyAttribute){
 		this.dataFileList.addAll(dataFiles);
 		this.attributeSet.addAll(attributes);
-		this.keyAttribute.putAll(keyAttribute);
+		this.keyAttribute.putAll(keyAttribute == null ? Collections.emptyMap(): keyAttribute);
 	}
 
 	public List<GSSurveyFile> getDataFiles(){

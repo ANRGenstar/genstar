@@ -14,7 +14,7 @@ import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
-import gospl.metamodel.GosplEntity;
+import gospl.metamodel.GenstarEntity;
 import gospl.metamodel.GosplPopulation;
 
 /**
@@ -53,7 +53,7 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 				.collect(Collectors.toSet());
 		
 		IntStream.range(0, numberOfIndividual).forEach(i -> gosplPop.add(
-				new GosplEntity(attSet.stream().collect(Collectors.toMap(att -> att, 
+				new GenstarEntity(attSet.stream().collect(Collectors.toMap(att -> att, 
 						att -> randomVal(att.getValues()))))));
 		
 		return gosplPop;

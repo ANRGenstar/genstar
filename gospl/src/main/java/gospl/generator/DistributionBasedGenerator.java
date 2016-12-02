@@ -6,7 +6,7 @@ import core.io.survey.entity.attribut.AGenstarAttribute;
 import core.io.survey.entity.attribut.value.AGenstarValue;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.metamodel.GosplEntity;
+import gospl.metamodel.GenstarEntity;
 import gospl.metamodel.GosplPopulation;
 
 /**
@@ -28,7 +28,7 @@ public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	@Override
 	public GosplPopulation generate(int numberOfIndividual) {
 		GosplPopulation pop = new GosplPopulation();
-		pop.addAll(sampler.draw(numberOfIndividual).parallelStream().map(coord -> new GosplEntity(coord.getMap())).collect(Collectors.toSet()));
+		pop.addAll(sampler.draw(numberOfIndividual).parallelStream().map(coord -> new GenstarEntity(coord.getMap())).collect(Collectors.toSet()));
 		return pop;
 	}
 
