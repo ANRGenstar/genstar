@@ -24,7 +24,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
-import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.metamodel.pop.APopulationAttribute;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 
@@ -71,7 +71,7 @@ public class AttributesDependanciesGraph {
 		for (AFullNDimensionalMatrix<?> currentMatrix: segmentedMatrix.getMatrices()) {
 
 			// add all the nodes 
-			for (AGenstarAttribute attribute: currentMatrix.getDimensions()) {
+			for (APopulationAttribute attribute: currentMatrix.getDimensions()) {
 				dependancies.addKnownAttribute(attribute);				
 			}
 			
@@ -89,7 +89,7 @@ public class AttributesDependanciesGraph {
 	 * Adds this attribute as a known attribute in the graph
 	 * @param attribute
 	 */
-	public void addKnownAttribute(AGenstarAttribute attribute) {
+	public void addKnownAttribute(APopulationAttribute attribute) {
 		
 		logger.debug("should add node {}", attribute.getAttributeName());
 		
@@ -121,7 +121,7 @@ public class AttributesDependanciesGraph {
 	
 	
 	public void addKnownGlobalFrequency(AFullNDimensionalMatrix<?> currentMatrix) {
-		List<AGenstarAttribute> attributes = new ArrayList<>();
+		List<APopulationAttribute> attributes = new ArrayList<>();
 		attributes.addAll(currentMatrix.getDimensions());
 		for (int i=0; i<attributes.size();i++) {
 			for (int j=i+1; j<attributes.size();j++) {
@@ -171,7 +171,7 @@ public class AttributesDependanciesGraph {
 	 * returns the sets of the survey attributes which belong to independnat components.
 	 * @return
 	 */
-	public Collection<Set<AGenstarAttribute>> getConnectedComponents() {
+	public Collection<Set<APopulationAttribute>> getConnectedComponents() {
 		
 		ConnectedComponents cc = new ConnectedComponents(graph);
 		cc.setCountAttribute(NODE_ATTRIBUTE_SUBGRAPH_ID);
@@ -181,11 +181,11 @@ public class AttributesDependanciesGraph {
 		
 		if (count == 1) {
 			// quick exit
-			LinkedList<Set<AGenstarAttribute>> res = new LinkedList<>();
+			LinkedList<Set<APopulationAttribute>> res = new LinkedList<>();
 			res.add(
 					graph.getNodeSet()
 						.stream()
-						.map(node -> (AGenstarAttribute)node.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE))
+						.map(node -> (APopulationAttribute)node.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE))
 						.collect(Collectors.toSet()));
 			
 			return res;
@@ -193,7 +193,7 @@ public class AttributesDependanciesGraph {
 		
 		// the algo puts an id of component into every node. Just collect the nodes based on that. 
 		
-		Map<Integer, Set<AGenstarAttribute>> componentId2attributes = new HashMap<>(count);
+		Map<Integer, Set<APopulationAttribute>> componentId2attributes = new HashMap<>(count);
 		for (Node n: graph.getNodeSet()) {
 			Integer componentId = n.getAttribute(NODE_ATTRIBUTE_SUBGRAPH_ID);
 			if (!componentId2attributes.containsKey(componentId)) {
@@ -213,12 +213,12 @@ public class AttributesDependanciesGraph {
 	 * will be degree 1; else, it will be the lowest possible). 
 	 * @return
 	 */
-	public Set<AGenstarAttribute> getRoots(Collection<AGenstarAttribute> component) {
+	public Set<APopulationAttribute> getRoots(Collection<APopulationAttribute> component) {
 		
 		// the max connectivity found so far
 		Integer minDegree = Integer.MAX_VALUE;
 		// the nodes found so far for the degrees
-		Map<Integer,Set<AGenstarAttribute>> degree2nodes = new TreeMap<>();
+		Map<Integer,Set<APopulationAttribute>> degree2nodes = new TreeMap<>();
 		
 		for (Node n: graph.getNodeSet()) {
 			Integer degree = n.getDegree();
@@ -251,15 +251,15 @@ public class AttributesDependanciesGraph {
 	 * @param root
 	 * @return
 	 */
-	public List<AGenstarAttribute> getOrderOfExploration(Collection<AGenstarAttribute> component, AGenstarAttribute root) {
+	public List<APopulationAttribute> getOrderOfExploration(Collection<APopulationAttribute> component, APopulationAttribute root) {
 		
-		Map<AGenstarAttribute,Integer> attribute2rank = new HashMap<>(component.size());
+		Map<APopulationAttribute,Integer> attribute2rank = new HashMap<>(component.size());
 		
 		// these nodes were seen already !
-		Set<AGenstarAttribute> taboo = new HashSet<>();
-		List<AGenstarAttribute> list = new ArrayList<>(component.size());
+		Set<APopulationAttribute> taboo = new HashSet<>();
+		List<APopulationAttribute> list = new ArrayList<>(component.size());
 		
-		Set<AGenstarAttribute> toExplore = new HashSet<>();
+		Set<APopulationAttribute> toExplore = new HashSet<>();
 		
 		// bootstrap
 		toExplore.add(root);
@@ -267,7 +267,7 @@ public class AttributesDependanciesGraph {
 		
 		while (!toExplore.isEmpty()) {
 			
-			AGenstarAttribute current = toExplore.iterator().next();
+			APopulationAttribute current = toExplore.iterator().next();
 			toExplore.remove(current);
 			Integer currentRank = attribute2rank.get(current);
 			taboo.add(current);
@@ -278,7 +278,7 @@ public class AttributesDependanciesGraph {
 			Iterator<Node> itNeighboors = graph.getNode(current.getAttributeName()).getNeighborNodeIterator();
 			while (itNeighboors.hasNext()) {
 				Node neighboor = itNeighboors.next();
-				AGenstarAttribute nei  = neighboor.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE);
+				APopulationAttribute nei  = neighboor.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE);
 				
 				if (taboo.contains(nei)) 
 					continue;

@@ -3,8 +3,6 @@ package core.metamodel;
 import java.util.Collection;
 import java.util.Set;
 
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-
 /**
  * A population is a collection of entity characterize by a set of attribute.
  * Each attribute is made of one or more value, and a particular entity should have
@@ -23,9 +21,5 @@ public interface IPopulation<E extends IEntity<A, V>, A extends IAttribute<V>, V
 	public Set<A> getPopulationAttributes();
 	
 	public String csvReport(CharSequence csvSep);
-	
-	public CoordinateReferenceSystem getCrs() ;
-
-	public void setCrs(CoordinateReferenceSystem crs) ;
 	
 }

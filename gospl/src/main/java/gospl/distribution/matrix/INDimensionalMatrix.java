@@ -4,8 +4,8 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import core.io.survey.GSSurveyType;
 import core.metamodel.IAttribute;
+import core.metamodel.pop.io.GSSurveyType;
 import core.util.data.GSDataParser;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;

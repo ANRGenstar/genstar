@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.io.geo.entity.GSFeature;
 import core.util.GSBasicStats;
 import core.util.data.GSEnumStats;
+import spll.entity.GSFeature;
 
 public class SPLUniformNormalizer extends ASPLNormalizer {
 	

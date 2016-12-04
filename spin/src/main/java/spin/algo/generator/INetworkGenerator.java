@@ -1,9 +1,9 @@
 package spin.algo.generator;
 
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
@@ -23,15 +23,15 @@ public interface INetworkGenerator {
 	 * @param population population en paramètre, implementant l'interface IPopulation 
 	 * @return un SpinNetwork
 	 */
-	public abstract SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population);
+	public abstract SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population);
 	
-	public static SpinNetwork loadPopulation(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population){
+	public static SpinNetwork loadPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 	//Create a SpinNetwork with nodes linked to population entities
 	//The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
 				
 		// create all the nodes 
-		for (AGenstarEntity entity : population) 
+		for (APopulationEntity entity : population) 
 					myNetwork.putNode(new NetworkNode(entity));
 		return myNetwork;
 	}

@@ -1,9 +1,9 @@
 package spin;
 
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UniformRandomGenerator;
 import spin.algo.factory.NetworkFactory;
@@ -27,7 +27,7 @@ public class NetworkGeneration {
 //		// 1 instancier la factory
 //		// 2 prendre une population en param
 		ISyntheticGosplPopGenerator populationGenerator = new UniformRandomGenerator(4,2);
-		IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population =
+		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
 				populationGenerator.generate(nbNode);
 //		
 //		// 3 la factory choisit un générator grace a une unum

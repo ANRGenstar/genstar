@@ -1,7 +1,7 @@
 package spll.datamapper.matcher;
 
-import core.io.geo.entity.GSFeature;
 import spll.datamapper.variable.SPLVariable;
+import spll.entity.GSFeature;
 
 public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 

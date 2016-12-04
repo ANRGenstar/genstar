@@ -4,28 +4,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 
-public class GosplCoordinate extends ACoordinate<AGenstarAttribute, AGenstarValue> {
+public class GosplCoordinate extends ACoordinate<APopulationAttribute, APopulationValue> {
 
-	public GosplCoordinate(Set<AGenstarValue> coordinate) {
+	public GosplCoordinate(Set<APopulationValue> coordinate) {
 		super(coordinate);
 	}
 
 	@Override
-	public Set<AGenstarAttribute> getDimensions() {
-		return values().stream().map(AGenstarValue::getAttribute).collect(Collectors.toSet());
+	public Set<APopulationAttribute> getDimensions() {
+		return values().stream().map(APopulationValue::getAttribute).collect(Collectors.toSet());
 	}
 
 	@Override
-	public Map<AGenstarAttribute, AGenstarValue> getMap() {
+	public Map<APopulationAttribute, APopulationValue> getMap() {
 		return values().stream().collect(Collectors.toMap(v -> v.getAttribute(), v -> v));
 	}
 
 	@Override
-	protected boolean isCoordinateSetComplient(Set<AGenstarValue> coordinateSet) {
-		Set<AGenstarAttribute> attributeSet = coordinateSet.stream().map(av -> av.getAttribute()).collect(Collectors.toSet());
+	protected boolean isCoordinateSetComplient(Set<APopulationValue> coordinateSet) {
+		Set<APopulationAttribute> attributeSet = coordinateSet.stream().map(av -> av.getAttribute()).collect(Collectors.toSet());
 		if(attributeSet.size() == coordinateSet.size())
 			return true;
 		return false;

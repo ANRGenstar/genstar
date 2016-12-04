@@ -3,3 +3,6 @@ Bundle-ManifestVersion: 2
 Bundle-Name: gospl
 Bundle-SymbolicName: gospl
 Bundle-Version: 1.0.0.qualifier
+Export-Package: gospl.entity.attribute,
+ gospl.entity.attribute.value,
+ gospl.io

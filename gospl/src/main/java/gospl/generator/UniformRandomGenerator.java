@@ -7,15 +7,15 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.AttributeFactory;
-import core.io.survey.entity.attribut.GSEnumAttributeType;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
-import gospl.metamodel.GosplEntity;
-import gospl.metamodel.GosplPopulation;
+import gospl.GosplPopulation;
+import gospl.entity.GosplEntity;
+import gospl.entity.attribute.AttributeFactory;
+import gospl.entity.attribute.GSEnumAttributeType;
 
 /**
  * 
@@ -48,7 +48,7 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		
 		// Attribute Factory
 		AttributeFactory attF = new AttributeFactory();
-		Set<AGenstarAttribute> attSet = IntStream.range(0, random.nextInt(maxAtt)+1)
+		Set<APopulationAttribute> attSet = IntStream.range(0, random.nextInt(maxAtt)+1)
 				.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
 				.collect(Collectors.toSet());
 		
@@ -59,8 +59,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return gosplPop;
 	}
 
-	private AGenstarAttribute createIntegerAtt(AttributeFactory factory) {
-		AGenstarAttribute asa = null;
+	private APopulationAttribute createIntegerAtt(AttributeFactory factory) {
+		APopulationAttribute asa = null;
 		try {
 			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Integer, 
@@ -73,8 +73,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return asa;
 	}
 	
-	private AGenstarAttribute createStringAtt(AttributeFactory factory){
-		AGenstarAttribute asa = null;
+	private APopulationAttribute createStringAtt(AttributeFactory factory){
+		APopulationAttribute asa = null;
 		try {
 			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.String, 
@@ -97,8 +97,8 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		return sb.toString();
 	}
 	
-	private AGenstarValue randomVal(Set<AGenstarValue> values){
-		List<AGenstarValue> vals = new ArrayList<>(values);
+	private APopulationValue randomVal(Set<APopulationValue> values){
+		List<APopulationValue> vals = new ArrayList<>(values);
 		return vals.get(random.nextInt(vals.size()));
 	}
 

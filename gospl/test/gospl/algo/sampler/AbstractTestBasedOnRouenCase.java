@@ -11,26 +11,26 @@ import java.util.stream.Collectors;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import core.io.configuration.GosplConfigurationFile;
-import core.io.configuration.GosplXmlSerializer;
-import core.io.exception.InvalidFileTypeException;
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.AttributeFactory;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.configuration.GenstarConfigurationFile;
+import core.configuration.GenstarXmlSerializer;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import core.util.GSPerformanceUtil;
-import gospl.GosplSPTemplate;
+import gospl.GosplPopulation;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.entity.attribute.AttributeFactory;
+import gospl.example.GosplSPTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.metamodel.GosplPopulation;
+import gospl.io.exception.InvalidSurveyFormatException;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -61,12 +61,12 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	 * Provides the configuration file for Rouen
 	 * @return
 	 */
-	protected GosplConfigurationFile getConfigurationFile() {
+	protected GenstarConfigurationFile getConfigurationFile() {
 
 		 // Setup the serializer that save configuration file
-		 GosplXmlSerializer gxs = null;
+		 GenstarXmlSerializer gxs = null;
 		 try {
-			 gxs = new GosplXmlSerializer();
+			 gxs = new GenstarXmlSerializer();
 		 } catch (FileNotFoundException e) {
 			 // TODO Auto-generated catch block
 			 e.printStackTrace();
@@ -76,7 +76,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		 @SuppressWarnings("unused")
 		AttributeFactory attf = new AttributeFactory();
 		
-		 GosplConfigurationFile gcf = null;
+		 GenstarConfigurationFile gcf = null;
 		 try {
 			 gcf = gxs.deserializeGSConfig(new File("testdata/rouen1/GSC_RouenIndividual.xml"));
 		 } catch (FileNotFoundException e) {
@@ -96,7 +96,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		// parameters of the test
 		int targetPopulationSize = 100;
-		GosplConfigurationFile confFile = this.getConfigurationFile();
+		GenstarConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
 		GosplPopulation population = null;
@@ -111,7 +111,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			e.printStackTrace();
 		} catch (final IOException e) {
 			e.printStackTrace();
-		} catch (final InvalidFileTypeException e) {
+		} catch (final InvalidSurveyFormatException e) {
 			e.printStackTrace();
 		}
 
@@ -125,7 +125,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (final InvalidFileTypeException e) {
+		} catch (final InvalidSurveyFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -134,7 +134,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// Choice is made here to use distribution based generator
 
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> distribution = null;
+		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -145,7 +145,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final IDistributionInferenceAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<AGenstarAttribute,AGenstarValue>> sampler = null;
+		ISampler<ACoordinate<APopulationAttribute,APopulationValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferDistributionSampler(
 					distribution, 
@@ -186,14 +186,14 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			File reportFile = tmpDir.newFile("PopExport.csv");
 
 			final BufferedWriter bw = Files.newBufferedWriter(reportFile.toPath());
-			final Collection<AGenstarAttribute> attributes = population.getPopulationAttributes();
+			final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
 			bw.write("Individual" + csvSep
 					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))
 					+ "\n");
-			for (final AGenstarEntity e : population) {
+			for (final APopulationEntity e : population) {
 				bw.write(String.valueOf(individual++));
-				for (final AGenstarAttribute attribute : attributes) {
-					AGenstarValue av = e.getValueForAttribute(attribute); 
+				for (final APopulationAttribute attribute : attributes) {
+					APopulationValue av = e.getValueForAttribute(attribute); 
 					bw.write(csvSep + (av == null?"":e.getValueForAttribute(attribute).getStringValue()));
 				}
 				bw.write("\n");

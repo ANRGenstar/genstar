@@ -3,7 +3,7 @@ package spin.objects;
 import java.util.HashSet;
 import java.util.Set;
 
-import core.io.survey.entity.AGenstarEntity;
+import core.metamodel.pop.APopulationEntity;
 
 /** Node of the SpinNetwork, linked to a GosplEntity (an individual from population generation module)
  * 
@@ -13,7 +13,7 @@ import core.io.survey.entity.AGenstarEntity;
  */
 public class NetworkNode {
 	// Entity associated 
-	private AGenstarEntity entity;
+	private APopulationEntity entity;
 	
 	// Connected node
 	private Set<NetworkLink> links;
@@ -23,7 +23,7 @@ public class NetworkNode {
 	 * @param entite
 	 */
 	
-	public NetworkNode(AGenstarEntity entite){
+	public NetworkNode(APopulationEntity entite){
 		entity = entite;
 		links = new HashSet<NetworkLink>();
 	}
@@ -32,7 +32,7 @@ public class NetworkNode {
 		links.add(link);
 	}
 	
-	public AGenstarEntity getEntity() {
+	public APopulationEntity getEntity() {
 		return entity;
 	}
 	

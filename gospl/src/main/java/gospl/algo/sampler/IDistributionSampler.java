@@ -1,12 +1,12 @@
 package gospl.algo.sampler;
 
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;
 
-public interface IDistributionSampler extends ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> {
+public interface IDistributionSampler extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>> {
 
 	// ---------------- setup methods ---------------- //
 	

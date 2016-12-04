@@ -3,10 +3,10 @@ package spin.algo.generator;
 import java.util.ArrayList;
 import java.util.List;
 
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
@@ -15,11 +15,11 @@ import spin.objects.SpinNetwork;
 public class RegularNetworkGenerator implements INetworkGenerator{
 
 	
-public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
+public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 	return generateNetwork(population, 4);//4 Valeur par défaut si la connectivite n'est pas précisée
 }	
 
-public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, int k) {
+public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, int k) {
 		
 		//int k connectivité
 		//TODO: traiter le cas de conectivity pas paire ... 

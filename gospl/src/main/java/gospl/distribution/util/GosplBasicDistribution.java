@@ -6,17 +6,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
-public class GosplBasicDistribution implements Map<ACoordinate<AGenstarAttribute, AGenstarValue>, Double> {
+public class GosplBasicDistribution implements Map<ACoordinate<APopulationAttribute, APopulationValue>, Double> {
 
-	private final Map<ACoordinate<AGenstarAttribute, AGenstarValue>, Double> innermap; 
+	private final Map<ACoordinate<APopulationAttribute, APopulationValue>, Double> innermap; 
 
-	public GosplBasicDistribution(Map<Set<AGenstarValue>, Double> sampleDistribution) {
+	public GosplBasicDistribution(Map<Set<APopulationValue>, Double> sampleDistribution) {
 		if(sampleDistribution.isEmpty())
 			throw new IllegalArgumentException("Sample distribution cannot be empty");
 		innermap = sampleDistribution.entrySet().parallelStream()
@@ -58,7 +58,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<AGenstarAttribute
 	}
 
 	@Override
-	public Double put(ACoordinate<AGenstarAttribute, AGenstarValue> key, Double value) {
+	public Double put(ACoordinate<APopulationAttribute, APopulationValue> key, Double value) {
 		return innermap.put(key, value);
 	}
 
@@ -68,7 +68,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<AGenstarAttribute
 	}
 
 	@Override
-	public void putAll(Map<? extends ACoordinate<AGenstarAttribute, AGenstarValue>, ? extends Double> m) {
+	public void putAll(Map<? extends ACoordinate<APopulationAttribute, APopulationValue>, ? extends Double> m) {
 		innermap.putAll(m);
 	}
 
@@ -78,7 +78,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<AGenstarAttribute
 	}
 
 	@Override
-	public Set<ACoordinate<AGenstarAttribute, AGenstarValue>> keySet() {
+	public Set<ACoordinate<APopulationAttribute, APopulationValue>> keySet() {
 		return innermap.keySet();
 	}
 
@@ -88,7 +88,7 @@ public class GosplBasicDistribution implements Map<ACoordinate<AGenstarAttribute
 	}
 
 	@Override
-	public Set<java.util.Map.Entry<ACoordinate<AGenstarAttribute, AGenstarValue>, Double>> entrySet() {
+	public Set<java.util.Map.Entry<ACoordinate<APopulationAttribute, APopulationValue>, Double>> entrySet() {
 		return innermap.entrySet();
 	}
 	

@@ -12,9 +12,9 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import core.io.configuration.GosplConfigurationFile;
-import core.io.configuration.GosplXmlSerializer;
-import core.io.survey.entity.attribut.AGenstarAttribute;
+import core.configuration.GenstarConfigurationFile;
+import core.configuration.GenstarXmlSerializer;
+import core.metamodel.pop.APopulationAttribute;
 
 public class TestGosplXmlSerializer {
 
@@ -26,13 +26,13 @@ public class TestGosplXmlSerializer {
 		if (!filetest.isFile())
 			throw new IllegalArgumentException("invalid test environment: the file "+filetest+" is not available for test");
 		
-		GosplXmlSerializer xs  = null;
+		GenstarXmlSerializer xs  = null;
 		try {
-			xs = new GosplXmlSerializer();
+			xs = new GenstarXmlSerializer();
 		} catch (FileNotFoundException e) {
 			fail("unable to initialize serializer");
 		}
-		GosplConfigurationFile cf = null;
+		GenstarConfigurationFile cf = null;
 		try {
 			cf = xs.deserializeGSConfig(filetest);
 		} catch (FileNotFoundException e) {
@@ -51,7 +51,7 @@ public class TestGosplXmlSerializer {
 															Arrays.asList("CSP", "Age_2", "Age_3", "Couple", "Sexe", "Age"))
 															);
 		Set<String> foundAttributesNames = new HashSet<>();
-		for (AGenstarAttribute a : cf.getAttributes()) {
+		for (APopulationAttribute a : cf.getAttributes()) {
 			foundAttributesNames.add(a.getAttributeName());
 		}
 		assertEquals(

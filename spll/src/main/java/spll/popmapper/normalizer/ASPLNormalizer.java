@@ -3,8 +3,8 @@ package spll.popmapper.normalizer;
 import java.util.Map;
 import java.util.Random;
 
-import core.io.geo.entity.GSFeature;
 import core.util.random.GenstarRandom;
+import spll.entity.GSFeature;
 
 /**
  * TODO: make top value control, not just floor value 

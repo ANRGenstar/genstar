@@ -1,6 +1,6 @@
 package gospl.generator;
 
-import gospl.metamodel.GosplPopulation;
+import gospl.GosplPopulation;
 
 public interface ISyntheticGosplPopGenerator {
 
