@@ -1,10 +1,10 @@
 # Genstar
 ## Generation of Connected and Spatialized Synthetic Populations
 
-- Core abstraction and algorithm could be find in Gospl (generation of synthetic population library)
-- io is handled by the io package
-- Spatialization algorithm could be find in Spll (Synthetic population localisation library)
-- Network algorithm could be find in Spin (Synthetic population interaction network)
+- Core abstractions are define in Core module: IPopulation, IEntity, IAttribute and IValue, together with their direct implemented abtractions 
+- Population generation algorithm could be find in Gospl module (generation of synthetic population library)
+- Spatialization algorithm could be find in Spll module (Synthetic population localisation library)
+- Network algorithm could be find in Spin module (Synthetic population interaction network)
 
 ## Maven setup
 
