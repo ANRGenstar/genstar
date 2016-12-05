@@ -75,16 +75,8 @@ public class GenstarXmlSerializer {
 			throw new FileNotFoundException(valideXmlFile.toString());
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))
 			throw new FileNotFoundException("The file "+valideXmlFile.getName()+" is not an xml file");  
-		
-		String baseDirectory = valideXmlFile.getParentFile().getAbsolutePath();
 
 		GenstarConfigurationFile res = (GenstarConfigurationFile) xs.fromXML(valideXmlFile);
-		for (IGSSurvey sf : res.getDataFiles()) {
-			File f = new File(sf.getSurveyFilePath());
-			if (!f.isAbsolute()) {
-				sf.setSurveyFilePath(baseDirectory+File.separator+sf.getName());
-			}
-		}
 
 		return res;
 	}

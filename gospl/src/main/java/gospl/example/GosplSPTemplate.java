@@ -56,6 +56,9 @@ public class GosplSPTemplate {
 			e.printStackTrace();
 		} catch (final InvalidSurveyFormatException e) {
 			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		// TRANSPOSE SAMPLES INTO IPOPULATION
@@ -69,6 +72,9 @@ public class GosplSPTemplate {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (final InvalidSurveyFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

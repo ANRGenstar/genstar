@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -85,7 +86,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		 }
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
 						 gcf.getAttributes().size()+" attributs\n"+
-						 gcf.getDataFiles().size()+" data files");
+						 gcf.getSurveyWrapper().size()+" data files");
 						
 		 return gcf;
 	}
@@ -113,6 +114,9 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			e.printStackTrace();
 		} catch (final InvalidSurveyFormatException e) {
 			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		// TRANSPOSE SAMPLES INTO IPOPULATION
@@ -126,6 +130,9 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (final InvalidSurveyFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}

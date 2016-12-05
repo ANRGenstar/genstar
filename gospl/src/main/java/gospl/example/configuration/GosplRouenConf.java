@@ -2,6 +2,7 @@ package gospl.example.configuration;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,23 +22,17 @@ import core.metamodel.IAttribute;
 import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.pop.io.GSSurveyWrapper;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.entity.attribute.AttributeFactory;
 import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.io.SurveyFactory;
-import gospl.io.exception.InvalidSurveyFormatException;
 
 public class GosplRouenConf {
 
-	public static String CONF_CLASS_PATH = "../spll/sample/Rouen/Rouen_insee_indiv/";
+	public static String CONF_CLASS_PATH = "../spll/sample/Rouen/";
 	public static String CONF_EXPORT = "GSC_Rouen";
 	
-	public static String indiv1 = "AgeCouple-Tableau 1.csv";
-	public static String indiv2 = "AgeSexeCSP-Tableau 1.csv";
-	public static String indiv3 = "AgeSexe-Tableau 1.csv";
-	public static String indiv4 = "Rouen_iris.csv";
 //	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
 //	public static String menage2 = "Taille ménage & CSP référent-Tableau 1.csv";
 //	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
@@ -56,39 +51,26 @@ public class GosplRouenConf {
 		
 		// Setup the factory that build attribute
 		AttributeFactory attf = new AttributeFactory();
-		SurveyFactory sf = new SurveyFactory();
 
 		// What to define in this configuration file
-		List<IGSSurvey> inputFiles = new ArrayList<>();
+		List<GSSurveyWrapper> inputFiles = new ArrayList<>();
 		Set<APopulationAttribute> inputAttributes = new HashSet<>();
 		Map<String, IAttribute<? extends IValue>> inputKeyMap = new HashMap<>();
 		
+		// Make file path absolute
+		Path absolutePath = Paths.get(CONF_CLASS_PATH).toAbsolutePath();
+		
 		if(new ArrayList<>(Arrays.asList(args)).isEmpty()){
 			
-			try {
-				// Setup input files' configuration for individual aggregated data
-				inputFiles.add(sf.getSurvey(indiv1, 0, ';', 1, 1, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(indiv2, 0, ';', 2, 1, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(indiv3, 0, ';', 1, 1, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(indiv4, 0, ';', 1, 1, GSSurveyType.ContingencyTable));
-				
-				/*
-				// Setup input files' configuration for household aggregated data
-				inputFiles.add(sf.getSurvey(menage1, 0, ';', 1, 1, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(menage2, 0, ';', 1, 1, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(menage3, 0, ';', 2, 1, GSSurveyType.ContingencyTable));
-
-				
-				// Setup input files' configuration for sample data
-				inputFiles.add(sf.getSurvey(sample1, 0, ',', 0, 1, GSSurveyType.Sample));
-				*/
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InvalidSurveyFormatException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+			// Setup input files' configuration for individual aggregated data
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/AgeCouple-Tableau 1.csv").toString(), 
+					GSSurveyType.ContingencyTable, ';', 1, 1));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/AgeSexeCSP-Tableau 1.csv").toString(), 
+					GSSurveyType.ContingencyTable, ';', 2, 1));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/AgeSexe-Tableau 1.csv").toString(), 
+					GSSurveyType.ContingencyTable, ';', 1, 1));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/Rouen_iris.csv").toString(), 
+					GSSurveyType.ContingencyTable, ',', 1, 1));
 			
 			try {
 				
@@ -329,7 +311,7 @@ public class GosplRouenConf {
 				gxs.serializeGSConfig(gsdI, CONF_EXPORT);
 				System.out.println("Serialize Genstar input data with:\n"+
 						gsdI.getAttributes().size()+" attributs\n"+
-						gsdI.getDataFiles().size()+" data files");
+						gsdI.getSurveyWrapper().size()+" data files");
 								
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -345,7 +327,7 @@ public class GosplRouenConf {
 			}
 			System.out.println("Deserialize Genstar data configuration contains:\n"+
 					gcf.getAttributes().size()+" attributs\n"+
-					gcf.getDataFiles().size()+" data files");
+					gcf.getSurveyWrapper().size()+" data files");
 		}
 	}
 

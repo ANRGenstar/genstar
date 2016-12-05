@@ -19,7 +19,7 @@ public class GeoEntityFactory {
 
 	private Set<AGeoAttribute> attributes;
 
-	private static String ATTRIBUTE_PIXEL_BAND = "Band";
+	public static String ATTRIBUTE_PIXEL_BAND = "Band";
 
 	public GeoEntityFactory(Set<AGeoAttribute> attributes) {
 		this.attributes = attributes;
@@ -54,7 +54,8 @@ public class GeoEntityFactory {
 	}
 
 	/**
-	 * WARNING: could lead to concurrent access exception in case of parallel call
+	 * TODO: revise what AGeoValue should be
+	 * WARNING: could lead to concurrent access exception in case of parallel call (and it does occur)
 	 * 
 	 * @param pixelBands
 	 * @param pixel
@@ -65,7 +66,7 @@ public class GeoEntityFactory {
 	public GSPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
 		Set<AGeoValue> values = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
-			String bandsName = ATTRIBUTE_PIXEL_BAND+"_"+i;
+			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
 			Optional<AGeoAttribute> opAtt = attributes
 					.stream().filter(att -> att.getAttributeName().equals(bandsName))
 					.findFirst();

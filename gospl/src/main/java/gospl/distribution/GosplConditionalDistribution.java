@@ -21,8 +21,6 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<Double> {
 
-	//private static boolean DEBUG_SYSO = true;
-
 	protected GosplConditionalDistribution(Set<AFullNDimensionalMatrix<Double>> jointDistributionSet) throws IllegalDistributionCreation {
 		super(jointDistributionSet);
 	}

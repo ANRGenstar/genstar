@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.media.jai.RasterFactory;
@@ -240,7 +239,7 @@ public class GeofileFactory {
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
 
 		Map<APopulationEntity, Geometry> geoms = population.stream()
-				.collect(Collectors.toMap(Function.identity(), APopulationEntity::getLocation));
+				.collect(Collectors.toMap(e -> e, e -> e.getNest().getGeometry()));
 
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		final String geomType = getGeometryType(geoms.values());

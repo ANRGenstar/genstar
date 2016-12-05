@@ -1,6 +1,5 @@
 package gospl.distribution.matrix;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -99,11 +99,6 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return matrix;
 	}
 	
-
-	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
-		return controlOne.add(controlTwo);
-	}
-	
 	@Override
 	public AControl<T> getVal() {
 		AControl<T> result = getNulVal();
@@ -139,9 +134,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 			if(coordinates.containsKey(val.getAttribute()))
 				coordinates.get(val.getAttribute()).add(val);
 			else
-				coordinates.put(val.getAttribute(), new HashSet<>(Arrays.asList(val)));
+				coordinates.put(val.getAttribute(), Stream.of(val).collect(Collectors.toSet()));
 		}
-		AControl<T> conditionalProba = getIdentityProductVal();
+		AControl<T> conditionalProba = this.getIdentityProductVal();
 		Set<APopulationValue> includedProbaDimension = new HashSet<>();
 		for(APopulationAttribute att : coordinates.keySet()){
 			AControl<T> localProba = getNulVal();
@@ -165,7 +160,21 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return conditionalProba;
 	}
 	
-// ----------------------- utility ----------------------- //
+	// ---------------------- Inner utilities ---------------------- //
+	
+	/**
+	 * Inner utility method that add an encapsulated {@link AControl} value into the first
+	 * given in argument
+	 * 
+	 * @param controlOne
+	 * @param controlTwo
+	 * @return
+	 */
+	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
+		return controlOne.add(controlTwo);
+	}
+	
+	// ----------------------- utility ----------------------- //
 	
 	@Override
 	public String toString(){

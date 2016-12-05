@@ -1,5 +1,6 @@
 package core.configuration;
 
+import java.io.FileNotFoundException;
 import java.io.ObjectStreamException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -12,15 +13,14 @@ import java.util.Set;
 import core.metamodel.IAttribute;
 import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.pop.io.GSSurveyWrapper;
 
 /**
- * 
  * TODO: describe the main contract for input data in genstar !!!
  * <br>
- * TODO: describe
+ * TODO: add configuration for localization process 
  * <p><ul>
- * <li> list of survey and spatial files
+ * <li> list of survey files
  * <li> list of survey attribute
  * <li> list of key attribute (link between survey and spatial attribute)
  * </ul><p>
@@ -30,21 +30,24 @@ import core.metamodel.pop.io.IGSSurvey;
  */
 public class GenstarConfigurationFile {
 
-	private final List<IGSSurvey> dataFileList = new ArrayList<>();
+	private final List<GSSurveyWrapper> dataFileList = new ArrayList<>();
 
 	private final Set<APopulationAttribute> attributeSet = new HashSet<>();
 
 	private final Map<String, IAttribute<? extends IValue>> keyAttribute = new HashMap<>();
 
-	public GenstarConfigurationFile(List<IGSSurvey> dataFiles, 
+	public GenstarConfigurationFile(List<GSSurveyWrapper> dataFiles, 
 			Set<APopulationAttribute> attributes, 
-			Map<String, IAttribute<? extends IValue>> keyAttribute){
+			Map<String, IAttribute<? extends IValue>> keyAttribute) throws FileNotFoundException{
+		for(GSSurveyWrapper wrapper : dataFiles)
+			if(!wrapper.getAbsolutePath().toFile().exists())
+				throw new FileNotFoundException("Absolute path "+wrapper.getAbsoluteStringPath()+" does not denote any file");
 		this.dataFileList.addAll(dataFiles);
 		this.attributeSet.addAll(attributes);
 		this.keyAttribute.putAll(keyAttribute == null ? Collections.emptyMap(): keyAttribute);
 	}
 
-	public List<IGSSurvey> getDataFiles(){
+	public List<GSSurveyWrapper> getSurveyWrapper(){
 		return dataFileList;
 	}
 
@@ -61,8 +64,8 @@ public class GenstarConfigurationFile {
 	 * The serialization process end up in xml file that represents a particular java <br/>
 	 * object of this class; and the way back from xml file to java object. 
 	 */
-	protected Object readResolve() throws ObjectStreamException {
-		List<IGSSurvey> dataFiles = getDataFiles();
+	protected Object readResolve() throws ObjectStreamException, FileNotFoundException {
+		List<GSSurveyWrapper> dataFiles = getSurveyWrapper();
 		Set<APopulationAttribute> attributes = getAttributes();
 		Map<String, IAttribute<? extends IValue>> keyAttribute = getKeyAttributes();
 		return new GenstarConfigurationFile(dataFiles, attributes, keyAttribute);

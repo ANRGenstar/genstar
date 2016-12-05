@@ -33,6 +33,7 @@ import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
@@ -46,6 +47,7 @@ import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.entity.GosplEntity;
+import gospl.io.SurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 
 public class GosplDistributionFactory {
@@ -82,11 +84,13 @@ public class GosplDistributionFactory {
 	 * @throws MatrixCoordinateException
 	 * @throws InvalidFileTypeException
 	 */
-	public void buildDistributions() throws IOException, InvalidSurveyFormatException {
+	public void buildDistributions() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
+		SurveyFactory sf = new SurveyFactory();
 		this.distributions = new HashSet<>();
-		for (final IGSSurvey file : this.configuration.getDataFiles())
-			if (!file.getDataFileType().equals(GSSurveyType.Sample))
-				this.distributions.addAll(getDistribution(file, this.configuration.getAttributes()));
+		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrapper())
+			if (!wrapper.getSurveyType().equals(GSSurveyType.Sample))
+				this.distributions.addAll(getDistribution(sf.getSurvey(wrapper), 
+						this.configuration.getAttributes()));
 	}
 
 	/**
@@ -122,7 +126,7 @@ public class GosplDistributionFactory {
 				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
 		
-		// Matrices that contain an attribute
+		// Matrices that contain an record attribute
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : distributions.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> d.isRecordAttribute()))
 				.collect(Collectors.toSet())){
@@ -145,11 +149,12 @@ public class GosplDistributionFactory {
 	 * @throws InvalidFileTypeException
 	 * 
 	 */
-	public void buildSamples() throws IOException, InvalidSurveyFormatException {
+	public void buildSamples() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
+		SurveyFactory sf = new SurveyFactory();
 		samples = new HashSet<>();
-		for (final IGSSurvey file : this.configuration.getDataFiles())
-			if (file.getDataFileType().equals(GSSurveyType.Sample))
-				samples.add(getSample(file, this.configuration.getAttributes()));
+		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrapper())
+			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
+				samples.add(getSample(sf.getSurvey(wrapper), this.configuration.getAttributes()));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////

@@ -2,6 +2,7 @@ package gospl.example.configuration;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -19,26 +20,16 @@ import core.metamodel.IAttribute;
 import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.pop.io.GSSurveyWrapper;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.entity.attribute.AttributeFactory;
 import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.io.SurveyFactory;
-import gospl.io.exception.InvalidSurveyFormatException;
 
 public class GosplBangkokConf {
 
 	public static String CONF_CLASS_PATH = "../template/Bangkok/";
 	public static String CONF_EXPORT = "GSC_Bangkok";
-
-	// TODO: find a way to search file within CONF_CLASS_PATH
-	public static String indiv1 = "BKK 160 NSO10 DEM-Tableau 1.csv";
-	public static String indiv2 = "BKK 160 NSO10 WRK-Tableau 1.csv";
-	public static String indiv3 = "BKK 160 NSO10 EDU-Tableau 1.csv";
-	public static String indiv4 = "Districts-Tableau 1.csv";
-	public static String menage1 = "BKK 160 NSO10 DEM-Tableau 1.csv";
-	public static String menage2 = "BKK 160 NSO10 HH-Tableau 1.csv";
 
 	public static void main(String[] args) throws InvalidFormatException {
 
@@ -53,32 +44,31 @@ public class GosplBangkokConf {
 
 		// Setup the factory that build attribute
 		AttributeFactory attf = new AttributeFactory();
-		SurveyFactory sf = new SurveyFactory();
 
 		// What to define in this configuration file
-		List<IGSSurvey> inputFiles = new ArrayList<>();
+		List<GSSurveyWrapper> inputFiles = new ArrayList<>();
 		Set<APopulationAttribute> inputAttributes = new HashSet<>();
 		Map<String, IAttribute<? extends IValue>> inputKeyMap = new HashMap<>();
 
+		// Make things a bit more abstract
+		Path absolutePath = Paths.get(CONF_CLASS_PATH).toAbsolutePath();
+
 		if(new ArrayList<>(Arrays.asList(args)).isEmpty()){
 
-			try {
-				
-				// Setup input files' configuration for individual aggregated data
-				inputFiles.add(sf.getSurvey(indiv1, 0, ';', 1, 4, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(indiv2, 0, ';', 1, 4, GSSurveyType.LocalFrequencyTable));
-				inputFiles.add(sf.getSurvey(indiv3, 0, ';', 1, 4, GSSurveyType.LocalFrequencyTable));
-				inputFiles.add(sf.getSurvey(indiv4, 0, ';', 1, 3, GSSurveyType.ContingencyTable));
-				// Setup input files' configuration for household aggregated data
-				inputFiles.add(sf.getSurvey(menage1, 0, ';', 1, 4, GSSurveyType.ContingencyTable));
-				inputFiles.add(sf.getSurvey(menage2, 0, ';', 1, 4, GSSurveyType.LocalFrequencyTable));
-				
-			} catch (IOException e) {
-				e.printStackTrace();
-			} catch (InvalidSurveyFormatException e) {
-				e.printStackTrace();
-			}
-
+			// Setup input files' configuration for individual aggregated data
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Bkk_indiv/BKK 160 NSO10 DEM-Tableau 1.csv").toString(), 
+					GSSurveyType.ContingencyTable, ';', 1, 4));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Bkk_indiv/BKK 160 NSO10 WRK-Tableau 1.csv").toString(), 
+					GSSurveyType.LocalFrequencyTable, ';', 1, 4));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Bkk_indiv/BKK 160 NSO10 EDU-Tableau 1.csv").toString(), 
+					GSSurveyType.LocalFrequencyTable, ';', 1, 4));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Bkk_indiv/Districts-Tableau 1.csv").toString(), 
+					GSSurveyType.ContingencyTable, ';', 1, 3));
+			// Setup input files' configuration for household aggregated data
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Bkk_menage/BKK 160 NSO10 DEM-Tableau 1.csv").toString(), 
+					GSSurveyType.ContingencyTable, ';', 1, 4));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Bkk_menage/BKK 160 NSO10 HH-Tableau 1.csv").toString(), 
+					GSSurveyType.LocalFrequencyTable, ';', 1, 4));
 
 
 			try {
@@ -186,7 +176,7 @@ public class GosplBangkokConf {
 				gxs.serializeGSConfig(gsdI, CONF_EXPORT);
 				System.out.println("Serialize Genstar configuration data with:\n"+
 						gsdI.getAttributes().size()+" attributs\n"+
-						gsdI.getDataFiles().size()+" data files");
+						gsdI.getSurveyWrapper().size()+" data files");
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -202,7 +192,7 @@ public class GosplBangkokConf {
 			}
 			System.out.println("Deserialize Genstar data configuration contains:\n"+
 					gcf.getAttributes().size()+" attributs\n"+
-					gcf.getDataFiles().size()+" data files");
+					gcf.getSurveyWrapper().size()+" data files");
 		}
 	}
 

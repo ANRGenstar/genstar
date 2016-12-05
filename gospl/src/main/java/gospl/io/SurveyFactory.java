@@ -27,6 +27,7 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;
 import gospl.io.exception.InvalidSurveyFormatException;
 
@@ -38,10 +39,10 @@ import gospl.io.exception.InvalidSurveyFormatException;
  */
 public class SurveyFactory {
 
-	private char DEFAULT_SEPARATOR = ',';
-	private int DEFAULT_SHEET_NB = 0;
-	private int FIRST_ROW_DATA = 1;
-	private int FIRST_COLUMN_DATA = 1;
+	private char separator = GSSurveyWrapper.DEFAULT_SEPARATOR;
+	private int sheetNb = GSSurveyWrapper.DEFAULT_SHEET_NB;
+	private int firstRowDataIdx = GSSurveyWrapper.FIRST_ROW_DATA;
+	private int firstColumnDataIdx = GSSurveyWrapper.FIRST_COLUMN_DATA;
 
 	private static final String CSV_EXT = ".csv";
 	private static final String XLS_EXT = ".xls";
@@ -64,10 +65,10 @@ public class SurveyFactory {
 	public SurveyFactory(final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex) {
 		this();
-		this.DEFAULT_SHEET_NB = sheetNn;
-		this.DEFAULT_SEPARATOR = csvSeparator;
-		this.FIRST_ROW_DATA = firstRowDataIndex;
-		this.FIRST_COLUMN_DATA = firstColumnDataIndex;
+		this.sheetNb = sheetNn;
+		this.separator = csvSeparator;
+		this.firstRowDataIdx = firstRowDataIndex;
+		this.firstColumnDataIdx = firstColumnDataIndex;
 	}
 	
 	/**
@@ -82,6 +83,24 @@ public class SurveyFactory {
 	// ----------------------------------------------------------------------- //
 	// ------------------------- DATA IMPORT SECTION ------------------------- //
 	// ----------------------------------------------------------------------- //
+	
+	/**
+	 * Retrieve a survey from a wrapper (lighter memory version of a survey) 
+	 * 
+	 * @see GSSurveyWrapper
+	 * 
+	 * @param wrapper
+	 * @return
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
+	 */
+	public IGSSurvey getSurvey(GSSurveyWrapper wrapper) 
+			throws InvalidFormatException, IOException, InvalidSurveyFormatException {
+		return this.getSurvey(wrapper.getAbsolutePath().toFile(), wrapper.getSheetNumber(), 
+				wrapper.getCsvSeparator(), wrapper.getFirstRowIndex(), wrapper.getFirstColumnIndex(),
+				wrapper.getSurveyType());
+	}
 	
 	/**
 	 * TODO: javadoc
@@ -125,8 +144,8 @@ public class SurveyFactory {
 	 */
 	public IGSSurvey getSurvey(final String filepath, GSSurveyType dataFileType) 
 			throws InvalidFormatException, IOException, InvalidSurveyFormatException{
-		return this.getSurvey(filepath, DEFAULT_SHEET_NB, DEFAULT_SEPARATOR, 
-				FIRST_ROW_DATA, FIRST_COLUMN_DATA, dataFileType);
+		return this.getSurvey(filepath, sheetNb, separator, 
+				firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
 
 	/**
@@ -170,8 +189,8 @@ public class SurveyFactory {
 	 */
 	public IGSSurvey getSurvey(final File file, GSSurveyType dataFileType) 
 			throws IOException, InvalidFormatException, InvalidSurveyFormatException {
-		return this.getSurvey(file, DEFAULT_SHEET_NB, DEFAULT_SEPARATOR, 
-				FIRST_ROW_DATA, FIRST_COLUMN_DATA, dataFileType);
+		return this.getSurvey(file, sheetNb, separator, 
+				firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
 
 	/**
@@ -217,8 +236,8 @@ public class SurveyFactory {
 	 */
 	public IGSSurvey getSurvey(final String fileName, final InputStream surveyIS, GSSurveyType dataFileType) 
 			throws IOException, InvalidFormatException, InvalidSurveyFormatException {
-		return this.getSurvey(fileName, surveyIS, DEFAULT_SHEET_NB, DEFAULT_SEPARATOR, 
-				FIRST_ROW_DATA, FIRST_COLUMN_DATA, dataFileType);
+		return this.getSurvey(fileName, surveyIS, sheetNb, separator, 
+				firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
 	
 	// ----------------------------------------------------------------------- //
@@ -242,13 +261,13 @@ public class SurveyFactory {
 			int individual = 1;
 			final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 			final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
-			bw.write("Individual" + DEFAULT_SEPARATOR
-					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(DEFAULT_SEPARATOR)))
+			bw.write("Individual" + separator
+					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator)))
 					+ "\n");
 			for (final APopulationEntity e : population) {
 				bw.write(String.valueOf(individual++));
 				for (final APopulationAttribute attribute : attributes)
-					bw.write(DEFAULT_SEPARATOR + e.getValueForAttribute(attribute).getStringValue());
+					bw.write(separator + e.getValueForAttribute(attribute).getStringValue());
 				bw.write("\n");
 			}
 		} catch (final IOException e) {
