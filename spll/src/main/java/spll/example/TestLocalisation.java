@@ -28,10 +28,10 @@ import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
-import gospl.algo.sampler.GosplBasicSampler;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.algo.sampler.sr.GosplBasicSampler;
+import gospl.distribution.GosplDistributionBuilder;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -68,7 +68,7 @@ public class TestLocalisation {
 		///////////////////////
 		
 		//target number of entities to create
-		int targetPopulation = 10000; 
+		int targetPopulation = 100000; 
 		
 		//path to the configuration file for the population generation (GOSPL)
 		String stringPathToXMLConfFile = "sample/Rouen/GSC_Rouen.xml";
@@ -267,9 +267,9 @@ public class TestLocalisation {
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionFactory df = null; 
+		GosplDistributionBuilder df = null; 
 		try {
-			df = new GosplDistributionFactory(confFile);
+			df = new GosplDistributionBuilder(confFile);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}

@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -132,12 +133,25 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////
 
 	@Override
+	public AControl<T> getVal() {
+		AControl<T> result = getNulVal();
+		for(AControl<T> control : this.matrix.values())
+			getSummedControl(result, control);
+		return result;
+	}
+	
+	@Override
 	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
 		if(!matrix.containsKey(coordinate))
 			throw new NullPointerException("Coordinate "+coordinate+" is absent from this control table ("+this.hashCode()+")");
 		return this.matrix.get(coordinate);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of parallelism through {@link Stream#parallel()}
+	 */
 	@Override
 	public AControl<T> getVal(APopulationValue aspect) {
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
@@ -150,6 +164,11 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of parallelism through {@link Stream#parallel()}
+	 */
 	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects) {
 		if(aspects.stream().allMatch(a -> !matrix.keySet().stream().anyMatch(coord -> coord.contains(a))))
@@ -173,15 +192,6 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 						.stream().allMatch(aa -> aa.getValue()
 								.stream().anyMatch(a -> e.getKey().contains(a))))
 				.map(Entry::getValue).collect(Collectors.toSet()))
-			getSummedControl(result, control);
-		return result;
-	}
-
-
-	@Override
-	public AControl<T> getVal() {
-		AControl<T> result = getNulVal();
-		for(AControl<T> control : this.matrix.values())
 			getSummedControl(result, control);
 		return result;
 	}

@@ -15,10 +15,10 @@ import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
 import gospl.algo.IDistributionInferenceAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
-import gospl.algo.sampler.GosplBasicSampler;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.algo.sampler.sr.GosplBasicSampler;
+import gospl.distribution.GosplDistributionBuilder;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -40,9 +40,9 @@ public class GosplSPTemplate {
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionFactory df = null;
+		GosplDistributionBuilder df = null;
 		try {
-			df = new GosplDistributionFactory(confFile);
+			df = new GosplDistributionBuilder(confFile);
 		} catch (final FileNotFoundException e) {
 			e.printStackTrace();
 		}

@@ -1,4 +1,4 @@
-package gospl.algo.sampler;
+package gospl.algo.sampler.sr;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandom;
+import gospl.algo.sampler.IDistributionSampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.util.GosplBasicDistribution;

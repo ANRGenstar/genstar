@@ -1,4 +1,4 @@
-package gospl.algo;
+package gospl.algo.graph;
 
 import java.awt.Desktop;
 import java.io.File;

@@ -20,7 +20,7 @@ import core.metamodel.pop.APopulationValue;
 import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
 import gospl.algo.IDistributionInferenceAlgo;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplDistributionBuilder;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -103,7 +103,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionFactory df = new GosplDistributionFactory(confFile);
+		GosplDistributionBuilder df = new GosplDistributionBuilder(confFile);
 		
 		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS
 		try {

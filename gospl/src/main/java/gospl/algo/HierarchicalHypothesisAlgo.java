@@ -17,6 +17,7 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
+import gospl.algo.graph.AttributesDependanciesGraph;
 import gospl.algo.sampler.IHierarchicalSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;

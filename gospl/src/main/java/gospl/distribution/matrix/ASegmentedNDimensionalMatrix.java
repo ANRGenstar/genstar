@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -129,33 +130,33 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects) {
-		Map<APopulationAttribute, Collection<APopulationValue>> coordinates = new HashMap<>();
-		for(APopulationValue val : aspects){
-			if(coordinates.containsKey(val.getAttribute()))
-				coordinates.get(val.getAttribute()).add(val);
-			else
-				coordinates.put(val.getAttribute(), Stream.of(val).collect(Collectors.toSet()));
-		}
+		// Setup output with identity product value
 		AControl<T> conditionalProba = this.getIdentityProductVal();
-		Set<APopulationValue> includedProbaDimension = new HashSet<>();
-		for(APopulationAttribute att : coordinates.keySet()){
-			AControl<T> localProba = getNulVal();
-			for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
-					.stream().filter(jd -> jd.getDimensions().contains(att)).collect(Collectors.toList())){
-				Set<APopulationAttribute> hookAtt = distribution.getDimensions()
-						.stream().filter(d -> includedProbaDimension.contains(d)).collect(Collectors.toSet());
-				if(hookAtt.isEmpty()){
-					localProba = distribution.getVal(coordinates.get(att));  
-				} else {
-					Set<APopulationValue> hookVals = hookAtt.stream().flatMap(a -> a.getValues().stream()).collect(Collectors.toSet());
-					Set<APopulationValue> localVals = new HashSet<>(hookVals);
-					localVals.addAll(coordinates.get(att));
-					localProba.multiply(distribution.getVal(localVals)
-							.getRowProduct(new ControlFrequency(1d / distribution.getVal(hookVals).getValue().doubleValue())));
-				}
-			}	
-			includedProbaDimension.addAll(coordinates.get(att));
-			conditionalProba.multiply(localProba);
+		// Setup a record of visited dimension to avoid duplicated probabilities
+		Set<APopulationAttribute> remainingDimension = aspects.stream()
+				.map(aspect -> aspect.getAttribute()).collect(Collectors.toSet());
+		
+		// Select matrices that contains at least one concerned dimension and ordered them
+		// in decreasing order of the number of matches
+		List<AFullNDimensionalMatrix<T>> concernedMatrices = jointDistributionSet.stream()
+				.filter(matrix -> matrix.getDimensions().stream().anyMatch(dimension -> remainingDimension.contains(dimension)))
+				.sorted((m1, m2) -> m1.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() >=
+						m2.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() ? -1 : 1)
+				.collect(Collectors.toList());
+		
+		for(AFullNDimensionalMatrix<T> mat : concernedMatrices){
+			if(!mat.getDimensions().stream()
+					.anyMatch(dimension -> remainingDimension.contains(dimension)))
+				continue;
+			// Setup concerned values
+			Set<APopulationValue> concernedValues = aspects.stream()
+					.filter(a -> mat.getDimensions().contains(a.getAttribute()))
+					.collect(Collectors.toSet());
+			// Update conditional probability
+			conditionalProba.multiply(mat.getVal(concernedValues));
+			// Update visited probability
+			remainingDimension.removeAll(concernedValues
+					.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()));
 		}
 		return conditionalProba;
 	}

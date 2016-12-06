@@ -1,4 +1,4 @@
-package gospl.algo.sampler;
+package gospl.algo.sampler.sr;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +18,7 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
+import gospl.algo.sampler.IHierarchicalSampler;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
@@ -83,7 +84,8 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 					// this attribute as for a control attribute an attribute which was already sampled. 
 					// we should probably not sample it, but rather use this reference with the user rules
 					// so we can translate it. 
-					logger.debug("\t{} was already defined to {}; let's reuse the mapping...", att.getReferentAttribute().getAttributeName(), att2value.get(att.getReferentAttribute()));
+					logger.debug("\t{} was already defined to {}; let's reuse the mapping...", 
+							att.getReferentAttribute().getAttributeName(), att2value.get(att.getReferentAttribute()));
 					
 					APopulationValue referentValue = att2value.get(att.getReferentAttribute()); 
 					Set<APopulationValue> mappedValues = att.findMappedAttributeValues(referentValue);
