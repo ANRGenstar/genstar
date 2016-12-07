@@ -22,7 +22,6 @@ import gospl.algo.sampler.IHierarchicalSampler;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
 /**
  * A Hierarchical sampler explores the variables in a given order to generate the individuals.  
@@ -33,8 +32,6 @@ import gospl.distribution.util.GosplBasicDistribution;
 public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
-	@SuppressWarnings("unused")
-	private GosplBasicDistribution gosplBasicDistribution = null;
 	private Collection<List<APopulationAttribute>> explorationOrder = null;
 	private ASegmentedNDimensionalMatrix<Double> segmentedMatrix;
 	
@@ -50,11 +47,9 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	@Override
 	public void setDistribution(
-			GosplBasicDistribution gosplBasicDistribution,
 			Collection<List<APopulationAttribute>> explorationOrder,
 			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
 			) {
-		this.gosplBasicDistribution = gosplBasicDistribution;
 		this.explorationOrder = explorationOrder;
 		this.segmentedMatrix = segmentedMatrix;
 		

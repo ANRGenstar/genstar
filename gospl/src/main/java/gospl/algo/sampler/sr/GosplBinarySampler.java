@@ -3,8 +3,6 @@ package gospl.algo.sampler.sr;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -15,18 +13,17 @@ import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
 /**
  * Sample method to draw from a discrete distribution, based on binary search algorithm
- * <p>
- * Default random engine is {@link ThreadLocalRandom} current generator 
+ * <p> 
  * 
  * TODO: 
  * <ul> 
  *  <li> method reset sampler
- *  <li> random engine abstraction should extends another one than java {@link Random} 
+ *  <li> junit test because it is not robust at all
  * </ul>
  * 
  * @author kevinchapuis
@@ -44,7 +41,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 	
 
 	@Override
-	public void setDistribution(GosplBasicDistribution distribution){
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution){
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
 				distribution.size());
 		gspu.sysoStempPerformance(0, this);
@@ -52,20 +49,16 @@ public class GosplBinarySampler implements IDistributionSampler {
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
 		int count = 1;
-		for(Entry<ACoordinate<APopulationAttribute, APopulationValue>, Double> entry : distribution.entrySet()){
+		for(Entry<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> entry : 
+				distribution.getMatrix().entrySet()){
 			indexedKey.add(entry.getKey());
-			sumOfProbabilities += entry.getValue();
+			sumOfProbabilities += entry.getValue().getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
 			if(count++ % (distribution.size() / 10) == 0)
 				gspu.sysoStempPerformance(count * 1d / distribution.size(), this);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
 			throw new IllegalArgumentException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
-	}
-
-	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 
 	// -------------------- main contract -------------------- //

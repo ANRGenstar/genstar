@@ -12,8 +12,8 @@ import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandom;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
 
 public class GosplBasicSampler implements IDistributionSampler {
@@ -30,13 +30,14 @@ public class GosplBasicSampler implements IDistributionSampler {
 
 
 	@Override
-	public void setDistribution(GosplBasicDistribution distribution) {
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
 		this.indexedKey = new ArrayList<>(distribution.size());
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
-		for(Entry<ACoordinate<APopulationAttribute, APopulationValue>, Double> entry : distribution.entrySet()){
+		for(Entry<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> entry : 
+				distribution.getMatrix().entrySet()){
 			indexedKey.add(entry.getKey());
-			sumOfProbabilities += entry.getValue();
+			sumOfProbabilities += entry.getValue().getValue();
 			indexedProbabilitySum.add(sumOfProbabilities);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON){
@@ -46,11 +47,6 @@ public class GosplBasicSampler implements IDistributionSampler {
 			} else 
 				throw new IllegalArgumentException("Sum of probabilities for this sampler is not equal to 1 (SOP = "+sumOfProbabilities+")");
 		}
-	}
-
-	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 	
 

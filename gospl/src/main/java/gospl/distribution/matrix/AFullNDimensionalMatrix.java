@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -121,6 +122,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
 		return Collections.unmodifiableMap(matrix);
+	}
+	
+	@Override
+	public LinkedHashMap<ACoordinate<APopulationAttribute,APopulationValue>, AControl<T>> getOrderedMatrix() {
+		return matrix.entrySet().stream().sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new));
 	}
 	
 	@Override

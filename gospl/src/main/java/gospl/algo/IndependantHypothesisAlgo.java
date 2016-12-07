@@ -17,13 +17,13 @@ import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
+import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
 
 /**
@@ -209,7 +209,8 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 			gspu.sysoStempPerformance(1, this);
 		}
 	
-		sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
+		sampler.setDistribution(new GosplDistributionFactory()
+				.createDistribution(matrix.getDimensions(), sampleDistribution));
 		return sampler;
 	}
 

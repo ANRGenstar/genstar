@@ -1,7 +1,5 @@
 package gospl.algo.ipf;
 
-import java.util.Collection;
-
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
@@ -14,7 +12,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 
 public class CombinatorialOptimizationIPFAlgo extends GosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
 
-	public CombinatorialOptimizationIPFAlgo(Collection<APopulationEntity> seed,
+	public CombinatorialOptimizationIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix) {
 		super(seed);
 		super.setMarginalMatrix(matrix);

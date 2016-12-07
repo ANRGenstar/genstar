@@ -4,6 +4,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -16,8 +17,8 @@ import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandom;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
 /******************************************************************************
  * File: AliasMethod.java
@@ -50,14 +51,18 @@ public class GosplAliasSampler implements IDistributionSampler {
 	// -------------------- setup methods -------------------- //
 
 	@Override
-	public void setDistribution(GosplBasicDistribution distribution){
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution){
 		if(distribution == null)
 			throw new NullPointerException();
-		if(distribution.isEmpty())
+		if(distribution.getMatrix().isEmpty())
 			throw new IllegalArgumentException("Probability vector must be nonempty.");
 		
-		this.indexedKey = new ArrayList<>(distribution.keySet());
-		this.initProba = new ArrayList<>(distribution.values());
+		Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> orderedDistribution = 
+				distribution.getOrderedMatrix();
+		
+		this.indexedKey = new ArrayList<>(orderedDistribution.keySet());
+		this.initProba = orderedDistribution.values().stream().map(AControl::getValue)
+				.collect(Collectors.toList());
 		
 		/* Allocate space for the probability and alias tables. */
 		probability = new double[distribution.size()];
@@ -127,11 +132,6 @@ public class GosplAliasSampler implements IDistributionSampler {
 			probability[small.removeLast()] = 1.0;
 		while (!large.isEmpty())
 			probability[large.removeLast()] = 1.0;
-	}
-
-	@Override
-	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.setDistribution(new GosplBasicDistribution(distribution));
 	}
 	
 

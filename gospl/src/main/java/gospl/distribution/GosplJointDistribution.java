@@ -21,7 +21,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 
-	protected GosplJointDistribution(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, GSSurveyType metaDataType) {
+	protected GosplJointDistribution(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, 
+			GSSurveyType metaDataType) {
 		super(dimensionAspectMap, metaDataType);
 	}
 		

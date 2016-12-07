@@ -31,7 +31,6 @@ import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;

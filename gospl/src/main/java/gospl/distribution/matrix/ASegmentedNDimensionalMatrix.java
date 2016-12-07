@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -16,7 +16,6 @@ import core.metamodel.pop.io.GSSurveyType;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
-import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
@@ -88,6 +87,12 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	
 	// ---------------------- Matrix accessors ---------------------- //
 	
+	/**
+	 * Return the partitioned view of this matrix, i.e. the collection
+	 * of inner full matrices
+	 * 
+	 * @return
+	 */
 	public Collection<AFullNDimensionalMatrix<T>> getMatrices(){
 		return Collections.unmodifiableSet(jointDistributionSet);
 	}
@@ -97,6 +102,14 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = new HashMap<>();
 		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
 			matrix.putAll(jd.getMatrix());
+		return matrix;
+	}
+	
+	public LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getOrderedMatrix(){
+		LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = 
+				new LinkedHashMap<>();
+		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
+			matrix.putAll(jd.getOrderedMatrix());
 		return matrix;
 	}
 	
