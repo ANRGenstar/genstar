@@ -7,10 +7,11 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.ICombinatorialOptimizationAlgo;
 import gospl.algo.sampler.IEntitySampler;
 import gospl.algo.sampler.ISampler;
+import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
-public class CombinatorialOptimizationIPFAlgo extends GosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
+public class CombinatorialOptimizationIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
 
 	public CombinatorialOptimizationIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix) {
@@ -18,12 +19,19 @@ public class CombinatorialOptimizationIPFAlgo extends GosplIPF<Integer> implemen
 		super.setMarginalMatrix(matrix);
 	}
 	
+	public CombinatorialOptimizationIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
+			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix,
+			int step, double delta) {
+		super(seed);
+		super.setMarginalMatrix(matrix);
+		super.setMaxStep(step);
+		super.setMaxDelta(delta);
+	}
+	
 	@Override
 	public ISampler<APopulationEntity> inferCOSampler(
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample, 
 			IEntitySampler sampler) {
-		
-		// TODO: test if sample fits to ipf controls
 		
 		sampler.setSample(sample);
 		sampler.setObjectives(super.process());
@@ -32,9 +40,12 @@ public class CombinatorialOptimizationIPFAlgo extends GosplIPF<Integer> implemen
 	}
 
 	@Override
-	public AFullNDimensionalMatrix<Integer> process(double convergenceDelta, int step) {
-		// TODO Auto-generated method stub
-		return null;
+	public AFullNDimensionalMatrix<Integer> process(double delta, int step) {
+		if(this.matrix == null || this.matrix.getMatrix().isEmpty()) 
+			throw new IllegalArgumentException(this.getClass().getSimpleName()+" must define a matrix to setup marginals");
+		super.setMaxStep(step);
+		super.setMaxDelta(delta);
+		return process(new GosplDistributionFactory().createContringency(seed));
 	}
 
 }

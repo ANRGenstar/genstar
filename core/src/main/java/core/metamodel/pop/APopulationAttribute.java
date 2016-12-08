@@ -9,6 +9,12 @@ import java.util.stream.Stream;
 import core.metamodel.IAttribute;
 import core.util.data.GSEnumDataType;
 
+/**
+ * TODO: javadoc
+ * 
+ * @author kevinchapuis
+ * @author Duc an vo
+ */
 public abstract class APopulationAttribute implements IAttribute<APopulationValue> {
 
 	private APopulationAttribute referentAttribute;

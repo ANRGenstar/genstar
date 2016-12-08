@@ -13,6 +13,7 @@ import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
+import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
@@ -52,7 +53,7 @@ public class GosplDistributionFactory {
 	}
 	
 	/**
-	 * Create a frequency matrix from entity's population characteristics.  
+	 * Create a frequency matrix from entities' population characteristics.  
 	 * <p>
 	 * WARNING: make use of parallelism through {@link Stream#parallel()}
 	 * 
@@ -77,6 +78,30 @@ public class GosplDistributionFactory {
 		
 		// Normalize increments to global frequency
 		matrix.getMatrix().keySet().parallelStream().forEach(coord -> matrix.getVal(coord).multiply(1d/population.size()));
+		
+		return matrix;
+	}
+
+	/**
+	 * Create a contingency matrix from entities' population characteristics
+	 * 
+	 * @param seed
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> createContringency(
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
+		// Init the output matrix
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(population.getPopulationAttributes().stream()
+				.collect(Collectors.toMap(att -> att, att -> att.getValues())));
+		
+		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
+		for(APopulationEntity entity : population){
+			ACoordinate<APopulationAttribute, APopulationValue> entityCoord = new GosplCoordinate(
+					new HashSet<>(entity.getValues()));
+			AControl<Integer> unitFreq = new ControlContingency(1);
+			if(!matrix.addValue(entityCoord, unitFreq))
+				matrix.getVal(entityCoord).add(unitFreq);
+		}
 		
 		return matrix;
 	}

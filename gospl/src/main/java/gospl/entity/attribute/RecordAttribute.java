@@ -8,6 +8,12 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.util.data.GSEnumDataType;
 
+/**
+ * TODO: javadoc
+ * 
+ * @author kevinchapuis
+ * @author Duc an vo
+ */
 public class RecordAttribute extends APopulationAttribute {
 	
 	public RecordAttribute(String name, GSEnumDataType dataType, APopulationAttribute referentAttribute) {

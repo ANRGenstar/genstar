@@ -23,7 +23,7 @@ import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.entity.attribute.AttributeFactory;
+import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.entity.attribute.GSEnumAttributeType;
 
 public class GosplBangkokConf {
@@ -43,7 +43,7 @@ public class GosplBangkokConf {
 		}
 
 		// Setup the factory that build attribute
-		AttributeFactory attf = new AttributeFactory();
+		GosplAttributeFactory attf = new GosplAttributeFactory();
 
 		// What to define in this configuration file
 		List<GSSurveyWrapper> inputFiles = new ArrayList<>();

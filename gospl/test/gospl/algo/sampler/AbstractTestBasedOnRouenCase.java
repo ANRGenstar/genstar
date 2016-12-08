@@ -25,7 +25,7 @@ import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.entity.attribute.AttributeFactory;
+import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.example.GosplSPTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
@@ -75,7 +75,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		 // Setup the factory that build attribute
 		 @SuppressWarnings("unused")
-		AttributeFactory attf = new AttributeFactory();
+		GosplAttributeFactory attf = new GosplAttributeFactory();
 		
 		 GenstarConfigurationFile gcf = null;
 		 try {

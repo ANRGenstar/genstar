@@ -16,6 +16,7 @@ import core.util.data.GSEnumDataType;
  * TODO: javadoc
  * 
  * @author kevinchapuis
+ * @author Duc an vo
  *
  */
 public class MappedAttribute extends APopulationAttribute {

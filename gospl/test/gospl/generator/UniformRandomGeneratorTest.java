@@ -12,7 +12,7 @@ import core.metamodel.pop.APopulationValue;
 
 public class UniformRandomGeneratorTest {
 
-	static UniformRandomGenerator urg;
+	static UtilGenerator urg;
 	
 	static int maxAtt = 4, maxVal = 10;
 	
@@ -20,7 +20,7 @@ public class UniformRandomGeneratorTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		urg = new UniformRandomGenerator(maxAtt, maxVal);
+		urg = new UtilGenerator(maxAtt, maxVal);
 	}
 
 	@Test

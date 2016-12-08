@@ -14,52 +14,82 @@ import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
 import gospl.GosplPopulation;
 import gospl.entity.GosplEntity;
-import gospl.entity.attribute.AttributeFactory;
+import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.entity.attribute.GSEnumAttributeType;
 
 /**
  * 
- * Fully random generator: attribute and they values are randomly init. i.e. number of attribute,
- * number of value for each attribute, attribute name and value are choose randomly <p>
- * 
- * Use intended to supply any localization and / or interaction
+ * Fully random generator: 
+ * <p>
+ * <ul>
+ * <li> 1st constructor: lead to a fully random population (attribute & value 
+ * are generated randomly from a set of chars)
+ * </ul> 2nd constructor: given a set of attributes generate a population
+ * <p>
+ * Note: intended to be used as a population supplier on any test
  * 
  * @author kevinchapuis
  *
  */
-public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
+public class UtilGenerator implements ISyntheticGosplPopGenerator {
 
 	private int maxAtt;
 	private int maxVal;
-	
+
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
+
+	private Set<APopulationAttribute> attributes;
+
 	Random random = GenstarRandom.getInstance();
 
-	public UniformRandomGenerator(int maxAtt, int maxVal) {
+	/**
+	 * Set the maximum number of attribute and maximum value per attribute
+	 * 
+	 * @param maxAtt
+	 * @param maxVal
+	 */
+	public UtilGenerator(int maxAtt, int maxVal) {
 		this.maxAtt = maxAtt;
 		this.maxVal = maxVal;
 	}
-	
+
+	/**
+	 * Provide the set of attribute to draw entity from
+	 * 
+	 * @param attributes
+	 */
+	public UtilGenerator(Set<APopulationAttribute> attributes){
+		this.attributes = attributes;
+	}
+
 	@Override
 	public GosplPopulation generate(int numberOfIndividual) {
-		
+
 		// Basic population to feed
 		GosplPopulation gosplPop = new GosplPopulation();
-		
+
 		// Attribute Factory
-		AttributeFactory attF = new AttributeFactory();
-		Set<APopulationAttribute> attSet = IntStream.range(0, random.nextInt(maxAtt)+1)
-				.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
-				.collect(Collectors.toSet());
-		
+		if(attributes == null){
+			GosplAttributeFactory attF = new GosplAttributeFactory();
+			this.attributes = IntStream.range(0, random.nextInt(maxAtt)+1)
+					.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
+					.collect(Collectors.toSet());
+		}
+
 		IntStream.range(0, numberOfIndividual).forEach(i -> gosplPop.add(
-				new GosplEntity(attSet.stream().collect(Collectors.toMap(att -> att, 
+				new GosplEntity(attributes.stream().collect(Collectors.toMap(att -> att, 
 						att -> randomVal(att.getValues()))))));
-		
+
 		return gosplPop;
 	}
 
-	private APopulationAttribute createIntegerAtt(AttributeFactory factory) {
+
+	// ------------------------------------------------------ //
+	// ---------- attribute & value random creator ---------- //
+	// ------------------------------------------------------ //
+
+
+	private APopulationAttribute createIntegerAtt(GosplAttributeFactory factory) {
 		APopulationAttribute asa = null;
 		try {
 			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
@@ -72,14 +102,14 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		}
 		return asa;
 	}
-	
-	private APopulationAttribute createStringAtt(AttributeFactory factory){
+
+	private APopulationAttribute createStringAtt(GosplAttributeFactory factory){
 		APopulationAttribute asa = null;
 		try {
 			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.String, 
 					IntStream.range(0, random.nextInt(maxVal)).mapToObj(j -> 
-							generateName(random.nextInt(j+1))).collect(Collectors.toList()), 
+					generateName(random.nextInt(j+1))).collect(Collectors.toList()), 
 					GSEnumAttributeType.unique);
 		} catch (GSIllegalRangedData e) {
 			// TODO Auto-generated catch block
@@ -87,16 +117,18 @@ public class UniformRandomGenerator implements ISyntheticGosplPopGenerator {
 		}
 		return asa;
 	}
-	
+
 	private String generateName(int size){
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < size; i++) {
-		    char c = chars[random.nextInt(chars.length)];
-		    sb.append(c);
+			char c = chars[random.nextInt(chars.length)];
+			sb.append(c);
 		}
 		return sb.toString();
 	}
-	
+
+	// ---------------------- utilities ---------------------- //
+
 	private APopulationValue randomVal(Set<APopulationValue> values){
 		List<APopulationValue> vals = new ArrayList<>(values);
 		return vals.get(random.nextInt(vals.size()));

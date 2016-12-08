@@ -17,7 +17,7 @@ import core.util.excpetion.GSIllegalRangedData;
 import gospl.entity.attribute.value.RangeValue;
 import gospl.entity.attribute.value.UniqueValue;
 
-public class AttributeFactory {
+public class GosplAttributeFactory {
 
 	private final GSDataParser parser;
 	
@@ -30,7 +30,7 @@ public class AttributeFactory {
 	private double minDouble = 0d;
 	private double maxDouble = 1d;
 
-	public AttributeFactory() {
+	public GosplAttributeFactory() {
 		this.parser = new GSDataParser();
 	}
 
