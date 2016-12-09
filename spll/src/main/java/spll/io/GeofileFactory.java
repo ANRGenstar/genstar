@@ -61,8 +61,8 @@ import core.metamodel.geo.io.IGSGeofile;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import core.util.GSBasicStats;
-import core.util.data.GSEnumStats;
+import core.util.stats.GSBasicStats;
+import core.util.stats.GSEnumStats;
 import spll.entity.GSFeature;
 import spll.io.exception.InvalidGeoFormatException;
 

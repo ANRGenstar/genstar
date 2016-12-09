@@ -44,7 +44,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  * @author kevinchapuis
  *
  */
-public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDistributionSampler> {
+public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<IDistributionSampler> {
 
 	private Logger logger = LogManager.getLogger();
 	
@@ -53,7 +53,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 	}
 
 	@Override
-	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferDistributionSampler(
+	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSampler(
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,
 			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())

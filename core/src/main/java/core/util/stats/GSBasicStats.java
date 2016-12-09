@@ -1,4 +1,4 @@
-package core.util;
+package core.util.stats;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,7 +10,6 @@ import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
 import core.metamodel.IEntity;
-import core.util.data.GSEnumStats;
 
 /**
  * Intended to compute statistic on various list of number. To compute statistics on arrays {@see GSBasicStats#transpose(...)} static methods

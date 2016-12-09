@@ -1,4 +1,4 @@
-package core.util.data;
+package core.util.stats;
 
 public enum GSEnumStats {
 

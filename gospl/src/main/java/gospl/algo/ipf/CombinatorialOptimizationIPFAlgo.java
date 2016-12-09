@@ -22,10 +22,8 @@ public class CombinatorialOptimizationIPFAlgo extends AGosplIPF<Integer> impleme
 	public CombinatorialOptimizationIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix,
 			int step, double delta) {
-		super(seed);
+		super(seed, step, delta);
 		super.setMarginalMatrix(matrix);
-		super.setMaxStep(step);
-		super.setMaxDelta(delta);
 	}
 	
 	@Override
@@ -34,18 +32,16 @@ public class CombinatorialOptimizationIPFAlgo extends AGosplIPF<Integer> impleme
 			IEntitySampler sampler) {
 		
 		sampler.setSample(sample);
-		sampler.setObjectives(super.process());
+		sampler.setObjectives(process());
 		
 		return sampler;
 	}
 
 	@Override
-	public AFullNDimensionalMatrix<Integer> process(double delta, int step) {
-		if(this.matrix == null || this.matrix.getMatrix().isEmpty()) 
+	public AFullNDimensionalMatrix<Integer> process() {
+		if(this.marginals == null || this.marginals.getMatrix().isEmpty()) 
 			throw new IllegalArgumentException(this.getClass().getSimpleName()+" must define a matrix to setup marginals");
-		super.setMaxStep(step);
-		super.setMaxDelta(delta);
-		return process(new GosplDistributionFactory().createContringency(seed));
+		return process(new GosplDistributionFactory().createContringency(sampleSeed));
 	}
 
 }

@@ -19,7 +19,7 @@ import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
-import gospl.algo.IDistributionInferenceAlgo;
+import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplDistributionBuilder;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -56,7 +56,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	protected abstract SamplerType getSamplerToTest();
 	
 	
-	protected abstract IDistributionInferenceAlgo<SamplerType> getInferenceAlgoToTest();
+	protected abstract ISyntheticReconstructionAlgo<SamplerType> getInferenceAlgoToTest();
 	
 	/**
 	 * Provides the configuration file for Rouen
@@ -151,10 +151,10 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		}
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		final IDistributionInferenceAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
+		final ISyntheticReconstructionAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
 		ISampler<ACoordinate<APopulationAttribute,APopulationValue>> sampler = null;
 		try {
-			sampler = distributionInfAlgo.inferDistributionSampler(
+			sampler = distributionInfAlgo.inferSRSampler(
 					distribution, 
 					this.getSamplerToTest()
 					);

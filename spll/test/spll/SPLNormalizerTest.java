@@ -11,8 +11,8 @@ import java.util.stream.IntStream;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import core.util.GSBasicStats;
-import core.util.data.GSEnumStats;
+import core.util.stats.GSBasicStats;
+import core.util.stats.GSEnumStats;
 import spll.popmapper.normalizer.ASPLNormalizer;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 

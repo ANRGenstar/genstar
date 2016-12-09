@@ -1,6 +1,9 @@
 package gospl.algo.ipf;
+import static org.junit.Assert.assertTrue;
+
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -14,10 +17,10 @@ import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.util.data.GSEnumDataType;
 import gospl.GosplPopulation;
-import gospl.algo.IDistributionInferenceAlgo;
+import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
-import gospl.algo.sampler.sr.GosplBinarySampler;
+import gospl.algo.sampler.sr.GosplBasicSampler;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -56,13 +59,12 @@ public class GosplIPFTest {
 		
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(attributes);
 		objectif = generator.generate(POPULATION_SIZE);
-		System.out.println(objectif.size());
+		
 		List<APopulationEntity> collectionSeed = new ArrayList<>(objectif)
 				.subList(0, (int)(POPULATION_SIZE * SEED_RATIO));
 		seed = new GosplPopulation();
+		Collections.shuffle(collectionSeed);
 		collectionSeed.stream().forEach(entity -> seed.add(entity));
-		
-		System.out.println(seed.size());
 		
 		GosplDistributionFactory gdf = new GosplDistributionFactory();
 		marginals = gdf.createDistribution(objectif);
@@ -70,16 +72,17 @@ public class GosplIPFTest {
 
 	@Test
 	public void test() {
-		IDistributionInferenceAlgo<IDistributionSampler> inferenceAlgo = new DistributionInferenceIPFAlgo(seed);
+		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new DistributionInferenceIPFAlgo(seed);
 		ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler = null;
 		try {
-			sampler = inferenceAlgo.inferDistributionSampler(marginals, new GosplBinarySampler());
+			sampler = inferenceAlgo.inferSRSampler(marginals, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		ISyntheticGosplPopGenerator gosplGenerator = new DistributionBasedGenerator(sampler);
 		gosplGenerator.generate(100);
+		assertTrue(true);
 	}
 
 }

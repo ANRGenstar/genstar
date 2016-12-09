@@ -32,7 +32,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  * @author Samuel Thiriot
  *
  */
-public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IHierarchicalSampler> {
+public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<IHierarchicalSampler> {
 
 	private Logger logger = LogManager.getLogger();
 	
@@ -43,7 +43,7 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IH
 
 
 	@Override
-	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferDistributionSampler(
+	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSampler(
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix, 
 			IHierarchicalSampler sampler)
 					throws IllegalDistributionCreation {

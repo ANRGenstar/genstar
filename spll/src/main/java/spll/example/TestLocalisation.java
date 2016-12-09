@@ -24,9 +24,9 @@ import core.metamodel.geo.io.IGSGeofile;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import core.util.GSBasicStats;
 import core.util.GSPerformanceUtil;
-import gospl.algo.IDistributionInferenceAlgo;
+import core.util.stats.GSBasicStats;
+import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
@@ -312,10 +312,10 @@ public class TestLocalisation {
 		}
 		
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
+		ISyntheticReconstructionAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
 		ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler = null;
 		try {
-			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
+			sampler = distributionInfAlgo.inferSRSampler(distribution, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e1) {
 			e1.printStackTrace();
 		}

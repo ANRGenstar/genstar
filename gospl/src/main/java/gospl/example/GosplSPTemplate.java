@@ -13,7 +13,7 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
-import gospl.algo.IDistributionInferenceAlgo;
+import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.IndependantHypothesisAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
@@ -93,10 +93,10 @@ public class GosplSPTemplate {
 		}
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		final IDistributionInferenceAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
+		final ISyntheticReconstructionAlgo<IDistributionSampler> distributionInfAlgo = new IndependantHypothesisAlgo();
 		ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler = null;
 		try {
-			sampler = distributionInfAlgo.inferDistributionSampler(distribution, new GosplBasicSampler());
+			sampler = distributionInfAlgo.inferSRSampler(distribution, new GosplBasicSampler());
 		} catch (final IllegalDistributionCreation e1) {
 			e1.printStackTrace();
 		}
