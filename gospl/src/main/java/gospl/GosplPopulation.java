@@ -1,10 +1,8 @@
 package gospl;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -110,42 +108,5 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	public Set<APopulationAttribute> getPopulationAttributes(){
 		return population.parallelStream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
-	
-// --------------------------------- POP REPORT METHODS --------------------------------- //
-	
-	@Override
-	public String csvReport(CharSequence csvSep) {
-		Set<APopulationAttribute> attributes = this.getPopulationAttributes();
-		String report = attributes.stream().map(att -> att.getAttributeName() + csvSep + "contingent" + csvSep + "pourcentage").collect(Collectors.joining(csvSep))+"\n";
-		List<String> lines = new ArrayList<>();
-		for(int i = 0; i < attributes.stream().mapToInt(att -> att.getValues().size()).max().getAsInt()+1; i++)
-			lines.add("");
-		System.out.println("Headers done !");
-		for(APopulationAttribute attribute : attributes){
-			int lineNumber = 0;
-			Set<APopulationValue> vals = new HashSet<>(attribute.getValues());
-			vals.add(attribute.getEmptyValue());
-			for(APopulationValue value : vals){
-				long valCount = this.population.parallelStream()
-						.filter(e -> e.getValueForAttribute(attribute) != null && e.getValueForAttribute(attribute).equals(value)).count();
-				double valProp =  Math.round(Math.round(((valCount * 1d / this.population.size()) * 10000))) / 100d;
-				if(lines.get(lineNumber).isEmpty())
-					lines.set(lineNumber, value.getStringValue() + csvSep + valCount + csvSep + valProp);
-				else
-					lines.set(lineNumber, lines.get(lineNumber) + csvSep + value.getInputStringValue() + csvSep + valCount + csvSep + valProp);
-				lineNumber++;
-			}
-			for(int i = lineNumber; i < lines.size(); i++)
-				if(lines.get(i).isEmpty())
-					lines.set(i, lines.get(i) + csvSep + "" + csvSep + "");
-				else
-					lines.set(i, lines.get(i) + csvSep + "" + csvSep + "" + csvSep + "");
-			System.out.println("Attribute "+attribute+" done !");
-		}
-		System.out.println("Start joining lines to one another");
-		report += String.join("\n", lines);
-		return report;
-	}
-
 	
 }

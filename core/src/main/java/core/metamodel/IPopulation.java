@@ -20,6 +20,4 @@ public interface IPopulation<E extends IEntity<A, V>, A extends IAttribute<V>, V
 
 	public Set<A> getPopulationAttributes();
 	
-	public String csvReport(CharSequence csvSep);
-	
 }

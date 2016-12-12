@@ -18,7 +18,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import core.util.random.GenstarRandom;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.IEntitySampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -59,16 +58,16 @@ public abstract class AGosplIPF<T extends Number> {
 	private double delta = Math.pow(10, -2);
 
 	public static double ZERO_CELL_RATIO = Math.pow(10, -3);
-	
+
 	private Logger logger = LogManager.getLogger();
 
 	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed;
 	protected INDimensionalMatrix<APopulationAttribute, APopulationValue, T> marginals;
-	
+
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
 		this.sampleSeed = sampleSeed;
 	}
-	
+
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
 			int step, double delta){
 		this.sampleSeed = sampleSeed;
@@ -143,24 +142,25 @@ public abstract class AGosplIPF<T extends Number> {
 					+ "Distribution: "+Arrays.toString(marginals.getDimensions().toArray()) +"\n"
 					+ "Sample seed: :"+Arrays.toString(seed.getDimensions().toArray()));
 
+		// Some debug purpose log
+		logger.trace("Sample seed controls' dimension: \n{}", seed.getDimensions().stream().map(d -> d.getAttributeName()+" = "+seed.getVal(d.getValues()))
+				.reduce((s1, s2) -> s1.concat("\n"+s2)));
+
 		// Setup IPF main argument
 		Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> marginals = this.getMarginalCellsPerAttribute(this.marginals, true);
 		List<APopulationAttribute> attributesList = new ArrayList<>(this.marginals.getDimensions());
 
-		logger.debug("Setup maginals with a total of {} marginal controls", 
-				(int) marginals.entrySet().stream().mapToDouble(e -> e.getValue().size()).sum());
-		
 		// First: establish convergence criteria
 		int stepIter = step;
 		boolean convergentDelta = false;
-		
-		logger.debug("Convergence criteria are: step = {} | delta = {}", step, delta);
-		logger.debug("Start fitting iterations");
+
+		logger.trace("Convergence criteria are: step = {} | delta = {}", step, delta);
+		logger.trace("Start fitting iterations");
 
 		// Iterate while one of the criteria is not reach
-		while(stepIter-- > 0 || convergentDelta){
+		while(stepIter-- > 0 ? !convergentDelta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
-				logger.debug("Step = {} | convergence {}", stepIter, convergentDelta);
+				logger.trace("Step = {} | convergence {}", step - stepIter, convergentDelta);
 			// For each dimension
 			for(APopulationAttribute attribute : attributesList){
 				// For each marginal
@@ -182,20 +182,19 @@ public abstract class AGosplIPF<T extends Number> {
 			}
 			Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> actualMarginals = getMarginalCellsPerAttribute(seed, true);
 			if(actualMarginals.entrySet().stream().allMatch(entry -> 
-					marginals.get(entry.getKey()).entrySet().stream().allMatch(marginal -> 
-						entry.getValue().get(marginal.getKey()).equalsVal(marginal.getValue(), delta)))){
+				marginals.get(entry.getKey()).entrySet().stream().allMatch(marginal -> 
+					entry.getValue().get(marginal.getKey()).equalsVal(marginal.getValue(), delta))))
 				convergentDelta = true;
-			} else {
-				APopulationAttribute randomAtt = attributesList.get(GenstarRandom.getInstance().nextInt(attributesList.size()));
-				logger.debug("No match values \n{}", actualMarginals.get(randomAtt).entrySet().stream()
-						.map(e -> Arrays.toString(e.getKey().toArray())+"\nactual = "+e.getValue().toString()
-								+" | expected = "+marginals.get(randomAtt).get(e.getKey()).toString()).reduce("", (s1, s2) -> s1.concat(s2+"\n")));
-				System.exit(1);
-			}
+			logger.trace("There is some delta exceeding convergence criteria\n{}", actualMarginals.entrySet().stream()
+					.map(eActual -> eActual.getKey().getAttributeName()+" IPF computed values:\n"+
+							eActual.getValue().entrySet().stream().map(vActual -> Arrays.toString(vActual.getKey().toArray())
+									+" => "+vActual.getValue()+" | "+marginals.get(eActual.getKey()).get(vActual.getKey()))
+							.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
+					.reduce("", (s1, s2) -> s1.concat(s2)));
 		}
 		return seed;
 	}
-	
+
 	// ---------------------- IPF utilities ---------------------- //
 
 	/**

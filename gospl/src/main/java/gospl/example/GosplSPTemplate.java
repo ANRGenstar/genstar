@@ -3,7 +3,6 @@ package gospl.example;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -11,6 +10,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
 import gospl.algo.ISyntheticReconstructionAlgo;
@@ -117,24 +117,19 @@ public class GosplSPTemplate {
 		}
 
 		// MAKE REPORT
+		final SurveyFactory sf = new SurveyFactory();
 		final String pathFolder = confFile.getParent().toString() + File.separator;
 		final String report = "PopReport.csv";
 		final String export = "PopExport.csv";
 		
 		try {
-			new SurveyFactory().createSurvey(new File(pathFolder+export), population);
+			sf.createSurvey(new File(pathFolder+export), GSSurveyType.Sample, population);
+			sf.createSurvey(new File(pathFolder+report), GSSurveyType.GlobalFrequencyTable, population);
 		} catch (IOException | InvalidSurveyFormatException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		try {
-			gspu.sysoStempMessage("\nStart processing population to output files");
-			Files.write(Paths.get(pathFolder + report), population.csvReport(";").getBytes());
-			gspu.sysoStempPerformance("\treport done: " + pathFolder + report, GosplSPTemplate.class.getName());
-		} catch (final IOException e) {
 			e.printStackTrace();
 		}
 

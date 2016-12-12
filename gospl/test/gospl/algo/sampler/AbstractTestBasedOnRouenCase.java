@@ -1,12 +1,8 @@
 package gospl.algo.sampler;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
@@ -15,8 +11,8 @@ import org.junit.rules.TemporaryFolder;
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarXmlSerializer;
 import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
 import gospl.algo.ISyntheticReconstructionAlgo;
@@ -29,6 +25,7 @@ import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.example.GosplSPTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.io.SurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 
 public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
@@ -187,41 +184,21 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
 		try {
 			tmpDir.create();
-
-			final CharSequence csvSep = ";";
-			int individual = 1;
-			File reportFile = tmpDir.newFile("PopExport.csv");
-
-			final BufferedWriter bw = Files.newBufferedWriter(reportFile.toPath());
-			final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
-			bw.write("Individual" + csvSep
-					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))
-					+ "\n");
-			for (final APopulationEntity e : population) {
-				bw.write(String.valueOf(individual++));
-				for (final APopulationAttribute attribute : attributes) {
-					APopulationValue av = e.getValueForAttribute(attribute); 
-					bw.write(csvSep + (av == null?"":e.getValueForAttribute(attribute).getStringValue()));
-				}
-				bw.write("\n");
-			}
-			bw.close();
-			gspu.sysoStempPerformance("\texport done: " + reportFile.getAbsolutePath(), GosplSPTemplate.class.getName());
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-
-			
-			gspu.sysoStempMessage("\nStart processing population to output files");
+			File exportFile = tmpDir.newFile("PopExport.csv");
 			File reportFile = tmpDir.newFile("PopReport.csv");
-			Files.write(reportFile.toPath(), population.csvReport(";").getBytes());
-			gspu.sysoStempPerformance("\treport done: " + reportFile.getAbsolutePath(), GosplSPTemplate.class.getName());
+			
+			SurveyFactory sf = new SurveyFactory();
+			sf.createSurvey(exportFile, GSSurveyType.Sample, population);
+			sf.createSurvey(reportFile, GSSurveyType.GlobalFrequencyTable, population);
 		} catch (final IOException e) {
 			e.printStackTrace();
-		}
-		
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidSurveyFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 		
 
 //		fail("Not yet implemented - yet.");

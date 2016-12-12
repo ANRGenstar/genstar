@@ -1,5 +1,6 @@
 package gospl.algo.ipf;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,6 +36,7 @@ public class GosplIPFTest {
 	
 	public static double SEED_RATIO = Math.pow(10, -2);
 	public static int POPULATION_SIZE = (int) Math.pow(10, 5);
+	public static int GENERATION_SIZE = 1000;
 
 	public static IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> objectif;
 	public static IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed;
@@ -52,10 +54,12 @@ public class GosplIPFTest {
 				Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus"), GSEnumAttributeType.range));
 		attributes.add(gaf.createAttribute("Couple", GSEnumDataType.Boolean, 
 				Arrays.asList("oui", "non"), GSEnumAttributeType.unique));
+		/*
 		attributes.add(gaf.createAttribute("Education", GSEnumDataType.String, 
 				Arrays.asList("pre-bac", "bac", "licence", "master et plus"), GSEnumAttributeType.unique));
 		attributes.add(gaf.createAttribute("Activité", GSEnumDataType.String, 
 				Arrays.asList("inactif", "chomage", "employé", "fonctionnaire", "indépendant", "retraité"), GSEnumAttributeType.unique));
+		*/
 		
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(attributes);
 		objectif = generator.generate(POPULATION_SIZE);
@@ -81,8 +85,8 @@ public class GosplIPFTest {
 			e.printStackTrace();
 		}
 		ISyntheticGosplPopGenerator gosplGenerator = new DistributionBasedGenerator(sampler);
-		gosplGenerator.generate(100);
-		assertTrue(true);
+		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popOut = gosplGenerator.generate(GENERATION_SIZE);
+		assertEquals(GENERATION_SIZE, popOut.size());
 	}
 
 }

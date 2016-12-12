@@ -18,7 +18,11 @@ import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -38,6 +42,8 @@ import gospl.io.exception.InvalidSurveyFormatException;
  *
  */
 public class SurveyFactory {
+	
+	private double precision = Math.pow(10, -2);
 
 	private char separator = GSSurveyWrapper.DEFAULT_SEPARATOR;
 	private int sheetNb = GSSurveyWrapper.DEFAULT_SHEET_NB;
@@ -53,7 +59,7 @@ public class SurveyFactory {
 	public SurveyFactory() {
 		supportedFileFormat = Arrays.asList(CSV_EXT, XLS_EXT, XLSX_EXT);
 	}
-	
+
 	/**
 	 * Replace default factory value by explicit ones
 	 * 
@@ -70,7 +76,7 @@ public class SurveyFactory {
 		this.firstRowDataIdx = firstRowDataIndex;
 		this.firstColumnDataIdx = firstColumnDataIndex;
 	}
-	
+
 	/**
 	 * Gives the list of format (extension) the file this factory can setup input data with
 	 * 
@@ -79,11 +85,11 @@ public class SurveyFactory {
 	public List<String> getSupportedFileFormat() {
 		return supportedFileFormat;
 	}
-	
+
 	// ----------------------------------------------------------------------- //
 	// ------------------------- DATA IMPORT SECTION ------------------------- //
 	// ----------------------------------------------------------------------- //
-	
+
 	/**
 	 * Retrieve a survey from a wrapper (lighter memory version of a survey) 
 	 * 
@@ -101,7 +107,7 @@ public class SurveyFactory {
 				wrapper.getCsvSeparator(), wrapper.getFirstRowIndex(), wrapper.getFirstColumnIndex(),
 				wrapper.getSurveyType());
 	}
-	
+
 	/**
 	 * TODO: javadoc
 	 * 
@@ -131,7 +137,7 @@ public class SurveyFactory {
 		final String[] pathArray = filepath.split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}
-	
+
 	/**
 	 * TODO: javadoc
 	 * 
@@ -222,7 +228,7 @@ public class SurveyFactory {
 					firstRowDataIndex, firstColumnDataIndex, dataFileType);
 		throw new InvalidSurveyFormatException(fileName, supportedFileFormat);
 	}
-	
+
 	/**
 	 * TODO: javadoc
 	 * 
@@ -239,13 +245,82 @@ public class SurveyFactory {
 		return this.getSurvey(fileName, surveyIS, sheetNb, separator, 
 				firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
-	
+
 	// ----------------------------------------------------------------------- //
 	// ---------------------- POPULATION EXPORT SECTION ---------------------- //
 	// ----------------------------------------------------------------------- //
-	
+
 	/**
-	 * TODO: javadoc
+	 * Export a population to a file. Each {@link GSSurveyType} will cause the export
+	 * to be of the corresponding type; i.e. either a sample of the complete population
+	 * or the contingency / frequency of each attribute
+	 * <p>
+	 * WARNING: make use of parallelism using {@link Stream#parallel()}
+	 * 
+	 * @param surveyFile
+	 * @param surveyType
+	 * @param population
+	 * @return
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
+	 */
+	public IGSSurvey createSurvey(File surveyFile, GSSurveyType surveyType,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
+					throws InvalidFormatException, IOException, InvalidSurveyFormatException{
+		switch (surveyType) {
+		case Sample:
+			return createSample(surveyFile, population);
+		case ContingencyTable:
+			return createTable(surveyFile, surveyType, population);
+		case GlobalFrequencyTable:
+			return createTable(surveyFile, surveyType, population);
+		default:
+			return createTable(surveyFile, GSSurveyType.GlobalFrequencyTable, population);
+		}
+	}
+	
+	// ---------------------- inner methods ---------------------- // 
+
+	private IGSSurvey createTable(File surveyFile, GSSurveyType surveyType,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) throws IOException, InvalidFormatException, InvalidSurveyFormatException {
+		Set<APopulationAttribute> attributes = population.getPopulationAttributes();
+		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
+				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
+		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValues().size()).max().getAsInt())
+				.mapToObj(i -> "").collect(Collectors.toList());
+		
+		Map<APopulationValue, Integer> mapReport = attributes.stream().flatMap(att -> 
+					Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue())))
+				.collect(Collectors.toMap(value -> value, value -> 0)); 
+		population.parallelStream().forEach(entity -> entity.getValues()
+				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));
+		
+		for(APopulationAttribute attribute : attributes){
+			int lineNumber = 0;
+			for(APopulationValue value : attribute.getValues()){
+				String val = "";
+				if(surveyType.equals(GSSurveyType.ContingencyTable))
+					val = String.valueOf(mapReport.get(value));
+				else
+					val = String.valueOf((int)(mapReport.get(value).doubleValue() / population.size() / precision) * precision);
+				lines.set(lineNumber, lines.get(lineNumber)
+						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
+						value.getStringValue() + separator + val);
+			}
+			for(int i = lineNumber; i < lines.size(); i++)
+				lines.set(i, lines.get(i)
+						.concat(lines.get(i).isEmpty() ? "" : separator + "") + separator + "");
+		}
+		
+		report += String.join("\n", lines);
+		Files.write(surveyFile.toPath(), report.getBytes());
+		return this.getSurvey(surveyFile, GSSurveyType.GlobalFrequencyTable);
+	}
+
+	/**
+	 * Create a sample survey from a population: each entity of the population
+	 * is depicted with their attribute's values 
 	 * 
 	 * @param surveyFile
 	 * @param population
@@ -254,26 +329,22 @@ public class SurveyFactory {
 	 * @throws InvalidFormatException 
 	 * @throws InvalidFileTypeException
 	 */
-	public IGSSurvey createSurvey(File surveyFile, 
+	private IGSSurvey createSample(File surveyFile, 
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
-		try {
-			int individual = 1;
-			final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
-			final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
-			bw.write("Individual" + separator
-					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator)))
-					+ "\n");
-			for (final APopulationEntity e : population) {
-				bw.write(String.valueOf(individual++));
-				for (final APopulationAttribute attribute : attributes)
-					bw.write(separator + e.getValueForAttribute(attribute).getStringValue());
-				bw.write("\n");
-			}
-		} catch (final IOException e) {
-			e.printStackTrace();
+		int individual = 1;
+		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
+		final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
+		bw.write("Individual" + separator
+				+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator)))
+				+ "\n");
+		for (final APopulationEntity e : population) {
+			bw.write(String.valueOf(individual++));
+			for (final APopulationAttribute attribute : attributes)
+				bw.write(separator + e.getValueForAttribute(attribute).getStringValue());
+			bw.write("\n");
 		}
-		
+
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}
 

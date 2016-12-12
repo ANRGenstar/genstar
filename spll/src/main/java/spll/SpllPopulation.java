@@ -45,16 +45,6 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	public Set<APopulationAttribute> getPopulationAttributes() {
 		return population.getPopulationAttributes();
 	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * TODO: suppose to be overloaded to include spatial reference
-	 */
-	@Override
-	public String csvReport(CharSequence csvSep) {
-		return population.csvReport(csvSep);
-	}
 	
 	// ------------------------------------------- //
 	// ----------- COLLECTION CONTRACT ----------- //
