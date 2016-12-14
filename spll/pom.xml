@@ -366,4 +366,11 @@
 			<url>http://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 	</repositories>
+			<distributionManagement>
+		                <repository>
+		                <id>bintray-anrgenstar-genstar-packages</id>
+		                <name>anrgenstar-genstar-packages</name>
+		                <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/spll/;publish=1;override=1</url>
+		                </repository>
+		</distributionManagement>
 </project>
