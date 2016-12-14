@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Bundle-ManifestVersion: 2
-Bundle-Name: spll
-Bundle-SymbolicName: spll
-Bundle-Version: 1.0.0.qualifier
-Export-Package: spll.entity.iterator,
- spll.io.exception
