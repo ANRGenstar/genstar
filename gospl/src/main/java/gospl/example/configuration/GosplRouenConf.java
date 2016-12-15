@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -30,7 +31,7 @@ import gospl.entity.attribute.GSEnumAttributeType;
 
 public class GosplRouenConf {
 
-	public static String CONF_CLASS_PATH = "../spll/sample/Rouen/";
+	public static String CONF_CLASS_PATH = "testdata/rouen1/";
 	public static String CONF_EXPORT = "GSC_Rouen";
 	
 //	public static String menage1 = "Ménage & Enfants-Tableau 1.csv";
@@ -63,14 +64,14 @@ public class GosplRouenConf {
 		if(new ArrayList<>(Arrays.asList(args)).isEmpty()){
 			
 			// Setup input files' configuration for individual aggregated data
-			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/AgeCouple-Tableau 1.csv").toString(), 
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Age & Couple-Tableau 1.csv").toString(), 
 					GSSurveyType.ContingencyTable, ';', 1, 1));
-			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/AgeSexeCSP-Tableau 1.csv").toString(), 
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Age & Sexe & CSP-Tableau 1.csv").toString(), 
 					GSSurveyType.ContingencyTable, ';', 2, 1));
-			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/AgeSexe-Tableau 1.csv").toString(), 
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Age & Sexe-Tableau 1.csv").toString(), 
 					GSSurveyType.ContingencyTable, ';', 1, 1));
-			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_insee_indiv/Rouen_iris.csv").toString(), 
-					GSSurveyType.ContingencyTable, ',', 1, 1));
+			inputFiles.add(new GSSurveyWrapper(absolutePath.resolve("Rouen_sample_IRIS.csv").toString(), 
+					GSSurveyType.Sample, ',', 1, 1));
 			
 			try {
 				
@@ -84,8 +85,7 @@ public class GosplRouenConf {
 								"25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
 								"50 à 54 ans", "55 à 59 ans", "60 à 64 ans", "65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
 								"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus"), GSEnumAttributeType.range);
-				inputAttributes.add(referentAgeAttribute);
-				
+				inputAttributes.add(referentAgeAttribute);		
 				
 				// Create a mapper
 				Map<Set<String>, Set<String>> mapperA1 = new HashMap<>();
@@ -128,35 +128,41 @@ public class GosplRouenConf {
 						mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
 						GSEnumAttributeType.range, referentAgeAttribute, mapperA2));		
 				
-				/*
 				// Create another "age" attribute with diverging data and model modalities
+				List<String> refList = Arrays.asList("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans", "20 à 24 ans", 
+						"25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
+						"50 à 54 ans", "55 à 59 ans", "60 à 64 ans", "65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
+						"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans");
+				List<String> mapList = Arrays.asList("000", "005", "010", "015", "020", "025", "030",
+						"035", "040", "045", "050", "055", "060", "065", "070", "075", "080", "085",
+						"090", "095");
+				Map<Set<String>, Set<String>> mapperA3 = new HashMap<>();
+				IntStream.range(0, refList.size()).forEach(i -> mapperA3.put(new HashSet<>(Arrays.asList(refList.get(i))), 
+						new HashSet<>(Arrays.asList(mapList.get(i)))));
+				mapperA3.put(Stream.of("100 ans ou plus").collect(Collectors.toSet()), 
+						Stream.of("100", "105", "110", "115", "120").collect(Collectors.toSet()));
 				inputAttributes.add(attf.createAttribute("Age_y", GSEnumDataType.Integer, 	
 						Arrays.asList("000", "005", "010", "015", "020", "025", "030",
 								"035", "040", "045", "050", "055", "060", "065", "070", "075", "080", "085",
 								"090", "095", "100", "105", "110", "115", "120"), 
-						Arrays.asList("0 à 4 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans", 
-								"20 à 24 ans", "25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
-								"50 à 54 ans", "55 à 59 ans", "60 à 64 ans", "65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
-								"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 à 104 ans", "105 à 109 ans", 
-								"110 à 114 ans", "115 à 129 ans", "120 ans"), 
 						GSEnumAttributeType.range));
-						*/
 				
 				// --------------------------
 				// Setup "COUPLE" attribute: INDIVIDUAL
 				// --------------------------
 				
-				inputAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
+				APopulationAttribute attCouple = attf.createAttribute("Couple", GSEnumDataType.String, 
 						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
-						GSEnumAttributeType.unique));
+						GSEnumAttributeType.unique); 
+				inputAttributes.add(attCouple);
 				
-				/*
-				 * TODO: make a mapped attribute
+				Map<Set<String>, Set<String>> mapperC1 = new HashMap<>();
+				mapperC1.put(Stream.of("Vivant en couple").collect(Collectors.toSet()), 
+						Stream.of("1").collect(Collectors.toSet()));
+				mapperC1.put(Stream.of("Ne vivant pas en couple").collect(Collectors.toSet()), 
+						Stream.of("2").collect(Collectors.toSet()));
 				inputAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
-						Arrays.asList("1", "2"),
-						Arrays.asList("Vivant en couple", "Ne vivant pas en couple"), 
-						GSEnumAttributeType.unique));
-						*/
+						Arrays.asList("1", "2"), GSEnumAttributeType.unique, attCouple, mapperC1));
 				
 				// --------------------------
 				// Setup "IRIS" attribute: INDIVIDUAL
@@ -181,32 +187,31 @@ public class GosplRouenConf {
 				// Setup "SEXE" attribute: INDIVIDUAL
 				// -------------------------
 				
-				inputAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
-						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
+				APopulationAttribute attSexe = attf.createAttribute("Sexe", GSEnumDataType.String,
+						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique);
+				inputAttributes.add(attSexe);
 				
-				/*
-				 * TODO: make a mapped attribute
+				Map<Set<String>, Set<String>> mapperS1 = new HashMap<>();
+				mapperS1.put(Stream.of("Hommes").collect(Collectors.toSet()), 
+						Stream.of("Hommes").collect(Collectors.toSet()));
 				inputAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
-						Arrays.asList("1", "2"),
-						Arrays.asList("Hommes", "Femmes"), GSEnumAttributeType.unique));
-						*/
+						Arrays.asList("1", "2"), Arrays.asList("Hommes", "Femmes"), 
+						GSEnumAttributeType.unique, attSexe, mapperS1));
 				
 				// -------------------------
 				// Setup "CSP" attribute: INDIVIDUAL
 				// -------------------------
-				
-				inputAttributes.add(attf.createAttribute("CSP", GSEnumDataType.String, 
+				APopulationAttribute attCSP = attf.createAttribute("CSP", GSEnumDataType.String, 
 						Arrays.asList("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
 								"Cadres et professions intellectuelles supérieures", "Professions intermédiaires", 
 								"Employés", "Ouvriers", "Retraités", "Autres personnes sans activité professionnelle"), 
-						GSEnumAttributeType.unique));
-				
-				/*
+								GSEnumAttributeType.unique); 
+
 				Map<Set<String>, Set<String>> scp_mapper = new HashMap<>();
 				List<String> scpInput = Arrays.asList("11", "12", "21", "22", "23", "24", "25");
-				List<String> scpModel = Arrays.asList("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré", 
+				/*List<String> scpModel = Arrays.asList("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré", 
 						"Chômeurs", "Retraités ou préretraités", "Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus", 
-						"Moins de 14 ans", "Femmes ou hommes au foyer", "Autres inactifs");
+						"Moins de 14 ans", "Femmes ou hommes au foyer", "Autres inactifs");*/
 				scp_mapper.put(Stream.of("Retraités ou préretraités").collect(Collectors.toSet()),
 						Stream.of("Retraités").collect(Collectors.toSet()));
 				scp_mapper.put(Stream.of("Autres inactifs", "Chômeurs", 
@@ -220,9 +225,9 @@ public class GosplRouenConf {
 								"Employés", "Ouvriers").collect(Collectors.toSet()));
 				
 				
+				inputAttributes.add(attCSP);
 				inputAttributes.add(attf.createAttribute("SCP", GSEnumDataType.String, 
-						scpInput, scpModel, GSEnumAttributeType.unique));
-						*/
+						scpInput, GSEnumAttributeType.unique, attCSP, scp_mapper));
 				
 				// --------------------------
 				// Setup "MENAGE" attribute: MENAGE

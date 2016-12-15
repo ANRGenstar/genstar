@@ -31,6 +31,7 @@ import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
 import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
@@ -47,7 +48,7 @@ import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.entity.GosplEntity;
-import gospl.io.SurveyFactory;
+import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 
 public class GosplDistributionBuilder {
@@ -85,7 +86,7 @@ public class GosplDistributionBuilder {
 	 * @throws InvalidFileTypeException
 	 */
 	public void buildDistributions() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
-		SurveyFactory sf = new SurveyFactory();
+		GosplSurveyFactory sf = new GosplSurveyFactory();
 		this.distributions = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrapper())
 			if (!wrapper.getSurveyType().equals(GSSurveyType.Sample))
@@ -98,15 +99,13 @@ public class GosplDistributionBuilder {
 	 * sample is transposed where each individual in the survey is a {@link IEntity} in a synthetic {@link IPopulation}
 	 * 
 	 * @return
-	 * 
-	 * 		TODO: implement sample parser
 	 * @throws IOException
 	 * @throws InvalidFormatException
 	 * @throws InvalidFileTypeException
 	 * 
 	 */
 	public void buildSamples() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
-		SurveyFactory sf = new SurveyFactory();
+		GosplSurveyFactory sf = new GosplSurveyFactory();
 		samples = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrapper())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
@@ -118,13 +117,19 @@ public class GosplDistributionBuilder {
 	/////////////////////////////////////////////////////////////////////////////////
 	
 	/**
-	 * Returns the raw distributions, without any prior checking
+	 * Returns an unmodifiable view of the distributions, as a raw distributions i.e. without any prior checking
 	 * @return
 	 */
 	public Set<INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number>> getRawDistributions() {
-		Set<INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number>> higherOrderRawDistributions = new HashSet<>(); 
-		higherOrderRawDistributions.addAll(this.distributions);
-		return higherOrderRawDistributions;
+		return Collections.unmodifiableSet(this.distributions);
+	}
+	
+	/**
+	 * Returns an unmodifiable view of input samples 
+	 * @return
+	 */
+	public Set<IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>> getRawSamples(){
+		return Collections.unmodifiableSet(this.samples);
 	}
 	
 	/**

@@ -88,7 +88,7 @@ public class GosplDistributionFactory {
 	 * @param seed
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> createContringency(
+	public AFullNDimensionalMatrix<Integer> createContingency(
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(population.getPopulationAttributes().stream()

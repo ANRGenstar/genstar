@@ -41,7 +41,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
  * @author kevinchapuis
  *
  */
-public class SurveyFactory {
+public class GosplSurveyFactory {
 	
 	private double precision = Math.pow(10, -2);
 
@@ -56,7 +56,7 @@ public class SurveyFactory {
 
 	private final List<String> supportedFileFormat;
 
-	public SurveyFactory() {
+	public GosplSurveyFactory() {
 		supportedFileFormat = Arrays.asList(CSV_EXT, XLS_EXT, XLSX_EXT);
 	}
 
@@ -68,7 +68,7 @@ public class SurveyFactory {
 	 * @param firstRowDataIndex
 	 * @param firstColumnDataIndex
 	 */
-	public SurveyFactory(final int sheetNn, final char csvSeparator,
+	public GosplSurveyFactory(final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex) {
 		this();
 		this.sheetNb = sheetNn;

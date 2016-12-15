@@ -22,10 +22,10 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.attribute.GosplAttributeFactory;
-import gospl.example.GosplSPTemplate;
+import gospl.example.GosplIndependantEstimationTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.io.SurveyFactory;
+import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 
 public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
@@ -171,7 +171,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		try {
 			population = ispGenerator.generate(targetPopulationSize);
 			gspu.sysoStempPerformance("End generating synthetic population: elapse time",
-					GosplSPTemplate.class.getName());
+					GosplIndependantEstimationTemplate.class.getName());
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -181,13 +181,12 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// MAKE REPORT
 
-		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
 		try {
 			tmpDir.create();
 			File exportFile = tmpDir.newFile("PopExport.csv");
 			File reportFile = tmpDir.newFile("PopReport.csv");
 			
-			SurveyFactory sf = new SurveyFactory();
+			GosplSurveyFactory sf = new GosplSurveyFactory();
 			sf.createSurvey(exportFile, GSSurveyType.Sample, population);
 			sf.createSurvey(reportFile, GSSurveyType.GlobalFrequencyTable, population);
 		} catch (final IOException e) {

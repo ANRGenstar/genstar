@@ -36,7 +36,7 @@ import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.example.GosplSPTemplate;
+import gospl.example.GosplIndependantEstimationTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.io.exception.InvalidSurveyFormatException;
@@ -329,7 +329,7 @@ public class TestLocalisation {
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(targetPopulation);
-			gspu.sysoStempPerformance("End generating synthetic population: elapse time", GosplSPTemplate.class.getName());
+			gspu.sysoStempPerformance("End generating synthetic population: elapse time", GosplIndependantEstimationTemplate.class.getName());
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
 		}
