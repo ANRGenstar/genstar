@@ -232,7 +232,7 @@ public class HierarchicalHypothesisAlgo implements IDistributionInferenceAlgo<IH
 		//logger.info("a dot file was stored into "+dotFile.getAbsolutePath());
 		
 		// Use this to visualize the dependancy graph in png 
-		// dependancyGraph.generateDotRepresentationInPNG(true);
+		dependancyGraph.generateDotRepresentationInPNG(true);
 		
 		// TODO sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
 		Collection<List<AGenstarAttribute>> explorationOrder = proposeExplorationOrder(dependancyGraph);

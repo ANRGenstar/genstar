@@ -95,7 +95,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	public void test() {
 		
 		// parameters of the test
-		int targetPopulationSize = 100;
+		int targetPopulationSize = 1000;
 		GosplConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED

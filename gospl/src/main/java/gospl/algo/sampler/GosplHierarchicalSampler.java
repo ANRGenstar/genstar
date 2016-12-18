@@ -103,21 +103,21 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	
 					// what we want is the distribution of probabilities for each of these possible values of the current attribute...
 					List<AGenstarValue> keys = new ArrayList<>(att.getValues());
-					// TODO knowing the previous ones ! 
+					// ... knowing the previous ones ! 
 					keys.addAll(att2value.values());
 					
 					// for each of the aspects of this attribute we're working on...
 					List<Double> distribution = new ArrayList<>(att.getValues().size()+1);
-					@SuppressWarnings("unused")
-					List<AGenstarValue> a = new ArrayList<>(att2value.values());
+					ArrayList<AGenstarValue> a = new ArrayList<>(att2value.values());
 					for (AGenstarValue val : att.getValues()) {
-						// we want the probabilities conditions to all the previously defined values
-						List<AGenstarValue> aa =  new ArrayList<>(att2value.values());
+						// we want the probabilities conditioned to all the previously defined values
+						@SuppressWarnings("unchecked")
+						List<AGenstarValue> aa =  (List<AGenstarValue>) a.clone(); // quicker than recreating a list from scratch.
 						// ... and for this specific val
 						aa.add(val);
 						// TODO sometimes I've here a NUllpointerexception when one of the values if empty (typically Age3)
 						try {
-							logger.debug("\t\tfor aspects: {}, getVal returns {}", aa, this.segmentedMatrix.getVal(aa));
+							logger.debug("\t\tfor aspects: {}, getVal returns {}", aa, this.segmentedMatrix.getVal(aa).getValue());
 							distribution.add(this.segmentedMatrix.getVal(aa).getValue());
 						} catch (NullPointerException e) {
 							logger.warn("\t\tpotential value {} will be excluded from the distribution as it has no probability", val);

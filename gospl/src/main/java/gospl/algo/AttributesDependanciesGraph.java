@@ -39,7 +39,7 @@ public class AttributesDependanciesGraph {
 
 	private Graph graph = new SingleGraph("dependancies",true,false);
 	
-	private final static String NODE_ATTRIBUTE_SURVEYATTRIBUTE = "surveyattribute";
+	private final static String NODE_ATTRIBUTE_ATTRIBUTE = "surveyattribute";
 	private final static String EDGE_ATTRIBUTE_MATRIX = "matrix";
 	private final static String NODE_ATTRIBUTE_SUBGRAPH_ID = "componentid";
 
@@ -98,10 +98,10 @@ public class AttributesDependanciesGraph {
 			logger.debug("creating node {}", attribute.getAttributeName());
 			// create the node 
 			n = graph.addNode(attribute.getAttributeName());
-			n.setAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE, attribute);
+			n.setAttribute(NODE_ATTRIBUTE_ATTRIBUTE, attribute);
 		} else {
 			// ensure the node attribute data is ok
-			if (n.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE) != attribute) {
+			if (n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE) != attribute) {
 				throw new IllegalArgumentException("The node "+attribute.getAttributeName()+" was already declared with a different attribute content.");
 			}
 		}
@@ -185,7 +185,7 @@ public class AttributesDependanciesGraph {
 			res.add(
 					graph.getNodeSet()
 						.stream()
-						.map(node -> (AGenstarAttribute)node.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE))
+						.map(node -> (AGenstarAttribute)node.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE))
 						.collect(Collectors.toSet()));
 			
 			return res;
@@ -199,7 +199,7 @@ public class AttributesDependanciesGraph {
 			if (!componentId2attributes.containsKey(componentId)) {
 				componentId2attributes.put(componentId, new HashSet<>());
 			}
-			componentId2attributes.get(componentId).add(n.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE));
+			componentId2attributes.get(componentId).add(n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE));
 		}
 		
 		return componentId2attributes.values();
@@ -225,7 +225,7 @@ public class AttributesDependanciesGraph {
 			
 			// quick exit
 			if (degree==0) 
-				return n.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE);
+				return n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
 			
 			// quick skip
 			if (degree > minDegree)
@@ -236,7 +236,7 @@ public class AttributesDependanciesGraph {
 			if (!degree2nodes.containsKey(degree)) {
 				degree2nodes.put(degree, new HashSet<>());
 			}
-			degree2nodes.get(degree).add(n.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE));
+			degree2nodes.get(degree).add(n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE));
 		}
 		
 		return degree2nodes.entrySet().iterator().next().getValue();
@@ -278,7 +278,7 @@ public class AttributesDependanciesGraph {
 			Iterator<Node> itNeighboors = graph.getNode(current.getAttributeName()).getNeighborNodeIterator();
 			while (itNeighboors.hasNext()) {
 				Node neighboor = itNeighboors.next();
-				AGenstarAttribute nei  = neighboor.getAttribute(NODE_ATTRIBUTE_SURVEYATTRIBUTE);
+				AGenstarAttribute nei  = neighboor.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
 				
 				if (taboo.contains(nei)) 
 					continue;
