@@ -97,7 +97,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	public void test() {
 		
 		// parameters of the test
-		int targetPopulationSize = 100;
+		int targetPopulationSize = 1000;
 		GenstarConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
@@ -188,6 +188,8 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
 		try {
 			tmpDir.create();
+			System.out.println("will export population into: "+tmpDir.getRoot().getAbsolutePath());
+
 			File exportFile = tmpDir.newFile("PopExport.csv");
 			File reportFile = tmpDir.newFile("PopReport.csv");
 			

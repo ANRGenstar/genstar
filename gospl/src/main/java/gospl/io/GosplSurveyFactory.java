@@ -335,16 +335,23 @@ public class GosplSurveyFactory {
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
-		bw.write("Individual" + separator
-				+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator)))
-				+ "\n");
+		bw.write("Individual");
+		bw.write(separator);
+		bw.write(attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator))));
+		bw.write("\n");
 		for (final APopulationEntity e : population) {
 			bw.write(String.valueOf(individual++));
-			for (final APopulationAttribute attribute : attributes)
-				bw.write(separator + e.getValueForAttribute(attribute).getStringValue());
+			for (final APopulationAttribute attribute : attributes) {
+				bw.write(separator);
+				try {
+					bw.write(e.getValueForAttribute(attribute).getStringValue());
+				} catch (NullPointerException e2) {
+					bw.write("???");
+				}
+			}
 			bw.write("\n");
 		}
-
+		bw.flush();
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}
 

@@ -143,8 +143,10 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects) {
+		
 		// Setup output with identity product value
 		AControl<T> conditionalProba = this.getIdentityProductVal();
+		
 		// Setup a record of visited dimension to avoid duplicated probabilities
 		Set<APopulationAttribute> remainingDimension = aspects.stream()
 				.map(aspect -> aspect.getAttribute()).collect(Collectors.toSet());
@@ -158,8 +160,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 				.collect(Collectors.toList());
 		
 		for(AFullNDimensionalMatrix<T> mat : concernedMatrices){
-			if(!mat.getDimensions().stream()
-					.anyMatch(dimension -> remainingDimension.contains(dimension)))
+			if(!mat.getDimensions().stream().anyMatch(dimension -> remainingDimension.contains(dimension)))
 				continue;
 			// Setup concerned values
 			Set<APopulationValue> concernedValues = aspects.stream()
@@ -210,6 +211,14 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 				s += "\n"+matrixHeader+matrix.toCsv(csvSeparator);
 		}
 		return s;
+	}
+
+	/**
+	 * Returns the matrices which involve this val
+	 * @param val
+	 */
+	public Set<AFullNDimensionalMatrix<T>> getMatricesInvolving(APopulationAttribute att) {
+		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
 	
 }

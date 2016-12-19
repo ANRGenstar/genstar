@@ -111,8 +111,8 @@ public class AttributesDependanciesGraph {
 			// add edge TODO
 			Edge e = graph.addEdge(
 					"edge"+graph.getEdgeCount(), 
-					attribute.getAttributeName(), 
 					attribute.getReferentAttribute().getAttributeName(),
+					attribute.getAttributeName(), 
 					true	// not directed for a global frequency
 					);
 			e.setAttribute(EDGE_ATTRIBUTE_TYPE, EdgeDependancyType.REFERENT);
