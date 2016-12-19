@@ -11,15 +11,15 @@ import java.util.stream.Collectors;
 
 import org.opengis.referencing.operation.TransformException;
 
-import core.io.geo.IGSGeofile;
-import core.io.geo.ShapeFile;
-import core.io.geo.entity.AGeoEntity;
-import core.io.geo.entity.GSFeature;
+import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.io.IGSGeofile;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.matcher.ISPLMatcher;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
+import spll.entity.GSFeature;
+import spll.io.ShapeFile;
 
 /**
  * TODO: force <T> generic to fit a regression style contract: either boolean (variable is present or not) 
@@ -65,7 +65,7 @@ public class SPLMapper<V extends ISPLVariable, T> {
 		this.targetProp = propertyName;
 	}
 
-	protected boolean insertMatchedVariable(IGSGeofile regressorsFiles) 
+	protected boolean insertMatchedVariable(IGSGeofile<? extends AGeoEntity> regressorsFiles) 
 			throws IOException, TransformException, InterruptedException, ExecutionException{
 		boolean result = true;
 		for(ISPLMatcher<V, T> matchedVariable : matcherFactory

@@ -6,15 +6,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import core.io.survey.GSSurveyType;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
@@ -26,26 +28,26 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  *
  * @param <T>
  */
-public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<AGenstarAttribute, AGenstarValue, T> {
+public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 
 	private GSSurveyType dataType; 
 
-	private final Map<AGenstarAttribute, Set<AGenstarValue>> dimensions;
-	protected final Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<T>> matrix;
+	private final Map<APopulationAttribute, Set<APopulationValue>> dimensions;
+	protected final Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix;
 
-	private ACoordinate<AGenstarAttribute, AGenstarValue> emptyCoordinate = null;
+	private ACoordinate<APopulationAttribute, APopulationValue> emptyCoordinate = null;
 
 	protected String label = null;
 	
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
-	public AFullNDimensionalMatrix(Map<AGenstarAttribute, Set<AGenstarValue>> dimensionAspectMap, GSSurveyType metaDataType) {
+	public AFullNDimensionalMatrix(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, GSSurveyType metaDataType) {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
 		this.matrix = new HashMap<>(dimensions.entrySet().stream()
 				.mapToInt(d -> d.getValue().size())
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
-		this.emptyCoordinate = new GosplCoordinate(Collections.<AGenstarValue>emptySet());
+		this.emptyCoordinate = new GosplCoordinate(Collections.<APopulationValue>emptySet());
 	}
 		
 	// ------------------------- META DATA ------------------------ //
@@ -92,12 +94,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<AGenstarAttribute> getDimensions(){
+	public Set<APopulationAttribute> getDimensions(){
 		return Collections.unmodifiableSet(dimensions.keySet());
 	}
 
 	@Override
-	public AGenstarAttribute getDimension(AGenstarValue aspect) {
+	public APopulationAttribute getDimension(APopulationValue aspect) {
 		if(!dimensions.values().stream().flatMap(values -> values.stream()).collect(Collectors.toSet()).contains(aspect))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
 		return dimensions.entrySet()
@@ -106,24 +108,30 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<AGenstarValue> getAspects(){
+	public Set<APopulationValue> getAspects(){
 		return Collections.unmodifiableSet(dimensions.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
 	}
 
 	@Override
-	public Set<AGenstarValue> getAspects(AGenstarAttribute dimension) {
+	public Set<APopulationValue> getAspects(APopulationAttribute dimension) {
 		if(!dimensions.containsKey(dimension))
 			throw new NullPointerException("dimension "+dimension+" is not present in the joint distribution");
 		return Collections.unmodifiableSet(dimensions.get(dimension));
 	}
 
 	@Override
-	public Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<T>> getMatrix(){
+	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
 		return Collections.unmodifiableMap(matrix);
 	}
 	
 	@Override
-	public ACoordinate<AGenstarAttribute, AGenstarValue> getEmptyCoordinate(){
+	public LinkedHashMap<ACoordinate<APopulationAttribute,APopulationValue>, AControl<T>> getOrderedMatrix() {
+		return matrix.entrySet().stream().sorted(Map.Entry.comparingByValue())
+				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new));
+	}
+	
+	@Override
+	public ACoordinate<APopulationAttribute, APopulationValue> getEmptyCoordinate(){
 		return emptyCoordinate;
 	}
 
@@ -132,14 +140,27 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////
 
 	@Override
-	public AControl<T> getVal(ACoordinate<AGenstarAttribute, AGenstarValue> coordinate) {
+	public AControl<T> getVal() {
+		AControl<T> result = getNulVal();
+		for(AControl<T> control : this.matrix.values())
+			getSummedControl(result, control);
+		return result;
+	}
+	
+	@Override
+	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
 		if(!matrix.containsKey(coordinate))
 			throw new NullPointerException("Coordinate "+coordinate+" is absent from this control table ("+this.hashCode()+")");
 		return this.matrix.get(coordinate);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of parallelism through {@link Stream#parallel()}
+	 */
 	@Override
-	public AControl<T> getVal(AGenstarValue aspect) {
+	public AControl<T> getVal(APopulationValue aspect) {
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
 			throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
 		AControl<T> result = getNulVal();
@@ -150,18 +171,23 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return result;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: make use of parallelism through {@link Stream#parallel()}
+	 */
 	@Override
-	public AControl<T> getVal(Collection<AGenstarValue> aspects) {
+	public AControl<T> getVal(Collection<APopulationValue> aspects) {
 		if(aspects.stream().allMatch(a -> !matrix.keySet().stream().anyMatch(coord -> coord.contains(a))))
 			throw new NullPointerException("Aspect "+aspects+" is absent from this control table ("+this.getClass().getSimpleName()+" - "+this.hashCode()+")");
 
-		Map<AGenstarAttribute, Set<AGenstarValue>> attAsp = new HashMap<>();
-		for(AGenstarValue val : aspects){
-			AGenstarAttribute att = val.getAttribute();
+		Map<APopulationAttribute, Set<APopulationValue>> attAsp = new HashMap<>();
+		for(APopulationValue val : aspects){
+			APopulationAttribute att = val.getAttribute();
 			if(attAsp.containsKey(att))
 				attAsp.get(att).add(val);
 			else {
-				Set<AGenstarValue> valSet = new HashSet<>();
+				Set<APopulationValue> valSet = new HashSet<>();
 				valSet.add(val);
 				attAsp.put(att, valSet);
 			}
@@ -176,25 +202,16 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			getSummedControl(result, control);
 		return result;
 	}
-
-
-	@Override
-	public AControl<T> getVal() {
-		AControl<T> result = getNulVal();
-		for(AControl<T> control : this.matrix.values())
-			getSummedControl(result, control);
-		return result;
-	}
 	
 	///////////////////////////////////////////////////////////////////////////
 	// ----------------------- COORDINATE MANAGEMENT ----------------------- //
 	///////////////////////////////////////////////////////////////////////////
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<AGenstarAttribute, AGenstarValue> coordinate) {
-		List<AGenstarAttribute> dimensionsAspects = new ArrayList<>();
-		for(AGenstarValue aspect : coordinate.values()){
-			for(AGenstarAttribute dim : dimensions.keySet()){
+	public boolean isCoordinateCompliant(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
+		List<APopulationAttribute> dimensionsAspects = new ArrayList<>();
+		for(APopulationValue aspect : coordinate.values()){
+			for(APopulationAttribute dim : dimensions.keySet()){
 				if(dimensions.containsKey(dim)) {
 					if(dimensions.get(dim).contains(aspect))
 						dimensionsAspects.add(dim);
@@ -208,7 +225,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 					.collect(Collectors.toList()));
 					*/
 		}
-		Set<AGenstarAttribute> dimSet = new HashSet<>(dimensionsAspects);
+		Set<APopulationAttribute> dimSet = new HashSet<>(dimensionsAspects);
 		if(dimensionsAspects.size() == dimSet.size())
 			return true;
 		System.out.println(Arrays.toString(dimensionsAspects.toArray()));
@@ -227,9 +244,9 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		String s = "-- Matrix: "+dimensions.size()+" dimensions and "+dimensions.values().stream().mapToInt(Collection::size).sum()
 				+" aspects (theoretical size:"+theoreticalSpaceSize+")--\n";
 		AControl<T> empty = getNulVal();
-		for(AGenstarAttribute dimension : dimensions.keySet()){
+		for(APopulationAttribute dimension : dimensions.keySet()){
 			s += " -- dimension: "+dimension.getAttributeName()+" with "+dimensions.get(dimension).size()+" aspects -- \n";
-			for(AGenstarValue aspect : dimensions.get(dimension))
+			for(APopulationValue aspect : dimensions.get(dimension))
 				try {
 					s += "| "+aspect+": "+getVal(aspect)+"\n";
 				} catch (NullPointerException e) {
@@ -243,18 +260,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public String toCsv(char csvSeparator) {
-		List<AGenstarAttribute> atts = new ArrayList<>(getDimensions());
+		List<APopulationAttribute> atts = new ArrayList<>(getDimensions());
 		AControl<T> emptyVal = getNulVal();
 		String csv = "";
-		for(AGenstarAttribute att :atts){
+		for(APopulationAttribute att :atts){
 			if(!csv.isEmpty())
 				csv += csvSeparator;
 			csv+=att.getAttributeName();
 		}
 		csv += csvSeparator+"value\n";
-		for(ACoordinate<AGenstarAttribute, AGenstarValue> coordVal : matrix.keySet()){
+		for(ACoordinate<APopulationAttribute, APopulationValue> coordVal : matrix.keySet()){
 			String csvLine = "";
-			for(AGenstarAttribute att :atts){
+			for(APopulationAttribute att :atts){
 				if(!csvLine.isEmpty())
 					csvLine += csvSeparator;
 				if(!coordVal.values()

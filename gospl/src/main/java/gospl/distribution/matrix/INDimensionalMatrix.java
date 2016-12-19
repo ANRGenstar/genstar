@@ -1,11 +1,12 @@
 package gospl.distribution.matrix;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import core.io.survey.GSSurveyType;
 import core.metamodel.IAttribute;
+import core.metamodel.pop.io.GSSurveyType;
 import core.util.data.GSDataParser;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
@@ -87,11 +88,18 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 // ------------------------- Accessors ------------------------- //
 	
 	/**
-	 * Return a view of matrix: each coordinate of the matrix is mapped with a numerical 
-	 * value according to the underlying n Dimensional matrix
+	 * Return a view of the inner matrix: each coordinate is mapped with 
+	 * a numerical value 
 	 * 
 	 */
 	public Map<ACoordinate<D, A>, AControl<T>> getMatrix();
+	
+	/**
+	 * Return an ordered view of the inner matrix: each coordinate is mapped
+	 * with a numerical value sorted by increasing number 
+	 * @return
+	 */
+	public LinkedHashMap<ACoordinate<D, A>, AControl<T>> getOrderedMatrix();
 	
 	/**
 	 * Return the empty coordinate of this matrix
@@ -174,10 +182,28 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	
 	public String toCsv(char csvSeparator);
 
+	/**
+	 * Get relative {@code T} null value
+	 * 
+	 * @return
+	 */
 	public AControl<T> getNulVal();
 
+	/**
+	 * Get the value that guarantee that any {@code T} value
+	 * multiply by {@link #getIdentityProductVal()} stay the same
+	 * 
+	 * @return
+	 */
 	public AControl<T> getIdentityProductVal();
 
+	/**
+	 * Parses a value from a string and encapsulates it in a {@link AControl} 
+	 * 
+	 * @param parser
+	 * @param val
+	 * @return
+	 */
 	public AControl<T> parseVal(GSDataParser parser, String val);
 	
 }

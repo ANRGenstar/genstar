@@ -1,25 +1,25 @@
 package gospl.distribution.matrix;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.io.survey.GSSurveyType;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
-import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
-		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, T> {
+		INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 
 	protected final Set<AFullNDimensionalMatrix<T>> jointDistributionSet;
 	
@@ -56,22 +56,22 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	// ---------------- Getters ---------------- //
 
 	@Override
-	public Set<AGenstarAttribute> getDimensions() {
+	public Set<APopulationAttribute> getDimensions() {
 		return jointDistributionSet.stream().flatMap(jd -> jd.getDimensions().stream()).collect(Collectors.toSet());
 	}
 	
 	@Override
-	public AGenstarAttribute getDimension(AGenstarValue aspect) {
+	public APopulationAttribute getDimension(APopulationValue aspect) {
 		return getDimensions().stream().filter(d -> d.getValues().contains(aspect)).findFirst().get();
 	}
 	
 	@Override
-	public Set<AGenstarValue> getAspects() {
+	public Set<APopulationValue> getAspects() {
 		return getDimensions().stream().flatMap(d -> d.getValues().stream()).collect(Collectors.toSet());
 	}
 
 	@Override
-	public Set<AGenstarValue> getAspects(AGenstarAttribute dimension) {
+	public Set<APopulationValue> getAspects(APopulationAttribute dimension) {
 		return Collections.unmodifiableSet(dimension.getValues());
 	}
 
@@ -81,27 +81,36 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	@Override
-	public ACoordinate<AGenstarAttribute, AGenstarValue> getEmptyCoordinate() {
+	public ACoordinate<APopulationAttribute, APopulationValue> getEmptyCoordinate() {
 		return jointDistributionSet.iterator().next().getEmptyCoordinate();
 	}
 	
 	// ---------------------- Matrix accessors ---------------------- //
 	
+	/**
+	 * Return the partitioned view of this matrix, i.e. the collection
+	 * of inner full matrices
+	 * 
+	 * @return
+	 */
 	public Collection<AFullNDimensionalMatrix<T>> getMatrices(){
 		return Collections.unmodifiableSet(jointDistributionSet);
 	}
 	
 	@Override
-	public Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<T>> getMatrix(){
-		Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<T>> matrix = new HashMap<>();
+	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
+		Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = new HashMap<>();
 		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
 			matrix.putAll(jd.getMatrix());
 		return matrix;
 	}
 	
-
-	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
-		return controlOne.add(controlTwo);
+	public LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getOrderedMatrix(){
+		LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = 
+				new LinkedHashMap<>();
+		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
+			matrix.putAll(jd.getOrderedMatrix());
+		return matrix;
 	}
 	
 	@Override
@@ -116,12 +125,12 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 	
 	@Override
-	public AControl<T> getVal(ACoordinate<AGenstarAttribute, AGenstarValue> coordinate) {
+	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
 		return getVal(coordinate.values());
 	}
 
 	@Override
-	public AControl<T> getVal(AGenstarValue aspect) throws IllegalNDimensionalMatrixAccess {
+	public AControl<T> getVal(APopulationValue aspect) throws IllegalNDimensionalMatrixAccess {
 		AControl<T> val = null;
 		for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().contains(aspect.getAttribute())).collect(Collectors.toList()))
@@ -133,39 +142,53 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 
 	@Override
-	public AControl<T> getVal(Collection<AGenstarValue> aspects) {
-		Map<AGenstarAttribute, Collection<AGenstarValue>> coordinates = new HashMap<>();
-		for(AGenstarValue val : aspects){
-			if(coordinates.containsKey(val.getAttribute()))
-				coordinates.get(val.getAttribute()).add(val);
-			else
-				coordinates.put(val.getAttribute(), new HashSet<>(Arrays.asList(val)));
-		}
-		AControl<T> conditionalProba = getIdentityProductVal();
-		Set<AGenstarValue> includedProbaDimension = new HashSet<>();
-		for(AGenstarAttribute att : coordinates.keySet()){
-			AControl<T> localProba = getNulVal();
-			for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
-					.stream().filter(jd -> jd.getDimensions().contains(att)).collect(Collectors.toList())){
-				Set<AGenstarAttribute> hookAtt = distribution.getDimensions()
-						.stream().filter(d -> includedProbaDimension.contains(d)).collect(Collectors.toSet());
-				if(hookAtt.isEmpty()){
-					localProba = distribution.getVal(coordinates.get(att));  
-				} else {
-					Set<AGenstarValue> hookVals = hookAtt.stream().flatMap(a -> a.getValues().stream()).collect(Collectors.toSet());
-					Set<AGenstarValue> localVals = new HashSet<>(hookVals);
-					localVals.addAll(coordinates.get(att));
-					localProba.multiply(distribution.getVal(localVals)
-							.getRowProduct(new ControlFrequency(1d / distribution.getVal(hookVals).getValue().doubleValue())));
-				}
-			}	
-			includedProbaDimension.addAll(coordinates.get(att));
-			conditionalProba.multiply(localProba);
+	public AControl<T> getVal(Collection<APopulationValue> aspects) {
+		// Setup output with identity product value
+		AControl<T> conditionalProba = this.getIdentityProductVal();
+		// Setup a record of visited dimension to avoid duplicated probabilities
+		Set<APopulationAttribute> remainingDimension = aspects.stream()
+				.map(aspect -> aspect.getAttribute()).collect(Collectors.toSet());
+		
+		// Select matrices that contains at least one concerned dimension and ordered them
+		// in decreasing order of the number of matches
+		List<AFullNDimensionalMatrix<T>> concernedMatrices = jointDistributionSet.stream()
+				.filter(matrix -> matrix.getDimensions().stream().anyMatch(dimension -> remainingDimension.contains(dimension)))
+				.sorted((m1, m2) -> m1.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() >=
+						m2.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() ? -1 : 1)
+				.collect(Collectors.toList());
+		
+		for(AFullNDimensionalMatrix<T> mat : concernedMatrices){
+			if(!mat.getDimensions().stream()
+					.anyMatch(dimension -> remainingDimension.contains(dimension)))
+				continue;
+			// Setup concerned values
+			Set<APopulationValue> concernedValues = aspects.stream()
+					.filter(a -> mat.getDimensions().contains(a.getAttribute()))
+					.collect(Collectors.toSet());
+			// Update conditional probability
+			conditionalProba.multiply(mat.getVal(concernedValues));
+			// Update visited probability
+			remainingDimension.removeAll(concernedValues
+					.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()));
 		}
 		return conditionalProba;
 	}
 	
-// ----------------------- utility ----------------------- //
+	// ---------------------- Inner utilities ---------------------- //
+	
+	/**
+	 * Inner utility method that add an encapsulated {@link AControl} value into the first
+	 * given in argument
+	 * 
+	 * @param controlOne
+	 * @param controlTwo
+	 * @return
+	 */
+	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
+		return controlOne.add(controlTwo);
+	}
+	
+	// ----------------------- utility ----------------------- //
 	
 	@Override
 	public String toString(){

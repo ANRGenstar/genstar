@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
@@ -15,11 +15,11 @@ import spin.objects.SpinNetwork;
 public class RandomNetworkGenerator implements INetworkGenerator 
 {
 	
-	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
+	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 		return this.generateNetwork(population,0D);
 	}
 	
-	public SpinNetwork generateNetwork(IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population, double proba){
+	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
 		

@@ -9,15 +9,16 @@ import java.util.concurrent.ExecutionException;
 
 import org.opengis.referencing.operation.TransformException;
 
-import core.io.geo.IGSGeofile;
-import core.io.geo.RasterFile;
-import core.io.geo.ShapeFile;
-import core.io.geo.entity.GSFeature;
+import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.io.IGSGeofile;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
+import spll.entity.GSFeature;
+import spll.io.RasterFile;
+import spll.io.ShapeFile;
 import spll.popmapper.normalizer.ASPLNormalizer;
 
 /**
@@ -36,7 +37,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	protected final ShapeFile mainFile;
 	protected final String propertyName;
 	
-	protected List<IGSGeofile> ancillaryFiles;
+	protected List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
 	
 	protected ISPLRegressionAlgo<V, T> regressionAlgorithm;
@@ -44,7 +45,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	protected ASPLNormalizer normalizer;
 	
 	public ASPLMapperBuilder(ShapeFile mainFile, String propertyName,
-			List<IGSGeofile> ancillaryFiles) {
+			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.propertyName = propertyName;
 		this.ancillaryFiles = ancillaryFiles;
@@ -120,7 +121,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
 	// ------------------------ ACCESSORS ------------------------ //
 	
-	public List<IGSGeofile> getAncillaryFiles(){
+	public List<IGSGeofile<? extends AGeoEntity>> getAncillaryFiles(){
 		return Collections.unmodifiableList(ancillaryFiles);
 	}
 	

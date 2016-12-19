@@ -7,28 +7,31 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.io.geo.IGSGeofile;
-import core.io.geo.entity.AGeoEntity;
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
 import core.metamodel.IPopulation;
+import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandom;
+import spll.SpllPopulation;
 import spll.popmapper.constraint.SpatialConstraint;
 import spll.popmapper.pointInalgo.PointInLocalizer;
 import spll.popmapper.pointInalgo.RandomPointInLocalizer;
+import spll.util.SpllUtil;
 
 
 public class SPUniformLocalizer implements ISPLocalizer {
 
 	
-	private IGSGeofile match; //main referenced area for placing the agents (ex: Iris)
-	private IGSGeofile localisation; //possible nest for agents (ex: buildings)
-	private IGSGeofile entityNbAreas; //gives the number of entities per area (ex: regression cells)
+	private IGSGeofile<? extends AGeoEntity> match; //main referenced area for placing the agents (ex: Iris)
+	private IGSGeofile<? extends AGeoEntity> localisation; //possible nest for agents (ex: buildings)
+	private IGSGeofile<? extends AGeoEntity> entityNbAreas; //gives the number of entities per area (ex: regression cells)
 	private List<SpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest
 	private Random rand;  
 	private PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
@@ -37,21 +40,22 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	private String keyAttPop; //name of the attribute that is used to store the id of the referenced area  in the population
 	private String keyAttMatch; //name of the attribute that is used to store the id of the referenced area in the entityNbAreas file
 	
-	public SPUniformLocalizer(IGSGeofile localisation) {
+	public SPUniformLocalizer(IGSGeofile<? extends AGeoEntity> localisation) {
 		this.localisation = localisation;
 		rand = GenstarRandom.getInstance();
 		pointInLocalizer = new RandomPointInLocalizer(rand);
 	}
 	
 	@Override
-	public IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> localisePopulation(
-			IPopulation<AGenstarEntity, AGenstarAttribute, AGenstarValue> population) {
+	public SpllPopulation localisePopulation(
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 		//define the crs of the population
-		population.setCrs(localisation.getCoordRefSystem());
+		CoordinateReferenceSystem crs = SpllUtil.getCRSfromWKT(localisation.getWKTCoordinateReferentSystem());
+		SpllPopulation spllPopulation = new SpllPopulation(population, crs);
 		try {
 			//case where the referenced file is not defined
 			if (match == null) {
-				List<AGenstarEntity> entities = new ArrayList<>(population);
+				List<APopulationEntity> entities = new ArrayList<>(spllPopulation);
 				
 				//case where there is no information about the number of entities in specific spatial areas
 				if (numberProperty == null || entityNbAreas == null) {
@@ -66,7 +70,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			else {
 				for (AGeoEntity globalfeature : match.getGeoData()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
-					List<AGenstarEntity> entities = population.stream()
+					List<APopulationEntity> entities = spllPopulation.stream()
 						.filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt))
 						.collect(Collectors.toList());
 					if (numberProperty == null || entityNbAreas == null) {
@@ -81,15 +85,15 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		} catch (IOException | TransformException e) {
 			e.printStackTrace();
 		} 
-		return population;
+		return spllPopulation;
 	}
 
 	//set to all the entities given as argument, a given nest chosen randomly in the possible geoEntities 
 	//of the localisation shapefile (all if not bounds is defined, only the one in the bounds if the one is not null)
-	private void randomLocalizationInNest(Collection<AGenstarEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
+	private void randomLocalizationInNest(Collection<APopulationEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
 		Object[] locTab = spatialBounds == null ? localisation.getGeoData().toArray() : localisation.getGeoDataWithin(spatialBounds).toArray();
 		int nb = locTab.length;
-		for (AGenstarEntity entity : entities) {
+		for (APopulationEntity entity : entities) {
 			AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
 			entity.setNest(nest);
 			entity.setLocation(pointInLocalizer.pointIn(nest.getGeometry()));
@@ -99,7 +103,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	// For each area concerned of the entityNbAreas shapefile  (all if not bounds is defined, only the one in the bounds if the one is not null),
 	//define the number of entities from the entities list to locate inside, then try to set a nest to this randomly chosen number of entities.
 	// NOTE: if no nest is located inside the area, not entities will be located inside.
-	private void randomLocalizationInNestWithNumbers(List<AGenstarEntity> entities, Geometry spatialBounds) 
+	private void randomLocalizationInNestWithNumbers(List<APopulationEntity> entities, Geometry spatialBounds) 
 			throws IOException, TransformException {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? 
 				entityNbAreas.getGeoData() : entityNbAreas.getGeoDataWithin(spatialBounds);
@@ -117,7 +121,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			for (int i = 0; i < val; i++) {
 				if (entities.isEmpty()) break;
 				int index = rand.nextInt(entities.size());
-				AGenstarEntity entity = entities.remove(index);
+				APopulationEntity entity = entities.remove(index);
 				
 				AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
 				entity.setNest(nest);
@@ -130,16 +134,16 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	
 	
 
-	public void setMatch(IGSGeofile match, String keyAttPop, String keyAttMatch) {
+	public void setMatch(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch) {
 		this.match = match;
 		this.keyAttPop = keyAttPop;
 		this.keyAttMatch = keyAttMatch;
 	}
 
-	public void setLocalisation(IGSGeofile localisation) {
+	public void setLocalisation(IGSGeofile<? extends AGeoEntity> localisation) {
 		this.localisation = localisation;
 	}
-	public void setEntityNbAreas(IGSGeofile entityNbAreas, String numberProperty) {
+	public void setEntityNbAreas(IGSGeofile<? extends AGeoEntity> entityNbAreas, String numberProperty) {
 		this.entityNbAreas = entityNbAreas;
 		this.numberProperty = numberProperty;
 	}

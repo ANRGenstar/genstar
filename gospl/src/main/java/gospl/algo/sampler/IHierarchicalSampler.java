@@ -3,18 +3,16 @@ package gospl.algo.sampler;
 import java.util.Collection;
 import java.util.List;
 
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
-public interface IHierarchicalSampler extends ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> {
+public interface IHierarchicalSampler extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>> {
 
 
 	public void setDistribution(
-			GosplBasicDistribution gosplBasicDistribution,
-			Collection<List<AGenstarAttribute>> explorationOrder, 
+			Collection<List<APopulationAttribute>> explorationOrder, 
 			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
 			);
 	

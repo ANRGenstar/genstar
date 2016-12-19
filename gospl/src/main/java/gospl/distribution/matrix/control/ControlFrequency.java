@@ -44,13 +44,13 @@ public class ControlFrequency extends AControl<Double> {
 	}
 
 	@Override
-	public boolean equalsVal(AControl<Double> val, double epsilon) {
-		return Math.abs(this.getValue() - val.getValue()) < this.getValue() * epsilon;
+	public boolean equalsVal(AControl<Double> val, double delta) {
+		return Math.abs(this.getValue() - val.getValue()) < this.getValue() * delta;
 	}
 	
 	@Override
-	public boolean equalsCastedVal(AControl<? extends Number> val, double epsilon){
-		return Math.abs(this.getValue() - val.getValue().doubleValue()) < this.getValue() * epsilon;
+	public boolean equalsCastedVal(AControl<? extends Number> val, double delta){
+		return Math.abs(this.getValue() - val.getValue().doubleValue()) < this.getValue() * delta;
 	}
 
 	@Override

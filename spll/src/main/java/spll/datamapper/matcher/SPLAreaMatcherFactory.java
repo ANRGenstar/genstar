@@ -12,26 +12,26 @@ import java.util.stream.Collectors;
 
 import org.opengis.referencing.operation.TransformException;
 
-import core.io.geo.IGSGeofile;
-import core.io.geo.entity.AGeoEntity;
-import core.io.geo.entity.GSFeature;
-import core.io.geo.entity.attribute.value.AGeoValue;
+import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.AGeoValue;
+import core.metamodel.geo.io.IGSGeofile;
 import core.util.GSPerformanceUtil;
 import spll.datamapper.variable.SPLVariable;
+import spll.entity.GSFeature;
 
 public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Double> {
 
 	private int matcherCount = 0;
 
-	private Collection<AGeoValue> variables;
+	private Collection<? extends AGeoValue> variables;
 
-	public SPLAreaMatcherFactory(Collection<AGeoValue> variables) {
+	public SPLAreaMatcherFactory(Collection<? extends AGeoValue> variables) {
 		this.variables = variables;
 	}
 
 	@Override
 	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(GSFeature feature, 
-			IGSGeofile regressorsFile) throws IOException, TransformException, InterruptedException, ExecutionException { 
+			IGSGeofile<? extends AGeoEntity> regressorsFile) throws IOException, TransformException, InterruptedException, ExecutionException { 
 		return getMatchers(Arrays.asList(feature), regressorsFile);
 	}
 
@@ -44,7 +44,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	 */
 	@Override
 	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<GSFeature> features,
-			IGSGeofile regressorsFile) 
+			IGSGeofile<? extends AGeoEntity> regressorsFile) 
 					throws IOException, TransformException, InterruptedException, ExecutionException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regressors' data");
 		gspu.setObjectif(features.size());
@@ -64,7 +64,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	 * TODO: could be optimise
 	 */
 	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(GSFeature feature,
-			Iterator<? extends AGeoEntity> geoData, Collection<AGeoValue> variables, 
+			Iterator<? extends AGeoEntity> geoData, Collection<? extends AGeoValue> variables, 
 			GSPerformanceUtil gspu) {
 		List<ISPLMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
 		while(geoData.hasNext()){

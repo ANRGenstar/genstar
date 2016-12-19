@@ -2,26 +2,33 @@ package spll.util;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
-import core.io.geo.GeoGSFileType;
-import core.io.geo.IGSGeofile;
-import core.io.geo.RasterFile;
-import core.io.geo.entity.attribute.value.AGeoValue;
+import org.geotools.referencing.CRS;
+import org.opengis.referencing.FactoryException;
+import org.opengis.referencing.crs.CoordinateReferenceSystem;
+
+import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.AGeoValue;
+import core.metamodel.geo.io.GeoGSFileType;
+import core.metamodel.geo.io.IGSGeofile;
+import spll.io.RasterFile;
 
 public class SpllUtil {
 
 	/**
 	 * Return values of meaningful geographical purpose (i.e. exclude raster noData) contains 
-	 * in given files collection
+	 * in given files collection and that complains to given {@code vals} argument collection
+	 * of attribute name
 	 * 
 	 * @param vals
 	 * @return
 	 */
-	public static Collection<AGeoValue> getMeaningfullValues(Collection<String> vals, Collection<IGSGeofile> files){
+	public static Collection<? extends AGeoValue> getValuesFor(Collection<String> vals, List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile){
 		Collection<AGeoValue> values = new HashSet<>();
 		if(vals.isEmpty()){
-			for(IGSGeofile file : files){
+			for(IGSGeofile<? extends AGeoEntity> file : endogeneousVarFile){
 				if(file.getGeoGSFileType().equals(GeoGSFileType.RASTER))
 					values.addAll(file.getGeoValues()
 							.stream().filter(val -> !((RasterFile)file).isNoDataValue(val))
@@ -30,7 +37,7 @@ public class SpllUtil {
 					values.addAll(file.getGeoValues());
 			}
 		} else {
-			values.addAll(files.stream()
+			values.addAll(endogeneousVarFile.stream()
 					.flatMap(file -> file.getGeoValues().stream())
 					.filter(var -> vals.stream().anyMatch(vName -> var.valueEquals(vName)))
 					.collect(Collectors.toSet()));
@@ -38,6 +45,12 @@ public class SpllUtil {
 		return values;
 	}
 
+	/**
+	 * Return a string representation of a 2D matrix
+	 * 
+	 * @param matrix
+	 * @return
+	 */
 	public static String getStringMatrix(float[][] matrix){
 		String string = "";
 		for(int x = 0; x < matrix.length; x++){
@@ -47,6 +60,25 @@ public class SpllUtil {
 			string += "\n";
 		}
 		return string;
+	}
+	
+	/**
+	 * Retrieve a CRS from a WKT encoding. If Geotools fails to initialize
+	 * a CRS factory, then null is return together with a stack trace of
+	 * failure
+	 * 
+	 * @param wktCRS
+	 * @return
+	 */
+	public static CoordinateReferenceSystem getCRSfromWKT(String wktCRS) {
+		CoordinateReferenceSystem crs = null;
+		try {
+			crs = CRS.parseWKT(wktCRS);
+		} catch (FactoryException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return crs;
 	}
 
 }

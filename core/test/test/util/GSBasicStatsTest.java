@@ -7,8 +7,8 @@ import java.util.stream.IntStream;
 import org.junit.Assert;
 import org.junit.Test;
 
-import core.util.GSBasicStats;
-import core.util.data.GSEnumStats;
+import core.util.stats.GSBasicStats;
+import core.util.stats.GSEnumStats;
 
 public class GSBasicStatsTest {
 	

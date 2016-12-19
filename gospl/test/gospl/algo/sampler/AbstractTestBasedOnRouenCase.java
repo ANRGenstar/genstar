@@ -8,29 +8,31 @@ import java.nio.file.Files;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import core.io.configuration.GosplConfigurationFile;
-import core.io.configuration.GosplXmlSerializer;
-import core.io.exception.InvalidFileTypeException;
-import core.io.survey.entity.AGenstarEntity;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.AttributeFactory;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.configuration.GenstarConfigurationFile;
+import core.configuration.GenstarXmlSerializer;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
-import gospl.GosplSPTemplate;
-import gospl.algo.IDistributionInferenceAlgo;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.GosplPopulation;
+import gospl.algo.ISyntheticReconstructionAlgo;
+import gospl.distribution.GosplDistributionBuilder;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.entity.attribute.GosplAttributeFactory;
+import gospl.example.GosplIndependantEstimationTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.metamodel.GosplPopulation;
+import gospl.io.GosplSurveyFactory;
+import gospl.io.exception.InvalidSurveyFormatException;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -55,18 +57,18 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	protected abstract SamplerType getSamplerToTest();
 	
 	
-	protected abstract IDistributionInferenceAlgo<SamplerType> getInferenceAlgoToTest();
+	protected abstract ISyntheticReconstructionAlgo<SamplerType> getInferenceAlgoToTest();
 	
 	/**
 	 * Provides the configuration file for Rouen
 	 * @return
 	 */
-	protected GosplConfigurationFile getConfigurationFile() {
+	protected GenstarConfigurationFile getConfigurationFile() {
 
 		 // Setup the serializer that save configuration file
-		 GosplXmlSerializer gxs = null;
+		 GenstarXmlSerializer gxs = null;
 		 try {
-			 gxs = new GosplXmlSerializer();
+			 gxs = new GenstarXmlSerializer();
 		 } catch (FileNotFoundException e) {
 			 // TODO Auto-generated catch block
 			 e.printStackTrace();
@@ -74,18 +76,18 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		 // Setup the factory that build attribute
 		 @SuppressWarnings("unused")
-		AttributeFactory attf = new AttributeFactory();
+		GosplAttributeFactory attf = new GosplAttributeFactory();
 		
-		 GosplConfigurationFile gcf = null;
+		 GenstarConfigurationFile gcf = null;
 		 try {
-			 gcf = gxs.deserializeGSConfig(new File("testdata/rouen1/GSC_RouenIndividual.xml"));
+			 gcf = gxs.deserializeGSConfig(new File("testdata/rouen1/GSC_Rouen.xml"));
 		 } catch (FileNotFoundException e) {
 			 // TODO Auto-generated catch block
 			 e.printStackTrace();
 		 }
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
 						 gcf.getAttributes().size()+" attributs\n"+
-						 gcf.getDataFiles().size()+" data files");
+						 gcf.getSurveyWrapper().size()+" data files");
 						
 		 return gcf;
 	}
@@ -95,14 +97,14 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	public void test() {
 		
 		// parameters of the test
-		int targetPopulationSize = 1000;
-		GosplConfigurationFile confFile = this.getConfigurationFile();
+		int targetPopulationSize = 100;
+		GenstarConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionFactory df = new GosplDistributionFactory(confFile);
+		GosplDistributionBuilder df = new GosplDistributionBuilder(confFile);
 		
 		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS
 		try {
@@ -111,7 +113,10 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			e.printStackTrace();
 		} catch (final IOException e) {
 			e.printStackTrace();
-		} catch (final InvalidFileTypeException e) {
+		} catch (final InvalidSurveyFormatException e) {
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -125,7 +130,10 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		} catch (final IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (final InvalidFileTypeException e) {
+		} catch (final InvalidSurveyFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
@@ -134,7 +142,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// Choice is made here to use distribution based generator
 
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> distribution = null;
+		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -144,10 +152,10 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		}
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
-		final IDistributionInferenceAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<AGenstarAttribute,AGenstarValue>> sampler = null;
+		final ISyntheticReconstructionAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
+		ISampler<ACoordinate<APopulationAttribute,APopulationValue>> sampler = null;
 		try {
-			sampler = distributionInfAlgo.inferDistributionSampler(
+			sampler = distributionInfAlgo.inferSRSampler(
 					distribution, 
 					this.getSamplerToTest()
 					);
@@ -167,7 +175,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		try {
 			population = ispGenerator.generate(targetPopulationSize);
 			gspu.sysoStempPerformance("End generating synthetic population: elapse time",
-					GosplSPTemplate.class.getName());
+					GosplIndependantEstimationTemplate.class.getName());
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -180,41 +188,21 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
 		try {
 			tmpDir.create();
-
-			final CharSequence csvSep = ";";
-			int individual = 1;
-			File reportFile = tmpDir.newFile("PopExport.csv");
-
-			final BufferedWriter bw = Files.newBufferedWriter(reportFile.toPath());
-			final Collection<AGenstarAttribute> attributes = population.getPopulationAttributes();
-			bw.write("Individual" + csvSep
-					+ attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(csvSep))
-					+ "\n");
-			for (final AGenstarEntity e : population) {
-				bw.write(String.valueOf(individual++));
-				for (final AGenstarAttribute attribute : attributes) {
-					AGenstarValue av = e.getValueForAttribute(attribute); 
-					bw.write(csvSep + (av == null?"":e.getValueForAttribute(attribute).getStringValue()));
-				}
-				bw.write("\n");
-			}
-			bw.close();
-			gspu.sysoStempPerformance("\texport done: " + reportFile.getAbsolutePath(), GosplSPTemplate.class.getName());
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
-		
-		try {
-
-			
-			gspu.sysoStempMessage("\nStart processing population to output files");
+			File exportFile = tmpDir.newFile("PopExport.csv");
 			File reportFile = tmpDir.newFile("PopReport.csv");
-			Files.write(reportFile.toPath(), population.csvReport(";").getBytes());
-			gspu.sysoStempPerformance("\treport done: " + reportFile.getAbsolutePath(), GosplSPTemplate.class.getName());
+			
+			GosplSurveyFactory sf = new GosplSurveyFactory();
+			sf.createSurvey(exportFile, GSSurveyType.Sample, population);
+			sf.createSurvey(reportFile, GSSurveyType.GlobalFrequencyTable, population);
 		} catch (final IOException e) {
 			e.printStackTrace();
-		}
-		
+		} catch (InvalidFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (InvalidSurveyFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}		
 		
 
 //		fail("Not yet implemented - yet.");

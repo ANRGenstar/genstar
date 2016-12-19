@@ -11,19 +11,19 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.io.survey.GSSurveyType;
-import core.io.survey.entity.attribut.AGenstarAttribute;
-import core.io.survey.entity.attribut.value.AGenstarValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
+import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.util.GosplBasicDistribution;
 
 
 /**
@@ -44,7 +44,7 @@ import gospl.distribution.util.GosplBasicDistribution;
  * @author kevinchapuis
  *
  */
-public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDistributionSampler> {
+public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<IDistributionSampler> {
 
 	private Logger logger = LogManager.getLogger();
 	
@@ -53,8 +53,8 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 	}
 
 	@Override
-	public ISampler<ACoordinate<AGenstarAttribute, AGenstarValue>> inferDistributionSampler(
-			INDimensionalMatrix<AGenstarAttribute, AGenstarValue, Double> matrix,
+	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSampler(
+			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,
 			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
@@ -81,10 +81,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 		ASegmentedNDimensionalMatrix<Double> segmentedMatrix = (ASegmentedNDimensionalMatrix<Double>) matrix;
 
 		// Init sample distribution simple expression
-		Map<Set<AGenstarValue>, Double> sampleDistribution = new HashMap<>();
+		Map<Set<APopulationValue>, Double> sampleDistribution = new HashMap<>();
 
 		// Init collection to store processed attributes & matrix
-		Set<AGenstarAttribute> allocatedAttributes = new HashSet<>();
+		Set<APopulationAttribute> allocatedAttributes = new HashSet<>();
 		Set<AFullNDimensionalMatrix<Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
 
 		/////////////////////////////////////
@@ -92,27 +92,27 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 		/////////////////////////////////////
 
 		// First identify referent & aggregated attributes
-		Set<AGenstarAttribute> aggAtts = segmentedMatrix.getDimensions()
+		Set<APopulationAttribute> aggAtts = segmentedMatrix.getDimensions()
 				.stream().filter(d -> !d.isRecordAttribute() && !d.getReferentAttribute().equals(d))
 				.collect(Collectors.toSet());
-		Set<AGenstarAttribute> refAtts = aggAtts.stream().map(att -> att.getReferentAttribute())
+		Set<APopulationAttribute> refAtts = aggAtts.stream().map(att -> att.getReferentAttribute())
 				.collect(Collectors.toSet());
 		// Then disintegrated attribute -> to aggregated attributes relationships
-		Map<AGenstarAttribute, Set<AGenstarAttribute>> aggAttributeMap = refAtts
+		Map<APopulationAttribute, Set<APopulationAttribute>> aggAttributeMap = refAtts
 				.stream().collect(Collectors.toMap(refDim -> refDim, refDim -> segmentedMatrix.getDimensions()
 						.stream().filter(aggDim -> aggDim.getReferentAttribute().equals(refDim) 
 								&& !aggDim.equals(refDim)).collect(Collectors.toSet())));
 		
 		// And disintegrated value -> to aggregated values relationships:
-		Map<AGenstarValue, Set<AGenstarValue>> aggToRefValues = new HashMap<>();
-		for(AGenstarAttribute asa : aggAtts){
-			Map<AGenstarValue, Set<AGenstarValue>> tmpMap = new HashMap<>();
-			Set<AGenstarValue> values = asa.getValues();
-			for(AGenstarValue val : values)
+		Map<APopulationValue, Set<APopulationValue>> aggToRefValues = new HashMap<>();
+		for(APopulationAttribute asa : aggAtts){
+			Map<APopulationValue, Set<APopulationValue>> tmpMap = new HashMap<>();
+			Set<APopulationValue> values = asa.getValues();
+			for(APopulationValue val : values)
 				tmpMap.put(val, val.getAttribute().findMappedAttributeValues(val));
-			Set<AGenstarValue> matchedValue = tmpMap.values().stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
-			Set<AGenstarValue> refValue = asa.getReferentAttribute().getValues();
-			Set<AGenstarValue> unmatchedValue = refValue.stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
+			Set<APopulationValue> matchedValue = tmpMap.values().stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
+			Set<APopulationValue> refValue = asa.getReferentAttribute().getValues();
+			Set<APopulationValue> unmatchedValue = refValue.stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
 			tmpMap.put(asa.getEmptyValue(), unmatchedValue);
 			aggToRefValues.putAll(tmpMap);
 		}
@@ -139,8 +139,8 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 				.collect(Collectors.toList());
 		
 		for(AFullNDimensionalMatrix<Double> mat : aggMatrices){
-			Map<Set<AGenstarValue>, Double> updatedSampleDistribution = new HashMap<>();
-			Map<Set<AGenstarValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
+			Map<Set<APopulationValue>, Double> updatedSampleDistribution = new HashMap<>();
+			Map<Set<APopulationValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
 			
 			// Corresponding disintegrated control total of aggregated values
 			double oControl = sampleDistribution.entrySet()
@@ -151,10 +151,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 					.mapToDouble(indiv -> indiv.getValue()).sum();
 			
 			// Iterate over the old sampleDistribution to had new disaggregate values
-			for(ACoordinate<AGenstarAttribute, AGenstarValue> aggCoord : mat.getMatrix().keySet()){
+			for(ACoordinate<APopulationAttribute, APopulationValue> aggCoord : mat.getMatrix().keySet()){
 				
 				// Identify all individual in the distribution that have disintegrated information about aggregated data
-				Map<Set<AGenstarValue>, Double> targetedIndiv = sampleDistribution.entrySet()
+				Map<Set<APopulationValue>, Double> targetedIndiv = sampleDistribution.entrySet()
 						.stream().filter(indiv -> aggCoord.getDimensions()
 								.stream().filter(d -> allocatedAttributes.contains(d)).map(d -> aggCoord.getMap().get(d))
 								.allMatch(v -> indiv.getKey().contains(v))
@@ -164,7 +164,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 								
 				// Retain new values from aggregated coordinate
-				Set<AGenstarValue> newVals = aggCoord.getMap().entrySet()
+				Set<APopulationValue> newVals = aggCoord.getMap().entrySet()
 						.stream().filter(e -> !aggAtts.contains(e.getKey()) 
 								&& !allocatedAttributes.contains(e.getKey()))
 						.map(e -> e.getValue()).collect(Collectors.toSet());
@@ -172,7 +172,7 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 				// Identify targeted probability: sum of proba for tageted disintegrated values and proba for aggregated values
 				double mControl = targetedIndiv.values().stream().reduce(0d, (d1, d2) -> d1 + d2);
 				double aControl = mat.getMatrix().get(aggCoord).getValue();
-				for(Set<AGenstarValue> indiv : targetedIndiv.keySet()){
+				for(Set<APopulationValue> indiv : targetedIndiv.keySet()){
 					updatedSampleDistribution.put(Stream.concat(indiv.stream(), newVals.stream()).collect(Collectors.toSet()), 
 							targetedIndiv.get(indiv) / mControl * aControl * oControl);
 
@@ -181,10 +181,10 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 			}
 			
 			// Iterate over non updated individual to add new attribute empty value (no info in aggregated data)
-			Set<AGenstarValue> newVals = mat.getDimensions()
+			Set<APopulationValue> newVals = mat.getDimensions()
 					.stream().filter(d -> !allocatedAttributes.contains(d) && !aggAtts.contains(d))
 					.map(d -> d.getEmptyValue()).collect(Collectors.toSet());
-			for(Set<AGenstarValue> indiv : untargetedIndiv.keySet())
+			for(Set<APopulationValue> indiv : untargetedIndiv.keySet())
 				updatedSampleDistribution.put(Stream.concat(indiv.stream(), newVals.stream()).collect(Collectors.toSet()), 
 						sampleDistribution.get(indiv));
 			
@@ -209,7 +209,8 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 			gspu.sysoStempPerformance(1, this);
 		}
 	
-		sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
+		sampler.setDistribution(new GosplDistributionFactory()
+				.createDistribution(matrix.getDimensions(), sampleDistribution));
 		return sampler;
 	}
 
@@ -218,28 +219,28 @@ public class IndependantHypothesisAlgo implements IDistributionInferenceAlgo<IDi
 	// ------------------------------ inner utility methods ------------------------------ //
 
 	
-	private Map<Set<AGenstarValue>, Double> updateGosplProbaMap(Map<Set<AGenstarValue>, Double> sampleDistribution, 
+	private Map<Set<APopulationValue>, Double> updateGosplProbaMap(Map<Set<APopulationValue>, Double> sampleDistribution, 
 			AFullNDimensionalMatrix<Double> matrix, GSPerformanceUtil gspu){
-		Map<Set<AGenstarValue>, Double> updatedSampleDistribution = new HashMap<>();
+		Map<Set<APopulationValue>, Double> updatedSampleDistribution = new HashMap<>();
 		if(sampleDistribution.isEmpty()){
 			updatedSampleDistribution.putAll(matrix.getMatrix().entrySet()
 					.parallelStream().collect(Collectors.toMap(e -> new HashSet<>(e.getKey().values()), e -> e.getValue().getValue())));
 		} else {
 			int j = 1;
-			Set<AGenstarAttribute> allocatedAttributes = sampleDistribution.keySet()
+			Set<APopulationAttribute> allocatedAttributes = sampleDistribution.keySet()
 					.parallelStream().flatMap(set -> set.stream()).map(a -> a.getAttribute()).collect(Collectors.toSet());
-			Set<AGenstarAttribute> hookAtt = matrix.getDimensions()
+			Set<APopulationAttribute> hookAtt = matrix.getDimensions()
 					.stream().filter(att -> allocatedAttributes.contains(att)).collect(Collectors.toSet());
-			for(Set<AGenstarValue> indiv : sampleDistribution.keySet()){
-				Set<AGenstarValue> hookVal = indiv.stream().filter(val -> hookAtt.contains(val.getAttribute()))
+			for(Set<APopulationValue> indiv : sampleDistribution.keySet()){
+				Set<APopulationValue> hookVal = indiv.stream().filter(val -> hookAtt.contains(val.getAttribute()))
 						.collect(Collectors.toSet());
-				Map<ACoordinate<AGenstarAttribute, AGenstarValue>, AControl<Double>> coordsHooked = matrix.getMatrix().entrySet()
+				Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> coordsHooked = matrix.getMatrix().entrySet()
 						.parallelStream().filter(e -> e.getKey().containsAll(hookVal))
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 				double summedProba = coordsHooked.values()
 						.stream().reduce(matrix.getNulVal(), (v1, v2) -> v1.add(v2)).getValue();
-				for(ACoordinate<AGenstarAttribute, AGenstarValue> newIndivVal : coordsHooked.keySet()){
-					Set<AGenstarValue> newIndiv = Stream.concat(indiv.stream(), newIndivVal.values().stream()).collect(Collectors.toSet());
+				for(ACoordinate<APopulationAttribute, APopulationValue> newIndivVal : coordsHooked.keySet()){
+					Set<APopulationValue> newIndiv = Stream.concat(indiv.stream(), newIndivVal.values().stream()).collect(Collectors.toSet());
 					double newProba = sampleDistribution.get(indiv) * coordsHooked.get(newIndivVal).getValue() / summedProba;
 					if(newProba > 0d)
 						updatedSampleDistribution.put(newIndiv, newProba);

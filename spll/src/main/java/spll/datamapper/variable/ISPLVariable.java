@@ -1,6 +1,6 @@
 package spll.datamapper.variable;
 
-import core.io.geo.entity.attribute.value.AGeoValue;
+import core.metamodel.geo.AGeoValue;
 
 public interface ISPLVariable {
 
