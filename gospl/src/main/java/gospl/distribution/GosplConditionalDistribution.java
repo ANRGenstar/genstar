@@ -1,5 +1,6 @@
 package gospl.distribution;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -69,5 +70,6 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			return getNulVal();
 		return new ControlFrequency(Double.valueOf(val));
 	}
+
 
 }

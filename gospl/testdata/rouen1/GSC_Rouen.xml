@@ -249,70 +249,6 @@
         <inputStringUpperBound>0</inputStringUpperBound>
       </emptyValue>
     </gospl.entity.attribute.RangeAttribute>
-    <gospl.entity.attribute.UniqueAttribute>
-      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
-      <name>Couple</name>
-      <dataType>String</dataType>
-      <values>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>Vivant en couple</inputStringValue>
-          <mappedStringValue>Vivant en couple</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>Ne vivant pas en couple</inputStringValue>
-          <mappedStringValue>Ne vivant pas en couple</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-      </values>
-      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
-        <dataType>String</dataType>
-        <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../.."/>
-        <inputStringValue>null</inputStringValue>
-        <mappedStringValue>null</mappedStringValue>
-      </emptyValue>
-    </gospl.entity.attribute.UniqueAttribute>
-    <gospl.entity.attribute.MappedAttribute>
-      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference="../../gospl.entity.attribute.UniqueAttribute"/>
-      <name>Couple</name>
-      <dataType>String</dataType>
-      <values>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>2</inputStringValue>
-          <mappedStringValue>2</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>1</inputStringValue>
-          <mappedStringValue>1</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-      </values>
-      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
-        <dataType>String</dataType>
-        <attribute class="gospl.entity.attribute.MappedAttribute" reference="../.."/>
-        <inputStringValue>null</inputStringValue>
-        <mappedStringValue>null</mappedStringValue>
-      </emptyValue>
-      <mapper>
-        <Relative__path class="set">
-          <string>Vivant en couple</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <string>1</string>
-        </Meta__data__type>
-        <Relative__path class="set">
-          <string>Ne vivant pas en couple</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <string>2</string>
-        </Meta__data__type>
-      </mapper>
-    </gospl.entity.attribute.MappedAttribute>
     <gospl.entity.attribute.RecordAttribute>
       <name>POP</name>
       <dataType>Integer</dataType>
@@ -331,64 +267,6 @@
         <mappedStringValue>0</mappedStringValue>
       </emptyValue>
     </gospl.entity.attribute.RecordAttribute>
-    <gospl.entity.attribute.UniqueAttribute>
-      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
-      <name>Sexe</name>
-      <dataType>String</dataType>
-      <values>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>Hommes</inputStringValue>
-          <mappedStringValue>Hommes</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>Femmes</inputStringValue>
-          <mappedStringValue>Femmes</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-      </values>
-      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
-        <dataType>String</dataType>
-        <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../.."/>
-        <inputStringValue>null</inputStringValue>
-        <mappedStringValue>null</mappedStringValue>
-      </emptyValue>
-    </gospl.entity.attribute.UniqueAttribute>
-    <gospl.entity.attribute.MappedAttribute>
-      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference="../../gospl.entity.attribute.UniqueAttribute[2]"/>
-      <name>Sexe</name>
-      <dataType>String</dataType>
-      <values>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>2</inputStringValue>
-          <mappedStringValue>Femmes</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>1</inputStringValue>
-          <mappedStringValue>Hommes</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-      </values>
-      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
-        <dataType>String</dataType>
-        <attribute class="gospl.entity.attribute.MappedAttribute" reference="../.."/>
-        <inputStringValue>null</inputStringValue>
-        <mappedStringValue>null</mappedStringValue>
-      </emptyValue>
-      <mapper>
-        <Relative__path class="set">
-          <string>Hommes</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <string>Hommes</string>
-        </Meta__data__type>
-      </mapper>
-    </gospl.entity.attribute.MappedAttribute>
     <gospl.entity.attribute.RangeAttribute>
       <referentAttribute class="gospl.entity.attribute.RangeAttribute" reference=".."/>
       <name>Age</name>
@@ -572,167 +450,11 @@
         <inputStringUpperBound>0</inputStringUpperBound>
       </emptyValue>
     </gospl.entity.attribute.RangeAttribute>
-    <gospl.entity.attribute.MappedAttribute>
-      <referentAttribute class="gospl.entity.attribute.UniqueAttribute">
-        <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
-        <name>CSP</name>
-        <dataType>String</dataType>
-        <values>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Cadres et professions intellectuelles supérieures</inputStringValue>
-            <mappedStringValue>Cadres et professions intellectuelles supérieures</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Ouvriers</inputStringValue>
-            <mappedStringValue>Ouvriers</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Artisans. commerçants. chefs d&apos;entreprise</inputStringValue>
-            <mappedStringValue>Artisans. commerçants. chefs d&apos;entreprise</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Autres personnes sans activité professionnelle</inputStringValue>
-            <mappedStringValue>Autres personnes sans activité professionnelle</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Employés</inputStringValue>
-            <mappedStringValue>Employés</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Agriculteurs exploitants</inputStringValue>
-            <mappedStringValue>Agriculteurs exploitants</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Retraités</inputStringValue>
-            <mappedStringValue>Retraités</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-          <gospl.entity.attribute.value.UniqueValue>
-            <dataType>String</dataType>
-            <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-            <inputStringValue>Professions intermédiaires</inputStringValue>
-            <mappedStringValue>Professions intermédiaires</mappedStringValue>
-          </gospl.entity.attribute.value.UniqueValue>
-        </values>
-        <emptyValue class="gospl.entity.attribute.value.UniqueValue">
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../.."/>
-          <inputStringValue>null</inputStringValue>
-          <mappedStringValue>null</mappedStringValue>
-        </emptyValue>
-      </referentAttribute>
-      <name>SCP</name>
-      <dataType>String</dataType>
-      <values>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>24</inputStringValue>
-          <mappedStringValue>24</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>25</inputStringValue>
-          <mappedStringValue>25</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>11</inputStringValue>
-          <mappedStringValue>11</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>22</inputStringValue>
-          <mappedStringValue>22</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>12</inputStringValue>
-          <mappedStringValue>12</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>23</inputStringValue>
-          <mappedStringValue>23</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
-          <inputStringValue>21</inputStringValue>
-          <mappedStringValue>21</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-      </values>
-      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
-        <dataType>String</dataType>
-        <attribute class="gospl.entity.attribute.MappedAttribute" reference="../.."/>
-        <inputStringValue>null</inputStringValue>
-        <mappedStringValue>null</mappedStringValue>
-      </emptyValue>
-      <mapper>
-        <Relative__path class="set">
-          <string>Retraités ou préretraités</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <string>Retraités</string>
-        </Meta__data__type>
-        <Relative__path class="set">
-          <string>Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <string>Cadres et professions intellectuelles supérieures</string>
-          <string>Agriculteurs exploitants</string>
-          <string>Artisans. commerçants. chefs d&apos;entreprise</string>
-          <string>Employés</string>
-          <string>Ouvriers</string>
-          <string>Professions intermédiaires</string>
-        </Meta__data__type>
-        <Relative__path class="set">
-          <string>Femmes ou hommes au foyer</string>
-          <string>Autres inactifs</string>
-          <string>Chômeurs</string>
-          <string>Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <string>Autres personnes sans activité professionnelle</string>
-        </Meta__data__type>
-        <Relative__path class="set">
-          <string>Moins de 14 ans</string>
-        </Relative__path>
-        <Meta__data__type class="set">
-          <null/>
-        </Meta__data__type>
-      </mapper>
-    </gospl.entity.attribute.MappedAttribute>
-    <gospl.entity.attribute.UniqueAttribute reference="../gospl.entity.attribute.MappedAttribute[3]/referentAttribute"/>
     <gospl.entity.attribute.UniqueAttribute>
       <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
       <name>IRIS</name>
       <dataType>String</dataType>
       <values>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765401006</inputStringValue>
-          <mappedStringValue>765401006</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
@@ -742,14 +464,14 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765401004</inputStringValue>
-          <mappedStringValue>765401004</mappedStringValue>
+          <inputStringValue>765401006</inputStringValue>
+          <mappedStringValue>765401006</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765401003</inputStringValue>
-          <mappedStringValue>765401003</mappedStringValue>
+          <inputStringValue>765401001</inputStringValue>
+          <mappedStringValue>765401001</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -760,8 +482,14 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765401001</inputStringValue>
-          <mappedStringValue>765401001</mappedStringValue>
+          <inputStringValue>765401003</inputStringValue>
+          <mappedStringValue>765401003</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765401004</inputStringValue>
+          <mappedStringValue>765401004</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -790,68 +518,8 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400301</inputStringValue>
-          <mappedStringValue>765400301</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400103</inputStringValue>
-          <mappedStringValue>765400103</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400202</inputStringValue>
-          <mappedStringValue>765400202</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400104</inputStringValue>
-          <mappedStringValue>765400104</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400302</inputStringValue>
-          <mappedStringValue>765400302</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400401</inputStringValue>
-          <mappedStringValue>765400401</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400203</inputStringValue>
-          <mappedStringValue>765400203</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400101</inputStringValue>
-          <mappedStringValue>765400101</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400201</inputStringValue>
-          <mappedStringValue>765400201</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400102</inputStringValue>
-          <mappedStringValue>765400102</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400305</inputStringValue>
-          <mappedStringValue>765400305</mappedStringValue>
+          <inputStringValue>765400306</inputStringValue>
+          <mappedStringValue>765400306</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -880,8 +548,8 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400404</inputStringValue>
-          <mappedStringValue>765400404</mappedStringValue>
+          <inputStringValue>765400405</inputStringValue>
+          <mappedStringValue>765400405</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -892,8 +560,8 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400306</inputStringValue>
-          <mappedStringValue>765400306</mappedStringValue>
+          <inputStringValue>765400305</inputStringValue>
+          <mappedStringValue>765400305</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -904,20 +572,68 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400405</inputStringValue>
-          <mappedStringValue>765400405</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
           <inputStringValue>765400503</inputStringValue>
           <mappedStringValue>765400503</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400404</inputStringValue>
+          <mappedStringValue>765400404</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400201</inputStringValue>
+          <mappedStringValue>765400201</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400102</inputStringValue>
+          <mappedStringValue>765400102</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400101</inputStringValue>
+          <mappedStringValue>765400101</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
           <inputStringValue>765400601</inputStringValue>
           <mappedStringValue>765400601</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400304</inputStringValue>
+          <mappedStringValue>765400304</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400502</inputStringValue>
+          <mappedStringValue>765400502</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400106</inputStringValue>
+          <mappedStringValue>765400106</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400403</inputStringValue>
+          <mappedStringValue>765400403</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400205</inputStringValue>
+          <mappedStringValue>765400205</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -934,32 +650,8 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400502</inputStringValue>
-          <mappedStringValue>765400502</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
           <inputStringValue>765400204</inputStringValue>
           <mappedStringValue>765400204</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400105</inputStringValue>
-          <mappedStringValue>765400105</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400304</inputStringValue>
-          <mappedStringValue>765400304</mappedStringValue>
-        </gospl.entity.attribute.value.UniqueValue>
-        <gospl.entity.attribute.value.UniqueValue>
-          <dataType>String</dataType>
-          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400106</inputStringValue>
-          <mappedStringValue>765400106</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
@@ -970,14 +662,233 @@
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400403</inputStringValue>
-          <mappedStringValue>765400403</mappedStringValue>
+          <inputStringValue>765400105</inputStringValue>
+          <mappedStringValue>765400105</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
         <gospl.entity.attribute.value.UniqueValue>
           <dataType>String</dataType>
           <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
-          <inputStringValue>765400205</inputStringValue>
-          <mappedStringValue>765400205</mappedStringValue>
+          <inputStringValue>765400104</inputStringValue>
+          <mappedStringValue>765400104</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400302</inputStringValue>
+          <mappedStringValue>765400302</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400401</inputStringValue>
+          <mappedStringValue>765400401</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400203</inputStringValue>
+          <mappedStringValue>765400203</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400301</inputStringValue>
+          <mappedStringValue>765400301</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400103</inputStringValue>
+          <mappedStringValue>765400103</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>765400202</inputStringValue>
+          <mappedStringValue>765400202</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+      </values>
+      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
+        <dataType>String</dataType>
+        <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </gospl.entity.attribute.UniqueAttribute>
+    <gospl.entity.attribute.UniqueAttribute>
+      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
+      <name>Couple</name>
+      <dataType>String</dataType>
+      <values>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Ne vivant pas en couple</inputStringValue>
+          <mappedStringValue>Ne vivant pas en couple</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Vivant en couple</inputStringValue>
+          <mappedStringValue>Vivant en couple</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+      </values>
+      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
+        <dataType>String</dataType>
+        <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </gospl.entity.attribute.UniqueAttribute>
+    <gospl.entity.attribute.MappedAttribute>
+      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference="../../gospl.entity.attribute.UniqueAttribute[2]"/>
+      <name>Couple</name>
+      <dataType>String</dataType>
+      <values>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>2</inputStringValue>
+          <mappedStringValue>2</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>1</inputStringValue>
+          <mappedStringValue>1</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+      </values>
+      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
+        <dataType>String</dataType>
+        <attribute class="gospl.entity.attribute.MappedAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+      <mapper>
+        <Relative__path class="set">
+          <string>Vivant en couple</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>1</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>Ne vivant pas en couple</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>2</string>
+        </Meta__data__type>
+      </mapper>
+    </gospl.entity.attribute.MappedAttribute>
+    <gospl.entity.attribute.UniqueAttribute>
+      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
+      <name>Sexe</name>
+      <dataType>String</dataType>
+      <values>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Hommes</inputStringValue>
+          <mappedStringValue>Hommes</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Femmes</inputStringValue>
+          <mappedStringValue>Femmes</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+      </values>
+      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
+        <dataType>String</dataType>
+        <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+    </gospl.entity.attribute.UniqueAttribute>
+    <gospl.entity.attribute.MappedAttribute>
+      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference="../../gospl.entity.attribute.UniqueAttribute[3]"/>
+      <name>Sexe</name>
+      <dataType>String</dataType>
+      <values>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>2</inputStringValue>
+          <mappedStringValue>Femmes</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>1</inputStringValue>
+          <mappedStringValue>Hommes</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+      </values>
+      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
+        <dataType>String</dataType>
+        <attribute class="gospl.entity.attribute.MappedAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+      <mapper>
+        <Relative__path class="set">
+          <string>Hommes</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>Hommes</string>
+        </Meta__data__type>
+      </mapper>
+    </gospl.entity.attribute.MappedAttribute>
+    <gospl.entity.attribute.UniqueAttribute>
+      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference=".."/>
+      <name>CSP</name>
+      <dataType>String</dataType>
+      <values>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Employés</inputStringValue>
+          <mappedStringValue>Employés</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Cadres et professions intellectuelles supérieures</inputStringValue>
+          <mappedStringValue>Cadres et professions intellectuelles supérieures</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Artisans. commerçants. chefs d&apos;entreprise</inputStringValue>
+          <mappedStringValue>Artisans. commerçants. chefs d&apos;entreprise</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Autres personnes sans activité professionnelle</inputStringValue>
+          <mappedStringValue>Autres personnes sans activité professionnelle</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Professions intermédiaires</inputStringValue>
+          <mappedStringValue>Professions intermédiaires</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Ouvriers</inputStringValue>
+          <mappedStringValue>Ouvriers</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Agriculteurs exploitants</inputStringValue>
+          <mappedStringValue>Agriculteurs exploitants</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.UniqueAttribute" reference="../../.."/>
+          <inputStringValue>Retraités</inputStringValue>
+          <mappedStringValue>Retraités</mappedStringValue>
         </gospl.entity.attribute.value.UniqueValue>
       </values>
       <emptyValue class="gospl.entity.attribute.value.UniqueValue">
@@ -1223,6 +1134,95 @@
           <string>35 à 39 ans</string>
           <string>25 à 29 ans</string>
           <string>30 à 34 ans</string>
+        </Meta__data__type>
+      </mapper>
+    </gospl.entity.attribute.MappedAttribute>
+    <gospl.entity.attribute.MappedAttribute>
+      <referentAttribute class="gospl.entity.attribute.UniqueAttribute" reference="../../gospl.entity.attribute.UniqueAttribute[4]"/>
+      <name>SCP</name>
+      <dataType>String</dataType>
+      <values>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>25</inputStringValue>
+          <mappedStringValue>25</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>24</inputStringValue>
+          <mappedStringValue>24</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>12</inputStringValue>
+          <mappedStringValue>12</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>23</inputStringValue>
+          <mappedStringValue>23</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>11</inputStringValue>
+          <mappedStringValue>11</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>22</inputStringValue>
+          <mappedStringValue>22</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+        <gospl.entity.attribute.value.UniqueValue>
+          <dataType>String</dataType>
+          <attribute class="gospl.entity.attribute.MappedAttribute" reference="../../.."/>
+          <inputStringValue>21</inputStringValue>
+          <mappedStringValue>21</mappedStringValue>
+        </gospl.entity.attribute.value.UniqueValue>
+      </values>
+      <emptyValue class="gospl.entity.attribute.value.UniqueValue">
+        <dataType>String</dataType>
+        <attribute class="gospl.entity.attribute.MappedAttribute" reference="../.."/>
+        <inputStringValue>null</inputStringValue>
+        <mappedStringValue>null</mappedStringValue>
+      </emptyValue>
+      <mapper>
+        <Relative__path class="set">
+          <string>Retraités ou préretraités</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>Retraités</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>Cadres et professions intellectuelles supérieures</string>
+          <string>Agriculteurs exploitants</string>
+          <string>Artisans. commerçants. chefs d&apos;entreprise</string>
+          <string>Employés</string>
+          <string>Ouvriers</string>
+          <string>Professions intermédiaires</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>Femmes ou hommes au foyer</string>
+          <string>Autres inactifs</string>
+          <string>Chômeurs</string>
+          <string>Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <string>Autres personnes sans activité professionnelle</string>
+        </Meta__data__type>
+        <Relative__path class="set">
+          <string>Moins de 14 ans</string>
+        </Relative__path>
+        <Meta__data__type class="set">
+          <null/>
         </Meta__data__type>
       </mapper>
     </gospl.entity.attribute.MappedAttribute>

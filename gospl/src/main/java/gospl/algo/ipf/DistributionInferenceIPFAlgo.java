@@ -40,7 +40,7 @@ public class DistributionInferenceIPFAlgo extends AGosplIPF<Double> implements I
 	public AFullNDimensionalMatrix<Double> process() {
 		if(this.marginals == null || this.marginals.getMatrix().isEmpty()) 
 			throw new IllegalArgumentException(this.getClass().getSimpleName()+" must define a matrix to setup marginals");	
-		return process(new GosplDistributionFactory().createDistribution(sampleSeed));
+		return process(GosplDistributionFactory.createDistribution(sampleSeed));
 	}
 
 }

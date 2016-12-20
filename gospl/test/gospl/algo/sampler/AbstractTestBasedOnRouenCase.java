@@ -97,7 +97,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	public void test() {
 		
 		// parameters of the test
-		int targetPopulationSize = 1000;
+		int targetPopulationSize = 100;
 		GenstarConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
@@ -169,13 +169,14 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 				new GSPerformanceUtil("Start generating synthetic population of size " + targetPopulationSize);
 
 		// BUILD THE GENERATOR
-		final ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
+		final ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator((IHierarchicalSampler) sampler);
 
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(targetPopulationSize);
 			gspu.sysoStempPerformance("End generating synthetic population: elapse time",
 					GosplIndependantEstimationTemplate.class.getName());
+			
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();
 		}

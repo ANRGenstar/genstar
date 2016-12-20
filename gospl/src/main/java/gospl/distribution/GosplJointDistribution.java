@@ -65,5 +65,6 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 			return getNulVal();
 		return new ControlFrequency(parser.getDouble(val));
 	}
+
 	
 }

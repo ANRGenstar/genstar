@@ -16,15 +16,23 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 
+import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.algo.sampler.IHierarchicalSampler;
+import gospl.distribution.GosplContingencyTable;
+import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
+import gospl.evaluation.BasicSamplingEvaluation;
+import gospl.evaluation.IEvaluableSampler;
+import gospl.evaluation.ISamplingEvaluation;
+import gospl.evaluation.SamplingEvaluationUtils;
 
 /**
  * A Hierarchical sampler explores the variables in a given order to generate the individuals.  
@@ -32,7 +40,7 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  * @author Samuel Thiriot
  *
  */
-public class GosplHierarchicalSampler implements IHierarchicalSampler {
+public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluableSampler {
 
 	private Logger logger = LogManager.getLogger();
 	private Collection<List<APopulationAttribute>> explorationOrder = null;
@@ -181,6 +189,43 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	@Override
 	public final List<ACoordinate<APopulationAttribute, APopulationValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
+	}
+	
+	/**
+	 * Based on a list of generated individuals, computes the delta between the available data 
+	 * and the generated population. 
+	 * @param generated
+	 */
+	@Override
+	public ISamplingEvaluation evaluateQuality(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
+
+		BasicSamplingEvaluation evaluation = new BasicSamplingEvaluation(population.size());
+		
+		double totalMSE = .0;
+		
+		// for each matrix, recompute the probabilities
+		for (AFullNDimensionalMatrix<Double> mParam: segmentedMatrix.getMatrices()) {
+			
+			AFullNDimensionalMatrix<Integer> mMeasuredContigency = GosplDistributionFactory.createContigencyFromPopulation(mParam.getDimensions(), population);
+			
+			AFullNDimensionalMatrix<Double> mMeasuredFrequency = GosplDistributionFactory.createGlobalFrequencyTableFromContingency(mMeasuredContigency);
+			
+			System.out.println("reference: ");
+			System.out.println(mParam);
+			
+			System.out.println("generated: ");
+			System.out.println(mMeasuredFrequency);
+			
+			double msq = SamplingEvaluationUtils.computeMeanSquarredError(mParam, mMeasuredFrequency);
+			totalMSE += msq;
+			System.out.println("error: "+msq);
+			// compute difference between the matrices
+			
+		}
+		
+		evaluation.setOverallBias(totalMSE/segmentedMatrix.getMatrices().size());
+		return evaluation;
+		
 	}
 
 	// -------------------- utility -------------------- //

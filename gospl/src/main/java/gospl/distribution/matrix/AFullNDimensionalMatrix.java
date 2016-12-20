@@ -97,6 +97,11 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	public Set<APopulationAttribute> getDimensions(){
 		return Collections.unmodifiableSet(dimensions.keySet());
 	}
+	
+	@Override
+	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues() {
+		return Collections.unmodifiableMap(dimensions);
+	}
 
 	@Override
 	public APopulationAttribute getDimension(APopulationValue aspect) {
@@ -149,9 +154,20 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	@Override
 	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
-		if(!matrix.containsKey(coordinate))
-			throw new NullPointerException("Coordinate "+coordinate+" is absent from this control table ("+this.hashCode()+")");
-		return this.matrix.get(coordinate);
+		
+		AControl<T> res = this.matrix.get(coordinate);
+		
+		if (res == null) {
+			if (isCoordinateCompliant(coordinate)) {
+				// return the default null value
+				return this.getNulVal();
+			} else {
+				throw new NullPointerException("Coordinate "+coordinate+" is absent from this control table ("+this.hashCode()+")");
+			}
+		} 
+			
+		return res;
+		 
 	}
 
 	/**
@@ -241,21 +257,26 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public String toString(){
 		int theoreticalSpaceSize = this.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
-		String s = "-- Matrix: "+dimensions.size()+" dimensions and "+dimensions.values().stream().mapToInt(Collection::size).sum()
-				+" aspects (theoretical size:"+theoreticalSpaceSize+")--\n";
+		StringBuffer sb = new StringBuffer();
+		sb.append("-- Matrix: ").append(dimensions.size()).append(" dimensions and ").append(dimensions.values().stream().mapToInt(Collection::size).sum())
+					.append(" aspects (theoretical size:").append(theoreticalSpaceSize).append(")--\n");
 		AControl<T> empty = getNulVal();
 		for(APopulationAttribute dimension : dimensions.keySet()){
-			s += " -- dimension: "+dimension.getAttributeName()+" with "+dimensions.get(dimension).size()+" aspects -- \n";
-			for(APopulationValue aspect : dimensions.get(dimension))
+			sb.append(" -- dimension: ").append(dimension.getAttributeName());
+			sb.append(" with ").append(dimensions.get(dimension).size()).append(" aspects -- \n");
+			for(APopulationValue aspect : dimensions.get(dimension)) {
+				AControl<T> value = null;
 				try {
-					s += "| "+aspect+": "+getVal(aspect)+"\n";
+					value = getVal(aspect);
 				} catch (NullPointerException e) {
-					e.printStackTrace();
-					s += "| "+aspect+": "+empty+"\n";
+					//e.printStackTrace();
+					value = empty;
 				}
+				sb.append("| ").append(aspect).append(": ").append(value).append("\n");
+			}
 		}
-		s += " ----------------------------------- \n";
-		return s;
+		sb.append(" ----------------------------------- \n");
+		return sb.toString();
 	}
 
 	@Override

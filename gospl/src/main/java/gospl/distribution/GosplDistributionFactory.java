@@ -27,7 +27,7 @@ public class GosplDistributionFactory {
 	 * @param dimensions
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Double> createDitribution(
+	public static AFullNDimensionalMatrix<Double> createDistribution(
 			Set<APopulationAttribute> dimensions){
 		return new GosplJointDistribution(dimensions.stream().collect(Collectors.toMap(dim -> dim, dim -> dim.getValues())), 
 				GSSurveyType.GlobalFrequencyTable);
@@ -42,11 +42,11 @@ public class GosplDistributionFactory {
 	 * @param sampleDistribution
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Double> createDistribution(Set<APopulationAttribute> dimensions,
+	public static AFullNDimensionalMatrix<Double> createDistribution(Set<APopulationAttribute> dimensions,
 			Map<Set<APopulationValue>, Double> sampleDistribution){
 		if(sampleDistribution.isEmpty())
 			throw new IllegalArgumentException("Sample distribution cannot be empty");
-		AFullNDimensionalMatrix<Double> distribution = this.createDitribution(dimensions);
+		AFullNDimensionalMatrix<Double> distribution = createDistribution(dimensions);
 		sampleDistribution.entrySet().parallelStream().forEach(entry -> distribution.addValue(
 				new GosplCoordinate(entry.getKey()), new ControlFrequency(entry.getValue())));
 		return distribution;
@@ -60,7 +60,7 @@ public class GosplDistributionFactory {
 	 * @param population
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Double> createDistribution(
+	public static AFullNDimensionalMatrix<Double> createDistribution(
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		// Init the output matrix
 		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
@@ -81,6 +81,33 @@ public class GosplDistributionFactory {
 		
 		return matrix;
 	}
+	
+	/**
+	 * Changes a contingency table to a global frequency table
+	 * @param contigency
+	 * @return
+	 */
+	public static AFullNDimensionalMatrix<Double> createGlobalFrequencyTableFromContingency(
+			AFullNDimensionalMatrix<Integer> contigency){
+		// Init the output matrix
+		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
+				contigency.getDimensionsAsAttributesAndValues(), 
+				GSSurveyType.GlobalFrequencyTable
+				);
+		
+		
+		int total = contigency.getVal().getValue();
+		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
+		
+		// Normalize increments to global frequency
+		contigency.getMatrix().keySet().stream().forEach(coord -> matrix.setValue(
+											coord, 
+											new ControlFrequency(contigency.getVal(coord).getValue().doubleValue()/total)
+											));
+		
+		return matrix;
+	}
+
 
 	/**
 	 * Create a contingency matrix from entities' population characteristics
@@ -88,7 +115,7 @@ public class GosplDistributionFactory {
 	 * @param seed
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> createContingency(
+	public static AFullNDimensionalMatrix<Integer> createContingency(
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(population.getPopulationAttributes().stream()
@@ -103,6 +130,29 @@ public class GosplDistributionFactory {
 				matrix.getVal(entityCoord).add(unitFreq);
 		}
 		
+		return matrix;
+	}
+	
+	public static AFullNDimensionalMatrix<Integer> createContigencyFromPopulation(
+			Set<APopulationAttribute> attributesToMeasure,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population 
+			) {
+		
+		// Init the output matrix
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(
+				attributesToMeasure.stream().collect(Collectors.toMap(att -> att, att -> att.getValues()))
+				);
+		
+		// iterate the whole population
+		for (APopulationEntity entity : population) {
+			ACoordinate<APopulationAttribute, APopulationValue> entityCoord = new GosplCoordinate(
+					entity.getValues().stream().filter(pv -> attributesToMeasure.contains(pv.getAttribute())).collect(Collectors.toSet())
+					);
+			AControl<Integer> unitFreq = new ControlContingency(1);
+			if(!matrix.addValue(entityCoord, unitFreq))
+				matrix.getVal(entityCoord).add(unitFreq);
+		}
+
 		return matrix;
 	}
 	

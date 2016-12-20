@@ -59,6 +59,15 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	public Set<APopulationAttribute> getDimensions() {
 		return jointDistributionSet.stream().flatMap(jd -> jd.getDimensions().stream()).collect(Collectors.toSet());
 	}
+
+	@Override
+	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues() {
+		Map<APopulationAttribute, Set<APopulationValue>>  res = new HashMap<>();
+		for (AFullNDimensionalMatrix<T> m: jointDistributionSet) {
+			res.putAll(m.getDimensionsAsAttributesAndValues());
+		}
+		return res;
+	}
 	
 	@Override
 	public APopulationAttribute getDimension(APopulationValue aspect) {

@@ -209,8 +209,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			gspu.sysoStempPerformance(1, this);
 		}
 	
-		sampler.setDistribution(new GosplDistributionFactory()
-				.createDistribution(matrix.getDimensions(), sampleDistribution));
+		sampler.setDistribution(GosplDistributionFactory.createDistribution(matrix.getDimensions(), sampleDistribution));
 		return sampler;
 	}
 
