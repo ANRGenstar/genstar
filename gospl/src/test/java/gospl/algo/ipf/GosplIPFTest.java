@@ -50,7 +50,7 @@ public class GosplIPFTest {
 		Collections.shuffle(collectionSeed);
 		collectionSeed.stream().forEach(entity -> seed.add(entity));
 		
-		marginals = GosplDistributionFactory.createDistribution(objectif);
+		marginals = new GosplDistributionFactory().createDistribution(objectif);
 	}
 
 	@Test

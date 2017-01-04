@@ -1,12 +1,8 @@
 package gospl.algo.sampler;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.util.Collection;
-import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
@@ -26,7 +22,6 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.attribute.GosplAttributeFactory;
-import gospl.example.GosplIndependantEstimationTemplate;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.io.GosplSurveyFactory;
@@ -174,8 +169,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(targetPopulationSize);
-			gspu.sysoStempPerformance("End generating synthetic population: elapse time",
-					GosplIndependantEstimationTemplate.class.getName());
+			gspu.sysoStempPerformance("End generating synthetic population: elapse time", this);
 			
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();

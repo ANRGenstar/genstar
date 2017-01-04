@@ -2,11 +2,6 @@ package gospl.algo.sampler;
 
 import java.util.List;
 
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
-
 /**
  * The global contract for sampler --
  * 

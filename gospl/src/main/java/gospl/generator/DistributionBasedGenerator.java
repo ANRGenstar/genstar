@@ -3,10 +3,8 @@ package gospl.generator;
 import java.util.stream.Collectors;
 
 import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import gospl.GosplPopulation;
-import gospl.algo.sampler.IHierarchicalSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.GosplEntity;

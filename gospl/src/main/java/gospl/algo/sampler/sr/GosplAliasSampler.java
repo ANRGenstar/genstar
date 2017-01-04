@@ -12,16 +12,13 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandom;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.evaluation.ISamplingEvaluation;
 
 /******************************************************************************
  * File: AliasMethod.java

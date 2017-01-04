@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
@@ -23,7 +21,6 @@ import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.algo.sampler.IHierarchicalSampler;
-import gospl.distribution.GosplContingencyTable;
 import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -206,9 +203,9 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 		// for each matrix, recompute the probabilities
 		for (AFullNDimensionalMatrix<Double> mParam: segmentedMatrix.getMatrices()) {
 			
-			AFullNDimensionalMatrix<Integer> mMeasuredContigency = GosplDistributionFactory.createContigencyFromPopulation(mParam.getDimensions(), population);
+			AFullNDimensionalMatrix<Integer> mMeasuredContigency = new GosplDistributionFactory().createContigencyFromPopulation(mParam.getDimensions(), population);
 			
-			AFullNDimensionalMatrix<Double> mMeasuredFrequency = GosplDistributionFactory.createGlobalFrequencyTableFromContingency(mMeasuredContigency);
+			AFullNDimensionalMatrix<Double> mMeasuredFrequency = new GosplDistributionFactory().createGlobalFrequencyTableFromContingency(mMeasuredContigency);
 			
 			System.out.println("reference: ");
 			System.out.println(mParam);
