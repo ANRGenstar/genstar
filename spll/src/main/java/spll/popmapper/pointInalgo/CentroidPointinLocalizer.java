@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import com.vividsolutions.jts.algorithm.Centroid;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryFactory;
 import com.vividsolutions.jts.geom.Point;
 
 public class CentroidPointinLocalizer implements PointInLocalizer{
 
+	public static GeometryFactory FACTORY = new GeometryFactory();
+	
 	@Override
 	public Point pointIn(Geometry geom) {
-		return geom.getCentroid();
+		return FACTORY.createPoint(Centroid.getCentroid(geom));
 	}
 
 	@Override

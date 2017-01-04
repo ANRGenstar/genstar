@@ -1,8 +1,12 @@
 package gospl.algo.sampler;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
@@ -76,7 +80,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		 GenstarConfigurationFile gcf = null;
 		 try {
-			 gcf = gxs.deserializeGSConfig(new File("testdata/rouen1/GSC_RouenIndividual.xml"));
+			 gcf = gxs.deserializeGSConfig(new File("testdata/rouen1/GSC_Rouen.xml"));
 		 } catch (FileNotFoundException e) {
 			 // TODO Auto-generated catch block
 			 e.printStackTrace();
@@ -165,13 +169,14 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 				new GSPerformanceUtil("Start generating synthetic population of size " + targetPopulationSize);
 
 		// BUILD THE GENERATOR
-		final ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator(sampler);
+		final ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator((IHierarchicalSampler) sampler);
 
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(targetPopulationSize);
 			gspu.sysoStempPerformance("End generating synthetic population: elapse time",
 					GosplIndependantEstimationTemplate.class.getName());
+			
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();
 		}
@@ -181,8 +186,11 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// MAKE REPORT
 
+		// TODO: move to core io => generic method to export report of IPopolution or any other IEntity collection
 		try {
 			tmpDir.create();
+			System.out.println("will export population into: "+tmpDir.getRoot().getAbsolutePath());
+
 			File exportFile = tmpDir.newFile("PopExport.csv");
 			File reportFile = tmpDir.newFile("PopReport.csv");
 			

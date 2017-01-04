@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Set;
 
 import core.metamodel.IAttribute;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import core.util.data.GSDataParser;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
@@ -116,6 +118,12 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public Set<D> getDimensions();
 	
 	/**
+	 * A complete view of the dimensions of the matrix
+	 * @return
+	 */
+	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues();
+
+	/**
 	 * The dimensions associated with a spectific aspect
 	 * 
 	 * @param aspect
@@ -205,5 +213,6 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public AControl<T> parseVal(GSDataParser parser, String val);
+
 	
 }

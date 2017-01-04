@@ -39,6 +39,14 @@ public class GosplRouenConf {
 //	public static String menage3 = "Taille ménage & Sex & Age-Tableau 1.csv";
 //	public static String sample1 = "Rouen_sample_IRIS.csv";
 
+	protected static Set<String> asSet(String... content) {
+		Set<String> set = new HashSet<String>();
+	    for (String o : content) {
+	        set.add(o);
+	    }
+	    return set;
+	}
+	
 	public static void main(String[] args) throws InvalidFormatException {
 		
 		// Setup the serializer that save configuration file
@@ -87,47 +95,35 @@ public class GosplRouenConf {
 								"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus"), GSEnumAttributeType.range);
 				inputAttributes.add(referentAgeAttribute);		
 				
-				// Create a mapper
-				Map<Set<String>, Set<String>> mapperA1 = new HashMap<>();
-				mapperA1.put(Stream.of("15 à 19 ans").collect(Collectors.toSet()), 
-						Stream.of("15 à 19 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("20 à 24 ans").collect(Collectors.toSet()), 
-						Stream.of("20 à 24 ans").collect(Collectors.toSet())); 
-				mapperA1.put(Stream.of("25 à 39 ans").collect(Collectors.toSet()), 
-						Stream.of("25 à 29 ans", "30 à 34 ans", "35 à 39 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("40 à 54 ans").collect(Collectors.toSet()), 
-						Stream.of("40 à 44 ans", "45 à 49 ans", "50 à 54 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("55 à 64 ans").collect(Collectors.toSet()),
-						Stream.of("55 à 59 ans", "60 à 64 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("65 à 79 ans").collect(Collectors.toSet()), 
-						Stream.of("65 à 69 ans", "70 à 74 ans", "75 à 79 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("80 ans ou plus").collect(Collectors.toCollection(HashSet::new)),
-						Stream.of("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
-						"95 à 99 ans", "100 ans ou plus").collect(Collectors.toCollection(HashSet::new)));
-				// Instantiate an aggregated attribute using previously referent attribute
-				inputAttributes.add(attf.createAttribute("Age_2", GSEnumDataType.Integer,
-						mapperA1.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
-						GSEnumAttributeType.range, referentAgeAttribute, mapperA1));
+				// Age_2
+				{
+					Map<Set<String>, Set<String>> mapperA1 = new HashMap<>();
+					mapperA1.put(asSet("15 à 19 ans"), asSet("15 à 19 ans"));
+					mapperA1.put(asSet("20 à 24 ans"), asSet("20 à 24 ans")); 
+					mapperA1.put(asSet("25 à 39 ans"), asSet("25 à 29 ans", "30 à 34 ans", "35 à 39 ans"));
+					mapperA1.put(asSet("40 à 54 ans"), asSet("40 à 44 ans", "45 à 49 ans", "50 à 54 ans"));
+					mapperA1.put(asSet("55 à 64 ans"), asSet("55 à 59 ans", "60 à 64 ans"));
+					mapperA1.put(asSet("65 à 79 ans"), asSet("65 à 69 ans", "70 à 74 ans", "75 à 79 ans"));
+					mapperA1.put(asSet("80 ans ou plus"), asSet("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus"));
+					// Instantiate an aggregated attribute using previously referent attribute
+					inputAttributes.add(attf.createAttribute("Age_2", GSEnumDataType.Integer,
+							mapperA1.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
+							GSEnumAttributeType.range, referentAgeAttribute, mapperA1));
+				}
 				
-				// Create another mapper
-				Map<Set<String>, Set<String>> mapperA2 = new HashMap<>();
-				mapperA2.put(Stream.of("15 à 19 ans").collect(Collectors.toSet()), 
-						Stream.of("15 à 19 ans").collect(Collectors.toSet()));
-				mapperA2.put(Stream.of("20 à 24 ans").collect(Collectors.toSet()), 
-						Stream.of("20 à 24 ans").collect(Collectors.toSet()));
-				mapperA2.put(Stream.of("25 à 39 ans").collect(Collectors.toSet()), 
-						Stream.of("25 à 29 ans", "30 à 34 ans", "35 à 39 ans").collect(Collectors.toSet()));
-				mapperA2.put(Stream.of("40 à 54 ans").collect(Collectors.toSet()), 
-						Stream.of("40 à 44 ans", "45 à 49 ans", "50 à 54 ans").collect(Collectors.toSet()));
-				mapperA2.put(Stream.of("55 à 64 ans").collect(Collectors.toSet()),
-						Stream.of("55 à 59 ans", "60 à 64 ans").collect(Collectors.toSet()));
-				mapperA2.put(Stream.of("65 ans ou plus").collect(Collectors.toSet()), 
-						Stream.of("65 à 69 ans", "70 à 74 ans", "75 à 79 ans", 
-						"80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus").collect(Collectors.toSet()));
-				inputAttributes.add(attf.createAttribute("Age_3", GSEnumDataType.Integer,
-						mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
-						GSEnumAttributeType.range, referentAgeAttribute, mapperA2));		
-				
+				// Age_3
+				{
+					Map<Set<String>, Set<String>> mapperA2 = new HashMap<>();
+					mapperA2.put(asSet("15 à 19 ans"), asSet("15 à 19 ans"));
+					mapperA2.put(asSet("20 à 24 ans"), asSet("20 à 24 ans"));
+					mapperA2.put(asSet("25 à 39 ans"), asSet("25 à 29 ans", "30 à 34 ans", "35 à 39 ans"));
+					mapperA2.put(asSet("40 à 54 ans"), asSet("40 à 44 ans", "45 à 49 ans", "50 à 54 ans"));
+					mapperA2.put(asSet("55 à 64 ans"), asSet("55 à 59 ans", "60 à 64 ans"));
+					mapperA2.put(asSet("65 ans ou plus"), asSet("65 à 69 ans", "70 à 74 ans", "75 à 79 ans", "80 à 84 ans", "85 à 89 ans", "90 à 94 ans", "95 à 99 ans", "100 ans ou plus"));
+					inputAttributes.add(attf.createAttribute("Age_3", GSEnumDataType.Integer,
+							mapperA2.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
+							GSEnumAttributeType.range, referentAgeAttribute, mapperA2));		
+				}
 				// Create another "age" attribute with diverging data and model modalities
 				List<String> refList = Arrays.asList("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans", "20 à 24 ans", 
 						"25 à 29 ans", "30 à 34 ans", "35 à 39 ans", "40 à 44 ans", "45 à 49 ans", 
@@ -139,8 +135,8 @@ public class GosplRouenConf {
 				Map<Set<String>, Set<String>> mapperA3 = new HashMap<>();
 				IntStream.range(0, refList.size()).forEach(i -> mapperA3.put(new HashSet<>(Arrays.asList(refList.get(i))), 
 						new HashSet<>(Arrays.asList(mapList.get(i)))));
-				mapperA3.put(Stream.of("100 ans ou plus").collect(Collectors.toSet()), 
-						Stream.of("100", "105", "110", "115", "120").collect(Collectors.toSet()));
+				mapperA3.put(asSet("100 ans ou plus"), 
+						asSet("100", "105", "110", "115", "120"));
 				inputAttributes.add(attf.createAttribute("Age_y", GSEnumDataType.Integer, 	
 						Arrays.asList("000", "005", "010", "015", "020", "025", "030",
 								"035", "040", "045", "050", "055", "060", "065", "070", "075", "080", "085",
@@ -157,12 +153,9 @@ public class GosplRouenConf {
 				inputAttributes.add(attCouple);
 				
 				Map<Set<String>, Set<String>> mapperC1 = new HashMap<>();
-				mapperC1.put(Stream.of("Vivant en couple").collect(Collectors.toSet()), 
-						Stream.of("1").collect(Collectors.toSet()));
-				mapperC1.put(Stream.of("Ne vivant pas en couple").collect(Collectors.toSet()), 
-						Stream.of("2").collect(Collectors.toSet()));
-				inputAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, 
-						Arrays.asList("1", "2"), GSEnumAttributeType.unique, attCouple, mapperC1));
+				mapperC1.put(asSet("Vivant en couple"), asSet("1"));
+				mapperC1.put(asSet("Ne vivant pas en couple"), asSet("2"));
+				inputAttributes.add(attf.createAttribute("Couple", GSEnumDataType.String, Arrays.asList("1", "2"), GSEnumAttributeType.unique, attCouple, mapperC1));
 				
 				// --------------------------
 				// Setup "IRIS" attribute: INDIVIDUAL
@@ -192,8 +185,8 @@ public class GosplRouenConf {
 				inputAttributes.add(attSexe);
 				
 				Map<Set<String>, Set<String>> mapperS1 = new HashMap<>();
-				mapperS1.put(Stream.of("Hommes").collect(Collectors.toSet()), 
-						Stream.of("Hommes").collect(Collectors.toSet()));
+				mapperS1.put(asSet("Hommes"), 
+						asSet("Hommes"));
 				inputAttributes.add(attf.createAttribute("Sexe", GSEnumDataType.String,
 						Arrays.asList("1", "2"), Arrays.asList("Hommes", "Femmes"), 
 						GSEnumAttributeType.unique, attSexe, mapperS1));
@@ -212,17 +205,17 @@ public class GosplRouenConf {
 				/*List<String> scpModel = Arrays.asList("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré", 
 						"Chômeurs", "Retraités ou préretraités", "Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus", 
 						"Moins de 14 ans", "Femmes ou hommes au foyer", "Autres inactifs");*/
-				scp_mapper.put(Stream.of("Retraités ou préretraités").collect(Collectors.toSet()),
-						Stream.of("Retraités").collect(Collectors.toSet()));
-				scp_mapper.put(Stream.of("Autres inactifs", "Chômeurs", 
-						"Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus", "Femmes ou hommes au foyer").collect(Collectors.toSet()), 
-						Stream.of("Autres personnes sans activité professionnelle").collect(Collectors.toSet()));
-				scp_mapper.put(Stream.of("Moins de 14 ans").collect(Collectors.toSet()), 
-						Stream.of((String) null).collect(Collectors.toSet()));
-				scp_mapper.put(Stream.of("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré").collect(Collectors.toSet()), 
-						Stream.of("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
+				scp_mapper.put(asSet("Retraités ou préretraités"),
+						asSet("Retraités"));
+				scp_mapper.put(asSet("Autres inactifs", "Chômeurs", 
+						"Elèves, étudiants, stagiaires non rémunéré de 14 ans ou plus", "Femmes ou hommes au foyer"), 
+						asSet("Autres personnes sans activité professionnelle"));
+				scp_mapper.put(asSet("Moins de 14 ans"), 
+						asSet((String) null));
+				scp_mapper.put(asSet("Actifs ayant un emploi, y compris sous apprentissage ou en stage rémunéré"), 
+						asSet("Agriculteurs exploitants", "Artisans. commerçants. chefs d'entreprise", 
 								"Cadres et professions intellectuelles supérieures", "Professions intermédiaires", 
-								"Employés", "Ouvriers").collect(Collectors.toSet()));
+								"Employés", "Ouvriers"));
 				
 				
 				inputAttributes.add(attCSP);
@@ -281,21 +274,21 @@ public class GosplRouenConf {
 				
 				// A mapper to link individual age and menage ref age
 				Map<Set<String>, Set<String>> mapper = new HashMap<>();
-				mapper.put(Stream.of("Moins de 20 ans").collect(Collectors.toSet()), 
-						Stream.of("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("20 à 24 ans").collect(Collectors.toSet()), 
-						Stream.of("20 à 24 ans").collect(Collectors.toSet())); 
-				mapperA1.put(Stream.of("25 à 39 ans").collect(Collectors.toSet()), 
-						Stream.of("25 à 29 ans", "30 à 34 ans", "35 à 39 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("40 à 54 ans").collect(Collectors.toSet()), 
-						Stream.of("40 à 44 ans", "45 à 49 ans", "50 à 54 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("55 à 64 ans").collect(Collectors.toSet()),
-						Stream.of("55 à 59 ans", "60 à 64 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("65 à 79 ans").collect(Collectors.toSet()), 
-						Stream.of("65 à 69 ans", "70 à 74 ans", "75 à 79 ans").collect(Collectors.toSet()));
-				mapperA1.put(Stream.of("80 ans ou plus").collect(Collectors.toCollection(HashSet::new)),
-						Stream.of("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
-						"95 à 99 ans", "100 ans ou plus").collect(Collectors.toCollection(HashSet::new)));
+				mapper.put(asSet("Moins de 20 ans"), 
+						asSet("Moins de 5 ans", "5 à 9 ans", "10 à 14 ans", "15 à 19 ans"));
+				mapperA1.put(asSet("20 à 24 ans"), 
+						asSet("20 à 24 ans")); 
+				mapperA1.put(asSet("25 à 39 ans"), 
+						asSet("25 à 29 ans", "30 à 34 ans", "35 à 39 ans"));
+				mapperA1.put(asSet("40 à 54 ans"), 
+						asSet("40 à 44 ans", "45 à 49 ans", "50 à 54 ans"));
+				mapperA1.put(asSet("55 à 64 ans"),
+						asSet("55 à 59 ans", "60 à 64 ans"));
+				mapperA1.put(asSet("65 à 79 ans"), 
+						asSet("65 à 69 ans", "70 à 74 ans", "75 à 79 ans"));
+				mapperA1.put(asSet("80 ans ou plus"),
+						asSet("80 à 84 ans", "85 à 89 ans", "90 à 94 ans", 
+						"95 à 99 ans", "100 ans ou plus"));
 				inputAttributes.add(attf.createAttribute("Age référent", GSEnumDataType.Integer, 
 						mapperA1.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()), 
 						GSEnumAttributeType.range, referentAgeAttribute, mapper));

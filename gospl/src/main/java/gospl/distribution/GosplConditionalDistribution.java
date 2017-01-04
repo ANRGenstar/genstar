@@ -30,7 +30,6 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	protected GosplConditionalDistribution(Set<AFullNDimensionalMatrix<Double>> jointDistributionSet) throws IllegalDistributionCreation {
 		super(jointDistributionSet);
-		// TODO: setup referent attribute map
 	}
 	
 	// --------------- Main contract --------------- //
@@ -169,5 +168,6 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			return getNulVal();
 		return new ControlFrequency(Double.valueOf(val));
 	}
+
 
 }

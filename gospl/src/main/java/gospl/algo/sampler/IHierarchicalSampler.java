@@ -7,8 +7,10 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.evaluation.IEvaluableSampler;
 
-public interface IHierarchicalSampler extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>> {
+public interface IHierarchicalSampler extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>,
+												IEvaluableSampler {
 
 
 	public void setDistribution(

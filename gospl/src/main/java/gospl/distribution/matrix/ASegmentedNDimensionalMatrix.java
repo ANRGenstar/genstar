@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -80,6 +81,15 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	@Override
 	public Set<APopulationAttribute> getDimensions() {
 		return jointDistributionSet.stream().flatMap(jd -> jd.getDimensions().stream()).collect(Collectors.toSet());
+	}
+
+	@Override
+	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues() {
+		Map<APopulationAttribute, Set<APopulationValue>>  res = new HashMap<>();
+		for (AFullNDimensionalMatrix<T> m: jointDistributionSet) {
+			res.putAll(m.getDimensionsAsAttributesAndValues());
+		}
+		return res;
 	}
 	
 	@Override
@@ -199,6 +209,14 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 				s += "\n"+matrixHeader+matrix.toCsv(csvSeparator);
 		}
 		return s;
+	}
+
+	/**
+	 * Returns the matrices which involve this val
+	 * @param val
+	 */
+	public Set<AFullNDimensionalMatrix<T>> getMatricesInvolving(APopulationAttribute att) {
+		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
 	
 }

@@ -98,6 +98,32 @@ public class GosplDistributionFactory {
 				.stream().map(pop -> this.createDistribution(pop))
 				.collect(Collectors.toSet()));
 	}
+	
+	/**
+	 * Changes a contingency table to a global frequency table
+	 * @param contigency
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> createGlobalFrequencyTableFromContingency(
+			AFullNDimensionalMatrix<Integer> contigency){
+		// Init the output matrix
+		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
+				contigency.getDimensionsAsAttributesAndValues(), 
+				GSSurveyType.GlobalFrequencyTable
+				);
+		
+		
+		int total = contigency.getVal().getValue();
+		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
+		
+		// Normalize increments to global frequency
+		contigency.getMatrix().keySet().stream().forEach(coord -> matrix.setValue(
+											coord, 
+											new ControlFrequency(contigency.getVal(coord).getValue().doubleValue()/total)
+											));
+		
+		return matrix;
+	}
 
 	/**
 	 * Create a contingency matrix from entities' population characteristics
@@ -120,6 +146,29 @@ public class GosplDistributionFactory {
 				matrix.getVal(entityCoord).add(unitFreq);
 		}
 		
+		return matrix;
+	}
+	
+	public AFullNDimensionalMatrix<Integer> createContigencyFromPopulation(
+			Set<APopulationAttribute> attributesToMeasure,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population 
+			) {
+		
+		// Init the output matrix
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(
+				attributesToMeasure.stream().collect(Collectors.toMap(att -> att, att -> att.getValues()))
+				);
+		
+		// iterate the whole population
+		for (APopulationEntity entity : population) {
+			ACoordinate<APopulationAttribute, APopulationValue> entityCoord = new GosplCoordinate(
+					entity.getValues().stream().filter(pv -> attributesToMeasure.contains(pv.getAttribute())).collect(Collectors.toSet())
+					);
+			AControl<Integer> unitFreq = new ControlContingency(1);
+			if(!matrix.addValue(entityCoord, unitFreq))
+				matrix.getVal(entityCoord).add(unitFreq);
+		}
+
 		return matrix;
 	}
 	
