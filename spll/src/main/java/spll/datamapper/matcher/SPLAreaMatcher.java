@@ -1,7 +1,7 @@
 package spll.datamapper.matcher;
 
+import core.metamodel.geo.AGeoEntity;
 import spll.datamapper.variable.SPLVariable;
-import spll.entity.GSFeature;
 
 public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 
@@ -9,14 +9,14 @@ public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 	
 	private final SPLVariable variable;
 
-	private GSFeature feature;
+	private AGeoEntity entity;
 	
-	protected SPLAreaMatcher(GSFeature feat, SPLVariable variable){
-		this(feat, variable, 1d);
+	protected SPLAreaMatcher(AGeoEntity entity, SPLVariable variable){
+		this(entity, variable, 1d);
 	}
 	
-	protected SPLAreaMatcher(GSFeature feat, SPLVariable variable, double area){
-		this.feature = feat;
+	protected SPLAreaMatcher(AGeoEntity entity, SPLVariable variable, double area){
+		this.entity = entity;
 		this.variable = variable;
 		this.area = area;
 	}
@@ -43,15 +43,15 @@ public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 	}
 
 	@Override
-	public GSFeature getFeature() {
-		return feature;
+	public AGeoEntity getEntity() {
+		return entity;
 	}
 	
 	// -------------------------------------------------- //
 	
 	@Override
 	public String toString() {
-		return feature.getGenstarName()+" => ["+getVariable()+" = "+area+"]";
+		return entity.getGenstarName()+" => ["+getVariable()+" = "+area+"]";
 	}
 
 	/* (non-Javadoc)
@@ -64,7 +64,7 @@ public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 		long temp;
 		temp = Double.doubleToLongBits(area);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
-		result = prime * result + ((feature == null) ? 0 : feature.hashCode());
+		result = prime * result + ((entity == null) ? 0 : entity.hashCode());
 		result = prime * result + ((variable == null) ? 0 : variable.hashCode());
 		return result;
 	}
@@ -83,10 +83,10 @@ public class SPLAreaMatcher implements ISPLMatcher<SPLVariable, Double> {
 		SPLAreaMatcher other = (SPLAreaMatcher) obj;
 		if (Double.doubleToLongBits(area) != Double.doubleToLongBits(other.area))
 			return false;
-		if (feature == null) {
-			if (other.feature != null)
+		if (entity == null) {
+			if (other.entity != null)
 				return false;
-		} else if (!feature.equals(other.feature))
+		} else if (!entity.equals(other.entity))
 			return false;
 		if (variable == null) {
 			if (other.variable != null)

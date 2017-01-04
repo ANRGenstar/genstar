@@ -2,7 +2,6 @@ package spll.io;
 
 import java.awt.Color;
 import java.awt.image.DataBuffer;
-import java.awt.image.SampleModel;
 import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.FileWriter;
@@ -44,7 +43,6 @@ import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.NumberRange;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -55,18 +53,17 @@ import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
-import core.metamodel.IPopulation;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
 import core.util.stats.GSBasicStats;
 import core.util.stats.GSEnumStats;
+import spll.SpllPopulation;
 import spll.entity.GSFeature;
 import spll.io.exception.InvalidGeoFormatException;
 
-public class GeofileFactory {
+public class SPLGeofileFactory {
 
 	public  static String SHAPEFILE_EXT = "shp";
 	public static String ARC_EXT = "asc";
@@ -90,10 +87,10 @@ public class GeofileFactory {
 	public IGSGeofile<? extends AGeoEntity> getGeofile(File geofile) 
 			throws IllegalArgumentException, TransformException, IOException, InvalidGeoFormatException{
 		if(FilenameUtils.getExtension(geofile.getName()).equals(SHAPEFILE_EXT))
-			return new ShapeFile(geofile);
+			return new SPLVectorFile(geofile);
 		if(FilenameUtils.getExtension(geofile.getName()).equals(GEOTIFF_EXT) || 
 				FilenameUtils.getExtension(geofile.getName()).equals(ARC_EXT))
-			return new RasterFile(geofile);
+			return new SPLRasterFile(geofile);
 		String[] pathArray = geofile.getPath().split(File.separator);
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT, GEOTIFF_EXT, ARC_EXT));
 	}
@@ -104,16 +101,16 @@ public class GeofileFactory {
 	 * @return
 	 * @throws IOException, InvalidFileTypeException 
 	 */
-	public ShapeFile getShapeFile(File shapefile) throws IOException, InvalidGeoFormatException {
+	public SPLVectorFile getShapeFile(File shapefile) throws IOException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
-			return new ShapeFile(shapefile);
+			return new SPLVectorFile(shapefile);
 		String[] pathArray = shapefile.getPath().split(File.separator);
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
 	
-	public ShapeFile getShapeFile(File shapefile,List<String> attributes) throws IOException, InvalidGeoFormatException {
+	public SPLVectorFile getShapeFile(File shapefile,List<String> attributes) throws IOException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
-			return new ShapeFile(shapefile, attributes);
+			return new SPLVectorFile(shapefile, attributes);
 		String[] pathArray = shapefile.getPath().split(File.separator);
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
@@ -122,24 +119,6 @@ public class GeofileFactory {
 	// ------------------------------------------------------------ //
 	//						CREATE GEOFILE							//
 	// ------------------------------------------------------------ //
-	
-
-	/**
-	 * Create a geotiff file based on a collection of pixel data 
-	 * 
-	 * @param rasterfile
-	 * @param pixels
-	 * @return
-	 * @throws IOException
-	 * @throws IllegalArgumentException
-	 * @throws TransformException
-	 */
-	public RasterFile createRasterfile(File rasterfile, float[][] pixels, CoordinateReferenceSystem crs) 
-			throws IOException, IllegalArgumentException, TransformException {
-		GridCoverage2D coverage = new GridCoverageFactory().create(rasterfile.getName(), pixels, 
-				new ReferencedEnvelope(0, pixels.length, 0, pixels[0].length, crs));
-		return writeRasterFile(rasterfile, coverage);
-	}
 
 	/**
 	 * TODO
@@ -152,7 +131,7 @@ public class GeofileFactory {
 	 * @throws IllegalArgumentException
 	 * @throws TransformException
 	 */
-	public RasterFile createRasterfile(File rasterfile, float[][] pixels, float noData, 
+	public SPLRasterFile createRasterfile(File rasterfile, float[][] pixels, float noData, 
 			ReferencedEnvelope envelope) 
 			throws IOException, IllegalArgumentException, TransformException {
 		// Create image options based on pixels' characteristics
@@ -182,38 +161,6 @@ public class GeofileFactory {
 	}
 
 	/**
-	 * TODO: proper implementation
-	 * 
-	 * @param rasterfile
-	 * @param crs
-	 * @param noData
-	 * @param multiBandMatrix
-	 * @return
-	 * @throws IOException
-	 * @throws IllegalArgumentException
-	 * @throws TransformException
-	 */
-	public RasterFile createRasterFile(File rasterfile, GridSampleDimension[] bands, 
-			CoordinateReferenceSystem crs, double[][]... multiBandMatrix) 
-			throws IOException, IllegalArgumentException, TransformException {
-		// Create image options based on pixels' characteristics
-		ReferencedEnvelope envelope = new ReferencedEnvelope(0, multiBandMatrix[0].length, 0, multiBandMatrix[0][0].length, crs);
-
-		SampleModel sample = RasterFactory.createBandedSampleModel(DataBuffer.TYPE_DOUBLE, (int) envelope.getWidth(), (int) envelope.getHeight(), multiBandMatrix.length);
-		WritableRaster raster = RasterFactory.createWritableRaster(sample, null);
-
-		for(int b = 0; b < multiBandMatrix.length; b++){
-			for(int x = 0; x < multiBandMatrix[b].length; x++){
-				for(int y = 0; y < multiBandMatrix[b][x].length; y++)
-					raster.setSample(x, y, b, multiBandMatrix[b][y][x]);
-			}
-		}
-
-		return writeRasterFile(rasterfile, 
-				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
-	}
-
-	/**
 	 * Export a population in a shapefile
 	 * 
 	 * TODO: explain more
@@ -225,9 +172,8 @@ public class GeofileFactory {
 	 * @throws IOException
 	 * @throws SchemaException
 	 */
-	public ShapeFile createShapeFile(File shapefile, 
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, 
-			CoordinateReferenceSystem crs) throws IOException, SchemaException {
+	public SPLVectorFile createShapeFile(File shapefile, SpllPopulation population) 
+			throws IOException, SchemaException {
 		if(population.isEmpty()) 
 			throw new IllegalStateException("Population ("+Arrays.toString(population.toArray())+") in methode createShapeFile cannot be empty");
 		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
@@ -275,17 +221,15 @@ public class GeofileFactory {
 				fw.write();
 			}
 			// store.dispose();
-			if (crs != null) {
-				try (FileWriter fwz = new FileWriter(shapefile.getAbsolutePath().replace(".shp", ".prj"))) {
-					fwz.write(crs.toString());
-				} catch (final IOException e) {
-					e.printStackTrace();
-				}
+			try (FileWriter fwz = new FileWriter(shapefile.getAbsolutePath().replace(".shp", ".prj"))) {
+				fwz.write(population.getCrs().toString());
+			} catch (final IOException e) {
+				e.printStackTrace();
 			}
 		} 	
 		
 
-		return new ShapeFile(newDataStore, null);
+		return new SPLVectorFile(newDataStore, null);
 	}
 	
 
@@ -298,7 +242,7 @@ public class GeofileFactory {
 	 * @throws IOException
 	 * @throws SchemaException
 	 */
-	public ShapeFile createShapeFile(File shapefile, Collection<GSFeature> features) throws IOException, SchemaException {
+	public SPLVectorFile createShapeFile(File shapefile, Collection<GSFeature> features) throws IOException, SchemaException {
 		if(features.isEmpty())
 			throw new IllegalStateException("GSFeature collection ("+Arrays.toString(features.toArray())+") in methode createShapeFile cannot be empty");
 		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
@@ -332,12 +276,12 @@ public class GeofileFactory {
 			transaction.close();
 		}
 
-		return new ShapeFile(newDataStore, null);
+		return new SPLVectorFile(newDataStore, null);
 	}
 	
 	// ------------------- INNER UTILITIES ------------------- //
 	
-	private RasterFile writeRasterFile(File rasterfile, GridCoverage2D coverage) 
+	private SPLRasterFile writeRasterFile(File rasterfile, GridCoverage2D coverage) 
 			throws IllegalArgumentException, TransformException, IOException {
 		AbstractGridCoverageWriter writer;
 		if(FilenameUtils.getExtension(rasterfile.getName()).contains(ARC_EXT))
@@ -345,7 +289,7 @@ public class GeofileFactory {
 		else
 			writer = new GeoTiffWriter(rasterfile);
 		writer.write(coverage, null);
-		return new RasterFile(rasterfile);
+		return new SPLRasterFile(rasterfile);
 	}
 
 	private String getGeometryType(final Collection<Geometry> geoms) {

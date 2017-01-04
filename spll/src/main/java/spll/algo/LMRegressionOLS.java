@@ -43,7 +43,7 @@ public class LMRegressionOLS extends OLSMultipleLinearRegression implements ISPL
 			for(int i = 0; i < regVars.size(); i++){
 				int index = i;
 				Optional<ISPLMatcher<SPLVariable, Double>> optVar = regressors.parallelStream()
-						.filter(varfm -> varfm.getFeature().equals(geoEntity) 
+						.filter(varfm -> varfm.getEntity().equals(geoEntity) 
 								&& varfm.getVariable().equals(regVars.get(index)))
 						.findFirst();
 				x[observationIdx][index] = optVar.isPresent() ? optVar.get().getValue() : 0d;

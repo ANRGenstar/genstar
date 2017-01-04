@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.Set;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
@@ -96,7 +95,7 @@ public class GosplIterativeProportionalFittingTemplate {
 		}
 		
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample = df.getRawSamples().iterator().next();
-		System.out.println(Arrays.toString(sample.getPopulationAttributes().toArray()));
+		System.out.println("["+GosplIterativeProportionalFittingTemplate.class.getSimpleName()+"]"+Arrays.toString(sample.getPopulationAttributes().toArray()));
 		System.exit(1);
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM

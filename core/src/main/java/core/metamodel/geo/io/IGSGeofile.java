@@ -9,6 +9,7 @@ import javax.xml.crypto.dsig.TransformException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
+import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 
@@ -30,7 +31,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @return
 	 * @throws TransformException 
 	 */
-	public Collection<Entity> getGeoData() throws IOException;
+	public Collection<Entity> getGeoEntity() throws IOException;
 	
 	/**
 	 * Retrieve all possible variable within spatial component.
@@ -39,6 +40,14 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @return 
 	 */
 	public Collection<AGeoValue> getGeoValues() ;
+	
+	/**
+	 * Retrieve all possible attribute that geo entity can embody
+	 * 
+	 * @return
+	 */
+	public Collection<AGeoAttribute> getGeoAttributes();
+
 
 	/**
 	 * Says if geographical information of the two files are congruent in term of space.
@@ -49,7 +58,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @return
 	 * @throws FactoryException 
 	 */
-	public boolean isCoordinateCompliant(IGSGeofile<Entity> file);
+	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity> file);
 	
 	/**
 	 * Access to file coordinate referent system through a WKT representation.
@@ -63,7 +72,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * 
 	 * @return
 	 */
-	public Iterator<Entity> getGeoAttributeIterator() ;
+	public Iterator<Entity> getGeoEntityIterator() ;
 	
 	/**
 	 * Access to file data but limited to geo data within the given Geometry.
@@ -71,7 +80,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param feature
 	 * @return Iterator 
 	 */
-	public Iterator<Entity> getGeoAttributeIteratorWithin(Geometry geom);
+	public Iterator<Entity> getGeoEntityIteratorWithin(Geometry geom);
 	
 	/**
 	 * Access to file data but limited to geo data within the given Geometry.
@@ -79,7 +88,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param geom
 	 * @return Collection 
 	 */
-	public Collection<Entity> getGeoDataWithin(Geometry geom);
+	public Collection<Entity> getGeoEntityWithin(Geometry geom);
 	
 	/**
 	 * Access to file data but limited to geo data intersected with the given Geometry
@@ -87,7 +96,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param feature
 	 * @return Iterator 
 	 */
-	public Iterator<Entity> getGeoAttributeIteratorIntersect(Geometry geom);
+	public Iterator<Entity> getGeoEntityIteratorIntersect(Geometry geom);
 
 	/**
 	 * Access to file data but limited to geo data intersected with the given Geometry
@@ -95,7 +104,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param geom
 	 * @return Collection 
 	 */
-	public Collection<Entity> getGeoDataIntersect(Geometry geom);
+	public Collection<Entity> getGeoEntityIntersect(Geometry geom);
 	
 	/**
 	 * Access to file envelope as define in JTS 

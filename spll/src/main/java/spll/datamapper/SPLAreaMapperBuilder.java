@@ -1,6 +1,5 @@
 package spll.datamapper;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,35 +33,79 @@ import spll.datamapper.matcher.SPLAreaMatcherFactory;
 import spll.datamapper.variable.SPLVariable;
 import spll.entity.GSFeature;
 import spll.entity.GSPixel;
-import spll.io.RasterFile;
-import spll.io.ShapeFile;
+import spll.io.SPLRasterFile;
+import spll.io.SPLVectorFile;
+import spll.popmapper.normalizer.ASPLNormalizer;
+import spll.popmapper.normalizer.SPLUniformNormalizer;
 
+/**
+ * TODO: javadoc
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double> {
 
 	private SPLMapper<SPLVariable, Double> mapper;
 
-	private static int pixelRendered = 0;
-
-	public SPLAreaMapperBuilder(ShapeFile mainFile, String propertyName,
-			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, Collection<? extends AGeoValue> variables) {
-		this(mainFile, propertyName, ancillaryFiles, variables, new LMRegressionOLS());
+	/**
+	 * Simplest constructor that define default regression and normalizer algorithm
+	 * 
+	 * @param mainFile
+	 * @param ancillaryFiles
+	 * @param variables
+	 */
+	public SPLAreaMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute,
+			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, 
+			Collection<? extends AGeoValue> variables) {
+		this(mainFile, mainAttribute, ancillaryFiles, variables, new LMRegressionOLS());
 	}
 	
-	public SPLAreaMapperBuilder(ShapeFile mainFile, String propertyName,
+	/**
+	 * Constructor that enable custom regression algorithm
+	 * 
+	 * @param mainFile
+	 * @param ancillaryFiles
+	 * @param variables
+	 * @param regAlgo
+	 */
+	public SPLAreaMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute,
 			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, 
 			Collection<? extends AGeoValue> variables, 
 			ISPLRegressionAlgo<SPLVariable, Double> regAlgo) {
-		super(mainFile, propertyName, ancillaryFiles);
+		this(mainFile, mainAttribute, ancillaryFiles, variables, regAlgo, 
+				new SPLUniformNormalizer(0, SPLRasterFile.DEF_NODATA));
+	}
+	
+	/**
+	 * Constructor that enable full custom density estimation process
+	 * 
+	 * @param mainFile
+	 * @param ancillaryFiles
+	 * @param variables
+	 * @param regAlgo
+	 * @param normalizer
+	 */
+	public SPLAreaMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute,
+			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, 
+			Collection<? extends AGeoValue> variables, 
+			ISPLRegressionAlgo<SPLVariable, Double> regAlgo,
+			ASPLNormalizer normalizer) {
+		super(mainFile, mainAttribute, ancillaryFiles);
 		super.setRegressionAlgorithm(regAlgo);
 		super.setMatcherFactory(new SPLAreaMatcherFactory(variables));
+		super.setNormalizer(normalizer);
 	}
-
+	
+	/////////////////////////////////////////////////////
+	// :::::::::::::::: MAIN CONTRACT :::::::::::::::: // 
+	/////////////////////////////////////////////////////
+	
 	@Override
 	public SPLMapper<SPLVariable, Double> buildMapper() throws IOException, TransformException, InterruptedException, ExecutionException {
 		if(mapper == null){
 			mapper = new SPLMapper<>();
 			mapper.setMainSPLFile(mainFile);
-			mapper.setMainProperty(propertyName);
 			mapper.setRegAlgo(regressionAlgorithm);
 			mapper.setMatcherFactory(matcherFactory);
 			for(IGSGeofile<? extends AGeoEntity> file : ancillaryFiles)
@@ -76,12 +119,13 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * <p>
 	 * WARNING: for performance purpose parallel stream are used !
 	 * @throws GSMapperException 
+	 * @throws IOException 
 	 * 
 	 */
 	@Override
-	public float[][] buildOutput(RasterFile outputFormat, boolean intersect, boolean integer, Double targetPop) 
+	protected float[][] buildOutput(SPLRasterFile outputFormat, boolean intersect, boolean integer, Number targetPop) 
 			throws IllegalRegressionException, TransformException, 
-			IndexOutOfBoundsException, IOException, GSMapperException {
+			IndexOutOfBoundsException, GSMapperException, IOException {
 		if(mapper == null)
 			throw new IllegalAccessError("Cannot create output before a SPLMapper has been built and regression done");
 		if(!ancillaryFiles.contains(outputFormat))
@@ -101,7 +145,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		// Correction for each pixel (does not exclude noData pixels)
 		Map<AGeoEntity, Double> pixCorrection = mapper.getResidual().entrySet()
 				.stream().collect(Collectors.toMap(e -> e.getKey(), 
-					e -> (e.getValue() + intercept) / outputFormat.getGeoDataWithin(e.getKey().getGeometry()).size()));
+					e -> (e.getValue() + intercept) / outputFormat.getGeoEntityWithin(e.getKey().getGeometry()).size()));
 		
 		if(pixCorrection.values().stream().anyMatch(value -> value.isInfinite() || value.isNaN()))
 			throw new GSMapperException(outputFormat.toString()+" output format file does not cover all geographical entity !\n"+
@@ -110,7 +154,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 			
 		// Define utilities
 		Collection<IGSGeofile<? extends AGeoEntity>> ancillaries = new ArrayList<>(super.ancillaryFiles);
-		Collection<GSFeature> mainGeoData = super.mainFile.getGeoData();
+		Collection<? extends AGeoEntity> mainGeoData = super.mainFile.getGeoEntity();
 		ancillaries.remove(outputFormat);
 
 		// Iterate over pixels to apply regression coefficient
@@ -121,21 +165,23 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 						)
 				);
 		
-		// syso purpose
+		// debug purpose
 		pixelRendered = 0;
 		
-		// Normalize output
-		float output = targetPop != null ? targetPop.floatValue() : (float) mainFile.getGeoData().parallelStream()
-				.mapToDouble(feature -> feature.getValueForAttribute(propertyName).getNumericalValue().doubleValue())
-				.sum();
-		super.normalizer.process(pixels, output, integer);
+		super.normalizer.process(pixels, targetPop.floatValue(), integer);
 		
 		return pixels;
 	}
 
 	@Override
-	public Map<GSFeature, Double> buildOutput(File outputFile, ShapeFile formatFile) {
+	protected Map<GSFeature, Number> buildOutput(SPLVectorFile formatFile, boolean intersect, boolean integer, Number tagetPopulation) {
 		// TODO Auto-generated method stub
+		
+		if(mapper == null)
+			throw new IllegalAccessError("Cannot create output before a SPLMapper has been built and regression done");
+		if(!ancillaryFiles.contains(formatFile))
+			throw new IllegalArgumentException("output format file must be one of ancillary files use to proceed regression");
+		
 		return null;
 	}
 
@@ -143,8 +189,11 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	// --------------------------- INNER UTILITIES --------------------------- //
 	/////////////////////////////////////////////////////////////////////////////
 	
-	private double computePixelWithinOutput(int x, int y, RasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
-			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual,
+	// INNER UTILITY PIXEL PROCESS COUNT
+	private static int pixelRendered = 0;
+	
+	private double computePixelWithinOutput(int x, int y, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
+			Collection<? extends AGeoEntity> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual,
 			GSPerformanceUtil gspu, boolean intersect) {
 		// Output progression
 		int prop10for100 = Math.round(Math.round(geotiff.getRowNumber() * geotiff.getColumnNumber() * 0.1d));
@@ -162,10 +211,10 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		
 		// Get the related feature in main space features
 		Point pixelLocation = refPixel.getLocation();
-		Optional<GSFeature> opFeature = mainFeatures.stream().filter(ft -> pixelLocation.within(ft.getGeometry())).findFirst();
+		Optional<? extends AGeoEntity> opFeature = mainFeatures.stream().filter(ft -> pixelLocation.within(ft.getGeometry())).findFirst();
 
 		if(!opFeature.isPresent())
-			return RasterFile.DEF_NODATA.floatValue();
+			return SPLRasterFile.DEF_NODATA.floatValue();
 		if(intersect)
 			return computePixelIntersectOutput(refPixel, geotiff, ancillaries, mainFeatures, regCoef, pixResidual);
 		return computePixelWithin(refPixel, geotiff, ancillaries, opFeature.get(), regCoef, pixResidual.get(opFeature.get()));
@@ -178,8 +227,8 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * WARNING: the within function used define inclusion as: 
 	 * centroide of {@code refPixel} geometry is within the referent geometry
 	 */
-	private double computePixelWithin(GSPixel refPixel, RasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
-			GSFeature feat, Map<SPLVariable, Double> regCoef, double corCoef){
+	private double computePixelWithin(GSPixel refPixel, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
+			AGeoEntity entity, Map<SPLVariable, Double> regCoef, double corCoef){
 
 		// Retain info about pixel and his context
 		Geometry pixGeom = refPixel.getGeometry();
@@ -187,7 +236,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		Collection<AGeoValue> coefVal = regCoef.keySet()
 				.stream().map(var -> var.getValue()).collect(Collectors.toSet());
 		if(pixData.stream().allMatch(val -> geotiff.isNoDataValue(val) || !coefVal.contains(val)) && ancillaries.isEmpty())
-			return RasterFile.DEF_NODATA.floatValue();
+			return SPLRasterFile.DEF_NODATA.floatValue();
 		double pixArea = refPixel.getArea();
 
 		// Setup output value for the pixel based on pixels' band values
@@ -197,7 +246,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		// Iterate over other explanatory variables to update pixels value
 		for(IGSGeofile<? extends AGeoEntity> otherExplanVarFile : ancillaries){
 			Iterator<? extends AGeoEntity> otherItt = otherExplanVarFile
-					.getGeoAttributeIteratorWithin(pixGeom);
+					.getGeoEntityIteratorWithin(pixGeom);
 			while(otherItt.hasNext()){
 				AGeoEntity other = otherItt.next();
 				Set<SPLVariable> otherValues = regCoef.keySet()
@@ -213,16 +262,16 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	/*
 	 * WARNING: intersection area calculation is very computation demanding, so this method is pretty slow 
 	 */
-	private double computePixelIntersectOutput(GSPixel refPixel, RasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
-			Collection<GSFeature> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual) {
+	private double computePixelIntersectOutput(GSPixel refPixel, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
+			Collection<? extends AGeoEntity> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual) {
 
 		// Retain main feature the pixel is within
 		Geometry pixGeom = refPixel.getGeometry(); 
-		List<GSFeature> feats = mainFeatures.stream()
+		List<? extends AGeoEntity> feats = mainFeatures.stream()
 				.filter(ft -> ft.getGeometry().intersects(pixGeom))
 				.collect(Collectors.toList());
 		if(feats.isEmpty())
-			return RasterFile.DEF_NODATA.floatValue();
+			return SPLRasterFile.DEF_NODATA.floatValue();
 
 		// Get the values contain in the pixel bands
 		Collection<AGeoValue> pixData = refPixel.getValues();
@@ -235,7 +284,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		// Iterate over other explanatory variables to update pixels value
 		for(IGSGeofile<? extends AGeoEntity> otherExplanVarFile : ancillaries){
 			Iterator<? extends AGeoEntity> otherItt = otherExplanVarFile
-					.getGeoAttributeIteratorIntersect(pixGeom);
+					.getGeoEntityIteratorIntersect(pixGeom);
 			while(otherItt.hasNext()){
 				AGeoEntity other = otherItt.next();
 				Set<SPLVariable> otherValues = regCoef.keySet()
@@ -249,8 +298,8 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		// Compute corrected value based on output data (to balanced for unknown determinant information)
 		// Intersection correction try /catch clause come from GAMA
 		float correctedOutput = 0f; 
-		for(GSFeature f : feats){
-			Geometry fGeom = f.getGeometry();
+		for(AGeoEntity entity : feats){
+			Geometry fGeom = entity.getGeometry();
 			Geometry intersectGeom = null;
 			try {
 				intersectGeom = fGeom.intersection(pixGeom);
@@ -271,7 +320,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 					}
 				}
 			}
-			correctedOutput += Math.round(output * intersectGeom.getArea() / pixGeom.getArea() + pixResidual.get(f));
+			correctedOutput += Math.round(output * intersectGeom.getArea() / pixGeom.getArea() + pixResidual.get(entity));
 		}
 		return correctedOutput;
 	}

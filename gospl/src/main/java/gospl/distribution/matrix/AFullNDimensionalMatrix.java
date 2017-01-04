@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -23,6 +24,9 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
 /**
  * TODO: javadoc
+ * <p>
+ * WARNING: the inner data collection is concurrent friendly. This implied a low efficiency when no parallelism
+ * <p>
  * 
  * @author kevinchapuis
  *
@@ -41,9 +45,15 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
+	/**
+	 * TODO: javadoc
+	 * 
+	 * @param dimensionAspectMap
+	 * @param metaDataType
+	 */
 	public AFullNDimensionalMatrix(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, GSSurveyType metaDataType) {
 		this.dimensions = new HashMap<>(dimensionAspectMap);
-		this.matrix = new HashMap<>(dimensions.entrySet().stream()
+		this.matrix = new ConcurrentHashMap<>(dimensions.entrySet().stream()
 				.mapToInt(d -> d.getValue().size())
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;

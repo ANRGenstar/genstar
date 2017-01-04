@@ -141,6 +141,8 @@ public abstract class AGosplIPF<T extends Number> {
 			throw new IllegalArgumentException("Output ditribution and sample seed cannot have divergent dimensions\n"
 					+ "Distribution: "+Arrays.toString(marginals.getDimensions().toArray()) +"\n"
 					+ "Sample seed: :"+Arrays.toString(seed.getDimensions().toArray()));
+		
+		// TODO: treat mapped 
 
 		// Some debug purpose log
 		logger.trace("Sample seed controls' dimension: \n{}", seed.getDimensions().stream().map(d -> d.getAttributeName()+" = "+seed.getVal(d.getValues()))

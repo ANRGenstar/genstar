@@ -1,5 +1,7 @@
 package gospl.algo;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +26,7 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
 
 /**
@@ -41,19 +44,69 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  * variable 'empty' for dimension 'job'
  * </ul><p>
  * 
+ * According to these hypothesis, we refer to this algorithm as IS for Independent Sampler algorithm
+ * 
  * @author kevinchapuis
  *
  */
 public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<IDistributionSampler> {
 
 	private Logger logger = LogManager.getLogger();
-	
-	public IndependantHypothesisAlgo() {
-
-	}
 
 	@Override
 	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSampler(
+			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,
+			IDistributionSampler sampler) throws IllegalDistributionCreation {
+		if(matrix == null || matrix.getMatrix().isEmpty())
+			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
+		if(!matrix.isSegmented() && matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))
+			throw new IllegalDistributionCreation("can't create a sampler using only one matrix of GosplMetaDataType#LocalFrequencyTable");
+
+		// Begin the algorithm (and performance utility)
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
+				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
+		gspu.getStempPerformance(0);
+
+		// Stop the algorithm and exit the unique matrix if there is only one
+		if(!matrix.isSegmented()){
+			sampler.setDistribution((AFullNDimensionalMatrix<Double>) matrix);
+			return sampler;
+		}
+		
+		// Reject attribute with referent, to only account for referent attribute
+		Set<APopulationAttribute> targetedDimensions = matrix.getDimensions()
+				.stream().filter(att -> att.getReferentAttribute().equals(att))
+				.collect(Collectors.toSet());
+		
+		// Setup the matrix to estimate 
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplDistributionFactory().createDitribution(targetedDimensions);
+
+		// Extrapolate the whole set of coordinates
+		Collection<Set<APopulationValue>> coordinates = new ArrayList<>();
+		for(APopulationAttribute attribute : targetedDimensions){
+			if(coordinates.isEmpty())
+				coordinates.addAll(attribute.getValues()
+						.stream().map(value -> Stream.of(value).collect(Collectors.toSet()))
+						.collect(Collectors.toSet()));
+			else {
+				Set<Set<APopulationValue>> newVals = attribute.getValues().stream()
+						.flatMap(value -> coordinates.stream().map(set -> 
+							Stream.concat(set.stream(), Stream.of(value)).collect(Collectors.toSet())))
+						.collect(Collectors.toSet());
+				coordinates.clear();
+				coordinates.addAll(newVals);
+			}
+		}
+		
+		// Apply each coordinate
+		coordinates.parallelStream().forEach(coord -> 
+			freqMatrix.addValue(new GosplCoordinate(coord), matrix.getVal(coord)));
+		
+		sampler.setDistribution(freqMatrix);
+		return sampler;
+	}
+	
+	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSamplerWithReferentProcess(
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,
 			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
@@ -90,6 +143,9 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		/////////////////////////////////////
 		// 2nd STEP: disaggregate attributes & start processing associated matrices
 		/////////////////////////////////////
+		
+		// TODO: move this step to the getValue method in segmented matrix
+		// More elegant and generic
 
 		// First identify referent & aggregated attributes
 		Set<APopulationAttribute> aggAtts = segmentedMatrix.getDimensions()
@@ -213,7 +269,6 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 				.createDistribution(matrix.getDimensions(), sampleDistribution));
 		return sampler;
 	}
-
 	
 	
 	// ------------------------------ inner utility methods ------------------------------ //

@@ -13,6 +13,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.configuration.GenstarConfigurationFile;
@@ -53,6 +56,8 @@ import gospl.io.exception.InvalidSurveyFormatException;
 
 public class GosplDistributionBuilder {
 
+	private Logger logger = LogManager.getLogger();
+	
 	private final double EPSILON = Math.pow(10d, -3);
 
 	private final GenstarConfigurationFile configuration;
@@ -319,26 +324,51 @@ public class GosplDistributionBuilder {
 		return freqMatrix;
 	}
 
+	/*
+	 * TODO: describre
+	 */
 	private GosplPopulation getSample(final IGSSurvey survey, 
 			final Set<APopulationAttribute> attributes)
 			throws IOException, InvalidSurveyFormatException {
 		final GosplPopulation sampleSet = new GosplPopulation();
 		
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<APopulationValue>> columnHeaders = getColumnHeaders(survey, attributes);
+		final Map<Integer, APopulationAttribute> columnHeaders = getColumnSample(survey, attributes);
 
+		int unmatchSize = 0;
+		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
+		
 		for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
 			final Map<APopulationAttribute, APopulationValue> entityAttributes = new HashMap<>();
 			final List<String> indiVals = survey.readLine(i);
-			for (final Integer idx : columnHeaders.keySet())
-				entityAttributes.put(columnHeaders.get(idx).iterator().next().getAttribute(), columnHeaders.get(idx)
-						.stream().filter(val -> val.getInputStringValue().equals(indiVals.get(idx))).findAny().get());
-			sampleSet.add(new GosplEntity(entityAttributes));
+			if(indiVals.size() <= maxIndivSize){
+				logger.debug("One individual does not fit required number of attributes: \n"
+						+ Arrays.toString(indiVals.toArray()));
+				unmatchSize++;
+				continue;
+			}
+			for (final Integer idx : columnHeaders.keySet()){
+				Optional<APopulationValue> opVal = columnHeaders.get(idx).getValues()
+						.stream().filter(val -> val.getInputStringValue().equals(indiVals.get(idx))).findAny();
+				if(opVal.isPresent())
+					entityAttributes.put(columnHeaders.get(idx), opVal.get());
+				else if(columnHeaders.get(idx).getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
+					entityAttributes.put(columnHeaders.get(idx), columnHeaders.get(idx).getEmptyValue());
+				else{
+					logger.debug("Data modality "+indiVals.get(idx)+" does not match any value for attribute "+columnHeaders.get(idx).getAttributeName());
+					unmatchSize++;
+				}
+			}
+			if(entityAttributes.size() == entityAttributes.size())
+				sampleSet.add(new GosplEntity(entityAttributes));
 		}
-
+		logger.debug("Input sample have bypass "+unmatchSize+" entity due to unmatching attribute's value");
 		return sampleSet;
 	}
 	
+	/*
+	 * TODO: describe
+	 */
 	private AFullNDimensionalMatrix<Double> getTransposedRecord(
 			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
 		
@@ -428,8 +458,7 @@ public class GosplDistributionBuilder {
 		final Map<Integer, Set<APopulationValue>> columnHeaders = new HashMap<>();
 		for (int i = survey.getFirstColumnIndex(); i <= survey.getLastColumnIndex(); i++) {
 			final List<String> column = survey.readLines(0, survey.getFirstRowIndex(), i);
-			for (int j = 0; j < column.size(); j++) {
-				final String columnVal = column.get(j);
+			for (String columnVal : column) {
 				Set<APopulationValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
 						.filter(asp -> asp.getInputStringValue().equals(columnVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
@@ -445,6 +474,36 @@ public class GosplDistributionBuilder {
 					columnHeaders.get(i).addAll(vals);
 				else
 					columnHeaders.put(i, new HashSet<>(vals));
+			}
+		}
+		return columnHeaders;
+	}
+	
+	/*
+	 * Retrieves column headers from sample data file
+	 */
+	private Map<Integer, APopulationAttribute> getColumnSample(
+			final IGSSurvey survey, final Set<APopulationAttribute> attributes){
+		Map<Integer, APopulationAttribute> columnHeaders = new HashMap<>();
+		for(int i = survey.getFirstColumnIndex(); i <= survey.getLastColumnIndex(); i++){
+			List<String> columnAtt = survey.readLines(0, survey.getFirstRowIndex(), i);
+			Set<APopulationAttribute> attSet = attributes.stream()
+					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
+					.collect(Collectors.toSet());
+			if(attSet.isEmpty())
+				continue;
+			if(attSet.size() > 1){
+				int row = survey.getFirstRowIndex();
+				Optional<APopulationAttribute> opAtt = null;
+				do {
+					String value = survey.read(row++, i);
+					opAtt = attSet.stream().filter(att -> att.getValues()
+							.stream().anyMatch(val -> val.getInputStringValue().equals(value)))
+							.findAny();
+				} while (opAtt.isPresent());
+				columnHeaders.put(i, opAtt.get());
+			} else {
+				columnHeaders.put(i, attSet.iterator().next());
 			}
 		}
 		return columnHeaders;

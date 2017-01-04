@@ -10,7 +10,21 @@ import core.metamodel.IAttribute;
 import core.util.data.GSEnumDataType;
 
 /**
- * TODO: javadoc
+ * The abstract expression of attribute's entity population schema. This schema
+ * is defined to be the same for all entity in a given population, and can be 
+ * described as:
+ * <p>
+ * <ul>
+ * <li> <b>Name</b> = a unique and characterized name (most of the time, taken from the data)
+ * <li> <b>Values</b> = the set of all possible values, concrete entities can get for this attribute.
+ * Apart from possible values, most attribute can have an empty value, refereed as {@code emptyValue}
+ * <li> <b>Data type</b> = a {@link GSEnumDataType} that gives information on value's content type
+ * <li> <b>Referent attribute</b> = an attribute this one referees to. That means values of the first are
+ * explicitly bind to values of the second
+ * </ul>
+ * <p> 
+ * {@link APopulationAttribute} are defined at population level, where all entity should have
+ * a value for each.
  * 
  * @author kevinchapuis
  * @author Duc an vo

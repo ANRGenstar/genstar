@@ -1,4 +1,4 @@
-package spll;
+package spll.algo;
 
 import static org.junit.Assert.assertEquals;
 

@@ -2,11 +2,15 @@ package spll.datamapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import org.geotools.feature.SchemaException;
+import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.geo.AGeoEntity;
@@ -17,15 +21,18 @@ import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
 import spll.entity.GSFeature;
-import spll.io.RasterFile;
-import spll.io.ShapeFile;
+import spll.io.SPLGeofileFactory;
+import spll.io.SPLRasterFile;
+import spll.io.SPLVectorFile;
 import spll.popmapper.normalizer.ASPLNormalizer;
+import spll.util.SpllUtil;
 
 /**
  * The mapper is the main concept of SPLL algorithm. It matches main geographical features
  * contain in a shape file to various geographical variables (e.g. other features, satellite image).
  * It also setup regression algorithm to compute the relationship between an attribute of main features
- * (dependent variable) and ancillary geographical variable (explanatory variables)
+ * (dependent variable) and ancillary geographical variable (explanatory variables). Last, it encapsulate
+ * the method to fit regression output to a proper contract (e.g. integer values, adjusted output sum).
  * 
  * @author kevinchapuis
  *
@@ -34,8 +41,8 @@ import spll.popmapper.normalizer.ASPLNormalizer;
  */
 public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
-	protected final ShapeFile mainFile;
-	protected final String propertyName;
+	protected final IGSGeofile<? extends AGeoEntity> mainFile;
+	private final String mainAttribute;
 	
 	protected List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
@@ -44,12 +51,17 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
 	protected ASPLNormalizer normalizer;
 	
-	public ASPLMapperBuilder(ShapeFile mainFile, String propertyName,
+	public ASPLMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute, 
 			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles) {
 		this.mainFile = mainFile;
-		this.propertyName = propertyName;
+		this.mainAttribute = mainAttribute;
 		this.ancillaryFiles = ancillaryFiles;
 	}
+	
+	////////////////////////////////////////////////////////////////
+	// ------------------------- SETTERS ------------------------ //
+	////////////////////////////////////////////////////////////////
+	
 	
 	/**
 	 * Setup the regression algorithm
@@ -79,6 +91,37 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	}
 	
 	/**
+	 * Setup the output format to fit given geographic file
+	 * 
+	 * @param outputFormat
+	 */
+	public void setOutputFormat(IGSGeofile<? extends AGeoEntity> outputFormat){
+		if(!ancillaryFiles.contains(outputFormat))
+			throw new IllegalArgumentException("output format must be one of ancillary files");
+		ancillaryFiles.add(0, ancillaryFiles.remove(ancillaryFiles.indexOf(outputFormat)));
+	}
+	
+	///////////////////////////////////////////////////////////////
+	// ------------------------ GETTERS ------------------------ //
+	///////////////////////////////////////////////////////////////
+	
+	public List<IGSGeofile<? extends AGeoEntity>> getAncillaryFiles(){
+		return Collections.unmodifiableList(ancillaryFiles);
+	}
+	
+	public IGSGeofile<? extends AGeoEntity> getMainFile(){
+		return mainFile;
+	}
+	
+	public String getMainAttribute(){
+		return mainAttribute;
+	}
+	
+	/////////////////////////////////////////////////////////////////
+	// ---------------------- main contract ---------------------- // 
+	/////////////////////////////////////////////////////////////////
+	
+	/**
 	 * This method match all ancillary files with the main shape file. More precisely,
 	 * all geographic variables ancillary files contain will be bind to corresponding feature
 	 * of the main file. Each {@link ASPLMapperBuilder} has its own definition of how
@@ -91,6 +134,12 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws ExecutionException
 	 */
 	public abstract SPLMapper<V, T> buildMapper() throws IOException, TransformException, InterruptedException, ExecutionException;
+	
+	/*
+	 * The method to implement to compute regression output with raster output format
+	 */
+	protected abstract float[][] buildOutput(SPLRasterFile formatFile, boolean intersect, boolean integer, Number targetPopulation) 
+			throws IllegalRegressionException, TransformException, IndexOutOfBoundsException, IOException, GSMapperException;
 	
 	/**
 	 * build the output of spll regression based localization as pixel based format output.
@@ -105,9 +154,20 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws IOException
 	 * @throws GSMapperException 
 	 */
-	public abstract float[][] buildOutput(RasterFile formatFile, boolean intersect, boolean integer, Double targetPopulation) 
+	public SPLRasterFile buildOutput(File output, SPLRasterFile formatFile, 
+			boolean intersect, boolean integer, Number targetPopulation) 
 			throws IllegalRegressionException, TransformException, 
-			IndexOutOfBoundsException, IOException, GSMapperException;
+			IndexOutOfBoundsException, IOException, GSMapperException {
+		float[][] pixels = this.buildOutput(formatFile, intersect, integer, targetPopulation);
+		return new SPLGeofileFactory().createRasterfile(output, pixels, 
+				SPLRasterFile.DEF_NODATA.floatValue(), new ReferencedEnvelope(formatFile.getEnvelope(),
+						SpllUtil.getCRSfromWKT(formatFile.getWKTCoordinateReferentSystem())));
+	}
+	
+	/*
+	 * The method to implement to compute regression output with vector output format
+	 */
+	protected abstract Map<GSFeature, Number> buildOutput(SPLVectorFile formatFile, boolean intersect, boolean integer, Number tagetPopulation);
 	
 	/**
 	 * build the output of Spll regression based localization as vector based format output.
@@ -116,21 +176,19 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @param outputFile
 	 * @param formatFile
 	 * @return
+	 * @throws SchemaException 
+	 * @throws IOException 
 	 */
-	public abstract Map<GSFeature, Double> buildOutput(File outputFile, ShapeFile formatFile);
-	
-	// ------------------------ ACCESSORS ------------------------ //
-	
-	public List<IGSGeofile<? extends AGeoEntity>> getAncillaryFiles(){
-		return Collections.unmodifiableList(ancillaryFiles);
-	}
-	
-	public ShapeFile getMainFile(){
-		return mainFile;
-	}
-	
-	public String getMainPropertyName(){
-		return propertyName;
+	public SPLVectorFile buildOutput(File output, SPLVectorFile formatFile, 
+			boolean intersect, boolean integer, Number tagetPopulation) 
+			throws IOException, SchemaException{
+		@SuppressWarnings("unused")
+		Map<GSFeature, Number> map = this.buildOutput(formatFile, intersect, integer, tagetPopulation);
+		Collection<GSFeature> features = new ArrayList<>();
+		
+		// TODO compute feature from map
+		
+		return new SPLGeofileFactory().createShapeFile(output, features);
 	}
 	
 }

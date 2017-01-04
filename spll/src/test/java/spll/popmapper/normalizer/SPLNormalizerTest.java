@@ -1,4 +1,4 @@
-package spll;
+package spll.popmapper.normalizer;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

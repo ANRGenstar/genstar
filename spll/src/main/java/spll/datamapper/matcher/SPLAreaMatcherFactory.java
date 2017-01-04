@@ -17,7 +17,6 @@ import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.IGSGeofile;
 import core.util.GSPerformanceUtil;
 import spll.datamapper.variable.SPLVariable;
-import spll.entity.GSFeature;
 
 public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Double> {
 
@@ -30,9 +29,9 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	}
 
 	@Override
-	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(GSFeature feature, 
+	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity entity, 
 			IGSGeofile<? extends AGeoEntity> regressorsFile) throws IOException, TransformException, InterruptedException, ExecutionException { 
-		return getMatchers(Arrays.asList(feature), regressorsFile);
+		return getMatchers(Arrays.asList(entity), regressorsFile);
 	}
 
 	/**
@@ -43,14 +42,14 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	 * 
 	 */
 	@Override
-	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<GSFeature> features,
+	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<? extends AGeoEntity> entities,
 			IGSGeofile<? extends AGeoEntity> regressorsFile) 
 					throws IOException, TransformException, InterruptedException, ExecutionException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regressors' data");
-		gspu.setObjectif(features.size());
-		List<ISPLMatcher<SPLVariable, Double>> varList = features
-				.parallelStream().map(feat -> getMatchers(feat, 
-						regressorsFile.getGeoAttributeIteratorWithin(feat.getGeometry()), 
+		gspu.setObjectif(entities.size());
+		List<ISPLMatcher<SPLVariable, Double>> varList = entities
+				.parallelStream().map(entity -> getMatchers(entity, 
+						regressorsFile.getGeoEntityIteratorWithin(entity.getGeometry()), 
 						this.variables, gspu))
 				.flatMap(list -> list.stream()).collect(Collectors.toList());
 		gspu.sysoStempMessage("-------------------------\n"
@@ -63,7 +62,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	/*
 	 * TODO: could be optimise
 	 */
-	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(GSFeature feature,
+	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity entity,
 			Iterator<? extends AGeoEntity> geoData, Collection<? extends AGeoValue> variables, 
 			GSPerformanceUtil gspu) {
 		List<ISPLMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
@@ -82,7 +81,7 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 				} else {
 					// ELSE create Variable based on the feature and create SPLAreaMatcher with basic area
 					//if(!geoEntity.getPropertyAttribute(prop).equals(value))
-					areaMatcherList.add(new SPLAreaMatcher(feature, 
+					areaMatcherList.add(new SPLAreaMatcher(entity, 
 							new SPLVariable(value, prop.toString()), geoEntity.getArea()));
 				}
 			}

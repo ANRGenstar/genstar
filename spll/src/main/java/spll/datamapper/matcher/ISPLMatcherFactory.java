@@ -10,14 +10,13 @@ import org.opengis.referencing.operation.TransformException;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
 import spll.datamapper.variable.ISPLVariable;
-import spll.entity.GSFeature;
 
 public interface ISPLMatcherFactory<V extends ISPLVariable, T> {
 
-	public List<ISPLMatcher<V, T>> getMatchers(GSFeature geoData, 
+	public List<ISPLMatcher<V, T>> getMatchers(AGeoEntity geoData, 
 			IGSGeofile<? extends AGeoEntity> ancillaryFile) throws IOException, TransformException, InterruptedException, ExecutionException;
 
-	public List<ISPLMatcher<V, T>> getMatchers(Collection<GSFeature> geoData, 
+	public List<ISPLMatcher<V, T>> getMatchers(Collection<? extends AGeoEntity> geoData, 
 			IGSGeofile<? extends AGeoEntity> regressorsFiles) throws IOException, TransformException, InterruptedException, ExecutionException;
 	
 }

@@ -41,6 +41,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.geo.AGeoAttribute;
+import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
@@ -51,7 +52,16 @@ import spll.entity.attribute.value.RawGeoData;
 import spll.entity.iterator.GSFeatureIterator;
 import spll.util.SpllUtil;
 
-public class ShapeFile implements IGSGeofile<GSFeature> {
+/**
+ * TODO: javadoc
+ * 
+ * WARNING: purpose of this file is to cover the wider number of template for geographic vector files,
+ * <i>but</i> in practice it can only stand for standard shapefile
+ * 
+ * @author kevinchapuis
+ *
+ */
+public class SPLVectorFile implements IGSGeofile<GSFeature> {
 
 	private Set<GSFeature> features = null;
 	
@@ -61,7 +71,7 @@ public class ShapeFile implements IGSGeofile<GSFeature> {
 	/*
 	 * Protected constructor to ensure file are created through the provided factory
 	 */
-	protected ShapeFile(DataStore dataStore, List<String> attributes) throws IOException {
+	protected SPLVectorFile(DataStore dataStore, List<String> attributes) throws IOException {
 		this.dataStore = dataStore;
 		this.crs = dataStore.getSchema(dataStore.getTypeNames()[0]).getCoordinateReferenceSystem();
 		FeatureSource<SimpleFeatureType,SimpleFeature> fSource = dataStore
@@ -74,7 +84,7 @@ public class ShapeFile implements IGSGeofile<GSFeature> {
 	    	features.add(gef.createGeoEntity(fItt.next(), attributes));
 	}
 	
-	protected ShapeFile(File file, List<String> attributes) throws IOException{
+	protected SPLVectorFile(File file, List<String> attributes) throws IOException{
 		this(DataStoreFinder.getDataStore(
 				Stream.of(
 						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
@@ -82,7 +92,7 @@ public class ShapeFile implements IGSGeofile<GSFeature> {
 		);
 	}
 	
-	protected ShapeFile(File file) throws IOException{
+	protected SPLVectorFile(File file) throws IOException{
 		this(DataStoreFinder.getDataStore(
 				Stream.of(
 						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
@@ -98,7 +108,7 @@ public class ShapeFile implements IGSGeofile<GSFeature> {
 	}
 	
 	@Override
-	public boolean isCoordinateCompliant(IGSGeofile<GSFeature> file) {
+	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity> file) {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
@@ -121,22 +131,41 @@ public class ShapeFile implements IGSGeofile<GSFeature> {
 	
 
 	@Override
-	public Collection<GSFeature> getGeoData() {
+	public Collection<GSFeature> getGeoEntity() {
 		return Collections.unmodifiableSet(features);
 	}
 	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * WARNING: make use of parallelism through {@link Stream#isParallel()}
+	 * @return
+	 */
+	@Override
+	public Collection<AGeoAttribute> getGeoAttributes() {
+		return features.parallelStream().flatMap(f -> f.getAttributes().stream())
+				.collect(Collectors.toSet());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * WARNING: make use of parallelism through {@link Stream#parallel()}
+	 * @return
+	 */
 	@Override
 	public Collection<AGeoValue> getGeoValues() {
-		return features.parallelStream().flatMap(f -> f.getValues().stream()).collect(Collectors.toSet());
+		return features.parallelStream().flatMap(f -> f.getValues().stream())
+				.collect(Collectors.toSet());
 	}
 
 	@Override
-	public Iterator<GSFeature> getGeoAttributeIterator() {
+	public Iterator<GSFeature> getGeoEntityIterator() {
 		return new GSFeatureIterator(dataStore);
 	}
 	
 	@Override
-	public Iterator<GSFeature> getGeoAttributeIteratorWithin(Geometry geom) {
+	public Iterator<GSFeature> getGeoEntityIteratorWithin(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.within(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
@@ -144,23 +173,23 @@ public class ShapeFile implements IGSGeofile<GSFeature> {
 	
 
 	@Override
-	public Collection<GSFeature> getGeoDataWithin(Geometry geom) {
+	public Collection<GSFeature> getGeoEntityWithin(Geometry geom) {
 		Set<GSFeature> collection = new HashSet<>(); 
-		getGeoAttributeIteratorWithin(geom).forEachRemaining(collection::add);
+		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Iterator<GSFeature> getGeoAttributeIteratorIntersect(Geometry geom) {
+	public Iterator<GSFeature> getGeoEntityIteratorIntersect(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.intersects(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
 	}
 	
 	@Override
-	public Collection<GSFeature> getGeoDataIntersect(Geometry geom) {
+	public Collection<GSFeature> getGeoEntityIntersect(Geometry geom) {
 		Set<GSFeature> collection = new HashSet<>(); 
-		getGeoAttributeIteratorIntersect(geom).forEachRemaining(collection::add);
+		getGeoEntityIteratorIntersect(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -18,6 +17,29 @@ import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
+/**
+ * Represent the higher order abstraction for segmented matrix: it is a record
+ * of matrices with diverging dimensional coverage. Look at the exemple, where
+ * matrices are refer as {@code m} and dimensions as {@code d}:
+ * <p>
+ * {@code
+ * m_seg = m1,m2,m3;} the segmented matrix contains 3 inner full matrices <br>
+ * {@code
+ * m_seg.getDimensions() == d1,d2,d3,d4,d5;} the segmented matrix contains 5 dimensions<br>
+ * {@code
+ * m1.getDimensions() == d1,d2,d3;} 1st inner full matrix contains 3 dimensions<br>
+ * {@code
+ * m2.getDimensions() == d1,d4;} 2nd inner full matrix contains 2 dimensions<br>
+ * {@code
+ * m1.getDimensions() == d5;} 3th inner full matrix contains only one dimensions <br> 
+ * 
+ * WARNING: for the record, the only implementation concerns distribution matrix, i.e.
+ * matrix that store probabilities 
+ * 
+ * @author kevinchapuis
+ *
+ * @param <T>
+ */
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 
@@ -139,39 +161,6 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 			else if(!val.getValue().equals(distribution.getVal(aspect).getValue()))
 				throw new IllegalNDimensionalMatrixAccess("Incongruent probability in underlying distributions");
 		return val;
-	}
-
-	@Override
-	public AControl<T> getVal(Collection<APopulationValue> aspects) {
-		// Setup output with identity product value
-		AControl<T> conditionalProba = this.getIdentityProductVal();
-		// Setup a record of visited dimension to avoid duplicated probabilities
-		Set<APopulationAttribute> remainingDimension = aspects.stream()
-				.map(aspect -> aspect.getAttribute()).collect(Collectors.toSet());
-		
-		// Select matrices that contains at least one concerned dimension and ordered them
-		// in decreasing order of the number of matches
-		List<AFullNDimensionalMatrix<T>> concernedMatrices = jointDistributionSet.stream()
-				.filter(matrix -> matrix.getDimensions().stream().anyMatch(dimension -> remainingDimension.contains(dimension)))
-				.sorted((m1, m2) -> m1.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() >=
-						m2.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() ? -1 : 1)
-				.collect(Collectors.toList());
-		
-		for(AFullNDimensionalMatrix<T> mat : concernedMatrices){
-			if(!mat.getDimensions().stream()
-					.anyMatch(dimension -> remainingDimension.contains(dimension)))
-				continue;
-			// Setup concerned values
-			Set<APopulationValue> concernedValues = aspects.stream()
-					.filter(a -> mat.getDimensions().contains(a.getAttribute()))
-					.collect(Collectors.toSet());
-			// Update conditional probability
-			conditionalProba.multiply(mat.getVal(concernedValues));
-			// Update visited probability
-			remainingDimension.removeAll(concernedValues
-					.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()));
-		}
-		return conditionalProba;
 	}
 	
 	// ---------------------- Inner utilities ---------------------- //

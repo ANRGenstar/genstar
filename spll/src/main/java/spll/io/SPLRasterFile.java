@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.io.FilenameUtils;
 import org.geotools.coverage.grid.GridCoordinates2D;
@@ -31,6 +32,8 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
+import core.metamodel.geo.AGeoAttribute;
+import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
@@ -45,12 +48,12 @@ import spll.util.SpllUtil;
  * 
  * <p>
  * Available input format can be found at
- * {@link GeofileFactory#getSupportedFileFormat()} 
+ * {@link SPLGeofileFactory#getSupportedFileFormat()} 
  * 
  * @author kevinchapuis
  *
  */
-public class RasterFile implements IGSGeofile<GSPixel> {
+public class SPLRasterFile implements IGSGeofile<GSPixel> {
 
 	private final GridCoverage2D coverage;
 	private final AbstractGridCoverage2DReader store;
@@ -70,7 +73,7 @@ public class RasterFile implements IGSGeofile<GSPixel> {
 	 * @throws TransformException
 	 * @throws IllegalArgumentException 
 	 */
-	public RasterFile(File file) throws TransformException, IllegalArgumentException, IOException {
+	public SPLRasterFile(File file) throws TransformException, IllegalArgumentException, IOException {
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);
 
@@ -84,14 +87,14 @@ public class RasterFile implements IGSGeofile<GSPixel> {
 		// TODO: fill in the factory with all possible attribute for this file
 		this.gef = new GeoEntityFactory(new HashSet<>());
 
-		if(FilenameUtils.getExtension(file.getName()).equals(GeofileFactory.ARC_EXT)){
+		if(FilenameUtils.getExtension(file.getName()).equals(SPLGeofileFactory.ARC_EXT)){
 			this.store = GridFormatFinder.findFormat(file).getReader(file);
-		} else if(FilenameUtils.getExtension(file.getName()).equals(GeofileFactory.GEOTIFF_EXT)){
+		} else if(FilenameUtils.getExtension(file.getName()).equals(SPLGeofileFactory.GEOTIFF_EXT)){
 			this.store = new GeoTiffReader(file, new Hints(Hints.USE_JAI_IMAGEREAD, true));
 			this.noData = ((GeoTiffReader) store).getMetadata().getNoData();
 		} else
 			throw new IOException("File format "+FilenameUtils.getExtension(file.getName())+" is not supported "
-					+ "\nSupported file type are: "+Arrays.toString(GeofileFactory.getSupportedFileFormat().toArray()));
+					+ "\nSupported file type are: "+Arrays.toString(SPLGeofileFactory.getSupportedFileFormat().toArray()));
 		 
 		this.coverage = this.store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});	
 	}
@@ -109,7 +112,7 @@ public class RasterFile implements IGSGeofile<GSPixel> {
 	}
 	
 	@Override
-	public boolean isCoordinateCompliant(IGSGeofile<GSPixel> file) {
+	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity> file) {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
@@ -126,14 +129,6 @@ public class RasterFile implements IGSGeofile<GSPixel> {
 	// ----------------------- ACCESS TO VALUES ----------------------- //
 	// ---------------------------------------------------------------- //
 	
-	
-	@Override
-	public Collection<AGeoValue> getGeoValues() {
-		Set<AGeoValue> values = new HashSet<>();
-		getGeoAttributeIterator().forEachRemaining(pix -> values.addAll(pix.getValues()));
-		return values;
-	}
-	
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -142,33 +137,48 @@ public class RasterFile implements IGSGeofile<GSPixel> {
 	 * 
 	 */
 	@Override
-	public Collection<GSPixel> getGeoData(){
+	public Collection<GSPixel> getGeoEntity(){
 		Set<GSPixel> collection = new HashSet<>(); 
-		getGeoAttributeIterator().forEachRemaining(collection::add);
+		getGeoEntityIterator().forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Collection<GSPixel> getGeoDataWithin(Geometry geom) {
+	public Collection<AGeoValue> getGeoValues() {
+		Set<AGeoValue> values = new HashSet<>();
+		getGeoEntityIterator().forEachRemaining(pix -> values.addAll(pix.getValues()));
+		return values;
+	}
+	
+	@Override
+	public Collection<AGeoAttribute> getGeoAttributes(){
+		return getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
+				.collect(Collectors.toSet());
+	}
+	
+	// ------------------------------------- //
+	
+	@Override
+	public Collection<GSPixel> getGeoEntityWithin(Geometry geom) {
 		Set<GSPixel> collection = new HashSet<>(); 
-		getGeoAttributeIteratorWithin(geom).forEachRemaining(collection::add);
+		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Collection<GSPixel> getGeoDataIntersect(Geometry geom) {
+	public Collection<GSPixel> getGeoEntityIntersect(Geometry geom) {
 		Set<GSPixel> collection = new HashSet<>(); 
-		getGeoAttributeIteratorIntersect(geom).forEachRemaining(collection::add);
+		getGeoEntityIteratorIntersect(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Iterator<GSPixel> getGeoAttributeIterator() {
+	public Iterator<GSPixel> getGeoEntityIterator() {
 		return new GSPixelIterator(store.getGridCoverageCount(), coverage);
 	}
 
 	@Override
-	public Iterator<GSPixel> getGeoAttributeIteratorWithin(Geometry geom) {
+	public Iterator<GSPixel> getGeoEntityIteratorWithin(Geometry geom) {
 		Crop cropper = new Crop(); 
 		ParameterValueGroup param = cropper.getParameters();
 		param.parameter("Source").setValue(coverage); // Nul nul nul et si jamais il change le nom du parametre ???
@@ -178,8 +188,8 @@ public class RasterFile implements IGSGeofile<GSPixel> {
 	}
 	
 	@Override 
-	public Iterator<GSPixel> getGeoAttributeIteratorIntersect(Geometry geom) {
-		return getGeoAttributeIteratorWithin(geom);
+	public Iterator<GSPixel> getGeoEntityIteratorIntersect(Geometry geom) {
+		return getGeoEntityIteratorWithin(geom);
 	}
 	
 	// ------------------- specific geotiff accessors ------------------- //

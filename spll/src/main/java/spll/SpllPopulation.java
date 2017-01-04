@@ -6,44 +6,43 @@ import java.util.Set;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import core.metamodel.IPopulation;
+import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.io.IGSGeofile;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spll.util.SpllUtil;
 
 public class SpllPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
 	private IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population;
-	private CoordinateReferenceSystem crs;
+	private IGSGeofile<? extends AGeoEntity> geoFile; 
 
 	public SpllPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			CoordinateReferenceSystem crs) {
+			IGSGeofile<? extends AGeoEntity> geoFile) {
 		this.population = population; 
-		this.crs = crs;
+		this.geoFile = geoFile;
 	}
 	
 	/**
-	 * Give the specific coordinate system this population
+	 * Gives the specific coordinate system this population
 	 * have been localized with
 	 * 
 	 * @return
 	 */
 	public CoordinateReferenceSystem getCrs(){
-		return crs;
-	}
-
-	/**
-	 * change the coordinate system in which population
-	 * should be localized
-	 * 
-	 * @param crs
-	 */
-	public void setCrs(CoordinateReferenceSystem crs){
-		this.crs = crs;
+		return SpllUtil.getCRSfromWKT(geoFile.getWKTCoordinateReferentSystem());
 	}
 	
 	/**
+	 * Gives the geography this population is localized in
 	 * 
+	 * @return
 	 */
+	public IGSGeofile<? extends AGeoEntity> getGeography() {
+		return geoFile;
+	}
+	
 	@Override
 	public Set<APopulationAttribute> getPopulationAttributes() {
 		return population.getPopulationAttributes();

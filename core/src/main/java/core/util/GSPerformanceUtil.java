@@ -116,5 +116,9 @@ public class GSPerformanceUtil {
 	public double getObjectif(){
 		return objectif;
 	}
+	
+	public Logger getLogger(){
+		return logger;
+	}
 
 }

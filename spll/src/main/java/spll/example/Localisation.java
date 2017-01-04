@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.geo.AGeoEntity;
@@ -18,8 +17,6 @@ import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
 import core.util.GSPerformanceUtil;
-import core.util.stats.GSBasicStats;
-import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
@@ -27,13 +24,18 @@ import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.SPLMapper;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.variable.SPLVariable;
-import spll.io.GeofileFactory;
-import spll.io.RasterFile;
-import spll.io.ShapeFile;
+import spll.io.SPLGeofileFactory;
+import spll.io.SPLRasterFile;
 import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 import spll.util.SpllUtil;
 
+/**
+ * TODO; move to template project
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class Localisation {
 
 	/**
@@ -69,11 +71,11 @@ public class Localisation {
 		// IMPORT DATA FILES
 		/////////////////////
 		
-		GeofileFactory gf = new GeofileFactory();
+		SPLGeofileFactory gf = new SPLGeofileFactory();
 		
 		core.util.GSPerformanceUtil gspu = new GSPerformanceUtil("Localisation of people in Bangkok based on Kwaeng (district) population");
 		
-		ShapeFile sfAdmin = null;
+		IGSGeofile<? extends AGeoEntity> sfAdmin = null;
 		try {
 			sfAdmin = gf.getShapeFile(new File(stringPathToMainShapefile));
 		} catch (IOException e) {
@@ -103,9 +105,6 @@ public class Localisation {
 				e2.printStackTrace();
 			}
 		}
-		
-		String propertyName = sfAdmin.getGeoData().iterator().next()
-				.getPropertyAttribute(stringOfMainProperty).getAttributeName();
 
 		Collection<? extends AGeoValue> regVariables = SpllUtil.getValuesFor(regVarName, endogeneousVarFile);
 		
@@ -115,12 +114,9 @@ public class Localisation {
 		// SETUP MAIN CLASS FOR REGRESSION
 		//////////////////////////////////
 		
-		// Choice have been made to regress from areal data count
-		ISPLRegressionAlgo<SPLVariable, Double> regressionAlgo = new LMRegressionOLS();
-		
 		ASPLMapperBuilder<SPLVariable, Double> spllBuilder = new SPLAreaMapperBuilder(
-				sfAdmin, propertyName.toString(), endogeneousVarFile, regVariables,
-				regressionAlgo);
+				sfAdmin, stringOfMainProperty, endogeneousVarFile, regVariables,
+				new LMRegressionOLS(), new SPLUniformNormalizer(0, SPLRasterFile.DEF_NODATA));
 		gspu.sysoStempPerformance("Setup MapperBuilder to proceed regression: done\n", "Main");
 
 		// Setup main regressor class: SPLMapper
@@ -155,13 +151,11 @@ public class Localisation {
 		// ---------------------------------
 		
 		// WARNING: not generic at all - or define 1st ancillary data file to be the one for output format
-		RasterFile outputFormat = (RasterFile) endogeneousVarFile
+		SPLRasterFile outputFormat = (SPLRasterFile) endogeneousVarFile
 				.stream().filter(file -> file.getGeoGSFileType().equals(GeoGSFileType.RASTER))
 				.findFirst().get();
-		spllBuilder.setNormalizer(new SPLUniformNormalizer(0, RasterFile.DEF_NODATA));
-		float[][] pixelOutput = null;
 		try { 
-			pixelOutput = spllBuilder.buildOutput(outputFormat, false, true, null);
+			spllBuilder.buildOutput(new File(stringPath+File.separator+outputFileName), outputFormat, false, true, null);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -177,30 +171,6 @@ public class Localisation {
 		} catch (GSMapperException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
-		
-		List<Double> outList = GSBasicStats.transpose(pixelOutput);
-		GSBasicStats<Double> bs = new GSBasicStats<>(outList, Arrays.asList(RasterFile.DEF_NODATA.doubleValue()));
-		gspu.sysoStempMessage("\nStatistics on output:\n"+bs.getStatReport());
-		
-		/////////////////////////
-		// EXPORT OUTPUT
-		////////////////////////
-		
-		try {
-			ReferencedEnvelope env = new ReferencedEnvelope(endogeneousVarFile.get(0).getEnvelope(), 
-					SpllUtil.getCRSfromWKT(outputFormat.getWKTCoordinateReferentSystem()));
-			gf.createRasterfile(new File(stringPath+File.separator+outputFileName), pixelOutput, 
-					RasterFile.DEF_NODATA.floatValue(), env);
-		} catch (IllegalArgumentException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (TransformException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
 		}
 		
 		///////////////////////

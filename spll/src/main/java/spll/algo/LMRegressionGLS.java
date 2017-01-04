@@ -45,7 +45,7 @@ public class LMRegressionGLS extends GLSMultipleLinearRegression implements ISPL
 			for(int i = 0; i < regVars.size(); i++){
 				int idx = i;
 				Optional<ISPLMatcher<SPLVariable, Double>> optVar = regressors.parallelStream()
-						.filter(varfm -> varfm.getFeature().equals(geoEntity) 
+						.filter(varfm -> varfm.getEntity().equals(geoEntity) 
 								&& varfm.getVariable().equals(regVars.get(idx)))
 						.findFirst();
 				instances[instanceCount++] = optVar.isPresent() ? optVar.get().getValue() : 0d;

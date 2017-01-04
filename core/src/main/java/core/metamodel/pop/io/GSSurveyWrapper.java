@@ -22,33 +22,35 @@ public class GSSurveyWrapper {
 	public static int DEFAULT_SHEET_NB = 0;
 	public static int FIRST_ROW_DATA = 1;
 	public static int FIRST_COLUMN_DATA = 1;
-	
-	// Cannot set a default value to this two variables
-	private final String absoluteFilePath;
+
+	// Cannot set a default value to these variables
+	private String relativePath;
 	private final GSSurveyType surveyType;
-	
+
 	// Possible default value for these variables
 	private final int sheetNb;
 	private final char csvSeparator;
 	private final int firstRowIndex;
 	private final int firstColumnIndex;
-	
+
 	/**
 	 * Inner constructor for deserialization
 	 * 
 	 * @param absoluteFilePath
 	 * @param surveyType
 	 */
-	protected GSSurveyWrapper(String absoluteFilePath, GSSurveyType surveyType,
-			int sheetNb, char csvSeparator, int firstRowIndex, int firstColumnIndex){
-		this.absoluteFilePath = absoluteFilePath;
+	protected GSSurveyWrapper(String absolutePath, 
+			GSSurveyType surveyType, int sheetNb, 
+			char csvSeparator, int firstRowIndex, int firstColumnIndex){
+		this.relativePath = Paths.get(System.getProperty("user.dir"))
+				.relativize(Paths.get(absolutePath)).toString();
 		this.surveyType = surveyType;
 		this.sheetNb = sheetNb;
 		this.csvSeparator = csvSeparator;
 		this.firstRowIndex = firstRowIndex;
 		this.firstColumnIndex = firstColumnIndex;
 	}
-	
+
 	/**
 	 * Wrapper for default survey file attribute
 	 * 
@@ -58,7 +60,7 @@ public class GSSurveyWrapper {
 		this(absoluteFilePath, surveyType, DEFAULT_SHEET_NB,
 				DEFAULT_SEPARATOR, FIRST_ROW_DATA, FIRST_COLUMN_DATA);
 	}
-	
+
 	/**
 	 * Wrapper for Excel type survey
 	 * 
@@ -72,7 +74,7 @@ public class GSSurveyWrapper {
 		this(absoluteFilePath, surveyType, sheetNb, DEFAULT_SEPARATOR, 
 				firstRowIndex, firstColumnIndex);
 	}
-	
+
 	/**
 	 * Wrapper for csv type survey
 	 * 
@@ -86,18 +88,37 @@ public class GSSurveyWrapper {
 		this(absoluteFilePath, surveyType, DEFAULT_SHEET_NB, csvSeparator, 
 				firstRowIndex, firstColumnIndex);
 	}
-	
+
 	// ------------------- ACCESSOR ------------------- //
-	
+
 	/**
 	 * Get the absolute {@link Path} to the file
 	 * 
 	 * @return
 	 */
 	public Path getAbsolutePath(){
-		return Paths.get(absoluteFilePath);
+		return Paths.get(relativePath).toAbsolutePath();
 	}
-	
+
+	/**
+	 * Get the relative {@link Path} to the file
+	 * 
+	 * @return
+	 */
+	public Path getRelativePath(){
+		return Paths.get(relativePath);
+	}
+
+	/**
+	 * Set the relative path to the file according to an external 
+	 * {@link Path}
+	 * 
+	 * @param parentPath
+	 */
+	public void setRelativePath(Path parentPath) throws IllegalArgumentException {
+		this.relativePath = parentPath.relativize(this.getAbsolutePath()).toString();
+	}
+
 	/**
 	 * Get the type of survey as a {@link GSSurveyType} enum
 	 * 
@@ -107,16 +128,7 @@ public class GSSurveyWrapper {
 	public GSSurveyType getSurveyType(){
 		return surveyType;
 	}
-	
-	/**
-	 * Get the absolute path to the file as a {@link String}
-	 * 
-	 * @return
-	 */
-	public String getAbsoluteStringPath(){
-		return absoluteFilePath.toString();
-	}
-	
+
 	/**
 	 * Get the number associated with current sheet (from a tabular data
 	 * frame Excel type)
@@ -126,7 +138,7 @@ public class GSSurveyWrapper {
 	public int getSheetNumber(){
 		return sheetNb;
 	}
-	
+
 	/**
 	 * Give the csv separator character
 	 * 
@@ -135,7 +147,7 @@ public class GSSurveyWrapper {
 	public char getCsvSeparator() {
 		return csvSeparator;
 	}
-	
+
 	/**
 	 * Get the first row data index. Former index denote then
 	 * headers and the like
@@ -145,7 +157,7 @@ public class GSSurveyWrapper {
 	public int getFirstRowIndex(){
 		return firstRowIndex;
 	}
-	
+
 	/**
 	 * Get the first column data index. Former index denote then
 	 * info about the content of each row
@@ -155,18 +167,18 @@ public class GSSurveyWrapper {
 	public int getFirstColumnIndex(){
 		return firstColumnIndex;
 	}
-	
+
 	// ------------------------------------------------------- //
-	
+
 	/*
 	 * Method that enable a safe serialization / deserialization of this java class <br/>
 	 * The serialization process end up in xml file that represents a particular java <br/>
 	 * object of this class; and the way back from xml file to java object. 
 	 */
 	protected Object readResolve() throws ObjectStreamException, FileNotFoundException, UnsupportedEncodingException {
-		return new GSSurveyWrapper(getAbsoluteStringPath(), getSurveyType(), 
-				getSheetNumber(), getCsvSeparator(), getFirstRowIndex(), 
+		return new GSSurveyWrapper(getAbsolutePath().toString(), 
+				getSurveyType(), getSheetNumber(), getCsvSeparator(), getFirstRowIndex(), 
 				getFirstColumnIndex());
 	}
-	
+
 }

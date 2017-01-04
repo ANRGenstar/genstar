@@ -11,7 +11,9 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
+import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.control.ControlFrequency;
@@ -80,6 +82,21 @@ public class GosplDistributionFactory {
 		matrix.getMatrix().keySet().parallelStream().forEach(coord -> matrix.getVal(coord).multiply(1d/population.size()));
 		
 		return matrix;
+	}
+	
+	/**
+	 * Create a segmented matrix from multiple population, each beeing a full dimensional matrix
+	 * 
+	 * @param populations
+	 * @return
+	 * @throws IllegalDistributionCreation 
+	 */
+	public ASegmentedNDimensionalMatrix<Double> createDistribution(
+			Set<IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>> populations) 
+					throws IllegalDistributionCreation {
+		return new GosplConditionalDistribution(populations
+				.stream().map(pop -> this.createDistribution(pop))
+				.collect(Collectors.toSet()));
 	}
 
 	/**

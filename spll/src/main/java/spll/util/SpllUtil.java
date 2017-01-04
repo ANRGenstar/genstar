@@ -13,7 +13,7 @@ import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
-import spll.io.RasterFile;
+import spll.io.SPLRasterFile;
 
 public class SpllUtil {
 
@@ -31,7 +31,7 @@ public class SpllUtil {
 			for(IGSGeofile<? extends AGeoEntity> file : endogeneousVarFile){
 				if(file.getGeoGSFileType().equals(GeoGSFileType.RASTER))
 					values.addAll(file.getGeoValues()
-							.stream().filter(val -> !((RasterFile)file).isNoDataValue(val))
+							.stream().filter(val -> !((SPLRasterFile)file).isNoDataValue(val))
 							.collect(Collectors.toSet()));
 				else
 					values.addAll(file.getGeoValues());

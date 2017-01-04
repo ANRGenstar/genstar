@@ -303,7 +303,7 @@ public class GosplSurveyFactory {
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
 					val = String.valueOf(mapReport.get(value));
 				else
-					val = String.valueOf((int)(mapReport.get(value).doubleValue() / population.size() / precision) * precision);
+					val = String.valueOf(Math.round(mapReport.get(value).doubleValue() / population.size() / precision) * precision);
 				lines.set(lineNumber, lines.get(lineNumber)
 						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
 						value.getStringValue() + separator + val);
