@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +45,7 @@ import org.geotools.resources.i18n.VocabularyKeys;
 import org.geotools.util.NumberRange;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.FeatureType;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -65,16 +68,20 @@ import spll.io.exception.InvalidGeoFormatException;
 
 public class SPLGeofileFactory {
 
-	public  static String SHAPEFILE_EXT = "shp";
+	public static String SHAPEFILE_EXT = "shp";
 	public static String ARC_EXT = "asc";
 	public static String GEOTIFF_EXT = "tif";
+	
+	public static Color[] bestRedPalette = new Color[] { new Color(254,240,217), 
+			new Color(253,204,138), new Color(252,141,89), new Color(227,74,51), 
+			new Color(179, 0, 0)};
+	public static Color noDataColor = new Color(0, 0, 0, 0);
 	
 	public static List<String> getSupportedFileFormat(){
 		return Arrays.asList(SHAPEFILE_EXT, GEOTIFF_EXT, ARC_EXT);
 	}
 
 	/**
-	 * 
 	 * Create a geo referenced file 
 	 * 
 	 * @param geofile
@@ -108,7 +115,16 @@ public class SPLGeofileFactory {
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
 	
-	public SPLVectorFile getShapeFile(File shapefile,List<String> attributes) throws IOException, InvalidGeoFormatException {
+	/**
+	 * TODO: javadoc
+	 * 
+	 * @param shapefile
+	 * @param attributes
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidGeoFormatException
+	 */
+	public SPLVectorFile getShapeFile(File shapefile, List<String> attributes) throws IOException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
 			return new SPLVectorFile(shapefile, attributes);
 		String[] pathArray = shapefile.getPath().split(File.separator);
@@ -121,7 +137,8 @@ public class SPLGeofileFactory {
 	// ------------------------------------------------------------ //
 
 	/**
-	 * TODO
+	 * TODO: test
+	 * TODO: change float pixel value type to double (possible through JAI)
 	 * 
 	 * @param rasterfile
 	 * @param pixels
@@ -139,10 +156,9 @@ public class SPLGeofileFactory {
 		GSBasicStats<Double> gsbs = new GSBasicStats<Double>(GSBasicStats.transpose(pixels), Arrays.asList(new Double(noData)));
 
 		Category nan = new Category(Vocabulary.formatInternational(VocabularyKeys.NODATA), 
-				new Color[] { new Color(0, 0, 0, 0) },
+				new Color[] { noDataColor },
 				NumberRange.create(noData, noData));
-		Category values = new Category("values", 
-				new Color[] { Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.RED }, 
+		Category values = new Category("values", bestRedPalette, 
 				NumberRange.create(gsbs.getStat(GSEnumStats.min)[0], gsbs.getStat(GSEnumStats.max)[0]));
 
 		GridSampleDimension[] bands = new GridSampleDimension[] { 
@@ -154,6 +170,53 @@ public class SPLGeofileFactory {
 			for (int x=0; x<pixels.length; x++) {
 				raster.setSample(x, y, 0, pixels[x][y]);
 			}
+		}
+		
+		return writeRasterFile(rasterfile, 
+				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
+	}
+	
+	/**
+	 * TODO: test
+	 * TODO: change float pixel value type to double (possible through JAI)
+	 * 
+	 * Build a raster file from a list of pixel band.
+	 * 
+	 * @param rasterfile
+	 * @param pixels
+	 * @param crs
+	 * @return
+	 * @throws IOException
+	 * @throws IllegalArgumentException
+	 * @throws TransformException
+	 */
+	public SPLRasterFile createRasterfile(File rasterfile, List<float[][]> pixelsBand, float noData, 
+			ReferencedEnvelope envelope) 
+			throws IOException, IllegalArgumentException, TransformException {
+		// Create image options based on pixels' characteristics
+		List<GSBasicStats<Double>> stats = pixelsBand.stream()
+				.map(pix -> new GSBasicStats<Double>(GSBasicStats.transpose(pix), Arrays.asList(new Double(noData))))
+				.collect(Collectors.toList());
+		float min = (float) stats.stream().mapToDouble(stat -> stat.getStat(GSEnumStats.min)[0]).min().getAsDouble();
+		float max = (float) stats.stream().mapToDouble(stat -> stat.getStat(GSEnumStats.max)[0]).min().getAsDouble();
+
+		Category nan = new Category(Vocabulary.formatInternational(VocabularyKeys.NODATA), 
+				new Color[] { noDataColor },
+				NumberRange.create(noData, noData));
+		Category values = new Category("values", bestRedPalette, 
+				NumberRange.create(min, max));
+
+		GridSampleDimension[] bands = new GridSampleDimension[] { 
+				new GridSampleDimension("Dimension", new Category[] { nan, values }, null)}; 
+
+		WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT,
+				pixelsBand.get(0).length, pixelsBand.get(0)[0].length, pixelsBand.size(), null);
+		int bandNb = -1;
+		for(float[][] pixels : pixelsBand){
+			bandNb++;
+			for (int y=0; y<pixels[0].length; y++) 
+				for (int x=0; x<pixels.length; x++) 
+					raster.setSample(x, y, bandNb, pixels[x][y]);
 		}
 		
 		return writeRasterFile(rasterfile, 
@@ -229,7 +292,7 @@ public class SPLGeofileFactory {
 		} 	
 		
 
-		return new SPLVectorFile(newDataStore, null);
+		return new SPLVectorFile(newDataStore, Collections.emptyList());
 	}
 	
 
@@ -253,11 +316,11 @@ public class SPLGeofileFactory {
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
 
-		Set<SimpleFeatureType> featTypeSet = features
-				.parallelStream().map(feat -> (SimpleFeatureType) feat.getInnerFeature().getType()).collect(Collectors.toSet());
+		Set<FeatureType> featTypeSet = features
+				.parallelStream().map(feat -> feat.getInnerFeature().getType()).collect(Collectors.toSet());
 		if(featTypeSet.size() > 1)
 			throw new SchemaException("Multiple feature type to instantiate schema:\n"+Arrays.toString(featTypeSet.toArray()));
-		SimpleFeatureType featureType = featTypeSet.iterator().next();
+		SimpleFeatureType featureType = (SimpleFeatureType) featTypeSet.iterator().next();
 		newDataStore.createSchema(featureType);
 
 		Transaction transaction = new DefaultTransaction("create");
@@ -276,10 +339,12 @@ public class SPLGeofileFactory {
 			transaction.close();
 		}
 
-		return new SPLVectorFile(newDataStore, null);
+		return new SPLVectorFile(newDataStore, new HashSet<>(features));
 	}
 	
+	// ------------------------------------------------------- //
 	// ------------------- INNER UTILITIES ------------------- //
+	// ------------------------------------------------------- //
 	
 	private SPLRasterFile writeRasterFile(File rasterfile, GridCoverage2D coverage) 
 			throws IllegalArgumentException, TransformException, IOException {

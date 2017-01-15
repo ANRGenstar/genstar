@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,12 +19,13 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
-import org.opengis.feature.Feature;
+import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
@@ -54,6 +57,11 @@ import spll.util.SpllUtil;
 
 public class SPUniformLocalizer implements ISPLocalizer {
 
+	/*
+	 * Performance purpose logger
+	 */
+	private GSPerformanceUtil gspu;
+
 	private SpllPopulation population;
 
 	private IGSGeofile<? extends AGeoEntity> match; //main referenced area for placing the agents (ex: Iris)
@@ -62,9 +70,9 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	private List<SpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest 
 	private PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
 
-	private String keyAttMap; //name of the attribute that contains the number of entities in the entityNbAreas file
-	private String keyAttPop; //name of the attribute that is used to store the id of the referenced area  in the population
-	private String keyAttMatch; //name of the attribute that is used to store the id of the referenced area in the entityNbAreas file
+	private String keyAttMap; //name of the attribute that contains the number of entities in the map file
+	private String keyAttPop; //name of the attribute that is used to store the id of the referenced area in the population
+	private String keyAttMatch; //name of the attribute that is used to store the id of the referenced area in the match file
 
 	private Random rand;
 
@@ -87,7 +95,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	}
 
 	// ----------------------------------------------------- //
-	// ---------------------- SETTERS ---------------------- //
+	// ---------------------- MATHCER ---------------------- //
 	// ----------------------------------------------------- //
 
 	@Override
@@ -107,6 +115,45 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		this.keyAttMatch = keyAttMatch;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * make use of parallelism through {@link Stream#parallel()}
+	 * @throws TransformException 
+	 * @throws IOException 
+	 * @throws IllegalArgumentException 
+	 * @throws MismatchedDimensionException 
+	 * @throws SchemaException 
+	 * 
+	 */
+	@Override
+	public IGSGeofile<? extends AGeoEntity> estimateMatcher(File match) 
+			throws MismatchedDimensionException, IllegalArgumentException, IOException, 
+			TransformException, SchemaException {
+		if(this.match == null)
+			throw new NullPointerException("To call for a matcher, you need first to set one while match variable is null");
+
+		// Logger to track process
+		gspu = new GSPerformanceUtil("Create a file to store entity-space match (called 'matcher')", LogManager.getLogger());
+
+		switch (this.match.getGeoGSFileType()) {
+		case RASTER:
+			return this.createMatchFile(match, (SPLRasterFile) this.match, 
+					this.estimateMatches(this.match, this.keyAttMatch, this.keyAttPop));
+		case VECTOR:
+			return this.createMatchFile(match, (SPLVectorFile) this.match, 
+					this.estimateMatches(this.match, this.keyAttMatch, this.keyAttPop),
+					this.keyAttMatch); 
+		default:
+			throw new IllegalArgumentException("The match file entered does not correspond to any known GeoGSFileTyep = "
+					+ this.match.getGeoGSFileType());
+		} 
+	}
+
+	// ----------------------------------------------------- //
+	// ----------------------- MAPPER ---------------------- //
+	// ----------------------------------------------------- //
+
 	@Override
 	public void setMapper(IGSGeofile<? extends AGeoEntity> map, String mapAttribute) {
 		this.map = map;
@@ -114,13 +161,17 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	}
 
 	@Override
-	public void setMapper(List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
+	public void setMapper(List<IGSGeofile<? extends AGeoEntity>> ancillaryFileList, 
 			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException {
-		File tmp = File.createTempFile("match", "geo");
+		String extension = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
+				SPLGeofileFactory.SHAPEFILE_EXT : SPLGeofileFactory.GEOTIFF_EXT;
+		String keyAttribute = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
+				GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
+		File tmp = File.createTempFile("match", "."+extension);
 		tmp.deleteOnExit();
-		this.setMapper(this.getMatcher(tmp), this.keyAttMap, endogeneousVarFile, 
+		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
 				varList, lmRegressionOLS, splUniformNormalizer);
 	}
 
@@ -143,32 +194,42 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			throws IOException, TransformException, InterruptedException, ExecutionException, 
 			IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException {
 		splMapperBuilder.buildMapper();
-		File tmpFile = Files.createTempFile("regression_raster_output", "tif").toFile();
-		tmpFile.deleteOnExit();
 		switch (splMapperBuilder.getAncillaryFiles().get(0).getGeoGSFileType()) {
 		case RASTER:
-			this.setMapper(splMapperBuilder.buildOutput(tmpFile, 
+			File tmpRaster = Files.createTempFile("regression_raster_output", ".tif").toFile();
+			tmpRaster.deleteOnExit();
+			this.setMapper(splMapperBuilder.buildOutput(tmpRaster, 
 					(SPLRasterFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
 					(double) population.size()), GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0);
 			break;
 		case VECTOR:
-			this.setMapper(splMapperBuilder.buildOutput(tmpFile, 
-				(SPLVectorFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
-				(double) population.size()), GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0);
+			File tmpVector = Files.createTempFile("regression_vector_output", ".shp").toFile();
+			tmpVector.deleteOnExit();
+			this.setMapper(splMapperBuilder.buildOutput(tmpVector, 
+					(SPLVectorFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
+					(double) population.size()), splMapperBuilder.getMainAttribute());
 			break;
 		default:
 			throw new IllegalArgumentException("Ancillary could not be resolve to a proper geo file type ("+GeoGSFileType.values()+")");
 		}
 	}
-	
+
+	// ----------------------------------------------------- //
+	// -------------------- CONSTRIANTS -------------------- //
+	// ----------------------------------------------------- //
+
 	public void setConstraints(List<SpatialConstraint> constraints) {
 		this.constraints = constraints;
 	}
-	
+
+	// ----------------------------------------------------- //
+	// ------------------ POINT LOCALIZER ------------------ //
+	// ----------------------------------------------------- //
+
 	public void setPointInLocalizer(PointInLocalizer pointInLocalizer) {
 		this.pointInLocalizer = pointInLocalizer;
 	}
-	
+
 	// ----------------------------------------------------- //
 	// ---------------------- GETTERS ---------------------- //
 	// ----------------------------------------------------- //
@@ -181,93 +242,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 	public PointInLocalizer getPointInLocalizer() {
 		return pointInLocalizer;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * make use of parallelism through {@link Stream#parallel()}
-	 * @throws TransformException 
-	 * @throws IOException 
-	 * @throws IllegalArgumentException 
-	 * @throws MismatchedDimensionException 
-	 * @throws SchemaException 
-	 * 
-	 */
-	@Override
-	public IGSGeofile<? extends AGeoEntity> getMatcher(File match) 
-			throws MismatchedDimensionException, IllegalArgumentException, IOException, 
-			TransformException, SchemaException {
-		if(this.match == null)
-			throw new NullPointerException("To call for a matcher, you need first to set one while match variable is null");
-		
-		// Logger to track process
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Create a file to store entity-space match (called 'matcher')", LogManager.getLogger());
-		gspu.sysoStempPerformance(1, this);
-		
-		// Collection of entity to match
-		Collection<? extends AGeoEntity> entities = this.match.getGeoEntity();
-		// Setup key attribute of entity mapped to the number of match
-		Map<String, Integer> attMatches = entities.parallelStream()
-				.collect(Collectors.toMap(e -> e.getValueForAttribute(keyAttMatch).getInputStringValue(), e -> 0));
-		// Test if each entity has it's own key attribute, and if not through an exception
-		if(attMatches.size() != entities.size())
-				throw new IllegalArgumentException("Define matcher does not fit key attribute contract: some entity has the same key value");
-			
-		// DOES THE MATCH
-		population.stream().map(e -> e.getValueForAttribute(keyAttPop).getInputStringValue())
-			.forEach(value -> attMatches.put(value, attMatches.get(value)+1));
-		
-		gspu.sysoStempMessage("matches count ("+attMatches.size()+") done");
-		gspu.sysoStempPerformance(2, this);
-		
-		// Bind each key attribute with its entity to fasten further processes
-		Map<AGeoEntity, Integer> entityMatches = entities.stream()
-				.collect(Collectors.toMap(e -> e, e -> attMatches.get(e.getValueForAttribute(keyAttMatch).getInputStringValue())));
-		
-		// Setup factories
-		SPLGeofileFactory gf = new SPLGeofileFactory();
-		
-		// DOES EXPORT THE MATCH TO THE PROPER FORMAT, EITHER RASTER OR VECTOR
-		switch (this.match.getGeoGSFileType()) {
-		case RASTER:
-			SPLRasterFile rasterMatch = (SPLRasterFile) this.match;
-			float[][] pixels = new float[rasterMatch.getColumnNumber()][rasterMatch.getRowNumber()];
-			entityMatches.entrySet().parallelStream()
-				.forEach(e -> pixels[((GSPixel) e.getKey()).getGridX()][((GSPixel) e.getKey()).getGridY()] = e.getValue());
-			return gf.createRasterfile(match, pixels, (float) rasterMatch.getNoDataValue(), 
-					new ReferencedEnvelope(rasterMatch.getEnvelope(), SpllUtil.getCRSfromWKT(rasterMatch.getWKTCoordinateReferentSystem())));
-		case VECTOR:
-			gspu.sysoStempMessage("Start exporting to file");
-			SPLVectorFile vectorMatch = (SPLVectorFile) this.match;
-			RawGeoAttribute contAtt = new RawGeoAttribute(keyAttMatch);
-			// Build a factory able to create proper feature 
-			GeoEntityFactory ef = new GeoEntityFactory(Stream.of(contAtt).collect(Collectors.toSet()),
-					vectorMatch.getStore().getSchema(vectorMatch.getStore().getTypeNames()[0]));
-			gspu.getLogger().debug("Start processing data and create feature with attribute {}", 
-					contAtt.getAttributeName());
-			// Transpose entity-contingency map into a collection of feature
-//			Collection<GSFeature> features = entityMatches.entrySet().parallelStream()
-//				.map(e -> ef.createGeoEntity(ef.createContingencyFeature(e.getKey().getGeometry(), 
-//						Stream.of(new RawGeoData(contAtt, e.getValue())).collect(Collectors.toSet())), 
-//						null))
-//				.collect(Collectors.toSet());
-			Collection<GSFeature> features = new HashSet<>();
-			for(Entry<AGeoEntity, Integer> entry : entityMatches.entrySet()){
-				AGeoValue val = new RawGeoData(contAtt, entry.getValue());
-				Feature feat = ef.createContingencyFeature(entry.getKey().getGeometry(), 
-						Stream.of(val).collect(Collectors.toSet()));
-				gspu.getLogger().debug("Create feature with value {} and inner feature {}", 
-						val.getInputStringValue(), feat.getIdentifier().getID());
-				GSFeature spllFeat = ef.createGeoEntity(feat, null);
-				features.add(spllFeat);
-			}
-			return gf.createShapeFile(match, features);
-		default:
-			throw new IllegalArgumentException("Geographic file "+match.getClass().getCanonicalName()
-					+" does not match any known geographic file type");
-		}
-	}
-	
+
 	///////////////////////////////////////////////////////////
 	// ------------------- MAIN CONTRACT ------------------- //
 	///////////////////////////////////////////////////////////
@@ -310,12 +285,12 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		return population;
 	}
 
-	
+
 	/////////////////////////////////////////////////////
 	// --------------- INNER UTILITIES --------------- //
 	/////////////////////////////////////////////////////
-	
-	
+
+
 	//set to all the entities given as argument, a given nest chosen randomly in the possible geoEntities 
 	//of the localisation shapefile (all if not bounds is defined, only the one in the bounds if the one is not null)
 	private void randomLocalizationInNest(Collection<APopulationEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
@@ -358,4 +333,116 @@ public class SPUniformLocalizer implements ISPLocalizer {
 				}
 	}
 
+	/*
+	 * Estimate the number of match between population and space through the key attribute link
+	 */
+	private Map<AGeoEntity, Number> estimateMatches(IGSGeofile<? extends AGeoEntity> matchFile, 
+			String keyAttributeSpace, String keyAttributePopulation) 
+					throws IOException {
+		// Collection of entity to match
+		Collection<? extends AGeoEntity> entities = matchFile.getGeoEntity();
+
+		// Setup key attribute of entity mapped to the number of match
+		Map<String, Integer> attMatches = entities.parallelStream()
+				.collect(Collectors.toMap(e -> e.getValueForAttribute(keyAttributeSpace).getInputStringValue(), e -> 0));
+
+		// Test if each entity has it's own key attribute, and if not through an exception
+		if(attMatches.size() != entities.size())
+			throw new IllegalArgumentException("Define matcher does not fit key attribute contract: some entity has the same key value");
+
+		// DOES THE MATCH
+		population.stream().map(e -> e.getValueForAttribute(keyAttributePopulation).getInputStringValue())
+		.forEach(value -> attMatches.put(value, attMatches.get(value)+1));
+
+		this.gspu.sysoStempPerformance("Matches ("+ attMatches.size() +") have been counted (Total = "
+				+attMatches.values().stream().reduce(0, (i1, i2) -> i1 + i2).intValue()+") !", this);
+
+		// Bind each key attribute with its entity to fasten further processes
+		return entities.stream().collect(Collectors.toMap(e -> e, 
+				e -> attMatches.get(e.getValueForAttribute(keyAttributeSpace).getInputStringValue())));
+	}
+
+	/*
+	 * Create a raster match file from a number of matches (eMatches) and a key attribute: parameter file for areal interpolation
+	 */
+	private SPLRasterFile createMatchFile(File output, SPLRasterFile template, 
+			Map<AGeoEntity, Number> eMatches) 
+					throws MismatchedDimensionException, IllegalArgumentException, IOException, TransformException, SchemaException {
+		float[][] pixels = new float[template.getColumnNumber()][template.getRowNumber()];
+		eMatches.entrySet().parallelStream()
+		.forEach(e -> pixels[((GSPixel) e.getKey()).getGridX()][((GSPixel) e.getKey()).getGridY()] = e.getValue().floatValue());
+
+		this.gspu.sysoStempPerformance("Matches have been stored in a raster file ("
+				+ pixels[0].length * pixels.length +" pixels) !", this);
+
+		return new SPLGeofileFactory().createRasterfile(output, pixels, (float) template.getNoDataValue(), 
+				new ReferencedEnvelope(template.getEnvelope(), SpllUtil.getCRSfromWKT(template.getWKTCoordinateReferentSystem())));
+	}
+
+	/*
+	 * Create a vector file from a number of matches and a key attribute: parameter file for areal interpolation
+	 */
+	private SPLVectorFile createMatchFile(File output, SPLVectorFile matchFile,
+			Map<AGeoEntity, Number> eMatches, String keyAttMatch) 
+					throws IOException, SchemaException {
+		Optional<AGeoAttribute> keyAtt = matchFile.getGeoAttributes().stream()
+				.filter(att -> att.getAttributeName().equals(keyAttMatch)).findFirst();
+		if(!keyAtt.isPresent())
+			throw new IllegalArgumentException("key attribute matcher "
+					+keyAttMatch+ " does not exist in proposed matched file");
+		if(!eMatches.keySet().stream().allMatch(entity -> entity.getPropertiesAttribute().contains(keyAttMatch))
+				|| !eMatches.keySet().stream().allMatch(entity -> entity.getValueForAttribute(keyAtt.get()) != null))
+			throw new IllegalArgumentException("Matches entity must contain attribute "+keyAttMatch);
+
+		AGeoAttribute key = keyAtt.get();
+		AGeoAttribute contAtt = new RawGeoAttribute(GeoEntityFactory.ATTRIBUTE_FEATURE_POP);
+
+		// Transpose entity-contingency map into a collection of feature
+		Collection<GSFeature> features = constructFeatureCollection(eMatches, contAtt, key, 
+				matchFile.getStore().getSchema(matchFile.getStore().getTypeNames()[0]), true);
+
+		this.gspu.sysoStempPerformance("Matches have been stored in a vector file ("
+				+features.size()+ " features) !", this);
+		Set<GSFeature> categoricalValue = features.stream()
+				.filter(feat -> !feat.getValueForAttribute(contAtt).isNumericalValue())
+				.collect(Collectors.toSet());
+		if(!categoricalValue.isEmpty())
+			throw new RuntimeException(categoricalValue.size()+" created feature are not numerical: "
+					+ categoricalValue.stream().map(gsf -> gsf.getValueForAttribute(key).getInputStringValue())
+					.collect(Collectors.joining("; ")));
+		this.gspu.sysoStempPerformance("Total population count is "+features.stream().mapToDouble(feat -> 
+		feat.getValueForAttribute(contAtt).getNumericalValue().intValue()).sum(), this);
+
+		return new SPLGeofileFactory().createShapeFile(output, features);
+	}
+
+	/*
+	 * Create a set of GSFeature
+	 */
+	private Collection<GSFeature> constructFeatureCollection(Map<AGeoEntity, Number> eMatches, 
+			AGeoAttribute contAtt, AGeoAttribute keyAtt, SimpleFeatureType featType,
+			boolean stream){
+		GeoEntityFactory ef = new GeoEntityFactory(Stream.of(contAtt, keyAtt).collect(Collectors.toSet()), 
+				featType);
+		Collection<GSFeature> features;
+		if(stream){
+			features = eMatches.entrySet().stream().map(e -> 
+					ef.createGeoEntity(e.getKey().getGeometry(), 
+							Stream.of(e.getKey().getValueForAttribute(keyAtt), new RawGeoData(contAtt, e.getValue()))
+						.collect(Collectors.toSet())))
+					.collect(Collectors.toSet());
+		} else {
+			features = new HashSet<>();
+			for(Entry<AGeoEntity, Number> entry : eMatches.entrySet()){
+				AGeoValue contingency = new RawGeoData(contAtt, entry.getValue());
+				AGeoValue iris = entry.getKey().getValueForAttribute(keyAtt);
+				GSFeature spllFeat = ef.createGeoEntity(entry.getKey().getGeometry(), 
+						Stream.of(contingency, iris)
+						.collect(Collectors.toSet()));
+				features.add(spllFeat);
+			}
+		}
+		return features;
+	}
+	
 }

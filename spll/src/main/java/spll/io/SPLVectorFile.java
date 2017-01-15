@@ -30,6 +30,8 @@ import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.feature.Feature;
+import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
@@ -64,49 +66,99 @@ import spll.util.SpllUtil;
 public class SPLVectorFile implements IGSGeofile<GSFeature> {
 
 	private Set<GSFeature> features = null;
-	
+
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
-	
-	/*
-	 * Protected constructor to ensure file are created through the provided factory
+
+	/**
+	 * In this constructor {@link GSFeature} and {@code dataStore} provide the side of the
+	 * same coin: {@link GSFeature} set must contains all {@link Feature} of the {@code dataStore}
+	 * 
+	 * @param dataStore
+	 * @param features
+	 * @throws IOException
+	 */
+	protected SPLVectorFile(DataStore dataStore, Set<GSFeature> features) throws IOException {
+		this.dataStore = dataStore;
+		SimpleFeatureType schema = dataStore.getSchema(dataStore.getTypeNames()[0]);
+		this.crs = schema.getCoordinateReferenceSystem();
+		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(dataStore
+				.getFeatureSource(dataStore.getTypeNames()[0]).getFeatures(Filter.INCLUDE))
+				.features();
+
+		// Tests whether the dataStore contains all SimpleFeature that are within the GSFeature set
+		// WARNING: for weird reasons, when a Feature is stored in a DataStore every numerical value
+		// are transposed to a double value; hence fail to recognize equality with set integer value
+		while(fItt.hasNext()){
+			SimpleFeature feat = fItt.next();
+			for(Property prop : feat.getProperties()){
+				boolean match = false;
+				for(GSFeature feature : features){
+					if(prop.getName().toString().equals(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME)){
+						if(prop.getValue().toString().equals(feature.getGeometry().toString()))
+							match = true;
+					} else if(feature.getValueForAttribute(prop.getName().toString()).isNumericalValue()
+							&& Double.valueOf(prop.getValue().toString()).equals(
+									feature.getValueForAttribute(prop.getName().toString())
+									.getNumericalValue().doubleValue())
+							|| prop.getValue().toString().equals(feature.getInnerFeature()
+									.getProperty(prop.getName()).getValue().toString())){
+						match = true;
+					}
+				}
+				if(!match)
+					throw new IllegalArgumentException("Property "+prop.getName().toString()+" has not been match at all:\n"
+							+ "Geotools feature value is "+feat.getProperty(prop.getName()).getValue().toString()+ "\n"
+							+ "but available value are: "
+							+ features.stream().map(gsf -> gsf.getInnerFeature().getProperty(prop.getName()).toString())
+							.collect(Collectors.joining("; ")));
+			}	
+		}
+		this.features = features;
+	}
+
+	/**
+	 * In this constructor {@link GSFeature} are build from the {@link Feature} contains in the {@code dataStore}
+	 * 
+	 * @param dataStore
+	 * @param attributes
+	 * @throws IOException
 	 */
 	protected SPLVectorFile(DataStore dataStore, List<String> attributes) throws IOException {
 		this.dataStore = dataStore;
 		this.crs = dataStore.getSchema(dataStore.getTypeNames()[0]).getCoordinateReferenceSystem();
 		FeatureSource<SimpleFeatureType,SimpleFeature> fSource = dataStore
-	            .getFeatureSource(dataStore.getTypeNames()[0]);
-		Filter filter = Filter.INCLUDE;
+				.getFeatureSource(dataStore.getTypeNames()[0]);
 		features = new HashSet<>();
-	    FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(filter)).features();
-	    GeoEntityFactory gef = new GeoEntityFactory(new HashSet<AGeoAttribute>());
-	    while (fItt.hasNext())
-	    	features.add(gef.createGeoEntity(fItt.next(), attributes));
+		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(Filter.INCLUDE)).features();
+		GeoEntityFactory gef = new GeoEntityFactory(new HashSet<AGeoAttribute>());
+		while (fItt.hasNext())
+			features.add(gef.createGeoEntity(fItt.next(), attributes));
 	}
-	
+
 	protected SPLVectorFile(File file, List<String> attributes) throws IOException{
 		this(DataStoreFinder.getDataStore(
 				Stream.of(
 						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
 				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), attributes
-		);
+				);
 	}
-	
+
 	protected SPLVectorFile(File file) throws IOException{
 		this(DataStoreFinder.getDataStore(
 				Stream.of(
 						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), null
-		);
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), Collections.emptyList()
+				);
 	}
-	
+
 	// ------------------- GENERAL CONTRACT ------------------- //
-	
+
 	@Override
 	public GeoGSFileType getGeoGSFileType() {
 		return GeoGSFileType.VECTOR;
 	}
-	
+
 	@Override
 	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity> file) {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
@@ -124,17 +176,17 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 	public Envelope getEnvelope() throws IOException {
 		return new ReferencedEnvelope(dataStore.getFeatureSource(dataStore.getTypeNames()[0]).getBounds());
 	}
-	
+
 	// ---------------------------------------------------------------- //
 	// ----------------------- ACCESS TO VALUES ----------------------- //
 	// ---------------------------------------------------------------- //
-	
+
 
 	@Override
 	public Collection<GSFeature> getGeoEntity() {
 		return Collections.unmodifiableSet(features);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -146,7 +198,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 		return features.parallelStream().flatMap(f -> f.getAttributes().stream())
 				.collect(Collectors.toSet());
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -163,14 +215,14 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 	public Iterator<GSFeature> getGeoEntityIterator() {
 		return new GSFeatureIterator(dataStore);
 	}
-	
+
 	@Override
 	public Iterator<GSFeature> getGeoEntityIteratorWithin(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.within(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
 	}
-	
+
 
 	@Override
 	public Collection<GSFeature> getGeoEntityWithin(Geometry geom) {
@@ -178,25 +230,25 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
-	
+
 	@Override
 	public Iterator<GSFeature> getGeoEntityIteratorIntersect(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.intersects(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
 	}
-	
+
 	@Override
 	public Collection<GSFeature> getGeoEntityIntersect(Geometry geom) {
 		Set<GSFeature> collection = new HashSet<>(); 
 		getGeoEntityIteratorIntersect(geom).forEachRemaining(collection::add);
 		return collection;
 	}
-	
+
 	public DataStore getStore() {
 		return dataStore;
 	}
-	
+
 	public void addAttributes(File csvFile, char seperator, String keyAttribute, String keyCSV, List<String> newAttributes) {
 		if (features== null && features.isEmpty()) return;
 		if (!csvFile.exists()) return;
@@ -218,7 +270,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 					attAGeo.put(n, new RawGeoAttribute(n));
 				}
 			}
-			
+
 			for (String[] data : dataTable) {
 				String id = data[keyCSVind];
 				Map<String, String> vals = new Hashtable<String, String>();
@@ -233,12 +285,12 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 				Collection<String> properties = ft.getPropertiesAttribute();
 				if (!properties.contains(keyAttribute)) continue;
 				String objid = ft.getValueForAttribute(keyAttribute).getStringValue();
-				
+
 				Map<String, String> vals = values.get(objid);
 				if (vals == null) continue;
 				for (String vN : vals.keySet()) {
 					AGeoAttribute attri = attAGeo.get(vN);
-					
+
 					String v = vals.get(vN);
 					try {
 						Number value = defaultFormat.parse(v);
@@ -254,7 +306,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public String toString() {
 		String s = "";
 		try {
@@ -265,5 +317,5 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 		}
 		return s;
 	}
-	
+
 }

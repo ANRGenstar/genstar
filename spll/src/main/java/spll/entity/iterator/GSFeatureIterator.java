@@ -1,6 +1,7 @@
 package spll.entity.iterator;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 
@@ -83,7 +84,7 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 				e.printStackTrace();
 			}
 		}
-		return factory.createGeoEntity(feature, null);
+		return factory.createGeoEntity(feature, Collections.emptyList());
 	}
 
 }

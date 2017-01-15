@@ -106,6 +106,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 		if(mapper == null){
 			mapper = new SPLMapper<>();
 			mapper.setMainSPLFile(mainFile);
+			mapper.setMainProperty(super.getMainAttribute());
 			mapper.setRegAlgo(regressionAlgorithm);
 			mapper.setMatcherFactory(matcherFactory);
 			for(IGSGeofile<? extends AGeoEntity> file : ancillaryFiles)

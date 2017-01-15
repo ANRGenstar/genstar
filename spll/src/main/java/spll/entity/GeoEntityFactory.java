@@ -26,7 +26,7 @@ import spll.entity.attribute.value.RawGeoData;
 
 /**
  * The factory to safely create Spll geographical entity
- * 
+ * <p>
  *  TODO: revise what AGeoValue should be
  * 
  * @author kevinchapuis
@@ -35,6 +35,7 @@ import spll.entity.attribute.value.RawGeoData;
 public class GeoEntityFactory {
 
 	public static String ATTRIBUTE_PIXEL_BAND = "Band";
+	public static String ATTRIBUTE_FEATURE_POP = "Population";
 	
 	private Set<AGeoAttribute> attributes;
 	
@@ -65,13 +66,9 @@ public class GeoEntityFactory {
 	public GeoEntityFactory(Set<AGeoAttribute> attributes, SimpleFeatureType schema){
 		this(attributes);
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
-        builder.setName("contingency");
+        builder.setName("SimpleFeatureTypeBuilder");
         builder.setCRS(schema.getCoordinateReferenceSystem()); // <- Coordinate reference system
-
-        /*
-         *  WARNING: after all not sure what getBinding really return
-         */
-        builder.add("the_geom", schema.getGeometryDescriptor().getType().getBinding());
+        builder.add(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME, schema.getGeometryDescriptor().getType().getBinding());
         log.debug("Setup a builder ({}) with {} geometry and [{}] attribute list",
         		builder.getName(),
         		schema.getGeometryDescriptor().getType().getBinding().getSimpleName(), 
@@ -95,7 +92,7 @@ public class GeoEntityFactory {
 		Set<AGeoValue> values = new HashSet<>();
 		for(Property property : feature.getProperties()){
 			String name = property.getName().getLocalPart();
-			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) || (attList != null && !attList.contains(name))) continue;
+			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) || (!attList.isEmpty() && !attList.contains(name))) continue;
 			Optional<AGeoAttribute> opAtt = attributes
 					.stream().filter(att -> att.getAttributeName().equals(name))
 					.findFirst();
@@ -111,6 +108,28 @@ public class GeoEntityFactory {
 			values.add(value);
 		}
 		return new GSFeature(values, feature);
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param the_geom
+	 * @param featureValues
+	 * @return
+	 */
+	public GSFeature createGeoEntity(Geometry the_geom, Set<AGeoValue> featureValues){
+		// Use factory defined feature constructor to build the inner feature
+		contingencyFeatureBuilder.add(the_geom);
+		featureValues.stream().forEach(values -> 
+			contingencyFeatureBuilder.set(values.getAttribute().getAttributeName(), 
+					values.isNumericalValue() ? values.getNumericalValue() : values.getInputStringValue()));
+		Feature feat = contingencyFeatureBuilder.buildFeature(null);
+		// Add non previously encountered attribute to attributes set
+		attributes.addAll(featureValues.stream()
+				.map(val -> val.getAttribute()).filter(att -> !attributes.contains(att))
+				.collect(Collectors.toSet()));
+		// Return created GSFeature
+		return new GSFeature(featureValues, feat);
 	}
 
 	/**
@@ -142,23 +161,6 @@ public class GeoEntityFactory {
 			values.add(value);
 		}
 		return new GSPixel(values, pixel, gridX, gridY);
-	}
-	
-	// ----------------------- GEOTOOLS RELATED FEATURE CREATION ----------------------- //
-	
-	/**
-	 * 
-	 * 
-	 * @param the_geom
-	 * @param featureValues
-	 * @return
-	 */
-	public Feature createContingencyFeature(Geometry the_geom, Set<AGeoValue> featureValues){
-		contingencyFeatureBuilder.add(the_geom);
-		featureValues.stream().forEach(values -> 
-			contingencyFeatureBuilder.set(values.getAttribute().getAttributeName(), 
-					values.isNumericalValue() ? values.getNumericalValue() : values.getInputStringValue()));
-		return contingencyFeatureBuilder.buildFeature(null);
 	}
 
 }

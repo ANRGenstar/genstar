@@ -17,6 +17,10 @@ public abstract class AGeoValue implements IValue {
 	private AGeoAttribute attribute;
 
 	public AGeoValue(String stringVal, String inputStringVal, AGeoAttribute attribute){
+		if(stringVal == null || inputStringVal == null)
+			throw new IllegalArgumentException("Cannot instanciate a geo-value with a null value");
+		if(attribute == null)
+			throw new IllegalArgumentException("Cannot instanciate a geo-value with a null attribute"); 
 		this.stringVal = stringVal;
 		this.inputStringVal = inputStringVal;
 		this.attribute = attribute;

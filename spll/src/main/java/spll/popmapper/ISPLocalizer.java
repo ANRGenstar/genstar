@@ -44,6 +44,8 @@ import spll.popmapper.normalizer.SPLUniformNormalizer;
  */
 public interface ISPLocalizer {
 
+	// -------------- MAIN CONTRACT -------------- //
+	
 	/**
 	 * Provide the higher order method that take a population and 
 	 * return the population with localisation indication 
@@ -52,6 +54,12 @@ public interface ISPLocalizer {
 	 * @return
 	 */
 	public IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> localisePopulation();
+	
+	////////////////////////////////////////////////
+	// -------------- MATCHER PART -------------- //
+	//  Matcher part corresponds to the matching  // 
+	// 	   phase between population and space     //
+	////////////////////////////////////////////////
 	
 	/**
 	 * Setup a "matched geography" between population's entities attribute and a geographical entitites
@@ -73,8 +81,16 @@ public interface ISPLocalizer {
 	 * @throws MismatchedDimensionException 
 	 * @throws SchemaException 
 	 */
-	public IGSGeofile<? extends AGeoEntity> getMatcher(File match) 
+	public IGSGeofile<? extends AGeoEntity> estimateMatcher(File match) 
 			throws MismatchedDimensionException, IllegalArgumentException, IOException, TransformException, SchemaException;
+	
+	
+	///////////////////////////////////////////////
+	// -------------- MAPPER PART -------------- //
+	// 	  Mapper part corresponds to the Areal   // 
+	// 	  Interpolation phase of localization    //
+	///////////////////////////////////////////////
+	
 	
 	/**
 	 * Setup a density map - through external files that define spatial contingency without any 
@@ -87,8 +103,8 @@ public interface ISPLocalizer {
 	
 	/**
 	 * Setup a density map - from the result of spatial interpolation: this interpolation
-	 * is based on the previous match !
-	 * 
+	 * is based on the previous match setup !
+	 * <p>
 	 * WARNING: will throw a Exception if no match have been set before
 	 * 
 	 * @param endogeneousVarFile
@@ -111,7 +127,7 @@ public interface ISPLocalizer {
 	
 	/**
 	 * Setup a density map - from the result of spatial interpolation: this interpolation
-	 * is based on a given map file 
+	 * is based on a given match file 
 	 * 
 	 * @param mainMapper
 	 * @param mainAttribute
@@ -133,5 +149,6 @@ public interface ISPLocalizer {
 			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
 			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
 	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
+	
 	
 }

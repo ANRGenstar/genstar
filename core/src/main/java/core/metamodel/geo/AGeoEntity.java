@@ -49,7 +49,7 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 				.stream().filter(att -> att.getAttributeName().equals(property)).findFirst();
 		if(opAtt.isPresent())
 			return values.get(opAtt.get());
-		throw new NullPointerException("Attribute "+property+" does not exist in "+this.getClass().getSimpleName());
+		throw new NullPointerException("Attribute \""+property+"\" does not exist in "+this.getClass().getSimpleName());
 	}
 
 	@Override
