@@ -239,16 +239,15 @@ public class SPLGeofileFactory {
 			throws IOException, SchemaException {
 		if(population.isEmpty()) 
 			throw new IllegalStateException("Population ("+Arrays.toString(population.toArray())+") in methode createShapeFile cannot be empty");
-		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();
-
-		Map<String, Serializable> params = new HashMap<>();
-		params.put("url", shapefile.toURI().toURL());
-		params.put("create spatial index", Boolean.TRUE);
-
-		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
+		
+		final File parent = shapefile.getParentFile();
+		if (!parent.exists()) {
+			parent.mkdirs();
+		}
+		ShapefileDataStore newDataStore = new ShapefileDataStore(shapefile.toURI().toURL());
 
 		Map<APopulationEntity, Geometry> geoms = population.stream().filter(e -> e.getLocation() != null)
-				.collect(Collectors.toMap(e -> e, e -> e.getNest().getGeometry()));
+				.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
 
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		final String geomType = getGeometryType(geoms.values());
