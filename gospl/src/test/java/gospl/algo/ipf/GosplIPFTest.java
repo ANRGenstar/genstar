@@ -16,6 +16,8 @@ import core.metamodel.pop.APopulationValue;
 import gospl.GosplPopulation;
 import gospl.algo.GosplAlgoUtilTest;
 import gospl.algo.ISyntheticReconstructionAlgo;
+import gospl.algo.generator.DistributionBasedGenerator;
+import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.algo.sampler.sr.GosplBasicSampler;
@@ -23,8 +25,6 @@ import gospl.distribution.GosplDistributionFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.generator.DistributionBasedGenerator;
-import gospl.generator.ISyntheticGosplPopGenerator;
 
 public class GosplIPFTest {
 

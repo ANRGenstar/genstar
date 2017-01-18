@@ -1,4 +1,4 @@
-package gospl.evaluation;
+package gospl.algo.evaluation;
 
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 

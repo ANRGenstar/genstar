@@ -1,4 +1,4 @@
-package gospl.generator;
+package gospl.algo.generator;
 
 import java.util.ArrayList;
 import java.util.List;

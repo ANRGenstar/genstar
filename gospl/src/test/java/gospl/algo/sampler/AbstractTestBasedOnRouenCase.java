@@ -16,14 +16,14 @@ import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
 import gospl.algo.ISyntheticReconstructionAlgo;
+import gospl.algo.generator.DistributionBasedGenerator;
+import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.distribution.GosplDistributionBuilder;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.attribute.GosplAttributeFactory;
-import gospl.generator.DistributionBasedGenerator;
-import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 

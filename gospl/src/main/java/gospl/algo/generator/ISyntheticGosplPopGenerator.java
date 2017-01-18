@@ -1,4 +1,4 @@
-package gospl.generator;
+package gospl.algo.generator;
 
 import gospl.GosplPopulation;
 

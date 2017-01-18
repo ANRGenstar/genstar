@@ -8,16 +8,23 @@
 	<packaging>bundle</packaging>
 
 	<dependencies>
-	
+
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-api</artifactId>
-		    <version>2.7</version>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.7</version>
 		</dependency>
 		<dependency>
-		    <groupId>org.apache.logging.log4j</groupId>
-		    <artifactId>log4j-core</artifactId>
-		    <version>2.7</version>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.7</version>
 		</dependency>
 
 		<dependency>
@@ -37,33 +44,33 @@
 			<artifactId>vecmath</artifactId>
 			<version>1.5.2</version>
 		</dependency>
-		
+
 		<dependency>
-	    <groupId>com.thoughtworks.xstream</groupId>
-	    <artifactId>xstream</artifactId>
-	    <version>1.4.9</version>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<version>1.4.9</version>
 		</dependency>
-		
-		<!--  MINIMAL SPATIAL IMPORT -->
+
+		<!-- MINIMAL SPATIAL IMPORT -->
 		<dependency>
-    	<groupId>com.vividsolutions</groupId>
-    	<artifactId>jts-core</artifactId>
-    	<version>1.14.0</version>
+			<groupId>com.vividsolutions</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.14.0</version>
 		</dependency>
 		<!-- END OF JTS IMPORT -->
-		
-		<!--  BEGIN OF R -->
+
+		<!-- BEGIN OF R -->
 		<dependency>
-	    <groupId>com.github.yannrichet</groupId>
-	    <artifactId>Rsession</artifactId>
+			<groupId>com.github.yannrichet</groupId>
+			<artifactId>Rsession</artifactId>
 			<version>1.8.3</version>
-	  </dependency>
-	  <!--  END OF R -->
-		
+		</dependency>
+		<!-- END OF R -->
+
 	</dependencies>
 
-	 <build>
-	 	<plugins>
+	<build>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -73,27 +80,27 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-		      <plugin>
-		        <groupId>org.apache.felix</groupId>
-		          <artifactId>maven-bundle-plugin</artifactId>
-		          <version>3.2.0</version>
-		          <extensions>true</extensions>
-		          <configuration>
-		                    <instructions>
-		                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-		                        <Bundle-Version>${project.version}</Bundle-Version>
-		                        <Export-Package>core.*</Export-Package>
-		                    </instructions>
-		          </configuration>
-		        </plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.2.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Export-Package>core.*</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
 		</plugins>
-		</build>
+	</build>
 
-		<distributionManagement>
-		                <repository>
-		                <id>bintray-anrgenstar-genstar-packages</id>
-		                <name>anrgenstar-genstar-packages</name>
-		                <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/core/;publish=1;override=1</url>
-		                </repository>
-		</distributionManagement>
+	<distributionManagement>
+		<repository>
+			<id>bintray-anrgenstar-genstar-packages</id>
+			<name>anrgenstar-genstar-packages</name>
+			<url>https://api.bintray.com/maven/anrgenstar/genstar-packages/core/;publish=1;override=1</url>
+		</repository>
+	</distributionManagement>
 </project>

@@ -1,15 +1,15 @@
-package gospl.generator;
+package gospl.algo.generator;
 
 import java.util.stream.Collectors;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import gospl.GosplPopulation;
+import gospl.algo.evaluation.IEvaluableSampler;
+import gospl.algo.evaluation.ISamplingEvaluation;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.GosplEntity;
-import gospl.evaluation.IEvaluableSampler;
-import gospl.evaluation.ISamplingEvaluation;
 
 /**
  * A generator that take a defined distribution and a given sampler
