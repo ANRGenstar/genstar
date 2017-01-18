@@ -2,8 +2,8 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>genstar.core</groupId>
-	<artifactId>core</artifactId>
+	<groupId>org.genstar</groupId>
+	<artifactId>genstar-core</artifactId>
 	<version>1.0</version>
 	<packaging>bundle</packaging>
 
@@ -56,7 +56,7 @@
 		<dependency>
 	    <groupId>com.github.yannrichet</groupId>
 	    <artifactId>Rsession</artifactId>
-			<version>1.8.3</version>
+		<version>1.8.3</version>
 	  </dependency>
 	  <!--  END OF R -->
 		
