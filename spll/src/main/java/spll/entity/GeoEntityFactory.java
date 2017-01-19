@@ -2,6 +2,7 @@ package spll.entity;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,7 +38,7 @@ public class GeoEntityFactory {
 	public static String ATTRIBUTE_PIXEL_BAND = "Band";
 	public static String ATTRIBUTE_FEATURE_POP = "Population";
 	
-	private Set<AGeoAttribute> attributes;
+	private Map<String, AGeoAttribute> attributes;
 	
 	private SimpleFeatureBuilder contingencyFeatureBuilder;
 	
@@ -50,8 +51,10 @@ public class GeoEntityFactory {
 	 * @param attributes
 	 */
 	public GeoEntityFactory(Set<AGeoAttribute> attributes) {
-		this.attributes = ConcurrentHashMap.newKeySet();
-		this.attributes.addAll(attributes);
+		this.attributes = new ConcurrentHashMap<String, AGeoAttribute>();
+		for (AGeoAttribute att: attributes) {
+			this.attributes.put(att.getAttributeName(), att);
+		}
 	}
 	
 	/**
@@ -93,18 +96,16 @@ public class GeoEntityFactory {
 		for(Property property : feature.getProperties()){
 			String name = property.getName().getLocalPart();
 			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) || (!attList.isEmpty() && !attList.contains(name))) continue;
-			Optional<AGeoAttribute> opAtt = attributes
-					.stream().filter(att -> att.getAttributeName().equals(name))
-					.findFirst();
-			AGeoAttribute attribute = opAtt.isPresent() ? opAtt.get() : new RawGeoAttribute(name);
-			if(!opAtt.isPresent())
-				attributes.add(attribute);
-			Optional<AGeoValue> opVal = attribute.getValues()
-					.stream().filter(val -> val.getInputStringValue().equals(name))
-					.findFirst();
-			AGeoValue value = opVal.isPresent() ? opVal.get() : new RawGeoData(attribute, property.getValue());
-			if(!opVal.isPresent())
+			AGeoAttribute attribute = attributes.get(name);
+			if (attribute == null) {
+				attribute = new RawGeoAttribute(name);
+				attributes.put(name,attribute);
+			}
+			AGeoValue value = attribute.getValue( property.getValue().toString());
+			if (value == null) {
+				value = new RawGeoData(attribute, property.getValue());
 				attribute.addValue(value);
+			}
 			values.add(value);
 		}
 		return new GSFeature(values, feature);
@@ -125,9 +126,12 @@ public class GeoEntityFactory {
 					values.isNumericalValue() ? values.getNumericalValue() : values.getInputStringValue()));
 		Feature feat = contingencyFeatureBuilder.buildFeature(null);
 		// Add non previously encountered attribute to attributes set
-		attributes.addAll(featureValues.stream()
-				.map(val -> val.getAttribute()).filter(att -> !attributes.contains(att))
-				.collect(Collectors.toSet()));
+		
+		for (AGeoValue val: featureValues) {
+			if (!attributes.containsKey(val.getInputStringValue())) 
+				attributes.put(val.getInputStringValue(), val.getAttribute());
+		}
+		
 		// Return created GSFeature
 		return new GSFeature(featureValues, feat);
 	}
@@ -145,12 +149,12 @@ public class GeoEntityFactory {
 		Set<AGeoValue> values = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
-			Optional<AGeoAttribute> opAtt = attributes
-					.stream().filter(att -> att.getAttributeName().equals(bandsName))
-					.findFirst();
-			AGeoAttribute attribute = opAtt.isPresent() ? opAtt.get() : new RawGeoAttribute(bandsName);
-			if(!opAtt.isPresent())
-				attributes.add(attribute);
+			AGeoAttribute attribute = attributes.get(bandsName);
+			if (attribute == null) {
+				attribute = new RawGeoAttribute(bandsName);
+				attributes.put(bandsName,attribute);
+			}
+				
 			int idx = i;
 			Optional<AGeoValue> opVal = values
 					.stream().filter(val -> val.getInputStringValue().equals(pixelBands[idx].toString()))

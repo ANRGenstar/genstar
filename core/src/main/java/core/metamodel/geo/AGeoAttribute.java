@@ -1,7 +1,10 @@
 package core.metamodel.geo;
 
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import core.metamodel.IAttribute;
 
@@ -16,11 +19,12 @@ public abstract class AGeoAttribute implements IAttribute<AGeoValue> {
 
 	private String name;
 	
-	private Set<AGeoValue> values;
+	private Map<String, AGeoValue> values;
 	private AGeoValue emptyValue;
 
 	public AGeoAttribute(Set<AGeoValue> values, AGeoValue emptyValue, String name) {
-		this.values = values;
+		this.values = new ConcurrentHashMap<String, AGeoValue>();
+		for (AGeoValue v : values) this.values.put(v.getInputStringValue(), v);
 		this.emptyValue = emptyValue;
 		this.name = name;
 	}
@@ -46,18 +50,24 @@ public abstract class AGeoAttribute implements IAttribute<AGeoValue> {
 
 	@Override
 	public Set<AGeoValue> getValues() {
-		return Collections.unmodifiableSet(values);
+		return Collections.unmodifiableSet(new HashSet<AGeoValue>(values.values()));
 	}
 	
 	@Override
 	public boolean setValues(Set<AGeoValue> values){
-		if(this.values.isEmpty())
-			return this.values.addAll(values);
+		if(this.values.isEmpty()) {
+			for (AGeoValue v: values)addValue(v);
+			return true;
+		}
+			
 		return false;
 	}
 	
-	public boolean addValue(AGeoValue value){
-		return values.add(value);
+	public void addValue(AGeoValue value){
+		values.put(value.getInputStringValue(), value);
 	}
 	
+	public AGeoValue getValue(String name){
+		return values.get(name);
+	}
 }
