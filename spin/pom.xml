@@ -8,6 +8,10 @@
     <version>1.0</version>
   <packaging>bundle</packaging>
 
+ <properties>
+    <maven.test.skip>true</maven.test.skip>
+</properties>
+
 <dependencies>
 	<dependency>
 	    <groupId>org.genstar</groupId>
@@ -22,6 +26,7 @@
 	</dependency> 
 
  </dependencies>
+ 
  <build>
     <plugins>
       <plugin>

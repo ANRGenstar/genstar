@@ -7,6 +7,10 @@
 	<version>1.0</version>
 	<packaging>bundle</packaging>
 
+ 	<properties>
+    <maven.test.skip>true</maven.test.skip>
+	</properties>
+
 	<dependencies>
 
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
@@ -68,7 +72,7 @@
 	  <!--  END OF R -->
 		
 	</dependencies>
-
+	
 	 <build>
 	 	<plugins>
 			<plugin>
