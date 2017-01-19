@@ -370,7 +370,7 @@
 		                <repository>
 		                <id>bintray-anrgenstar-genstar-packages</id>
 		                <name>anrgenstar-genstar-packages</name>
-		                <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/spll/;publish=1;override=1</url>
+		                <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-spll/;publish=1;override=1</url>
 		                </repository>
 		</distributionManagement>
 </project>
