@@ -14,3 +14,8 @@
 That's done, all dependencies are handle by maven
 
 - If you want to add dependencies, please insert the corresponding Maven import into the pom.xml of current project you are working on (main pom if it concerns all project)
+
+## Maven compile and deploy
+
+- Run `mvn clean compile` into root folder to build the different Gen* jar (see in `/target` folder)
+- If you have a settings.xml correctly configured with [bintray](https://bintray.com/anrgenstar) credentials, you can deploy the Gen* jar on Bintray using `mvn deploy` command
