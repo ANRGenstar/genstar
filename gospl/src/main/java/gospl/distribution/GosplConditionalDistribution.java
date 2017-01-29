@@ -1,14 +1,15 @@
 package gospl.distribution;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -28,12 +29,14 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<Double> {
 
+	Logger logger = LogManager.getLogger();
+
 	protected GosplConditionalDistribution(Set<AFullNDimensionalMatrix<Double>> jointDistributionSet) throws IllegalDistributionCreation {
 		super(jointDistributionSet);
 	}
-	
+
 	// --------------- Main contract --------------- //
-	
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -48,74 +51,111 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		// Setup a record of visited dimension to avoid duplicated probabilities
 		Set<APopulationAttribute> remainingDimension = aspects.stream()
 				.map(aspect -> aspect.getAttribute()).collect(Collectors.toSet());
-		
+
 		// Select matrices that contains at least one concerned dimension and ordered them
 		// in decreasing order of the number of matches
 		List<AFullNDimensionalMatrix<Double>> concernedMatrices = jointDistributionSet.stream()
 				.filter(matrix -> matrix.getDimensions().stream().anyMatch(dimension -> remainingDimension.contains(dimension)))
 				.sorted((m1, m2) -> m1.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() >=
-						m2.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() ? -1 : 1)
+				m2.getDimensions().stream().filter(dim -> remainingDimension.contains(dim)).count() ? -1 : 1)
 				.collect(Collectors.toList());
-		
+
 		// Store visited dimension to compute conditional probabilities
 		Set<APopulationAttribute> assignedDimension = new HashSet<>();
-		
+
 		for(AFullNDimensionalMatrix<Double> mat : concernedMatrices){
 			if(mat.getDimensions().stream()
 					.noneMatch(dimension -> remainingDimension.contains(dimension)))
 				continue;
+
 			// Setup concerned values
 			Set<APopulationValue> concernedValues = aspects.stream()
 					.filter(a -> mat.getDimensions().contains(a.getAttribute()))
 					.collect(Collectors.toSet());
-			
+
+
 			// Setup conditional values (known probability to compute conditional probability)
-			Set<APopulationValue> conditionalValues = aspects.stream()
+			Set<APopulationValue> conditionalValues = concernedValues.stream()
 					.filter(val -> assignedDimension.stream().anyMatch(dim -> dim.getValues().contains(val)))
 					.collect(Collectors.toSet());
-			
-			// Deal with referent attribute to also make use of know relationship between attributes
-			Map<Set<APopulationValue>, Set<APopulationValue>> referentAspects = new HashMap<>(); 
-					
-			// Bottom-up references
-			referentAspects.putAll(aspects.stream()
-					.filter(as -> !as.getAttribute().getReferentAttribute().equals(as.getAttribute()) 
-						&& !as.getAttribute().isRecordAttribute() 
-						&& mat.getDimensions().contains(as.getAttribute().getReferentAttribute()))
-					.collect(Collectors.groupingBy(as -> as.getAttribute().getReferentAttribute().findMappedAttributeValues(as),
-								Collectors.mapping(Function.identity(), Collectors.toSet()))));
-			
-			// Top-down references
-			referentAspects.putAll(mat.getDimensions().stream().filter(att -> aspects.stream()
-					.anyMatch(as -> as.getAttribute().equals(att.getReferentAttribute())))
-					.map(att -> att.getValues().stream()
-							.filter(as -> att.findMappedAttributeValues(as).stream().anyMatch(mapAs -> aspects.contains(mapAs)))
-							.collect(Collectors.toSet()))
-					.collect(Collectors.toMap(Function.identity(), set -> set.stream().flatMap(as -> 
-							as.getAttribute().findMappedAttributeValues(as).stream()).collect(Collectors.toSet()))));
-			
-			// Partial mapping record to referent attribute's values
-			AControl<Double> conditionalReferent = this.getIdentityProductVal();
-			for(Entry<Set<APopulationValue>, Set<APopulationValue>> entry : referentAspects.entrySet()){
-				long theoreticalMap = entry.getValue().stream().findFirst().get().getAttribute()
-						.getValues().stream().filter(as -> as.getAttribute().getReferentAttribute().findMappedAttributeValues(as)
-								.equals(entry.getKey())).count();
+
+			AControl<Double> conditionalReferent = mat.getIdentityProductVal();
+
+			// Setup conditional bottom up values: value for which this matrix has partial 
+			// bottom-up information, i.e. one attribute of this matrix has for referent
+			// one value attribute for which probability has already be defined 
+			Map<APopulationAttribute, APopulationAttribute> refAttributeToBottomup = mat.getDimensions().stream()
+					.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute()
+							&& assignedDimension.contains(att.getReferentAttribute()))
+					.collect(Collectors.toMap(att -> att.getReferentAttribute(), Function.identity()));
+			if(!refAttributeToBottomup.isEmpty()){
+				// Map of referent attribute and their already defined value
+				Map<APopulationAttribute, Set<APopulationValue>> refAttributeToAssignedValues = 
+						aspects.stream().filter(as -> assignedDimension.contains(as.getAttribute())
+								&& refAttributeToBottomup.keySet().contains(as.getAttribute()))
+						.collect(Collectors.groupingBy(as -> refAttributeToBottomup.get(as.getAttribute()), 
+								Collectors.mapping(Function.identity(), Collectors.toSet())));
+				// Map of already assigned value to conditional bottom op values
+				Map<Set<APopulationValue>, Set<APopulationValue>> assignedValueToBottomup = refAttributeToAssignedValues
+						.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), 
+								entry -> entry.getValue().stream().flatMap(val -> entry.getKey()
+										.findMappedAttributeValues(val).stream()).collect(Collectors.toSet())));
+				// ADD BOTTOM UP CONDITIONAL VALUES
+				conditionalValues.addAll(assignedValueToBottomup.values().stream()
+						.flatMap(set -> set.stream()).collect(Collectors.toSet()));
 				// WARNING: this is the independent hypothesis, another way to do can be to randomly pick
 				// referent attribute value = i.e. randomly select 'x' value in entry.getKey()
-				conditionalReferent.multiply(entry.getValue().size() * 1d / theoreticalMap);
+				conditionalReferent.multiply(new ControlFrequency(assignedValueToBottomup.keySet()
+						.stream().flatMap(set -> set.stream()).collect(Collectors.toSet()).size() * 1d / 
+						assignedValueToBottomup.values().stream().flatMap(set -> set.stream())
+						.flatMap(bUpAspect -> bUpAspect.getAttribute().findMappedAttributeValues(bUpAspect).stream())
+						.collect(Collectors.toSet()).size()));
 			}
-			
-			// Add all referent values to conditional values
-			conditionalValues.addAll(referentAspects.keySet().stream().flatMap(Set::stream).collect(Collectors.toSet()));
-			
-			// TODO: verify the process
-			// Compute brut probability
-			AControl<Double> brutUpdate = mat.getVal(concernedValues);
-			AControl<Double> conditionalUpdate = mat.getVal(conditionalValues).multiply(conditionalReferent);
-			// Update conditional probability
-			conditionalProba.multiply(brutUpdate.multiply(conditionalUpdate.getValue()));
-			
-			// Update visited probability
+
+			// Setup conditional top down values: value for which this matrix has partial 
+			// top down information, i.e. one attribute of this matrix is the referent of
+			// one value attribute for which probability has already be defined
+			Map<APopulationAttribute, APopulationAttribute> assignedAttributeToTopdown = assignedDimension.stream()
+					.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute()
+							&& mat.getDimensions().contains(att))
+					.collect(Collectors.toMap(Function.identity(), att -> att.getReferentAttribute()));
+			if(!assignedAttributeToTopdown.isEmpty()){
+				// Map of top down attribute and bottom up already defined value
+				Map<APopulationAttribute, Set<APopulationValue>> topdownToAssignedValues = 
+						aspects.stream().filter(as -> assignedDimension.contains(as.getAttribute())
+								&& assignedAttributeToTopdown.keySet().contains(as.getAttribute()))
+						.collect(Collectors.groupingBy(as -> assignedAttributeToTopdown.get(as.getAttribute()), 
+								Collectors.mapping(Function.identity(), Collectors.toSet())));
+				// Map of already assigned value to conditional topdown values
+				Map<Set<APopulationValue>, Set<APopulationValue>> assignedValueToTopdown = topdownToAssignedValues
+						.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), 
+								entry -> entry.getValue().stream().flatMap(val -> val.getAttribute().getReferentAttribute()
+										.findMappedAttributeValues(val).stream()).collect(Collectors.toSet())));
+				// ADD BOTTOM UP CONDITIONAL VALUES
+				conditionalValues.addAll(assignedValueToTopdown.values().stream()
+						.flatMap(set -> set.stream()).collect(Collectors.toSet()));
+				// WARNING: this is the independent hypothesis, another way to do can be to randomly pick
+				// referent attribute value = i.e. randomly select 'x' value in entry.getKey()
+				int assignedAttributeFullSize = assignedValueToTopdown.keySet().stream()
+						.map(set -> set.stream().findAny().get()).flatMap(as -> as.getAttribute().findMappedAttributeValues(as).stream())
+						.collect(Collectors.toSet()).size();
+				conditionalReferent.multiply(assignedValueToTopdown.keySet().stream()
+						.flatMap(set -> set.stream()).collect(Collectors.toSet()).size() * 1d / assignedAttributeFullSize);
+			}
+
+
+			// COMPUTE BRUT PROBABILITY
+			AControl<Double> brutProbability = mat.getVal(concernedValues);
+
+			// COMPUTE CONDITIONAL PROBABILITY
+			AControl<Double> conditionalUpdate = conditionalValues.isEmpty() ? 
+					this.getIdentityProductVal() : mat.getVal(conditionalValues);
+					conditionalUpdate.multiply(conditionalReferent);
+
+					// Update conditional probability
+			conditionalProba.multiply(brutProbability.multiply(1d / conditionalUpdate.getValue().doubleValue()));
+
+					// Update visited probability
 			Set<APopulationAttribute> updateDimension = concernedValues
 					.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()); 
 			assignedDimension.addAll(updateDimension);
@@ -133,7 +173,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return jds.iterator().next().addValue(coordinates, value);
 	}
 
-	
+
 	@Override
 	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
@@ -142,9 +182,9 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			return false;
 		return jds.iterator().next().setValue(coordinates, value);
 	}
-	
-// ------------------ Side contract ------------------ //  
-	
+
+	// ------------------ Side contract ------------------ //  
+
 	@Override
 	public AControl<Double> getNulVal() {
 		return new ControlFrequency(0d);
@@ -155,7 +195,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return new ControlFrequency(1d);
 	}
 
-// -------------------- Utilities -------------------- //
+	// -------------------- Utilities -------------------- //
 
 	@Override
 	public boolean isCoordinateCompliant(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {

@@ -107,11 +107,11 @@ public class GenstarConfigurationFile {
 	}
 	
 	/*
-	 * Throws an exception if attributes have some cross references, e.g. : A referees to B that referees to C
+	 * Throws an exception if attributes have feedback loop references, e.g. : A referees to B that referees to C
 	 * that referees to A; in this case, no any attribute can be taken as a referent one 
 	 */
 	private void isCircleReferencedAttribute(Set<APopulationAttribute> attSet) throws IllegalArgumentException {
-		// store attributes that have a referent one other than itself
+		// store attributes that have referent attribute
 		Map<APopulationAttribute, APopulationAttribute> attToRefAtt = attSet.stream()
 				.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute())
 				.collect(Collectors.toMap(att -> att, att -> att.getReferentAttribute()));

@@ -6,7 +6,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import gospl.algo.GosplAlgoUtilTest;
-import gospl.algo.IndependantHypothesisAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.sr.GosplBasicSampler;
 import gospl.distribution.exception.IllegalDistributionCreation;

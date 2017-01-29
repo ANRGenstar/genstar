@@ -3,11 +3,12 @@ package gospl.algo.ipf;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,14 +19,15 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import gospl.algo.ipf.util.IMarginalsIPFProcessor;
+import gospl.algo.ipf.util.MarginalsIPFProcessor;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.IEntitySampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
-import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
-import gospl.distribution.matrix.coordinate.GosplCoordinate;
+import gospl.distribution.matrix.coordinate.ACoordinate;
 
 /**
  * 
@@ -63,18 +65,31 @@ public abstract class AGosplIPF<T extends Number> {
 
 	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed;
 	protected INDimensionalMatrix<APopulationAttribute, APopulationValue, T> marginals;
-
-	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
-		this.sampleSeed = sampleSeed;
-	}
+	protected IMarginalsIPFProcessor<T> zeroCell;
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
-			int step, double delta){
+			IMarginalsIPFProcessor<T> zeroCell, int step, double delta){
 		this.sampleSeed = sampleSeed;
+		this.zeroCell = zeroCell;
 		this.step = step;
 		this.delta = delta;
 	}
 
+	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
+			int step, double delta){
+		this(sampleSeed, new MarginalsIPFProcessor<T>(), step, delta);
+	}
+	
+	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
+			IMarginalsIPFProcessor<T> zeroCell){
+		this.sampleSeed = sampleSeed;
+		this.zeroCell = zeroCell;
+	}
+
+	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
+		this(sampleSeed, new MarginalsIPFProcessor<T>());
+	}
+		
 	/**
 	 * Setup the matrix that define marginal control. May be a full or segmented matrix: the first one
 	 * will give actual marginal, while the second one will give estimate marginal
@@ -137,52 +152,47 @@ public abstract class AGosplIPF<T extends Number> {
 	 * @return
 	 */
 	protected AFullNDimensionalMatrix<T> process(AFullNDimensionalMatrix<T> seed) {
-		if(!marginals.getDimensions().equals(seed.getDimensions())) 
-			throw new IllegalArgumentException("Output ditribution and sample seed cannot have divergent dimensions\n"
+		if(seed.getDimensions().stream().noneMatch(dim -> marginals.getDimensions().contains(dim) || 
+				marginals.getDimensions().contains(dim.getReferentAttribute())))
+			throw new IllegalArgumentException("Output distribution and sample seed does not have any matching dimensions\n"
 					+ "Distribution: "+Arrays.toString(marginals.getDimensions().toArray()) +"\n"
 					+ "Sample seed: :"+Arrays.toString(seed.getDimensions().toArray()));
-		
-		// TODO: treat mapped 
 
-		// Some debug purpose log
+		List<APopulationAttribute> unmatchSeedAttribute = seed.getDimensions().stream()
+				.filter(dim -> marginals.getDimensions().contains(dim) 
+						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
+				.collect(Collectors.toList());
+
+		logger.trace("{}% of samples dimensions will be estimate with output controls", 
+				unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d);
 		logger.trace("Sample seed controls' dimension: \n{}", seed.getDimensions().stream().map(d -> d.getAttributeName()+" = "+seed.getVal(d.getValues()))
 				.reduce((s1, s2) -> s1.concat("\n"+s2)));
 
-		// Setup IPF main argument
-		Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> marginals = this.getMarginalCellsPerAttribute(this.marginals, true);
-		List<APopulationAttribute> attributesList = new ArrayList<>(this.marginals.getDimensions());
+		Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> marginals = zeroCell.buildCompliantMarginals(this.marginals, seed, true);
 
-		// First: establish convergence criteria
 		int stepIter = step;
 		boolean convergentDelta = false;
-
 		logger.trace("Convergence criteria are: step = {} | delta = {}", step, delta);
 		logger.trace("Start fitting iterations");
 
-		// Iterate while one of the criteria is not reach
 		while(stepIter-- > 0 ? !convergentDelta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
 				logger.trace("Step = {} | convergence {}", step - stepIter, convergentDelta);
-			// For each dimension
-			for(APopulationAttribute attribute : attributesList){
-				// For each marginal
+			for(APopulationAttribute attribute : marginals.keySet()){
 				for(Entry<Set<APopulationValue>, AControl<T>> entry : 
 					marginals.get(attribute).entrySet()){
-					// Compute correction factor
 					AControl<Double> factor = new ControlFrequency(entry.getValue().getValue().doubleValue() / 
 							seed.getVal(entry.getKey()).getValue().doubleValue());
-					// For each value
-					for(APopulationValue value : attribute.getValues()){
-						try {
-							seed.getVal(new GosplCoordinate(Stream.concat(entry.getKey().stream(), 
-									Stream.of(value)).collect(Collectors.toSet()))).multiply(factor);
-						} catch (NullPointerException e) {
-							// ZERO CELL PROBLEM
-						}
-					}
+					Collection<ACoordinate<APopulationAttribute, APopulationValue>> relatedCoordinates = 
+							seed.getCoordinates(entry.getKey()); 
+					for(ACoordinate<APopulationAttribute, APopulationValue> coord : relatedCoordinates)
+						seed.getVal(coord).multiply(factor);
+					logger.trace("Work on value set {} and related {} coordinates; factor = {}",
+							Arrays.toString(entry.getKey().toArray()), relatedCoordinates.size(), factor.getValue());
 				}
 			}
-			Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> actualMarginals = getMarginalCellsPerAttribute(seed, true);
+			Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> actualMarginals = getMarginals(seed, 
+					Collections.emptyList(), true);
 			if(actualMarginals.entrySet().stream().allMatch(entry -> 
 				marginals.get(entry.getKey()).entrySet().stream().allMatch(marginal -> 
 					entry.getValue().get(marginal.getKey()).equalsVal(marginal.getValue(), delta))))
@@ -200,21 +210,30 @@ public abstract class AGosplIPF<T extends Number> {
 	// ---------------------- IPF utilities ---------------------- //
 
 	/**
-	 * Return the marginal descriptors coordinate for a referent dimension:
-	 * a collection of all attribute's value combination (a set of value) that 
-	 * exclude referent attribute; those set describe the marginal for this
-	 * referent attribute conditional to all other possible combination of 
-	 * attribute's values
+	 * Defines and retrieves marginal from a n-dimensional matrix
 	 * 
-	 * @param referent
+	 * @param control
+	 * @param attributes
+	 * @param parallel
 	 * @return
 	 */
-	private Collection<Set<APopulationValue>> getMarginalDescriptors(APopulationAttribute referent){
+	private Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> getMarginals(
+			AFullNDimensionalMatrix<T> matrix, Collection<APopulationAttribute> attributes, boolean parallel) {
+		if(!matrix.getDimensions().containsAll(attributes))
+			throw new IllegalArgumentException("All attributes must be part of the control matrix");
+		Stream<APopulationAttribute> attStream;
+		if(parallel)
+			attStream = attributes.parallelStream();
+		else
+			attStream = attributes.stream();
+		return attStream.collect(Collectors.toMap(Function.identity(), att -> 
+			getMarginalDescriptors(attributes.stream().filter(a -> !a.equals(att)).collect(Collectors.toSet()))
+				.stream().collect(Collectors.toMap(Function.identity(), valset -> matrix.getVal(valset)))));
+	}
+	
+	private Collection<Set<APopulationValue>> getMarginalDescriptors(Collection<APopulationAttribute> targetedAttributes){
 		// Setup output
 		Collection<Set<APopulationValue>> marginalDescriptors = new ArrayList<>();
-		// Define the set of tageted attributes
-		Set<APopulationAttribute> targetedAttributes = new HashSet<>(marginals.getDimensions());
-		targetedAttributes.remove(referent);
 		// Init. the output collection with any attribute
 		APopulationAttribute firstAtt = targetedAttributes.iterator().next();
 		for(APopulationValue value : firstAtt.getValues())
@@ -231,32 +250,6 @@ public abstract class AGosplIPF<T extends Number> {
 			marginalDescriptors = tmpDescriptors;
 		}
 		return marginalDescriptors;
-	}
-
-	/**
-	 * One of the crucial method although very light. All marginals are calculated using 
-	 * {@link INDimensionalMatrix#getVal(Collection values)}, hence comprising different
-	 * knowledge depending on matrix concrete type: 
-	 * <p>
-	 * <ul>
-	 * <li> {@link AFullNDimensionalMatrix}: gives the real margin
-	 * <li> {@link ASegmentedNDimensionalMatrix}: gives accurate margin based on potentially
-	 * limited information
-	 * </ul>
-	 * <p>
-	 * WARNING: let the user define if this method should use {@link Stream#parallel()} capabilities or not
-	 * 
-	 * @param parallel
-	 * @return
-	 */
-	private Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> getMarginalCellsPerAttribute(
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, T> anyDistribution,
-			boolean parallel){
-		if(parallel)
-			return anyDistribution.getDimensions().parallelStream().collect(Collectors.toMap(att -> att, att -> getMarginalDescriptors(att)
-					.stream().collect(Collectors.toMap(valSet -> valSet, valSet -> anyDistribution.getVal(valSet)))));
-		return anyDistribution.getDimensions().stream().collect(Collectors.toMap(att -> att, att -> getMarginalDescriptors(att)
-				.stream().collect(Collectors.toMap(valSet -> valSet, valSet -> anyDistribution.getVal(valSet)))));
 	}
 
 }

@@ -13,7 +13,10 @@ import core.metamodel.pop.APopulationValue;
 import core.util.data.GSEnumDataType;
 
 /**
- * TODO: javadoc
+ * This attribute stands for one that refers to another attribute. The binding
+ * should be explicitly made using a {@code mapper} to pass as an argument of
+ * the constructor. It must define the relationship between these attribute
+ * values (as map key) and the referent attribute values (as map value). 
  * 
  * @author kevinchapuis
  * @author Duc an vo
@@ -26,6 +29,15 @@ public class MappedAttribute extends APopulationAttribute {
 	 */
 	private Map<Set<String>, Set<String>> mapper;
 
+	/**
+	 * WARNING: mapper must comply to map-key being this attribute's value and map-value
+	 * being the referent attribute's value
+	 * 
+	 * @param name
+	 * @param dataType
+	 * @param referentAttribute
+	 * @param mapper
+	 */
 	public MappedAttribute(String name, GSEnumDataType dataType, APopulationAttribute referentAttribute,
 			Map<Set<String>, Set<String>> mapper) {
 		super(name, dataType, referentAttribute);
@@ -44,19 +56,22 @@ public class MappedAttribute extends APopulationAttribute {
 	@Override
 	public Set<APopulationValue> findMappedAttributeValues(APopulationValue val) {
 
-		// or, is val part of the values that map to a key ?
+		// is val part of the values that map to a key ?
 		Optional<Entry<Set<String>, Set<String>>> optMap2 = mapper.entrySet().stream()
 				.filter(e -> e.getValue().contains(val.getInputStringValue())).findFirst();
 		if (optMap2.isPresent()) 
 			return this.getValues().stream()
-					.filter(refVal -> optMap2.get().getKey().contains(refVal.getInputStringValue()))
+					.filter(refVal -> optMap2.get().getKey().contains(refVal.getInputStringValue()) 
+							|| optMap2.get().getKey().contains(refVal.getStringValue()))
 					.collect(Collectors.toSet());
 		
 		// is val part of the keys that map to something ?
-		Optional<Entry<Set<String>, Set<String>>> optMap = mapper.entrySet().stream() .filter(e -> e.getKey().contains(val.getInputStringValue())).findFirst();
+		Optional<Entry<Set<String>, Set<String>>> optMap = mapper.entrySet().stream()
+				.filter(e -> e.getKey().contains(val.getInputStringValue())).findFirst();
 		if(optMap.isPresent())
 			return this.getReferentAttribute().getValues().stream()
-					.filter(refVal -> optMap.get().getValue().contains(refVal.getInputStringValue()))
+					.filter(refVal -> optMap.get().getValue().contains(refVal.getInputStringValue())
+							|| optMap.get().getValue().contains(refVal.getStringValue()))
 					.collect(Collectors.toSet());
 		
 		// maybe nothing was found; in this case return the empty value

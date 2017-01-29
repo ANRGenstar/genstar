@@ -5,9 +5,9 @@ import java.util.stream.Collectors;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import gospl.GosplPopulation;
-import gospl.algo.evaluation.IEvaluableSampler;
-import gospl.algo.evaluation.ISamplingEvaluation;
 import gospl.algo.sampler.ISampler;
+import gospl.algo.sampler.evaluation.IEvaluableSampler;
+import gospl.algo.sampler.evaluation.ISamplingEvaluation;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.GosplEntity;
 

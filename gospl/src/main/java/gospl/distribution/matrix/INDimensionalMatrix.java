@@ -38,6 +38,8 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	
 	/**
 	 * Retrieve the matrix value according to the coordinate passed in method parameter. 
+	 * <p>
+	 * WARNING: return the actual control associated to this matrix
 	 * 
 	 * @param coordinate
 	 * @return {@link AControl} associated to the given {@link ACoordinate}
@@ -45,7 +47,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(ACoordinate<D, A> coordinate);
 	
 	/**
-	 * Retrieve the matrix aggregated value according to one dimension's aspect
+	 * Compute the matrix aggregated value according to one dimension's aspect
 	 * 
 	 * @param aspect
 	 * @return
@@ -54,7 +56,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(A aspect) throws IllegalNDimensionalMatrixAccess;
 	
 	/**
-	 * Retrieve the matrix aggregated value according to a set of aspect of one or several dimension
+	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension
 	 * 
 	 * @param aspects
 	 * @return
@@ -62,7 +64,8 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(Collection<A> aspects);
 	
 	/**
-	 * Returns the total sum of the entire matrix
+	 * Compute the total sum of the entire matrix
+	 * 
 	 * @return
 	 */
 	public AControl<T> getVal();
@@ -183,6 +186,17 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public boolean isCoordinateCompliant(ACoordinate<D, A> coordinate);
+	
+	/**
+	 * Retrieve all coordinate that describe this set of value.
+	 * Simply translated, this will return all coordinates which
+	 * contains the {@code values} (one per dimension) passed as
+	 * argument
+	 * 
+	 * @param values
+	 * @return
+	 */
+	public Collection<ACoordinate<D, A>> getCoordinates(Set<A> values);
 
 // ------------------------- utility methods ------------------------- //
 	

@@ -1,12 +1,15 @@
 package gospl.distribution.matrix;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.pop.APopulationAttribute;
@@ -41,16 +44,16 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  * @param <T>
  */
 public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
-		INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
+INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 
 	protected final Set<AFullNDimensionalMatrix<T>> jointDistributionSet;
-	
-// -------------------- Constructor -------------------- //
-	
+
+	// -------------------- Constructor -------------------- //
+
 	private ASegmentedNDimensionalMatrix(){
 		jointDistributionSet = new HashSet<>();
 	}
-	
+
 	public ASegmentedNDimensionalMatrix(Set<AFullNDimensionalMatrix<T>> jointDistributionSet) throws IllegalDistributionCreation {
 		this();
 		if(jointDistributionSet.isEmpty())
@@ -59,8 +62,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		if(jointDistributionSet.stream().map(jd -> jd.getMetaDataType()).collect(Collectors.toSet()).size() > 1)
 			throw new IllegalDistributionCreation("Divergent frame of reference among sub joint distribution");
 	}
-	
-// ------------------------- META DATA ------------------------ //
+
+	// ------------------------- META DATA ------------------------ //
 
 	@Override
 	public GSSurveyType getMetaDataType() {
@@ -69,12 +72,12 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 			return null;
 		return mdtSet.iterator().next();
 	}
-	
+
 	@Override
 	public boolean isSegmented(){
 		return true;
 	}
-	
+
 	// ---------------- Getters ---------------- //
 
 	@Override
@@ -90,12 +93,12 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		}
 		return res;
 	}
-	
+
 	@Override
 	public APopulationAttribute getDimension(APopulationValue aspect) {
 		return getDimensions().stream().filter(d -> d.getValues().contains(aspect)).findFirst().get();
 	}
-	
+
 	@Override
 	public Set<APopulationValue> getAspects() {
 		return getDimensions().stream().flatMap(d -> d.getValues().stream()).collect(Collectors.toSet());
@@ -110,14 +113,32 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	public int size() {
 		return jointDistributionSet.stream().mapToInt(AFullNDimensionalMatrix::size).sum();
 	}
-	
+
 	@Override
 	public ACoordinate<APopulationAttribute, APopulationValue> getEmptyCoordinate() {
 		return jointDistributionSet.iterator().next().getEmptyCoordinate();
 	}
-	
+
+	@Override
+	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(Set<APopulationValue> values){
+		List<AFullNDimensionalMatrix<T>> concernedJointDistributions = jointDistributionSet.stream()
+				.filter(matrix -> matrix.getAspects().stream()
+						.anyMatch(aspect -> values.contains(aspect))).collect(Collectors.toList());
+		if(concernedJointDistributions.size() == 1)
+			return concernedJointDistributions.get(0).getCoordinates(values);
+		Collection<ACoordinate<APopulationAttribute, APopulationValue>> coords = new ArrayList<>();
+		Map<APopulationAttribute, Set<APopulationValue>> attValues = values.stream()
+				.collect(Collectors.groupingBy(value -> value.getAttribute(),
+						Collectors.mapping(Function.identity(), Collectors.toSet())));
+		coords.addAll(concernedJointDistributions.stream().flatMap(matrix -> matrix.getMatrix().keySet()
+				.stream().filter(coord -> attValues.entrySet().stream().filter(entry -> matrix.getDimensions().contains(entry.getKey()))
+						.allMatch(entry -> entry.getValue().stream().anyMatch(val -> coord.values().contains(val)))))
+				.collect(Collectors.toSet()));
+		return coords;
+	}
+
 	// ---------------------- Matrix accessors ---------------------- //
-	
+
 	/**
 	 * Return the partitioned view of this matrix, i.e. the collection
 	 * of inner full matrices
@@ -127,7 +148,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	public Collection<AFullNDimensionalMatrix<T>> getMatrices(){
 		return Collections.unmodifiableSet(jointDistributionSet);
 	}
-	
+
 	@Override
 	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
 		Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = new HashMap<>();
@@ -135,7 +156,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 			matrix.putAll(jd.getMatrix());
 		return matrix;
 	}
-	
+
 	public LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getOrderedMatrix(){
 		LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = 
 				new LinkedHashMap<>();
@@ -143,7 +164,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 			matrix.putAll(jd.getOrderedMatrix());
 		return matrix;
 	}
-	
+
 	@Override
 	public AControl<T> getVal() {
 		AControl<T> result = getNulVal();
@@ -154,7 +175,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		}
 		return result;
 	}
-	
+
 	@Override
 	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
 		return getVal(coordinate.values());
@@ -171,9 +192,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 				throw new IllegalNDimensionalMatrixAccess("Incongruent probability in underlying distributions");
 		return val;
 	}
-	
+
 	// ---------------------- Inner utilities ---------------------- //
-	
+
 	/**
 	 * Inner utility method that add an encapsulated {@link AControl} value into the first
 	 * given in argument
@@ -185,16 +206,16 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
 		return controlOne.add(controlTwo);
 	}
-	
+
 	// ----------------------- utility ----------------------- //
-	
+
 	@Override
 	public String toString(){
 		String s = "Segmented matrix with "+jointDistributionSet.size()+" inner full matrices:\n";
 		s += jointDistributionSet.stream().map(m -> m.toString()+"\n").reduce("", (s1, s2) -> s1 + s2);
 		return s;
 	}
-	
+
 	@Override
 	public String toCsv(char csvSeparator){
 		String s = "";
@@ -217,5 +238,5 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	public Set<AFullNDimensionalMatrix<T>> getMatricesInvolving(APopulationAttribute att) {
 		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
-	
+
 }

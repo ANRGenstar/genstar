@@ -5,7 +5,7 @@ import java.util.List;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
-import gospl.algo.evaluation.IEvaluableSampler;
+import gospl.algo.sampler.evaluation.IEvaluableSampler;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 

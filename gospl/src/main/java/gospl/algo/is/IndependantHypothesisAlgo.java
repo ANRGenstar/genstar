@@ -1,6 +1,7 @@
-package gospl.algo;
+package gospl.algo.is;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,7 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import core.util.GSPerformanceUtil;
+import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.GosplDistributionFactory;
@@ -63,9 +65,10 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			throw new IllegalDistributionCreation("can't create a sampler using only one matrix of GosplMetaDataType#LocalFrequencyTable");
 
 		// Begin the algorithm (and performance utility)
+		int theoreticalSize = matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
-				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
-		gspu.getStempPerformance(0);
+				theoreticalSize, logger);
+		gspu.setObjectif(theoreticalSize);
 
 		// Stop the algorithm and exit the unique matrix if there is only one
 		if(!matrix.isSegmented()){
@@ -80,6 +83,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		
 		// Setup the matrix to estimate 
 		AFullNDimensionalMatrix<Double> freqMatrix = new GosplDistributionFactory().createDitribution(targetedDimensions);
+		
+		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
 
 		// Extrapolate the whole set of coordinates
 		Collection<Set<APopulationValue>> coordinates = new ArrayList<>();
@@ -98,7 +103,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			}
 		}
 		
-		// Apply each coordinate
+		gspu.sysoStempMessage("Start writting down collpased distribution");
 		coordinates.parallelStream().forEach(coord -> 
 			freqMatrix.addValue(new GosplCoordinate(coord), matrix.getVal(coord)));
 		

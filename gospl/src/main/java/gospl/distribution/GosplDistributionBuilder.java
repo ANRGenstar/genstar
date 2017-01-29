@@ -12,6 +12,7 @@ package gospl.distribution;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -39,6 +40,7 @@ import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;
+import core.util.GSPerformanceUtil;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import gospl.GosplPopulation;
@@ -156,13 +158,10 @@ public class GosplDistributionBuilder {
 			return getFrequency(distributions.iterator().next());
 		final Set<AFullNDimensionalMatrix<Double>> fullMatrices = new HashSet<>();
 		
-		// Matrices that do not contain any record attribute
-		for (final AFullNDimensionalMatrix<? extends Number> mat : distributions.stream()
-				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !d.isRecordAttribute()))
-				.collect(Collectors.toSet()))
-			fullMatrices.add(getFrequency(mat));
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Proceed to distribution collapse", logger);
+		gspu.sysoStempPerformance(0, this);
 		
-		// Matrices that contain an record attribute
+		// Matrices that contain a record attribute
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : distributions.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> d.isRecordAttribute()))
 				.collect(Collectors.toSet())){
@@ -170,6 +169,19 @@ public class GosplDistributionBuilder {
 					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
 		}
+		
+		gspu.sysoStempPerformance(1, this);
+		gspu.sysoStempMessage("Collapse record attribute: done");
+		
+		// Matrices that do not contain any record attribute
+		for (final AFullNDimensionalMatrix<? extends Number> mat : distributions.stream()
+				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !d.isRecordAttribute()))
+				.collect(Collectors.toSet()))
+			fullMatrices.add(getFrequency(mat));
+		
+		gspu.sysoStempPerformance(2, this);
+		gspu.sysoStempMessage("Transpose to frequency: done");
+				
 		return new GosplConditionalDistribution(fullMatrices);
 	}
 	
@@ -250,7 +262,7 @@ public class GosplDistributionBuilder {
 		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
 				matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
 				GSSurveyType.GlobalFrequencyTable);
-
+		
 		if (matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
 			// Identify local referent dimension
 			final Map<APopulationAttribute, List<AControl<? extends Number>>> mappedControls =
@@ -342,8 +354,10 @@ public class GosplDistributionBuilder {
 			final Map<APopulationAttribute, APopulationValue> entityAttributes = new HashMap<>();
 			final List<String> indiVals = survey.readLine(i);
 			if(indiVals.size() <= maxIndivSize){
-				logger.debug("One individual does not fit required number of attributes: \n"
+				/*
+				logger.info("One individual does not fit required number of attributes: \n"
 						+ Arrays.toString(indiVals.toArray()));
+						*/
 				unmatchSize++;
 				continue;
 			}
@@ -355,14 +369,15 @@ public class GosplDistributionBuilder {
 				else if(columnHeaders.get(idx).getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(columnHeaders.get(idx), columnHeaders.get(idx).getEmptyValue());
 				else{
-					logger.debug("Data modality "+indiVals.get(idx)+" does not match any value for attribute "+columnHeaders.get(idx).getAttributeName());
+					//logger.info("Data modality "+indiVals.get(idx)+" does not match any value for attribute "+columnHeaders.get(idx).getAttributeName());
 					unmatchSize++;
 				}
 			}
 			if(entityAttributes.size() == entityAttributes.size())
 				sampleSet.add(new GosplEntity(entityAttributes));
 		}
-		logger.debug("Input sample have bypass "+unmatchSize+" entity due to unmatching attribute's value");
+		logger.debug("Input sample have bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
+				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
 		return sampleSet;
 	}
 	
@@ -375,6 +390,11 @@ public class GosplDistributionBuilder {
 		Set<APopulationAttribute> dims = recordMatrices.getDimensions().stream().filter(d -> !d.isRecordAttribute())
 				.collect(Collectors.toSet());
 		
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Transpose process of matrix "
+				+Arrays.toString(recordMatrices.getDimensions().toArray()), logger);
+		gspu.sysoStempPerformance(0, this);
+		gspu.setObjectif(recordMatrices.getMatrix().size());
+		
 		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
 				recordMatrices.getDimensions().stream().filter(d -> dims.contains(d))
 				.collect(Collectors.toMap(d -> d, d -> d.getValues())),
@@ -382,7 +402,10 @@ public class GosplDistributionBuilder {
 		
 		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal(dims.iterator().next().getValues());
 		
+		int iter = 1;
 		for(ACoordinate<APopulationAttribute, APopulationValue> oldCoord : recordMatrices.getMatrix().keySet()){
+			if(iter % (gspu.getObjectif()/10) == 0)
+				gspu.sysoStempPerformance(0.1, this);
 			Set<APopulationValue> newCoord = new HashSet<>(oldCoord.values());
 			newCoord.retainAll(dims.stream().flatMap(dim -> dim.getValues().stream()).collect(Collectors.toSet()));
 			freqMatrix.addValue(new GosplCoordinate(newCoord), 
@@ -404,7 +427,8 @@ public class GosplDistributionBuilder {
 			final List<String> sLine = survey.readLine(line);
 			for (int idx = 0; idx < survey.getFirstColumnIndex(); idx++) {
 				final String headAtt = sLine.get(idx);
-				if (attributes.stream().map(att -> att.getAttributeName()).anyMatch(attName -> attName.equals(headAtt)))
+				if (attributes.stream().map(att -> att.getAttributeName())
+						.anyMatch(attName -> attName.equals(headAtt)))
 					attributeIdx.add(idx);
 				if (headAtt.isEmpty()) {
 					final List<String> valList = survey.readColumn(idx);

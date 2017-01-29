@@ -1,4 +1,4 @@
-package gospl.algo.evaluation;
+package gospl.algo.sampler.evaluation;
 
 import java.util.Set;
 

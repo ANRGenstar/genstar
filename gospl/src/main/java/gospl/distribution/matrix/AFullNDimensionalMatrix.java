@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -205,20 +206,13 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects) {
 		if(aspects.stream().allMatch(a -> !matrix.keySet().stream().anyMatch(coord -> coord.contains(a))))
-			throw new NullPointerException("Aspect "+aspects+" is absent from this control table ("+this.getClass().getSimpleName()+" - "+this.hashCode()+")");
+			throw new NullPointerException("Aspect "+Arrays.toString(aspects.toArray())+" is absent from this matrix"
+					+ " (size = "+this.size()+" - attribute = "+Arrays.toString(this.getDimensions().toArray())+")");
 
-		Map<APopulationAttribute, Set<APopulationValue>> attAsp = new HashMap<>();
-		for(APopulationValue val : aspects){
-			APopulationAttribute att = val.getAttribute();
-			if(attAsp.containsKey(att))
-				attAsp.get(att).add(val);
-			else {
-				Set<APopulationValue> valSet = new HashSet<>();
-				valSet.add(val);
-				attAsp.put(att, valSet);
-			}
-		}
-
+		Map<APopulationAttribute, Set<APopulationValue>> attAsp = aspects.stream()
+				.collect(Collectors.groupingBy(aspect -> aspect.getAttribute(),
+				Collectors.mapping(Function.identity(), Collectors.toSet())));
+		
 		AControl<T> result = getNulVal();
 		for(AControl<T> control : this.matrix.entrySet().parallelStream()
 				.filter(e -> attAsp.entrySet()
@@ -244,18 +238,23 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				} else if(dim.getEmptyValue() != null && dim.getEmptyValue().equals(aspect))
 					dimensionsAspects.add(dim);
 			}
-			/* FUCK ONE LINER
-			dimensionsAspects.addAll(dimensions.keySet()
-					.stream().filter(d -> dimensions.get(d).contains(aspect) 
-							|| d.getEmptyValue() != null && d.getEmptyValue().equals(aspect))
-					.collect(Collectors.toList()));
-					*/
 		}
 		Set<APopulationAttribute> dimSet = new HashSet<>(dimensionsAspects);
 		if(dimensionsAspects.size() == dimSet.size())
 			return true;
 		System.out.println(Arrays.toString(dimensionsAspects.toArray()));
 		return false;
+	}
+	
+	@Override
+	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(Set<APopulationValue> values){
+		Map<APopulationAttribute, Set<APopulationValue>> attValues = values.stream()
+				.filter(val -> this.getDimensions().contains(val.getAttribute()))
+				.collect(Collectors.groupingBy(value -> value.getAttribute(),
+				Collectors.mapping(Function.identity(), Collectors.toSet())));
+		return this.matrix.keySet().stream().filter(coord -> attValues.values()
+				.stream().allMatch(attVals -> attVals.stream().anyMatch(val -> coord.contains(val))))
+				.collect(Collectors.toList());
 	}
 
 	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
