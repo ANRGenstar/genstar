@@ -159,9 +159,11 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 				Arrays.toString(controlToSeedMarginalsDescriptors.keySet().toArray()));
 		logger.info("Start to bind seed compliant marginals with control marginals value");
 		
+		/*
 		Stream<APopulationAttribute> smdStream = parallel ? 
 				controlToSeedMarginalsDescriptors.keySet().parallelStream() :
 			controlToSeedMarginalsDescriptors.keySet().stream();
+			*/
 			
 		/* HINT: Inspection purpose code to replace lambda blurry code */
 		Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> controlMargin = new HashMap<>();

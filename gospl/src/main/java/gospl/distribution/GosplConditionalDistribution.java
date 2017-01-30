@@ -1,12 +1,16 @@
 package gospl.distribution;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -73,89 +77,51 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 					.filter(a -> mat.getDimensions().contains(a.getAttribute()))
 					.collect(Collectors.toSet());
 
-
 			// Setup conditional values (known probability to compute conditional probability)
 			Set<APopulationValue> conditionalValues = concernedValues.stream()
 					.filter(val -> assignedDimension.stream().anyMatch(dim -> dim.getValues().contains(val)))
 					.collect(Collectors.toSet());
+			AControl<Double> conditionalProbability = conditionalValues.isEmpty() ? 
+					this.getIdentityProductVal() : mat.getVal(conditionalValues);
 
-			AControl<Double> conditionalReferent = mat.getIdentityProductVal();
+			// ADD BOTTOM UP & TOP DOWN CONDITIONAL VALUES
+			// WARNING: make false assumption
+			// TODO: do the trick
+			Map<Set<APopulationValue>, Set<APopulationValue>> aValueToReferentValue = Collections.emptyMap(); 
+					/*
+					Stream.concat(
+					this.estimateBottomUpReferences(mat, aspects, assignedDimension).entrySet().stream(),
+					this.estimateTopDownReferences(mat, aspects, assignedDimension).entrySet().stream())
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+					*/
+			
+			conditionalValues.addAll(aValueToReferentValue.values().stream()
+					.flatMap(set -> set.stream()).collect(Collectors.toSet()));
+			concernedValues.addAll(aValueToReferentValue.keySet().stream()
+					.flatMap(set -> set.stream()).collect(Collectors.toSet()));
+			
+			if(aValueToReferentValue.entrySet().stream().anyMatch(entry -> entry.getKey().isEmpty() 
+					|| entry.getValue().isEmpty()))
+				throw new RuntimeException("EMPTY CONDITIONAL");
+			if(aValueToReferentValue.entrySet().stream().anyMatch(entry -> 
+				entry.getKey().stream().anyMatch(val -> val.getAttribute().getEmptyValue().equals(val)) 
+					|| entry.getValue().stream().anyMatch(val -> val.getAttribute().getEmptyValue().equals(val))))
+				throw new RuntimeException("EMPTY CONDITIONAL VALUE");
 
-			// Setup conditional bottom up values: value for which this matrix has partial 
-			// bottom-up information, i.e. one attribute of this matrix has for referent
-			// one value attribute for which probability has already be defined 
-			Map<APopulationAttribute, APopulationAttribute> refAttributeToBottomup = mat.getDimensions().stream()
-					.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute()
-							&& assignedDimension.contains(att.getReferentAttribute()))
-					.collect(Collectors.toMap(att -> att.getReferentAttribute(), Function.identity()));
-			if(!refAttributeToBottomup.isEmpty()){
-				// Map of referent attribute and their already defined value
-				Map<APopulationAttribute, Set<APopulationValue>> refAttributeToAssignedValues = 
-						aspects.stream().filter(as -> assignedDimension.contains(as.getAttribute())
-								&& refAttributeToBottomup.keySet().contains(as.getAttribute()))
-						.collect(Collectors.groupingBy(as -> refAttributeToBottomup.get(as.getAttribute()), 
-								Collectors.mapping(Function.identity(), Collectors.toSet())));
-				// Map of already assigned value to conditional bottom op values
-				Map<Set<APopulationValue>, Set<APopulationValue>> assignedValueToBottomup = refAttributeToAssignedValues
-						.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), 
-								entry -> entry.getValue().stream().flatMap(val -> entry.getKey()
-										.findMappedAttributeValues(val).stream()).collect(Collectors.toSet())));
-				// ADD BOTTOM UP CONDITIONAL VALUES
-				conditionalValues.addAll(assignedValueToBottomup.values().stream()
-						.flatMap(set -> set.stream()).collect(Collectors.toSet()));
-				// WARNING: this is the independent hypothesis, another way to do can be to randomly pick
-				// referent attribute value = i.e. randomly select 'x' value in entry.getKey()
-				conditionalReferent.multiply(new ControlFrequency(assignedValueToBottomup.keySet()
-						.stream().flatMap(set -> set.stream()).collect(Collectors.toSet()).size() * 1d / 
-						assignedValueToBottomup.values().stream().flatMap(set -> set.stream())
-						.flatMap(bUpAspect -> bUpAspect.getAttribute().findMappedAttributeValues(bUpAspect).stream())
-						.collect(Collectors.toSet()).size()));
-			}
-
-			// Setup conditional top down values: value for which this matrix has partial 
-			// top down information, i.e. one attribute of this matrix is the referent of
-			// one value attribute for which probability has already be defined
-			Map<APopulationAttribute, APopulationAttribute> assignedAttributeToTopdown = assignedDimension.stream()
-					.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute()
-							&& mat.getDimensions().contains(att))
-					.collect(Collectors.toMap(Function.identity(), att -> att.getReferentAttribute()));
-			if(!assignedAttributeToTopdown.isEmpty()){
-				// Map of top down attribute and bottom up already defined value
-				Map<APopulationAttribute, Set<APopulationValue>> topdownToAssignedValues = 
-						aspects.stream().filter(as -> assignedDimension.contains(as.getAttribute())
-								&& assignedAttributeToTopdown.keySet().contains(as.getAttribute()))
-						.collect(Collectors.groupingBy(as -> assignedAttributeToTopdown.get(as.getAttribute()), 
-								Collectors.mapping(Function.identity(), Collectors.toSet())));
-				// Map of already assigned value to conditional topdown values
-				Map<Set<APopulationValue>, Set<APopulationValue>> assignedValueToTopdown = topdownToAssignedValues
-						.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), 
-								entry -> entry.getValue().stream().flatMap(val -> val.getAttribute().getReferentAttribute()
-										.findMappedAttributeValues(val).stream()).collect(Collectors.toSet())));
-				// ADD BOTTOM UP CONDITIONAL VALUES
-				conditionalValues.addAll(assignedValueToTopdown.values().stream()
-						.flatMap(set -> set.stream()).collect(Collectors.toSet()));
-				// WARNING: this is the independent hypothesis, another way to do can be to randomly pick
-				// referent attribute value = i.e. randomly select 'x' value in entry.getKey()
-				int assignedAttributeFullSize = assignedValueToTopdown.keySet().stream()
-						.map(set -> set.stream().findAny().get()).flatMap(as -> as.getAttribute().findMappedAttributeValues(as).stream())
-						.collect(Collectors.toSet()).size();
-				conditionalReferent.multiply(assignedValueToTopdown.keySet().stream()
-						.flatMap(set -> set.stream()).collect(Collectors.toSet()).size() * 1d / assignedAttributeFullSize);
-			}
-
+			// COMPUTE CONDITIONAL PROBABILITY
+			AControl<Double> conditionalUpdate = this.getIdentityProductVal().multiply(conditionalProbability); 
+			for(Set<APopulationValue> cv : aValueToReferentValue.values())
+				conditionalUpdate.multiply(new ControlFrequency(mat.getVal(cv).getValue()));
+			if(conditionalUpdate.getValue() > 1)
+				throw new IllegalArgumentException("Conditional probability is above 1: "+conditionalUpdate.getValue());
 
 			// COMPUTE BRUT PROBABILITY
 			AControl<Double> brutProbability = mat.getVal(concernedValues);
 
-			// COMPUTE CONDITIONAL PROBABILITY
-			AControl<Double> conditionalUpdate = conditionalValues.isEmpty() ? 
-					this.getIdentityProductVal() : mat.getVal(conditionalValues);
-					conditionalUpdate.multiply(conditionalReferent);
+			// Update conditional probability
+			conditionalProba.multiply(brutProbability.multiply(1 / conditionalUpdate.getValue()));
 
-					// Update conditional probability
-			conditionalProba.multiply(brutProbability.multiply(1d / conditionalUpdate.getValue().doubleValue()));
-
-					// Update visited probability
+			// Update visited probability
 			Set<APopulationAttribute> updateDimension = concernedValues
 					.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()); 
 			assignedDimension.addAll(updateDimension);
@@ -209,5 +175,62 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return new ControlFrequency(Double.valueOf(val));
 	}
 
+	// -------------------- Inner Utilities -------------------- //
 
+	private Map<Set<APopulationValue>, Set<APopulationValue>> estimateBottomUpReferences(
+			AFullNDimensionalMatrix<Double> mat, Collection<APopulationValue> aspects,
+			Set<APopulationAttribute> assignedDimension){
+		// Setup conditional bottom up values: value for which this matrix has partial 
+		// bottom-up information, i.e. one attribute of this matrix has for referent
+		// one value attribute for which probability has already be defined 
+		Map<APopulationAttribute, APopulationAttribute> refAttributeToBottomup = mat.getDimensions().stream()
+				.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute()
+						&& assignedDimension.contains(att.getReferentAttribute()))
+				.collect(Collectors.toMap(att -> att.getReferentAttribute(), Function.identity()));
+		// Map of referent attribute and their already defined value
+		Map<APopulationAttribute, Set<APopulationValue>> refAttributeToAssignedValues = 
+				aspects.stream().filter(as -> assignedDimension.contains(as.getAttribute())
+						&& refAttributeToBottomup.keySet().contains(as.getAttribute()))
+				.collect(Collectors.groupingBy(as -> refAttributeToBottomup.get(as.getAttribute()), 
+						Collectors.mapping(Function.identity(), Collectors.toSet())));
+		// Map of already assigned value to conditional bottom op values
+		Map<Set<APopulationValue>, Set<APopulationValue>> assignedValueToBottomup = refAttributeToAssignedValues
+				.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), 
+						entry -> entry.getValue().stream().flatMap(val -> entry.getKey()
+								.findMappedAttributeValues(val).stream()).collect(Collectors.toSet())));
+		// Remove reference to empty value & in case of partial binding choose only limited set of bottom up value
+		Map<Set<APopulationValue>, Set<APopulationValue>> output = new HashMap<>();
+		for(Set<APopulationValue> key : assignedValueToBottomup.keySet()){
+			Set<APopulationValue> emptyValues = assignedValueToBottomup.get(key).stream()
+					.filter(val -> val.getAttribute().getEmptyValue().equals(val)).collect(Collectors.toSet());
+			Set<APopulationValue> bottomup = assignedValueToBottomup.get(key);
+			if(!bottomup.removeAll(emptyValues) || !bottomup.isEmpty())
+				output.put(key, bottomup);
+		}
+		return output;
+	}
+
+	private Map<Set<APopulationValue>, Set<APopulationValue>> estimateTopDownReferences(
+			AFullNDimensionalMatrix<Double> mat, Collection<APopulationValue> aspects,
+			Set<APopulationAttribute> assignedDimension){
+		// Setup conditional top down values: value for which this matrix has partial 
+		// top down information, i.e. one attribute of this matrix is the referent of
+		// one value attribute for which probability has already be defined
+		Map<APopulationAttribute, APopulationAttribute> assignedAttributeToTopdown = assignedDimension.stream()
+				.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute()
+						&& mat.getDimensions().contains(att))
+				.collect(Collectors.toMap(Function.identity(), att -> att.getReferentAttribute()));
+		// Map of top down attribute and bottom up already defined value
+		Map<APopulationAttribute, Set<APopulationValue>> topdownToAssignedValues = 
+				aspects.stream().filter(as -> assignedDimension.contains(as.getAttribute())
+						&& assignedAttributeToTopdown.keySet().contains(as.getAttribute()))
+				.collect(Collectors.groupingBy(as -> assignedAttributeToTopdown.get(as.getAttribute()), 
+						Collectors.mapping(Function.identity(), Collectors.toSet())));
+		// Map of already assigned value to conditional topdown values
+		Map<Set<APopulationValue>, Set<APopulationValue>> assignedValueToTopdown = topdownToAssignedValues
+				.entrySet().stream().collect(Collectors.toMap(entry -> entry.getValue(), 
+						entry -> entry.getValue().stream().flatMap(val -> val.getAttribute().getReferentAttribute()
+								.findMappedAttributeValues(val).stream()).collect(Collectors.toSet())));
+		return assignedValueToTopdown;
+	}
 }

@@ -205,8 +205,9 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	 */
 	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects) {
-		if(aspects.stream().allMatch(a -> !matrix.keySet().stream().anyMatch(coord -> coord.contains(a))))
-			throw new NullPointerException("Aspect "+Arrays.toString(aspects.toArray())+" is absent from this matrix"
+		if(aspects.stream().allMatch(a -> matrix.keySet().stream().noneMatch(coord -> coord.contains(a))))
+			throw new NullPointerException("Aspect collection "+Arrays.toString(aspects.toArray())+" of size "
+					+ aspects.size()+" is absent from this matrix"
 					+ " (size = "+this.size()+" - attribute = "+Arrays.toString(this.getDimensions().toArray())+")");
 
 		Map<APopulationAttribute, Set<APopulationValue>> attAsp = aspects.stream()
