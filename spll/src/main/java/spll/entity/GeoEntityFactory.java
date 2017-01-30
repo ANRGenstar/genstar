@@ -1,5 +1,7 @@
 package spll.entity;
 
+import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +95,7 @@ public class GeoEntityFactory {
 	 */
 	public GSFeature createGeoEntity(Feature feature, List<String> attList) {
 		Set<AGeoValue> values = new HashSet<>();
+		NumberFormat defaultFormat = NumberFormat.getInstance();
 		for(Property property : feature.getProperties()){
 			String name = property.getName().getLocalPart();
 			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) || (!attList.isEmpty() && !attList.contains(name))) continue;
@@ -103,7 +106,12 @@ public class GeoEntityFactory {
 			}
 			AGeoValue value = attribute.getValue( property.getValue().toString());
 			if (value == null) {
-				value = new RawGeoData(attribute, property.getValue());
+				try {
+					Number val = defaultFormat.parse(property.getValue().toString());
+					value = new RawGeoData(attribute, val);
+				} catch (ParseException e){
+					value = new RawGeoData(attribute, property.getValue());
+				}
 				attribute.addValue(value);
 			}
 			values.add(value);
