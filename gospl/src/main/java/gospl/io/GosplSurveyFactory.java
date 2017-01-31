@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
 public class GosplSurveyFactory {
 	
 	private double precision = Math.pow(10, -2);
+	private DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
 	private char separator = GSSurveyWrapper.DEFAULT_SEPARATOR;
 	private int sheetNb = GSSurveyWrapper.DEFAULT_SHEET_NB;
@@ -303,7 +305,8 @@ public class GosplSurveyFactory {
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
 					val = String.valueOf(mapReport.get(value));
 				else
-					val = String.valueOf(Math.round(mapReport.get(value).doubleValue() / population.size() / precision) * precision);
+					val = decimalFormat.format(mapReport.get(value).doubleValue() / population.size());
+				//val = String.valueOf(Math.round(mapReport.get(value).doubleValue() / population.size() / precision) * precision);
 				lines.set(lineNumber, lines.get(lineNumber)
 						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
 						value.getStringValue() + separator + val);
