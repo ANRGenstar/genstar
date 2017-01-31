@@ -310,6 +310,10 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			throws IOException, TransformException {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? 
 				map.getGeoEntity() : map.getGeoEntityWithin(spatialBounds);
+				Map<AGeoEntity,Double> vals = areas.stream().collect(Collectors.toMap(a -> a, a -> a.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue()));
+				Double tot = vals.values().stream().mapToDouble(s -> s).sum();
+				int size = areas.size();
+				if (tot == 0) return;
 				for (AGeoEntity feature: areas) {
 					Object[] locTab = null;
 					if (population.getGeography() == map) {
@@ -320,7 +324,7 @@ public class SPUniformLocalizer implements ISPLocalizer {
 					}
 					int nb = locTab.length;
 					if (nb == 0) continue;
-					double val = feature.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue();
+					long val = Math.round(vals.get(feature) * size/tot);
 					for (int i = 0; i < val; i++) {
 						if (entities.isEmpty()) break;
 						int index = rand.nextInt(entities.size());
