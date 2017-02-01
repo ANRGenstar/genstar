@@ -248,10 +248,8 @@ public class SPLGeofileFactory {
 
 		Map<APopulationEntity, Geometry> geoms = population.stream().filter(e -> e.getLocation() != null)
 				.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
-
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
-		final String geomType = getGeometryType(geoms.values());
-
+		String geomType = getGeometryType(geoms.values());
 		specs.append("geometry:" + geomType);
 		List<String> atts = new ArrayList<>();
 			for (final APopulationAttribute at : population.getPopulationAttributes()) {

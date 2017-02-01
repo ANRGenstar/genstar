@@ -310,9 +310,9 @@ public class SPUniformLocalizer implements ISPLocalizer {
 			throws IOException, TransformException {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? 
 				map.getGeoEntity() : map.getGeoEntityWithin(spatialBounds);
-				Map<AGeoEntity,Double> vals = areas.stream().collect(Collectors.toMap(a -> a, a -> a.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue()));
+				Map<String,Double> vals = map.getGeoEntity().stream().collect(Collectors.toMap(a -> ((AGeoEntity)a).getGenstarName(), a -> a.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue()));
 				Double tot = vals.values().stream().mapToDouble(s -> s).sum();
-				int size = areas.size();
+				int size = map.getGeoEntity().size();
 				if (tot == 0) return;
 				for (AGeoEntity feature: areas) {
 					Object[] locTab = null;
@@ -324,15 +324,16 @@ public class SPUniformLocalizer implements ISPLocalizer {
 					}
 					int nb = locTab.length;
 					if (nb == 0) continue;
-					long val = Math.round(vals.get(feature) * size/tot);
+					
+					long val = Math.round(entities.size() *vals.get(feature.getGenstarName()) / tot*size);
 					for (int i = 0; i < val; i++) {
 						if (entities.isEmpty()) break;
 						int index = rand.nextInt(entities.size());
 						APopulationEntity entity = entities.remove(index);
-
 						AGeoEntity nest = (AGeoEntity) locTab[rand.nextInt(nb)];
 						entity.setNest(nest);
 						entity.setLocation(pointInLocalizer.pointIn(nest.getGeometry()));
+						
 					}
 				}
 	}
