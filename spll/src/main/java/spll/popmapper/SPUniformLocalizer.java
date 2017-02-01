@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -311,11 +313,23 @@ public class SPUniformLocalizer implements ISPLocalizer {
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? 
 				map.getGeoEntity() : map.getGeoEntityWithin(spatialBounds);
 				Map<String,Double> vals = map.getGeoEntity().stream().collect(Collectors.toMap(a -> ((AGeoEntity)a).getGenstarName(), a -> a.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue()));
+				
+				if (map.getGeoGSFileType().equals(GeoGSFileType.RASTER)) {
+					double unknowVal = ((SPLRasterFile) map).getNoDataValue();
+					List<String> es = new ArrayList<>(vals.keySet());
+					for (String e : es) {
+						if (vals.get(e).doubleValue() == unknowVal) {
+							vals.remove(e);
+						}
+					}
+				}
 				Double tot = vals.values().stream().mapToDouble(s -> s).sum();
-				int size = map.getGeoEntity().size();
 				if (tot == 0) return;
 				for (AGeoEntity feature: areas) {
 					Object[] locTab = null;
+					if (map.getGeoGSFileType().equals(GeoGSFileType.RASTER))  {
+						if (!vals.containsKey(feature.getGenstarName())) continue;
+					}
 					if (population.getGeography() == map) {
 						locTab = new Object[1];
 						locTab[0] = feature;
@@ -325,7 +339,8 @@ public class SPUniformLocalizer implements ISPLocalizer {
 					int nb = locTab.length;
 					if (nb == 0) continue;
 					
-					long val = Math.round(entities.size() *vals.get(feature.getGenstarName()) / tot*size);
+					long val = Math.round(population.size() *vals.get(feature.getGenstarName()) / tot);
+					
 					for (int i = 0; i < val; i++) {
 						if (entities.isEmpty()) break;
 						int index = rand.nextInt(entities.size());
