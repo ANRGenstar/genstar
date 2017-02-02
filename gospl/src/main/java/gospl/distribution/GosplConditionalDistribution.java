@@ -6,11 +6,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -177,6 +175,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	// -------------------- Inner Utilities -------------------- //
 
+	@SuppressWarnings("unused")
 	private Map<Set<APopulationValue>, Set<APopulationValue>> estimateBottomUpReferences(
 			AFullNDimensionalMatrix<Double> mat, Collection<APopulationValue> aspects,
 			Set<APopulationAttribute> assignedDimension){
@@ -210,6 +209,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return output;
 	}
 
+	@SuppressWarnings("unused")
 	private Map<Set<APopulationValue>, Set<APopulationValue>> estimateTopDownReferences(
 			AFullNDimensionalMatrix<Double> mat, Collection<APopulationValue> aspects,
 			Set<APopulationAttribute> assignedDimension){

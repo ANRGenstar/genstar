@@ -1,16 +1,10 @@
 package gospl.algo.ipf;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,8 +13,9 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import gospl.algo.ipf.util.IMarginalsIPFProcessor;
-import gospl.algo.ipf.util.MarginalsIPFProcessor;
+import gospl.algo.ipf.margin.AMargin;
+import gospl.algo.ipf.margin.IMarginalsIPFProcessor;
+import gospl.algo.ipf.margin.MarginalsIPFProcessor;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.IEntitySampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -65,12 +60,12 @@ public abstract class AGosplIPF<T extends Number> {
 
 	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed;
 	protected INDimensionalMatrix<APopulationAttribute, APopulationValue, T> marginals;
-	protected IMarginalsIPFProcessor<T> zeroCell;
+	protected IMarginalsIPFProcessor<T> marginalProcessor;
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
-			IMarginalsIPFProcessor<T> zeroCell, int step, double delta){
+			IMarginalsIPFProcessor<T> marginalProcessor, int step, double delta){
 		this.sampleSeed = sampleSeed;
-		this.zeroCell = zeroCell;
+		this.marginalProcessor = marginalProcessor;
 		this.step = step;
 		this.delta = delta;
 	}
@@ -81,9 +76,9 @@ public abstract class AGosplIPF<T extends Number> {
 	}
 	
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
-			IMarginalsIPFProcessor<T> zeroCell){
+			IMarginalsIPFProcessor<T> marginalProcessor){
 		this.sampleSeed = sampleSeed;
-		this.zeroCell = zeroCell;
+		this.marginalProcessor = marginalProcessor;
 	}
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
@@ -163,12 +158,13 @@ public abstract class AGosplIPF<T extends Number> {
 						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
 				.collect(Collectors.toList());
 
-		logger.trace("{}% of samples dimensions will be estimate with output controls", 
+		logger.debug("{}% of samples dimensions will be estimate with output controls", 
 				unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d);
-		logger.trace("Sample seed controls' dimension: \n{}", seed.getDimensions().stream().map(d -> d.getAttributeName()+" = "+seed.getVal(d.getValues()))
-				.reduce((s1, s2) -> s1.concat("\n"+s2)));
+		logger.debug("Sample seed controls' dimension: {}", seed.getDimensions()
+				.stream().map(d -> d.getAttributeName()+" = "+seed.getVal(d.getValues()))
+				.collect(Collectors.joining(";")));
 
-		Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> marginals = zeroCell.buildCompliantMarginals(this.marginals, seed, true);
+		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
 
 		int stepIter = step;
 		boolean convergentDelta = false;
@@ -177,79 +173,32 @@ public abstract class AGosplIPF<T extends Number> {
 
 		while(stepIter-- > 0 ? !convergentDelta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
-				logger.trace("Step = {} | convergence {}", step - stepIter, convergentDelta);
-			for(APopulationAttribute attribute : marginals.keySet()){
-				for(Entry<Set<APopulationValue>, AControl<T>> entry : 
-					marginals.get(attribute).entrySet()){
-					AControl<Double> factor = new ControlFrequency(entry.getValue().getValue().doubleValue() / 
-							seed.getVal(entry.getKey()).getValue().doubleValue());
+				logger.debug("Step = {} | convergence {}", step - stepIter, convergentDelta);
+			for(AMargin<T> margin : marginals){
+				for(Set<APopulationValue> seedMarginalDescriptor : margin.getSeedMarginalDescriptors()){
+					AControl<Double> factor = new ControlFrequency(
+							margin.getControl(seedMarginalDescriptor).getValue().doubleValue() / 
+							seed.getVal(seedMarginalDescriptor).getValue().doubleValue());
 					Collection<ACoordinate<APopulationAttribute, APopulationValue>> relatedCoordinates = 
-							seed.getCoordinates(entry.getKey()); 
+							seed.getCoordinates(seedMarginalDescriptor); 
 					for(ACoordinate<APopulationAttribute, APopulationValue> coord : relatedCoordinates)
 						seed.getVal(coord).multiply(factor);
 					logger.trace("Work on value set {} and related {} coordinates; factor = {}",
-							Arrays.toString(entry.getKey().toArray()), relatedCoordinates.size(), factor.getValue());
+							Arrays.toString(seedMarginalDescriptor.toArray()), 
+							relatedCoordinates.size(), factor.getValue());
 				}
 			}
-			Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> actualMarginals = getMarginals(seed, 
-					Collections.emptyList(), true);
-			if(actualMarginals.entrySet().stream().allMatch(entry -> 
-				marginals.get(entry.getKey()).entrySet().stream().allMatch(marginal -> 
-					entry.getValue().get(marginal.getKey()).equalsVal(marginal.getValue(), delta))))
+			if(marginals.stream().allMatch(m -> m.getSeedMarginalDescriptors()
+					.stream().allMatch(sd -> seed.getVal(sd).equalsVal(m.getControl(sd), delta))))
 				convergentDelta = true;
-			logger.trace("There is some delta exceeding convergence criteria\n{}", actualMarginals.entrySet().stream()
-					.map(eActual -> eActual.getKey().getAttributeName()+" IPF computed values:\n"+
-							eActual.getValue().entrySet().stream().map(vActual -> Arrays.toString(vActual.getKey().toArray())
-									+" => "+vActual.getValue()+" | "+marginals.get(eActual.getKey()).get(vActual.getKey()))
+			logger.debug("There is some delta exceeding convergence criteria\n{}", marginals.stream()
+					.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
+							margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
+									+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))
 							.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
 					.reduce("", (s1, s2) -> s1.concat(s2)));
 		}
 		return seed;
-	}
-
-	// ---------------------- IPF utilities ---------------------- //
-
-	/**
-	 * Defines and retrieves marginal from a n-dimensional matrix
-	 * 
-	 * @param control
-	 * @param attributes
-	 * @param parallel
-	 * @return
-	 */
-	private Map<APopulationAttribute, Map<Set<APopulationValue>, AControl<T>>> getMarginals(
-			AFullNDimensionalMatrix<T> matrix, Collection<APopulationAttribute> attributes, boolean parallel) {
-		if(!matrix.getDimensions().containsAll(attributes))
-			throw new IllegalArgumentException("All attributes must be part of the control matrix");
-		Stream<APopulationAttribute> attStream;
-		if(parallel)
-			attStream = attributes.parallelStream();
-		else
-			attStream = attributes.stream();
-		return attStream.collect(Collectors.toMap(Function.identity(), att -> 
-			getMarginalDescriptors(attributes.stream().filter(a -> !a.equals(att)).collect(Collectors.toSet()))
-				.stream().collect(Collectors.toMap(Function.identity(), valset -> matrix.getVal(valset)))));
-	}
-	
-	private Collection<Set<APopulationValue>> getMarginalDescriptors(Collection<APopulationAttribute> targetedAttributes){
-		// Setup output
-		Collection<Set<APopulationValue>> marginalDescriptors = new ArrayList<>();
-		// Init. the output collection with any attribute
-		APopulationAttribute firstAtt = targetedAttributes.iterator().next();
-		for(APopulationValue value : firstAtt.getValues())
-			marginalDescriptors.add(Stream.of(value).collect(Collectors.toSet()));
-		targetedAttributes.remove(firstAtt);
-		// Then iterate over all other attributes
-		for(APopulationAttribute att : targetedAttributes){
-			List<Set<APopulationValue>> tmpDescriptors = new ArrayList<>();
-			for(Set<APopulationValue> descriptors : marginalDescriptors){
-				tmpDescriptors.addAll(att.getValues().stream()
-						.map(val -> Stream.concat(descriptors.stream(), Stream.of(val)).collect(Collectors.toSet()))
-						.collect(Collectors.toList())); 
-			}
-			marginalDescriptors = tmpDescriptors;
-		}
-		return marginalDescriptors;
 	}
 
 }

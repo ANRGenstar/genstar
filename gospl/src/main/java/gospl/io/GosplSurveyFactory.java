@@ -44,6 +44,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
  */
 public class GosplSurveyFactory {
 	
+	@SuppressWarnings("unused")
 	private double precision = Math.pow(10, -2);
 	private DecimalFormat decimalFormat = new DecimalFormat("#.##");
 

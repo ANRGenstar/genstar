@@ -231,6 +231,12 @@ public class GSDataParser {
 		return numbers;
 	}
 
+	/**
+	 * Parse a string to return a Number either double or integer
+	 * 
+	 * @param stringVal
+	 * @return
+	 */
 	public Number parseNumber(String stringVal) {
 		switch (this.getValueType(stringVal)) {
 		case Double:
