@@ -9,30 +9,6 @@ import core.metamodel.IValue;
  */
 public class NetworkLinkValue implements IValue {
 
-//	public int weight;
-	
-//	@Override
-//	public int hashCode() {
-//		final int prime = 31;
-//		int result = 1;
-//		result = prime * result + weight;
-//		return result;
-//	}
-//
-//	@Override
-//	public boolean equals(Object obj) {
-//		if (this == obj)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (getClass() != obj.getClass())
-//			return false;
-//		NetworkLinkValue other = (NetworkLinkValue) obj;
-//		if (weight != other.weight)
-//			return false;
-//		return true;
-//	}
-
 	@Override
 	public String getStringValue() {
 		// TODO Auto-generated method stub

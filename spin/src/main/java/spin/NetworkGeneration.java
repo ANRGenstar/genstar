@@ -27,18 +27,12 @@ public class NetworkGeneration {
 //		// 1 instancier la factory
 //		// 2 prendre une population en param
 		ISyntheticGosplPopGenerator populationGenerator = new UtilGenerator(4,2);
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
-				populationGenerator.generate(nbNode);
-//		
+		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population = populationGenerator.generate(nbNode);
+
 //		// 3 la factory choisit un générator grace a une unum
 //		// 4 le générator renvoi le réseau obtenu sur la population
-//		SpinNetwork<IAttribute<IValue>,IValue> NEPASCOMMIT =
-//		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
-//		SpinNetwork NEPASCOMMIT =
-//				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
 		@SuppressWarnings("unused")
-		SpinNetwork NEPASCOMMIT =
-				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
+		SpinNetwork aNetwork = NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
  		
 	}
 }
