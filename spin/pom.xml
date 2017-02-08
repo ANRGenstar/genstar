@@ -19,11 +19,18 @@
 	    <version>1.0</version>
 	</dependency>
 
-<dependency>
+	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-gospl</artifactId>
 	    <version>1.0</version>
 	</dependency> 
+
+	<dependency>
+	    <groupId>org.graphstream</groupId>
+	    <artifactId>gs-core</artifactId>
+	    <version>1.3</version>
+	</dependency> 
+	
 
  </dependencies>
  

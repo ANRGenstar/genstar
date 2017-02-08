@@ -1,5 +1,7 @@
 package spin.objects;
 
+import org.graphstream.graph.Graph;
+
 /** Objet pour un network
  * Combien des informations sur le type de lien entre des nodes
  *
@@ -8,6 +10,7 @@ public class NetworkLink{
 	private NetworkNode from;
 	private NetworkNode to;
 	private boolean oriented=false;
+	Graph lol;
 	
 	public NetworkLink(NetworkNode f, NetworkNode t){
 		this.from=f;
