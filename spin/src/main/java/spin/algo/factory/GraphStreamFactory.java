@@ -38,7 +38,7 @@ public class GraphStreamFactory {
 	
 	private GraphStreamFactory(){
 		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
-		StatFactory.getIntance().setRefToGraphList(graphs);
+		StatFactory.getInstance().setRefToGraphList(graphs);
 	}
 	
 	/** TODO Parcours des éléments du spinGraph pour en faire un graphStream.

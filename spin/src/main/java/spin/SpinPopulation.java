@@ -10,8 +10,29 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spin.algo.factory.StatFactory;
+import spin.interfaces.ISpinNetProperties;
 
+/** Population Spin. 
+ * 
+ *
+ */
 public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
+
+	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population. 
+	private ISpinNetProperties properties;
+	
+	/**
+	 * Permet d'assurer d'instancier l'interface avant la 1er utilisation
+	 * mais évite cette instanciation dans tous les cas d'utilisation.
+	 * ( Conversion du SpinNetwork en graphStream )
+	 * @return
+	 */
+	public ISpinNetProperties getProperties() {
+		if(properties == null)
+			properties = StatFactory.getInstance();
+		return properties;
+	}
 
 	private final Collection<APopulationEntity> population;
 	

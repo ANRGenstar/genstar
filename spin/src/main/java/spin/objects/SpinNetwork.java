@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import core.metamodel.pop.APopulationEntity;
 import spin.tools.Tools;
@@ -64,18 +63,8 @@ public class SpinNetwork {
 	 * @return
 	 */
 	public Set<NetworkLink> getLinks(){
-// TODO a rafiner
-//		network.values().stream()
-//			.flatMap(f -> f.stream())
-//			.distinct()
-//			.sorted()
-//			.forEach(System.out::println);
-		
-		
-		
-		
 		HashSet<NetworkNode> nodes = new HashSet<>(this.getNodes());
-		HashSet<NetworkLink> links = new HashSet<>();
+		Set<NetworkLink> links  = new HashSet<>();
 		
 //		links = 
 //				network.values().stream()
@@ -83,8 +72,6 @@ public class SpinNetwork {
 //				.distinct()
 //				.sorted()
 //				.collect(Collectors.toSet());
-				
-				
 				
 		for (NetworkNode n : nodes){
 			for (NetworkLink l : n.getLinks()){

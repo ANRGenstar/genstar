@@ -7,12 +7,15 @@ import org.graphstream.algorithm.APSP;
 import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Graph;
 
+import core.metamodel.pop.APopulationEntity;
 import spin.interfaces.EGraphStreamNetworkType;
+import spin.interfaces.ISpinNetProperties;
+import spin.objects.NetworkNode;
 
 /** Factory de stat, donne les infos sur les graphes
  * 
  */
-public class StatFactory {
+public class StatFactory implements ISpinNetProperties{
 
 	// Map de networkType <-> graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
 	// TODO besoin éventuelle d'une synchronisation?
@@ -21,7 +24,7 @@ public class StatFactory {
 	// Singleton
 	private static StatFactory INSTANCE;
 	
-	public static StatFactory getIntance(){
+	public static StatFactory getInstance(){
 		if(INSTANCE == null)
 			INSTANCE = new StatFactory();
 		return INSTANCE;
@@ -40,9 +43,9 @@ public class StatFactory {
 		this.graphs = GSFactoryList;
 	}
 	
-	// --------------------------------
-	// --- PARTIE OBTENIR LES INFOS ---
-	// --------------------------------
+	// -----------------------------------------
+	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
+	// -----------------------------------------
 	
 	/**
 	 * 
@@ -59,7 +62,7 @@ public class StatFactory {
 	 * @return
 	 */
 	public double getAPL(EGraphStreamNetworkType whichOne){
-		Graph graph = graphs.get(EGraphStreamNetworkType.fileRead);
+		Graph graph = graphs.get(whichOne);
 		APSP apsp = new APSP();
 		apsp.init(graph);
 		apsp.setDirected(false);
@@ -77,6 +80,32 @@ public class StatFactory {
 		
 		System.out.println(total / nbValue);
 		return total / nbValue;
+	}
+
+	
+	// -----------------------------------------
+	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
+	// -----------------------------------------
+	
+	private double getLocalClustering(NetworkNode node){
+		
+	}
+	
+	
+	
+	
+	// -------------------------------------------
+	// --- PARTIE FONCTION LIEES A L'INTERFACE ---
+	// -------------------------------------------
+	
+	@Override
+	public double getAPL() {
+		return getAPL(EGraphStreamNetworkType.spinNetwork);
+	}
+
+	@Override
+	public double getClustering(APopulationEntity entite) {
+//		return getLocalClustering(spin)
 	}
 	
 	
