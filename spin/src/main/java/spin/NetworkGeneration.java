@@ -7,7 +7,7 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
 import spin.algo.factory.NetworkFactory;
-import spin.interfaces.INetworkEnumGenerator;
+import spin.interfaces.ENetworkEnumGenerator;
 import spin.objects.SpinNetwork;
 
 
@@ -32,7 +32,7 @@ public class NetworkGeneration {
 		// 3 la factory choisit un générator grace a une unum
 		// 4 le générator renvoi le réseau obtenu sur la population
 		@SuppressWarnings("unused")
-		SpinNetwork aNetwork = NetworkFactory.getNetwork(INetworkEnumGenerator.SmallWorld, population);
+		SpinNetwork aNetwork = NetworkFactory.getNetwork(ENetworkEnumGenerator.SmallWorld, population);
  		
 	}
 }

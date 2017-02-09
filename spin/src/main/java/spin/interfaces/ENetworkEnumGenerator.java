@@ -1,6 +1,6 @@
 package spin.interfaces;
 
-public enum INetworkEnumGenerator {
+public enum ENetworkEnumGenerator {
 	SmallWorld,
 	ScaleFree;
 }

@@ -1,20 +1,20 @@
 package spin.algo.factory;
 
+import java.util.Hashtable;
 import java.util.Map;
 
 import org.graphstream.graph.Graph;
 
+import spin.interfaces.EGraphStreamNetworkType;
 import spin.objects.SpinNetwork;
 
 public class GraphStreamFactory {
 
-	// Map de string graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
-	Map<String, Graph> graphes;
-	Graph graph;
+	// Map de networkType <-> graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
+	Map<EGraphStreamNetworkType, Graph> graphs;
 	
-	
-	private static GraphStreamFactory INSTANCE;
 	// Singleton
+	private static GraphStreamFactory INSTANCE;
 	
 	public static GraphStreamFactory getIntance(){
 		if(INSTANCE == null)
@@ -22,39 +22,48 @@ public class GraphStreamFactory {
 		return INSTANCE;
 	}
 	
-	private GraphStreamFactory(){		
+	private GraphStreamFactory(){
+		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
 	}
 	
-	/** TODO Parcours des éléments du spinGraph pour en faire un graphStream
+	/** TODO Parcours des éléments du spinGraph pour en faire un graphStream.
+	 * Ajouté dans la liste des graphs,  associé a l'enum spinNetwork
 	 * 
-	 * @param spinNetwork
-	 * @return
+	 * @param spinNetwork a convertir en graphSteam
 	 */
-	public Graph getGraphStreamGraph(SpinNetwork spinNetwork){
-	 return null;	// ou bien this.graph = graph?
+	public void getGraphStreamGraph(SpinNetwork spinNetwork){
+		// blablalba foreach node foreach link 
 	}
 	
-	/** lit un fichier texte et le converti en graph stream
-	 * 
+	/** TODO lit un fichier texte et le converti en graph stream
+	 * Ajouté dans la liste des graphs,  associé a l'enum fileRead
 	 * @return
 	 */
-	public Graph readFile(){
-		return null;
+	public void readFile(){
+		// TODO modifier les params
 	}
 	
-	/** Export un graph 
+	/** Export un graph dans un fichier extérieur
 	 * 
 	 * @return
 	 */
-	public void exportFile(){
+	public void exportFile(EGraphStreamNetworkType whichOne){
 		
 	}
 	
 	/** Donne un ensemble de stat sur le graph. Créer une classe de stat pour ce faire? 
-	 *  
+	 *  TODO renvoyer un objet de properties?
 	 */
-	public void ensembleDesFonctionsDeStat(){
+	public void ensembleDesFonctionsDeStat(EGraphStreamNetworkType whichOne){
 		
+	}
+	
+	/** Libère une référence a un graph dans la list qu'il puisse etre garbagé?
+	 * 
+	 * @param graph
+	 */
+	public void forgetGraph(EGraphStreamNetworkType whichOne){
+		graphs.put(whichOne, null);
 	}
 	
 }
