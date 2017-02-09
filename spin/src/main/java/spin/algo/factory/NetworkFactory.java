@@ -4,8 +4,8 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.algo.generator.NetworkEnumGenerator;
 import spin.algo.generator.SWGenerator;
+import spin.interfaces.NetworkEnumGenerator;
 import spin.objects.SpinNetwork;
 
 /** Propose de générer des réseaux 

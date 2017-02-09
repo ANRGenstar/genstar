@@ -7,7 +7,7 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
 import spin.algo.factory.NetworkFactory;
-import spin.algo.generator.NetworkEnumGenerator;
+import spin.interfaces.NetworkEnumGenerator;
 import spin.objects.SpinNetwork;
 
 

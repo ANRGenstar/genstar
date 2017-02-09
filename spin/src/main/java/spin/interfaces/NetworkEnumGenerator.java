@@ -1,4 +1,4 @@
-package spin.algo.generator;
+package spin.interfaces;
 
 public enum NetworkEnumGenerator {
 	SmallWorld,
