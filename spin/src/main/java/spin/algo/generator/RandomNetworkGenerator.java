@@ -13,7 +13,7 @@ import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class RandomNetworkGenerator implements INetworkGenerator 
+public class RandomNetworkGenerator extends BaseGenerator 
 {
 	
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {

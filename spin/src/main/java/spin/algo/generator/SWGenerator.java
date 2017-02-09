@@ -14,7 +14,7 @@ import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class SWGenerator implements INetworkGenerator
+public class SWGenerator  extends BaseGenerator
 {
 	
 	@Override

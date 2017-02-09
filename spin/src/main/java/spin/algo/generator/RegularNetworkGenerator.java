@@ -13,7 +13,7 @@ import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 
-public class RegularNetworkGenerator implements INetworkGenerator{
+public class RegularNetworkGenerator  extends BaseGenerator{
 
 	
 public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
