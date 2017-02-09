@@ -12,13 +12,13 @@ public class NetworkLink{
 	
 	public NetworkLink(NetworkNode f, NetworkNode t, String id){
 		this.from=f;
-		this.to=t;
+		this.to= t;
 		this.id = id;
 	}
 	
 	public NetworkLink(NetworkNode f, NetworkNode t, boolean oriented, String id){
 		this(f,t,id);
-		this.oriented=oriented;
+		this.oriented = oriented;
 	}
 	
 	public NetworkNode getFrom(){

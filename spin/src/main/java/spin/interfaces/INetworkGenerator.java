@@ -4,7 +4,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Interface de générateur de réseau, commun a tous les générateurs. 

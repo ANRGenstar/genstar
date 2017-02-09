@@ -14,7 +14,7 @@ public class NetworkNode {
 	// Entity associated 
 	private APopulationEntity entity;
 	
-	// Connected node
+	// Non initalisé volontairement.
 	private Set<NetworkLink> links;
 	
 	private String id;
@@ -24,7 +24,6 @@ public class NetworkNode {
 	 * 
 	 */
 	public NetworkNode(){
-		links = new HashSet<NetworkLink>();
 	}
 	
 	/** Constructeur de networkNode prenant une entité
@@ -36,6 +35,11 @@ public class NetworkNode {
 		entity = entite;
 		this.id = id;
 	}
+	
+	public void defineLinkHash(HashSet<NetworkLink> links){
+		this.links = links;
+	}
+	
 	
 	public void addLink(NetworkLink link){
 		links.add(link);

@@ -6,7 +6,6 @@ import java.util.Map;
 import org.graphstream.algorithm.APSP;
 import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 
 import spin.interfaces.EGraphStreamNetworkType;
 
@@ -60,14 +59,6 @@ public class StatFactory {
 	 * @return
 	 */
 	public double getAPL(EGraphStreamNetworkType whichOne){
-//		Graph graph = graphs.get(EGraphStreamNetworkType.fileRead);
-//		for (Node myNode : graph.getNodeSet()) {
-//			System.out.println(myNode.getId());
-//		}
-//		
-//		
-//		return 0;
-		
 		Graph graph = graphs.get(EGraphStreamNetworkType.fileRead);
 		APSP apsp = new APSP();
 		apsp.init(graph);
@@ -77,7 +68,7 @@ public class StatFactory {
 		double total = 0;
 		int nbValue = 0;
 		for (int i = 0; i < graph.getNodeCount(); i++) {
-			info =  graph.getNode("n"+i).getAttribute(APSPInfo.ATTRIBUTE_NAME);
+			info = graph.getNode(i).getAttribute(APSPInfo.ATTRIBUTE_NAME);
 			for (String string : info.targets.keySet()) {
 				total += info.targets.get(string).distance;
 				nbValue++;

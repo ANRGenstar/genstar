@@ -50,7 +50,7 @@ public class GraphStreamFactory {
 		}
 		System.out.println(spinNetwork.getLinks());
 		for (NetworkLink link : spinNetwork.getLinks()) {
-			g.addEdge("e", link.getFrom().getId(), link.getTo().getId());
+			g.addEdge("e" + link.getFrom().getId() +"->" +link.getTo().getId(), link.getFrom().getId(), link.getTo().getId());
 		}
 		
 		graphs.put(EGraphStreamNetworkType.spinNetwork, g);
