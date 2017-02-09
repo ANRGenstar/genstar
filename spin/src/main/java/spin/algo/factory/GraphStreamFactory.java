@@ -1,9 +1,13 @@
 package spin.algo.factory;
 
+import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.implementations.DefaultGraph;
+import org.graphstream.stream.file.FileSource;
+import org.graphstream.stream.file.FileSourceFactory;
 
 import spin.interfaces.EGraphStreamNetworkType;
 import spin.objects.SpinNetwork;
@@ -39,8 +43,21 @@ public class GraphStreamFactory {
 	 * Ajouté dans la liste des graphs,  associé a l'enum fileRead
 	 * @return
 	 */
-	public void readFile(){
-		// TODO modifier les params
+	public void readFile(String path){
+		Graph g = new DefaultGraph("g");
+		FileSource fs;
+		try {
+			fs = FileSourceFactory.sourceFor(path);
+			fs.addSink(g);
+			fs.readAll(path);
+			fs.removeSink(g);
+			
+			graphs.put(EGraphStreamNetworkType.fileRead, g);
+			
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 	}
 	
 	/** Export un graph dans un fichier extérieur
