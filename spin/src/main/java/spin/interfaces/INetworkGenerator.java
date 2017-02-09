@@ -1,4 +1,4 @@
-package spin.algo.generator;
+package spin.interfaces;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;

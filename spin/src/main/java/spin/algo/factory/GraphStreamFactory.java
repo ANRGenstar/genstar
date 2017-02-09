@@ -1,13 +1,15 @@
-package spin.objects;
+package spin.algo.factory;
 
 import java.util.Map;
 
 import org.graphstream.graph.Graph;
 
+import spin.objects.SpinNetwork;
+
 public class GraphStreamFactory {
 
 	// Map de string graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
-	Map<String, Graph> graphes ;
+	Map<String, Graph> graphes;
 	Graph graph;
 	
 	

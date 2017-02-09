@@ -6,6 +6,7 @@ import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spin.interfaces.INetworkGenerator;
 import spin.objects.SpinNetwork;
 
 public class SFGenerator<A extends IAttribute<V>,V extends IValue> implements INetworkGenerator
