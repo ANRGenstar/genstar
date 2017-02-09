@@ -14,7 +14,7 @@ public class ScenarJouet {
 	 * II - B Création d'un spinnetwork dessus,
 	 * II - C spinNetwork en graphStream, 
 	 * II - D Stat. 
-	 * II - E SpinNetwork écrit dans un fichier de texte
+	 * II - E SpinNetwork//Graph écrit dans un fichier de texte
 	 * 
 	 * @param args
 	 */

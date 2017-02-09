@@ -17,7 +17,7 @@ public class RandomNetworkGenerator extends BaseGenerator
 {
 	
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population,0D);
+		return this.generateNetwork(population, 0D);
 	}
 	
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
@@ -25,7 +25,7 @@ public class RandomNetworkGenerator extends BaseGenerator
 		Random rand = new Random();
 		
 		// create the spinNetwork
-		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
+		SpinNetwork myNetwork = loadPopulation(population);
 		
 		// List the created nodes
 		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());

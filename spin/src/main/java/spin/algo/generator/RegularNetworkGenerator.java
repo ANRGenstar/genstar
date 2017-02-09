@@ -26,7 +26,7 @@ public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAtt
 		//TODO: traiter le cas de conectivity pas paire ... 
 		
 		// create the spinNetwork
-		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
+		SpinNetwork myNetwork = loadPopulation(population);
 		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
 		
 		// for each node i, create a link to i+1 ... i+k/2
