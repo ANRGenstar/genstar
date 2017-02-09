@@ -6,10 +6,14 @@ import java.util.Map;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.DefaultGraph;
+import org.graphstream.stream.file.FileSink;
+import org.graphstream.stream.file.FileSinkGML;
+import org.graphstream.stream.file.FileSinkGraphML;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
 
 import spin.interfaces.EGraphStreamNetworkType;
+import spin.interfaces.ENetworkFormat;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
@@ -82,8 +86,28 @@ public class GraphStreamFactory {
 	 * 
 	 * @return
 	 */
-	public void exportFile(EGraphStreamNetworkType whichOne){
-		
+	public void exportFile(EGraphStreamNetworkType whichOne, ENetworkFormat format, String path){
+		Graph g = graphs.get(whichOne);
+		FileSink filesink = null;
+		switch (format) {
+		case GraphML:
+			filesink = new FileSinkGraphML();
+			break;
+
+		case GML:
+			filesink = new FileSinkGML();
+			break;
+			
+		default:
+			break;
+		}
+
+		try {
+			filesink.writeAll(g, path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/** Donne un ensemble de stat sur le graph. Créer une classe de stat pour ce faire? 
