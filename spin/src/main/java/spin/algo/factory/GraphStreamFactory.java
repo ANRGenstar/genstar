@@ -3,10 +3,8 @@ package spin.algo.factory;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.Set;
 
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
@@ -36,6 +34,7 @@ public class GraphStreamFactory {
 	
 	private GraphStreamFactory(){
 		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
+		StatFactory.getIntance().setRefToGraphList(graphs);
 	}
 	
 	/** TODO Parcours des éléments du spinGraph pour en faire un graphStream.
