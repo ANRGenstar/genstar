@@ -1,6 +1,8 @@
 package spin;
 
 import spin.algo.factory.GraphStreamFactory;
+import spin.algo.factory.StatFactory;
+import spin.interfaces.EGraphStreamNetworkType;
 
 public class ScenarJouet {
 	
@@ -21,10 +23,12 @@ public class ScenarJouet {
 	public static void main(String[] args) {
 		
 		GraphStreamFactory factory = GraphStreamFactory.getIntance();
+		StatFactory stat = StatFactory.getIntance();
+		
 		
 		// I - A & I - B & I - C
-		factory.readFile("/Users/csg/Desktop/simple.graphml.xml");
-		
+		factory.readFile("/Users/felix/Desktop/simple.graphml.xml");
+		stat.getAPL(EGraphStreamNetworkType.fileRead);
 		
 	}
 }
