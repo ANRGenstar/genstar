@@ -2,8 +2,11 @@ package spin.objects;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+
+import spin.tools.Tools;
 
 
 
@@ -31,6 +34,11 @@ public class SpinNetwork {
 		network.put(node, new HashSet<NetworkLink>());		
 	}
 
+	public void putLink(NetworkLink link){
+		Tools.addElementInHashArray(network, link.getFrom(), link);
+		Tools.addElementInHashArray(network, link.getTo(), link);
+	}
+	
 	public Set<NetworkNode> getNodes() {
 		return network.keySet();
 	}

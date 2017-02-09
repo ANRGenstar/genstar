@@ -1,5 +1,7 @@
 package spin;
 
+import org.graphstream.graph.Graph;
+
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
@@ -9,6 +11,8 @@ import gospl.algo.generator.UtilGenerator;
 import spin.algo.factory.GraphStreamFactory;
 import spin.algo.factory.NetworkFactory;
 import spin.interfaces.ENetworkEnumGenerator;
+import spin.objects.NetworkLink;
+import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 
@@ -36,9 +40,19 @@ public class NetworkGeneration {
 		//SpinNetwork aNetwork = NetworkFactory.getNetwork(ENetworkEnumGenerator.SmallWorld, population);
 		
 		GraphStreamFactory factory = GraphStreamFactory.getIntance();
-		factory.readFile("/Users/csg/Desktop/simple.graphml.xml"); 
+		//factory.readFile("/Users/csg/Desktop/simple.graphml.xml"); 
 		
+		SpinNetwork spinNetwork = new SpinNetwork();
+		NetworkNode n1 = new NetworkNode(null,"1");
+		NetworkNode n2 = new NetworkNode(null,"2");
+		NetworkNode n3 = new NetworkNode(null,"3");
+		spinNetwork.putNode(n1);
+		spinNetwork.putNode(n2);
+		spinNetwork.putNode(n3);
+		spinNetwork.putLink(new NetworkLink(n1,n2,"1"));
+		spinNetwork.putLink(new NetworkLink(n1,n3,"2"));
 		
+		factory.getGraphStreamGraph(spinNetwork);
 		
 		
  		

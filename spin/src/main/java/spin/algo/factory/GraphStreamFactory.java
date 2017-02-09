@@ -46,11 +46,15 @@ public class GraphStreamFactory {
 
 		Graph g = new DefaultGraph("g");
 		for (NetworkNode node : spinNetwork.getNodes()) {
-			g.addNode(String.valueOf(node.getId()));
+			g.addNode(node.getId());
 		}
+		System.out.println(spinNetwork.getLinks());
 		for (NetworkLink link : spinNetwork.getLinks()) {
-			g.addEdge("e", String.valueOf(link.getFrom().getId()), String.valueOf(link.getTo().toString()));
+			g.addEdge("e", link.getFrom().getId(), link.getTo().getId());
 		}
+		
+		graphs.put(EGraphStreamNetworkType.spinNetwork, g);
+		g.display();
 	}
 	
 	/** Lit un fichier texte et le converti en graph stream
