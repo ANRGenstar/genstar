@@ -8,14 +8,16 @@ public class NetworkLink{
 	private NetworkNode from;
 	private NetworkNode to;
 	private boolean oriented = false;
+	private int id;
 	
-	public NetworkLink(NetworkNode f, NetworkNode t){
+	public NetworkLink(NetworkNode f, NetworkNode t, int id){
 		this.from=f;
 		this.to=t;
+		this.id = id;
 	}
 	
-	public NetworkLink(NetworkNode f, NetworkNode t, boolean oriented){
-		this(f,t);
+	public NetworkLink(NetworkNode f, NetworkNode t, boolean oriented, int id){
+		this(f,t,id);
 		this.oriented=oriented;
 	}
 	
