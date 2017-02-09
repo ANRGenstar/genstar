@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import core.metamodel.pop.APopulationEntity;
 import spin.tools.Tools;
 
 
@@ -17,12 +19,16 @@ public class SpinNetwork {
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
 	// let set<networkLink> est commun a ceux donné aux noeuds
 	private Map<NetworkNode, Set<NetworkLink>> network;
+	private Map<NetworkNode, APopulationEntity> kvNodeEntityFastList;
+	private Map<APopulationEntity, NetworkNode> kvEntityNodeFastList;
 	
 	/** Constructeur sans param. 
 	 * 
 	 */
 	public SpinNetwork(){
 		network = new HashMap<NetworkNode, Set<NetworkLink>>();
+		kvNodeEntityFastList = new HashMap<NetworkNode, APopulationEntity>();
+		kvEntityNodeFastList = new HashMap<APopulationEntity, NetworkNode>();
 	}
 	
 	/**
@@ -65,8 +71,21 @@ public class SpinNetwork {
 //			.sorted()
 //			.forEach(System.out::println);
 		
+		
+		
+		
 		HashSet<NetworkNode> nodes = new HashSet<>(this.getNodes());
 		HashSet<NetworkLink> links = new HashSet<>();
+		
+//		links = 
+//				network.values().stream()
+//				.flatMap(f -> f.stream())
+//				.distinct()
+//				.sorted()
+//				.collect(Collectors.toSet());
+				
+				
+				
 		for (NetworkNode n : nodes){
 			for (NetworkLink l : n.getLinks()){
 				if (!links.contains(l)){
