@@ -9,7 +9,6 @@ import spin.algo.generator.SWGenerator;
 import spin.objects.SpinNetwork;
 
 /** Propose de générer des réseaux 
- * 
  *
  */
 public class NetworkFactory {

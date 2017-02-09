@@ -25,6 +25,7 @@ public interface INetworkGenerator {
 	 */
 	public abstract SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population);
 	
+	
 	public static SpinNetwork loadPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 	//Create a SpinNetwork with nodes linked to population entities
 	//The SpinNetwork has all the needed nodes and no links

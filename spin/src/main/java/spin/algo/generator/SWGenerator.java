@@ -54,7 +54,6 @@ public class SWGenerator implements INetworkGenerator
 						nodeTo.addLink(link);
 					}					
 				}
-				
 			}
 		}
 		

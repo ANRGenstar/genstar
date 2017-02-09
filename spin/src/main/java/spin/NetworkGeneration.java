@@ -24,13 +24,13 @@ public class NetworkGeneration {
 	public static void main(String[] args) {
 		int nbNode = 100;
 		
-//		// 1 instancier la factory
-//		// 2 prendre une population en param
+		// 1 instancier la factory
+		// 2 prendre une population en param
 		ISyntheticGosplPopGenerator populationGenerator = new UtilGenerator(4,2);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population = populationGenerator.generate(nbNode);
 
-//		// 3 la factory choisit un générator grace a une unum
-//		// 4 le générator renvoi le réseau obtenu sur la population
+		// 3 la factory choisit un générator grace a une unum
+		// 4 le générator renvoi le réseau obtenu sur la population
 		@SuppressWarnings("unused")
 		SpinNetwork aNetwork = NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
  		
