@@ -33,7 +33,8 @@ public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAtt
 		int link_id = 0;
 		for (int i=0; i<nodes.size();i++){
 			for (int j=1;j<=k/2;j++){
-				NetworkLink l=new NetworkLink(nodes.get(i),nodes.get((i+j)%nodes.size()),false,link_id++);
+				NetworkLink l=new NetworkLink(nodes.get(i),nodes.get((i+j)%nodes.size()),false,String.valueOf(link_id));
+				link_id++;
 				nodes.get(i).addLink(l);
 				nodes.get((i+j)%nodes.size()).addLink(l);				
 			}

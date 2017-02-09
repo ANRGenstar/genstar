@@ -48,7 +48,8 @@ public class SWGenerator  extends BaseGenerator
 				while (!linkCreated) {
 					nodeFrom = nodes.get(rand.nextInt(nbNodes));
 					nodeTo = nodes.get(rand.nextInt(nbNodes));
-					link = new NetworkLink(nodeFrom,nodeTo,false,link_id++);//link is not oriented
+					link = new NetworkLink(nodeFrom,nodeTo,false,String.valueOf(link_id));//link is not oriented
+					link_id++;
 					
 					if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
 						linkCreated=true;

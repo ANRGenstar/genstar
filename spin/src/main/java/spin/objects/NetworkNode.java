@@ -17,7 +17,7 @@ public class NetworkNode {
 	// Connected node
 	private Set<NetworkLink> links;
 	
-	private int id;
+	private String id;
 	
 	
 	/** Constructeur sans paramètre.
@@ -31,7 +31,7 @@ public class NetworkNode {
 	 * 
 	 * @param entite
 	 */
-	public NetworkNode(APopulationEntity entite, int id){
+	public NetworkNode(APopulationEntity entite, String id){
 		this();
 		entity = entite;
 		this.id = id;
@@ -45,7 +45,7 @@ public class NetworkNode {
 		return entity;
 	}
 	
-	public int getId(){
+	public String getId(){
 		return id;
 	}
 	

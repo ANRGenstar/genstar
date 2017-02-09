@@ -18,8 +18,10 @@ public abstract class BaseGenerator implements INetworkGenerator {
 		int i = 0;		
 		
 		// create all the nodes 
-		for (APopulationEntity entity : population) 
-					myNetwork.putNode(new NetworkNode(entity, i++));
+		for (APopulationEntity entity : population) {
+					myNetwork.putNode(new NetworkNode(entity, String.valueOf(i)));
+					i++;
+		}
 		return myNetwork;
 	}
 }
