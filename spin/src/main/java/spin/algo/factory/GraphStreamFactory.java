@@ -3,13 +3,17 @@ package spin.algo.factory;
 import java.io.IOException;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
 
 import spin.interfaces.EGraphStreamNetworkType;
+import spin.objects.NetworkLink;
+import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Factory de graph stream, gère le lien entre représensation SpinNetwork et GraphStream,
@@ -40,7 +44,14 @@ public class GraphStreamFactory {
 	 * @param spinNetwork a convertir en graphSteam
 	 */
 	public void getGraphStreamGraph(SpinNetwork spinNetwork){
-		// blablalba foreach node foreach link 
+
+		Graph g = new DefaultGraph("g");
+		for (NetworkNode node : spinNetwork.getNodes()) {
+			g.addNode(String.valueOf(node.getId()));
+		}
+		for (NetworkLink link : spinNetwork.getLinks()) {
+			g.addEdge("e", String.valueOf(link.getFrom().getId()), String.valueOf(link.getTo().toString()));
+		}
 	}
 	
 	/** Lit un fichier texte et le converti en graph stream
