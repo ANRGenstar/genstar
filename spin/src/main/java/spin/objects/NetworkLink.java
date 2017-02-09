@@ -1,13 +1,13 @@
 package spin.objects;
 
 /** Objet pour un network
- * Combien des informations sur le type de lien entre des nodes
+ * Contient des informations sur le type de lien entre des nodes
  *
  */
 public class NetworkLink{
 	private NetworkNode from;
 	private NetworkNode to;
-	private boolean oriented=false;
+	private boolean oriented = false;
 	
 	public NetworkLink(NetworkNode f, NetworkNode t){
 		this.from=f;

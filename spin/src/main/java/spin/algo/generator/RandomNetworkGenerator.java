@@ -8,15 +8,16 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spin.interfaces.INetworkGenerator;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class RandomNetworkGenerator implements INetworkGenerator 
+public class RandomNetworkGenerator extends BaseGenerator 
 {
 	
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population,0D);
+		return this.generateNetwork(population, 0D);
 	}
 	
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
@@ -24,7 +25,7 @@ public class RandomNetworkGenerator implements INetworkGenerator
 		Random rand = new Random();
 		
 		// create the spinNetwork
-		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
+		SpinNetwork myNetwork = loadPopulation(population);
 		
 		// List the created nodes
 		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());

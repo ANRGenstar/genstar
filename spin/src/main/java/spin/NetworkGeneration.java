@@ -6,8 +6,9 @@ import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
+import spin.algo.factory.GraphStreamFactory;
 import spin.algo.factory.NetworkFactory;
-import spin.algo.generator.NetworkEnumGenerator;
+import spin.interfaces.ENetworkEnumGenerator;
 import spin.objects.SpinNetwork;
 
 
@@ -24,21 +25,22 @@ public class NetworkGeneration {
 	public static void main(String[] args) {
 		int nbNode = 100;
 		
-//		// 1 instancier la factory
-//		// 2 prendre une population en param
-		ISyntheticGosplPopGenerator populationGenerator = new UtilGenerator(4,2);
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
-				populationGenerator.generate(nbNode);
-//		
-//		// 3 la factory choisit un générator grace a une unum
-//		// 4 le générator renvoi le réseau obtenu sur la population
-//		SpinNetwork<IAttribute<IValue>,IValue> NEPASCOMMIT =
-//		NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
-//		SpinNetwork NEPASCOMMIT =
-//				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
-		@SuppressWarnings("unused")
-		SpinNetwork NEPASCOMMIT =
-				NetworkFactory.getNetwork(NetworkEnumGenerator.SmallWorld, population);
+		// 1 instancier la factory
+		// 2 prendre une population en param
+		//ISyntheticGosplPopGenerator populationGenerator = new UtilGenerator(4,2);
+		//IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population = populationGenerator.generate(nbNode);
+
+		// 3 la factory choisit un générator grace a une unum
+		// 4 le générator renvoi le réseau obtenu sur la population
+		//@SuppressWarnings("unused")
+		//SpinNetwork aNetwork = NetworkFactory.getNetwork(ENetworkEnumGenerator.SmallWorld, population);
+		
+		GraphStreamFactory factory = GraphStreamFactory.getIntance();
+		factory.readFile("/Users/csg/Desktop/simple.graphml.xml"); 
+		
+		
+		
+		
  		
 	}
 }

@@ -9,11 +9,12 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spin.interfaces.INetworkGenerator;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class SWGenerator implements INetworkGenerator
+public class SWGenerator  extends BaseGenerator
 {
 	
 	@Override
@@ -54,63 +55,8 @@ public class SWGenerator implements INetworkGenerator
 						nodeTo.addLink(link);
 					}					
 				}
-				
 			}
 		}
-		
-		/** A Suppr ???
-		// table temporaire pour garder une référence indexé sur les noeuds créés
-		Hashtable<Integer, NetworkNode> nodeCreated = new Hashtable<Integer, NetworkNode>();
-		int i = 0;
-		
-		
-		// cyclé sur la pop
-		for (IEntity<A,V> entity : population) {
-			
-			// créer un objet noeud et lui associer l'entité, puis ajouter le node a spinNetwork
-			// on crée un objet noeud et un set de lien vide qui sera rempli apres
-//			N node = new N(entity);
-			
-//			 new NetworkNode<E, V, A>(entity);
-			NetworkNode node =  new NetworkNode(entity);
-			nodeCreated.put(i++, node);
-			myNetwork.putNode(node);
-		}
-		
-		
-		
-		// fin de création de tous les noeuds du réseau 
-		
-		// Cycle sur les noeuds du réseau
-		/** FA: creer des Liens puis les ajouter aux links de chaque Node
-		 for (int j = 0; j < nodeCreated.size(); j++) {
-		 
-			int indexDestination = j;
-			while (indexDestination == j)
-				indexDestination = new Random().nextInt(nodeCreated.size() - 1);
-			if(nodeCreated.get(j).
-					connectedNodes.
-					contains(
-							nodeCreated.get(indexDestination))){
-				// Rien
-			}
-			else {
-			nodeCreated.get(j).connectedNodes.add(nodeCreated.get(indexDestination));
-			nodeCreated.get(indexDestination).connectedNodes.add(nodeCreated.get(j));
-			}
-		}*/
-		
-		/**
-		for (NetworkNode node : myNetwork.getNodes()) {
-			
-			
-			// créer un lien vers d'autre noeud puis ajouter les liens a spin ET mettre a jour la liste des noeuds connectés a un noeud
-//			nodeCreated.get(0).add(nodeCreated.get(3));
-		}
-		//for
-				
-		// fin de création des liens
-		*/
 		
 		return myNetwork;
 	}
