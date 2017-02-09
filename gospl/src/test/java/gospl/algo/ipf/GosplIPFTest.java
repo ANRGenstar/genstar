@@ -21,7 +21,7 @@ import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.algo.sampler.sr.GosplBasicSampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -42,7 +42,7 @@ public class GosplIPFTest {
 		
 		GosplAlgoUtilTest gaut = new GosplAlgoUtilTest();
 		
-		objectif = gaut.getPopulation(POPULATION_SIZE);
+		objectif = gaut.buildPopulation(POPULATION_SIZE);
 		
 		List<APopulationEntity> collectionSeed = new ArrayList<>(objectif)
 				.subList(0, (int)(POPULATION_SIZE * SEED_RATIO));
@@ -50,7 +50,7 @@ public class GosplIPFTest {
 		Collections.shuffle(collectionSeed);
 		collectionSeed.stream().forEach(entity -> seed.add(entity));
 		
-		marginals = new GosplDistributionFactory().createDistribution(objectif);
+		marginals = new GosplNDimensionalMatrixFactory().createDistribution(objectif);
 	}
 
 	@Test

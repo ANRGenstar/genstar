@@ -191,7 +191,8 @@ public abstract class AGosplIPF<T extends Number> {
 			if(marginals.stream().allMatch(m -> m.getSeedMarginalDescriptors()
 					.stream().allMatch(sd -> seed.getVal(sd).equalsVal(m.getControl(sd), delta))))
 				convergentDelta = true;
-			logger.debug("There is some delta exceeding convergence criteria\n{}", marginals.stream()
+			// TODO: better log and get back to debug
+			logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
 					.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
 							margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
 									+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))

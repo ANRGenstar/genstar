@@ -25,7 +25,7 @@ import gospl.algo.sampler.evaluation.BasicSamplingEvaluation;
 import gospl.algo.sampler.evaluation.IEvaluableSampler;
 import gospl.algo.sampler.evaluation.ISamplingEvaluation;
 import gospl.algo.sampler.evaluation.SamplingEvaluationUtils;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -200,12 +200,14 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 		
 		double totalMSE = .0;
 		
+		GosplNDimensionalMatrixFactory factory = new GosplNDimensionalMatrixFactory();
+		
 		// for each matrix, recompute the probabilities
 		for (AFullNDimensionalMatrix<Double> mParam: segmentedMatrix.getMatrices()) {
 			
-			AFullNDimensionalMatrix<Integer> mMeasuredContigency = new GosplDistributionFactory().createContigencyFromPopulation(mParam.getDimensions(), population);
+			AFullNDimensionalMatrix<Integer> mMeasuredContigency = factory.createContigency(mParam.getDimensions(), population);
 			
-			AFullNDimensionalMatrix<Double> mMeasuredFrequency = new GosplDistributionFactory().createGlobalFrequencyTableFromContingency(mMeasuredContigency);
+			AFullNDimensionalMatrix<Double> mMeasuredFrequency = factory.createDistribution(mMeasuredContigency);
 			
 			System.out.println("reference: ");
 			System.out.println(mParam);

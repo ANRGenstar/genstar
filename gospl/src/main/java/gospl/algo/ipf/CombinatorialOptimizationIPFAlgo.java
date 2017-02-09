@@ -7,7 +7,7 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.ICombinatorialOptimizationAlgo;
 import gospl.algo.sampler.IEntitySampler;
 import gospl.algo.sampler.ISampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
@@ -41,7 +41,7 @@ public class CombinatorialOptimizationIPFAlgo extends AGosplIPF<Integer> impleme
 	public AFullNDimensionalMatrix<Integer> process() {
 		if(this.marginals == null || this.marginals.getMatrix().isEmpty()) 
 			throw new IllegalArgumentException(this.getClass().getSimpleName()+" must define a matrix to setup marginals");
-		return process(new GosplDistributionFactory().createContingency(sampleSeed));
+		return process(new GosplNDimensionalMatrixFactory().createContingency(sampleSeed));
 	}
 
 }

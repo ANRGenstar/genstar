@@ -1,6 +1,7 @@
 package gospl.algo;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,7 @@ import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -33,7 +34,19 @@ public class GosplAlgoUtilTest {
 	private GosplAttributeFactory gaf = new GosplAttributeFactory();
 	private ISyntheticGosplPopGenerator generator;
 	private Set<APopulationAttribute> attributes;
+	
+	private IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population = null;
 
+	public GosplAlgoUtilTest(Set<APopulationAttribute> attributes, 
+			ISyntheticGosplPopGenerator generator){
+		this.attributes = attributes;
+		this.generator = generator;
+	}
+	
+	public GosplAlgoUtilTest(Set<APopulationAttribute> attributes){
+		this(attributes, new UtilGenerator(attributes));
+	}
+	
 	public GosplAlgoUtilTest() throws GSIllegalRangedData{
 		this.attributes = new HashSet<>();
 		this.attributes.add(gaf.createAttribute("Genre", GSEnumDataType.String, 
@@ -48,23 +61,21 @@ public class GosplAlgoUtilTest {
 				Arrays.asList("inactif", "chomage", "employé", "fonctionnaire", "indépendant", "retraité"), GSEnumAttributeType.unique));
 		this.generator = new UtilGenerator(attributes);
 	}
-
-	public GosplAlgoUtilTest(Set<APopulationAttribute> attributes){
-		this.attributes = attributes;
-		this.generator = new UtilGenerator(attributes);
-	}
 	
-	// ---------------------------------------------------- //
-
 	/**
 	 * Create a population with random component and given attributes
 	 * 
 	 * @param size
+	 * @return 
 	 * @return
 	 */
-	public IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> getPopulation(int size){
-		return generator.generate(size);
+	public IPopulation<APopulationEntity,APopulationAttribute,APopulationValue> buildPopulation(int size){
+		this.population = generator.generate(size);
+		return this.population;
 	}
+	
+	// ---------------------------------------------------- //
+
 
 	/**
 	 * Get a contingency based on a created population using {@link #getPopulation(int)}
@@ -72,8 +83,10 @@ public class GosplAlgoUtilTest {
 	 * @param size
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> getContingency(int size){
-		return new GosplDistributionFactory().createContingency(generator.generate(size));
+	public AFullNDimensionalMatrix<Integer> getContingency(){
+		if(this.population == null)
+			throw new NullPointerException("No population have been generated - see #buildPopulation");
+		return new GosplNDimensionalMatrixFactory().createContingency(this.population);
 	}
 
 	/**
@@ -82,8 +95,10 @@ public class GosplAlgoUtilTest {
 	 * @param size
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Double> getFrequency(int size){
-		return new GosplDistributionFactory().createDistribution(generator.generate(size));
+	public AFullNDimensionalMatrix<Double> getFrequency(){
+		if(this.population == null)
+			throw new NullPointerException("No population have been generated - see #buildPopulation");
+		return new GosplNDimensionalMatrixFactory().createDistribution(this.population);
 	}
 
 	/**
@@ -95,11 +110,14 @@ public class GosplAlgoUtilTest {
 	 */
 	public ASegmentedNDimensionalMatrix<Double> getSegmentedFrequency(int segmentSize) 
 			throws IllegalDistributionCreation {
+		if(this.population == null)
+			throw new NullPointerException("No population have been generated - see #buildPopulation");
 		log.debug("Try to build segmented matrix with {} dimensions", this.attributes.size());
 		Map<APopulationAttribute, Double> attributesProb = this.attributes.stream().collect(
 				Collectors.toMap(Function.identity(), att -> new Double(0.5)));
-		Set<IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>> populations = new HashSet<>();
-		while(!populations.stream().flatMap(pop -> pop.getPopulationAttributes().stream())
+
+		Collection<Set<APopulationAttribute>> segmentedAttribute = new HashSet<>();
+		while(!segmentedAttribute.stream().flatMap(set -> set.stream())
 				.collect(Collectors.toSet()).containsAll(this.attributes)){
 			Set<APopulationAttribute> atts = new HashSet<>();
 			for(APopulationAttribute attribute : attributesProb.keySet()){
@@ -114,10 +132,13 @@ public class GosplAlgoUtilTest {
 				continue;
 			log.debug("Build a new full inner matrix with {} attributes", 
 					atts.stream().map(a -> a.getAttributeName()).collect(Collectors.joining(", ")));
-			populations.add(new UtilGenerator(atts).generate(segmentSize));
+			segmentedAttribute.add(atts);
 		}
-		log.debug("Build the segmented matrix with {} inner full matrix", populations.size());
-		return new GosplDistributionFactory().createDistribution(populations);
+		log.debug("Build the segmented matrix with {} inner full matrix", segmentedAttribute.size());
+		GosplNDimensionalMatrixFactory factory = new GosplNDimensionalMatrixFactory();
+		return factory.createDistributionFromDistributions(segmentedAttribute.stream()
+				.map(sa -> factory.createDistribution(sa, this.population))
+				.collect(Collectors.toSet()));
 	}
 
 }

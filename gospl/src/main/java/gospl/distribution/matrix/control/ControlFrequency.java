@@ -59,7 +59,7 @@ public class ControlFrequency extends AControl<Double> {
 			return 1;
 		if(getValue() < o.getValue())
 			return -1;
-		if(getValue().equals(o) && this.hashCode() != o.hashCode())
+		if(getValue().equals(o.getValue()) && this.hashCode() != o.hashCode())
 			return this.hashCode() < o.hashCode() ? -1 : 1;
 		return 0;
 	}

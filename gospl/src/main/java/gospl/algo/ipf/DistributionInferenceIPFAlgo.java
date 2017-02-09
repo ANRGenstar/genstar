@@ -7,7 +7,7 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -40,7 +40,7 @@ public class DistributionInferenceIPFAlgo extends AGosplIPF<Double> implements I
 	public AFullNDimensionalMatrix<Double> process() {
 		if(this.marginals == null || this.marginals.getMatrix().isEmpty()) 
 			throw new IllegalArgumentException(this.getClass().getSimpleName()+" must define a matrix to setup marginals");	
-		return process(new GosplDistributionFactory().createDistribution(sampleSeed));
+		return process(new GosplNDimensionalMatrixFactory().createDistribution(sampleSeed));
 	}
 
 }

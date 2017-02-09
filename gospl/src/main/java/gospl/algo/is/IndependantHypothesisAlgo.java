@@ -21,7 +21,7 @@ import core.util.GSPerformanceUtil;
 import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.ISampler;
-import gospl.distribution.GosplDistributionFactory;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -82,7 +82,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 				.collect(Collectors.toSet());
 		
 		// Setup the matrix to estimate 
-		AFullNDimensionalMatrix<Double> freqMatrix = new GosplDistributionFactory().createDitribution(targetedDimensions);
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplNDimensionalMatrixFactory().createEmptyDistribution(targetedDimensions);
 		
 		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
 
@@ -270,7 +270,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			gspu.sysoStempPerformance(1, this);
 		}
 	
-		sampler.setDistribution(new GosplDistributionFactory().createDistribution(matrix.getDimensions(), sampleDistribution));
+		sampler.setDistribution(new GosplNDimensionalMatrixFactory().createDistribution(matrix.getDimensions(), sampleDistribution));
 		return sampler;
 	}
 	
