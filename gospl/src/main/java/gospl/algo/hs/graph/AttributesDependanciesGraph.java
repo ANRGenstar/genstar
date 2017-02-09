@@ -20,6 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graphstream.algorithm.ConnectedComponents;
 import org.graphstream.graph.Edge;
+import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
@@ -125,14 +126,24 @@ public class AttributesDependanciesGraph {
 		attributes.addAll(currentMatrix.getDimensions());
 		for (int i=0; i<attributes.size();i++) {
 			for (int j=i+1; j<attributes.size();j++) {
-				Edge e = graph.addEdge(
-						"edge"+graph.getEdgeCount(), 
-						attributes.get(i).getAttributeName(), 
-						attributes.get(j).getAttributeName(),
-						false	// not directed for a global frequency
-						);
-				e.setAttribute(EDGE_ATTRIBUTE_MATRIX, currentMatrix);
-				e.setAttribute(EDGE_ATTRIBUTE_TYPE, EdgeDependancyType.GLOBAL_FREQUENCY);
+				final String from = attributes.get(i).getAttributeName();
+				final String to = attributes.get(j).getAttributeName();
+				try {
+					Edge e = graph.addEdge(
+							"edge"+graph.getEdgeCount(), 
+							from, 
+							to,
+							false	// not directed for a global frequency
+							);
+					e.setAttribute(EDGE_ATTRIBUTE_MATRIX, currentMatrix);
+					e.setAttribute(EDGE_ATTRIBUTE_TYPE, EdgeDependancyType.GLOBAL_FREQUENCY);
+				} catch (EdgeRejectedException e) {
+					throw new IllegalArgumentException(
+							"when importing the matrix "+currentMatrix.getLabel()+
+							", unable to add edge "+from+"->"+to
+							+", because another edge is already present. Genesis of the matrix:\n"+currentMatrix.getGenesisAsString()
+							);
+				}
 			}
 		}
 	}

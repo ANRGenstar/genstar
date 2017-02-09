@@ -47,8 +47,10 @@ public class GosplNDimensionalMatrixFactory {
 	 */
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
 			Set<APopulationAttribute> dimensions){
-		return new GosplJointDistribution(dimensions.stream().collect(Collectors.toMap(dim -> dim, dim -> dim.getValues())), 
+		AFullNDimensionalMatrix<Double> matrix =  new GosplJointDistribution(dimensions.stream().collect(Collectors.toMap(dim -> dim, dim -> dim.getValues())), 
 				GSSurveyType.GlobalFrequencyTable);
+		matrix.addGenesis("created from scratch GosplNDimensionalMatrixFactory@createEmptyDistribution");
+		return matrix;
 	}
 	
 	/**
@@ -99,8 +101,9 @@ public class GosplNDimensionalMatrixFactory {
 		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
 				contigency.getDimensionsAsAttributesAndValues(), 
 				GSSurveyType.GlobalFrequencyTable
-				);
-		
+				); 
+		matrix.addGenesis("created from distribution GosplNDimensionalMatrixFactory@createDistribution");
+
 		int total = contigency.getVal().getValue();
 		
 		// Normalize increments to global frequency
@@ -124,7 +127,8 @@ public class GosplNDimensionalMatrixFactory {
 		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
 				population.getPopulationAttributes().stream().collect(Collectors.toMap(att -> att, att -> att.getValues())), 
 				GSSurveyType.GlobalFrequencyTable);
-		
+		matrix.addGenesis("created from population GosplNDimensionalMatrixFactory@createDistribution");
+
 		double unitFreq = 1d/population.size();
 		
 		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
@@ -154,7 +158,8 @@ public class GosplNDimensionalMatrixFactory {
 		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
 				attributesToMeasure.stream().collect(Collectors.toMap(att -> att, att -> att.getValues())),
 				GSSurveyType.GlobalFrequencyTable);
-		
+		matrix.addGenesis("created from population GosplNDimensionalMatrixFactory@createDistribution");
+
 		double unitFreq = 1d/population.size();
 		
 		// iterate the whole population
@@ -215,7 +220,8 @@ public class GosplNDimensionalMatrixFactory {
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(population.getPopulationAttributes().stream()
 				.collect(Collectors.toMap(att -> att, att -> att.getValues())));
-		
+		matrix.addGenesis("created from a population GosplNDimensionalMatrixFactory@createContigency");
+
 		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
 		for(APopulationEntity entity : population){
 			ACoordinate<APopulationAttribute, APopulationValue> entityCoord = new GosplCoordinate(
@@ -242,6 +248,8 @@ public class GosplNDimensionalMatrixFactory {
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(
 				attributesToMeasure.stream().collect(Collectors.toMap(att -> att, att -> att.getValues())));
 		
+		matrix.addGenesis("created from a population GosplNDimensionalMatrixFactory@createContigency");
+
 		// iterate the whole population
 		for (APopulationEntity entity : population) {
 			ACoordinate<APopulationAttribute, APopulationValue> entityCoord = new GosplCoordinate(

@@ -225,6 +225,7 @@ public class GosplDistributionBuilder {
 				else
 					jDistribution = new GosplJointDistribution(dimTable, survey.getDataFileType());
 				jDistribution.setLabel(survey.getName());
+				jDistribution.addGenesis("from file "+survey.getName());
 				// Fill in the matrix through line & column
 				for (final Integer row : rowHeaders.entrySet().stream()
 						.filter(e -> e.getValue().stream().allMatch(v -> rSchema.contains(v.getAttribute())))
@@ -259,9 +260,7 @@ public class GosplDistributionBuilder {
 	private AFullNDimensionalMatrix<Double> getFrequency(final AFullNDimensionalMatrix<? extends Number> matrix)
 			throws IllegalControlTotalException {
 		// returned matrix
-		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
-				matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
-				GSSurveyType.GlobalFrequencyTable);
+		AFullNDimensionalMatrix<Double> freqMatrix = null;
 		
 		if (matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
 			// Identify local referent dimension
@@ -332,6 +331,10 @@ public class GosplDistributionBuilder {
 							matrix.getVal(coord).getValue().doubleValue() / total.getValue().doubleValue()));
 			}
 		}
+		
+		freqMatrix.inheritGenesis(matrix);
+		freqMatrix.addGenesis("converted to frequency GosplDistributionBuilder@@getFrequency");
+
 		return freqMatrix;
 	}
 
@@ -396,7 +399,9 @@ public class GosplDistributionBuilder {
 		
 		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(dims.stream()
 				.collect(Collectors.toMap(d -> d, d -> d.getValues())), GSSurveyType.GlobalFrequencyTable);
-		
+		freqMatrix.inheritGenesis(recordMatrices);
+		freqMatrix.addGenesis("transposted by GosplDistributionBuilder@getTransposedRecord");
+
 		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal();
 		
 		int iter = 1;
