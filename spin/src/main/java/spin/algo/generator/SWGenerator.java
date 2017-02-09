@@ -13,7 +13,7 @@ import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class SWGenerator  extends BaseGenerator
+public class SWGenerator extends BaseGenerator
 {
 	
 	@Override

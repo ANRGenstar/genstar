@@ -1,7 +1,9 @@
 package spin.algo.factory;
 
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.Set;
 
 import org.graphstream.algorithm.APSP;
 import org.graphstream.algorithm.APSP.APSPInfo;
@@ -11,6 +13,7 @@ import core.metamodel.pop.APopulationEntity;
 import spin.interfaces.EGraphStreamNetworkType;
 import spin.interfaces.ISpinNetProperties;
 import spin.objects.NetworkNode;
+import spin.objects.SpinNetwork;
 
 /** Factory de stat, donne les infos sur les graphes
  * 
@@ -52,7 +55,7 @@ public class StatFactory implements ISpinNetProperties{
 	 * @param whichOne
 	 * @return
 	 */
-	public double getAverageClustering(EGraphStreamNetworkType whichOne){
+	private double getAverageClustering(EGraphStreamNetworkType whichOne){
 		return 0;
 	}
 	
@@ -89,6 +92,9 @@ public class StatFactory implements ISpinNetProperties{
 	
 	private double getLocalClustering(NetworkNode node){
 		
+		
+		return 0;
+		
 	}
 	
 	
@@ -105,7 +111,21 @@ public class StatFactory implements ISpinNetProperties{
 
 	@Override
 	public double getClustering(APopulationEntity entite) {
-//		return getLocalClustering(spin)
+		SpinNetwork network = NetworkFactory.getIntance().getSpinNetwork();
+		NetworkNode node = network.kvEntityNodeFastList.get(entite);
+		return getLocalClustering(node);
+	}
+	
+	public Set<APopulationEntity> getNeighboor(APopulationEntity entite){
+		Set<APopulationEntity> entities = new HashSet<APopulationEntity>();
+		SpinNetwork network = NetworkFactory.getIntance().getSpinNetwork();
+		NetworkNode node = network.kvEntityNodeFastList.get(entite);
+		
+		for (NetworkNode nodeNeigh : node.getNeighbours()) {
+			entities.add(network.kvNodeEntityFastList.get(nodeNeigh));
+		}
+		
+		return entities;
 	}
 	
 	

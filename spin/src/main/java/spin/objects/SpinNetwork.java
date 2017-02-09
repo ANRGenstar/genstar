@@ -18,8 +18,9 @@ public class SpinNetwork {
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
 	// let set<networkLink> est commun a ceux donné aux noeuds
 	private Map<NetworkNode, Set<NetworkLink>> network;
-	private Map<NetworkNode, APopulationEntity> kvNodeEntityFastList;
-	private Map<APopulationEntity, NetworkNode> kvEntityNodeFastList;
+	// Map d'acces rapide;
+	public Map<NetworkNode, APopulationEntity> kvNodeEntityFastList;
+	public Map<APopulationEntity, NetworkNode> kvEntityNodeFastList;
 	
 	/** Constructeur sans param. 
 	 * 
@@ -39,6 +40,9 @@ public class SpinNetwork {
 		HashSet<NetworkLink> links = new HashSet<NetworkLink>();
 		network.put(node, links);
 		node.defineLinkHash(links);
+	
+		kvNodeEntityFastList.put(node, node.getEntity());
+		kvEntityNodeFastList.put(node.getEntity(), node);
 	}
 
 	/** Ajout de link aux listes de link des noeuds

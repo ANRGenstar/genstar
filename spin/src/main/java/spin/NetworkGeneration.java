@@ -1,21 +1,8 @@
 package spin;
 
-import org.graphstream.graph.Graph;
-
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
-import gospl.algo.generator.ISyntheticGosplPopGenerator;
-import gospl.algo.generator.UtilGenerator;
 import spin.algo.factory.GraphStreamFactory;
-import spin.algo.factory.NetworkFactory;
 import spin.interfaces.EGraphStreamNetworkType;
-import spin.interfaces.ENetworkEnumGenerator;
 import spin.interfaces.ENetworkFormat;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
-import spin.objects.SpinNetwork;
 
 
 /** Classe de main pour la génération de réseau sur une population

@@ -17,6 +17,7 @@ public class NetworkNode {
 	// Non initalisé volontairement.
 	private Set<NetworkLink> links;
 	
+	// Id du node. 
 	private String id;
 	
 	

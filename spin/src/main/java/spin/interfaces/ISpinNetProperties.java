@@ -1,5 +1,7 @@
 package spin.interfaces;
 
+import java.util.Set;
+
 import core.metamodel.pop.APopulationEntity;
 
 /** 
@@ -11,6 +13,6 @@ public interface ISpinNetProperties {
 
 	double getAPL();
 	double getClustering(APopulationEntity entite);
-	
+	Set<APopulationEntity> getNeighboor(APopulationEntity entite);
 	
 }
