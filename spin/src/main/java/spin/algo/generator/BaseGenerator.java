@@ -15,10 +15,11 @@ public abstract class BaseGenerator implements INetworkGenerator {
 	//Create a SpinNetwork with nodes linked to population entities
 	//The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
-				
+		int i = 0;		
+		
 		// create all the nodes 
 		for (APopulationEntity entity : population) 
-					myNetwork.putNode(new NetworkNode(entity));
+					myNetwork.putNode(new NetworkNode(entity, i++));
 		return myNetwork;
 	}
 }
