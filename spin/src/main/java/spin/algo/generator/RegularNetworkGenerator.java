@@ -30,9 +30,10 @@ public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAtt
 		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
 		
 		// for each node i, create a link to i+1 ... i+k/2
+		int link_id = 0;
 		for (int i=0; i<nodes.size();i++){
 			for (int j=1;j<=k/2;j++){
-				NetworkLink l=new NetworkLink(nodes.get(i),nodes.get((i+j)%nodes.size()),false);
+				NetworkLink l=new NetworkLink(nodes.get(i),nodes.get((i+j)%nodes.size()),false,link_id++);
 				nodes.get(i).addLink(l);
 				nodes.get((i+j)%nodes.size()).addLink(l);				
 			}

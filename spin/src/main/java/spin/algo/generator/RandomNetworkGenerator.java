@@ -38,10 +38,11 @@ public class RandomNetworkGenerator extends BaseGenerator
 		NetworkLink link;
 		
 		// create the links
+		int link_id = 0;
 		while (nbLink>0) {
 			nodeFrom = nodes.get(rand.nextInt(nbNodes));
 			nodeTo = nodes.get(rand.nextInt(nbNodes));
-			link = new NetworkLink(nodeFrom,nodeTo,false);//link is not oriented
+			link = new NetworkLink(nodeFrom,nodeTo,false,link_id++);//link is not oriented
 			
 			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
 				nbLink--;
