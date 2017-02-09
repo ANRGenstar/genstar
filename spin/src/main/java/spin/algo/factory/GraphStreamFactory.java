@@ -43,7 +43,7 @@ public class GraphStreamFactory {
 		// blablalba foreach node foreach link 
 	}
 	
-	/** TODO lit un fichier texte et le converti en graph stream
+	/** Lit un fichier texte et le converti en graph stream
 	 * Ajouté dans la liste des graphs,  associé a l'enum fileRead
 	 * @return
 	 */
