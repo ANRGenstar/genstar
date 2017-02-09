@@ -38,6 +38,9 @@ public class NetworkGeneration {
 		GraphStreamFactory factory = GraphStreamFactory.getIntance();
 		factory.readFile("/Users/csg/Desktop/simple.graphml.xml"); 
 		
+		
+		
+		
  		
 	}
 }

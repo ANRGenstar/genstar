@@ -12,6 +12,10 @@ import org.graphstream.stream.file.FileSourceFactory;
 import spin.interfaces.EGraphStreamNetworkType;
 import spin.objects.SpinNetwork;
 
+/** Factory de graph stream, gère le lien entre représensation SpinNetwork et GraphStream,
+ * lecture et ecriture de fichier
+ * 
+ */
 public class GraphStreamFactory {
 
 	// Map de networkType <-> graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
