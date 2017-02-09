@@ -59,7 +59,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
 		this.emptyCoordinate = new GosplCoordinate(Collections.<APopulationValue>emptySet());
-		this.label = dimensionAspectMap.keySet().stream().map(dim -> dim.getAttributeName().substring(0, 3))
+		this.label = dimensionAspectMap.keySet().stream().map(dim -> dim.getAttributeName().length()>3?dim.getAttributeName().substring(0, 3):dim.getAttributeName())
 				.collect(Collectors.joining(" x "));
 	}
 		
