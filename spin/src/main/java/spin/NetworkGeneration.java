@@ -6,7 +6,6 @@ import spin.interfaces.ENetworkFormat;
 
 
 /** Classe de main pour la génération de réseau sur une population
- * 
  *
  */
 public class NetworkGeneration {

@@ -39,10 +39,9 @@ public class GraphStreamFactory {
 	private GraphStreamFactory(){
 		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
 		StatFactory.getInstance().setRefToGraphList(graphs);
-		
 	}
 	
-	/** TODO Parcours des éléments du spinGraph pour en faire un graphStream.
+	/** Parcours des éléments du spinGraph pour en faire un graphStream.
 	 * Ajouté dans la liste des graphs,  associé a l'enum spinNetwork
 	 * 
 	 * @param spinNetwork a convertir en graphSteam
@@ -53,7 +52,7 @@ public class GraphStreamFactory {
 		for (NetworkNode node : spinNetwork.getNodes()) {
 			g.addNode(node.getId());
 		}
-		System.out.println(spinNetwork.getLinks());
+//		System.out.println(spinNetwork.getLinks());
 		for (NetworkLink link : spinNetwork.getLinks()) {
 			g.addEdge("e" + link.getFrom().getId() +"->" +link.getTo().getId(), link.getFrom().getId(), link.getTo().getId());
 		}
@@ -109,13 +108,6 @@ public class GraphStreamFactory {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
-	
-	/** Donne un ensemble de stat sur le graph. Créer une classe de stat pour ce faire? 
-	 *  TODO renvoyer un objet de properties?
-	 */
-	public void ensembleDesFonctionsDeStat(EGraphStreamNetworkType whichOne){
-		
 	}
 	
 	/** Libère une référence a un graph dans la list qu'il puisse etre garbagé?

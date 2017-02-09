@@ -16,11 +16,13 @@ import spin.objects.SpinNetwork;
 public class SWGenerator extends BaseGenerator
 {
 	
-	@Override
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population,4,0.1D);
-	}
-	
+	/**
+	 * 
+	 * @param population
+	 * @param k
+	 * @param beta
+	 * @return
+	 */
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, int k, double beta){
 		//int k connectivity of the network
 		//double beta noise introduced on the regular network

@@ -17,7 +17,7 @@ public interface INetworkGenerator {
 	 * @param population population en paramètre, implementant l'interface IPopulation 
 	 * @return un SpinNetwork
 	 */
-	public abstract SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population);
+//	public abstract SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population);
 
 	
 }

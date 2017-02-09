@@ -1,15 +1,10 @@
 package spin.algo.factory;
 
-import java.util.Hashtable;
-
-import org.graphstream.graph.Graph;
-
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import spin.algo.generator.SWGenerator;
-import spin.interfaces.EGraphStreamNetworkType;
 import spin.interfaces.ENetworkEnumGenerator;
 import spin.objects.SpinNetwork;
 
@@ -41,7 +36,7 @@ public class NetworkFactory {
 	 */
 	public SpinNetwork generateNetwork(ENetworkEnumGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		if(typeGenerator.equals(ENetworkEnumGenerator.SmallWorld))
-			network = new SWGenerator().generateNetwork(population); 
+			network = new SWGenerator().generateNetwork(population,4, .1); 
 			
 //		if(typeGenerator.equals(NetworkEnumGenerator.ScaleFree))
 //			return new SFGenerator().generateNetwork(population);

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Tools {
+	
 	/** Ajoute, dans une hashtable(key, arraylist<value>) une valeur, que la key existe
 	 * déjà ou non. 
 	 * 

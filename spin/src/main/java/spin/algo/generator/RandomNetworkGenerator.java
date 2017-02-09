@@ -14,11 +14,13 @@ import spin.objects.SpinNetwork;
 
 public class RandomNetworkGenerator extends BaseGenerator 
 {
-	
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population, 0D);
-	}
-	
+
+	/**
+	 * 
+	 * @param population
+	 * @param proba
+	 * @return
+	 */
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
