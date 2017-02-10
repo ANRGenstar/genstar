@@ -139,7 +139,8 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	@Override
 	public final boolean addValue(Double value, String... coordinates) {
-		return addValue(GosplCoordinate.createCoordinate(this.getDimensions(), coordinates), value);
+		
+		return this.addValue(this.getCoordinate(coordinates), value);
 	}
 
 
@@ -266,5 +267,16 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		// TODO Auto-generated method stub
 		return true;
 	}
+
+
+	@Override
+	public AControl<Double> getVal(String... coordinates) {
+
+		return getVal(this.getAttributes(coordinates));
+
+	}
+
+
+
 	
 }

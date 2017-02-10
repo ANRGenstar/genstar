@@ -6,11 +6,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.vividsolutions.jts.geom.Coordinate;
-
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
 
 /**
  * <b>Warning: a GosplCoordinate should rarely, if never, be forged by a user himself. 

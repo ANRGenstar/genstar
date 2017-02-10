@@ -20,7 +20,6 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
 /**
  * Represent the higher order abstraction for segmented matrix: it is a record
@@ -196,11 +195,6 @@ INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 	}
 
 	
-	@Override
-	public final AControl<T> getVal(String... coordinates) {
-		return getVal(GosplCoordinate.createCoordinate(this.getDimensions(), coordinates));
-	}
-
 
 	@Override
 	public final AControl<T> getVal(APopulationValue... aspects) {
@@ -255,4 +249,88 @@ INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
 
+
+	@Override
+	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
+			throws IllegalArgumentException {
+
+		
+		return getCoordinates(getAttributes(keyAndVal));
+	}
+	
+
+
+	@Override
+	public Set<APopulationValue> getAttributes(String... keyAndVal) throws IllegalArgumentException {
+
+		Set<APopulationValue> coordinateValues = new HashSet<>();
+		
+		// collect all the attributes and index their names
+		Map<String,APopulationAttribute> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
+															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
+
+		if (keyAndVal.length % 2 != 0) {
+			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+		}
+		
+		// lookup values
+		for (int i=0; i<keyAndVal.length; i=i+2) {
+			final String attributeName = keyAndVal[i];
+			final String attributeValueStr = keyAndVal[i+1];
+			
+			APopulationAttribute attribute = name2attribute.get(attributeName);
+			if (attribute == null)
+				throw new IllegalArgumentException("unknown attribute "+attributeName);
+			coordinateValues.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
+
+		}
+		
+		return coordinateValues;
+		
+	}
+
+
+
+	@Override
+	public ACoordinate<APopulationAttribute, APopulationValue> getCoordinate(String... keyAndVal)
+			throws IllegalArgumentException {
+		
+		Collection<ACoordinate<APopulationAttribute, APopulationValue>> s = getCoordinates(keyAndVal);
+				
+		if (s.size() > 1) 
+			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
+		
+		if (s.isEmpty()) 
+			throw new IllegalArgumentException("these coordinates do not map to any cell in the matrix");
+
+		
+		return s.iterator().next();
+	}
+
+
+	@Override
+	public APopulationAttribute getDimension(String name) throws IllegalArgumentException {
+		
+		for (AFullNDimensionalMatrix<T> m: jointDistributionSet) {
+			for (APopulationAttribute a: m.getDimensions()) {
+				if (a.getAttributeName().equals(name)) {
+					return a;
+				}
+			}
+		}
+		
+		throw new IllegalArgumentException(
+				"No dimension named "+name+
+				"; available dimensions are: "+
+				jointDistributionSet
+					.stream().map(
+							m -> m.getDimensions()
+									.stream()
+									.map(d -> d.getAttributeName())
+									.reduce("", (u,t)->u+","+t)
+									)
+					.reduce("", (u,t)->u+","+t)
+				);
+		
+	}
 }

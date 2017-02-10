@@ -1,5 +1,6 @@
 package gospl.distribution;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -102,5 +103,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 		throw new IllegalArgumentException("should not normalize a "+getMetaDataType());		
 		
 	}
+
+
 
 }

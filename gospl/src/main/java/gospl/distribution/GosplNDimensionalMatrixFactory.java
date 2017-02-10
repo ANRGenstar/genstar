@@ -62,7 +62,10 @@ public class GosplNDimensionalMatrixFactory {
 		return createEmptyDistribution(dimensions, GSSurveyType.GlobalFrequencyTable);
 	}
 
-	
+	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
+			APopulationAttribute ... dimensions){
+		return createEmptyDistribution(new HashSet(Arrays.asList(dimensions)), GSSurveyType.GlobalFrequencyTable);
+	}
 	/**
 	 * Create an empty segmented distribution
 	 * 

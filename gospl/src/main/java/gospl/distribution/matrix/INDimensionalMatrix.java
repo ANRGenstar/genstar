@@ -184,6 +184,14 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public Set<D> getDimensions();
 	
 	/**
+	 * Searches for the dimension having this name. 
+	 * @param name
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
+	public D getDimension(String name) throws IllegalArgumentException;
+	
+	/**
 	 * A complete view of the dimensions of the matrix
 	 * @return
 	 */
@@ -261,6 +269,42 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public Collection<ACoordinate<D, A>> getCoordinates(Set<A> values);
 	
+
+	/**
+	 * Retrieve all coordinate that describe this set of value.
+	 * Simply translated, this will return all coordinates which
+	 * contains the {@code values} (one per dimension) passed as
+	 * argument
+	 * 
+	 * pass the parameters as: "gender", "male", "age", "12-25"... 
+	 * 
+	 * @param keyAndVal
+	 * @return
+	 */
+	public Collection<ACoordinate<D, A>> getCoordinates(String ... keyAndVal) throws IllegalArgumentException;
+
+	/**
+	 * Retrieve all coordinate that describe this set of value.
+	 * Simply translated, this will return all coordinates which
+	 * contains the {@code values} (one per dimension) passed as
+	 * argument
+	 * 
+	 * pass the parameters as: "gender", "male", "age", "12-25"... 
+	 * 
+	 * @param keyAndVal
+	 * @return
+	 */
+	public Set<A> getAttributes(String ... keyAndVal) throws IllegalArgumentException;
+
+	/**
+	 * Retrieve the only coordinate that describe this set of value.
+	 * 
+	 * pass the parameters as: "gender", "male", "age", "12-25"... 
+	 * 
+	 * @param keyAndVal
+	 * @return
+	 */
+	public ACoordinate<D, A> getCoordinate(String ... keyAndVal) throws IllegalArgumentException;
 
 // ------------------------- utility methods ------------------------- //
 	
