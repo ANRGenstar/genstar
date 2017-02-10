@@ -31,4 +31,10 @@ public interface ISpinNetProperties {
 	 */
 	Set<APopulationEntity> getNeighboor(APopulationEntity entite);
 	
+	/** Obtient la densité du réseau
+	 * 
+	 * @return
+	 */
+	double getDensity();
+	
 }

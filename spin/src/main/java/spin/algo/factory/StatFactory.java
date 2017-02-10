@@ -34,6 +34,13 @@ public class StatFactory implements ISpinNetProperties{
 	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
 	// -----------------------------------------
 	
+	private double getDensitySpin(){
+		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
+		double nbNodes = network.getNodes().size();
+		double nbLinks = network.getLinks().size();
+		return nbLinks / (nbNodes * (nbNodes-1));
+	}
+	
 	/**
 	 * 
 	 * @param whichOne
@@ -114,6 +121,10 @@ public class StatFactory implements ISpinNetProperties{
 		}
 		
 		return entities;
+	}
+	
+	public double getDensity(){
+		return getDensitySpin();
 	}
 	
 }
