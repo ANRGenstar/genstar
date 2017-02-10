@@ -20,7 +20,7 @@ import spin.interfaces.ISpinNetProperties;
 public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
 	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population. 
-	private ISpinNetProperties properties;
+	public ISpinNetProperties properties;
 	
 	/**
 	 * Permet d'assurer d'instancier l'interface avant la 1er utilisation

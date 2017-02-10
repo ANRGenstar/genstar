@@ -60,7 +60,7 @@ public class GraphStreamFactory {
 		for (NetworkNode node : spinNetwork.getNodes()) {
 			g.addNode(node.getId());
 		}
-//		System.out.println(spinNetwork.getLinks());
+
 		for (NetworkLink link : spinNetwork.getLinks()) {
 			g.addEdge("e" + link.getFrom().getId() +"->" +link.getTo().getId(), link.getFrom().getId(), link.getTo().getId());
 		}
