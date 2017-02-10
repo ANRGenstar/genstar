@@ -103,13 +103,25 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			}
 		}
 		
-		gspu.sysoStempMessage("Start writting down collpased distribution");
-		coordinates.parallelStream().forEach(coord -> 
-			freqMatrix.addValue(new GosplCoordinate(coord), matrix.getVal(coord)));
+		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
+		
+		int iter = 1;
+		gspu.setObjectif(coordinates.size());
+		for(Set<APopulationValue> coordinate : coordinates){
+			if(gspu.getObjectif() / 100 % iter++ == 0)
+				gspu.sysoStempPerformance(0.1, this);
+			ACoordinate<APopulationAttribute, APopulationValue> coord = new GosplCoordinate(coordinate);
+			AControl<Double> freq = matrix.getVal(coord);
+			freqMatrix.addValue(coord, freq);
+		}
+		
+//		coordinates.parallelStream().forEach(coord -> 
+//			freqMatrix.addValue(new GosplCoordinate(coord), matrix.getVal(coord)));
 		
 		sampler.setDistribution(freqMatrix);
 		return sampler;
 	}
+	
 	
 	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSamplerWithReferentProcess(
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,

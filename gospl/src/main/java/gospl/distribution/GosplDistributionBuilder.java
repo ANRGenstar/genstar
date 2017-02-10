@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
@@ -205,10 +206,19 @@ public class GosplDistributionBuilder {
 		final Set<Set<APopulationAttribute>> columnSchemas = columnHeaders.values().stream()
 				.map(head -> head.stream().map(v -> v.getAttribute()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
+		// Remove lower generality schema: e.g. if we have scheam [A,B] then [A] or [B] will be skiped
+		columnSchemas.removeAll(columnSchemas.stream().filter(schema -> 
+			columnSchemas.stream().anyMatch(higherSchema -> schema.stream()
+					.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
+				.collect(Collectors.toSet()));
 		// Store line related attributes while keeping unrelated attributes separated
 		final Set<Set<APopulationAttribute>> rowSchemas = rowHeaders.values().stream()
 				.map(line -> line.stream().map(v -> v.getAttribute()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
+		rowSchemas.removeAll(rowSchemas.stream().filter(schema -> 
+			rowSchemas.stream().anyMatch(higherSchema -> schema.stream()
+				.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
+				.collect(Collectors.toSet()));
 
 		// Start iterating over each related set of attribute
 		for (final Set<APopulationAttribute> rSchema : rowSchemas) {
@@ -228,10 +238,12 @@ public class GosplDistributionBuilder {
 				jDistribution.addGenesis("from file "+survey.getName());
 				// Fill in the matrix through line & column
 				for (final Integer row : rowHeaders.entrySet().stream()
-						.filter(e -> e.getValue().stream().allMatch(v -> rSchema.contains(v.getAttribute())))
+						.filter(e -> rSchema.stream().allMatch(att -> e.getValue().stream()
+								.anyMatch(val -> val.getAttribute().equals(att))))
 						.map(e -> e.getKey()).collect(Collectors.toSet())) {
 					for (final Integer col : columnHeaders.entrySet().stream()
-							.filter(e -> e.getValue().stream().allMatch(v -> cSchema.contains(v.getAttribute())))
+							.filter(e -> cSchema.stream().allMatch(att -> e.getValue().stream()
+									.anyMatch(val -> val.getAttribute().equals(att))))
 							.map(e -> e.getKey()).collect(Collectors.toSet())) {
 						// The value
 						final String stringVal = survey.read(row, col);
@@ -317,10 +329,8 @@ public class GosplDistributionBuilder {
 				for (final ACoordinate<APopulationAttribute, APopulationValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
 			} else {
-				final List<APopulationAttribute> attributes = new ArrayList<>(matrix.getDimensions());
-				Collections.shuffle(attributes);
-				final AControl<? extends Number> total = matrix.getVal(attributes.remove(0).getValues());
-				for (final APopulationAttribute attribut : attributes) {
+				final AControl<? extends Number> total = matrix.getVal();
+				for (final APopulationAttribute attribut : matrix.getDimensions()) {
 					final AControl<? extends Number> controlAtt = matrix.getVal(attribut.getValues());
 					if (Math.abs(controlAtt.getValue().doubleValue() - total.getValue().doubleValue())
 							/ controlAtt.getValue().doubleValue() > this.EPSILON)
@@ -393,7 +403,7 @@ public class GosplDistributionBuilder {
 				.collect(Collectors.toSet());
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Transpose process of matrix "
-				+Arrays.toString(recordMatrices.getDimensions().toArray()), logger);
+				+Arrays.toString(recordMatrices.getDimensions().toArray()), logger, Level.TRACE);
 		gspu.sysoStempPerformance(0, this);
 		gspu.setObjectif(recordMatrices.getMatrix().size());
 		
