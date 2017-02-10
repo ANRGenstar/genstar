@@ -1,5 +1,6 @@
 package gospl.algo.ipf;
 
+import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -74,7 +75,7 @@ public abstract class AGosplIPF<T extends Number> {
 			int step, double delta){
 		this(sampleSeed, new MarginalsIPFProcessor<T>(), step, delta);
 	}
-	
+
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
 			IMarginalsIPFProcessor<T> marginalProcessor){
 		this.sampleSeed = sampleSeed;
@@ -84,7 +85,7 @@ public abstract class AGosplIPF<T extends Number> {
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
 		this(sampleSeed, new MarginalsIPFProcessor<T>());
 	}
-		
+
 	/**
 	 * Setup the matrix that define marginal control. May be a full or segmented matrix: the first one
 	 * will give actual marginal, while the second one will give estimate marginal
@@ -161,7 +162,8 @@ public abstract class AGosplIPF<T extends Number> {
 		logger.debug("{}% of samples dimensions will be estimate with output controls", 
 				unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d);
 		logger.debug("Sample seed controls' dimension: {}", seed.getDimensions()
-				.stream().map(d -> d.getAttributeName()+" = "+seed.getVal(d.getValues()))
+				.stream().map(d -> d.getAttributeName()+" = "+new DecimalFormat("#.##")
+						.format(seed.getVal(d.getValues()).getValue().doubleValue()))
 				.collect(Collectors.joining(";")));
 
 		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
@@ -186,20 +188,20 @@ public abstract class AGosplIPF<T extends Number> {
 					logger.trace("Work on value set {} and related {} coordinates; factor = {}",
 							Arrays.toString(seedMarginalDescriptor.toArray()), 
 							relatedCoordinates.size(), factor.getValue());
-				}
 			}
-			if(marginals.stream().allMatch(m -> m.getSeedMarginalDescriptors()
-					.stream().allMatch(sd -> seed.getVal(sd).equalsVal(m.getControl(sd), delta))))
-				convergentDelta = true;
-			// TODO: better log and get back to debug
-			logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
-					.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
-							margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
-									+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))
-							.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
-					.reduce("", (s1, s2) -> s1.concat(s2)));
 		}
-		return seed;
+		if(marginals.stream().allMatch(m -> m.getSeedMarginalDescriptors()
+				.stream().allMatch(sd -> seed.getVal(sd).equalsVal(m.getControl(sd), delta))))
+			convergentDelta = true;
+		// TODO: better log and get back to debug
+		logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
+				.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
+						margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
+								+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))
+						.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
+				.reduce("", (s1, s2) -> s1.concat(s2)));
 	}
+	return seed;
+}
 
 }

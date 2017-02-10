@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -55,13 +56,15 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 					+ "Seed: "+Arrays.toString(seed.getDimensions().toArray())+"\n"
 					+ "Control: "+Arrays.toString(control.getDimensions().toArray()));
 
-		logger.info("Estimates the seed' referent marginals from a control matrix");
+		logger.info("Estimates seed's referent marginals from control matrix {}", 
+				control.getDimensions().stream().map(att -> att.getAttributeName()
+						.substring(0, att.getAttributeName().length() < 3 ? att.getAttributeName().length() : 3))
+				.collect(Collectors.joining(" x ")));
 		Map<APopulationAttribute, APopulationAttribute> controlToSeedAttribute = new HashMap<>();
 		for(APopulationAttribute sAttribute : seed.getDimensions()){
-			List<APopulationAttribute> cAttList = control.getDimensions().stream().filter(ca -> sAttribute.equals(ca) 
-					|| sAttribute.getReferentAttribute().equals(ca) || ca.getReferentAttribute().equals(sAttribute)
-					|| sAttribute.getReferentAttribute().equals(ca.getReferentAttribute())).
-					collect(Collectors.toList());
+			List<APopulationAttribute> cAttList = control.getDimensions().stream()
+					.filter(ca -> ca.isLinked(sAttribute))
+					.collect(Collectors.toList());
 			if(!cAttList.isEmpty())
 				for(APopulationAttribute cAtt : cAttList)
 					controlToSeedAttribute.put(cAtt, sAttribute);
@@ -80,13 +83,16 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 		List<APopulationAttribute> targetedAttributes = controlToSeedAttribute.keySet().stream()
 				.filter(att -> att.getReferentAttribute().equals(att)).collect(Collectors.toList());
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Trying to build marginals for attribute set "
-				+Arrays.toString(targetedAttributes.toArray()), logger);
+				+Arrays.toString(targetedAttributes.toArray()), logger, Level.TRACE);
+		gspu.sysoStempPerformance(0, this);
 		for(APopulationAttribute cAttribute : targetedAttributes){
 			Collection<Set<APopulationValue>> cMarginalDescriptors = this.getMarginalDescriptors(cAttribute,
 					controlToSeedAttribute.keySet().stream().filter(att -> !att.equals(cAttribute)).collect(Collectors.toSet()), 
 					control);
 			
-			gspu.sysoStempPerformance(1, this);
+			gspu.sysoStempMessage("Attribute "+cAttribute.getAttributeName()+" marginal descriptors are composed of "
+					+cMarginalDescriptors.size()+" set of value with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
+					.collect(Collectors.toSet()).size()+" different values being used");
 			
 			AMargin<T> mrg = null;
 			if(controlToSeedAttribute.get(cAttribute).equals(cAttribute)){
@@ -103,7 +109,17 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 				marginals.add(margin);
 			}
 			
-			gspu.sysoStempMessage("Attribute "+cAttribute.getAttributeName()+" have been transpose to margin (size "+mrg.size()+")");
+			gspu.sysoStempPerformance(1, this);
+			double totalMRG = mrg.marginalControl.values().stream().mapToDouble(c -> c.getValue().doubleValue()).sum();
+			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
+					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
+			
+			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
+				logger.info("Detailed marginals:\n{}", mrg.marginalControl.entrySet()
+					.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
+							+" = "+entry.getValue()).collect(Collectors.joining("\n")));
+				System.exit(1);
+			}
 		}
 
 		return marginals;
@@ -204,7 +220,7 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 			marginalDescriptors = tmpDescriptors;
 		}
 		// Translate into control compliant coordinate set of value
-		return marginalDescriptors.stream()
+		return marginalDescriptors.parallelStream()
 				.flatMap(set -> control.getCoordinates(set).stream()
 						.filter(coord -> coord.getDimensions().contains(targetedAttribute))
 						.map(coord -> coord.values().stream().filter(val -> !val.getAttribute().equals(targetedAttribute))

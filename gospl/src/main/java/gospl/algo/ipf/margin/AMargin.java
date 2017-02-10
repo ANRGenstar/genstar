@@ -52,6 +52,7 @@ public abstract class AMargin<T extends Number> implements IMargin<APopulationAt
 		return seedAttribute;
 	}
 
+	@Override
 	public int size() {
 		return marginalControl.size();
 	}

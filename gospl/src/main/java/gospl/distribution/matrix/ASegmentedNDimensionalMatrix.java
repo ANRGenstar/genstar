@@ -35,16 +35,17 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  * m2.getDimensions() == d1,d4;} 2nd inner full matrix contains 2 dimensions<br>
  * {@code
  * m1.getDimensions() == d5;} 3th inner full matrix contains only one dimensions <br> 
+ * <p>
  * 
- * WARNING: for the record, the only implementation concerns distribution matrix, i.e.
- * matrix that store probabilities 
+ * WARNING: Abstract segmented matrix only concerns distribution matrix, i.e.
+ * matrix that store probabilities
  * 
  * @author kevinchapuis
  *
  * @param <T>
  */
-public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
-INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
+public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
+	INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 
 	protected final Set<AFullNDimensionalMatrix<T>> jointDistributionSet;
 
@@ -121,19 +122,37 @@ INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 
 	@Override
 	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(Set<APopulationValue> values){
-		List<AFullNDimensionalMatrix<T>> concernedJointDistributions = jointDistributionSet.stream()
-				.filter(matrix -> matrix.getAspects().stream()
-						.anyMatch(aspect -> values.contains(aspect))).collect(Collectors.toList());
-		if(concernedJointDistributions.size() == 1)
-			return concernedJointDistributions.get(0).getCoordinates(values);
-		Collection<ACoordinate<APopulationAttribute, APopulationValue>> coords = new ArrayList<>();
 		Map<APopulationAttribute, Set<APopulationValue>> attValues = values.stream()
 				.collect(Collectors.groupingBy(value -> value.getAttribute(),
 						Collectors.mapping(Function.identity(), Collectors.toSet())));
-		coords.addAll(concernedJointDistributions.stream().flatMap(matrix -> matrix.getMatrix().keySet()
-				.stream().filter(coord -> attValues.entrySet().stream().filter(entry -> matrix.getDimensions().contains(entry.getKey()))
-						.allMatch(entry -> entry.getValue().stream().anyMatch(val -> coord.values().contains(val)))))
-				.collect(Collectors.toSet()));
+		List<AFullNDimensionalMatrix<T>> concernedJointDistributions = jointDistributionSet.stream()
+				.filter(matrix -> matrix.getDimensions().stream()
+						.anyMatch(dim -> attValues.keySet().stream().anyMatch(att -> dim.isLinked(att))))
+				.collect(Collectors.toList());
+		if(concernedJointDistributions.size() == 1)
+			return concernedJointDistributions.get(0).getCoordinates(values);
+
+		Map<APopulationAttribute, Set<APopulationValue>> overallMapLink = new HashMap<>();
+		Set<APopulationAttribute> overallAttributes = concernedJointDistributions
+				.stream().flatMap(mat -> mat.getDimensions().stream()).collect(Collectors.toSet());
+		for(APopulationAttribute attribute : attValues.keySet()){
+			for(APopulationAttribute mapAtt : overallAttributes.stream()
+					.filter(att -> att.isLinked(attribute)).collect(Collectors.toList())){
+				Set<APopulationValue> mapVals = new HashSet<>();
+				for(APopulationValue val : attValues.get(attribute))
+					mapVals.addAll(mapAtt.findMappedAttributeValues(val));
+				overallMapLink.put(mapAtt, mapVals);
+			}
+		}
+
+		Collection<ACoordinate<APopulationAttribute, APopulationValue>> coords = new ArrayList<>();
+		for(ACoordinate<APopulationAttribute, APopulationValue> coord : concernedJointDistributions
+				.stream().flatMap(matrix -> matrix.getMatrix().keySet().stream()).collect(Collectors.toSet())){ 
+			if(coord.getMap().entrySet().stream().filter(entry -> overallMapLink.keySet().contains(entry.getKey()))
+					.allMatch(entry -> overallMapLink.get(entry.getKey()).contains(entry.getValue())))
+				coords.add(coord);
+		}
+
 		return coords;
 	}
 

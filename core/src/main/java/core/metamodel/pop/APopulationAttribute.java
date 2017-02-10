@@ -114,8 +114,36 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 	 */
 	public Set<APopulationValue> findMappedAttributeValues(APopulationValue val) {
 		if(values.contains(val))
-			Stream.of(val).collect(Collectors.toSet());
+			return Stream.of(val).collect(Collectors.toSet());
 		return Stream.of(this.getEmptyValue()).collect(Collectors.toSet());
+	}
+	
+	/**
+	 * Tests if this attribute is linked to the one passed as argument.
+	 * It returns true if one of these are true:
+	 * <p>
+	 * <ul>
+	 * <li> {@code this.equals(attribute)}
+	 * <li> {@code this.equals(attribute.getReferentAttribute())}
+	 * <li> {@code this.getReferentAttribute().equals(attribute)}
+	 * </ul>
+	 * <p>
+	 * AND none of these are true:
+	 * <ul>
+	 * <li> {@code this.isRecordAttribute()}
+	 * <li> {@code attribute.isRecordAttribute()}
+	 * </ul>
+	 *  
+	 * @param attribute
+	 * @return
+	 */
+	public boolean isLinked(APopulationAttribute attribute){
+		if(this.isRecordAttribute() || attribute.isRecordAttribute())
+			return false;
+		if(this.equals(attribute) || this.equals(attribute.getReferentAttribute())
+				|| this.getReferentAttribute().equals(attribute))
+			return true;
+		return false;
 	}
 
 
