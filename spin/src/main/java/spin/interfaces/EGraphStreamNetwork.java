@@ -5,7 +5,7 @@ package spin.interfaces;
  * fileRead: network lu depuis un fichier
  * 
  */
-public enum EGraphStreamNetworkType {
+public enum EGraphStreamNetwork {
 	spinNetwork,
 	fileRead
 }

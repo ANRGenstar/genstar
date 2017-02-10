@@ -12,7 +12,7 @@ import org.graphstream.stream.file.FileSinkGraphML;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
 
-import spin.interfaces.EGraphStreamNetworkType;
+import spin.interfaces.EGraphStreamNetwork;
 import spin.interfaces.ENetworkFormat;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
@@ -25,7 +25,7 @@ import spin.objects.SpinNetwork;
 public class GraphStreamFactory {
 
 	// Map de networkType <-> graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
-	Map<EGraphStreamNetworkType, Graph> graphs;
+	Map<EGraphStreamNetwork, Graph> graphs;
 	
 	// Singleton
 	private static GraphStreamFactory INSTANCE;
@@ -37,7 +37,16 @@ public class GraphStreamFactory {
 	}
 	
 	private GraphStreamFactory(){
-		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
+		graphs = new Hashtable<EGraphStreamNetwork, Graph>();
+	}
+	
+	/** Pour les calculs qui nécessite la création d'un graphstream.
+	 * 
+	 */
+	public void initialiseGraphStreamFromSpin(){
+		if(!this.containsGraphType(EGraphStreamNetwork.spinNetwork))
+			this.generateGraphStreamGraph(SpinNetworkFactory.getInstance().getSpinNetwork());
+			
 	}
 	
 	/** 
@@ -45,9 +54,9 @@ public class GraphStreamFactory {
 	 * @param whichOne
 	 * @return
 	 */
-	public Graph getGraphStreamGraph(EGraphStreamNetworkType whichOne){
-		Graph toReturn = graphs.get(whichOne);
-//		if(toReturn == null && whichOne == EGraph)
+	public Graph getGraphStreamGraph(EGraphStreamNetwork whichOne){
+		if(whichOne == EGraphStreamNetwork.spinNetwork)
+			initialiseGraphStreamFromSpin();
 		return graphs.get(whichOne);
 	}
 	
@@ -68,7 +77,7 @@ public class GraphStreamFactory {
 			g.addEdge("e" + link.getFrom().getId() +"->" +link.getTo().getId(), link.getFrom().getId(), link.getTo().getId());
 		}
 		
-		graphs.put(EGraphStreamNetworkType.spinNetwork, g);
+		graphs.put(EGraphStreamNetwork.spinNetwork, g);
 //		g.display();
 	}
 	
@@ -85,7 +94,7 @@ public class GraphStreamFactory {
 			fs.readAll(path);
 			fs.removeSink(g);
 			
-			graphs.put(EGraphStreamNetworkType.fileRead, g);
+			graphs.put(EGraphStreamNetwork.fileRead, g);
 			
 		} catch (IOException e1) {
 			// TODO Auto-generated catch block
@@ -97,7 +106,7 @@ public class GraphStreamFactory {
 	 * 
 	 * @return
 	 */
-	public void exportFile(EGraphStreamNetworkType whichOne, ENetworkFormat format, String path){
+	public void exportFile(EGraphStreamNetwork whichOne, ENetworkFormat format, String path){
 		Graph g = graphs.get(whichOne);
 		FileSink filesink = null;
 		switch (format) {
@@ -125,11 +134,11 @@ public class GraphStreamFactory {
 	 * 
 	 * @param graph
 	 */
-	public void forgetGraph(EGraphStreamNetworkType whichOne){
+	public void forgetGraph(EGraphStreamNetwork whichOne){
 		graphs.remove(whichOne);
 	}
 	
-	public boolean containsGraphType(EGraphStreamNetworkType whichOne){
+	public boolean containsGraphType(EGraphStreamNetwork whichOne){
 		return graphs.containsKey(whichOne);
 	}
 	
