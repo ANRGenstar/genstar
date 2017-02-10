@@ -45,7 +45,7 @@ public class ScenarJouet {
 		spinNetwork.putLink(new NetworkLink(n1,n2,"1"));
 		spinNetwork.putLink(new NetworkLink(n1,n3,"2"));
 		
-		factory.getGraphStreamGraph(spinNetwork);
+		factory.generateGraphStreamGraph(spinNetwork);
 		// II - D Stat
 		stat.getAPL(EGraphStreamNetworkType.spinNetwork);
 		

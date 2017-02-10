@@ -41,12 +41,21 @@ public class GraphStreamFactory {
 		StatFactory.getInstance().setRefToGraphList(graphs);
 	}
 	
+	/** 
+	 * 
+	 * @param whichOne
+	 * @return
+	 */
+	public Graph getGraphStreamGraph(EGraphStreamNetworkType whichOne){
+		return graphs.get(whichOne);
+	}
+	
 	/** Parcours des éléments du spinGraph pour en faire un graphStream.
 	 * Ajouté dans la liste des graphs,  associé a l'enum spinNetwork
 	 * 
 	 * @param spinNetwork a convertir en graphSteam
 	 */
-	public void getGraphStreamGraph(SpinNetwork spinNetwork){
+	public void generateGraphStreamGraph(SpinNetwork spinNetwork){
 
 		Graph g = new DefaultGraph("g");
 		for (NetworkNode node : spinNetwork.getNodes()) {

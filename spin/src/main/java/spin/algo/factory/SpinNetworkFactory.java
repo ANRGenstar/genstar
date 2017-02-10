@@ -11,20 +11,20 @@ import spin.objects.SpinNetwork;
 /** Propose de générer des réseaux 
  *
  */
-public class NetworkFactory {
+public class SpinNetworkFactory {
 	
 	private SpinNetwork network;
 	
 	// Singleton
-	private static NetworkFactory INSTANCE;
+	private static SpinNetworkFactory INSTANCE;
 	
-	public static NetworkFactory getIntance(){
+	public static SpinNetworkFactory getIntance(){
 		if(INSTANCE == null)
-			INSTANCE = new NetworkFactory();
+			INSTANCE = new SpinNetworkFactory();
 		return INSTANCE;
 	}
 	
-	private NetworkFactory(){
+	private SpinNetworkFactory(){
 	}
 	
 	/** Renvoi un spinNetwork sur une population passé en paramètre, en prenant une population

@@ -87,11 +87,19 @@ public class StatFactory implements ISpinNetProperties{
 
 	
 	// -----------------------------------------
-	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
+	// --- PARTIE OBTENIR LES INFOS LOCALES  ---
 	// -----------------------------------------
 	
 	private double getLocalClustering(NetworkNode node){
+		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
+		Set<NetworkNode> voisins = new HashSet<NetworkNode>();
 		
+		try{
+			
+			
+		}catch(NullPointerException e){
+			System.err.println("SpinNetwork not yet initialized");
+		}
 		
 		return 0;
 		
@@ -111,14 +119,14 @@ public class StatFactory implements ISpinNetProperties{
 
 	@Override
 	public double getClustering(APopulationEntity entite) {
-		SpinNetwork network = NetworkFactory.getIntance().getSpinNetwork();
+		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
 		NetworkNode node = network.kvEntityNodeFastList.get(entite);
 		return getLocalClustering(node);
 	}
 	
 	public Set<APopulationEntity> getNeighboor(APopulationEntity entite){
 		Set<APopulationEntity> entities = new HashSet<APopulationEntity>();
-		SpinNetwork network = NetworkFactory.getIntance().getSpinNetwork();
+		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
 		NetworkNode node = network.kvEntityNodeFastList.get(entite);
 		
 		for (NetworkNode nodeNeigh : node.getNeighbours()) {
