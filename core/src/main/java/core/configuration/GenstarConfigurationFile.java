@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.ObjectStreamException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -126,4 +127,25 @@ public class GenstarConfigurationFile {
 					.reduce((s1, s2) -> s1.concat(" >> "+s2)).get());
 	}
 
+	/**
+	 * facilitates the creation of lisible mappings.
+	 * 
+	 * Example: Map<Set<String>, Set<String>> mapper = new HashMap<>();
+	 * addMapper(mapper, Arrays.asList("moins de 15"),  Arrays.asList("0-5", "6-15"));
+	 * addMapper(mapper, Arrays.asList("16-25"), Arrays.asList("16-25"));
+	 * addMapper(mapper, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
+	 * addMapper(mapper, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
+	 *	
+	 * @param mapper
+	 * @param from
+	 * @param to
+	 */
+	public static void addMapper(
+			Map<Set<String>, Set<String>> mapper, 
+			List<String> from, List<String> to) {
+		
+		mapper.put(new HashSet<>(from), new HashSet<>(to));
+		
+	}
+	
 }
