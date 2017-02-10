@@ -70,4 +70,11 @@ public abstract class AGeoAttribute implements IAttribute<AGeoValue> {
 	public AGeoValue getValue(String name){
 		return values.get(name);
 	}
+	
+
+	@Override
+	public boolean hasValue(String name) {
+		return values.containsKey(name);
+	}
+
 }
