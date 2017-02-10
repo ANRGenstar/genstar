@@ -17,9 +17,8 @@ import spin.objects.SpinNetwork;
  * 
  *
  */
-public class SWGenerator extends BaseGenerator
+public class SWNetworkGenerator extends BaseGenerator
 {
-	
 	/**
 	 * 
 	 * @param population
