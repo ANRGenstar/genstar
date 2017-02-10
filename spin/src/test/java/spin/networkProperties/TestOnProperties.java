@@ -9,7 +9,7 @@ import gospl.algo.generator.UtilGenerator;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 import spin.algo.factory.StatFactory;
-import spin.interfaces.ENetworkEnumGenerator;
+import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
 
 public class TestOnProperties {
@@ -26,10 +26,10 @@ public class TestOnProperties {
 		generator.generate(100000);
 	
 		System.out.println("Debut de la génération de réseau SmallWorld");
-		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkEnumGenerator.SmallWorld, population);
+		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		System.out.println("Fin de génération de réseau SmallWorld");
 	
-		SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW, StatFactory.getInstance());
+		SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
 		
 		
 		// TEST

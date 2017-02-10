@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
@@ -64,7 +63,7 @@ public class GosplNDimensionalMatrixFactory {
 
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
 			APopulationAttribute ... dimensions){
-		return createEmptyDistribution(new HashSet(Arrays.asList(dimensions)), GSSurveyType.GlobalFrequencyTable);
+		return createEmptyDistribution(new HashSet<APopulationAttribute>(Arrays.asList(dimensions)), GSSurveyType.GlobalFrequencyTable);
 	}
 	/**
 	 * Create an empty segmented distribution

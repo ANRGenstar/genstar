@@ -2,7 +2,7 @@ package spin;
 
 import spin.algo.factory.GraphStreamFactory;
 import spin.algo.factory.StatFactory;
-import spin.interfaces.EGraphStreamNetworkType;
+import spin.interfaces.EGraphStreamNetwork;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
@@ -32,7 +32,7 @@ public class ScenarJouet {
 		// I - A & I - B & I - C
 		factory.readFile("/Users/felix/Desktop/simple.graphml.xml");
 		// I - D
-		stat.getAPL(EGraphStreamNetworkType.fileRead);
+		stat.getAPL(EGraphStreamNetwork.fileRead);
 		
 		// II - C 
 		SpinNetwork spinNetwork = new SpinNetwork();
@@ -47,7 +47,7 @@ public class ScenarJouet {
 		
 		factory.generateGraphStreamGraph(spinNetwork);
 		// II - D Stat
-		stat.getAPL(EGraphStreamNetworkType.spinNetwork);
+		stat.getAPL(EGraphStreamNetwork.spinNetwork);
 		
 	}
 }

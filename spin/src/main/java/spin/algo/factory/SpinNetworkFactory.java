@@ -8,7 +8,7 @@ import spin.algo.generator.RandomNetworkGenerator;
 import spin.algo.generator.RegularNetworkGenerator;
 import spin.algo.generator.SFNetworkGenerator;
 import spin.algo.generator.SWNetworkGenerator;
-import spin.interfaces.ENetworkEnumGenerator;
+import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
 
 /** Propose de générer des réseaux 
@@ -37,14 +37,14 @@ public class SpinNetworkFactory {
 	 * @param population Population en parametre. 
 	 * @return
 	 */
-	public SpinNetwork generateNetwork(ENetworkEnumGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
-		if(typeGenerator.equals(ENetworkEnumGenerator.SmallWorld))
+	public SpinNetwork generateNetwork(ENetworkGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
 			network = new SWNetworkGenerator().generateNetwork(population,4, .1); 
-		if(typeGenerator.equals(ENetworkEnumGenerator.Random))	
+		if(typeGenerator.equals(ENetworkGenerator.Random))	
 			network = new RandomNetworkGenerator().generateNetwork(population, .1);
-		if(typeGenerator.equals(ENetworkEnumGenerator.Regular))	
+		if(typeGenerator.equals(ENetworkGenerator.Regular))	
 			network = new RegularNetworkGenerator().generateNetwork(population, 2);
-		if(typeGenerator.equals(ENetworkEnumGenerator.ScaleFree))	
+		if(typeGenerator.equals(ENetworkGenerator.ScaleFree))	
 			network = new SFNetworkGenerator().generateNetwork(population);
 		
 		return network;

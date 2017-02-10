@@ -1,7 +1,7 @@
 package spin;
 
 import spin.algo.factory.GraphStreamFactory;
-import spin.interfaces.EGraphStreamNetworkType;
+import spin.interfaces.EGraphStreamNetwork;
 import spin.interfaces.ENetworkFormat;
 
 
@@ -43,7 +43,7 @@ public class NetworkGeneration {
 		*/
 		
 		
-		factory.exportFile(EGraphStreamNetworkType.fileRead, ENetworkFormat.GML, "/Users/csg/Desktop/simple.gml");;
+		factory.exportFile(EGraphStreamNetwork.fileRead, ENetworkFormat.GML, "/Users/csg/Desktop/simple.gml");;
 		
  		
 	}

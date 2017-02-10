@@ -4,7 +4,7 @@ package spin.interfaces;
  * 
  *
  */
-public enum ENetworkEnumGenerator {
+public enum ENetworkGenerator {
 	SmallWorld,
 	ScaleFree,
 	Random,

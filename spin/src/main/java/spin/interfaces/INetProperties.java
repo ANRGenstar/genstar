@@ -9,7 +9,7 @@ import core.metamodel.pop.APopulationEntity;
  * généré sur la population. 
  *
  */
-public interface ISpinNetProperties {
+public interface INetProperties {
 
 	/** obtention du plus court chemin moyen sur le graphe. 
 	 * 
