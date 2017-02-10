@@ -10,9 +10,8 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.algo.factory.SpinNetworkFactory;
 import spin.algo.factory.StatFactory;
-import spin.interfaces.ISpinNetProperties;
+import spin.interfaces.INetProperties;
 import spin.objects.SpinNetwork;
 
 /** Population Spin. 
@@ -21,35 +20,13 @@ import spin.objects.SpinNetwork;
  */
 public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
-	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population. 
-	private ISpinNetProperties properties;
 	// Network associé a la population.
 	private SpinNetwork network;
-	
-	
-	
-	
-	/**
-	 * Permet d'assurer d'instancier l'interface avant la 1er utilisation
-	 * mais évite cette instanciation dans tous les cas d'utilisation.
-	 * ( Conversion du SpinNetwork en graphStream )
-	 * @return
-	 */
-	public ISpinNetProperties getProperties() {
-		if(properties == null)
-			properties = StatFactory.getInstance();
-		return properties;
-	}
 
-	/**
-	 * Permet d'assurer d'instancier du network avant la 1er utilisation
-	 * @return
-	 */
-	public SpinNetwork getNetwork() {
-		if(network == null)
-			network = SpinNetworkFactory.getInstance().getSpinNetwork();
-		return network;
-	}
+	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population.
+	// pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
+	// de certaines propriétés
+	private INetProperties properties;
 	
 	private final Collection<APopulationEntity> population;
 
@@ -60,12 +37,11 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	 * @param network
 	 */
 	public SpinPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popRef, 
-    SpinNetwork network, ISpinNetProperties prop){
+						 SpinNetwork network){
 		population = popRef;
 		this.network = network;
-		this.properties = prop;
+		this.properties = StatFactory.getInstance();
 	}
-	
 	
 	/**
 	 * Default inner type collection is {@link Set}
@@ -90,6 +66,14 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 			this.population = population;
 	}
 	
+	public SpinNetwork getNetwork() {
+		return network;
+	}
+
+	public INetProperties getProperties() {
+		return properties;
+	}
+
 	@Override
 	public int size() {
 		return population.size();

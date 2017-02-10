@@ -8,15 +8,15 @@ import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Graph;
 
 import core.metamodel.pop.APopulationEntity;
-import spin.interfaces.EGraphStreamNetworkType;
-import spin.interfaces.ISpinNetProperties;
+import spin.interfaces.EGraphStreamNetwork;
+import spin.interfaces.INetProperties;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Factory de stat, donne les infos sur les graphes
  * implémente @ISpinNetProperties, interface qui sera disponible dans SpinPopulation
  */
-public class StatFactory implements ISpinNetProperties{
+public class StatFactory implements INetProperties{
 	
 	// Singleton
 	private static StatFactory INSTANCE;
@@ -30,15 +30,7 @@ public class StatFactory implements ISpinNetProperties{
 	private StatFactory(){
 	}
 	
-	/** Pour les calculs qui nécessite la création d'un graphstream.
-	 * 
-	 */
-	private void initialiseGraphStreamFromSpin(){
-		GraphStreamFactory gsf = GraphStreamFactory.getIntance();
-		if(!gsf.containsGraphType(EGraphStreamNetworkType.spinNetwork))
-			gsf.generateGraphStreamGraph(SpinNetworkFactory.getInstance().getSpinNetwork());
-			
-	}
+
 
 	// -----------------------------------------
 	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
@@ -56,7 +48,7 @@ public class StatFactory implements ISpinNetProperties{
 	 * @param whichOne
 	 * @return
 	 */
-	private double getAverageClustering(EGraphStreamNetworkType whichOne){
+	private double getAverageClustering(EGraphStreamNetwork whichOne){
 		return 0;
 	}
 	
@@ -65,8 +57,8 @@ public class StatFactory implements ISpinNetProperties{
 	 * @param whichOne
 	 * @return
 	 */
-	public double getAPL(EGraphStreamNetworkType whichOne){
-		initialiseGraphStreamFromSpin();
+	public double getAPL(EGraphStreamNetwork whichOne){
+		GraphStreamFactory.getIntance().initialiseGraphStreamFromSpin();
 		Graph graph = GraphStreamFactory.getIntance().getGraphStreamGraph(whichOne);
 		APSP apsp = new APSP();
 		apsp.init(graph);
@@ -113,7 +105,7 @@ public class StatFactory implements ISpinNetProperties{
 	@Override
 	public double getAPL() {
 		
-		return getAPL(EGraphStreamNetworkType.spinNetwork);
+		return getAPL(EGraphStreamNetwork.spinNetwork);
 	}
 
 	@Override
