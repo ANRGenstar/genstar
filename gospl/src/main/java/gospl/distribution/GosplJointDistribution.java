@@ -5,8 +5,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import com.vividsolutions.jts.geom.GeometryComponentFilter;
-
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;

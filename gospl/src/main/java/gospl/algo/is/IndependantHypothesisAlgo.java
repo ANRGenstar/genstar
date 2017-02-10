@@ -108,7 +108,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		int iter = 1;
 		gspu.setObjectif(coordinates.size());
 		for(Set<APopulationValue> coordinate : coordinates){
-			if(gspu.getObjectif() / 100 % iter++ == 0)
+			if((gspu.getObjectif() / 100) % iter++ == 0)
 				gspu.sysoStempPerformance(0.1, this);
 			ACoordinate<APopulationAttribute, APopulationValue> coord = new GosplCoordinate(coordinate);
 			AControl<Double> freq = matrix.getVal(coord);
