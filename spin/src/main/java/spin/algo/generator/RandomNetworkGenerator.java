@@ -8,18 +8,19 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.interfaces.INetworkGenerator;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 public class RandomNetworkGenerator extends BaseGenerator 
 {
-	
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population, 0D);
-	}
-	
+
+	/** Génération d'un spinNetwork. 
+	 * 
+	 * @param population
+	 * @param proba
+	 * @return
+	 */
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
@@ -38,13 +39,15 @@ public class RandomNetworkGenerator extends BaseGenerator
 		NetworkLink link;
 		
 		// create the links
+		int link_id = 0;
 		while (nbLink>0) {
 			nodeFrom = nodes.get(rand.nextInt(nbNodes));
 			nodeTo = nodes.get(rand.nextInt(nbNodes));
-			link = new NetworkLink(nodeFrom,nodeTo,false);//link is not oriented
+			link = new NetworkLink(nodeFrom,nodeTo,false,String.valueOf(link_id));//link is not oriented
 			
 			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
 				nbLink--;
+				link_id++;
 				nodeFrom.addLink(link);
 				nodeTo.addLink(link);
 			}

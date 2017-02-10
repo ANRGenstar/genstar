@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 
-import org.apache.poi.util.SystemOutLogger;
-
 public class TestEtc {
 
 	public static void main(String[] args) {

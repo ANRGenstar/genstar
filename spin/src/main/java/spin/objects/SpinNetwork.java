@@ -5,6 +5,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import core.metamodel.pop.APopulationEntity;
+import spin.tools.Tools;
+
 
 
 /** Network composé de noeud et de lien
@@ -13,13 +16,19 @@ import java.util.Set;
 public class SpinNetwork {
 
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
+	// let set<networkLink> est commun a ceux donné aux noeuds
 	private Map<NetworkNode, Set<NetworkLink>> network;
+	// Map d'acces rapide;
+	public Map<NetworkNode, APopulationEntity> kvNodeEntityFastList;
+	public Map<APopulationEntity, NetworkNode> kvEntityNodeFastList;
 	
 	/** Constructeur sans param. 
 	 * 
 	 */
 	public SpinNetwork(){
 		network = new HashMap<NetworkNode, Set<NetworkLink>>();
+		kvNodeEntityFastList = new HashMap<NetworkNode, APopulationEntity>();
+		kvEntityNodeFastList = new HashMap<APopulationEntity, NetworkNode>();
 	}
 	
 	/**
@@ -28,16 +37,46 @@ public class SpinNetwork {
 	 * @param node the NetworkNode to add
 	 */
 	public void putNode(NetworkNode node) {
-		network.put(node, new HashSet<NetworkLink>());		
+		HashSet<NetworkLink> links = new HashSet<NetworkLink>();
+		network.put(node, links);
+		node.defineLinkHash(links);
+	
+		kvNodeEntityFastList.put(node, node.getEntity());
+		kvEntityNodeFastList.put(node.getEntity(), node);
 	}
 
+	/** Ajout de link aux listes de link des noeuds
+	 * 
+	 * @param link
+	 */
+	public void putLink(NetworkLink link){
+		Tools.addElementInHashArray(network, link.getFrom(), link);
+		Tools.addElementInHashArray(network, link.getTo(), link);
+	}
+	
+	/** Obtenir les noeuds du réseau
+	 * 
+	 * @return
+	 */
 	public Set<NetworkNode> getNodes() {
 		return network.keySet();
 	}
 	
+	/** Obtenir la liste de liens
+	 * 
+	 * @return
+	 */
 	public Set<NetworkLink> getLinks(){
 		HashSet<NetworkNode> nodes = new HashSet<>(this.getNodes());
-		HashSet<NetworkLink> links = new HashSet<>();
+		Set<NetworkLink> links  = new HashSet<>();
+		
+//		links = 
+//				network.values().stream()
+//				.flatMap(f -> f.stream())
+//				.distinct()
+//				.sorted()
+//				.collect(Collectors.toSet());
+				
 		for (NetworkNode n : nodes){
 			for (NetworkLink l : n.getLinks()){
 				if (!links.contains(l)){
@@ -47,10 +86,4 @@ public class SpinNetwork {
 		}
 		return links;
 	}
-	
-	
-	
-	// Methode de calcul quelconque
-	
-
 }

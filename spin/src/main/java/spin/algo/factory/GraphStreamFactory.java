@@ -6,10 +6,16 @@ import java.util.Map;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.DefaultGraph;
+import org.graphstream.stream.file.FileSink;
+import org.graphstream.stream.file.FileSinkGML;
+import org.graphstream.stream.file.FileSinkGraphML;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
 
 import spin.interfaces.EGraphStreamNetworkType;
+import spin.interfaces.ENetworkFormat;
+import spin.objects.NetworkLink;
+import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Factory de graph stream, gère le lien entre représensation SpinNetwork et GraphStream,
@@ -34,13 +40,33 @@ public class GraphStreamFactory {
 		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
 	}
 	
-	/** TODO Parcours des éléments du spinGraph pour en faire un graphStream.
+	/** 
+	 * 
+	 * @param whichOne
+	 * @return
+	 */
+	public Graph getGraphStreamGraph(EGraphStreamNetworkType whichOne){
+		return graphs.get(whichOne);
+	}
+	
+	/** Parcours des éléments du spinGraph pour en faire un graphStream.
 	 * Ajouté dans la liste des graphs,  associé a l'enum spinNetwork
 	 * 
 	 * @param spinNetwork a convertir en graphSteam
 	 */
-	public void getGraphStreamGraph(SpinNetwork spinNetwork){
-		// blablalba foreach node foreach link 
+	public void generateGraphStreamGraph(SpinNetwork spinNetwork){
+
+		Graph g = new DefaultGraph("g");
+		for (NetworkNode node : spinNetwork.getNodes()) {
+			g.addNode(node.getId());
+		}
+//		System.out.println(spinNetwork.getLinks());
+		for (NetworkLink link : spinNetwork.getLinks()) {
+			g.addEdge("e" + link.getFrom().getId() +"->" +link.getTo().getId(), link.getFrom().getId(), link.getTo().getId());
+		}
+		
+		graphs.put(EGraphStreamNetworkType.spinNetwork, g);
+		g.display();
 	}
 	
 	/** Lit un fichier texte et le converti en graph stream
@@ -68,15 +94,28 @@ public class GraphStreamFactory {
 	 * 
 	 * @return
 	 */
-	public void exportFile(EGraphStreamNetworkType whichOne){
-		
-	}
-	
-	/** Donne un ensemble de stat sur le graph. Créer une classe de stat pour ce faire? 
-	 *  TODO renvoyer un objet de properties?
-	 */
-	public void ensembleDesFonctionsDeStat(EGraphStreamNetworkType whichOne){
-		
+	public void exportFile(EGraphStreamNetworkType whichOne, ENetworkFormat format, String path){
+		Graph g = graphs.get(whichOne);
+		FileSink filesink = null;
+		switch (format) {
+		case GraphML:
+			filesink = new FileSinkGraphML();
+			break;
+
+		case GML:
+			filesink = new FileSinkGML();
+			break;
+			
+		default:
+			break;
+		}
+
+		try {
+			filesink.writeAll(g, path);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	/** Libère une référence a un graph dans la list qu'il puisse etre garbagé?
