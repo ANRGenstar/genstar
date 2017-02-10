@@ -4,8 +4,6 @@ package spin.interfaces;
  * spinNetwork: network courant 
  * fileRead: network lu depuis un fichier
  * 
- * @author Felix
- *
  */
 public enum EGraphStreamNetworkType {
 	spinNetwork,

@@ -7,20 +7,20 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.interfaces.INetworkGenerator;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 
-public class RegularNetworkGenerator  extends BaseGenerator{
+public class RegularNetworkGenerator extends BaseGenerator{
 
-	
-public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-	return generateNetwork(population, 4);//4 Valeur par défaut si la connectivite n'est pas précisée
-}	
-
-public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, int k) {
+	/**
+	 * 
+	 * @param population
+	 * @param k
+	 * @return
+	 */
+	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, int k) {
 		
 		//int k connectivité
 		//TODO: traiter le cas de conectivity pas paire ... 

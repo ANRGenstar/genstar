@@ -4,10 +4,10 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-/** Interface de générateur de réseau, commun a tous les générateurs. 
+/** MaJ: AUCUNE UTILITE? les fonctions de génération demande des paramètres différents  
+ * Interface de générateur de réseau, commun a tous les générateurs. 
  * 
  */
 public interface INetworkGenerator {
@@ -18,7 +18,7 @@ public interface INetworkGenerator {
 	 * @param population population en paramètre, implementant l'interface IPopulation 
 	 * @return un SpinNetwork
 	 */
-	public abstract SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population);
+//	public abstract SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population);
 
 	
 }

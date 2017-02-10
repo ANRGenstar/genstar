@@ -9,19 +9,24 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.interfaces.INetworkGenerator;
 import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class SWGenerator  extends BaseGenerator
+/**Générateur SmallWorld
+ * 
+ *
+ */
+public class SWGenerator extends BaseGenerator
 {
 	
-	@Override
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population,4,0.1D);
-	}
-	
+	/**
+	 * 
+	 * @param population
+	 * @param k
+	 * @param beta
+	 * @return
+	 */
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, int k, double beta){
 		//int k connectivity of the network
 		//double beta noise introduced on the regular network
@@ -49,10 +54,10 @@ public class SWGenerator  extends BaseGenerator
 					nodeFrom = nodes.get(rand.nextInt(nbNodes));
 					nodeTo = nodes.get(rand.nextInt(nbNodes));
 					link = new NetworkLink(nodeFrom,nodeTo,false,String.valueOf(link_id));//link is not oriented
-					link_id++;
 					
 					if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
 						linkCreated=true;
+						link_id++;
 						nodeFrom.addLink(link);
 						nodeTo.addLink(link);
 					}					

@@ -14,17 +14,17 @@ public class NetworkNode {
 	// Entity associated 
 	private APopulationEntity entity;
 	
-	// Connected node
+	// Non initalisé volontairement. Liste lié a celle de SpinNetwork
 	private Set<NetworkLink> links;
 	
+	// Id du node. 
 	private String id;
 	
 	
 	/** Constructeur sans paramètre.
 	 * 
 	 */
-	public NetworkNode(){
-		links = new HashSet<NetworkLink>();
+	private NetworkNode(){
 	}
 	
 	/** Constructeur de networkNode prenant une entité
@@ -37,10 +37,26 @@ public class NetworkNode {
 		this.id = id;
 	}
 	
+	/** Fait un lien entre la hash du spinNetwork et celle la.
+	 * 
+	 * @param links
+	 */
+	public void defineLinkHash(HashSet<NetworkLink> links){
+		this.links = links;
+	}
+	
+	/** Ajout d'un link dans la list linké avec celle du spinG.
+	 * 
+	 * @param link
+	 */
 	public void addLink(NetworkLink link){
 		links.add(link);
 	}
 	
+	/** Obtenir l'entité associée
+	 * 
+	 * @return
+	 */
 	public APopulationEntity getEntity() {
 		return entity;
 	}
