@@ -10,8 +10,10 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spin.algo.factory.SpinNetworkFactory;
 import spin.algo.factory.StatFactory;
 import spin.interfaces.ISpinNetProperties;
+import spin.objects.SpinNetwork;
 
 /** Population Spin. 
  * 
@@ -20,7 +22,12 @@ import spin.interfaces.ISpinNetProperties;
 public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
 	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population. 
-	public ISpinNetProperties properties;
+	private ISpinNetProperties properties;
+	// Network associé a la population.
+	private SpinNetwork network;
+	
+	
+	
 	
 	/**
 	 * Permet d'assurer d'instancier l'interface avant la 1er utilisation
@@ -34,7 +41,31 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 		return properties;
 	}
 
+	/**
+	 * Permet d'assurer d'instancier du network avant la 1er utilisation
+	 * @return
+	 */
+	public SpinNetwork getNetwork() {
+		if(network == null)
+			network = SpinNetworkFactory.getInstance().getSpinNetwork();
+		return network;
+	}
+	
 	private final Collection<APopulationEntity> population;
+
+	/**
+	 * 
+	 * @param popRef
+	 * @param prop
+	 * @param network
+	 */
+	public SpinPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popRef, 
+    SpinNetwork network, ISpinNetProperties prop){
+		population = popRef;
+		this.network = network;
+		this.properties = prop;
+	}
+	
 	
 	/**
 	 * Default inner type collection is {@link Set}

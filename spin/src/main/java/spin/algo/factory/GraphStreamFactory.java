@@ -46,6 +46,8 @@ public class GraphStreamFactory {
 	 * @return
 	 */
 	public Graph getGraphStreamGraph(EGraphStreamNetworkType whichOne){
+		Graph toReturn = graphs.get(whichOne);
+//		if(toReturn == null && whichOne == EGraph)
 		return graphs.get(whichOne);
 	}
 	
@@ -55,7 +57,8 @@ public class GraphStreamFactory {
 	 * @param spinNetwork a convertir en graphSteam
 	 */
 	public void generateGraphStreamGraph(SpinNetwork spinNetwork){
-
+		System.out.println("Generation d'un graphStream depuis un spin");
+		
 		Graph g = new DefaultGraph("g");
 		for (NetworkNode node : spinNetwork.getNodes()) {
 			g.addNode(node.getId());
@@ -66,7 +69,7 @@ public class GraphStreamFactory {
 		}
 		
 		graphs.put(EGraphStreamNetworkType.spinNetwork, g);
-		g.display();
+//		g.display();
 	}
 	
 	/** Lit un fichier texte et le converti en graph stream
@@ -123,9 +126,12 @@ public class GraphStreamFactory {
 	 * @param graph
 	 */
 	public void forgetGraph(EGraphStreamNetworkType whichOne){
-		graphs.put(whichOne, null);
+		graphs.remove(whichOne);
 	}
 	
+	public boolean containsGraphType(EGraphStreamNetworkType whichOne){
+		return graphs.containsKey(whichOne);
+	}
 	
 	
 }

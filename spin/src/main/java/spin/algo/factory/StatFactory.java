@@ -29,13 +29,23 @@ public class StatFactory implements ISpinNetProperties{
 	
 	private StatFactory(){
 	}
+	
+	/** Pour les calculs qui nécessite la création d'un graphstream.
+	 * 
+	 */
+	private void initialiseGraphStreamFromSpin(){
+		GraphStreamFactory gsf = GraphStreamFactory.getIntance();
+		if(!gsf.containsGraphType(EGraphStreamNetworkType.spinNetwork))
+			gsf.generateGraphStreamGraph(SpinNetworkFactory.getInstance().getSpinNetwork());
+			
+	}
 
 	// -----------------------------------------
 	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
 	// -----------------------------------------
 	
 	private double getDensitySpin(){
-		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
+		SpinNetwork network = SpinNetworkFactory.getInstance().getSpinNetwork();
 		double nbNodes = network.getNodes().size();
 		double nbLinks = network.getLinks().size();
 		return nbLinks / (nbNodes * (nbNodes-1));
@@ -56,6 +66,7 @@ public class StatFactory implements ISpinNetProperties{
 	 * @return
 	 */
 	public double getAPL(EGraphStreamNetworkType whichOne){
+		initialiseGraphStreamFromSpin();
 		Graph graph = GraphStreamFactory.getIntance().getGraphStreamGraph(whichOne);
 		APSP apsp = new APSP();
 		apsp.init(graph);
@@ -82,7 +93,7 @@ public class StatFactory implements ISpinNetProperties{
 	// -----------------------------------------
 	
 	private double getLocalClustering(NetworkNode node){
-		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
+		SpinNetwork network = SpinNetworkFactory.getInstance().getSpinNetwork();
 		Set<NetworkNode> voisins = new HashSet<NetworkNode>();
 		
 		try{
@@ -101,19 +112,20 @@ public class StatFactory implements ISpinNetProperties{
 	
 	@Override
 	public double getAPL() {
+		
 		return getAPL(EGraphStreamNetworkType.spinNetwork);
 	}
 
 	@Override
 	public double getClustering(APopulationEntity entite) {
-		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
+		SpinNetwork network = SpinNetworkFactory.getInstance().getSpinNetwork();
 		NetworkNode node = network.kvEntityNodeFastList.get(entite);
 		return getLocalClustering(node);
 	}
 	
 	public Set<APopulationEntity> getNeighboor(APopulationEntity entite){
 		Set<APopulationEntity> entities = new HashSet<APopulationEntity>();
-		SpinNetwork network = SpinNetworkFactory.getIntance().getSpinNetwork();
+		SpinNetwork network = SpinNetworkFactory.getInstance().getSpinNetwork();
 		NetworkNode node = network.kvEntityNodeFastList.get(entite);
 		
 		for (NetworkNode nodeNeigh : node.getNeighbours()) {
