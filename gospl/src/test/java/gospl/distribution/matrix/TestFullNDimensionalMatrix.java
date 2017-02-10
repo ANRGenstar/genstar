@@ -15,6 +15,7 @@ import core.metamodel.pop.APopulationAttribute;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
+import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.entity.attribute.GSEnumAttributeType;
 import gospl.entity.attribute.GosplAttributeFactory;
 
@@ -77,22 +78,22 @@ public class TestFullNDimensionalMatrix {
 			
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 			
-			m.setValue(1.0,   "Activite", "Sans emploi", "Age", "0-5");
-			m.setValue(1.0,   "Activite", "Sans emploi", "Age", "6-15");
+			m.setValue(1.0, "Activite", "Sans emploi", "Age", "0-5");
+			m.setValue(1.0, "Activite", "Sans emploi", "Age", "6-15");
 			m.setValue(0.3, "Activite", "Sans emploi", "Age", "16-25");
 			m.setValue(0.1, "Activite", "Sans emploi", "Age", "26-40");
 			m.setValue(0.2, "Activite", "Sans emploi", "Age", "40-55");
 			m.setValue(0.4, "Activite", "Sans emploi", "Age", "55 et plus");
 			
-			m.setValue(0.0,   "Activite", "Précaire", "Age", "0-5");
-			m.setValue(0.0,   "Activite", "Précaire", "Age", "6-15");
+			m.setValue(0.0, "Activite", "Précaire", "Age", "0-5");
+			m.setValue(0.0, "Activite", "Précaire", "Age", "6-15");
 			m.setValue(0.3, "Activite", "Précaire", "Age", "16-25");
 			m.setValue(0.2, "Activite", "Précaire", "Age", "26-40");
 			m.setValue(0.2, "Activite", "Précaire", "Age", "40-55");
 			m.setValue(0.1, "Activite", "Précaire", "Age", "55 et plus");
 			
-			m.setValue(0.0,   "Activite", "Employé", "Age", "0-5");
-			m.setValue(0.0,   "Activite", "Employé", "Age", "6-15");
+			m.setValue(0.0, "Activite", "Employé", "Age", "0-5");
+			m.setValue(0.0, "Activite", "Employé", "Age", "6-15");
 			m.setValue(0.3, "Activite", "Employé", "Age", "16-25");
 			m.setValue(0.7, "Activite", "Employé", "Age", "26-40");
 			m.setValue(0.6, "Activite", "Employé", "Age", "40-55");
@@ -105,6 +106,24 @@ public class TestFullNDimensionalMatrix {
 		} catch (GSIllegalRangedData e) {
 			throw new RuntimeException("the developer screwed up when writing unit tests. Just kill him, get rid of the body, and hire someone better.", e);
 		}
+	}
+	
+	/**
+	 * generates a segmented matrix with no mapping, based on  age X gender and age X csp
+	 * @return
+	 */
+	protected ASegmentedNDimensionalMatrix<Double> generateSegmentedNoMappingAgePyramidAndCSP() {
+		try {
+			return GosplNDimensionalMatrixFactory.getFactory().createDistributionFromDistributions(
+					generateGlobalFrequencyAgePyramid(),
+					generateGlobalFrequencyCSP()
+					);
+		} catch (IllegalDistributionCreation e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException("error in the construction of the test case", e);
+		}
+		
 	}
 	
 	
@@ -148,6 +167,11 @@ public class TestFullNDimensionalMatrix {
 
 		assertEquals("wrong computation of the probas", agePyramid.getVal("Genre","Homme","Genre","Femme","Age","0-5", "Age", "6-15").getValue(), agePyramid.getVal("Age","0-5", "Age", "6-15").getValue());
 
+	}
+	
+	public void testGetValSegmented() {
+		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
+		assertEquals("joined probability does not sum to 1", new Double(1.0), seg.getVal());
 	}
 
 }

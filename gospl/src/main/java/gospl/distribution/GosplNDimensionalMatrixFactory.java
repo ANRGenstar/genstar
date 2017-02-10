@@ -1,5 +1,6 @@
 package gospl.distribution;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -210,6 +211,19 @@ public class GosplNDimensionalMatrixFactory {
 	public ASegmentedNDimensionalMatrix<Double> createDistributionFromDistributions(
 			Set<AFullNDimensionalMatrix<Double>> innerDistributions) throws IllegalDistributionCreation{
 		return new GosplConditionalDistribution(innerDistributions);
+	}
+	
+	/**
+	 * Create a segmented matrix from multiple full matrix
+	 * 
+	 * @param innerDistributions
+	 * @return
+	 * @throws IllegalDistributionCreation
+	 */
+	@SuppressWarnings("unchecked")
+	public ASegmentedNDimensionalMatrix<Double> createDistributionFromDistributions(
+			AFullNDimensionalMatrix<Double>... innerDistributions) throws IllegalDistributionCreation{
+		return createDistributionFromDistributions(new HashSet<>(Arrays.asList(innerDistributions)));
 	}
 	
 	//////////////////////////////////////////////////
