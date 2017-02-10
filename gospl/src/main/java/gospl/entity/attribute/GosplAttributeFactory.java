@@ -30,9 +30,14 @@ public class GosplAttributeFactory {
 	private double minDouble = 0d;
 	private double maxDouble = 1d;
 
+	public static GosplAttributeFactory getFactory() {
+		return new GosplAttributeFactory();
+	}
+
 	public GosplAttributeFactory() {
 		this.parser = new GSDataParser();
 	}
+	
 
 	/**
 	 * Main method to instantiate {@link APopulationAttribute}. Concrete type depend on {@link GSAttDataType} passed in argument.

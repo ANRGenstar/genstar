@@ -23,6 +23,7 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
 /**
  * A set of joint distributions with links of dependancy between them. 
@@ -36,6 +37,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	protected GosplConditionalDistribution(Set<AFullNDimensionalMatrix<Double>> jointDistributionSet) throws IllegalDistributionCreation {
 		super(jointDistributionSet);
 	}
+	
 
 	// --------------- Main contract --------------- //
 
@@ -129,6 +131,19 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return jds.iterator().next().addValue(coordinates, value);
 	}
 
+	@Override
+	public final boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, Double value) {
+		return addValue(coordinates, new ControlFrequency(value));
+	}
+
+
+	@Override
+	public final boolean addValue(Double value, String... coordinates) {
+		
+		return this.addValue(this.getCoordinate(coordinates), value);
+	}
+
+
 
 	@Override
 	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, AControl<? extends Number> value) {
@@ -139,6 +154,17 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return jds.iterator().next().setValue(coordinates, value);
 	}
 
+	@Override
+	public final boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, Double value) {
+		return setValue(coordinate, new ControlFrequency(value));
+	}
+	
+	@Override
+	public final boolean setValue(Double value, String... coordinates) {
+		return setValue(GosplCoordinate.createCoordinate(this.getDimensions(), coordinates), value);
+	}
+
+	
 	// ------------------ Side contract ------------------ //  
 
 	@Override
@@ -220,5 +246,37 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		}
 		return output;
 	}
+
+
+	@Override
+	public void normalize() throws IllegalArgumentException {
+
+		throw new IllegalArgumentException("should not normalize a "+getMetaDataType());		
+		
+	}
+
+
+	@Override
+	public boolean checkAllCoordinatesHaveValues() {
+		return false;
+	}
+
+
+	@Override
+	public boolean checkGlobalSum() {
+		// TODO Auto-generated method stub
+		return true;
+	}
+
+
+	@Override
+	public AControl<Double> getVal(String... coordinates) {
+
+		return getVal(this.getAttributes(coordinates));
+
+	}
+
+
+
 	
 }

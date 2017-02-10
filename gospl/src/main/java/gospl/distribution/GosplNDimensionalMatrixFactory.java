@@ -1,5 +1,6 @@
 package gospl.distribution;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -34,6 +35,9 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  */
 public class GosplNDimensionalMatrixFactory {
 
+	public static final GosplNDimensionalMatrixFactory getFactory() {
+		return new GosplNDimensionalMatrixFactory();
+	}
 	
 	//////////////////////////////////////////////
 	//				EMPTY MATRIX				//
@@ -46,13 +50,22 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
-			Set<APopulationAttribute> dimensions){
+			Set<APopulationAttribute> dimensions, GSSurveyType type){
 		AFullNDimensionalMatrix<Double> matrix =  new GosplJointDistribution(dimensions.stream().collect(Collectors.toMap(dim -> dim, dim -> dim.getValues())), 
-				GSSurveyType.GlobalFrequencyTable);
+				type);
 		matrix.addGenesis("created from scratch GosplNDimensionalMatrixFactory@createEmptyDistribution");
 		return matrix;
 	}
 	
+	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
+			Set<APopulationAttribute> dimensions){
+		return createEmptyDistribution(dimensions, GSSurveyType.GlobalFrequencyTable);
+	}
+
+	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
+			APopulationAttribute ... dimensions){
+		return createEmptyDistribution(new HashSet(Arrays.asList(dimensions)), GSSurveyType.GlobalFrequencyTable);
+	}
 	/**
 	 * Create an empty segmented distribution
 	 * 
@@ -73,8 +86,6 @@ public class GosplNDimensionalMatrixFactory {
 	/**
 	 * Create a distribution from a map: key are mapped to matrix coordinate
 	 * and value to matrix control value
-	 * <p>
-	 * WARNING: make use of parallelism through {@link Stream#parallel()}
 	 * 
 	 * @param sampleDistribution
 	 * @return
@@ -84,7 +95,7 @@ public class GosplNDimensionalMatrixFactory {
 		if(sampleDistribution.isEmpty())
 			throw new IllegalArgumentException("Sample distribution cannot be empty");
 		AFullNDimensionalMatrix<Double> distribution = this.createEmptyDistribution(dimensions);
-		sampleDistribution.entrySet().parallelStream().forEach(entry -> distribution.addValue(
+		sampleDistribution.entrySet().stream().forEach(entry -> distribution.addValue(
 				new GosplCoordinate(entry.getKey()), new ControlFrequency(entry.getValue())));
 		return distribution;
 	}
@@ -203,6 +214,19 @@ public class GosplNDimensionalMatrixFactory {
 	public ASegmentedNDimensionalMatrix<Double> createDistributionFromDistributions(
 			Set<AFullNDimensionalMatrix<Double>> innerDistributions) throws IllegalDistributionCreation{
 		return new GosplConditionalDistribution(innerDistributions);
+	}
+	
+	/**
+	 * Create a segmented matrix from multiple full matrix
+	 * 
+	 * @param innerDistributions
+	 * @return
+	 * @throws IllegalDistributionCreation
+	 */
+	@SuppressWarnings("unchecked")
+	public ASegmentedNDimensionalMatrix<Double> createDistributionFromDistributions(
+			AFullNDimensionalMatrix<Double>... innerDistributions) throws IllegalDistributionCreation{
+		return createDistributionFromDistributions(new HashSet<>(Arrays.asList(innerDistributions)));
 	}
 	
 	//////////////////////////////////////////////////

@@ -2,6 +2,10 @@ package gospl.distribution;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import com.vividsolutions.jts.geom.GeometryComponentFilter;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -21,10 +25,19 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 
-	protected GosplJointDistribution(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, 
+	public GosplJointDistribution(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, 
 			GSSurveyType metaDataType) {
 		super(dimensionAspectMap, metaDataType);
 	}
+	
+	public GosplJointDistribution(Set<APopulationAttribute> attributes, GSSurveyType metaDataType) {
+		this(
+			attributes.stream().collect(Collectors.toMap(Function.identity(), APopulationAttribute::getValues)),
+			metaDataType
+			);
+	}
+
+
 		
 	// ----------------------- SETTER CONTRACT ----------------------- //
 	
@@ -35,6 +48,11 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 			return false;
 		return setValue(coordinates, value);
 	}
+	
+	@Override
+	public final boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, Double value) {
+		return addValue(coordinates, new ControlFrequency(value));
+	}
 
 	@Override
 	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, AControl<? extends Number> value){
@@ -44,6 +62,12 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 			return true;
 		}
 		return false;
+	}
+	
+
+	@Override
+	public final boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, Double value) {
+		return setValue(coordinate, new ControlFrequency(value));
 	}
 	
 	// ----------------------- CONTRACT ----------------------- //
@@ -66,5 +90,15 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 		return new ControlFrequency(parser.getDouble(val));
 	}
 
+	@Override
+	public void normalize() throws IllegalArgumentException {
+
+		Double total = getVal().getValue();
+		
+		for (AControl<Double> c: getMatrix().values()) {
+			c.multiply(1/total);
+		}
+			
+	}
 	
 }

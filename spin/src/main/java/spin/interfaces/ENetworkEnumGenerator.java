@@ -6,5 +6,7 @@ package spin.interfaces;
  */
 public enum ENetworkEnumGenerator {
 	SmallWorld,
-	ScaleFree;
+	ScaleFree,
+	Random,
+	Regular;
 }

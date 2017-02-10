@@ -66,6 +66,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.collect(Collectors.joining(" x "));
 	}
 	
+	public AFullNDimensionalMatrix(Set<APopulationAttribute> attributes, GSSurveyType metaDataType) {
+		this(
+				attributes.stream().collect(Collectors.toMap(Function.identity(),APopulationAttribute::getValues)),
+				metaDataType
+				);
+	}
 
 	/**
 	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
@@ -141,6 +147,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	// ---------------------- GLOBAL ACCESSORS ---------------------- //
 
+
+	@Override
+	public final boolean addValue(T value, String... coordinates) {
+		return this.addValue(GosplCoordinate.createCoordinate(dimensions.keySet(), coordinates), value);
+	}
+
+	@Override
+	public final boolean setValue(T value, String... coordinates) {
+		return this.setValue(GosplCoordinate.createCoordinate(dimensions.keySet(), coordinates), value);
+	}
+
+	
 	@Override
 	public int size(){
 		return matrix.size();
@@ -225,15 +243,13 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	/**
 	 * {@inheritDoc}
-	 * <p>
-	 * WARNING: make use of parallelism through {@link Stream#parallel()}
 	 */
 	@Override
 	public AControl<T> getVal(APopulationValue aspect) {
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
 			throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
 		AControl<T> result = getNulVal();
-		for(AControl<T> control : this.matrix.entrySet().parallelStream()
+		for(AControl<T> control : this.matrix.entrySet().stream()
 				.filter(e -> e.getKey().values().contains(aspect))
 				.map(Entry::getValue).collect(Collectors.toSet()))
 			getSummedControl(result, control);
@@ -264,6 +280,38 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.map(Entry::getValue).collect(Collectors.toSet()))
 			getSummedControl(result, control);
 		return result;
+	}
+	
+	public final AControl<T> getVal(String ... coordinates) {
+		
+		Collection<APopulationValue> l = new LinkedList<>();
+		
+		// collect all the attributes and index their names
+		Map<String,APopulationAttribute> name2attribute = dimensions.keySet().stream()
+															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
+
+		if (coordinates.length % 2 != 0) {
+			throw new IllegalArgumentException("values should be passed in even count, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+		}
+		
+		// lookup values
+		for (int i=0; i<coordinates.length; i=i+2) {
+			
+			final String attributeName = coordinates[i];
+			final String attributeValueStr = coordinates[i+1];
+			
+			APopulationAttribute attribute = name2attribute.get(attributeName);
+			if (attribute == null)
+				throw new IllegalArgumentException("unknown attribute "+attributeName);
+			l.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
+			
+		}
+		
+		return getVal(l);
+	}
+	
+	public final AControl<T> getVal(APopulationValue ... aspects) {
+		return getVal(Arrays.asList(aspects));
 	}
 	
 	///////////////////////////////////////////////////////////////////////////
@@ -368,5 +416,102 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		}
 		return csv;
 	}
+
+
+	@Override
+	public boolean checkAllCoordinatesHaveValues() {
+		
+		return matrix.size() == dimensions.values().stream().mapToInt(Set::size).reduce(1, (a, b) -> a * b);
+
+	}
 	
+
+	@Override
+	public boolean checkGlobalSum() {
+		
+		switch (dataType) {
+			
+			case GlobalFrequencyTable:
+				return (Double)getVal().getValue() == 1.0;
+			case LocalFrequencyTable:
+			case Sample:
+			case ContingencyTable:
+					return true;
+			default:
+				throw new IllegalStateException("unknown state "+dataType);
+			
+		}
+		
+	}
+
+
+	@Override
+	public APopulationAttribute getDimension(String name) throws IllegalArgumentException {
+		
+		for (APopulationAttribute a: dimensions.keySet())
+			if (a.getAttributeName().equals(name))
+				return a;
+
+		throw new IllegalArgumentException(
+				"unknown dimension "+name+"; available dimensions are "+
+				dimensions.keySet().stream().map(d -> d.getAttributeName()).reduce("", (u,t)->u+","+t)
+				);
+	}
+
+
+	@Override
+	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
+			throws IllegalArgumentException {
+
+		return getCoordinates(getAttributes(keyAndVal));
+	}
+	
+
+
+	@Override
+	public Set<APopulationValue> getAttributes(String... keyAndVal) throws IllegalArgumentException {
+
+		Set<APopulationValue> coordinateValues = new HashSet<>();
+		
+		// collect all the attributes and index their names
+		Map<String,APopulationAttribute> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
+															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
+
+		if (keyAndVal.length/2 != name2attribute.size()) {
+			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+		}
+		
+		// lookup values
+		for (int i=0; i<keyAndVal.length; i=i+2) {
+			final String attributeName = keyAndVal[i];
+			final String attributeValueStr = keyAndVal[i+1];
+			
+			APopulationAttribute attribute = name2attribute.get(attributeName);
+			if (attribute == null)
+				throw new IllegalArgumentException("unknown attribute "+attributeName);
+			coordinateValues.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
+
+		}
+		
+		return coordinateValues;
+	}
+	
+
+	@Override
+	public ACoordinate<APopulationAttribute, APopulationValue> getCoordinate(String... keyAndVal)
+			throws IllegalArgumentException {
+		
+		Collection<ACoordinate<APopulationAttribute, APopulationValue>> s = getCoordinates(keyAndVal);
+				
+		if (s.size() > 1) 
+			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
+		
+		if (s.isEmpty()) 
+			throw new IllegalArgumentException("these coordinates do not map to any cell in the matrix");
+
+		
+		return s.iterator().next();
+	}
+	
+
 }

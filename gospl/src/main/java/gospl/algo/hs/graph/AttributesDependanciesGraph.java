@@ -62,9 +62,30 @@ public class AttributesDependanciesGraph {
 	
 	public AttributesDependanciesGraph() {
 		
-
 	}
 
+
+	/**
+	 * utility: display an edge in a nice way
+	 * @param e
+	 * @return
+	 */
+	protected String edgeToString(Edge e) {
+		StringBuffer sb = new StringBuffer();
+		sb.append(e.getSourceNode().getId());
+		sb.append("--[");
+		sb.append(e.getAttribute(EDGE_ATTRIBUTE_TYPE).toString().toLowerCase());
+		sb.append("]-->");
+		sb.append(e.getTargetNode().getId());
+		return sb.toString();
+	}
+	
+	/**
+	 * Builds a graph of dependancy between attributes based on a segmented matrix. Will open it and explore the 
+	 * matricies inside it. 
+	 * @param segmentedMatrix
+	 * @return
+	 */
 	public static AttributesDependanciesGraph constructDependancies(ASegmentedNDimensionalMatrix<?> segmentedMatrix) {
 		
 		AttributesDependanciesGraph dependancies = new AttributesDependanciesGraph();
@@ -138,11 +159,23 @@ public class AttributesDependanciesGraph {
 					e.setAttribute(EDGE_ATTRIBUTE_MATRIX, currentMatrix);
 					e.setAttribute(EDGE_ATTRIBUTE_TYPE, EdgeDependancyType.GLOBAL_FREQUENCY);
 				} catch (EdgeRejectedException e) {
-					throw new IllegalArgumentException(
-							"when importing the matrix "+currentMatrix.getLabel()+
-							", unable to add edge "+from+"->"+to
-							+", because another edge is already present. Genesis of the matrix:\n"+currentMatrix.getGenesisAsString()
-							);
+					Edge existing_edge = graph.getNode(to).getEdgeToward(from);
+					if (existing_edge == null)
+						existing_edge = graph.getNode(from).getEdgeToward(to);
+					
+					StringBuffer msg = new StringBuffer();
+					msg.append("when importing the matrix ").append(currentMatrix.getLabel());
+					msg.append(", unable to add edge ").append(from).append("->").append(to);
+					msg.append(", because another edge is already present.\n");
+					msg.append("Previous edge is: ").append(edgeToString(existing_edge));
+					AFullNDimensionalMatrix<?> previousMatrix = existing_edge.getAttribute(EDGE_ATTRIBUTE_MATRIX);
+					if (previousMatrix != null)
+						msg.append(", it came from matrix ").append(previousMatrix.getLabel()).append(previousMatrix.getGenesisAsString());
+					msg.append("\n");
+					msg.append("genesis of the novel matrix: ").append(currentMatrix.getGenesisAsString());
+					
+					logger.error(msg.toString());
+					throw new IllegalArgumentException(msg.toString());
 				}
 			}
 		}
@@ -339,7 +372,9 @@ public class AttributesDependanciesGraph {
 		}
 		sb.append("\n");
 		
+		// general attributes of edges
 		sb.append("\tedge [len=2];\n");
+		
 		// add edges
 		for (Edge e: graph.getEdgeSet()) {
 			
