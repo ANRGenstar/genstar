@@ -26,13 +26,6 @@ import gospl.entity.attribute.GosplAttributeFactory;
 
 public class TestFullNDimensionalMatrix {
 
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
 	
 	
 	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeGender() {
@@ -317,12 +310,21 @@ public class TestFullNDimensionalMatrix {
 
 	@Test
 	public void testGetValSegmentedWithMapping() {
-		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedWithMappingAgePyramidAndCSP();
+		
+		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
+		
+		ASegmentedNDimensionalMatrix<Double> seg2 = generateSegmentedWithMappingAgePyramidAndCSP();
 		
 		assertEquals(
-				"wrong joined distribution", 
-				0.0048d, 
-				seg.getVal("Age2","26-55","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
+				"wrong joined distribution on same age", 
+				seg.getVal("Age","16-25","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
+				seg2.getVal("Age","16-25","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
+				0.001
+				);
+		assertEquals(
+				"wrong joined distribution on mapped age", 
+				seg.getVal("Age","26-40","Age","40-55","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
+				seg2.getVal("Age2","26-55","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
 				0.001
 				);
 
