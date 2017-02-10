@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -44,6 +45,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	protected String label = null;
 	
+	protected List<String> genesis = new LinkedList<>();
+	
 	// ----------------------- CONSTRUCTORS ----------------------- //
 
 	/**
@@ -59,8 +62,47 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
 		this.emptyCoordinate = new GosplCoordinate(Collections.<APopulationValue>emptySet());
+		this.label = dimensionAspectMap.keySet().stream().map(dim -> dim.getAttributeName().length()>3?dim.getAttributeName().substring(0, 3):dim.getAttributeName())
+				.collect(Collectors.joining(" x "));
+	}
+	
+
+	/**
+	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
+	 * current state. Useful to expose meaningful error messages to the user.
+	 * @return
+	 */
+	public List<String> getGenesisAsList() {
+		return Collections.unmodifiableList(genesis);
 	}
 		
+	/**
+	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
+	 * current state. Useful to expose meaningful error messages to the user.
+	 * @return
+	 */
+	public String getGenesisAsString() {
+		return String.join("->", genesis);
+	}
+	
+	/**
+	 * imports into this matrix the genesis of another one. 
+	 * Should be called after creating a matrix to keep a memory of where it comes from.
+	 * @param o
+	 */
+	public void inheritGenesis(AFullNDimensionalMatrix<?> o) {
+		genesis.addAll(o.getGenesisAsList());
+	}
+	
+	/**
+	 * add one line to the genesis (history) of this matrix. 
+	 * This line should better be kept quiet short for readibility.
+	 * @param step
+	 */
+	public void addGenesis(String step) {
+		genesis.add(step);
+	}
+	
 	// ------------------------- META DATA ------------------------ //
 
 	@Override

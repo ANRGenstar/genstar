@@ -225,6 +225,7 @@ public class GosplDistributionBuilder {
 				else
 					jDistribution = new GosplJointDistribution(dimTable, survey.getDataFileType());
 				jDistribution.setLabel(survey.getName());
+				jDistribution.addGenesis("from file "+survey.getName());
 				// Fill in the matrix through line & column
 				for (final Integer row : rowHeaders.entrySet().stream()
 						.filter(e -> e.getValue().stream().allMatch(v -> rSchema.contains(v.getAttribute())))
@@ -259,9 +260,7 @@ public class GosplDistributionBuilder {
 	private AFullNDimensionalMatrix<Double> getFrequency(final AFullNDimensionalMatrix<? extends Number> matrix)
 			throws IllegalControlTotalException {
 		// returned matrix
-		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
-				matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
-				GSSurveyType.GlobalFrequencyTable);
+		AFullNDimensionalMatrix<Double> freqMatrix = null;
 		
 		if (matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
 			// Identify local referent dimension
@@ -291,7 +290,6 @@ public class GosplDistributionBuilder {
 				freqMatrix = new GosplJointDistribution(
 						matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
 						GSSurveyType.GlobalFrequencyTable);
-				freqMatrix.setLabel((matrix.getLabel()==null?"?/joint":matrix.getLabel()+"/joint"));
 				final AFullNDimensionalMatrix<? extends Number> matrixOfReference = optionalRef.get();
 				final double totalControl =
 						matrixOfReference.getVal(localReferentDimension.getValues()).getValue().doubleValue();
@@ -306,7 +304,7 @@ public class GosplDistributionBuilder {
 									* freqControls.get(controlKey.getMap().get(localReferentDimension))));
 				}
 			} else
-				throw new IllegalControlTotalException("The matrix (" + matrix.hashCode()
+				throw new IllegalControlTotalException("The matrix (" + matrix.getLabel()
 						+ ") must be align to globale frequency table but lack of a referent matrix", matrix);
 		} else {
 			// Init output matrix
@@ -333,6 +331,10 @@ public class GosplDistributionBuilder {
 							matrix.getVal(coord).getValue().doubleValue() / total.getValue().doubleValue()));
 			}
 		}
+		
+		freqMatrix.inheritGenesis(matrix);
+		freqMatrix.addGenesis("converted to frequency GosplDistributionBuilder@@getFrequency");
+
 		return freqMatrix;
 	}
 
@@ -354,10 +356,9 @@ public class GosplDistributionBuilder {
 			final Map<APopulationAttribute, APopulationValue> entityAttributes = new HashMap<>();
 			final List<String> indiVals = survey.readLine(i);
 			if(indiVals.size() <= maxIndivSize){
-				/*
-				logger.info("One individual does not fit required number of attributes: \n"
+				logger.trace("One individual does not fit required number of attributes: \n"
 						+ Arrays.toString(indiVals.toArray()));
-						*/
+						
 				unmatchSize++;
 				continue;
 			}
@@ -369,7 +370,8 @@ public class GosplDistributionBuilder {
 				else if(columnHeaders.get(idx).getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(columnHeaders.get(idx), columnHeaders.get(idx).getEmptyValue());
 				else{
-					//logger.info("Data modality "+indiVals.get(idx)+" does not match any value for attribute "+columnHeaders.get(idx).getAttributeName());
+					logger.trace("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+							+columnHeaders.get(idx).getAttributeName());
 					unmatchSize++;
 				}
 			}
@@ -382,7 +384,7 @@ public class GosplDistributionBuilder {
 	}
 	
 	/*
-	 * TODO: describe
+	 * Result in the same matrix without any record attribute
 	 */
 	private AFullNDimensionalMatrix<Double> getTransposedRecord(
 			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
@@ -395,12 +397,12 @@ public class GosplDistributionBuilder {
 		gspu.sysoStempPerformance(0, this);
 		gspu.setObjectif(recordMatrices.getMatrix().size());
 		
-		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(
-				recordMatrices.getDimensions().stream().filter(d -> dims.contains(d))
-				.collect(Collectors.toMap(d -> d, d -> d.getValues())),
-				GSSurveyType.GlobalFrequencyTable);
-		
-		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal(dims.iterator().next().getValues());
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplJointDistribution(dims.stream()
+				.collect(Collectors.toMap(d -> d, d -> d.getValues())), GSSurveyType.GlobalFrequencyTable);
+		freqMatrix.inheritGenesis(recordMatrices);
+		freqMatrix.addGenesis("transposted by GosplDistributionBuilder@getTransposedRecord");
+
+		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal();
 		
 		int iter = 1;
 		for(ACoordinate<APopulationAttribute, APopulationValue> oldCoord : recordMatrices.getMatrix().keySet()){

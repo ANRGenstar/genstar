@@ -6,34 +6,63 @@ import java.util.Set;
 import core.metamodel.pop.APopulationEntity;
 
 /** Node of the SpinNetwork, linked to a GosplEntity (an individual from population generation module)
- * 
+ * TODO Doublon d'informations sur les lienconnectés avec la liste ici et l'objet spinNetwork.
  * @author Felix, FredA722
- *
- * @param <E>
  */
 public class NetworkNode {
+	
 	// Entity associated 
 	private APopulationEntity entity;
 	
-	// Connected node
+	// Non initalisé volontairement.
 	private Set<NetworkLink> links;
+	
+	// Id du node. 
+	private String id;
+	
+	
+	/** Constructeur sans paramètre.
+	 * 
+	 */
+	private NetworkNode(){
+	}
 	
 	/** Constructeur de networkNode prenant une entité
 	 * 
 	 * @param entite
 	 */
-	
-	public NetworkNode(APopulationEntity entite){
+	public NetworkNode(APopulationEntity entite, String id){
+		this();
 		entity = entite;
-		links = new HashSet<NetworkLink>();
+		this.id = id;
 	}
 	
+	/** Fait un lien entre la hash du spinNetwork et celle la.
+	 * 
+	 * @param links
+	 */
+	public void defineLinkHash(HashSet<NetworkLink> links){
+		this.links = links;
+	}
+	
+	/** Ajout d'un link dans la list linké avec celle du spinG.
+	 * 
+	 * @param link
+	 */
 	public void addLink(NetworkLink link){
 		links.add(link);
 	}
 	
+	/** Obtenir l'entité associée
+	 * 
+	 * @return
+	 */
 	public APopulationEntity getEntity() {
 		return entity;
+	}
+	
+	public String getId(){
+		return id;
 	}
 	
 	public Set<NetworkLink> getLinks(){

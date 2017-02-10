@@ -11,7 +11,7 @@
     <Logger name="test.util.R" level="trace" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-    <Logger name="../gospl.algo.ipf.util.MarginalsIPFProcessor" level="INFO" additivity="false">
+    <Logger name="gospl.algo.ipf.margin.MarginalsIPFProcessor" level="INFO" additivity="false">
     	<AppenderRef ref="Console"/>
     </Logger>
     <Root level="debug">

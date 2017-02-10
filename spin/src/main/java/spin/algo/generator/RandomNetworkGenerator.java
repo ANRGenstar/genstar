@@ -12,19 +12,21 @@ import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
-public class RandomNetworkGenerator implements INetworkGenerator 
+public class RandomNetworkGenerator extends BaseGenerator 
 {
-	
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-		return this.generateNetwork(population,0D);
-	}
-	
+
+	/**
+	 * 
+	 * @param population
+	 * @param proba
+	 * @return
+	 */
 	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
 		
 		// create the spinNetwork
-		SpinNetwork myNetwork = INetworkGenerator.loadPopulation(population);
+		SpinNetwork myNetwork = loadPopulation(population);
 		
 		// List the created nodes
 		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
@@ -37,13 +39,15 @@ public class RandomNetworkGenerator implements INetworkGenerator
 		NetworkLink link;
 		
 		// create the links
+		int link_id = 0;
 		while (nbLink>0) {
 			nodeFrom = nodes.get(rand.nextInt(nbNodes));
 			nodeTo = nodes.get(rand.nextInt(nbNodes));
-			link = new NetworkLink(nodeFrom,nodeTo,false);//link is not oriented
+			link = new NetworkLink(nodeFrom,nodeTo,false,String.valueOf(link_id));//link is not oriented
 			
 			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
 				nbLink--;
+				link_id++;
 				nodeFrom.addLink(link);
 				nodeTo.addLink(link);
 			}
