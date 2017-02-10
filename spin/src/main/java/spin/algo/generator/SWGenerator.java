@@ -13,6 +13,10 @@ import spin.objects.NetworkLink;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
+/**Générateur SmallWorld
+ * 
+ *
+ */
 public class SWGenerator extends BaseGenerator
 {
 	

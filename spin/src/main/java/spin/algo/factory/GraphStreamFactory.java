@@ -38,7 +38,6 @@ public class GraphStreamFactory {
 	
 	private GraphStreamFactory(){
 		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
-		StatFactory.getInstance().setRefToGraphList(graphs);
 	}
 	
 	/** 

@@ -47,6 +47,5 @@ public class SpinNetworkFactory {
 	public SpinNetwork getSpinNetwork(){
 		return this.network;
 	}
- 
 	
 }

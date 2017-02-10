@@ -15,7 +15,7 @@ import spin.objects.SpinNetwork;
 public class RandomNetworkGenerator extends BaseGenerator 
 {
 
-	/**
+	/** Génération d'un spinNetwork. 
 	 * 
 	 * @param population
 	 * @param proba

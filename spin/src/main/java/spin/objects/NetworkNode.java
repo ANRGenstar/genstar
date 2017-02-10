@@ -14,7 +14,7 @@ public class NetworkNode {
 	// Entity associated 
 	private APopulationEntity entity;
 	
-	// Non initalisé volontairement.
+	// Non initalisé volontairement. Liste lié a celle de SpinNetwork
 	private Set<NetworkLink> links;
 	
 	// Id du node. 

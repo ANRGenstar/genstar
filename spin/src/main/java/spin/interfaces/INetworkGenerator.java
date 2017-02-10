@@ -6,7 +6,8 @@ import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import spin.objects.SpinNetwork;
 
-/** Interface de générateur de réseau, commun a tous les générateurs. 
+/** MaJ: AUCUNE UTILITE? les fonctions de génération demande des paramètres différents  
+ * Interface de générateur de réseau, commun a tous les générateurs. 
  * 
  */
 public interface INetworkGenerator {

@@ -1,8 +1,6 @@
 package spin.algo.factory;
 
 import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.Set;
 
 import org.graphstream.algorithm.APSP;
@@ -16,13 +14,9 @@ import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Factory de stat, donne les infos sur les graphes
- * 
+ * implémente @ISpinNetProperties, interface qui sera disponible dans SpinPopulation
  */
 public class StatFactory implements ISpinNetProperties{
-
-	// Map de networkType <-> graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
-	// TODO besoin éventuelle d'une synchronisation?
-	Map<EGraphStreamNetworkType, Graph> graphs;
 	
 	// Singleton
 	private static StatFactory INSTANCE;
@@ -34,18 +28,8 @@ public class StatFactory implements ISpinNetProperties{
 	}
 	
 	private StatFactory(){
-		graphs = new Hashtable<EGraphStreamNetworkType, Graph>();
 	}
-	
-	/** A appeler dans le constrcuteur du GSFactory pour faire un lien direct
-	 * entre les deux listes. 
-	 * 
-	 * @param GSFactoryList
-	 */
-	public void setRefToGraphList(Map<EGraphStreamNetworkType, Graph> GSFactoryList){
-		this.graphs = GSFactoryList;
-	}
-	
+
 	// -----------------------------------------
 	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
 	// -----------------------------------------
@@ -65,7 +49,7 @@ public class StatFactory implements ISpinNetProperties{
 	 * @return
 	 */
 	public double getAPL(EGraphStreamNetworkType whichOne){
-		Graph graph = graphs.get(whichOne);
+		Graph graph = GraphStreamFactory.getIntance().getGraphStreamGraph(whichOne);
 		APSP apsp = new APSP();
 		apsp.init(graph);
 		apsp.setDirected(false);
@@ -102,11 +86,7 @@ public class StatFactory implements ISpinNetProperties{
 		}
 		
 		return 0;
-		
 	}
-	
-	
-	
 	
 	// -------------------------------------------
 	// --- PARTIE FONCTION LIEES A L'INTERFACE ---
@@ -135,7 +115,5 @@ public class StatFactory implements ISpinNetProperties{
 		
 		return entities;
 	}
-	
-	
 	
 }

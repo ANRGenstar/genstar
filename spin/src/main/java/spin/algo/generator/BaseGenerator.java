@@ -8,6 +8,10 @@ import spin.interfaces.INetworkGenerator;
 import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
+/** Fonction commune à tous les générateurs.
+ * 
+ *
+ */
 public abstract class BaseGenerator implements INetworkGenerator {
 	
 	/** Création depuis une population d'autant de noeud associés a chaque entité.

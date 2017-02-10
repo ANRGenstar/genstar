@@ -14,7 +14,6 @@ import spin.objects.SpinNetwork;
 
 public class RegularNetworkGenerator extends BaseGenerator{
 
-
 	/**
 	 * 
 	 * @param population
