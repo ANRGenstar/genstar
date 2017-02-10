@@ -39,7 +39,8 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	/**
 	 * Retrieve the matrix value according to the coordinate passed in method parameter. 
 	 * <p>
-	 * WARNING: return the actual control associated to this matrix
+	 * <b>WARNING: return the actual control associated to this matrix. 
+	 * This method enables a direct access to the content of the matrix with no computation at all.</b>
 	 * 
 	 * @param coordinate
 	 * @return {@link AControl} associated to the given {@link ACoordinate}
@@ -64,6 +65,25 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(Collection<A> aspects);
 	
 	/**
+	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension.
+	 * Pass parameters as: "gender", "female", "age", "60 and more", ... 
+	 * 
+	 * @param coordinates
+	 * @return
+	 */
+	public AControl<T> getVal(String ... coordinates);
+	
+	/**
+	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension
+	 * 
+	 * @param aspects
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public AControl<T> getVal(A ... aspects);
+
+	
+	/**
 	 * Compute the total sum of the entire matrix
 	 * 
 	 * @return
@@ -82,6 +102,28 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public boolean addValue(ACoordinate<D, A> coordinates, AControl<? extends Number> value);
 	
 	/**
+	 * Add a new value associated with a new coordinate. The add can fails if the specified coordinate in parameter
+	 * has already be binding with another value
+	 * 
+	 * @param coordinates
+	 * @param value
+	 * @return
+	 */
+	public boolean addValue(ACoordinate<D, A> coordinates, T value);
+	
+	/**
+	 * Add a new value associated with a new coordinate. The add can fails if the specified coordinate in parameter
+	 * has already be binding with another value.
+	 * This convenience function is called like: addValue(0.1,"gender","male","age","12-25"...)
+	 * 
+	 * @param coordinates
+	 * @param value
+	 * @return
+	 */
+	public boolean addValue(T value, String ... coordinates);
+
+
+	/**
 	 * Add or replace the value associate with the coordinate in parameter for the new value passed as method's argument  
 	 * 
 	 * @param coordinate
@@ -89,6 +131,27 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return <code>true</code> if the value has been added, <code>false</code> otherwise
 	 */
 	public boolean setValue(ACoordinate<D, A> coordinate, AControl<? extends Number> value);
+	
+	/**
+	 * Add or replace the value associate with the coordinate in parameter for the new value passed as method's argument  
+	 * 
+	 * @param coordinate
+	 * @param value
+	 * @return <code>true</code> if the value has been added, <code>false</code> otherwise
+	 */
+	public boolean setValue(ACoordinate<D, A> coordinate, T value);
+
+	
+	/**
+	 * Add or replace the value associate with the coordinate in parameter for the new value passed as method's argument  
+	 * This convenience function is called like: addValue(0.1,"gender","male","age","12-25"...)
+	 *
+	 * @param coordinate
+	 * @param value
+	 * @return <code>true</code> if the value has been added, <code>false</code> otherwise
+	 */
+	public boolean setValue(T value, String ... coordinates);
+
 	
 // ------------------------- Accessors ------------------------- //
 	
@@ -197,8 +260,28 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public Collection<ACoordinate<D, A>> getCoordinates(Set<A> values);
+	
 
 // ------------------------- utility methods ------------------------- //
+	
+	
+	/**
+	 * Checks if all of the coordinates of the matrix have defined values.
+	 * Note that not all matrices should have this contract. Sparse matricies are often relevant.
+	 * 
+	 * @param checkGlobalSum
+	 * @param checkAllCoordinatesHaveValue
+	 * @return true if the 
+	 */
+	public boolean checkAllCoordinatesHaveValues();
+	
+	/**
+	 * Ensures the global contract of the matrix is ok depending to its type: 
+	 * a global frequency has to sump up to 1, for instance. 
+	 * If the type enables no check, true is always returned.
+	 * @return
+	 */
+	public boolean checkGlobalSum();
 	
 	public String toString();
 	
@@ -228,5 +311,10 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public AControl<T> parseVal(GSDataParser parser, String val);
 
-	
+
+	/**
+	 * if it is relevant, normalizes the values
+	 */
+	public void normalize() throws IllegalArgumentException;
+
 }

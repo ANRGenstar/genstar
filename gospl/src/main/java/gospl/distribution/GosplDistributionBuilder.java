@@ -319,12 +319,16 @@ public class GosplDistributionBuilder {
 			} else {
 				final List<APopulationAttribute> attributes = new ArrayList<>(matrix.getDimensions());
 				Collections.shuffle(attributes);
-				final AControl<? extends Number> total = matrix.getVal(attributes.remove(0).getValues());
+				logger.error("attributs {}", attributes);
+				final AControl<? extends Number> total = matrix.getVal(attributes.remove(0).getValues()); 
 				for (final APopulationAttribute attribut : attributes) {
+					logger.error("attribute: {}", attribut);
+
 					final AControl<? extends Number> controlAtt = matrix.getVal(attribut.getValues());
 					if (Math.abs(controlAtt.getValue().doubleValue() - total.getValue().doubleValue())
-							/ controlAtt.getValue().doubleValue() > this.EPSILON)
+							/ controlAtt.getValue().doubleValue() > this.EPSILON) {
 						throw new IllegalControlTotalException(total, controlAtt);
+					}
 				}
 				for (final ACoordinate<APopulationAttribute, APopulationValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(

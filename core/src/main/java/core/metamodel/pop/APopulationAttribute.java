@@ -1,7 +1,9 @@
 package core.metamodel.pop;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -77,9 +79,16 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 
 	@Override
 	public boolean setValues(Set<APopulationValue> values) {
-		if(this.values.isEmpty())
-			return this.values.addAll(values);
-		return false;
+		
+		// quick exit if cannot add values 
+		if(!this.values.isEmpty()) {
+			return false;
+		}
+		
+		// add values indexed by names
+		this.values.addAll(values);
+		
+		return true;
 	}
 
 	@Override
@@ -167,6 +176,36 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 		} else if (values.size() != other.values.size())
 			return false;
 		return true;
+	}
+	
+	@Override
+	public APopulationValue getValue(String name) {
+		
+		// manual and slow lookup. 
+		// we assume querying by name is for manual usage only, that is a rare case. 
+		
+		for (APopulationValue v: values) {
+			if (v.getStringValue().equals(name))
+				return v;
+		}
+		
+		throw new IllegalArgumentException(
+				"unknown value "+name+
+				"; possible values are "+
+				values
+			);
+	}
+	
+
+	@Override
+	public boolean hasValue(String name) {
+		
+		for (APopulationValue v: values) {
+			if (v.getStringValue().equals(name))
+				return true;
+		}
+		
+		return false;
 	}
 
 }

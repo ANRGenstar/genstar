@@ -2,6 +2,8 @@ package gospl.distribution;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -26,7 +28,15 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	protected GosplContingencyTable(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap) {
 		super(dimensionAspectMap, GSSurveyType.ContingencyTable);
 	}
-		
+	
+	protected GosplContingencyTable(Set<APopulationAttribute> attributes) {
+		this(
+				attributes.stream().collect(Collectors.toMap(Function.identity(),APopulationAttribute::getValues))
+				);
+	}
+
+	
+	
 	// ----------------------- SETTER CONTRACT ----------------------- //
 
 	
@@ -37,6 +47,12 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 		return setValue(coordinates, value);
 	}
 
+
+	@Override
+	public final boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, Integer value) {
+		return addValue(coordinates, new ControlContingency(value));
+	}
+	
 	@Override
 	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
@@ -46,7 +62,13 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 		}
 		return false;
 	}
+
+	@Override
+	public final boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, Integer value) {
+		return setValue(coordinate, new ControlContingency(value));
+	}
 	
+
 	// ----------------------- SIDE CONTRACT ----------------------- //
 	
 	@Override
@@ -67,5 +89,18 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	}
 
 
-	
+	@Override
+	public boolean checkGlobalSum() {
+		// always true
+		return true;
+	}
+
+
+	@Override
+	public void normalize() throws IllegalArgumentException {
+
+		throw new IllegalArgumentException("should not normalize a "+getMetaDataType());		
+		
+	}
+
 }

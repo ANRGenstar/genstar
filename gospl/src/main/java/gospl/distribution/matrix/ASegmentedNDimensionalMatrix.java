@@ -1,6 +1,7 @@
 package gospl.distribution.matrix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
 /**
  * Represent the higher order abstraction for segmented matrix: it is a record
@@ -192,6 +194,20 @@ INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
 				throw new IllegalNDimensionalMatrixAccess("Incongruent probability in underlying distributions");
 		return val;
 	}
+
+	
+	@Override
+	public final AControl<T> getVal(String... coordinates) {
+		return getVal(GosplCoordinate.createCoordinate(this.getDimensions(), coordinates));
+	}
+
+
+	@Override
+	public final AControl<T> getVal(APopulationValue... aspects) {
+		return getVal(Arrays.asList(aspects));
+	}
+
+
 
 	// ---------------------- Inner utilities ---------------------- //
 
