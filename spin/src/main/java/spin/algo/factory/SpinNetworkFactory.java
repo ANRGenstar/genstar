@@ -12,10 +12,13 @@ import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
 
 /** Propose de générer des réseaux 
+ * Si le réseau est non orienté, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
  *
  */
 public class SpinNetworkFactory {
 	
+	// SpinNetwork est le réseau courant sur la population, donc pas plusieurs type de SpinNetwork
+	// contrairement a GraphStreamFactory possédant plusieurs graphes 
 	private SpinNetwork network;
 	
 	// Singleton

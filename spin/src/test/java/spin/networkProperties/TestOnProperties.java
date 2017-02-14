@@ -7,6 +7,7 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
 import spin.SpinPopulation;
+import spin.algo.factory.GraphStreamFactory;
 import spin.algo.factory.SpinNetworkFactory;
 import spin.algo.factory.StatFactory;
 import spin.interfaces.ENetworkGenerator;
@@ -23,20 +24,19 @@ public class TestOnProperties {
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
-		generator.generate(100000);
+		generator.generate(1000000);
 	
-		System.out.println("Debut de la génération de réseau SmallWorld");
+		System.out.println("Debut de la génération de réseau Regular");
 		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
-		System.out.println("Fin de génération de réseau SmallWorld");
+		System.out.println("Fin de génération de réseau Regular");
 	
 		SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
 		
 		
 		// TEST
 		System.out.println(StatFactory.getInstance().getDensity());
-		 
-		System.out.println(StatFactory.getInstance().getAPL());
-		
+		GraphStreamFactory.getIntance().initialiseGraphStreamFromSpin();
+		System.out.println("Fin du graphStream");
 		
 		
 		

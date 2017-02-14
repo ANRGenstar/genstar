@@ -24,6 +24,8 @@ import spin.objects.SpinNetwork;
  */
 public class GraphStreamFactory {
 
+	private boolean debug = true;
+	
 	// Map de networkType <-> graph, plusieurs graphes sont possibles, ceux lu pour avoir les données, ceux en cours, etc. 
 	Map<EGraphStreamNetwork, Graph> graphs;
 	
@@ -46,10 +48,9 @@ public class GraphStreamFactory {
 	public void initialiseGraphStreamFromSpin(){
 		if(!this.containsGraphType(EGraphStreamNetwork.spinNetwork))
 			this.generateGraphStreamGraph(SpinNetworkFactory.getInstance().getSpinNetwork());
-			
 	}
 	
-	/** 
+	/** Renvoi un graph de la hash, spécifié par son type 
 	 * 
 	 * @param whichOne
 	 * @return
@@ -66,7 +67,7 @@ public class GraphStreamFactory {
 	 * @param spinNetwork a convertir en graphSteam
 	 */
 	public void generateGraphStreamGraph(SpinNetwork spinNetwork){
-		System.out.println("Generation d'un graphStream depuis un spin");
+		if(debug)System.out.println("Generation d'un graphStream depuis un spin");
 		
 		Graph g = new DefaultGraph("g");
 		for (NetworkNode node : spinNetwork.getNodes()) {
@@ -78,7 +79,6 @@ public class GraphStreamFactory {
 		}
 		
 		graphs.put(EGraphStreamNetwork.spinNetwork, g);
-//		g.display();
 	}
 	
 	/** Lit un fichier texte et le converti en graph stream
@@ -107,6 +107,7 @@ public class GraphStreamFactory {
 	 * @return
 	 */
 	public void exportFile(EGraphStreamNetwork whichOne, ENetworkFormat format, String path){
+		initialiseGraphStreamFromSpin();
 		Graph g = graphs.get(whichOne);
 		FileSink filesink = null;
 		switch (format) {
@@ -138,9 +139,13 @@ public class GraphStreamFactory {
 		graphs.remove(whichOne);
 	}
 	
+	/** indique si la hash de graph contient un graph du type en paramètre
+	 * 
+	 * @param whichOne type du graph recherché
+	 * @return null si pas de ref. a ce type de graphe
+	 */
 	public boolean containsGraphType(EGraphStreamNetwork whichOne){
 		return graphs.containsKey(whichOne);
 	}
-	
 	
 }

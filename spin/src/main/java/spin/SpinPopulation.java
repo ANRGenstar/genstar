@@ -24,8 +24,8 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	private SpinNetwork network;
 
 	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population.
-	// pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
-	// de certaines propriétés
+	// (pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
+	// de certaines propriétés)
 	private INetProperties properties;
 	
 	private final Collection<APopulationEntity> population;

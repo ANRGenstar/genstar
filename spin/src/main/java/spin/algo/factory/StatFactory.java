@@ -15,6 +15,8 @@ import spin.objects.SpinNetwork;
 
 /** Factory de stat, donne les infos sur les graphes
  * implémente @ISpinNetProperties, interface qui sera disponible dans SpinPopulation
+ * Ne crée pas de GraphStream tant qu'une opération nécessitant l'usage de ce dernier n'est 
+ * pas demandé. 
  */
 public class StatFactory implements INetProperties{
 	
@@ -36,6 +38,10 @@ public class StatFactory implements INetProperties{
 	// --- PARTIE OBTENIR LES INFOS GLOBALES ---
 	// -----------------------------------------
 	
+	/** Avoir la densité du réseau spin courant. 
+	 * 
+	 * @return
+	 */
 	private double getDensitySpin(){
 		SpinNetwork network = SpinNetworkFactory.getInstance().getSpinNetwork();
 		double nbNodes = network.getNodes().size();
@@ -43,7 +49,7 @@ public class StatFactory implements INetProperties{
 		return nbLinks / (nbNodes * (nbNodes-1));
 	}
 	
-	/**
+	/** Obtenir le clustering moyen sur l'ensemble du réseau
 	 * 
 	 * @param whichOne
 	 * @return
@@ -52,9 +58,10 @@ public class StatFactory implements INetProperties{
 		return 0;
 	}
 	
-	/**
-	 * 
-	 * @param whichOne
+	/** Obtenir l'APL moyen sur un échantillon de chemin entre les noeuds.
+	 * Utilise la représentation GraphStream. 
+	 *  TODO Passer à un échantillon de chemin et non l'ensemble des chemins. 
+	 * @param Précise le graphe sur lequel faire le calcul
 	 * @return
 	 */
 	public double getAPL(EGraphStreamNetwork whichOne){
@@ -75,7 +82,6 @@ public class StatFactory implements INetProperties{
 			}
 		}
 		
-		System.out.println(total / nbValue);
 		return total / nbValue;
 	}
 
