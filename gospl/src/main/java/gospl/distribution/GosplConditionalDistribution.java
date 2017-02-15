@@ -76,6 +76,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			Set<APopulationValue> concernedValues = aspects.stream()
 					.filter(a -> mat.getDimensions().contains(a.getAttribute()))
 					.collect(Collectors.toSet());
+			AControl<Double> newProbability = mat.getVal(concernedValues);
 
 			// COMPUTE CONDITIONAL PROBABILITY
 			// Setup conditional values (known probability to compute conditional probability)
@@ -108,7 +109,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 					.reduce(this.getIdentityProductVal(), (c1, c2) -> c1.multiply(c2)));
 
 			// COMPUTE BRUT PROBABILITY
-			AControl<Double> newProbability = mat.getVal(concernedValues).multiply(1 / conditionalProbability.getValue());
+			newProbability.multiply(1 / conditionalProbability.getValue());
 
 			// Update conditional probability
 			conditionalProba.multiply(newProbability);
@@ -272,7 +273,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	@Override
 	public AControl<Double> getVal(String... coordinates) {
 
-		return getVal(this.getAttributes(coordinates));
+		return getVal(this.getValues(coordinates));
 
 	}
 

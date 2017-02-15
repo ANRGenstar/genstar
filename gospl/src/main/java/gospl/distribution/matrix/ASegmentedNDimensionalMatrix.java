@@ -177,6 +177,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return matrix;
 	}
 
+	@Override
 	public LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getOrderedMatrix(){
 		LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = 
 				new LinkedHashMap<>();
@@ -268,19 +269,20 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
 
+	// ----------------------- String accessors ----------------------- //
 
 	@Override
 	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
 			throws IllegalArgumentException {
 
 		
-		return getCoordinates(getAttributes(keyAndVal));
+		return getCoordinates(getValues(keyAndVal));
 	}
 	
 
 
 	@Override
-	public Set<APopulationValue> getAttributes(String... keyAndVal) throws IllegalArgumentException {
+	public Set<APopulationValue> getValues(String... keyAndVal) throws IllegalArgumentException {
 
 		Set<APopulationValue> coordinateValues = new HashSet<>();
 		

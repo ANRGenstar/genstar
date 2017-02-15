@@ -463,13 +463,13 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
 			throws IllegalArgumentException {
 
-		return getCoordinates(getAttributes(keyAndVal));
+		return getCoordinates(getValues(keyAndVal));
 	}
 	
 
 
 	@Override
-	public Set<APopulationValue> getAttributes(String... keyAndVal) throws IllegalArgumentException {
+	public Set<APopulationValue> getValues(String... keyAndVal) throws IllegalArgumentException {
 
 		Set<APopulationValue> coordinateValues = new HashSet<>();
 		
