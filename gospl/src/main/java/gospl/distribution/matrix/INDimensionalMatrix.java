@@ -294,7 +294,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @param keyAndVal
 	 * @return
 	 */
-	public Set<A> getAttributes(String ... keyAndVal) throws IllegalArgumentException;
+	public Set<A> getValues(String ... keyAndVal) throws IllegalArgumentException;
 
 	/**
 	 * Retrieve the only coordinate that describe this set of value.

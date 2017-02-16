@@ -21,11 +21,26 @@ import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
+import gospl.distribution.matrix.control.AControl;
 import gospl.entity.attribute.GSEnumAttributeType;
 import gospl.entity.attribute.GosplAttributeFactory;
 
 public class TestFullNDimensionalMatrix {
 
+	private double probaHomme;
+	private double probaFemme;
+	private double delta;
+	
+	@Before
+	public void setUp() throws Exception {
+		probaHomme = 0.47;
+		probaFemme = 0.53;
+		delta = 0.001;
+	}	
+
+	@After
+	public void tearDown() throws Exception {
+	}
 	
 	
 	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeGender() {
@@ -42,19 +57,19 @@ public class TestFullNDimensionalMatrix {
 			
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-			m.setValue(0.15/3, "Genre", "Homme", "Age", "0-5");
-			m.setValue(0.20/3, "Genre", "Homme", "Age", "6-15");
-			m.setValue(0.30/3, "Genre", "Homme", "Age", "16-25");
-			m.setValue(0.20/3, "Genre", "Homme", "Age", "26-40");
-			m.setValue(0.10/3, "Genre", "Homme", "Age", "40-55");
-			m.setValue(0.05/3, "Genre", "Homme", "Age", "55 et plus");
+			m.setValue(0.15*probaHomme, "Genre", "Homme", "Age", "0-5");
+			m.setValue(0.20*probaHomme, "Genre", "Homme", "Age", "6-15");
+			m.setValue(0.30*probaHomme, "Genre", "Homme", "Age", "16-25");
+			m.setValue(0.20*probaHomme, "Genre", "Homme", "Age", "26-40");
+			m.setValue(0.10*probaHomme, "Genre", "Homme", "Age", "40-55");
+			m.setValue(0.05*probaHomme, "Genre", "Homme", "Age", "55 et plus");
 			
-			m.setValue(0.10*2/3, "Genre", "Femme", "Age", "0-5");
-			m.setValue(0.20*2/3, "Genre", "Femme", "Age", "6-15");
-			m.setValue(0.30*2/3, "Genre", "Femme", "Age", "16-25");
-			m.setValue(0.25*2/3, "Genre", "Femme", "Age", "26-40");
-			m.setValue(0.10*2/3, "Genre", "Femme", "Age", "40-55");
-			m.setValue(0.05*2/3, "Genre", "Femme", "Age", "55 et plus");
+			m.setValue(0.10*probaFemme, "Genre", "Femme", "Age", "0-5");
+			m.setValue(0.20*probaFemme, "Genre", "Femme", "Age", "6-15");
+			m.setValue(0.30*probaFemme, "Genre", "Femme", "Age", "16-25");
+			m.setValue(0.25*probaFemme, "Genre", "Femme", "Age", "26-40");
+			m.setValue(0.10*probaFemme, "Genre", "Femme", "Age", "40-55");
+			m.setValue(0.05*probaFemme, "Genre", "Femme", "Age", "55 et plus");
 			
 		return m;
 		} catch (GSIllegalRangedData e) {
@@ -74,34 +89,44 @@ public class TestFullNDimensionalMatrix {
 			attributes.add(gaf.createAttribute("Activite", GSEnumDataType.String, 
 					Arrays.asList("Sans emploi", "Précaire", "Employé"), GSEnumAttributeType.unique));
 			
-			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
+			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory()
+					.createEmptyDistribution(attributes);
 			
-			m.setValue(1.0, "Activite", "Sans emploi", "Age", "0-5");
-			m.setValue(1.0, "Activite", "Sans emploi", "Age", "6-15");
-			m.setValue(0.3, "Activite", "Sans emploi", "Age", "16-25");
-			m.setValue(0.1, "Activite", "Sans emploi", "Age", "26-40");
-			m.setValue(0.2, "Activite", "Sans emploi", "Age", "40-55");
-			m.setValue(0.4, "Activite", "Sans emploi", "Age", "55 et plus");
+			AFullNDimensionalMatrix<Double> ageSexe = this.generateGlobalFrequencyAgeGender();
+			double age05 = ageSexe.getVal("Age", "0-5").getValue();
+			double age615 = ageSexe.getVal("Age", "6-15").getValue();
+			double age1625 = ageSexe.getVal("Age", "16-25").getValue();
+			double age2640 = ageSexe.getVal("Age", "26-40").getValue();
+			double age4055 = ageSexe.getVal("Age", "40-55").getValue();
+			double age55plus = ageSexe.getVal("Age", "55 et plus").getValue();
+			
+			m.setValue(age05, "Activite", "Sans emploi", "Age", "0-5");
+			m.setValue(age615, "Activite", "Sans emploi", "Age", "6-15");
+			m.setValue(0.3*age1625, "Activite", "Sans emploi", "Age", "16-25");
+			m.setValue(0.1*age2640, "Activite", "Sans emploi", "Age", "26-40");
+			m.setValue(0.2*age4055, "Activite", "Sans emploi", "Age", "40-55");
+			m.setValue(0.4*age55plus, "Activite", "Sans emploi", "Age", "55 et plus");
 			
 			m.setValue(0.0, "Activite", "Précaire", "Age", "0-5");
 			m.setValue(0.0, "Activite", "Précaire", "Age", "6-15");
-			m.setValue(0.3, "Activite", "Précaire", "Age", "16-25");
-			m.setValue(0.2, "Activite", "Précaire", "Age", "26-40");
-			m.setValue(0.2, "Activite", "Précaire", "Age", "40-55");
-			m.setValue(0.1, "Activite", "Précaire", "Age", "55 et plus");
+			m.setValue(0.3*age1625, "Activite", "Précaire", "Age", "16-25");
+			m.setValue(0.2*age2640, "Activite", "Précaire", "Age", "26-40");
+			m.setValue(0.2*age4055, "Activite", "Précaire", "Age", "40-55");
+			m.setValue(0.1*age55plus, "Activite", "Précaire", "Age", "55 et plus");
 			
 			m.setValue(0.0, "Activite", "Employé", "Age", "0-5");
 			m.setValue(0.0, "Activite", "Employé", "Age", "6-15");
-			m.setValue(0.3, "Activite", "Employé", "Age", "16-25");
-			m.setValue(0.7, "Activite", "Employé", "Age", "26-40");
-			m.setValue(0.6, "Activite", "Employé", "Age", "40-55");
-			m.setValue(0.5, "Activite", "Employé", "Age", "55 et plus");
+			m.setValue(0.3*age1625, "Activite", "Employé", "Age", "16-25");
+			m.setValue(0.7*age2640, "Activite", "Employé", "Age", "26-40");
+			m.setValue(0.6*age4055, "Activite", "Employé", "Age", "40-55");
+			m.setValue(0.5*age55plus, "Activite", "Employé", "Age", "55 et plus");
 						
 			m.normalize();
 			
 			return m;
 			
 		} catch (GSIllegalRangedData e) {
+			// In any case, do not kill the dev. 
 			throw new RuntimeException("the developer screwed up when writing unit tests. Just kill him, get rid of the body, and hire someone better.", e);
 		}
 	}
@@ -119,21 +144,28 @@ public class TestFullNDimensionalMatrix {
 					Arrays.asList("Sans emploi", "Précaire", "Employé"), GSEnumAttributeType.unique));
 			
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
+			AFullNDimensionalMatrix<Double> ageSexe = this.generateGlobalFrequencyAgeGender();
+			double age05 = ageSexe.getVal("Age", "0-5").getValue();
+			double age615 = ageSexe.getVal("Age", "6-15").getValue();
+			double age1625 = ageSexe.getVal("Age", "16-25").getValue();
+			double age2640 = ageSexe.getVal("Age", "26-40").getValue();
+			double age4055 = ageSexe.getVal("Age", "40-55").getValue();
+			double age55plus = ageSexe.getVal("Age", "55 et plus").getValue();
 			
-			m.setValue(1.0, "Activite", "Sans emploi", "Age2", "moins de 15");
-			m.setValue(0.3, "Activite", "Sans emploi", "Age2", "16-25");
-			m.setValue(0.3, "Activite", "Sans emploi", "Age2", "26-55");
-			m.setValue(0.4, "Activite", "Sans emploi", "Age2", "55 et plus");
+			m.setValue(age05+age615, "Activite", "Sans emploi", "Age2", "moins de 15");
+			m.setValue(0.3*age1625, "Activite", "Sans emploi", "Age2", "16-25");
+			m.setValue(0.3*(age2640+age4055), "Activite", "Sans emploi", "Age2", "26-55");
+			m.setValue(0.4*age55plus, "Activite", "Sans emploi", "Age2", "55 et plus");
 			
 			m.setValue(0.0, "Activite", "Précaire", "Age2", "moins de 15");
-			m.setValue(0.3, "Activite", "Précaire", "Age2", "16-25");
-			m.setValue(0.4, "Activite", "Précaire", "Age2", "26-55");
-			m.setValue(0.1, "Activite", "Précaire", "Age2", "55 et plus");
+			m.setValue(0.3*age1625, "Activite", "Précaire", "Age2", "16-25");
+			m.setValue(0.4*(age2640+age4055), "Activite", "Précaire", "Age2", "26-55");
+			m.setValue(0.1*age55plus, "Activite", "Précaire", "Age2", "55 et plus");
 			
 			m.setValue(0.0, "Activite", "Employé", "Age2", "moins de 15");
-			m.setValue(0.3, "Activite", "Employé", "Age2", "16-25");
-			m.setValue(0.7, "Activite", "Employé", "Age2", "26-55");
-			m.setValue(0.5, "Activite", "Employé", "Age2", "55 et plus");
+			m.setValue(0.3*age1625, "Activite", "Employé", "Age2", "16-25");
+			m.setValue(0.7*(age2640+age4055), "Activite", "Employé", "Age2", "26-55");
+			m.setValue(0.5*age55plus, "Activite", "Employé", "Age2", "55 et plus");
 						
 			m.normalize();
 			
@@ -166,6 +198,7 @@ public class TestFullNDimensionalMatrix {
 	 * generates a segmented matrix with a mapping, based on  age X gender and age2 X csp
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	protected ASegmentedNDimensionalMatrix<Double> generateSegmentedWithMappingAgePyramidAndCSP() {
 		
 		
@@ -190,43 +223,51 @@ public class TestFullNDimensionalMatrix {
 			APopulationAttribute attCSP = gaf.createAttribute("Activite", GSEnumDataType.String, 
 					Arrays.asList("Sans emploi", "Précaire", "Employé"), GSEnumAttributeType.unique);
 			
-			AFullNDimensionalMatrix<Double> mAgeGender = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attAge,attGenre);
+			AFullNDimensionalMatrix<Double> mAgeGender = GosplNDimensionalMatrixFactory.getFactory()
+					.createEmptyDistribution(attAge,attGenre);
 			
+			mAgeGender.setValue(0.15*probaHomme, "Genre", "Homme", "Age", "0-5");
+			mAgeGender.setValue(0.20*probaHomme, "Genre", "Homme", "Age", "6-15");
+			mAgeGender.setValue(0.30*probaHomme, "Genre", "Homme", "Age", "16-25");
+			mAgeGender.setValue(0.20*probaHomme, "Genre", "Homme", "Age", "26-40");
+			mAgeGender.setValue(0.10*probaHomme, "Genre", "Homme", "Age", "40-55");
+			mAgeGender.setValue(0.05*probaHomme, "Genre", "Homme", "Age", "55 et plus");
 			
-			mAgeGender.setValue(0.15/3, "Genre", "Homme", "Age", "0-5");
-			mAgeGender.setValue(0.20/3, "Genre", "Homme", "Age", "6-15");
-			mAgeGender.setValue(0.30/3, "Genre", "Homme", "Age", "16-25");
-			mAgeGender.setValue(0.20/3, "Genre", "Homme", "Age", "26-40");
-			mAgeGender.setValue(0.10/3, "Genre", "Homme", "Age", "40-55");
-			mAgeGender.setValue(0.05/3, "Genre", "Homme", "Age", "55 et plus");
-			
-			mAgeGender.setValue(0.10*2/3, "Genre", "Femme", "Age", "0-5");
-			mAgeGender.setValue(0.20*2/3, "Genre", "Femme", "Age", "6-15");
-			mAgeGender.setValue(0.30*2/3, "Genre", "Femme", "Age", "16-25");
-			mAgeGender.setValue(0.25*2/3, "Genre", "Femme", "Age", "26-40");
-			mAgeGender.setValue(0.10*2/3, "Genre", "Femme", "Age", "40-55");
-			mAgeGender.setValue(0.05*2/3, "Genre", "Femme", "Age", "55 et plus");
+			mAgeGender.setValue(0.10*probaFemme, "Genre", "Femme", "Age", "0-5");
+			mAgeGender.setValue(0.20*probaFemme, "Genre", "Femme", "Age", "6-15");
+			mAgeGender.setValue(0.30*probaFemme, "Genre", "Femme", "Age", "16-25");
+			mAgeGender.setValue(0.25*probaFemme, "Genre", "Femme", "Age", "26-40");
+			mAgeGender.setValue(0.10*probaFemme, "Genre", "Femme", "Age", "40-55");
+			mAgeGender.setValue(0.05*probaFemme, "Genre", "Femme", "Age", "55 et plus");
 			
 			mAgeGender.normalize();
 			
+			double age05 = mAgeGender.getVal("Age", "0-5").getValue();
+			double age615 = mAgeGender.getVal("Age", "6-15").getValue();
+			double age1625 = mAgeGender.getVal("Age", "16-25").getValue();
+			double age2640 = mAgeGender.getVal("Age", "26-40").getValue();
+			double age4055 = mAgeGender.getVal("Age", "40-55").getValue();
+			double age55plus = mAgeGender.getVal("Age", "55 et plus").getValue();
+			
 			// age2 X csp
 
-			AFullNDimensionalMatrix<Double> mAge2CSP = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attAge2,attCSP);
+			AFullNDimensionalMatrix<Double> mAge2CSP = GosplNDimensionalMatrixFactory.getFactory()
+					.createEmptyDistribution(attAge2,attCSP);
 			
-			mAge2CSP.setValue(1.0, "Activite", "Sans emploi", "Age2", "moins de 15");
-			mAge2CSP.setValue(0.3, "Activite", "Sans emploi", "Age2", "16-25");
-			mAge2CSP.setValue(0.3, "Activite", "Sans emploi", "Age2", "26-55");
-			mAge2CSP.setValue(0.4, "Activite", "Sans emploi", "Age2", "55 et plus");
+			mAge2CSP.setValue(age05+age615, "Activite", "Sans emploi", "Age2", "moins de 15");
+			mAge2CSP.setValue(0.3*age1625, "Activite", "Sans emploi", "Age2", "16-25");
+			mAge2CSP.setValue(0.3*(age2640+age4055), "Activite", "Sans emploi", "Age2", "26-55");
+			mAge2CSP.setValue(0.4*age55plus, "Activite", "Sans emploi", "Age2", "55 et plus");
 			
 			mAge2CSP.setValue(0.0, "Activite", "Précaire", "Age2", "moins de 15");
-			mAge2CSP.setValue(0.3, "Activite", "Précaire", "Age2", "16-25");
-			mAge2CSP.setValue(0.4, "Activite", "Précaire", "Age2", "26-55");
-			mAge2CSP.setValue(0.1, "Activite", "Précaire", "Age2", "55 et plus");
+			mAge2CSP.setValue(0.3*age1625, "Activite", "Précaire", "Age2", "16-25");
+			mAge2CSP.setValue(0.4*(age2640+age4055), "Activite", "Précaire", "Age2", "26-55");
+			mAge2CSP.setValue(0.1*age55plus, "Activite", "Précaire", "Age2", "55 et plus");
 			
 			mAge2CSP.setValue(0.0, "Activite", "Employé", "Age2", "moins de 15");
-			mAge2CSP.setValue(0.3, "Activite", "Employé", "Age2", "16-25");
-			mAge2CSP.setValue(0.7, "Activite", "Employé", "Age2", "26-55");
-			mAge2CSP.setValue(0.5, "Activite", "Employé", "Age2", "55 et plus");
+			mAge2CSP.setValue(0.3*age1625, "Activite", "Employé", "Age2", "16-25");
+			mAge2CSP.setValue(0.7*(age2640+age4055), "Activite", "Employé", "Age2", "26-55");
+			mAge2CSP.setValue(0.5*age55plus, "Activite", "Employé", "Age2", "55 et plus");
 						
 			mAge2CSP.normalize();
 			
@@ -280,16 +321,19 @@ public class TestFullNDimensionalMatrix {
 		
 		AFullNDimensionalMatrix<Double> agePyramid = generateGlobalFrequencyAgeGender();
 		
-		assertEquals("wrong computation of the probas", new Double(0.15/3+0.20/3), agePyramid.getVal("Genre","Homme","Age","0-5", "Age", "6-15").getValue());
+		assertEquals("wrong computation of the probas", new Double(0.15*probaHomme+0.20*probaHomme), 
+				agePyramid.getVal("Genre","Homme","Age","0-5", "Age", "6-15").getValue(), delta);
 
-		assertEquals("wrong computation of the probas", agePyramid.getVal("Genre","Homme","Genre","Femme","Age","0-5", "Age", "6-15").getValue(), agePyramid.getVal("Age","0-5", "Age", "6-15").getValue());
+		assertEquals("wrong computation of the probas", agePyramid.getVal("Genre","Homme","Genre","Femme","Age","0-5", "Age", "6-15").getValue(), 
+				agePyramid.getVal("Age","0-5", "Age", "6-15").getValue(), delta);
 
 	}
 	
 	@Test
 	public void testGetValSegmentedNoMappingAll() {
 		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
-		assertEquals("joined probability does not sum to the count of inner matrixes", seg.jointDistributionSet.size(), seg.getVal().getValue().doubleValue(), 0.01);
+		assertEquals("joined probability does not sum to the count of inner matrixes", 
+				seg.jointDistributionSet.size(), seg.getVal().getValue().doubleValue(), delta);
 		
 	}
 	
@@ -298,11 +342,16 @@ public class TestFullNDimensionalMatrix {
 	public void testGetValSegmentedNoMappingJoined() {
 		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
 		
+		AControl<Double> cAgeGender = seg.getVal("Age", "26-40", "Genre","Homme");
+		AControl<Double> cAge = seg.getVal("Age", "26-40");
+		AControl<Double> cAgeCSP = seg.getVal("Age", "26-40", "Activite","Sans emploi");
+		
+		AControl<Double> calculatedProba = cAgeGender.multiply(cAgeCSP.multiply(1 / cAge.getValue()));
+		
 		assertEquals(
-				"wrong joined distribution", 
-				0.0048d, 
-				seg.getVal("Age","26-40","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
-				0.001
+				"wrong joined distribution", calculatedProba.getValue(), 
+				seg.getVal("Age","26-40","Genre","Homme","Activite","Sans emploi").getValue(), 
+				delta
 				);
 		
 	}
@@ -310,25 +359,23 @@ public class TestFullNDimensionalMatrix {
 
 	@Test
 	public void testGetValSegmentedWithMapping() {
-		
 		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
+		
+		AControl<Double> cAgeGender = seg.getVal("Age", "26-40", "Age", "40-55", "Genre","Homme");
+		AControl<Double> cAge = seg.getVal("Age", "26-40", "Age", "40-55");
+		AControl<Double> cAgeCSP = seg.getVal("Age", "26-40", "Age", "40-55", "Activite","Sans emploi");
+		
+		AControl<Double> calculatedProba = cAgeGender.multiply(cAgeCSP.multiply(1 / cAge.getValue()));
 		
 		ASegmentedNDimensionalMatrix<Double> seg2 = generateSegmentedWithMappingAgePyramidAndCSP();
 		
 		assertEquals(
-				"wrong joined distribution on same age", 
-				seg.getVal("Age","16-25","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
-				seg2.getVal("Age","16-25","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
-				0.001
-				);
-		assertEquals(
-				"wrong joined distribution on mapped age", 
-				seg.getVal("Age","26-40","Age","40-55","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
-				seg2.getVal("Age2","26-55","Genre","Homme","Activite","Sans emploi").getValue().doubleValue(), 
-				0.001
+				"wrong joined distribution", calculatedProba.getValue(), 
+				seg2.getVal("Age2","26-55","Genre","Homme","Activite","Sans emploi").getValue(), 
+				delta
 				);
 
-		assertEquals("joined probability does not sum to 1", new Double(1.0), seg.getVal());
+		assertEquals("joined probability does not sum to 1", new Double(1.0), seg2.getVal());
 	}
 
 }

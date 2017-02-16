@@ -1,11 +1,5 @@
 package spin.interfaces;
 
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
-import spin.objects.SpinNetwork;
-
 /** MaJ: AUCUNE UTILITE? les fonctions de génération demande des paramètres différents  
  * Interface de générateur de réseau, commun a tous les générateurs. 
  * 
