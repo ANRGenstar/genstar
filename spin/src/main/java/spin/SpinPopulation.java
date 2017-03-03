@@ -28,6 +28,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	// de certaines propriétés)
 	private INetProperties properties;
 	
+	// TODO IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>
 	private final Collection<APopulationEntity> population;
 
 	/**

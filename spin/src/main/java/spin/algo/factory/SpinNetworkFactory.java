@@ -46,7 +46,7 @@ public class SpinNetworkFactory {
 		if(typeGenerator.equals(ENetworkGenerator.Random))	
 			network = new RandomNetworkGenerator().generateNetwork(population, .1);
 		if(typeGenerator.equals(ENetworkGenerator.Regular))	
-			network = new RegularNetworkGenerator().generateNetwork(population, 2);
+			network = new RegularNetworkGenerator().generateNetwork(population, 4);
 		if(typeGenerator.equals(ENetworkGenerator.ScaleFree))	
 			network = new SFNetworkGenerator().generateNetwork(population);
 		
