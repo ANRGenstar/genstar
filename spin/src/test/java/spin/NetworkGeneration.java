@@ -1,8 +1,8 @@
 package spin;
 
-import spin.algo.factory.GraphStreamFactory;
-import spin.interfaces.EGraphStreamNetwork;
 import spin.interfaces.ENetworkFormat;
+import useless.EGraphStreamNetwork;
+import useless.GraphStreamFactory;
 
 
 /** Classe de main pour la génération de réseau sur une population

@@ -1,4 +1,4 @@
-package spin.objects;
+package useless;
 
 import java.util.HashSet;
 import java.util.Set;

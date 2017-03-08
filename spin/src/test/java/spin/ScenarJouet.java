@@ -1,11 +1,11 @@
 package spin;
 
-import spin.algo.factory.GraphStreamFactory;
-import spin.algo.factory.StatFactory;
-import spin.interfaces.EGraphStreamNetwork;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
+import useless.EGraphStreamNetwork;
+import useless.GraphStreamFactory;
+import useless.NetworkLink;
+import useless.NetworkNode;
+import useless.StatFactory;
 
 public class ScenarJouet {
 	

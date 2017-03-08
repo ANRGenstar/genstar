@@ -1,4 +1,4 @@
-package spin.interfaces;
+package useless;
 
 /** MaJ: AUCUNE UTILITE? les fonctions de génération demande des paramètres différents  
  * Interface de générateur de réseau, commun a tous les générateurs. 

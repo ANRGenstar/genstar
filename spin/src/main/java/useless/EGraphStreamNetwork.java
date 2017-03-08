@@ -1,4 +1,4 @@
-package spin.interfaces;
+package useless;
 
 /** Type de network graphstream qu'on peut avoir au cours de l'execution.
  * spinNetwork: network courant 

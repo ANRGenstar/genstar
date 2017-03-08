@@ -11,6 +11,9 @@ import core.metamodel.pop.APopulationEntity;
  */
 public interface INetProperties {
 
+	// TODO [stage] compléter avec les fonctions accedant au propriétés diverses
+	
+	
 	/** obtention du plus court chemin moyen sur le graphe. 
 	 * 
 	 * @return la valeur de plus court chemin moyen sur le graphe

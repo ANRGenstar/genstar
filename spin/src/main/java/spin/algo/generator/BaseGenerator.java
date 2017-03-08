@@ -4,9 +4,9 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.interfaces.INetworkGenerator;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
+import useless.INetworkGenerator;
+import useless.NetworkNode;
 
 /** Fonction commune à tous les générateurs.
  * 
@@ -15,7 +15,7 @@ import spin.objects.SpinNetwork;
 public abstract class BaseGenerator implements INetworkGenerator {
 	
 	/** Création depuis une population d'autant de noeud associés a chaque entité.
-	 * 
+	 * TODO [stage] fusionner avec SpinNetwokFactory 
 	 * @param population
 	 * @return un network avec n entité, sans aucun lien. Id des noeuds de 0 à n. 
 	 */

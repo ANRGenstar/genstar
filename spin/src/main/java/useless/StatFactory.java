@@ -1,4 +1,4 @@
-package spin.algo.factory;
+package useless;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -8,9 +8,8 @@ import org.graphstream.algorithm.APSP.APSPInfo;
 import org.graphstream.graph.Graph;
 
 import core.metamodel.pop.APopulationEntity;
-import spin.interfaces.EGraphStreamNetwork;
+import spin.algo.factory.SpinNetworkFactory;
 import spin.interfaces.INetProperties;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Factory de stat, donne les infos sur les graphes

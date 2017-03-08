@@ -1,4 +1,4 @@
-package spin.objects;
+package useless;
 
 /** Objet pour un network
  * Contient des informations sur le type de lien entre des nodes

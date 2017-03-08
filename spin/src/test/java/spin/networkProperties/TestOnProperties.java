@@ -9,12 +9,12 @@ import core.metamodel.pop.APopulationValue;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
 import spin.SpinPopulation;
-import spin.algo.factory.GraphStreamFactory;
 import spin.algo.factory.SpinNetworkFactory;
-import spin.algo.factory.StatFactory;
-import spin.interfaces.EGraphStreamNetwork;
 import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
+import useless.EGraphStreamNetwork;
+import useless.GraphStreamFactory;
+import useless.StatFactory;
 
 public class TestOnProperties {
 

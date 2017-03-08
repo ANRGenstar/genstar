@@ -6,15 +6,24 @@ import java.util.Map;
 import java.util.Set;
 
 import core.metamodel.pop.APopulationEntity;
+import spin.interfaces.INetProperties;
 import spin.tools.Tools;
+import useless.NetworkLink;
+import useless.NetworkNode;
 
 
 
 /** Network composé de noeud et de lien
  * 
  */
-public class SpinNetwork {
+public class SpinNetwork implements INetProperties{
 
+	
+	// TODO [stage] ajouter un graphstream
+	
+	
+	// TODO [stage] virer ce qui est en dessous
+	
 	// Représentation du réseau. Une map de noeud, associé a un set de lien. 
 	// let set<networkLink> est commun a ceux donné aux noeuds
 	private Map<NetworkNode, Set<NetworkLink>> network;

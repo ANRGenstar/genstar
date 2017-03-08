@@ -13,7 +13,7 @@ import spin.objects.SpinNetwork;
 
 /** Propose de générer des réseaux 
  * Si le réseau est non orienté, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
- *
+ * TODO [stage] depuis une population obtenir un SPinPop avec le network correspondant
  */
 public class SpinNetworkFactory {
 	

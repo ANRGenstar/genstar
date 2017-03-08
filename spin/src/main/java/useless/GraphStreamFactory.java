@@ -1,4 +1,4 @@
-package spin.algo.factory;
+package useless;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -12,10 +12,8 @@ import org.graphstream.stream.file.FileSinkGraphML;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
 
-import spin.interfaces.EGraphStreamNetwork;
+import spin.algo.factory.SpinNetworkFactory;
 import spin.interfaces.ENetworkFormat;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
 import spin.objects.SpinNetwork;
 
 /** Factory de graph stream, gère le lien entre représensation SpinNetwork et GraphStream,
