@@ -42,7 +42,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	public SpinPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popRef, 
 						 SpinNetwork network){
 		population = popRef;
-		this.network = network;
+		this.network = network; 
 	}
 	
 	/**
