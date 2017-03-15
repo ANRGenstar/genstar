@@ -20,14 +20,14 @@ import useless.StatFactory;
  */
 public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
-	// Network associé a la population.
+	// Network associe a la population.
 	private SpinNetwork network;
 	// TODO [stage] a remplacer par un graphstream
 	
 
-	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population.
+	// Interface qui permet d'avoir acces aux proprietes du reseau associe a la population.
 	// (pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
-	// de certaines propriétés)
+	// de certaines proprietes)
 //	private INetProperties properties;
 	
 	// TODO IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>

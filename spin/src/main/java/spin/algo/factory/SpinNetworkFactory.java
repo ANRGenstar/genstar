@@ -4,6 +4,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import spin.SpinPopulation;
 import spin.algo.generator.RandomNetworkGenerator;
 import spin.algo.generator.RegularNetworkGenerator;
 import spin.algo.generator.SFNetworkGenerator;
@@ -11,14 +12,13 @@ import spin.algo.generator.SWNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
 
-/** Propose de générer des réseaux 
- * Si le réseau est non orienté, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
- * TODO [stage] depuis une population obtenir un SPinPop avec le network correspondant
+/** Propose de generer des reseaux 
+ * Si le reseau est non oriente, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
  */
 public class SpinNetworkFactory {
 	
-	// SpinNetwork est le réseau courant sur la population, donc pas plusieurs type de SpinNetwork
-	// contrairement a GraphStreamFactory possédant plusieurs graphes 
+	// SpinNetwork est le reseau courant sur la population, donc pas plusieurs type de SpinNetwork
+	// contrairement a GraphStreamFactory possedant plusieurs graphes 
 	private SpinNetwork network;
 	
 	// Singleton
@@ -33,28 +33,50 @@ public class SpinNetworkFactory {
 	private SpinNetworkFactory(){
 	}
 	
-	/** Renvoi un spinNetwork sur une population passé en paramètre, en prenant une population
-	 * en entrée.
+	// TODO [stage] depuis une population obtenir un SPinPop avec le network correspondant
+	
+	/** Creation d'une SpinPopulation dont le network correspond a la population passee en parametre
+	 * @param population
+	 * @return une SpinPopulation. 
+	 */
+	public SpinPopulation loadPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+		// Create a SpinNetwork with nodes linked to population entities
+		// The SpinNetwork has all the needed nodes and no links
+		SpinNetwork myNetwork = new SpinNetwork();
+		int i = 0;		
+		
+		// create all the nodes 
+		for (APopulationEntity entity : population) {
+			myNetwork.putNode(String.valueOf(i), entity);
+			i++;
+		}
+		
+		// Create the SpinPopulation
+		SpinPopulation spinPop = new SpinPopulation(population, myNetwork);
+		return spinPop;
+	}
+	
+	/** Renvoi un spinNetwork sur une population passe en parametre, en prenant une population
+	 * en entree.
 	 * 
-	 * @param typeGenerator Type du réseau généré
+	 * @param typeGenerator Type du reseau genere
 	 * @param population Population en parametre. 
 	 * @return
 	 */
-	public SpinNetwork generateNetwork(ENetworkGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public SpinNetwork generateNetwork(ENetworkGenerator typeGenerator, SpinPopulation spinPop){
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
-			network = new SWNetworkGenerator().generateNetwork(population,4, .1); 
+			network = new SWNetworkGenerator().generateNetwork(spinPop,4, .1); 
 		if(typeGenerator.equals(ENetworkGenerator.Random))	
-			network = new RandomNetworkGenerator().generateNetwork(population, .1);
+			network = new RandomNetworkGenerator().generateNetwork(spinPop, .1);
 		if(typeGenerator.equals(ENetworkGenerator.Regular))	
-			network = new RegularNetworkGenerator().generateNetwork(population, 4);
+			network = new RegularNetworkGenerator().generateNetwork(spinPop, 4);
 		if(typeGenerator.equals(ENetworkGenerator.ScaleFree))	
-			network = new SFNetworkGenerator().generateNetwork(population);
+			network = new SFNetworkGenerator().generateNetwork(spinPop);
 		
 		return network;
 	}
 	
 	public SpinNetwork getSpinNetwork(){
 		return this.network;
-	}
-	
+	}	
 }

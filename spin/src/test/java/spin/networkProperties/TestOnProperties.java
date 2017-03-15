@@ -28,9 +28,10 @@ public class TestOnProperties {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
 		generator.generate(100);
+		SpinPopulation spinPop = SpinNetworkFactory.getInstance().loadPopulation(population);
 	
 		System.out.println("Debut de la génération de réseau Regular");
-		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
+		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, spinPop);
 		System.out.println("Fin de génération de réseau Regular");
 	
 		SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);

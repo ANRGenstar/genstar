@@ -5,14 +5,11 @@ import java.util.Set;
 import core.metamodel.pop.APopulationEntity;
 
 /** 
- * Interface pour obtenir des valeurs de propriété sur le graphe
- * généré sur la population. 
+ * Interface pour obtenir des valeurs de propriete sur le graphe
+ * genere sur la population. 
  *
  */
 public interface INetProperties {
-
-	// TODO [stage] compléter avec les fonctions accedant au propriétés diverses
-	
 	
 	/** obtention du plus court chemin moyen sur le graphe. 
 	 * 
@@ -27,14 +24,14 @@ public interface INetProperties {
 	 */
 	double getClustering(APopulationEntity entite);
 	
-	/** Obtient les noeuds voisins a l'entite spécifier
+	/** Obtient les noeuds voisins a l'entite specifier
 	 * 
 	 * @param entite
 	 * @return
 	 */
 	Set<APopulationEntity> getNeighboor(APopulationEntity entite);
 	
-	/** Obtient la densité du réseau
+	/** Obtient la densite du reseau
 	 * 
 	 * @return
 	 */
