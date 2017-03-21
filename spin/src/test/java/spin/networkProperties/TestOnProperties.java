@@ -12,9 +12,6 @@ import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
-import useless.EGraphStreamNetwork;
-import useless.GraphStreamFactory;
-import useless.StatFactory;
 
 public class TestOnProperties {
 
@@ -28,23 +25,23 @@ public class TestOnProperties {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
 		generator.generate(100);
-		SpinPopulation spinPop = SpinNetworkFactory.getInstance().loadPopulation(population);
 	
 		System.out.println("Debut de la génération de réseau Regular");
-		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, spinPop);
+		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
+		SpinNetwork networkSW = populationWithNetwork.getNetwork();
 		System.out.println("Fin de génération de réseau Regular");
 	
-		SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
+		//SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
 		
 		
 		// TEST
-		System.out.println(StatFactory.getInstance().getDensity());
-		GraphStreamFactory.getIntance().initialiseGraphStreamFromSpin();
-		System.out.println("Fin du graphStream");
-		
-		Graph lol = GraphStreamFactory.getIntance().getGraphStreamGraph(EGraphStreamNetwork.spinNetwork);
-		lol.display();
-		
+//		System.out.println(StatFactory.getInstance().getDensity());
+//		GraphStreamFactory.getIntance().initialiseGraphStreamFromSpin();
+//		System.out.println("Fin du graphStream");
+//		
+//		Graph lol = GraphStreamFactory.getIntance().getGraphStreamGraph(EGraphStreamNetwork.spinNetwork);
+//		lol.display();
+//		
 		
 		
 		

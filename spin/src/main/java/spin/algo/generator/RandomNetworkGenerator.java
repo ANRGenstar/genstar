@@ -4,17 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.graphstream.graph.*;
+import org.graphstream.graph.Node;
 
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
 import spin.SpinPopulation;
 import spin.objects.SpinNetwork;
-import useless.BaseGenerator;
-import useless.NetworkLink;
-import useless.NetworkNode;
 
 public class RandomNetworkGenerator 
 {
@@ -25,21 +18,17 @@ public class RandomNetworkGenerator
 	 * @param proba
 	 * @return
 	 */
-	public SpinNetwork generateNetwork(SpinPopulation population, double proba){
+	public SpinNetwork generateNetwork(SpinNetwork myNetwork, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
 		
-		// create the spinNetwork
-		SpinNetwork myNetwork = population.getNetwork();
-		
 		// List the created nodes
 		List<Node> nodes = new ArrayList<>(myNetwork.getNodes());
-		
+		int nbNodes = nodes.size();
 		
 		// Compute the number of links to generate
 		// TODO: revoir le type de reseau à generer (diriger ou non ?) 
-		int nbLink = (int) Math.round(population.size()*(population.size()-1)*proba);
-		int nbNodes = nodes.size();
+		int nbLink = (int) Math.round(nbNodes*(nbNodes-1)*proba);
 		Node nodeFrom, nodeTo;
 		
 		// create the links
@@ -52,8 +41,6 @@ public class RandomNetworkGenerator
 				myNetwork.putLink(String.valueOf(link_id), nodeFrom, nodeTo);
 				nbLink--;
 				link_id++;
-				//nodeFrom.addLink(link);
-				//nodeTo.addLink(link);
 			}
 			// TODO : create links
 			

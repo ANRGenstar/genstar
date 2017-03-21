@@ -1,22 +1,21 @@
 package spin.objects;
 
-import java.util.ArrayList;
+import static org.graphstream.algorithm.Toolkit.clusteringCoefficient;
+import static org.graphstream.algorithm.Toolkit.density;
+
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import org.graphstream.algorithm.Dijkstra;
-import org.graphstream.graph.*;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
-import static org.graphstream.algorithm.Toolkit.*;
 
 import core.metamodel.pop.APopulationEntity;
 import spin.interfaces.INetProperties;
-import spin.tools.Tools;
-import useless.NetworkLink;
-import useless.NetworkNode;
 
 
 
@@ -52,8 +51,6 @@ public class SpinNetwork implements INetProperties{
 		Node node = network.getNode(nodeId);
 		
 		node.addAttribute("entity", entite);
-		
-		// TODO [stage (?)] : liste de liens pour chaque noeud
 	
 		kvNodeEntityFastList.put(node, node.getAttribute("entity"));
 		kvEntityNodeFastList.put(node.getAttribute("entity"), node);
@@ -65,7 +62,6 @@ public class SpinNetwork implements INetProperties{
 	 */
 	public void putLink(String linkId, Node n1, Node n2){
 		network.addEdge(linkId, n1, n2);
-		// TODO [stage (?)] si liste de liens, ajouter link
 		// TODO [stage (?)] utiliser String plutot que Node pour identifier n1 et n2
 	}
 	
@@ -83,7 +79,6 @@ public class SpinNetwork implements INetProperties{
 	 */
 	public void removeLink(Edge link) {
 		network.removeEdge(link);
-		// TODO [stage (?)] si liste de liens, enlever link
 	}
 	
 	/** Obtenir les noeuds du reseau
@@ -109,6 +104,8 @@ public class SpinNetwork implements INetProperties{
 		}
 		return links;
 	}
+	
+	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
 
 	@Override
 	public double getAPL() {

@@ -3,11 +3,6 @@ package spin;
 import org.graphstream.graph.Node;
 
 import spin.objects.SpinNetwork;
-import useless.EGraphStreamNetwork;
-import useless.GraphStreamFactory;
-import useless.NetworkLink;
-import useless.NetworkNode;
-import useless.StatFactory;
 
 public class ScenarJouet {
 	
@@ -27,14 +22,14 @@ public class ScenarJouet {
 	 */
 	public static void main(String[] args) {
 		
-		GraphStreamFactory factory = GraphStreamFactory.getIntance();
-		StatFactory stat = StatFactory.getInstance();
+		//GraphStreamFactory factory = GraphStreamFactory.getIntance();
+		//StatFactory stat = StatFactory.getInstance();
 		
 		
 		// I - A & I - B & I - C
-		factory.readFile("/Users/felix/Desktop/simple.graphml.xml");
+		//factory.readFile("/Users/felix/Desktop/simple.graphml.xml");
 		// I - D
-		stat.getAPL(EGraphStreamNetwork.fileRead);
+		//stat.getAPL(EGraphStreamNetwork.fileRead);
 		
 		// II - C 
 		SpinNetwork spinNetwork = new SpinNetwork();
@@ -50,9 +45,8 @@ public class ScenarJouet {
 		spinNetwork.putLink("1",n1,n2);
 		spinNetwork.putLink("2",n1,n3);
 		
-		//factory.generateGraphStreamGraph(spinNetwork);
 		// II - D Stat
-		stat.getAPL(EGraphStreamNetwork.spinNetwork);
+		spinNetwork.getAPL();
 		
 	}
 }

@@ -33,13 +33,11 @@ public class SpinNetworkFactory {
 	private SpinNetworkFactory(){
 	}
 	
-	// TODO [stage] depuis une population obtenir un SPinPop avec le network correspondant
-	
-	/** Creation d'une SpinPopulation dont le network correspond a la population passee en parametre
+	/** Création d'un SpinNetwork correspondant à la population passée en paramètre
 	 * @param population
-	 * @return une SpinPopulation. 
+	 * @return SpinNetwork. 
 	 */
-	public SpinPopulation loadPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public SpinNetwork loadPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		// Create a SpinNetwork with nodes linked to population entities
 		// The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
@@ -51,32 +49,33 @@ public class SpinNetworkFactory {
 			i++;
 		}
 		
-		// Create the SpinPopulation
-		SpinPopulation spinPop = new SpinPopulation(population, myNetwork);
-		return spinPop;
+		return myNetwork;
 	}
 	
-	/** Renvoi un spinNetwork sur une population passe en parametre, en prenant une population
-	 * en entree.
+	/** Création d'une SpinPopulation dont le réseau correspond à la population passée en paramètre.
+	 * Le réseau généré est du type passé en paramètre.
 	 * 
 	 * @param typeGenerator Type du reseau genere
 	 * @param population Population en parametre. 
-	 * @return
+	 * @return SpinPopulation
 	 */
-	public SpinNetwork generateNetwork(ENetworkGenerator typeGenerator, SpinPopulation spinPop){
+	public SpinPopulation generateNetwork(ENetworkGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
-			network = new SWNetworkGenerator().generateNetwork(spinPop,4, .1); 
+			network = new SWNetworkGenerator().generateNetwork(baseNetwork,4, .1); 
 		if(typeGenerator.equals(ENetworkGenerator.Random))	
-			network = new RandomNetworkGenerator().generateNetwork(spinPop, .1);
+			network = new RandomNetworkGenerator().generateNetwork(baseNetwork, .1);
 		if(typeGenerator.equals(ENetworkGenerator.Regular))	
-			network = new RegularNetworkGenerator().generateNetwork(spinPop, 4);
+			network = new RegularNetworkGenerator().generateNetwork(baseNetwork, 4);
 		if(typeGenerator.equals(ENetworkGenerator.ScaleFree))	
-			network = new SFNetworkGenerator().generateNetwork(spinPop);
+			network = new SFNetworkGenerator().generateNetwork(baseNetwork);
 		
-		return network;
+		// Create the SpinPopulation
+		SpinPopulation spinPop = new SpinPopulation(population, network);
+		return spinPop;
 	}
 	
 	public SpinNetwork getSpinNetwork(){
 		return this.network;
-	}	
+	}
 }

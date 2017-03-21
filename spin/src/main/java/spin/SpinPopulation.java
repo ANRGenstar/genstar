@@ -10,9 +10,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.interfaces.INetProperties;
 import spin.objects.SpinNetwork;
-import useless.StatFactory;
 
 /** Population Spin. 
  * 
@@ -22,7 +20,6 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 
 	// Network associe a la population.
 	private SpinNetwork network;
-	// TODO [stage] a remplacer par un graphstream
 	
 
 	// Interface qui permet d'avoir acces aux proprietes du reseau associe a la population.
