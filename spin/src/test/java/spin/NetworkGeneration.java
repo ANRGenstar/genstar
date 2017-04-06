@@ -1,7 +1,5 @@
 package spin;
 
-import spin.algo.factory.GraphStreamFactory;
-import spin.interfaces.EGraphStreamNetwork;
 import spin.interfaces.ENetworkFormat;
 
 
@@ -27,8 +25,8 @@ public class NetworkGeneration {
 		//@SuppressWarnings("unused")
 		//SpinNetwork aNetwork = NetworkFactory.getNetwork(ENetworkEnumGenerator.SmallWorld, population);
 		
-		GraphStreamFactory factory = GraphStreamFactory.getIntance();
-		factory.readFile("/Users/csg/Desktop/simple.graphml.xml"); 
+		//GraphStreamFactory factory = GraphStreamFactory.getIntance();
+		//factory.readFile("/Users/csg/Desktop/simple.graphml.xml"); 
 		
 		/*SpinNetwork spinNetwork = new SpinNetwork();
 		NetworkNode n1 = new NetworkNode(null,"1");
@@ -43,7 +41,7 @@ public class NetworkGeneration {
 		*/
 		
 		
-		factory.exportFile(EGraphStreamNetwork.fileRead, ENetworkFormat.GML, "/Users/csg/Desktop/simple.gml");;
+		//factory.exportFile(EGraphStreamNetwork.fileRead, ENetworkFormat.GML, "/Users/csg/Desktop/simple.gml");;
 		
  		
 	}

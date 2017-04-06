@@ -1,5 +1,7 @@
 package spin.networkProperties;
 
+import org.graphstream.graph.Graph;
+
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
@@ -8,7 +10,6 @@ import gospl.algo.generator.ISyntheticGosplPopGenerator;
 import gospl.algo.generator.UtilGenerator;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
-import spin.algo.factory.StatFactory;
 import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
 
@@ -23,20 +24,24 @@ public class TestOnProperties {
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
-		generator.generate(100000);
+		generator.generate(100);
 	
-		System.out.println("Debut de la génération de réseau SmallWorld");
-		SpinNetwork networkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
-		System.out.println("Fin de génération de réseau SmallWorld");
+		System.out.println("Debut de la génération de réseau Regular");
+		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
+		SpinNetwork networkSW = populationWithNetwork.getNetwork();
+		System.out.println("Fin de génération de réseau Regular");
 	
-		SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
+		//SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
 		
 		
 		// TEST
-		System.out.println(StatFactory.getInstance().getDensity());
-		 
-		System.out.println(StatFactory.getInstance().getAPL());
-		
+//		System.out.println(StatFactory.getInstance().getDensity());
+//		GraphStreamFactory.getIntance().initialiseGraphStreamFromSpin();
+//		System.out.println("Fin du graphStream");
+//		
+//		Graph lol = GraphStreamFactory.getIntance().getGraphStreamGraph(EGraphStreamNetwork.spinNetwork);
+//		lol.display();
+//		
 		
 		
 		

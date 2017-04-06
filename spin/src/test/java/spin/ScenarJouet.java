@@ -1,10 +1,7 @@
 package spin;
 
-import spin.algo.factory.GraphStreamFactory;
-import spin.algo.factory.StatFactory;
-import spin.interfaces.EGraphStreamNetwork;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
+import org.graphstream.graph.Node;
+
 import spin.objects.SpinNetwork;
 
 public class ScenarJouet {
@@ -25,29 +22,31 @@ public class ScenarJouet {
 	 */
 	public static void main(String[] args) {
 		
-		GraphStreamFactory factory = GraphStreamFactory.getIntance();
-		StatFactory stat = StatFactory.getInstance();
+		//GraphStreamFactory factory = GraphStreamFactory.getIntance();
+		//StatFactory stat = StatFactory.getInstance();
 		
 		
 		// I - A & I - B & I - C
-		factory.readFile("/Users/felix/Desktop/simple.graphml.xml");
+		//factory.readFile("/Users/felix/Desktop/simple.graphml.xml");
 		// I - D
-		stat.getAPL(EGraphStreamNetwork.fileRead);
+		//stat.getAPL(EGraphStreamNetwork.fileRead);
 		
 		// II - C 
 		SpinNetwork spinNetwork = new SpinNetwork();
-		NetworkNode n1 = new NetworkNode(null,"1");
-		NetworkNode n2 = new NetworkNode(null,"2");
-		NetworkNode n3 = new NetworkNode(null,"3");
-		spinNetwork.putNode(n1);
-		spinNetwork.putNode(n2);
-		spinNetwork.putNode(n3);
-		spinNetwork.putLink(new NetworkLink(n1,n2,"1"));
-		spinNetwork.putLink(new NetworkLink(n1,n3,"2"));
+		//NetworkNode n1 = new NetworkNode(null,"1");
+		//NetworkNode n2 = new NetworkNode(null,"2");
+		//NetworkNode n3 = new NetworkNode(null,"3");
+		spinNetwork.putNode("1",null);
+		Node n1 = spinNetwork.network.getNode("1");
+		spinNetwork.putNode("2",null);
+		Node n2 = spinNetwork.network.getNode("2");
+		spinNetwork.putNode("3",null);
+		Node n3 = spinNetwork.network.getNode("3");
+		spinNetwork.putLink("1",n1,n2);
+		spinNetwork.putLink("2",n1,n3);
 		
-		factory.generateGraphStreamGraph(spinNetwork);
 		// II - D Stat
-		stat.getAPL(EGraphStreamNetwork.spinNetwork);
+		spinNetwork.getAPL();
 		
 	}
 }

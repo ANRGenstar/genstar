@@ -23,6 +23,7 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.EdgeRejectedException;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import org.graphstream.graph.implementations.MultiGraph;
 import org.graphstream.graph.implementations.SingleGraph;
 
 import core.metamodel.pop.APopulationAttribute;
@@ -38,7 +39,7 @@ public class AttributesDependanciesGraph {
 
 	private Logger logger = LogManager.getLogger();
 
-	private Graph graph = new SingleGraph("dependancies",true,false);
+	private MultiGraph graph = new MultiGraph("dependancies",true,false);
 	
 	private final static String NODE_ATTRIBUTE_ATTRIBUTE = "surveyattribute";
 	private final static String EDGE_ATTRIBUTE_MATRIX = "matrix";
@@ -143,13 +144,22 @@ public class AttributesDependanciesGraph {
 	
 	
 	public void addKnownGlobalFrequency(AFullNDimensionalMatrix<?> currentMatrix) {
+		
+		logger.debug("adding information on matrix {}", currentMatrix.getLabel());
+
 		List<APopulationAttribute> attributes = new ArrayList<>();
 		attributes.addAll(currentMatrix.getDimensions());
 		for (int i=0; i<attributes.size();i++) {
 			for (int j=i+1; j<attributes.size();j++) {
+				
+				logger.debug("should add an edge to represent a link of statistical interdependances {}->{}", attributes.get(i).getAttributeName(), attributes.get(j).getAttributeName());
+
+				// did we already stored an edge for that ? 
 				final String from = attributes.get(i).getAttributeName();
 				final String to = attributes.get(j).getAttributeName();
-				try {
+				Edge existing_edge = graph.getNode(from).getEdgeToward(to);
+				
+				if (existing_edge == null) {
 					Edge e = graph.addEdge(
 							"edge"+graph.getEdgeCount(), 
 							from, 
@@ -158,11 +168,9 @@ public class AttributesDependanciesGraph {
 							);
 					e.setAttribute(EDGE_ATTRIBUTE_MATRIX, currentMatrix);
 					e.setAttribute(EDGE_ATTRIBUTE_TYPE, EdgeDependancyType.GLOBAL_FREQUENCY);
-				} catch (EdgeRejectedException e) {
-					Edge existing_edge = graph.getNode(to).getEdgeToward(from);
-					if (existing_edge == null)
-						existing_edge = graph.getNode(from).getEdgeToward(to);
-					
+				} else {
+
+
 					StringBuffer msg = new StringBuffer();
 					msg.append("when importing the matrix ").append(currentMatrix.getLabel());
 					msg.append(", unable to add edge ").append(from).append("->").append(to);
@@ -177,6 +185,7 @@ public class AttributesDependanciesGraph {
 					logger.error(msg.toString());
 					throw new IllegalArgumentException(msg.toString());
 				}
+				
 			}
 		}
 	}

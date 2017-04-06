@@ -5,19 +5,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
+import org.graphstream.graph.Edge;
+import org.graphstream.graph.Node;
+
+import spin.SpinPopulation;
 import spin.objects.SpinNetwork;
 
 /**Générateur SmallWorld
  * 
  *
  */
-public class SWNetworkGenerator extends BaseGenerator
+public class SWNetworkGenerator
 {
 	/**
 	 * 
@@ -26,39 +24,38 @@ public class SWNetworkGenerator extends BaseGenerator
 	 * @param beta
 	 * @return
 	 */
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, int k, double beta){
+	public SpinNetwork generateNetwork(SpinNetwork network, int k, double beta){
 		//int k connectivity of the network
 		//double beta noise introduced on the regular network
-		// crée un réseau régulier 
-		SpinNetwork myNetwork = (new RegularNetworkGenerator()).generateNetwork(population,k);
+		// cree un reseau regulier 
+		SpinNetwork myNetwork = (new RegularNetworkGenerator()).generateNetwork(network,k);
 				
 		//parcourir tous les liens
-		HashSet<NetworkLink> links = new HashSet<>(myNetwork.getLinks());
-		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
+		HashSet<Edge> links = new HashSet<>(myNetwork.getLinks());
+		int nbLinks = links.size();
+		List<Node> nodes = new ArrayList<>(myNetwork.getNodes());
 		int nbNodes = nodes.size();
 		
-		//pour chacun si proba < beta ; supprimer (des deux cotés) et rebrancher aléatoirement 
+		//pour chacun si proba < beta ; supprimer (des deux cotes) et rebrancher aleatoirement 
 		Random rand = new Random();
-		for(NetworkLink l : links){
+		
+		int link_id = nbLinks;
+		for(Edge l : links){
 			if(rand.nextDouble()<beta){
-				l.getFrom().removeLink(l);
-				l.getTo().removeLink(l);
+				myNetwork.removeLink(l);
 				
-				NetworkNode nodeFrom, nodeTo;
-				NetworkLink link;
-				boolean linkCreated=false;
 				// create the links
-				int link_id = 0;
+				Node nodeFrom, nodeTo;
+				boolean linkCreated=false;
+				
 				while (!linkCreated) {
 					nodeFrom = nodes.get(rand.nextInt(nbNodes));
 					nodeTo = nodes.get(rand.nextInt(nbNodes));
-					link = new NetworkLink(nodeFrom,nodeTo,false,String.valueOf(link_id));//link is not oriented
 					
-					if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
+					if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasEdgeBetween(nodeTo)){
+						myNetwork.putLink(String.valueOf(link_id), nodeFrom, nodeTo);
 						linkCreated=true;
 						link_id++;
-						nodeFrom.addLink(link);
-						nodeTo.addLink(link);
 					}					
 				}
 			}

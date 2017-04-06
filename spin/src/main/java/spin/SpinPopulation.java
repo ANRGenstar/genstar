@@ -10,8 +10,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import spin.algo.factory.StatFactory;
-import spin.interfaces.INetProperties;
 import spin.objects.SpinNetwork;
 
 /** Population Spin. 
@@ -20,14 +18,16 @@ import spin.objects.SpinNetwork;
  */
 public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
-	// Network associé a la population.
+	// Network associe a la population.
 	private SpinNetwork network;
-
-	// Interface qui permet d'avoir acces aux propriétés du réseau associé a la population.
-	// pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
-	// de certaines propriétés
-	private INetProperties properties;
 	
+
+	// Interface qui permet d'avoir acces aux proprietes du reseau associe a la population.
+	// (pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
+	// de certaines proprietes)
+//	private INetProperties properties;
+	
+	// TODO IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>
 	private final Collection<APopulationEntity> population;
 
 	/**
@@ -39,8 +39,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	public SpinPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popRef, 
 						 SpinNetwork network){
 		population = popRef;
-		this.network = network;
-		this.properties = StatFactory.getInstance();
+		this.network = network; 
 	}
 	
 	/**
@@ -70,9 +69,6 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 		return network;
 	}
 
-	public INetProperties getProperties() {
-		return properties;
-	}
 
 	@Override
 	public int size() {

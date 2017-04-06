@@ -4,15 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
-import spin.objects.NetworkLink;
-import spin.objects.NetworkNode;
+import org.graphstream.graph.Node;
+
+import spin.SpinPopulation;
 import spin.objects.SpinNetwork;
 
-public class RandomNetworkGenerator extends BaseGenerator 
+public class RandomNetworkGenerator 
 {
 
 	/** Génération d'un spinNetwork. 
@@ -21,35 +18,29 @@ public class RandomNetworkGenerator extends BaseGenerator
 	 * @param proba
 	 * @return
 	 */
-	public SpinNetwork generateNetwork(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double proba){
+	public SpinNetwork generateNetwork(SpinNetwork myNetwork, double proba){
 		// TODO: check random generator 
 		Random rand = new Random();
 		
-		// create the spinNetwork
-		SpinNetwork myNetwork = loadPopulation(population);
-		
 		// List the created nodes
-		List<NetworkNode> nodes = new ArrayList<>(myNetwork.getNodes());
+		List<Node> nodes = new ArrayList<>(myNetwork.getNodes());
+		int nbNodes = nodes.size();
 		
 		// Compute the number of links to generate
-		// TODO: revoir le type de réseau à générer (diriger ou non ?) 
-		int nbLink = (int) Math.round(population.size()*(population.size()-1)*proba);
-		int nbNodes = nodes.size();
-		NetworkNode nodeFrom, nodeTo;
-		NetworkLink link;
+		// TODO: revoir le type de reseau à generer (diriger ou non ?) 
+		int nbLink = (int) Math.round(nbNodes*(nbNodes-1)*proba);
+		Node nodeFrom, nodeTo;
 		
 		// create the links
 		int link_id = 0;
 		while (nbLink>0) {
 			nodeFrom = nodes.get(rand.nextInt(nbNodes));
 			nodeTo = nodes.get(rand.nextInt(nbNodes));
-			link = new NetworkLink(nodeFrom,nodeTo,false,String.valueOf(link_id));//link is not oriented
 			
-			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasLink(link)){
+			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasEdgeBetween(nodeTo)){
+				myNetwork.putLink(String.valueOf(link_id), nodeFrom, nodeTo);
 				nbLink--;
 				link_id++;
-				nodeFrom.addLink(link);
-				nodeTo.addLink(link);
 			}
 			// TODO : create links
 			
