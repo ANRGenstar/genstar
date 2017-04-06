@@ -205,7 +205,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 		// for each matrix, recompute the probabilities
 		for (AFullNDimensionalMatrix<Double> mParam: segmentedMatrix.getMatrices()) {
 			
-			AFullNDimensionalMatrix<Integer> mMeasuredContigency = factory.createContigency(mParam.getDimensions(), population);
+			AFullNDimensionalMatrix<Integer> mMeasuredContigency = factory.createContingency(mParam.getDimensions(), population);
 			
 			AFullNDimensionalMatrix<Double> mMeasuredFrequency = factory.createDistribution(mMeasuredContigency);
 			

@@ -188,7 +188,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	@Override
 	public AControl<T> getVal() {
-		AControl<T> result = getNulVal();
+		AControl<T> result = this.getNulVal();
 		for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet) {
 			for (AControl<T> control: distribution.matrix.values()) {
 				getSummedControl(result, control);	
@@ -291,7 +291,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
 
 		if (keyAndVal.length % 2 != 0) {
-			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, "
+					+ "such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
 		}
 		
 		// lookup values

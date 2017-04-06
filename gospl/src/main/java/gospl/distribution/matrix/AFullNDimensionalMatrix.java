@@ -291,7 +291,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
 
 		if (coordinates.length % 2 != 0) {
-			throw new IllegalArgumentException("values should be passed in even count, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+			throw new IllegalArgumentException("values should be passed in even count, "
+					+ "such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
 		}
 		
 		// lookup values
@@ -434,9 +435,11 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			case GlobalFrequencyTable:
 				return (Double)getVal().getValue() == 1.0;
 			case LocalFrequencyTable:
+				return false;
 			case Sample:
+				throw new IllegalStateException("This matrix cannot be of type "+dataType);
 			case ContingencyTable:
-					return true;
+				return true;
 			default:
 				throw new IllegalStateException("unknown state "+dataType);
 			

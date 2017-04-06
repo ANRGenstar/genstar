@@ -22,7 +22,7 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
-public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFProcessor<T> {
+public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 
 	private Logger logger = LogManager.getLogger();
 
@@ -58,7 +58,7 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 
 		logger.info("Estimates seed's referent marginals from control matrix {}", 
 				control.getDimensions().stream().map(att -> att.getAttributeName()
-						.substring(0, att.getAttributeName().length() < 3 ? att.getAttributeName().length() : 3))
+						.substring(0, att.getAttributeName().length() < 5 ? att.getAttributeName().length() : 5))
 				.collect(Collectors.joining(" x ")));
 		Map<APopulationAttribute, APopulationAttribute> controlToSeedAttribute = new HashMap<>();
 		for(APopulationAttribute sAttribute : seed.getDimensions()){
@@ -115,9 +115,9 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
 			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
-				logger.info("Detailed marginals:\n{}", mrg.marginalControl.entrySet()
-					.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
-							+" = "+entry.getValue()).collect(Collectors.joining("\n")));
+				logger.debug("Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n{}",mrg.marginalControl.entrySet()
+						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
+									+" = "+entry.getValue()).collect(Collectors.joining("\n")));
 				System.exit(1);
 			}
 		}

@@ -33,6 +33,8 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  *
  */
 public class GosplNDimensionalMatrixFactory {
+	
+	public static double EPSILON = Math.pow(10, -3);
 
 	public static final GosplNDimensionalMatrixFactory getFactory() {
 		return new GosplNDimensionalMatrixFactory();
@@ -114,7 +116,7 @@ public class GosplNDimensionalMatrixFactory {
 				); 
 		matrix.addGenesis("created from distribution GosplNDimensionalMatrixFactory@createDistribution");
 
-		int total = contigency.getVal().getValue();
+		int total = Math.round(Math.round(contigency.getVal().getValue().doubleValue()));
 		
 		// Normalize increments to global frequency
 		contigency.getMatrix().keySet().stream().forEach(coord -> matrix.setValue(
@@ -263,7 +265,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @param population
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> createContigency(
+	public AFullNDimensionalMatrix<Integer> createContingency(
 			Set<APopulationAttribute> attributesToMeasure,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 		

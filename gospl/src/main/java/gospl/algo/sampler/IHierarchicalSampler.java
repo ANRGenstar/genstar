@@ -18,5 +18,4 @@ public interface IHierarchicalSampler extends ISampler<ACoordinate<APopulationAt
 			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
 			);
 	
-	
 }

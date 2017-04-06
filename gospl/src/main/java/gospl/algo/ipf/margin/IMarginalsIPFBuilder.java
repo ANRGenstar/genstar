@@ -7,7 +7,15 @@ import core.metamodel.pop.APopulationValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
-public interface IMarginalsIPFProcessor<T extends Number> {
+/**
+ * Higher order abstraction to build marginals based on sparse matrix with
+ * custom T extends Number value type content
+ * 
+ * @author kevinchapuis
+ *
+ * @param <T>
+ */
+public interface IMarginalsIPFBuilder<T extends Number> {
 
 	public Collection<AMargin<T>> buildCompliantMarginals(
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, T> matrix,

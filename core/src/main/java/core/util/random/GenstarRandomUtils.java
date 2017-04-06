@@ -1,11 +1,14 @@
 package core.util.random;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class GenstarRandomUtils {
 
+	private GenstarRandomUtils() {}
+	
 	/**
 	 * Returns one element uniformly picked from the list
 	 * @param l
@@ -49,6 +52,20 @@ public class GenstarRandomUtils {
 		return it.next();
 	}
 	
-	private GenstarRandomUtils() {}
+	public static <T> T oneOf(Collection<T> c){
+		// check param
+		if (c.isEmpty())
+			throw new IllegalArgumentException("cannot take one value out of an empty list");
+		
+		// quick exit 
+		if (c.size() == 1)
+			return c.iterator().next();
+		
+		int rndNum = GenstarRandom.getInstance().nextInt(c.size());
+		for(T t: c) 
+			if (--rndNum < 0) 
+				return t;
+		throw new AssertionError();
+	}
 
 }
