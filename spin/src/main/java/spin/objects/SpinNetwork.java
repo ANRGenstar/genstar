@@ -105,7 +105,7 @@ public class SpinNetwork implements INetProperties{
 		return links;
 	}
 	
-	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
+	// TODO [stage] Utiliser des mÃ©thodes de sampling pour allÃ©ger le calcul de l'APL
 
 	@Override
 	public double getAPL() {

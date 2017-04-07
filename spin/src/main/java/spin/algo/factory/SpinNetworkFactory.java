@@ -33,7 +33,7 @@ public class SpinNetworkFactory {
 	private SpinNetworkFactory(){
 	}
 	
-	/** Création d'un SpinNetwork correspondant à la population passée en paramètre
+	/** CrÃ©ation d'un SpinNetwork correspondant Ã  la population passÃ©e en paramÃ¨tre
 	 * @param population
 	 * @return SpinNetwork. 
 	 */
@@ -52,8 +52,8 @@ public class SpinNetworkFactory {
 		return myNetwork;
 	}
 	
-	/** Création d'une SpinPopulation dont le réseau correspond à la population passée en paramètre.
-	 * Le réseau généré est du type passé en paramètre.
+	/** CrÃ©ation d'une SpinPopulation dont le rÃ©seau correspond Ã  la population passÃ©e en paramÃ¨tre.
+	 * Le rÃ©seau gÃ©nÃ©rÃ© est du type passÃ© en paramÃ¨tre.
 	 * 
 	 * @param typeGenerator Type du reseau genere
 	 * @param population Population en parametre. 
