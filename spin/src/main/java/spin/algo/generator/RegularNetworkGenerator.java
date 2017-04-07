@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.graphstream.graph.Node;
 
-import spin.SpinPopulation;
 import spin.objects.SpinNetwork;
 
 

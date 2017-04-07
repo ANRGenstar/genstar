@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.extended.NamedMapConverter;
-import com.thoughtworks.xstream.io.xml.DomDriver;
+import com.thoughtworks.xstream.io.xml.StaxDriver;
 
 import core.metamodel.IAttribute;
 import core.metamodel.pop.io.GSSurveyType;
@@ -41,7 +41,7 @@ public class GenstarXmlSerializer {
 	
 	public GenstarXmlSerializer() throws FileNotFoundException {
 		this.mkdir = new File(System.getProperty("user.dir"));
-		this.xs = new XStream(new DomDriver());
+		this.xs = new XStream(new StaxDriver());
 		
 		/*
 		 * Class alias for xml record

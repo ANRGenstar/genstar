@@ -7,11 +7,6 @@ import java.util.Random;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
-import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
-import spin.SpinPopulation;
 import spin.objects.SpinNetwork;
 
 public class SFNetworkGenerator {
