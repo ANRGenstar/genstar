@@ -1,4 +1,4 @@
-package gospl.algo.bayesiannetworks;
+package gospl.algo.bn;
 
 import java.util.Collections;
 import java.util.HashMap;

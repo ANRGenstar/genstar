@@ -24,7 +24,9 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  *  <li> {@code <T>} the type of value the matrix contains
  * </ul> 
  * <p>
- * There is also several methods to access and set the matrix
+ * There is also several methods to access and set the matrix. The collection
+ * format is based on spares collection abstraction: there is no memory allocated
+ * to null value and there is not any coordinate associated in the matrix
  * 
  * @author kevinchapuis
  *

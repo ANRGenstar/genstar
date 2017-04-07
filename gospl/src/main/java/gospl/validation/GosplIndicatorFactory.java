@@ -13,6 +13,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 
 /**
  * Provides some methods to evaluate the distance between input data and generated population.
+ * <p>
+ * Input data format as {@link INDimensionalMatrix} guarantees no zero cell value
  * 
  * @author kevinchapuis
  *
@@ -30,6 +32,86 @@ public class GosplIndicatorFactory {
 	
 	public void setChiSquareCritivalPValue(double criticalPValue){
 		this.criticalPValue  = criticalPValue;
+	}
+	
+	/**
+	 * Home made indicator that follow down the path of RSSZ* indicator but with
+	 * a very simple expression of "cell based error": it count the number of cells
+	 * that does not fit input matrix. 
+	 * 
+	 * The indicator test relative difference for contingency matrix, and absolute difference
+	 * for frequency matrix. Cells fit when the difference is less than critical chi value.
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public int getTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+		double chiFiveCritical = new ChiSquaredDistribution(1)
+				.inverseCumulativeProbability(criticalPValue);
+		switch (inputMatrix.getMetaDataType()) {
+		case ContingencyTable:
+			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
+				.getFactory().createContingency(population); 
+			return inputMatrix.getMatrix().entrySet()
+					.stream().mapToInt(e -> Math.pow(contingencyTable.getVal(e.getKey().values())
+							.getValue() - e.getValue().getValue().intValue(), 2) / 
+							e.getValue().getValue().doubleValue() > chiFiveCritical ? 1 : 0)
+					.sum();
+		case GlobalFrequencyTable:
+			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
+				.getFactory().createDistribution(population);
+			return inputMatrix.getMatrix().entrySet()
+					.stream().mapToInt(e -> Math.pow(frequencyTable.getVal(e.getKey().values())
+							.getValue() - e.getValue().getValue().doubleValue(), 2) > chiFiveCritical ? 1 : 0)
+					.sum();
+		case LocalFrequencyTable:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "of type "+ inputMatrix.getMetaDataType());
+		default:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "a segmented matrix with multiple matrix meta data type");
+		}
+	}
+	
+	/**
+	 * Home made indicator that follow down the path of RSSZ* indicator but with
+	 * a very simple expression of "cell based error": it count the number of cells
+	 * that does not fit input matrix. This one is based on a delta relative difference.
+	 * 
+	 * The indicator test relative difference for contingency matrix, and absolute difference
+	 * for frequency matrix. Cells fit when the difference is less than delta parameter.
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public int getTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double delta){
+		switch (inputMatrix.getMetaDataType()) {
+		case ContingencyTable:
+			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
+				.getFactory().createContingency(population); 
+			return inputMatrix.getMatrix().entrySet()
+					.stream().mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values())
+							.getValue() - e.getValue().getValue().intValue()) / 
+							e.getValue().getValue().doubleValue() > delta ? 1 : 0)
+					.sum();
+		case GlobalFrequencyTable:
+			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
+				.getFactory().createDistribution(population);
+			return inputMatrix.getMatrix().entrySet()
+					.stream().mapToInt(e -> Math.abs(frequencyTable.getVal(e.getKey().values())
+							.getValue() - e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
+					.sum();
+		case LocalFrequencyTable:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "of type "+ inputMatrix.getMetaDataType());
+		default:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "a segmented matrix with multiple matrix meta data type");
+		}
 	}
 	
 	/**

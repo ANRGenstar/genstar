@@ -20,11 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graphstream.algorithm.ConnectedComponents;
 import org.graphstream.graph.Edge;
-import org.graphstream.graph.EdgeRejectedException;
-import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.graph.implementations.SingleGraph;
 
 import core.metamodel.pop.APopulationAttribute;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;

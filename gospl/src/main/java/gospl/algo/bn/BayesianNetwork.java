@@ -1,12 +1,10 @@
-package gospl.algo.bayesiannetworks;
+package gospl.algo.bn;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,12 +17,10 @@ import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.dom4j.Attribute;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Node;
-import org.dom4j.io.DOMReader;
 
 public class BayesianNetwork {
 
