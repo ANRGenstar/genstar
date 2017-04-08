@@ -271,11 +271,17 @@ public class AttributesDependanciesGraph {
 		Map<Integer,Set<APopulationAttribute>> degree2nodes = new TreeMap<>();
 		
 		for (Node n: graph.getNodeSet()) {
+			
+			// skip graph nodes which are not in this component
+			if (!component.contains((APopulationAttribute)n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE)))
+				continue;
+			
 			Integer degree = n.getDegree();
 			
 			// quick exit
-			if (degree==0) 
-				return n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
+			//if (degree==0) 
+			//	return n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
+			
 			
 			// quick skip
 			if (degree > minDegree)
