@@ -96,7 +96,7 @@ public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<
 		//logger.info("a dot file was stored into "+dotFile.getAbsolutePath());
 		
 		// Use this to visualize the dependancy graph in png 
-		dependancyGraph.generateDotRepresentationInPNG(true);
+		//dependancyGraph.generateDotRepresentationInPNG(true);
 		
 		// TODO sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
 		Collection<List<APopulationAttribute>> explorationOrder = proposeExplorationOrder(dependancyGraph);

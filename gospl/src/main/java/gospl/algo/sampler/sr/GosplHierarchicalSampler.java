@@ -54,10 +54,9 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
 			) {
 		this.explorationOrder = explorationOrder;
-		this.segmentedMatrix = segmentedMatrix;
-
-		// TODO ?
-		//this.segmentedMatrix = new CachedSegmentedNDimensionalMatrix<Double>(segmentedMatrix);
+		
+		// create a cached version of this segmented matrix, to save time in our intensive computation of probabilities
+		this.segmentedMatrix = new CachedSegmentedNDimensionalMatrix<Double>(segmentedMatrix);
 		
 	}
 
@@ -80,7 +79,6 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 				
 				logger.debug("\tsampling att {}", att);
 			
-				
 				if (att2value.containsKey(att.getReferentAttribute())) {
 					// this attribute as for a control attribute an attribute which was already sampled. 
 					// we should probably not sample it, but rather use this reference with the user rules
@@ -172,7 +170,8 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 			}
 		}
 		
-		/*
+		// to test the efficiency of cache:
+		/* 
 		System.err.println(
 				"hits / missed     "+((CachedSegmentedNDimensionalMatrix)this.segmentedMatrix).getHits()+"/"+
 				((CachedSegmentedNDimensionalMatrix)this.segmentedMatrix).getMissed()
