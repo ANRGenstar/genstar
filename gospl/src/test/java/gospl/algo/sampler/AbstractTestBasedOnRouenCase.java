@@ -75,14 +75,14 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		 GenstarConfigurationFile gcf = null;
 		 try {
-			 gcf = gxs.deserializeGSConfig(new File("testdata/rouen1/GSC_Rouen.xml"));
+			 gcf = gxs.deserializeGSConfig(new File("../../template/target/classes/rouen/gospl/data/GSC_Rouen_IS.xml"));
 		 } catch (FileNotFoundException e) {
 			 // TODO Auto-generated catch block
 			 e.printStackTrace();
 		 }
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
 						 gcf.getAttributes().size()+" attributs\n"+
-						 gcf.getSurveyWrapper().size()+" data files");
+						 gcf.getSurveyWrappers().size()+" data files");
 						
 		 return gcf;
 	}
