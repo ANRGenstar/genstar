@@ -13,7 +13,6 @@ import core.configuration.GenstarXmlSerializer;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
-import core.util.GSPerformanceUtil;
 import gospl.GosplPopulation;
 import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.generator.DistributionBasedGenerator;
@@ -92,7 +91,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	public void test() {
 		
 		// parameters of the test
-		int targetPopulationSize = 100;
+		int targetPopulationSize = 10000;
 		GenstarConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
@@ -136,6 +135,9 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// HERE IS A CHOICE TO MAKE BASED ON THE TYPE OF GENERATOR WE WANT:
 		// Choice is made here to use distribution based generator
 
+
+		final long timestampStart = System.currentTimeMillis();
+		
 		// so we collapse all distribution build from the data
 		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
 		try {
@@ -160,20 +162,22 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		}
 
 
-		final GSPerformanceUtil gspu =
-				new GSPerformanceUtil("Start generating synthetic population of size " + targetPopulationSize);
-
 		// BUILD THE GENERATOR
 		final ISyntheticGosplPopGenerator ispGenerator = new DistributionBasedGenerator((IHierarchicalSampler) sampler);
 
 		// BUILD THE POPULATION
 		try {
 			population = ispGenerator.generate(targetPopulationSize);
-			gspu.sysoStempPerformance("End generating synthetic population: elapse time", this);
 			
 		} catch (final NumberFormatException e) {
 			e.printStackTrace();
 		}
+
+		final long durationMs = (System.currentTimeMillis() - timestampStart);
+		
+		double timePerIndic = (double)durationMs/(population.size());
+		
+		System.out.println("generated in "+durationMs+"ms --- "+timePerIndic+"ms per individal");
 		
 		TemporaryFolder tmpDir = new TemporaryFolder();
 		

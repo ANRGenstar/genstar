@@ -1,5 +1,7 @@
 package gospl.validation;
 
+import java.util.Collection;
+
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 
 import core.metamodel.IPopulation;
@@ -55,7 +57,7 @@ public class GosplIndicatorFactory {
 			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createContingency(population); 
 			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.pow(contingencyTable.getVal(e.getKey().values())
+					.stream().mapToInt(e -> Math.pow(contingencyTable.getVal(e.getKey().values(), true)
 							.getValue() - e.getValue().getValue().intValue(), 2) / 
 							e.getValue().getValue().doubleValue() > chiFiveCritical ? 1 : 0)
 					.sum();
@@ -63,7 +65,7 @@ public class GosplIndicatorFactory {
 			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createDistribution(population);
 			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.pow(frequencyTable.getVal(e.getKey().values())
+					.stream().mapToInt(e -> Math.pow(frequencyTable.getVal(e.getKey().values(), true)
 							.getValue() - e.getValue().getValue().doubleValue(), 2) > chiFiveCritical ? 1 : 0)
 					.sum();
 		case LocalFrequencyTable:
@@ -94,7 +96,7 @@ public class GosplIndicatorFactory {
 			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createContingency(population); 
 			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values())
+					.stream().mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values(), true)
 							.getValue() - e.getValue().getValue().intValue()) / 
 							e.getValue().getValue().doubleValue() > delta ? 1 : 0)
 					.sum();
@@ -102,7 +104,7 @@ public class GosplIndicatorFactory {
 			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createDistribution(population);
 			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.abs(frequencyTable.getVal(e.getKey().values())
+					.stream().mapToInt(e -> Math.abs(frequencyTable.getVal(e.getKey().values(), true)
 							.getValue() - e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
 					.sum();
 		case LocalFrequencyTable:
@@ -113,6 +115,7 @@ public class GosplIndicatorFactory {
 					+ "a segmented matrix with multiple matrix meta data type");
 		}
 	}
+	
 	
 	/**
 	 * Return total absolute error (TAE) for this {@code population}. The indicator
@@ -136,14 +139,15 @@ public class GosplIndicatorFactory {
 			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createContingency(population); 
 			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values())
+					.stream()
+					.mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values(), true)
 							.getValue() - e.getValue().getValue().intValue()))
 					.sum();
 		case GlobalFrequencyTable:
 			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createDistribution(population);
 			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToDouble(e -> Math.abs(frequencyTable.getVal(e.getKey().values())
+					.stream().mapToDouble(e -> Math.abs(frequencyTable.getVal(e.getKey().values(), true)
 							.getValue() - e.getValue().getValue().doubleValue()))
 					.sum();
 		case LocalFrequencyTable:
@@ -173,7 +177,7 @@ public class GosplIndicatorFactory {
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		return this.getTAE(inputMatrix, population) / inputMatrix.size();
 	}
-
+	
 	/**
 	 * Return the square root mean square error (SRMSE) for this {@code population}. This indicator
 	 * aggregates error between known control total from input data and those of the generated
@@ -203,7 +207,7 @@ public class GosplIndicatorFactory {
 		case ContingencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
-				actualValue = contingencyTable.getVal(coord.values()).getValue();
+				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 				s += Math.pow(actualValue, 2) / nbCells;
 			}
@@ -211,7 +215,7 @@ public class GosplIndicatorFactory {
 		case GlobalFrequencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
-				actualValue = contingencyTable.getVal(coord.values()).getValue();
+				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 				s += Math.pow(actualValue, 2) / nbCells;
 			}
@@ -251,14 +255,14 @@ public class GosplIndicatorFactory {
 		case ContingencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
-				actualValue = contingencyTable.getVal(coord.values()).getValue();
+				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;
 		case GlobalFrequencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
-				actualValue = contingencyTable.getVal(coord.values()).getValue();
+				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;

@@ -16,6 +16,7 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -74,7 +75,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 * @throws IllegalDistributionCreation 
 	 */
-	public ASegmentedNDimensionalMatrix<Double> createEmptyDistribution(
+	public ISegmentedNDimensionalMatrix<Double> createEmptyDistribution(
 			Collection<Set<APopulationAttribute>> segmentedDimensions) throws IllegalDistributionCreation{
 		return new GosplConditionalDistribution(segmentedDimensions.stream()
 				.map(dimSet -> this.createEmptyDistribution(dimSet)).collect(Collectors.toSet()));
@@ -197,7 +198,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 * @throws IllegalDistributionCreation 
 	 */
-	public ASegmentedNDimensionalMatrix<Double> createDistributionFromPopulations(
+	public ISegmentedNDimensionalMatrix<Double> createDistributionFromPopulations(
 			Set<IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>> populations) 
 					throws IllegalDistributionCreation {
 		return new GosplConditionalDistribution(populations

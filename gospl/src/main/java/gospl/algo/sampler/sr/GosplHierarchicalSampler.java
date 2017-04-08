@@ -14,20 +14,15 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.algo.sampler.IHierarchicalSampler;
-import gospl.algo.sampler.evaluation.BasicSamplingEvaluation;
-import gospl.algo.sampler.evaluation.IEvaluableSampler;
-import gospl.algo.sampler.evaluation.ISamplingEvaluation;
-import gospl.algo.sampler.evaluation.SamplingEvaluationUtils;
-import gospl.distribution.GosplNDimensionalMatrixFactory;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
+import gospl.distribution.matrix.CachedSegmentedNDimensionalMatrix;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
@@ -37,11 +32,11 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  * @author Samuel Thiriot
  *
  */
-public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluableSampler {
+public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
 	private Collection<List<APopulationAttribute>> explorationOrder = null;
-	private ASegmentedNDimensionalMatrix<Double> segmentedMatrix;
+	private ISegmentedNDimensionalMatrix<Double> segmentedMatrix;
 	
 	public GosplHierarchicalSampler() {
 		// TODO Auto-generated constructor stub
@@ -60,6 +55,9 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 			) {
 		this.explorationOrder = explorationOrder;
 		this.segmentedMatrix = segmentedMatrix;
+
+		// TODO ?
+		//this.segmentedMatrix = new CachedSegmentedNDimensionalMatrix<Double>(segmentedMatrix);
 		
 	}
 
@@ -71,16 +69,16 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 
 		Map<APopulationAttribute,APopulationValue> att2value = new HashMap<>();
 		
-		logger.info("starting hierarchical sampling...");
+		logger.debug("starting hierarchical sampling...");
 		for (List<APopulationAttribute> subgraph : explorationOrder) {
-			logger.info("starting hierarchical sampling for the first subgraph {}", subgraph);
+			logger.debug("starting hierarchical sampling for the first subgraph {}", subgraph);
 			for (APopulationAttribute att: subgraph) {
 			
 				// maybe we processed it already ? (because of control attributes / mapped aspects)
 				if (att2value.containsKey(att))
 					continue;
 				
-				logger.info("\tsampling att {}", att);
+				logger.debug("\tsampling att {}", att);
 			
 				
 				if (att2value.containsKey(att.getReferentAttribute())) {
@@ -93,18 +91,18 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 					APopulationValue referentValue = att2value.get(att.getReferentAttribute()); 
 					Set<APopulationValue> mappedValues = att.findMappedAttributeValues(referentValue);
 
-					logger.debug("\t\t{} maps to {}", referentValue, mappedValues);
+					logger.trace("\t\t{} maps to {}", referentValue, mappedValues);
 					if (mappedValues.size() > 1) {
 						logger.warn("\t\thypothesis of uniformity for {} => {}", referentValue, mappedValues);	
 					}
 					APopulationValue theOneMapped = GenstarRandomUtils.oneOf(mappedValues);
 					att2value.put(att, theOneMapped);
-					logger.info("\t\tpicked {} = {} (through referent attribute)", att, theOneMapped);
+					logger.debug("\t\tpicked {} = {} (through referent attribute)", att, theOneMapped);
 
 					
 				} else {
 					
-					logger.info("\tshould pick one of the values {}", att.getValues());
+					logger.debug("\tshould pick one of the values {}", att.getValues());
 	
 					// what we want is the distribution of probabilities for each of these possible values of the current attribute...
 					List<APopulationValue> keys = new ArrayList<>(att.getValues());
@@ -115,7 +113,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 					List<Double> distribution = new ArrayList<>(att.getValues().size()+1);
 					List<APopulationValue> a = new ArrayList<>();
 					// ... we want to add the values already defined that can condition the attribute of interest
-					for (AFullNDimensionalMatrix<Double> m : this.segmentedMatrix.getMatricesInvolving(att.getReferentAttribute())) {
+					for (INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> m : this.segmentedMatrix.getMatricesInvolving(att.getReferentAttribute())) {
 						a.addAll(
 								m.getDimensions()
 									.stream()
@@ -135,7 +133,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 						aa.add(val);
 						// TODO sometimes I've here a NUllpointerexception when one of the values if empty (typically Age3)
 						try {
-							logger.debug("\t\tfor aspects: {}, getVal returns {}", aa, this.segmentedMatrix.getVal(aa));
+							logger.trace("\t\tfor aspects: {}, getVal returns {}", aa, this.segmentedMatrix.getVal(aa));
 							Double v = this.segmentedMatrix.getVal(aa).getValue();
 							total += v;
 							distribution.add(v);
@@ -152,7 +150,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 					} else {
 						theOne = RouletteWheelSelectionFactory.getRouletteWheel(distribution,keys).drawObject();
 					}
-					logger.info("\t\tpicked {} = {}", att, theOne);
+					logger.debug("\t\tpicked {} = {}", att, theOne);
 					att2value.put(att, theOne);
 					
 					// well, we defined a value... maybe its defining the value of another thing ?
@@ -167,12 +165,19 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 						// another random
 						APopulationValue theOneMapped = GenstarRandomUtils.oneOf(mappedValues);
 						att2value.put(att.getReferentAttribute(), theOneMapped);
-						logger.info("\t\tpicked {} = {} (through referent attribute)", att.getReferentAttribute(), theOneMapped);
+						logger.debug("\t\tpicked {} = {} (through referent attribute)", att.getReferentAttribute(), theOneMapped);
 
 					}
 				}
 			}
 		}
+		
+		/*
+		System.err.println(
+				"hits / missed     "+((CachedSegmentedNDimensionalMatrix)this.segmentedMatrix).getHits()+"/"+
+				((CachedSegmentedNDimensionalMatrix)this.segmentedMatrix).getMissed()
+				);
+		*/
 		
 		return new GosplCoordinate(new HashSet<>(att2value.values()));
 		
@@ -188,45 +193,6 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler, IEvaluabl
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	
-	/**
-	 * Based on a list of generated individuals, computes the delta between the available data 
-	 * and the generated population. 
-	 * @param generated
-	 */
-	@Override
-	public ISamplingEvaluation evaluateQuality(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
-
-		BasicSamplingEvaluation evaluation = new BasicSamplingEvaluation(population.size());
-		
-		double totalMSE = .0;
-		
-		GosplNDimensionalMatrixFactory factory = new GosplNDimensionalMatrixFactory();
-		
-		// for each matrix, recompute the probabilities
-		for (AFullNDimensionalMatrix<Double> mParam: segmentedMatrix.getMatrices()) {
-			
-			AFullNDimensionalMatrix<Integer> mMeasuredContigency = factory.createContingency(mParam.getDimensions(), population);
-			
-			AFullNDimensionalMatrix<Double> mMeasuredFrequency = factory.createDistribution(mMeasuredContigency);
-			
-			System.out.println("reference: ");
-			System.out.println(mParam);
-			
-			System.out.println("generated: ");
-			System.out.println(mMeasuredFrequency);
-			
-			double msq = SamplingEvaluationUtils.computeMeanSquarredError(mParam, mMeasuredFrequency);
-			totalMSE += msq;
-			System.out.println("error: "+msq);
-			// compute difference between the matrices
-			
-		}
-		
-		evaluation.setOverallBias(totalMSE/segmentedMatrix.getMatrices().size());
-		return evaluation;
-		
-	}
-
 	// -------------------- utility -------------------- //
 
 	@Override
