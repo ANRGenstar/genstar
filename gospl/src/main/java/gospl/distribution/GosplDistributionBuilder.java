@@ -71,6 +71,7 @@ public class GosplDistributionBuilder {
 
 	public GosplDistributionBuilder(final Path configurationFilePath) throws FileNotFoundException {
 		this.configuration = new GenstarXmlSerializer().deserializeGSConfig(configurationFilePath);
+		this.configuration.setBaseDirectory(configurationFilePath.toFile());
 		this.dataParser = new GSDataParser();
 	}
 	
@@ -96,9 +97,9 @@ public class GosplDistributionBuilder {
 	public void buildDistributions() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
 		GosplSurveyFactory sf = new GosplSurveyFactory();
 		this.distributions = new HashSet<>();
-		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrapper())
+		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (!wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				this.distributions.addAll(getDistribution(sf.getSurvey(wrapper), 
+				this.distributions.addAll(getDistribution(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()==null?null:this.configuration.getBaseDirectory()), 
 						this.configuration.getAttributes()));
 	}
 
@@ -115,9 +116,9 @@ public class GosplDistributionBuilder {
 	public void buildSamples() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
 		GosplSurveyFactory sf = new GosplSurveyFactory();
 		samples = new HashSet<>();
-		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrapper())
+		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				samples.add(getSample(sf.getSurvey(wrapper), this.configuration.getAttributes()));
+				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), this.configuration.getAttributes()));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////

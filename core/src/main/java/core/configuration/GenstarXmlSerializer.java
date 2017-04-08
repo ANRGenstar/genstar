@@ -71,13 +71,15 @@ public class GenstarXmlSerializer {
 	}
 	
 	public GenstarConfigurationFile deserializeGSConfig(File valideXmlFile) throws FileNotFoundException{
+		
 		if(!valideXmlFile.exists())
 			throw new FileNotFoundException(valideXmlFile.toString());
 		else if(!valideXmlFile.getName().toLowerCase().endsWith(".xml"))
 			throw new FileNotFoundException("The file "+valideXmlFile.getName()+" is not an xml file");  
 
 		GenstarConfigurationFile res = (GenstarConfigurationFile) xs.fromXML(valideXmlFile);
-
+		res.setBaseDirectory(valideXmlFile);
+		
 		return res;
 	}
 	
