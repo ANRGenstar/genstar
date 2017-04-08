@@ -124,10 +124,10 @@ public class TestFullNDimensionalMatrix {
 			if(Math.abs(Arrays.stream(new double[]{m.getVal("Activite", "Sans emploi").getValue(), 
 					m.getVal("Activite", "Précaire").getValue(), 
 					m.getVal("Activite", "Employé").getValue()}).sum() - 1) > delta){
-				System.out.println("ERROR INIT: sans emploi = "+m.getVal("Activite", "Sans emploi")+
+				throw new RuntimeException("ERROR INIT: sans emploi = "+m.getVal("Activite", "Sans emploi")+
 						"; précaire = "+m.getVal("Activite", "Précaire")+
 						"; employé = "+m.getVal("Activite", "Employé"));
-				System.exit(1);
+				
 			}
 			
 			return m;

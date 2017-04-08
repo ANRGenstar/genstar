@@ -91,7 +91,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 					control);
 			
 			gspu.sysoStempMessage("Attribute "+cAttribute.getAttributeName()+" marginal descriptors are composed of "
-					+cMarginalDescriptors.size()+" set of value with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
+					+cMarginalDescriptors.size()+" set of values with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
 					.collect(Collectors.toSet()).size()+" different values being used");
 			
 			AMargin<T> mrg = null;
@@ -115,10 +115,11 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
 			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
-				logger.debug("Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n{}",mrg.marginalControl.entrySet()
+				String msg = "Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n "+mrg.marginalControl.entrySet()
 						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
-									+" = "+entry.getValue()).collect(Collectors.joining("\n")));
-				System.exit(1);
+								+" = "+entry.getValue()).collect(Collectors.joining("\n"));
+				logger.error(msg);
+				throw new RuntimeException("wrong total: "+msg);
 			}
 		}
 
