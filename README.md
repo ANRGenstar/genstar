@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/gama-platform/gama.svg?branch=master)](https://travis-ci.org/ANRGenstar/genstar)
+[![Language](http://img.shields.io/badge/language-java-brightgreen.svg)](https://www.java.com/)
+
 # Genstar
 ## Generation of Connected and Spatialized Synthetic Populations
 
