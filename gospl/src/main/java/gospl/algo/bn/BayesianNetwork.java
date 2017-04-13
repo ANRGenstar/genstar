@@ -54,6 +54,7 @@ public class BayesianNetwork {
 	}
 	
 	public List<NodeCategorical> enumerateNodes() {
+		
 		List<NodeCategorical> res = new LinkedList<>();
 		
 		for (NodeCategorical n: nodes) {

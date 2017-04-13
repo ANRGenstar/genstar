@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,11 +46,15 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  *
  * @param <T>
  */
-public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
-	INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
+public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements ISegmentedNDimensionalMatrix<T> {
 
 	protected final Set<AFullNDimensionalMatrix<T>> jointDistributionSet;
 
+
+	protected String label = null;
+	
+	protected List<String> genesis = new LinkedList<>();
+	
 	// -------------------- Constructor -------------------- //
 
 	private ASegmentedNDimensionalMatrix(){
@@ -67,6 +72,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	// ------------------------- META DATA ------------------------ //
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMetaDataType()
+	 */
 	@Override
 	public GSSurveyType getMetaDataType() {
 		Set<GSSurveyType> mdtSet = jointDistributionSet.stream().map(jd -> jd.getMetaDataType()).collect(Collectors.toSet());
@@ -75,6 +83,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return mdtSet.iterator().next();
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#isSegmented()
+	 */
 	@Override
 	public boolean isSegmented(){
 		return true;
@@ -82,11 +93,17 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	// ---------------- Getters ---------------- //
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimensions()
+	 */
 	@Override
 	public Set<APopulationAttribute> getDimensions() {
 		return jointDistributionSet.stream().flatMap(jd -> jd.getDimensions().stream()).collect(Collectors.toSet());
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimensionsAsAttributesAndValues()
+	 */
 	@Override
 	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues() {
 		Map<APopulationAttribute, Set<APopulationValue>>  res = new HashMap<>();
@@ -96,31 +113,49 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return res;
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimension(core.metamodel.pop.APopulationValue)
+	 */
 	@Override
 	public APopulationAttribute getDimension(APopulationValue aspect) {
 		return getDimensions().stream().filter(d -> d.getValues().contains(aspect)).findFirst().get();
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getAspects()
+	 */
 	@Override
 	public Set<APopulationValue> getAspects() {
 		return getDimensions().stream().flatMap(d -> d.getValues().stream()).collect(Collectors.toSet());
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getAspects(core.metamodel.pop.APopulationAttribute)
+	 */
 	@Override
 	public Set<APopulationValue> getAspects(APopulationAttribute dimension) {
 		return Collections.unmodifiableSet(dimension.getValues());
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#size()
+	 */
 	@Override
 	public int size() {
 		return jointDistributionSet.stream().mapToInt(AFullNDimensionalMatrix::size).sum();
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getEmptyCoordinate()
+	 */
 	@Override
 	public ACoordinate<APopulationAttribute, APopulationValue> getEmptyCoordinate() {
 		return jointDistributionSet.iterator().next().getEmptyCoordinate();
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.util.Set)
+	 */
 	@Override
 	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(Set<APopulationValue> values){
 		Map<APopulationAttribute, Set<APopulationValue>> attValues = values.stream()
@@ -159,16 +194,17 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	// ---------------------- Matrix accessors ---------------------- //
 
-	/**
-	 * Return the partitioned view of this matrix, i.e. the collection
-	 * of inner full matrices
-	 * 
-	 * @return
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMatrices()
 	 */
-	public Collection<AFullNDimensionalMatrix<T>> getMatrices(){
+	@Override
+	public Collection<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> getMatrices(){
 		return Collections.unmodifiableSet(jointDistributionSet);
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMatrix()
+	 */
 	@Override
 	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
 		Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = new HashMap<>();
@@ -177,6 +213,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return matrix;
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getOrderedMatrix()
+	 */
 	@Override
 	public LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getOrderedMatrix(){
 		LinkedHashMap<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix = 
@@ -186,6 +225,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return matrix;
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal()
+	 */
 	@Override
 	public AControl<T> getVal() {
 		AControl<T> result = this.getNulVal();
@@ -197,11 +239,17 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal(gospl.distribution.matrix.coordinate.ACoordinate)
+	 */
 	@Override
 	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
 		return getVal(coordinate.values());
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal(core.metamodel.pop.APopulationValue)
+	 */
 	@Override
 	public AControl<T> getVal(APopulationValue aspect) throws IllegalNDimensionalMatrixAccess {
 		AControl<T> val = null;
@@ -216,6 +264,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal(core.metamodel.pop.APopulationValue)
+	 */
 	@Override
 	public final AControl<T> getVal(APopulationValue... aspects) {
 		return getVal(Arrays.asList(aspects));
@@ -239,6 +290,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 	// ----------------------- utility ----------------------- //
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#toString()
+	 */
 	@Override
 	public String toString(){
 		String s = "Segmented matrix with "+jointDistributionSet.size()+" inner full matrices:\n";
@@ -246,6 +300,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return s;
 	}
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#toCsv(char)
+	 */
 	@Override
 	public String toCsv(char csvSeparator){
 		String s = "";
@@ -261,16 +318,19 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 		return s;
 	}
 
-	/**
-	 * Returns the matrices which involve this val
-	 * @param val
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMatricesInvolving(core.metamodel.pop.APopulationAttribute)
 	 */
-	public Set<AFullNDimensionalMatrix<T>> getMatricesInvolving(APopulationAttribute att) {
+	@Override
+	public Set<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> getMatricesInvolving(APopulationAttribute att) {
 		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
 
 	// ----------------------- String accessors ----------------------- //
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.lang.String)
+	 */
 	@Override
 	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
 			throws IllegalArgumentException {
@@ -281,6 +341,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	
 
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getValues(java.lang.String)
+	 */
 	@Override
 	public Set<APopulationValue> getValues(String... keyAndVal) throws IllegalArgumentException {
 
@@ -313,6 +376,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 
 
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinate(java.lang.String)
+	 */
 	@Override
 	public ACoordinate<APopulationAttribute, APopulationValue> getCoordinate(String... keyAndVal)
 			throws IllegalArgumentException {
@@ -330,6 +396,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 	}
 
 
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimension(java.lang.String)
+	 */
 	@Override
 	public APopulationAttribute getDimension(String name) throws IllegalArgumentException {
 		
@@ -355,4 +424,48 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements
 				);
 		
 	}
+	
+
+	@Override
+	public String getLabel() {
+		return label;
+	}
+
+
+	/**
+	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
+	 * current state. Useful to expose meaningful error messages to the user.
+	 * @return
+	 */
+	public List<String> getGenesisAsList() {
+		return Collections.unmodifiableList(genesis);
+	}
+		
+	/**
+	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
+	 * current state. Useful to expose meaningful error messages to the user.
+	 * @return
+	 */
+	public String getGenesisAsString() {
+		return String.join("->", genesis);
+	}
+	
+	/**
+	 * imports into this matrix the genesis of another one. 
+	 * Should be called after creating a matrix to keep a memory of where it comes from.
+	 * @param o
+	 */
+	public void inheritGenesis(AFullNDimensionalMatrix<?> o) {
+		genesis.addAll(o.getGenesisAsList());
+	}
+	
+	/**
+	 * add one line to the genesis (history) of this matrix. 
+	 * This line should better be kept quiet short for readibility.
+	 * @param step
+	 */
+	public void addGenesis(String step) {
+		genesis.add(step);
+	}
+	
 }

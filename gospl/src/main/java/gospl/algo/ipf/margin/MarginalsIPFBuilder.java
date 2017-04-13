@@ -91,7 +91,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 					control);
 			
 			gspu.sysoStempMessage("Attribute "+cAttribute.getAttributeName()+" marginal descriptors are composed of "
-					+cMarginalDescriptors.size()+" set of value with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
+					+cMarginalDescriptors.size()+" set of values with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
 					.collect(Collectors.toSet()).size()+" different values being used");
 			
 			AMargin<T> mrg = null;
@@ -114,13 +114,13 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
-			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01)
-				throw new RuntimeException("IPF "+mrg.getClass().getSimpleName()+" ["+mrg.getControlDimension()+" => "
-						+mrg.getSeedDimension()+"] do not sum to 1"
-								+ "\nSee marginal descriptor of size "+mrg.getSeedMarginalDescriptors().size()
-										+ " with marginals of type: "+Arrays.toString(mrg.getSeedMarginalDescriptors().stream()
-										.map(set -> set.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()))
-										.collect(Collectors.toSet()).toArray()));
+			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
+				String msg = "Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n "+mrg.marginalControl.entrySet()
+						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
+								+" = "+entry.getValue()).collect(Collectors.joining("\n"));
+				logger.error(msg);
+				throw new RuntimeException("wrong total: "+msg);
+			}
 		}
 
 		return marginals;

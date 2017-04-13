@@ -39,11 +39,10 @@ public class GSSurveyWrapper {
 	 * @param absoluteFilePath
 	 * @param surveyType
 	 */
-	protected GSSurveyWrapper(String absolutePath, 
+	protected GSSurveyWrapper(String relativePath, 
 			GSSurveyType surveyType, int sheetNb, 
 			char csvSeparator, int firstRowIndex, int firstColumnIndex){
-		this.relativePath = Paths.get(System.getProperty("user.dir"))
-				.relativize(Paths.get(absolutePath)).toString();
+		this.relativePath = relativePath;
 		this.surveyType = surveyType;
 		this.sheetNb = sheetNb;
 		this.csvSeparator = csvSeparator;
@@ -181,4 +180,7 @@ public class GSSurveyWrapper {
 				getFirstColumnIndex());
 	}
 
+	public String toString() {
+		return "wrapper to survey "+relativePath;
+	}
 }

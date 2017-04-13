@@ -1,5 +1,6 @@
 package core.configuration;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.ObjectStreamException;
 import java.nio.file.Paths;
@@ -11,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import core.metamodel.IAttribute;
 import core.metamodel.IValue;
@@ -38,6 +41,12 @@ public class GenstarConfigurationFile {
 
 	private final Map<String, IAttribute<? extends IValue>> keyAttribute = new HashMap<>();
 
+	/**
+	 * The path in which the files included in this configuration is stored, if known.
+	 */
+	@XStreamOmitField
+	protected File baseDirectory = null; 
+	
 	public GenstarConfigurationFile(List<GSSurveyWrapper> dataFiles, 
 			Set<APopulationAttribute> attributes, 
 			Map<String, IAttribute<? extends IValue>> keyAttribute) {
@@ -48,7 +57,7 @@ public class GenstarConfigurationFile {
 					wrapper.setRelativePath(Paths.get(System.getProperty("user.dir")));
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
-					System.exit(1);
+					throw new RuntimeException(e);
 				}
 			}
 		this.dataFileList.addAll(dataFiles);
@@ -58,7 +67,7 @@ public class GenstarConfigurationFile {
 			this.isCircleReferencedAttribute(attributes);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
-			System.exit(1);
+			throw new RuntimeException(e);
 		}
 		this.attributeSet.addAll(attributes);
 		
@@ -72,7 +81,7 @@ public class GenstarConfigurationFile {
 	 * Gives the survey wrappers
 	 * @return
 	 */
-	public List<GSSurveyWrapper> getSurveyWrapper(){
+	public List<GSSurveyWrapper> getSurveyWrappers(){
 		return dataFileList;
 	}
 
@@ -100,7 +109,7 @@ public class GenstarConfigurationFile {
 	 * object of this class; and the way back from xml file to java object. 
 	 */
 	protected Object readResolve() throws ObjectStreamException, FileNotFoundException {
-		List<GSSurveyWrapper> dataFiles = getSurveyWrapper();
+		List<GSSurveyWrapper> dataFiles = getSurveyWrappers();
 		Set<APopulationAttribute> attributes = getAttributes();
 		Map<String, IAttribute<? extends IValue>> keyAttribute = getKeyAttributes();
 		return new GenstarConfigurationFile(dataFiles, attributes, keyAttribute);
@@ -147,4 +156,12 @@ public class GenstarConfigurationFile {
 		
 	}
 	
+	public void setBaseDirectory(File f) {
+		this.baseDirectory = f.getParentFile();
+	}
+	
+	public File getBaseDirectory() {
+		return this.baseDirectory;
+	}
+
 }

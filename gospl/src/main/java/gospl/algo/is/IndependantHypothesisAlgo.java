@@ -155,7 +155,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 
 		// Init collection to store processed attributes & matrix
 		Set<APopulationAttribute> allocatedAttributes = new HashSet<>();
-		Set<AFullNDimensionalMatrix<Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
+		Set<INDimensionalMatrix<APopulationAttribute, APopulationValue, Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
 
 		/////////////////////////////////////
 		// 2nd STEP: disaggregate attributes & start processing associated matrices
@@ -191,27 +191,27 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		}
 
 		// Iterate over matrices that have referent attributes and no aggregated attributes
-		List<AFullNDimensionalMatrix<Double>> refMatrices = segmentedMatrix.getMatrices().stream()
+		List<INDimensionalMatrix<APopulationAttribute, APopulationValue, Double>> refMatrices = segmentedMatrix.getMatrices().stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(dim -> aggAttributeMap.keySet().contains(dim) 
 						&& !aggAttributeMap.values().stream().flatMap(set -> set.stream()).anyMatch(aggDim -> dim.equals(aggDim))))
 				.sorted((mat1, mat2) -> (int) mat2.getDimensions().stream().filter(dim2 -> aggAttributeMap.keySet().contains(dim2)).count()
 						- (int) mat1.getDimensions().stream().filter(dim1 -> aggAttributeMap.keySet().contains(dim1)).count())
 				.collect(Collectors.toList());
-		for(AFullNDimensionalMatrix<Double> mat : refMatrices){
+		for(INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> mat : refMatrices){
 			sampleDistribution = updateGosplProbaMap(sampleDistribution, mat, gspu);
 			unallocatedMatrices.remove(mat);
 			allocatedAttributes.addAll(mat.getDimensions());
 		}
 
 		// Iterate over matrices that have aggregated attributes
-		List<AFullNDimensionalMatrix<Double>> aggMatrices = unallocatedMatrices.stream()
+		List<INDimensionalMatrix<APopulationAttribute, APopulationValue, Double>> aggMatrices = unallocatedMatrices.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(dim -> aggAttributeMap.values()
 						.stream().flatMap(set -> set.stream()).anyMatch(aggDim -> dim.equals(aggDim))))
 				.sorted((mat1, mat2) -> (int) mat2.getDimensions().stream().filter(dim2 -> aggAttributeMap.keySet().contains(dim2)).count()
 						- (int) mat1.getDimensions().stream().filter(dim1 -> aggAttributeMap.keySet().contains(dim1)).count())
 				.collect(Collectors.toList());
 
-		for(AFullNDimensionalMatrix<Double> mat : aggMatrices){
+		for(INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> mat : aggMatrices){
 			Map<Set<APopulationValue>, Double> updatedSampleDistribution = new HashMap<>();
 			Map<Set<APopulationValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
 
@@ -272,7 +272,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		// 3rd STEP: proceed the remaining matrices
 		////////////////////////////////////
 
-		for(AFullNDimensionalMatrix<Double> mat : unallocatedMatrices){
+		for(INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> mat : unallocatedMatrices){
 			gspu.sysoStempPerformance(0d, this);
 
 			// If "hookAtt" is empty fill the proxy distribution with conditional probability of this joint distribution
@@ -291,7 +291,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 
 
 	private Map<Set<APopulationValue>, Double> updateGosplProbaMap(Map<Set<APopulationValue>, Double> sampleDistribution, 
-			AFullNDimensionalMatrix<Double> matrix, GSPerformanceUtil gspu){
+			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix, GSPerformanceUtil gspu){
 		Map<Set<APopulationValue>, Double> updatedSampleDistribution = new HashMap<>();
 		if(sampleDistribution.isEmpty()){
 			updatedSampleDistribution.putAll(matrix.getMatrix().entrySet()
