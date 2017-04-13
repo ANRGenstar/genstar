@@ -114,12 +114,13 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
-			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
-				logger.debug("Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n{}",mrg.marginalControl.entrySet()
-						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
-									+" = "+entry.getValue()).collect(Collectors.joining("\n")));
-				System.exit(1);
-			}
+			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01)
+				throw new RuntimeException("IPF "+mrg.getClass().getSimpleName()+" ["+mrg.getControlDimension()+" => "
+						+mrg.getSeedDimension()+"] do not sum to 1"
+								+ "\nSee marginal descriptor of size "+mrg.getSeedMarginalDescriptors().size()
+										+ " with marginals of type: "+Arrays.toString(mrg.getSeedMarginalDescriptors().stream()
+										.map(set -> set.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()))
+										.collect(Collectors.toSet()).toArray()));
 		}
 
 		return marginals;
@@ -220,10 +221,20 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			marginalDescriptors = tmpDescriptors;
 		}
 		// Translate into control compliant coordinate set of value
-		return marginalDescriptors.parallelStream()
+		Set<Set<APopulationValue>> outputMarginalDescriptors =  marginalDescriptors.stream()
 				.flatMap(set -> control.getCoordinates(set).stream()
 						.filter(coord -> coord.getDimensions().contains(targetedAttribute))
 						.map(coord -> coord.values().stream().filter(val -> !val.getAttribute().equals(targetedAttribute))
-								.collect(Collectors.toSet()))).collect(Collectors.toList());
+								.collect(Collectors.toSet()))).collect(Collectors.toSet());
+		// Exclude overlapping marginal descriptors in segmented matrix: e.g. md1 = {age} & md2 = {age, gender}
+		final Set<Set<APopulationAttribute>> mdAttributes = outputMarginalDescriptors.stream()
+				.map(set -> set.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()))
+				.collect(Collectors.toSet());
+		Set<Set<APopulationAttribute>> mdArchitype = mdAttributes.stream().filter(archi -> mdAttributes.stream()
+				.noneMatch(mdAtt -> mdAtt.containsAll(archi) && mdAtt.size() > archi.size()))
+			.collect(Collectors.toSet());
+		return outputMarginalDescriptors.stream().filter(set -> mdArchitype
+				.stream().anyMatch(architype -> architype.stream().allMatch(att -> set.stream().anyMatch(val -> att.getValues().contains(val)))))
+			.collect(Collectors.toList());
 	}
 }

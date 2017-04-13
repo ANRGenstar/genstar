@@ -1,5 +1,6 @@
 package gospl.distribution;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -106,10 +107,10 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			// while only a subset can be of target here)
 			Map<Set<APopulationValue>, AControl<Double>> bottomup = this.estimateBottomUpReferences(mat, aspects, assignedDimension);
 			Map<Set<APopulationValue>, AControl<Double>> topdown = this.estimateTopDownReferences(mat, aspects, assignedDimension); 
-
+			
 			conditionalValues.addAll(Stream.concat(bottomup.keySet().stream().flatMap(set -> set.stream()),
 					topdown.keySet().stream().flatMap(set -> set.stream())).collect(Collectors.toSet()));
-
+			
 			// If there is any empty value associated with mapped attribute, then exit with empty value
 			if(conditionalValues.stream().anyMatch(value -> value.getAttribute().getEmptyValue().equals(value)))
 				return this.getNulVal();
@@ -221,7 +222,13 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 						&& assignedDimension.contains(att.getReferentAttribute()))
 				.collect(Collectors.toMap(att -> att.getReferentAttribute(), Function.identity()));
 		// Transpose top down value set to control proportional referent
-		return computeControlReferences(refAttributeToBottomup, aspects, assignedDimension);
+		Map<Set<APopulationValue>, AControl<Double>> res = computeControlReferences(refAttributeToBottomup, 
+				aspects, assignedDimension);
+		if(res.keySet().stream().flatMap(set -> set.stream()).anyMatch(a -> !mat.getDimensions().contains(a.getAttribute())))
+			throw new RuntimeException("Estimated bottom up reference targeted dimension out of the concerned matrix:"
+					+ "\nConcerned matrix dimensions = "+Arrays.toString(mat.getDimensions().toArray())
+					+ "\nTargeted dimensions = "+res.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()));
+		return res;
 	}
 
 	private Map<Set<APopulationValue>, AControl<Double>> estimateTopDownReferences(
@@ -235,7 +242,13 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 						&& mat.getDimensions().contains(att.getReferentAttribute()))
 				.collect(Collectors.toMap(Function.identity(), att -> att.getReferentAttribute()));
 		// Transpose bottom up value set to control proportional referent
-		return computeControlReferences(assignedAttributeToTopdown, aspects, assignedDimension);
+		Map<Set<APopulationValue>, AControl<Double>> res = computeControlReferences(assignedAttributeToTopdown, 
+				aspects, assignedDimension);
+		if(res.keySet().stream().flatMap(set -> set.stream()).anyMatch(a -> !mat.getDimensions().contains(a.getAttribute())))
+			throw new RuntimeException("Estimated bottom up reference targeted dimension out of the concerned matrix:"
+					+ "\nConcerned matrix dimensions = "+Arrays.toString(mat.getDimensions().toArray())
+					+ "\nTargeted dimensions = "+res.keySet().stream().flatMap(set -> set.stream()).collect(Collectors.toList()));
+		return res;
 	}
 
 	private Map<Set<APopulationValue>, AControl<Double>> computeControlReferences(
