@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -99,14 +100,26 @@ public class GosplSurveyFactory {
 	 * @see GSSurveyWrapper
 	 * 
 	 * @param wrapper
+	 * @param basePath
 	 * @return
 	 * @throws InvalidFormatException
 	 * @throws IOException
 	 * @throws InvalidSurveyFormatException
 	 */
-	public IGSSurvey getSurvey(GSSurveyWrapper wrapper) 
+	public IGSSurvey getSurvey(GSSurveyWrapper wrapper, File basePath) 
 			throws InvalidFormatException, IOException, InvalidSurveyFormatException {
-		return this.getSurvey(wrapper.getAbsolutePath().toFile(), wrapper.getSheetNumber(), 
+
+		File surveyFile = wrapper.getRelativePath().toFile();
+		
+		if (!surveyFile.isAbsolute()) {
+			
+			if (basePath == null)
+				throw new IllegalArgumentException("cannot load relative file "+surveyFile+" if the configuration base path is not defined.");
+			
+			surveyFile = new File(basePath.toString()+File.separator+surveyFile.toString());
+			
+		}
+		return this.getSurvey(surveyFile, wrapper.getSheetNumber(), 
 				wrapper.getCsvSeparator(), wrapper.getFirstRowIndex(), wrapper.getFirstColumnIndex(),
 				wrapper.getSurveyType());
 	}

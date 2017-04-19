@@ -24,7 +24,9 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  *  <li> {@code <T>} the type of value the matrix contains
  * </ul> 
  * <p>
- * There is also several methods to access and set the matrix
+ * There is also several methods to access and set the matrix. The collection
+ * format is based on spares collection abstraction: there is no memory allocated
+ * to null value and there is not any coordinate associated in the matrix
  * 
  * @author kevinchapuis
  *
@@ -64,6 +66,16 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public AControl<T> getVal(Collection<A> aspects);
 	
+	/**
+	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension.
+	 * if defaultToNul is true, then a missing value will return null.
+	 * 
+	 * @param aspects
+	 * @param defaultToNul
+	 * @return
+	 */
+	public AControl<T> getVal(Collection<A> aspects, boolean defaultToNul);
+
 	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension.
 	 * Pass parameters as: "gender", "female", "age", "60 and more", ... 
@@ -361,4 +373,33 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public void normalize() throws IllegalArgumentException;
 
+	/**
+	 * Returns a human readable label, or null if undefined.
+	 * @return
+	 */
+	public String getLabel();
+	
+	/**
+	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
+	 * current state. Useful to expose meaningful error messages to the user.
+	 * @return
+	 */
+	public String getGenesisAsString();
+	
+	/**
+	 * imports into this matrix the genesis of another one. 
+	 * Should be called after creating a matrix to keep a memory of where it comes from.
+	 * @param o
+	 */
+	public void inheritGenesis(AFullNDimensionalMatrix<?> o);
+	
+	/**
+	 * add one line to the genesis (history) of this matrix. 
+	 * This line should better be kept quiet short for readibility.
+	 * @param step
+	 */
+	public void addGenesis(String step);
+	
+
+	
 }

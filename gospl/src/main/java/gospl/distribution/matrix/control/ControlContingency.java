@@ -34,6 +34,11 @@ public class ControlContingency extends AControl<Integer> {
 	public Integer getSum(AControl<? extends Number> controlSum) {
 		return this.getValue().intValue() + controlSum.getValue().intValue();
 	}
+	
+	@Override
+	public Integer getDiff(AControl<? extends Number> controlDiff) {
+		return this.getValue().intValue() - controlDiff.getValue().intValue();
+	}
 
 	@Override
 	public Integer getRowProduct(AControl<? extends Number> controlProd) {

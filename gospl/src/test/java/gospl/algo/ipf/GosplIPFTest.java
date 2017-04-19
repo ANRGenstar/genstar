@@ -1,10 +1,7 @@
 package gospl.algo.ipf;
 
 import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -13,7 +10,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import gospl.GosplPopulation;
 import gospl.algo.GosplAlgoUtilTest;
 import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.generator.DistributionBasedGenerator;
@@ -25,32 +21,24 @@ import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.validation.GosplIndicatorFactory;
 
 public class GosplIPFTest {
 
-	public static double SEED_RATIO = Math.pow(10, -2);
+	public static double SEED_RATIO = Math.pow(10, -1);
 	public static int POPULATION_SIZE = (int) Math.pow(10, 5);
 	public static int GENERATION_SIZE = 1000;
 
-	public static IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> objectif;
-	public static IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed;
-	
+	public static IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed;	
 	public static INDimensionalMatrix<APopulationAttribute,APopulationValue,Double> marginals;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		
 		GosplAlgoUtilTest gaut = new GosplAlgoUtilTest();
-		
-		objectif = gaut.buildPopulation(POPULATION_SIZE);
-		
-		List<APopulationEntity> collectionSeed = new ArrayList<>(objectif)
-				.subList(0, (int)(POPULATION_SIZE * SEED_RATIO));
-		seed = new GosplPopulation();
-		Collections.shuffle(collectionSeed);
-		collectionSeed.stream().forEach(entity -> seed.add(entity));
-		
-		marginals = new GosplNDimensionalMatrixFactory().createDistribution(objectif);
+
+		seed = gaut.buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
+		marginals = new GosplNDimensionalMatrixFactory().createDistribution(gaut.buildPopulation(POPULATION_SIZE));
 	}
 
 	@Test
@@ -65,7 +53,19 @@ public class GosplIPFTest {
 		}
 		ISyntheticGosplPopGenerator gosplGenerator = new DistributionBasedGenerator(sampler);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popOut = gosplGenerator.generate(GENERATION_SIZE);
+		
+		// Basic test of population size generation
 		assertEquals(GENERATION_SIZE, popOut.size());
+		
+		GosplIndicatorFactory gif = GosplIndicatorFactory.getFactory();
+		double srmse = gif.getSRMSE(marginals, popOut);
+		double aapd = gif.getAAPD(marginals, popOut);
+		double rsszStar = gif.getRSSZstar(marginals, popOut);
+		// Extended test based on validation criteria
+		assertTrue("SRMSE = "+srmse, srmse > 0d && srmse < 1d);
+		assertTrue("AAPD = "+aapd, aapd > 0d && aapd < 1d);
+		assertTrue("AAPD = "+rsszStar, rsszStar > 0d);
+		System.out.println("SRMSE = "+srmse+" | AAPD = "+aapd+" | RSSZ* = "+rsszStar);
 	}
 
 }

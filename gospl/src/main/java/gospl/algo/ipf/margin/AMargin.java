@@ -1,5 +1,7 @@
 package gospl.algo.ipf.margin;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -35,6 +37,11 @@ public abstract class AMargin<T extends Number> implements IMargin<APopulationAt
 		this.controlAttribute = controlAttribute;
 		this.seedAttribute = seedAttribute;
 		this.marginalControl = new HashMap<>();
+	}
+	
+	@Override
+	public Collection<AControl<T>> getControls(){
+		return Collections.unmodifiableCollection(marginalControl.values());
 	}
 	
 	@Override

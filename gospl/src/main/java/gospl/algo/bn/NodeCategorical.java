@@ -1,4 +1,4 @@
-package gospl.algo.bayesiannetworks;
+package gospl.algo.bn;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -33,11 +33,13 @@ public class NodeCategorical extends AbstractNode<NodeCategorical> {
 		
 	}
 	
+	/*
 	public NodeCategorical(String name, LinearProbabilities probabilities, NodeCategorical ... parents) {
 		
 		super(name);
 		
 	}
+	*/
 	
 	public NodeCategorical(String name, List<Double> probabilities, NodeCategorical ... parents) {
 		

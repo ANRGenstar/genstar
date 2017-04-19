@@ -56,6 +56,15 @@ public abstract class AControl<T extends Number> implements Comparable<AControl<
 	 * @return T value
 	 */
 	public abstract T getSum(AControl<? extends Number> controlSum);
+	
+	/**
+	 * Gives the value that results from the difference of this {@link AControl} value and the one of {@code controlDiff} passed in argument
+	 * 
+	 * @param controlDiff
+	 * @return
+	 */
+	public abstract T getDiff(AControl<? extends Number> controlDiff);
+
 
 	/**
 	 * Gives the value that result from product of this {@link AControl} value with <i> proper </i> {@code controlProd} value passed in argument.
@@ -110,5 +119,6 @@ public abstract class AControl<T extends Number> implements Comparable<AControl<
 	public String toString(){
 		return control.toString();
 	}
+
 
 }

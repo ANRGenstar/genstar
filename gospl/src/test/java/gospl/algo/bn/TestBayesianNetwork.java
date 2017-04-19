@@ -1,18 +1,19 @@
-package gospl.algo.bayesiannetworks;
+package gospl.algo.bn;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+
+import gospl.algo.bn.BayesianNetwork;
+import gospl.algo.bn.NodeCategorical;
 
 public class TestBayesianNetwork {
 
@@ -40,6 +41,7 @@ public class TestBayesianNetwork {
 		//fail("Not yet implemented");
 	}
 	
+	/*
 	@Test
 	public void testIndices() {
 		
@@ -69,6 +71,7 @@ public class TestBayesianNetwork {
 
 		
 	}
+	*/
 
 
 	@Test

@@ -1,9 +1,13 @@
 package gospl.algo.generator;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -14,8 +18,8 @@ import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
 import gospl.GosplPopulation;
 import gospl.entity.GosplEntity;
-import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.entity.attribute.GSEnumAttributeType;
+import gospl.entity.attribute.GosplAttributeFactory;
 
 /**
  * 
@@ -39,6 +43,7 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 	private Set<APopulationAttribute> attributes;
+	private Map<APopulationAttribute, SortedMap<Double, APopulationValue>> attributesProba;
 
 	Random random = GenstarRandom.getInstance();
 
@@ -67,6 +72,9 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 
 		// Basic population to feed
 		GosplPopulation gosplPop = new GosplPopulation();
+		
+		// Attribute probability table
+		this.setupAttributeProbabilityTable();
 
 		// Attribute Factory
 		if(attributes == null){
@@ -78,7 +86,7 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 
 		IntStream.range(0, numberOfIndividual).forEach(i -> gosplPop.add(
 				new GosplEntity(attributes.stream().collect(Collectors.toMap(att -> att, 
-						att -> randomVal(att.getValues()))))));
+						att -> randomVal(att))))));
 
 		return gosplPop;
 	}
@@ -126,12 +134,30 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 		}
 		return sb.toString();
 	}
+	
+	private void setupAttributeProbabilityTable(){
+		attributesProba = new HashMap<>();
+		for(APopulationAttribute att : attributes){
+			double sop = 1d;
+			attributesProba.put(att, new TreeMap<>());
+			for(APopulationValue val : att.getValues()){
+				double rnd = random.nextDouble() * sop;
+				attributesProba.get(att).put(rnd, val);
+				sop -= rnd;
+			}
+		}
+	}
 
 	// ---------------------- utilities ---------------------- //
 
-	private APopulationValue randomVal(Set<APopulationValue> values){
-		List<APopulationValue> vals = new ArrayList<>(values);
-		return vals.get(random.nextInt(vals.size()));
+	private APopulationValue randomVal(APopulationAttribute attribute){
+		List<Double> dop = new ArrayList<>(attributesProba.get(attribute).keySet());
+		double rnd = random.nextDouble();
+		for(Double proba : dop)
+			if(rnd <= proba)
+				return attributesProba.get(attribute).get(proba);
+		List<APopulationValue> values = new ArrayList<>(attributesProba.get(attribute).values());
+		return values.get(random.nextInt(values.size()));
 	}
 
 }

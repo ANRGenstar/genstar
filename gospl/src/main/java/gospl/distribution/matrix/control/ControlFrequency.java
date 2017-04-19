@@ -34,6 +34,11 @@ public class ControlFrequency extends AControl<Double> {
 	}
 	
 	@Override
+	public Double getDiff(AControl<? extends Number> controlDiff) {
+		return this.getValue().doubleValue() - controlDiff.getValue().doubleValue();
+	}
+	
+	@Override
 	public Double getRowProduct(AControl<? extends Number> controlProd) {
 		return this.getValue().doubleValue() * controlProd.getValue().doubleValue();
 	}

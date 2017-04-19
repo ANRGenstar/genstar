@@ -16,6 +16,7 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -33,6 +34,8 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  *
  */
 public class GosplNDimensionalMatrixFactory {
+	
+	public static double EPSILON = Math.pow(10, -3);
 
 	public static final GosplNDimensionalMatrixFactory getFactory() {
 		return new GosplNDimensionalMatrixFactory();
@@ -72,7 +75,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 * @throws IllegalDistributionCreation 
 	 */
-	public ASegmentedNDimensionalMatrix<Double> createEmptyDistribution(
+	public ISegmentedNDimensionalMatrix<Double> createEmptyDistribution(
 			Collection<Set<APopulationAttribute>> segmentedDimensions) throws IllegalDistributionCreation{
 		return new GosplConditionalDistribution(segmentedDimensions.stream()
 				.map(dimSet -> this.createEmptyDistribution(dimSet)).collect(Collectors.toSet()));
@@ -114,7 +117,7 @@ public class GosplNDimensionalMatrixFactory {
 				); 
 		matrix.addGenesis("created from distribution GosplNDimensionalMatrixFactory@createDistribution");
 
-		int total = contigency.getVal().getValue();
+		int total = Math.round(Math.round(contigency.getVal().getValue().doubleValue()));
 		
 		// Normalize increments to global frequency
 		contigency.getMatrix().keySet().stream().forEach(coord -> matrix.setValue(
@@ -195,7 +198,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 * @throws IllegalDistributionCreation 
 	 */
-	public ASegmentedNDimensionalMatrix<Double> createDistributionFromPopulations(
+	public ISegmentedNDimensionalMatrix<Double> createDistributionFromPopulations(
 			Set<IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>> populations) 
 					throws IllegalDistributionCreation {
 		return new GosplConditionalDistribution(populations
@@ -263,7 +266,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @param population
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> createContigency(
+	public AFullNDimensionalMatrix<Integer> createContingency(
 			Set<APopulationAttribute> attributesToMeasure,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
 		

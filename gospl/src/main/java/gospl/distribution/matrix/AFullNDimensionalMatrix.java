@@ -256,18 +256,27 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return result;
 	}
 
+	public AControl<T> getVal(Collection<APopulationValue> aspects) {
+		return getVal(aspects, false);
+	}
+	
 	/**
 	 * {@inheritDoc}
 	 * <p>
 	 * WARNING: make use of parallelism through {@link Stream#parallel()}
 	 */
 	@Override
-	public AControl<T> getVal(Collection<APopulationValue> aspects) {
-		if(aspects.stream().allMatch(a -> matrix.keySet().stream().noneMatch(coord -> coord.contains(a))))
-			throw new NullPointerException("Aspect collection "+Arrays.toString(aspects.toArray())+" of size "
+	public AControl<T> getVal(Collection<APopulationValue> aspects, boolean defaultToNul) {
+		if(aspects.stream().allMatch(a -> matrix.keySet().stream().noneMatch(coord -> coord.contains(a)))) {
+		
+			if (defaultToNul) {
+				return getNulVal();
+			} else {
+				throw new NullPointerException("Aspect collection "+Arrays.toString(aspects.toArray())+" of size "
 					+ aspects.size()+" is absent from this matrix"
 					+ " (size = "+this.size()+" - attribute = "+Arrays.toString(this.getDimensions().toArray())+")");
-
+			}
+		}
 		Map<APopulationAttribute, Set<APopulationValue>> attAsp = aspects.stream()
 				.collect(Collectors.groupingBy(aspect -> aspect.getAttribute(),
 				Collectors.mapping(Function.identity(), Collectors.toSet())));
@@ -291,7 +300,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
 
 		if (coordinates.length % 2 != 0) {
-			throw new IllegalArgumentException("values should be passed in even count, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+			throw new IllegalArgumentException("values should be passed in even count, "
+					+ "such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
 		}
 		
 		// lookup values
@@ -434,9 +444,11 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			case GlobalFrequencyTable:
 				return (Double)getVal().getValue() == 1.0;
 			case LocalFrequencyTable:
+				return false;
 			case Sample:
+				throw new IllegalStateException("This matrix cannot be of type "+dataType);
 			case ContingencyTable:
-					return true;
+				return true;
 			default:
 				throw new IllegalStateException("unknown state "+dataType);
 			

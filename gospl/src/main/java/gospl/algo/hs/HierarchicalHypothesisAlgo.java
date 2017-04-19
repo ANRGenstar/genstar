@@ -84,18 +84,19 @@ public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<
 		
 		logger.debug("end of process");
 		
-		for (AFullNDimensionalMatrix<Double> currentMatrix: segmentedMatrix.getMatrices()) {
+		for (INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> currentMatrix: segmentedMatrix.getMatrices()) {
 			for (APopulationAttribute att: currentMatrix.getDimensions()) {
 				logger.debug("	att: {}", att);
 			}
 		}
 
 		AttributesDependanciesGraph dependancyGraph = AttributesDependanciesGraph.constructDependancies(segmentedMatrix);
-		//File dotFile = graph.printDotRepresentationToFile();
+		
+		//File dotFile = dependancyGraph.printDotRepresentationToFile();
 		//logger.info("a dot file was stored into "+dotFile.getAbsolutePath());
 		
 		// Use this to visualize the dependancy graph in png 
-		// dependancyGraph.generateDotRepresentationInPNG(true);
+		//dependancyGraph.generateDotRepresentationInPNG(true);
 		
 		// TODO sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
 		Collection<List<APopulationAttribute>> explorationOrder = proposeExplorationOrder(dependancyGraph);

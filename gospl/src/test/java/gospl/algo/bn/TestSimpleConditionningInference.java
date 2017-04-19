@@ -1,9 +1,13 @@
-package gospl.algo.bayesiannetworks;
+package gospl.algo.bn;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import gospl.algo.bn.BayesianNetwork;
+import gospl.algo.bn.NodeCategorical;
+import gospl.algo.bn.SimpleConditionningInferenceEngine;
 
 public class TestSimpleConditionningInference {
 

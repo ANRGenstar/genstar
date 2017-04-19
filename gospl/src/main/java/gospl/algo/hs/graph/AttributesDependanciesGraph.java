@@ -20,15 +20,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graphstream.algorithm.ConnectedComponents;
 import org.graphstream.graph.Edge;
-import org.graphstream.graph.EdgeRejectedException;
-import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
-import org.graphstream.graph.implementations.SingleGraph;
 
 import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
-import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
 
 /**
  * Encodes the links between attributes.
@@ -87,11 +86,11 @@ public class AttributesDependanciesGraph {
 	 * @param segmentedMatrix
 	 * @return
 	 */
-	public static AttributesDependanciesGraph constructDependancies(ASegmentedNDimensionalMatrix<?> segmentedMatrix) {
+	public static AttributesDependanciesGraph constructDependancies(ISegmentedNDimensionalMatrix<?> segmentedMatrix) {
 		
 		AttributesDependanciesGraph dependancies = new AttributesDependanciesGraph();
 		
-		for (AFullNDimensionalMatrix<?> currentMatrix: segmentedMatrix.getMatrices()) {
+		for (INDimensionalMatrix<APopulationAttribute, APopulationValue, ?> currentMatrix: segmentedMatrix.getMatrices()) {
 
 			// add all the nodes 
 			for (APopulationAttribute attribute: currentMatrix.getDimensions()) {
@@ -143,7 +142,7 @@ public class AttributesDependanciesGraph {
 	}
 	
 	
-	public void addKnownGlobalFrequency(AFullNDimensionalMatrix<?> currentMatrix) {
+	public void addKnownGlobalFrequency(INDimensionalMatrix<APopulationAttribute, APopulationValue, ?> currentMatrix) {
 		
 		logger.debug("adding information on matrix {}", currentMatrix.getLabel());
 
@@ -274,11 +273,17 @@ public class AttributesDependanciesGraph {
 		Map<Integer,Set<APopulationAttribute>> degree2nodes = new TreeMap<>();
 		
 		for (Node n: graph.getNodeSet()) {
+			
+			// skip graph nodes which are not in this component
+			if (!component.contains((APopulationAttribute)n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE)))
+				continue;
+			
 			Integer degree = n.getDegree();
 			
 			// quick exit
-			if (degree==0) 
-				return n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
+			//if (degree==0) 
+			//	return n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
+			
 			
 			// quick skip
 			if (degree > minDegree)

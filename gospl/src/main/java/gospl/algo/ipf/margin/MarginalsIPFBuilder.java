@@ -22,7 +22,7 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
-public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFProcessor<T> {
+public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 
 	private Logger logger = LogManager.getLogger();
 
@@ -58,7 +58,7 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 
 		logger.info("Estimates seed's referent marginals from control matrix {}", 
 				control.getDimensions().stream().map(att -> att.getAttributeName()
-						.substring(0, att.getAttributeName().length() < 3 ? att.getAttributeName().length() : 3))
+						.substring(0, att.getAttributeName().length() < 5 ? att.getAttributeName().length() : 5))
 				.collect(Collectors.joining(" x ")));
 		Map<APopulationAttribute, APopulationAttribute> controlToSeedAttribute = new HashMap<>();
 		for(APopulationAttribute sAttribute : seed.getDimensions()){
@@ -91,7 +91,7 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 					control);
 			
 			gspu.sysoStempMessage("Attribute "+cAttribute.getAttributeName()+" marginal descriptors are composed of "
-					+cMarginalDescriptors.size()+" set of value with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
+					+cMarginalDescriptors.size()+" set of values with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
 					.collect(Collectors.toSet()).size()+" different values being used");
 			
 			AMargin<T> mrg = null;
@@ -115,10 +115,11 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
 			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
-				logger.info("Detailed marginals:\n{}", mrg.marginalControl.entrySet()
-					.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
-							+" = "+entry.getValue()).collect(Collectors.joining("\n")));
-				System.exit(1);
+				String msg = "Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n "+mrg.marginalControl.entrySet()
+						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
+								+" = "+entry.getValue()).collect(Collectors.joining("\n"));
+				logger.error(msg);
+				throw new RuntimeException("wrong total: "+msg);
 			}
 		}
 
@@ -220,10 +221,20 @@ public class MarginalsIPFProcessor<T extends Number> implements IMarginalsIPFPro
 			marginalDescriptors = tmpDescriptors;
 		}
 		// Translate into control compliant coordinate set of value
-		return marginalDescriptors.parallelStream()
+		Set<Set<APopulationValue>> outputMarginalDescriptors =  marginalDescriptors.stream()
 				.flatMap(set -> control.getCoordinates(set).stream()
 						.filter(coord -> coord.getDimensions().contains(targetedAttribute))
 						.map(coord -> coord.values().stream().filter(val -> !val.getAttribute().equals(targetedAttribute))
-								.collect(Collectors.toSet()))).collect(Collectors.toList());
+								.collect(Collectors.toSet()))).collect(Collectors.toSet());
+		// Exclude overlapping marginal descriptors in segmented matrix: e.g. md1 = {age} & md2 = {age, gender}
+		final Set<Set<APopulationAttribute>> mdAttributes = outputMarginalDescriptors.stream()
+				.map(set -> set.stream().map(a -> a.getAttribute()).collect(Collectors.toSet()))
+				.collect(Collectors.toSet());
+		Set<Set<APopulationAttribute>> mdArchitype = mdAttributes.stream().filter(archi -> mdAttributes.stream()
+				.noneMatch(mdAtt -> mdAtt.containsAll(archi) && mdAtt.size() > archi.size()))
+			.collect(Collectors.toSet());
+		return outputMarginalDescriptors.stream().filter(set -> mdArchitype
+				.stream().anyMatch(architype -> architype.stream().allMatch(att -> set.stream().anyMatch(val -> att.getValues().contains(val)))))
+			.collect(Collectors.toList());
 	}
 }

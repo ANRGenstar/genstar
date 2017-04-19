@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,9 +15,11 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.io.GSSurveyType;
+import core.util.GSPerformanceUtil;
 import gospl.algo.ipf.margin.AMargin;
-import gospl.algo.ipf.margin.IMarginalsIPFProcessor;
-import gospl.algo.ipf.margin.MarginalsIPFProcessor;
+import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
+import gospl.algo.ipf.margin.MarginalsIPFBuilder;
 import gospl.algo.sampler.IDistributionSampler;
 import gospl.algo.sampler.IEntitySampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -40,9 +43,11 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  * <ul>
  * <li> Convergence criteria: could be a number of maximum iteration {@link AGosplIPF#step} or
  * a maximal error for any objectif {@link AGosplIPF#delta}
- * <li> zero-cell problem: to provide a fit IPF procedure must not encounter any zero-cell or zero-control.
- * there are replaced by small values, calculated as a ratio - {@link AGosplIPF#ZERO_CELL_RATIO} - of the smallest 
- * value in matrix or control
+ * <li> zero-cell problem: As it is impossible to distinguish between structural 0 cell - i.e. impossible
+ * set of value, like being age under 5 and retired - and conjonctural 0 cell - i.e. a set of value for
+ * which we do not have any record  
+ * <li> zero-margin problem: As we use sparse collection to store marginal records hence 0 margin is not
+ * a problem at all
  * </ul>
  * <p>
  * Usefull information could be found at {@link http://u.demog.berkeley.edu/~eddieh/datafitting.html}
@@ -61,10 +66,10 @@ public abstract class AGosplIPF<T extends Number> {
 
 	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed;
 	protected INDimensionalMatrix<APopulationAttribute, APopulationValue, T> marginals;
-	protected IMarginalsIPFProcessor<T> marginalProcessor;
+	protected IMarginalsIPFBuilder<T> marginalProcessor;
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
-			IMarginalsIPFProcessor<T> marginalProcessor, int step, double delta){
+			IMarginalsIPFBuilder<T> marginalProcessor, int step, double delta){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
 		this.step = step;
@@ -73,17 +78,17 @@ public abstract class AGosplIPF<T extends Number> {
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
 			int step, double delta){
-		this(sampleSeed, new MarginalsIPFProcessor<T>(), step, delta);
+		this(sampleSeed, new MarginalsIPFBuilder<T>(), step, delta);
 	}
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
-			IMarginalsIPFProcessor<T> marginalProcessor){
+			IMarginalsIPFBuilder<T> marginalProcessor){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
 	}
 
 	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
-		this(sampleSeed, new MarginalsIPFProcessor<T>());
+		this(sampleSeed, new MarginalsIPFBuilder<T>());
 	}
 
 	/**
@@ -120,9 +125,23 @@ public abstract class AGosplIPF<T extends Number> {
 	// ------------------------- ALGO ------------------------- //
 	//////////////////////////////////////////////////////////////
 
-
+	/**
+	 * Main estimation method: iteratively fit the distribution to marginal
+	 * constraint using odd ratio procedure
+	 * 
+	 * @return
+	 */
 	public abstract AFullNDimensionalMatrix<T> process();
 
+	/**
+	 * Main estimation method using parametrized delta threshold and maximum step iteration
+	 * 
+	 * @see AGosplIPF#process()
+	 * 
+	 * @param delta
+	 * @param step
+	 * @return
+	 */
 	public AFullNDimensionalMatrix<T> process(double delta, int step){
 		this.delta = delta;
 		this.step = step;
@@ -159,49 +178,60 @@ public abstract class AGosplIPF<T extends Number> {
 						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
 				.collect(Collectors.toList());
 
-		logger.debug("{}% of samples dimensions will be estimate with output controls", 
-				unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d);
-		logger.debug("Sample seed controls' dimension: {}", seed.getDimensions()
-				.stream().map(d -> d.getAttributeName()+" = "+new DecimalFormat("#.##")
-						.format(seed.getVal(d.getValues()).getValue().doubleValue()))
-				.collect(Collectors.joining(";")));
+		GSPerformanceUtil gspu = new GSPerformanceUtil("*** IPF PROCEDURE ***", logger, Level.DEBUG);
+
+		gspu.sysoStempMessage(unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d
+				+"% of samples dimensions will be estimate with output controls");
+		gspu.sysoStempMessage("Sample seed controls' dimension: "+seed.getDimensions()
+			.stream().map(d -> d.getAttributeName()+" = "+new DecimalFormat("#.##")
+				.format(seed.getVal(d.getValues()).getValue().doubleValue()))
+			.collect(Collectors.joining(";")));
 
 		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
 
 		int stepIter = step;
-		boolean convergentDelta = false;
-		logger.trace("Convergence criteria are: step = {} | delta = {}", step, delta);
-		logger.trace("Start fitting iterations");
+		gspu.sysoStempMessage("Convergence criterias are: step = "+step+" | delta = "+delta);
+		double tae = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+				.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
+						.doubleValue())).sum()).sum();
+		double maxError = seed.getMetaDataType().equals(GSSurveyType.ContingencyTable) ? 
+				marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+						.stream().mapToDouble(sd -> m.getControl(sd).getValue().doubleValue()).sum()).sum() : 
+				marginals.stream().mapToInt(m -> m.getSeedMarginalDescriptors().size()).sum();
+		double ae = tae / maxError;
+		gspu.sysoStempMessage("Start fitting iterations with TAE = "+tae+" | RAE (relative average error) = "+ae);
 
-		while(stepIter-- > 0 ? !convergentDelta : false){
+		while(stepIter-- > 0 ? ae > delta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
-				logger.debug("Step = {} | convergence {}", step - stepIter, convergentDelta);
+				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+ae);
 			for(AMargin<T> margin : marginals){
 				for(Set<APopulationValue> seedMarginalDescriptor : margin.getSeedMarginalDescriptors()){
-					AControl<Double> factor = new ControlFrequency(
-							margin.getControl(seedMarginalDescriptor).getValue().doubleValue() / 
-							seed.getVal(seedMarginalDescriptor).getValue().doubleValue());
+					double marginValue = margin.getControl(seedMarginalDescriptor).getValue().doubleValue();
+					double actualValue = seed.getVal(seedMarginalDescriptor).getValue().doubleValue();
+					AControl<Double> factor = new ControlFrequency(marginValue/actualValue);
 					Collection<ACoordinate<APopulationAttribute, APopulationValue>> relatedCoordinates = 
 							seed.getCoordinates(seedMarginalDescriptor); 
 					for(ACoordinate<APopulationAttribute, APopulationValue> coord : relatedCoordinates)
 						seed.getVal(coord).multiply(factor);
-					logger.trace("Work on value set {} and related {} coordinates; factor = {}",
+					logger.trace("Work on value set {} and related {} coordinates; EV = {} and AV = {}",
 							Arrays.toString(seedMarginalDescriptor.toArray()), 
-							relatedCoordinates.size(), factor.getValue());
+							relatedCoordinates.size(), marginValue, actualValue);
+				}
 			}
+
+			ae = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+					.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
+							.doubleValue())).sum()).sum() / maxError;
+
+			// TODO: better log and get back to debug
+			logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
+					.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
+							margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
+									+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))
+							.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
+					.reduce("", (s1, s2) -> s1.concat(s2)));
 		}
-		if(marginals.stream().allMatch(m -> m.getSeedMarginalDescriptors()
-				.stream().allMatch(sd -> seed.getVal(sd).equalsVal(m.getControl(sd), delta))))
-			convergentDelta = true;
-		// TODO: better log and get back to debug
-		logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
-				.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
-						margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
-								+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))
-						.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
-				.reduce("", (s1, s2) -> s1.concat(s2)));
+		return seed;
 	}
-	return seed;
-}
 
 }
