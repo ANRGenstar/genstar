@@ -8,7 +8,6 @@ import java.util.Random;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
-import spin.SpinPopulation;
 import spin.objects.SpinNetwork;
 
 /**Générateur SmallWorld
