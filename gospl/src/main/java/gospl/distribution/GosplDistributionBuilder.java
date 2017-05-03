@@ -360,6 +360,9 @@ public class GosplDistributionBuilder {
 		// Read headers and store possible variables by column index
 		final Map<Integer, APopulationAttribute> columnHeaders = getColumnSample(survey, attributes);
 
+		if (columnHeaders.isEmpty()) 
+			throw new RuntimeException("no column header was found in survey "+survey);
+		
 		int unmatchSize = 0;
 		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
 		
@@ -381,7 +384,7 @@ public class GosplDistributionBuilder {
 				else if(columnHeaders.get(idx).getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(columnHeaders.get(idx), columnHeaders.get(idx).getEmptyValue());
 				else{
-					logger.trace("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
 							+columnHeaders.get(idx).getAttributeName());
 					unmatchSize++;
 				}
@@ -389,8 +392,10 @@ public class GosplDistributionBuilder {
 			if(entityAttributes.size() == entityAttributes.size())
 				sampleSet.add(new GosplEntity(entityAttributes));
 		}
-		logger.debug("Input sample have bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
+		if (unmatchSize > 0) {
+			logger.debug("Input sample have bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
 				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
+		}
 		return sampleSet;
 	}
 	
