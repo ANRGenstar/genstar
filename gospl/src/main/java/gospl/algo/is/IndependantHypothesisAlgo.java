@@ -69,12 +69,17 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
 				theoreticalSize, logger);
 		gspu.setObjectif(theoreticalSize);
+		gspu.sysoStempPerformance(0, this);
 
 		// Stop the algorithm and exit the unique matrix if there is only one
 		if(!matrix.isSegmented()){
-			sampler.setDistribution((AFullNDimensionalMatrix<Double>) matrix);
+			sampler.setDistribution(GosplNDimensionalMatrixFactory.getFactory()
+					.createDistribution(matrix.getMatrix()));
 			return sampler;
 		}
+		
+		if(!matrix.checkGlobalSum())
+			throw new IllegalArgumentException("Input data does not satisfy the checkGlobalSum method requirement");
 
 		// Reject attribute with referent, to only account for referent attribute
 		Set<APopulationAttribute> targetedDimensions = matrix.getDimensions()
@@ -106,18 +111,40 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
 
 		int iter = 1;
-		gspu.setObjectif(coordinates.size());
 		for(Set<APopulationValue> coordinate : coordinates){
 			if((gspu.getObjectif() / 100) % iter++ == 0)
 				gspu.sysoStempPerformance(0.1, this);
 			ACoordinate<APopulationAttribute, APopulationValue> coord = new GosplCoordinate(coordinate);
 			AControl<Double> freq = matrix.getVal(coord);
-			freqMatrix.addValue(coord, freq);
+			if(!freqMatrix.getNulVal().getValue().equals(freq.getValue()))
+				freqMatrix.addValue(coord, freq);
+			else {
+				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
+				Set<APopulationValue> emptyCorrelate = matrix.getEmptyReferentCorrelate(coord);
+				ACoordinate<APopulationAttribute, APopulationValue> newCoord = 
+						new GosplCoordinate(coord.values().stream()
+								.map(val -> emptyCorrelate.stream()
+											.anyMatch(emptyVal -> emptyVal.getAttribute().equals(val.getAttribute())) ? 
+										val.getAttribute().getEmptyValue() : val)
+								.collect(Collectors.toSet()));
+				if(newCoord.equals(coord))
+					freqMatrix.addValue(coord, freq);
+				else
+					freqMatrix.addValue(newCoord, matrix.getVal(newCoord.values()
+							.stream().filter(value -> !value.getAttribute().getEmptyValue().equals(value))
+							.collect(Collectors.toSet())));
+			}
 		}
-
-		//		coordinates.parallelStream().forEach(coord -> 
-		//			freqMatrix.addValue(new GosplCoordinate(coord), matrix.getVal(coord)));
-
+		
+		// WARNING: cannot justify this normalization, hence find another way to fit 1 sum of probability
+		gspu.sysoStempMessage("Distribution has been estimated");
+		freqMatrix.normalize();
+		/*
+		gspu.sysoStempMessage("Collapse matrix have been normalize:\n"
+				+ freqMatrix.getDimensions().stream()
+					.map(dim -> dim.toString()+" = "+freqMatrix.getVal(dim.getValues()).getValue())
+					.reduce("", (s1,s2) -> s1+"\n"+s2));
+					*/
 		sampler.setDistribution(freqMatrix);
 		return sampler;
 	}

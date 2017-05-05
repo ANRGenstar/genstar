@@ -21,6 +21,7 @@ import core.util.GSPerformanceUtil;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 
 public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 
@@ -49,17 +50,33 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, T> control,
 			AFullNDimensionalMatrix<T> seed,
 			boolean parallel){
-		if(!seed.getDimensions().stream().allMatch(dim -> control.getDimensions().contains(dim) 
-				|| control.getDimensions().contains(dim.getReferentAttribute())
-				|| control.getDimensions().stream().anyMatch(cDim -> cDim.getReferentAttribute().equals(dim))))
-			throw new IllegalArgumentException("Cannot build marginals for control and seed that does not match their attributes:\n"
-					+ "Seed: "+Arrays.toString(seed.getDimensions().toArray())+"\n"
-					+ "Control: "+Arrays.toString(control.getDimensions().toArray()));
-
+		
+		// check that the dimensions are correct and inform the user of potential issues
+		{
+		StringBuffer sbErrors = new StringBuffer();
+		for (APopulationAttribute dimControl: control.getDimensions()) {
+			if (!seed.getDimensions().contains(dimControl) 
+					&& !control.getDimensions().contains(dimControl.getReferentAttribute())
+					&& !seed.getDimensions().stream().anyMatch(dimSeed -> dimSeed.getReferentAttribute().equals(dimControl))
+					) {
+				sbErrors.append("control does not contains seed dimension ").append(dimControl).append(" (you might add a referent attribute?);\n");
+			} 
+		}
+		if (sbErrors.length() > 0) 
+			throw new IllegalArgumentException(
+					"Cannot build marginals for control and seed that does not match their attributes: "
+					+sbErrors.toString()
+					);
+		}
+		
+		// ... no error, let's go ahead
+		
+		// now let's build the marginals
 		logger.info("Estimates seed's referent marginals from control matrix {}", 
 				control.getDimensions().stream().map(att -> att.getAttributeName()
 						.substring(0, att.getAttributeName().length() < 5 ? att.getAttributeName().length() : 5))
 				.collect(Collectors.joining(" x ")));
+		
 		Map<APopulationAttribute, APopulationAttribute> controlToSeedAttribute = new HashMap<>();
 		for(APopulationAttribute sAttribute : seed.getDimensions()){
 			List<APopulationAttribute> cAttList = control.getDimensions().stream()
@@ -78,6 +95,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 		if(controlToSeedAttribute.isEmpty())
 			throw new IllegalArgumentException("Seed attributes do not match any attributes in control distribution");
 
+		// let's create the marginals based on this information
 		Collection<AMargin<T>> marginals = new ArrayList<>();
 
 		List<APopulationAttribute> targetedAttributes = controlToSeedAttribute.keySet().stream()
@@ -90,7 +108,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 					controlToSeedAttribute.keySet().stream().filter(att -> !att.equals(cAttribute)).collect(Collectors.toSet()), 
 					control);
 			
-			gspu.sysoStempMessage("Attribute "+cAttribute.getAttributeName()+" marginal descriptors are composed of "
+			logger.debug("Attribute "+cAttribute.getAttributeName()+" marginal descriptors are composed of "
 					+cMarginalDescriptors.size()+" set of values with "+cMarginalDescriptors.stream().flatMap(set -> set.stream())
 					.collect(Collectors.toSet()).size()+" different values being used");
 			
@@ -114,13 +132,29 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
+			/*
+			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
+				// oops, the margins are higher than 1.
+				// let's reweight (???? is it even relevant here ???)
+				for (AControl<T> c: mrg.marginalControl.values()) {
+					AControl<Double> cD = (AControl<Double>)c; // anyway I don't see how marginals would be integer... 
+					cD.multiply(1./totalMRG);
+				}
+				// recompute again
+				totalMRG = mrg.marginalControl.values().stream().mapToDouble(c -> c.getValue().doubleValue()).sum();
+				logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
+						mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
+				
+			}
+			
 			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
 				String msg = "Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n "+mrg.marginalControl.entrySet()
 						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
 								+" = "+entry.getValue()).collect(Collectors.joining("\n"));
 				logger.error(msg);
-				throw new RuntimeException("wrong total: "+msg);
+				throw new RuntimeException("wrong marginals total "+totalMRG+" ("+seed.getGenesisAsList()+")"+": "+msg);
 			}
+			*/
 		}
 
 		return marginals;

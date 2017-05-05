@@ -18,6 +18,11 @@ import gospl.distribution.matrix.control.AControl;
  */
 public class ComplexMargin<T extends Number> extends AMargin<T> implements IMargin<APopulationAttribute, APopulationValue, T> {
 
+	/**
+	 * WARNING: there is a issue here, linked to multiple marginal references, i.e. when a referent set of values
+	 * are linked to multiple possible combination of values.
+	 * 
+	 */
 	private Map<Set<APopulationValue>, Set<APopulationValue>> marginalDescriptors;
 	
 	protected ComplexMargin(APopulationAttribute controlAttribute, APopulationAttribute seedAttribute) {

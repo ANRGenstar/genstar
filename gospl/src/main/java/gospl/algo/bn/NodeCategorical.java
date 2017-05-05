@@ -358,7 +358,7 @@ public class NodeCategorical extends AbstractNode<NodeCategorical> {
 	
 	public BigDecimal getConditionalProbabilityPosterior(String att) {
 		
-		return getConditionalProbabilityPosterior(att, Collections.EMPTY_MAP);
+		return getConditionalProbabilityPosterior(att, Collections.emptyMap());
 		
 	}
 

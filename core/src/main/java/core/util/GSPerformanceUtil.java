@@ -64,7 +64,7 @@ public class GSPerformanceUtil {
 	
 	public String getStempPerformance(int stepFoward){
 		stempCalls += stepFoward;
-		return getStempPerformance("Step "+stempCalls);
+		return getStempPerformance(stepFoward == 0 ? "Init." : "Step "+stempCalls);
 	}
 
 	public String getStempPerformance(double proportion){

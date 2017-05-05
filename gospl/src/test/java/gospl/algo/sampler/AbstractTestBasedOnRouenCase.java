@@ -17,7 +17,7 @@ import gospl.GosplPopulation;
 import gospl.algo.ISyntheticReconstructionAlgo;
 import gospl.algo.generator.DistributionBasedGenerator;
 import gospl.algo.generator.ISyntheticGosplPopGenerator;
-import gospl.distribution.GosplDistributionBuilder;
+import gospl.distribution.GosplInputDataManager;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -98,7 +98,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionBuilder df = new GosplDistributionBuilder(confFile);
+		GosplInputDataManager df = new GosplInputDataManager(confFile);
 		
 		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS
 		try {

@@ -17,6 +17,7 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -185,6 +186,19 @@ public class GosplNDimensionalMatrixFactory {
 		}
 
 		return matrix;
+	}
+	
+	/**
+	 * Create a frequency matrix from inner map collection
+	 * <p>
+	 * WARNING: there is not any guarantee on inner map collection consistency
+	 * 
+	 * @param matrix
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> createDistribution(
+			Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> matrix){
+		return new GosplJointDistribution(matrix);
 	}
 	
 	//////////////////////////////////////////////////

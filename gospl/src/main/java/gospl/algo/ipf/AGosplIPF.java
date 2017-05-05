@@ -180,11 +180,11 @@ public abstract class AGosplIPF<T extends Number> {
 
 		GSPerformanceUtil gspu = new GSPerformanceUtil("*** IPF PROCEDURE ***", logger, Level.DEBUG);
 
-		gspu.sysoStempMessage(unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d
+		logger.debug(unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d
 				+"% of samples dimensions will be estimate with output controls");
-		gspu.sysoStempMessage("Sample seed controls' dimension: "+seed.getDimensions()
-			.stream().map(d -> d.getAttributeName()+" = "+new DecimalFormat("#.##")
-				.format(seed.getVal(d.getValues()).getValue().doubleValue()))
+		
+		logger.debug("Sample seed controls' dimension: "+seed.getDimensions()
+			.stream().map(d -> d.getAttributeName()+" = "+d.getValues().size())
 			.collect(Collectors.joining(";")));
 
 		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);

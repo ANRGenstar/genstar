@@ -233,6 +233,22 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public Set<A> getAspects(D dimension);
 	
+	/**
+	 * Test and apply referent mapping values to account for diverging
+	 * encoding between referent attribute.
+	 * <p>
+	 * For exemple, an attribute age can start at 15 years old when joint
+	 * distribution with occupation is stated, but will start at 0 when 
+	 * joint distribution with gender is stated. Hence people under 15 years
+	 * old can not be linked to occupation. To avoid such fallacious link
+	 * between unknown values, this method will return a coordinate with
+	 * empty occupation 
+	 * 
+	 * @param aspects
+	 * @return
+	 */
+	public Set<A> getEmptyReferentCorrelate(ACoordinate<D, A> aspects);
+	
 // ------------------------- descriptors ------------------------- //
 	
 	/**
@@ -269,6 +285,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public boolean isCoordinateCompliant(ACoordinate<D, A> coordinate);
+	
 	
 	/**
 	 * Retrieve all coordinate that describe this set of value.

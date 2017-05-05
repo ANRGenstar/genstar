@@ -15,13 +15,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -303,24 +303,25 @@ public class GosplSurveyFactory {
 		Set<APopulationAttribute> attributes = population.getPopulationAttributes();
 		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
 				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
-		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValues().size()).max().getAsInt())
+		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValues().size()+1).max().getAsInt())
 				.mapToObj(i -> "").collect(Collectors.toList());
 		
 		Map<APopulationValue, Integer> mapReport = attributes.stream().flatMap(att -> 
 					Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue())))
-				.collect(Collectors.toMap(value -> value, value -> 0)); 
-		population.parallelStream().forEach(entity -> entity.getValues()
+				.collect(Collectors.toMap(Function.identity(), value -> 0)); 
+		population.stream().forEach(entity -> entity.getValues()
 				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));
 		
 		for(APopulationAttribute attribute : attributes){
 			int lineNumber = 0;
-			for(APopulationValue value : attribute.getValues()){
+			Set<APopulationValue> attValues = Stream.concat(attribute.getValues().stream(), 
+					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
+			for(APopulationValue value : attValues){
 				String val = "";
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
 					val = String.valueOf(mapReport.get(value));
 				else
 					val = decimalFormat.format(mapReport.get(value).doubleValue() / population.size());
-				//val = String.valueOf(Math.round(mapReport.get(value).doubleValue() / population.size() / precision) * precision);
 				lines.set(lineNumber, lines.get(lineNumber)
 						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
 						value.getStringValue() + separator + val);
