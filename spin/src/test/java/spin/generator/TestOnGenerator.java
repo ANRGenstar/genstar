@@ -1,5 +1,8 @@
 package spin.generator;
 
+import org.graphstream.graph.Graph;
+import org.graphstream.graph.Node;
+
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
@@ -13,9 +16,9 @@ import spin.objects.SpinNetwork;
 
 public class TestOnGenerator {
 
-	/** Test pour les fonctions de génération de réseau sur une population
-	 * A - Génération d'une population de taille variable
-	 * B - Génération d'un graphe
+	/** Test pour les fonctions de generation de reseau sur une population
+	 * A - Generation d'une population de taille variable
+	 * B - Generation d'un graphe
 	 * C - Affichage du graphe
 	 * 
 	 * @param args
@@ -24,31 +27,32 @@ public class TestOnGenerator {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
 		generator.generate(100);
-		
-		System.out.println("Debut de la génération de réseau régulier");
+/*		
+		System.out.println("Debut de la generation de reseau regulier");
 		SpinPopulation populationWithNetworkRegular = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		SpinNetwork networkRegular = populationWithNetworkRegular.getNetwork();
-		System.out.println("Fin de génération de réseau régulier");
-
-		System.out.println("Debut de la génération de réseau Scale Free");
+		System.out.println("Fin de generation de reseau regulier");
+		
+		System.out.println("Debut de la generation de reseau Scale Free");
 		SpinPopulation populationWithNetworkSF = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
 		SpinNetwork networkSF = populationWithNetworkSF.getNetwork();
-		System.out.println("Fin de génération de réseau Scale Free");
-
-		System.out.println("Debut de la génération de réseau Random");
+		System.out.println("Fin de generation de reseau Scale Free");
+		
+		System.out.println("Debut de la generation de reseau Random");
 		SpinPopulation populationWithNetworkRandom = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Random, population);
 		SpinNetwork networkRandom = populationWithNetworkRandom.getNetwork();
-		System.out.println("Fin de génération de réseau Scale Random");
-
-		System.out.println("Debut de la génération de réseau SmallWorld");
+		System.out.println("Fin de generation de reseau Random");
+		
+		System.out.println("Debut de la generation de reseau SmallWorld");
 		SpinPopulation populationWithNetworkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.SmallWorld, population);
 		SpinNetwork networkSW = populationWithNetworkSW.getNetwork();
-		System.out.println("Fin de génération de réseau SmallWorld");
+		System.out.println("Fin de generation de reseau SmallWorld");
+*/		
+		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
+		SpinNetwork networkTest = populationWithNetwork.getNetwork();
+		networkTest.network.display();
 		
-		//networkRegular.network.display();
-		//networkSF.network.display();
-		//networkRandom.network.display();
-		//networkSW.network.display();
+		Graph sampleGraph = networkTest.randomWalkSample(50);
+		sampleGraph.display();
 	}
-
 }
