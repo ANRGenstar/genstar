@@ -65,7 +65,6 @@ public class SpinNetwork implements INetProperties{
 	 */
 	public void putLink(String linkId, Node n1, Node n2){
 		network.addEdge(linkId, n1, n2);
-		// TODO [stage (?)] utiliser String plutot que Node pour identifier n1 et n2
 	}
 	
 	/** Remove a node from a graph
@@ -108,9 +107,6 @@ public class SpinNetwork implements INetProperties{
 		return links;
 	}
 	
-	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
-	
-	// TODO [stage] Random Walk ne fonctionne pas sur les graphes SF. Chercher une solution au probl�me
 	/** Creates a sample graph from an existing graph using the Random Walk Sampling Method
 	 * 
 	 * @param sampleSize the number of nodes we want in our sample graph
@@ -159,14 +155,18 @@ public class SpinNetwork implements INetProperties{
 		
 		// Set the current step in the walk and update its weight
 		Node currentNode = start;
-		weights.replace(currentNode, weights.get(currentNode)/2);
+		if(currentNode.getDegree()==1) {
+			weights.replace(currentNode, 0.0);
+		} else {
+			weights.replace(currentNode, weights.get(currentNode)/2);
+		}
 		
 		// Next step in the walk
 		Node nextNode;
 		
 		// Counter used to measure the number of steps the program takes to complete. If the
-		// program takes too many steps without completing, it must be stuck and needs to be reset
-		// with a different starting point
+		// program takes too many steps without completing, it must be stuck and needs to be
+		// reset with a different starting point
 		int nbSteps = 0;
 		
 		// Adding the right number of nodes to the sample graph
@@ -222,12 +222,15 @@ public class SpinNetwork implements INetProperties{
 				sampleToOriginalMap.put(String.valueOf(sampleNodeId), nextNode.getId());
 				originalToSampleMap.put(nextNode.getId(), String.valueOf(sampleNodeId));
 				sampleNodeId++;
-				
-				currentNode = nextNode;
-				weights.replace(currentNode, weights.get(currentNode)/2);
-				
 				nbNodes--;
 			}
+			currentNode = nextNode;
+			if(currentNode.getDegree()==1) {
+				weights.replace(currentNode, 0.0);
+			} else {
+				weights.replace(currentNode, weights.get(currentNode)/2);
+			}
+			
 			nbSteps++;
 		}
 		
@@ -304,14 +307,15 @@ public class SpinNetwork implements INetProperties{
 	public double getAPL() {
 		double APL = 0;
 		int nbPaths = 0;
-		
+		ArrayList<Node> computedNodes = new ArrayList<Node>();
 		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "result", null);
 		dijkstra.init(network);
 		for(Node n1 : network.getEachNode()) {
+			computedNodes.add(n1);
 			dijkstra.setSource(n1);
 			dijkstra.compute();
 			for(Node n2 : network.getEachNode()) {
-				if(!n2.equals(n1)) {
+				if(!computedNodes.contains(n2)) {
 					APL += dijkstra.getPathLength(n2);
 					nbPaths ++;
 				}
