@@ -57,7 +57,18 @@ import gospl.entity.GosplEntity;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 
-public class GosplDistributionBuilder {
+/**
+ * Main class to setup and harmonize input data. Can handle:
+ * <p><ul>
+ * <li>Contingency or frequency table => collapse into one distribution of attribute, i.e. {@link INDimensionalMatrix}
+ * <li>Sample => convert to population, i.e. {@link IPopulation}
+ * </ul><p>
+ * TODO: the ability to input statistical moment or custom distribution
+ * 
+ * @author kevinchapuis
+ *
+ */
+public class GosplInputDataManager {
 
 	private Logger logger = LogManager.getLogger();
 	
@@ -69,13 +80,13 @@ public class GosplDistributionBuilder {
 	private Set<AFullNDimensionalMatrix<? extends Number>> distributions;
 	private Set<GosplPopulation> samples;
 
-	public GosplDistributionBuilder(final Path configurationFilePath) throws FileNotFoundException {
+	public GosplInputDataManager(final Path configurationFilePath) throws FileNotFoundException {
 		this.configuration = new GenstarXmlSerializer().deserializeGSConfig(configurationFilePath);
 		this.configuration.setBaseDirectory(configurationFilePath.toFile());
 		this.dataParser = new GSDataParser();
 	}
 	
-	public GosplDistributionBuilder(final GenstarConfigurationFile configurationFile) {
+	public GosplInputDataManager(final GenstarConfigurationFile configurationFile) {
 		this.configuration = configurationFile;
 		this.dataParser = new GSDataParser();
 	}

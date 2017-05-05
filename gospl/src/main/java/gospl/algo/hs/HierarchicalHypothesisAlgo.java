@@ -17,7 +17,6 @@ import gospl.algo.hs.graph.AttributesDependanciesGraph;
 import gospl.algo.sampler.IHierarchicalSampler;
 import gospl.algo.sampler.ISampler;
 import gospl.distribution.exception.IllegalDistributionCreation;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;

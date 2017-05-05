@@ -1,6 +1,5 @@
 package gospl.distribution.matrix;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -265,6 +264,11 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	public final boolean isCoordinateCompliant(ACoordinate<D, A> coordinate) {
 		return m.isCoordinateCompliant(coordinate);
 	}
+	
+	@Override
+	public Set<A> getEmptyReferentCorrelate(ACoordinate<D, A> aspect) {
+		return m.getEmptyReferentCorrelate(aspect);
+	} 
 
 	@Override
 	public final Collection<ACoordinate<D, A>> getCoordinates(Set<A> values) {

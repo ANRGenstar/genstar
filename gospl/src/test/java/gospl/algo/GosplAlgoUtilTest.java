@@ -111,7 +111,7 @@ public class GosplAlgoUtilTest {
 	public ASegmentedNDimensionalMatrix<Double> getSegmentedFrequency(int segmentSize) 
 			throws IllegalDistributionCreation {
 		if(this.population == null)
-			throw new NullPointerException("No population have been generated - see #buildPopulation");
+			this.buildPopulation(segmentSize);
 		log.debug("Try to build segmented matrix with {} dimensions", this.attributes.size());
 		Map<APopulationAttribute, Double> attributesProb = this.attributes.stream().collect(
 				Collectors.toMap(Function.identity(), att -> new Double(0.5)));

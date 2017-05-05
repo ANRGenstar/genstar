@@ -114,13 +114,14 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
+			/*
 			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
-				String msg = "Detailed marginals: "+mrg.getClass().getCanonicalName()+" \n "+mrg.marginalControl.entrySet()
-						.stream().map(entry -> Arrays.toString(entry.getKey().toArray())
+				String msg = "Detailed "+mrg.getClass().getSimpleName()+" "+mrg.getControlDimension().getAttributeName()+" of size "+mrg.size()
+						+"\n "+mrg.marginalControl.entrySet().stream().map(entry -> Arrays.toString(entry.getKey().toArray())
 								+" = "+entry.getValue()).collect(Collectors.joining("\n"));
-				logger.error(msg);
 				throw new RuntimeException("wrong total: "+msg);
 			}
+			*/
 		}
 
 		return marginals;

@@ -20,6 +20,7 @@ import java.util.stream.Stream;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
+import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
@@ -72,6 +73,24 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				metaDataType
 				);
 	}
+	
+	/**
+	 * Protected constructor in order for {@link GosplNDimensionalMatrixFactory} to initialize
+	 * a n dimensional matrix from the map inner collection structure itself
+	 * <p>
+	 * WARNING: may not fit to the required structure of {@link AFullNDimensionalMatrix}
+	 * 
+	 * @param matrix
+	 */
+	protected AFullNDimensionalMatrix(Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix){
+		this.dimensions = matrix.keySet().stream()
+				.flatMap(coord -> coord.getDimensions().stream())
+				.collect(Collectors.toSet()).stream()
+				.collect(Collectors.toMap(Function.identity(), dim -> dim.getValues()));
+		this.matrix = matrix;
+	}
+	
+	// --------------------------------------------------------------- //
 
 	/**
 	 * Returns the genesis of the matrix, that is the successive steps that brought it to its 
@@ -324,6 +343,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return getVal(Arrays.asList(aspects));
 	}
 	
+	
 	///////////////////////////////////////////////////////////////////////////
 	// ----------------------- COORDINATE MANAGEMENT ----------------------- //
 	///////////////////////////////////////////////////////////////////////////
@@ -343,7 +363,6 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		Set<APopulationAttribute> dimSet = new HashSet<>(dimensionsAspects);
 		if(dimensionsAspects.size() == dimSet.size())
 			return true;
-		System.out.println(Arrays.toString(dimensionsAspects.toArray()));
 		return false;
 	}
 	
@@ -358,12 +377,38 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.collect(Collectors.toList());
 	}
 
-	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
-		return controlOne.add(controlTwo);
+
+	/*
+	 * (non-Javadoc)
+	 * @see gospl.distribution.matrix.INDimensionalMatrix#getEmptyReferentCorrelate(java.util.Set)
+	 * 
+	 * TODO: turn values to coordinate to unsure one value per dimension
+	 */
+	@Override
+	public Set<APopulationValue> getEmptyReferentCorrelate(
+			ACoordinate<APopulationAttribute, APopulationValue> coordinate){
+		// Only focus on values of mapped attribute
+		Map<APopulationAttribute, APopulationValue> dimRef = this.getDimensions()
+				.stream().filter(dim -> !dim.getReferentAttribute().equals(dim) 
+						&& coordinate.getDimensions().contains(dim.getReferentAttribute()))
+				.collect(Collectors.toMap(Function.identity(), 
+						dim -> coordinate.getMap().get(dim.getReferentAttribute())));
+		
+		if(dimRef.isEmpty())
+			return Collections.emptySet();
+		Set<APopulationValue> emptyReferentValue = dimRef.entrySet().stream()
+				.flatMap(e -> e.getKey().findMappedAttributeValues(e.getValue()).stream())
+				.filter(val -> val.getAttribute().getEmptyValue().equals(val))
+				.collect(Collectors.toSet());
+		if(emptyReferentValue.isEmpty())
+			return Collections.emptySet();
+		return this.getDimensions().stream().filter(dim -> emptyReferentValue
+				.stream().noneMatch(val -> val.getAttribute().equals(dim)))
+				.map(dim -> dim.getEmptyValue()).collect(Collectors.toSet());
 	}
 
 	// -------------------------- UTILITY -------------------------- //
-
+	
 	@Override
 	public String toString(){
 		int theoreticalSpaceSize = this.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
@@ -442,7 +487,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		switch (dataType) {
 			
 			case GlobalFrequencyTable:
-				return (Double)getVal().getValue() == 1.0;
+				return Math.abs(getVal().getValue().doubleValue() - 1d) < Math.pow(10, -6);
 			case LocalFrequencyTable:
 				return false;
 			case Sample:
@@ -525,5 +570,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return s.iterator().next();
 	}
 	
+	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){
+		return controlOne.add(controlTwo);
+	}
 
 }

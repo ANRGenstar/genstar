@@ -1,6 +1,10 @@
 package gospl.validation;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 
@@ -8,6 +12,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
+import gospl.GosplPopulation;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -234,13 +239,15 @@ public class GosplIndicatorFactory {
 	 * It is first based on Z-score that focus on cell based indicator of error. SSZ is
 	 * the sum of square Z-score and RSSZ is a proposed relative indicator, that is the SSZ
 	 * divided by the chi square 5% critical value.
+	 * <p>
+	 * WARNING: do not use because of inconsistent result
 	 * 
 	 * @see Williamson, Pau, 2012. “An Evaluation of Two Synthetic Small-Area Microdata Simulation 
 	 * Methodologies: Synthetic Reconstruction and Combinatorial Optimisation.” 
 	 * In Spatial Microsimulation: A Reference Guide for Users
 	 * @see Huand, Z., Williamson, P., 2001. "A Comparison of Synthetic Reconstruction and Combinatorial
 	 * Optimisation Approaches to the Creation of Small-area Microdata" Working paper online
-	 * @return
+	 * @return RSSZstaar indicator as a double
 	 */
 	public double getRSSZstar(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
@@ -255,14 +262,14 @@ public class GosplIndicatorFactory {
 		case ContingencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
-				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
+				actualValue = contingencyTable.getVal(coord.values()).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;
 		case GlobalFrequencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
-				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
+				actualValue = contingencyTable.getVal(coord.values()).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;
@@ -272,6 +279,40 @@ public class GosplIndicatorFactory {
 		default:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "a segmented matrix with multiple matrix meta data type");
+		}
+	}
+
+	/**
+	 * Give a statistical summary
+	 * 
+	 * @param file
+	 * @param distribution
+	 * @param population
+	 * @throws IOException 
+	 */
+	public Map<GosplIndicator, Number> getReport(Collection<GosplIndicator> indicators,
+			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution,
+			GosplPopulation population) throws IOException {		
+		return indicators.stream().collect(Collectors.toMap(Function.identity(), 
+						indicator -> this.getStats(indicator, distribution, population)));
+	}
+	
+	private Number getStats(GosplIndicator indicator,
+			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution,
+			GosplPopulation population){
+		switch (indicator) {
+		case TAE:
+			return this.getTAE(distribution, population);
+		case TACE:
+			return this.getTACE(distribution, population);
+		case AAPD:
+			return this.getAAPD(distribution, population);
+		case SRMSE:
+			return this.getSRMSE(distribution, population);
+		case RSSZstar:
+			return this.getRSSZstar(distribution, population);
+		default:
+			return this.getTAE(distribution, population);
 		}
 	}
 
