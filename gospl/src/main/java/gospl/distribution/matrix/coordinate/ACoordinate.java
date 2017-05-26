@@ -40,7 +40,8 @@ public abstract class ACoordinate<D, A> {
 	protected abstract boolean isCoordinateSetComplient(Set<A> coordinateSet);
 	
 	/**
-	 * Gives the set of aspect (of parametric type {@code A}) this {@link ACoordinate} contains. <br>
+	 * Gives the set of aspect (of parametric type {@code A}) this {@link ACoordinate} contains. 
+	 * <p>
 	 * WARNING: The set is backed by the coordinate, so changes to the coordinate are reflected in the set, 
 	 * and vice-versa.
 	 * 

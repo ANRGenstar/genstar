@@ -73,9 +73,6 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 		// Basic population to feed
 		GosplPopulation gosplPop = new GosplPopulation();
 		
-		// Attribute probability table
-		this.setupAttributeProbabilityTable();
-
 		// Attribute Factory
 		if(attributes == null){
 			GosplAttributeFactory attF = new GosplAttributeFactory();
@@ -83,6 +80,9 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 					.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
 					.collect(Collectors.toSet());
 		}
+		
+		// Attribute probability table
+		this.setupAttributeProbabilityTable();
 
 		IntStream.range(0, numberOfIndividual).forEach(i -> gosplPop.add(
 				new GosplEntity(attributes.stream().collect(Collectors.toMap(att -> att, 

@@ -29,7 +29,6 @@ import org.opengis.parameter.ParameterValueGroup;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
@@ -107,7 +106,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	}
 	
 	@Override
-	public Envelope getEnvelope() {
+	public ReferencedEnvelope getEnvelope() {
 		return new ReferencedEnvelope(coverage.getEnvelope2D());
 	}
 	
@@ -218,6 +217,15 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		return store.getOriginalGridRange().getHigh(0)+1;
 	}
 	
+	/**
+	 * Gives the pixel that can be found at coordinate {@code x y}
+	 * in 0 based coordinate (bottom left corner)
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 * @throws TransformException
+	 */
 	public GSPixel getPixel(int x, int y) throws TransformException {
 		x += coverage.getGridGeometry().getGridRange2D().x;
 		y += coverage.getGridGeometry().getGridRange2D().y;
@@ -226,8 +234,27 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		Double[] valsN = new Double[vals.length];
 		for(int k = 0; k < vals.length; k++)
 			valsN[k] = vals[k];
-		return gef.createGeoEntity(valsN, coverage.getGridGeometry().gridToWorld(new GridEnvelope2D(x, y, 1, 1)), x, y);
+		return gef.createGeoEntity(valsN, coverage.getGridGeometry()
+				.gridToWorld(new GridEnvelope2D(x, y, 1, 1)), x, y);
 	}
+	
+	/**
+	 * Gives the entire matrix of value for raster band number {@code i}
+	 * 
+	 * @param i
+	 * @return
+	 * @throws TransformException
+	 */
+	public float[][] getMatrix(int i) throws TransformException {
+		String bandName = GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+i;
+		float[][] matrix = new float[getColumnNumber()][getRowNumber()];
+		for (int row = 0; row < getRowNumber(); row++)
+			for (int col = 0; col < getColumnNumber(); col++)
+				matrix[col][row] = this.getPixel(col, row).getValueForAttribute(bandName)
+						.getNumericalValue().floatValue();
+		return matrix;
+	}
+
 
 	// --------------------------- Utilities --------------------------- // 
 	

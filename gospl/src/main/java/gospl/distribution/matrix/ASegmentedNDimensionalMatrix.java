@@ -244,7 +244,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
-		return getVal(coordinate.values());
+		return getVal(new HashSet<>(coordinate.values()));
 	}
 
 	/* (non-Javadoc)
