@@ -262,14 +262,14 @@ public class GosplIndicatorFactory {
 		case ContingencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
-				actualValue = contingencyTable.getVal(coord.values()).getValue();
+				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;
 		case GlobalFrequencyTable:
 			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
-				actualValue = contingencyTable.getVal(coord.values()).getValue();
+				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;

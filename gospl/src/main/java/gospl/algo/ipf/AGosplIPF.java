@@ -1,6 +1,5 @@
 package gospl.algo.ipf;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -57,10 +56,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public abstract class AGosplIPF<T extends Number> {
 
-	private int step = 1000;
-	private double delta = Math.pow(10, -2);
-
-	public static double ZERO_CELL_RATIO = Math.pow(10, -3);
+	private int step = 100;
+	private double delta = Math.pow(10, -5);
 
 	private Logger logger = LogManager.getLogger();
 

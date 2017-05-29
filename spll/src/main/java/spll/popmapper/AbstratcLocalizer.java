@@ -106,10 +106,12 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 
 	@Override
 	public void setMatcher(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch) {
+		/*
 		if(!match.isCoordinateCompliant(population.getGeography()))
 			throw new IllegalArgumentException("The Coordinate Referent System of matcher does not fit population's geography:\n"
 					+ "Match = "+match.getWKTCoordinateReferentSystem()+"\n"
 					+ "Geography = "+population.getGeography().getWKTCoordinateReferentSystem());
+					*/
 		if(match.getGeoAttributes().stream().noneMatch(att -> att.getAttributeName().equals(keyAttMatch)))
 			throw new IllegalArgumentException("The match file does not contain any attribute named "+keyAttMatch
 					+ "while this name has been setup to be the key attribute match");
@@ -160,6 +162,10 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	// ----------------------- MAPPER ---------------------- //
 	// ----------------------------------------------------- //
 
+	public IGSGeofile<? extends AGeoEntity> getMapperOutput(){
+		return map;
+	}
+	
 	@Override
 	public void setMapper(IGSGeofile<? extends AGeoEntity> map, String mapAttribute) {
 		this.map = map;

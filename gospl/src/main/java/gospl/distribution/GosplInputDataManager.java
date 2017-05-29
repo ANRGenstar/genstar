@@ -404,7 +404,7 @@ public class GosplInputDataManager {
 				sampleSet.add(new GosplEntity(entityAttributes));
 		}
 		if (unmatchSize > 0) {
-			logger.debug("Input sample have bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
+			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
 				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
 		}
 		return sampleSet;
