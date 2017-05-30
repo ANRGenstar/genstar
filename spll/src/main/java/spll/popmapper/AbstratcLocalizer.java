@@ -500,7 +500,10 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 		return localizationConstraint;
 	}
 
-	
+	public void clearMapCache(){
+		if (map != null && map instanceof SPLRasterFile) 
+			((SPLRasterFile) map).clearCache();
+	}
 	
 	
 }
