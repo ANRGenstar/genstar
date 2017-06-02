@@ -16,9 +16,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -47,7 +49,9 @@ public class GosplSurveyFactory {
 	
 	@SuppressWarnings("unused")
 	private double precision = Math.pow(10, -2);
-	private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+	
+	private DecimalFormatSymbols dfs;
+	private DecimalFormat decimalFormat;
 
 	private char separator = GSSurveyWrapper.DEFAULT_SEPARATOR;
 	private int sheetNb = GSSurveyWrapper.DEFAULT_SHEET_NB;
@@ -61,6 +65,9 @@ public class GosplSurveyFactory {
 	private final List<String> supportedFileFormat;
 
 	public GosplSurveyFactory() {
+		this.dfs = new DecimalFormatSymbols(Locale.FRANCE);
+		this.dfs.setDecimalSeparator('.');
+		this.decimalFormat = new DecimalFormat("#.##", dfs);
 		supportedFileFormat = Arrays.asList(CSV_EXT, XLS_EXT, XLSX_EXT);
 	}
 
@@ -307,7 +314,8 @@ public class GosplSurveyFactory {
 				.mapToObj(i -> "").collect(Collectors.toList());
 		
 		Map<APopulationValue, Integer> mapReport = attributes.stream().flatMap(att -> 
-					Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue())))
+					Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue()))
+					.collect(Collectors.toSet()).stream())
 				.collect(Collectors.toMap(Function.identity(), value -> 0)); 
 		population.stream().forEach(entity -> entity.getValues()
 				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));

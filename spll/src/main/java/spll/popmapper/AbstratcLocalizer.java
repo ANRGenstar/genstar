@@ -107,6 +107,7 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	@Override
 	public void setMatcher(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch) {
 		/*
+		 * TODO: changer le test des CRS
 		if(!match.isCoordinateCompliant(population.getGeography()))
 			throw new IllegalArgumentException("The Coordinate Referent System of matcher does not fit population's geography:\n"
 					+ "Match = "+match.getWKTCoordinateReferentSystem()+"\n"
@@ -345,7 +346,8 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 		
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? 
 		map.getGeoEntity() : map.getGeoEntityWithin(spatialBounds);
-		Map<String,Double> vals = map.getGeoEntity().stream().collect(Collectors.toMap(a -> ((AGeoEntity)a).getGenstarName(), a -> a.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue()));
+		Map<String,Double> vals = map.getGeoEntity().stream().collect(Collectors.toMap(a -> ((AGeoEntity)a).getGenstarName(), 
+				a -> a.getValueForAttribute(keyAttMap).getNumericalValue().doubleValue()));
 				
 		if (map.getGeoGSFileType().equals(GeoGSFileType.RASTER)) {
 			double unknowVal = ((SPLRasterFile) map).getNoDataValue();
