@@ -106,12 +106,11 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 
 	@Override
 	public void setMatcher(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch) {
-		/*
 		if(!match.isCoordinateCompliant(population.getGeography()))
 			throw new IllegalArgumentException("The Coordinate Referent System of matcher does not fit population's geography:\n"
 					+ "Match = "+match.getWKTCoordinateReferentSystem()+"\n"
 					+ "Geography = "+population.getGeography().getWKTCoordinateReferentSystem());
-					*/
+					
 		if(match.getGeoAttributes().stream().noneMatch(att -> att.getAttributeName().equals(keyAttMatch)))
 			throw new IllegalArgumentException("The match file does not contain any attribute named "+keyAttMatch
 					+ "while this name has been setup to be the key attribute match");
@@ -295,7 +294,6 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 		} catch (IOException | TransformException e) {
 			e.printStackTrace();
 		} 
-		System.out.println("population: " + population.size());
 		return population;
 	}
 
@@ -314,15 +312,12 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 		localizationConstraint.setBounds(spatialBounds);
 		for (SpatialConstraint cr : constraints) {
 			while (!cr.isConstraintLimitReach()) {
-				//System.out.println("cr: " + cr.getClass().getCanonicalName() + " -> " + cr.getCurrentValue());
 				List<AGeoEntity> possibleNests = new ArrayList<>(population.getGeography().getGeoEntity());
 				List<AGeoEntity> possibleNestsInit = localizationConstraint.getSortedCandidates(null);
 				possibleNests = new ArrayList<>(possibleNests);
-				//System.out.println("possibleNests: " + possibleNests.size());
 				for (SpatialConstraint constraint : otherConstraints) {
 					possibleNests = constraint.getSortedCandidates(possibleNests);
 				}
-				//System.out.println("possibleNests2: " + possibleNests.size());
 				
 				remainingEntities = localizationInNestOp(remainingEntities, possibleNests, null);
 				if (remainingEntities != null && !remainingEntities.isEmpty()) 

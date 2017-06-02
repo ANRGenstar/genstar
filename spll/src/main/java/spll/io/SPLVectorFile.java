@@ -30,12 +30,14 @@ import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -164,7 +166,17 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
-		return thisCRS == null && fileCRS == null ? false : thisCRS.equals(fileCRS);
+		if (thisCRS == null && fileCRS == null) return false;
+		if (thisCRS.equals(fileCRS)) return true;
+		Integer codeThis = null;
+		Integer codeFile = null;
+		try {
+			codeThis = CRS.lookupEpsgCode(thisCRS, true);
+			codeFile = CRS.lookupEpsgCode(fileCRS, true);
+		} catch (FactoryException e) {
+			e.printStackTrace();
+		}
+		return codeThis == null && codeFile == null ? false : codeFile.equals(codeThis) ;
 	}
 
 	@Override

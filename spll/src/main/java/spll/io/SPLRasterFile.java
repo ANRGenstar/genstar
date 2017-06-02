@@ -24,9 +24,11 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
@@ -122,7 +124,17 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
-		return thisCRS == null && fileCRS == null ? false : thisCRS.equals(fileCRS);
+		if (thisCRS == null && fileCRS == null) return false;
+		if (thisCRS.equals(fileCRS)) return true;
+		Integer codeThis = null;
+		Integer codeFile = null;
+		try {
+			codeThis = CRS.lookupEpsgCode(thisCRS, true);
+			codeFile = CRS.lookupEpsgCode(fileCRS, true);
+		} catch (FactoryException e) {
+			e.printStackTrace();
+		}
+		return codeThis == null && codeFile == null ? false : codeFile.equals(codeThis) ;
 	}
 
 	@Override
