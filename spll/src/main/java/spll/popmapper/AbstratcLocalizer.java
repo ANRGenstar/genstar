@@ -106,11 +106,6 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 
 	@Override
 	public void setMatcher(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch) {
-<<<<<<< HEAD
-=======
-		/*
-		 * TODO: changer le test des CRS
->>>>>>> branch 'master' of https://github.com/ANRGenstar/genstar.git
 		if(!match.isCoordinateCompliant(population.getGeography()))
 			throw new IllegalArgumentException("The Coordinate Referent System of matcher does not fit population's geography:\n"
 					+ "Match = "+match.getWKTCoordinateReferentSystem()+"\n"
