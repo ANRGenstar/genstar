@@ -163,15 +163,13 @@ public class SPLGeofileFactory {
 
 		GridSampleDimension[] bands = new GridSampleDimension[] { 
 				new GridSampleDimension("Dimension", new Category[] { nan, values }, null)}; 
-
+		
 		WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT,
 				pixels.length, pixels[0].length, 1, null);
-		for (int y=0; y<pixels[0].length; y++) {
-			for (int x=0; x<pixels.length; x++) {
+		for (int y=0; y<pixels[0].length; y++)
+			for (int x=0; x<pixels.length; x++)
 				raster.setSample(x, y, 0, pixels[x][y]);
-			}
-		}
-		
+				
 		return writeRasterFile(rasterfile, 
 				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
 	}
