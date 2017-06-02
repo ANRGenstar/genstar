@@ -2,6 +2,7 @@ package spll.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -61,6 +62,12 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	
 	public static Number DEF_NODATA = -9999; 
 	private Number noData;
+	
+	private Collection<GSPixel> cacheGeoEntity = null;
+
+	private Collection<AGeoValue> cacheGeoValues = null;
+	
+	private Collection<AGeoAttribute> cacheGeoAttributes = null;
 
 	/**
 	 * 
@@ -137,29 +144,37 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	 */
 	@Override
 	public Collection<GSPixel> getGeoEntity(){
-		Set<GSPixel> collection = new HashSet<>(); 
-		getGeoEntityIterator().forEachRemaining(collection::add);
-		return collection;
+		if (cacheGeoEntity == null) {
+			cacheGeoEntity = new ArrayList<>(); 
+			getGeoEntityIterator().forEachRemaining(cacheGeoEntity::add);
+		}
+		return cacheGeoEntity;
 	}
 	
 	@Override
 	public Collection<AGeoValue> getGeoValues() {
-		Set<AGeoValue> values = new HashSet<>();
-		getGeoEntityIterator().forEachRemaining(pix -> values.addAll(pix.getValues()));
-		return values;
+		if (cacheGeoValues == null) {
+			cacheGeoValues = new HashSet<>();
+			getGeoEntityIterator().forEachRemaining(pix -> cacheGeoValues.addAll(pix.getValues()));
+		}
+		return cacheGeoValues;
 	}
 	
 	@Override
 	public Collection<AGeoAttribute> getGeoAttributes(){
-		return getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
+		if (cacheGeoAttributes ==null) {
+			cacheGeoAttributes = getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
 				.collect(Collectors.toSet());
+		}
+		return cacheGeoAttributes;
+	
 	}
 	
 	// ------------------------------------- //
 	
 	@Override
 	public Collection<GSPixel> getGeoEntityWithin(Geometry geom) {
-		Set<GSPixel> collection = new HashSet<>(); 
+		ArrayList<GSPixel> collection = new ArrayList<>(); 
 		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
@@ -284,6 +299,21 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 			s += "vals: " + (Arrays.toString((byte[])vals))+"\n";
 		}	
 		return s;
+	}
+	
+	public void clearCache(){
+		if(cacheGeoEntity != null) {
+			cacheGeoEntity.clear();
+			cacheGeoEntity = null;
+		}
+		if (cacheGeoAttributes != null) {
+			cacheGeoAttributes.clear();
+			cacheGeoAttributes = null;
+		}
+		if (cacheGeoValues != null) {
+			cacheGeoValues.clear();
+			cacheGeoValues = null;
+		}
 	}
 	
 	@Override
