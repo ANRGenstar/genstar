@@ -38,7 +38,9 @@ public class GosplEntity extends APopulationEntity {
 		this.nest = entity;
 	}
 
-
-	
+	@Override
+	public GosplEntity clone(){
+		return new GosplEntity(this.getAttributesMap());
+	}
 
 }

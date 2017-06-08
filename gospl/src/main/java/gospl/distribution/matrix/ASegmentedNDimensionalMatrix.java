@@ -262,8 +262,6 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		return val;
 	}
 
-	
-
 	/* (non-Javadoc)
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal(core.metamodel.pop.APopulationValue)
 	 */
@@ -272,7 +270,15 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		return getVal(Arrays.asList(aspects));
 	}
 
-
+	@Override
+	public final AControl<T> getVal(String... coordinate){
+		return getVal(this.getValues(coordinate));
+	}
+	
+	@Override
+	public final AControl<T> getVal(Collection<APopulationValue> aspects, boolean defaultToNul){
+		return getVal(aspects);
+	}
 
 	// ---------------------- Inner utilities ---------------------- //
 

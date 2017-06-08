@@ -19,7 +19,7 @@ import gospl.entity.GosplEntity;
  */
 public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	
-	private ISampler< ACoordinate<APopulationAttribute, APopulationValue>> sampler;
+	private ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler;
 	
 	public DistributionBasedGenerator(ISampler< ACoordinate<APopulationAttribute, APopulationValue>> sampler) {
 		this.sampler = sampler;
@@ -27,11 +27,8 @@ public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	
 	@Override
 	public GosplPopulation generate(int numberOfIndividual) {
-		GosplPopulation pop = new GosplPopulation();
-		pop.addAll(sampler.draw(numberOfIndividual).parallelStream().map(coord -> new GosplEntity(coord.getMap())).collect(Collectors.toSet()));
-		
-		
-		return pop;
+		return new GosplPopulation(sampler.draw(numberOfIndividual).stream()
+				.map(coord -> new GosplEntity(coord.getMap())).collect(Collectors.toSet()));
 	}
 
 }

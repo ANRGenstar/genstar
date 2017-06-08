@@ -102,7 +102,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS
 		try {
-			df.buildDistributions();
+			df.buildDataTables();
 		} catch (final RuntimeException e) {
 			e.printStackTrace();
 		} catch (final IOException e) {
@@ -141,7 +141,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// so we collapse all distribution build from the data
 		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
 		try {
-			distribution = df.collapseDistributions();
+			distribution = df.collapseDataTablesIntoDistributions();
 		} catch (final IllegalDistributionCreation e1) {
 			e1.printStackTrace();
 		} catch (final IllegalControlTotalException e1) {

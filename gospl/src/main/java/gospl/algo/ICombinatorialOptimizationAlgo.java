@@ -16,8 +16,8 @@ public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<APo
 	 * @param sampler
 	 * @return
 	 */
-	public ISampler<APopulationEntity> inferCOSampler(
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample, 
+	public ISampler<APopulationEntity> setupCOSampler(
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample,
 			SamplerType sampler);
 	
 }

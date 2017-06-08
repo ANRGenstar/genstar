@@ -11,15 +11,15 @@ import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
-public class CombinatorialOptimizationIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
+public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
 
-	public CombinatorialOptimizationIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
+	public COIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix) {
 		super(seed);
 		super.setMarginalMatrix(matrix);
 	}
 	
-	public CombinatorialOptimizationIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
+	public COIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix,
 			int step, double delta) {
 		super(seed, step, delta);
@@ -27,12 +27,12 @@ public class CombinatorialOptimizationIPFAlgo extends AGosplIPF<Integer> impleme
 	}
 	
 	@Override
-	public ISampler<APopulationEntity> inferCOSampler(
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample, 
+	public ISampler<APopulationEntity> setupCOSampler(
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample,
 			IEntitySampler sampler) {
 		
 		sampler.setSample(sample);
-		sampler.setObjectives(process());
+		sampler.addObjectives(process());
 		
 		return sampler;
 	}

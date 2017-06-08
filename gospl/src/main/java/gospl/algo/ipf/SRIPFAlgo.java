@@ -13,13 +13,13 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
-public class DistributionInferenceIPFAlgo extends AGosplIPF<Double> implements ISyntheticReconstructionAlgo<IDistributionSampler> {
+public class SRIPFAlgo extends AGosplIPF<Double> implements ISyntheticReconstructionAlgo<IDistributionSampler> {
 
-	public DistributionInferenceIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed) {
+	public SRIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed) {
 		super(seed);
 	}
 	
-	public DistributionInferenceIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
+	public SRIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
 			int step, double delta) {
 		super(seed, step, delta);
 	}

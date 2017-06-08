@@ -182,22 +182,6 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return conditionalProba;
 	}
 
-
-	@Override
-	public AControl<Double> getVal(Collection<APopulationValue> aspects, boolean defaultToNul) {
-		return getVal(aspects);
-	}
-
-
-	@Override
-	public AControl<Double> getVal(String... coordinates) {
-
-		return getVal(this.getValues(coordinates));
-
-	}
-
-
-
 	// ------------------ Setters ------------------ //
 
 	@Override

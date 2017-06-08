@@ -77,7 +77,7 @@ public class GosplInputDataManager {
 	private final GenstarConfigurationFile configuration;
 	private final GSDataParser dataParser;
 
-	private Set<AFullNDimensionalMatrix<? extends Number>> distributions;
+	private Set<AFullNDimensionalMatrix<? extends Number>> inputData;
 	private Set<GosplPopulation> samples;
 
 	public GosplInputDataManager(final Path configurationFilePath) throws FileNotFoundException {
@@ -105,12 +105,13 @@ public class GosplInputDataManager {
 	 * @throws MatrixCoordinateException
 	 * @throws InvalidFileTypeException
 	 */
-	public void buildDistributions() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
+	public void buildDataTables() throws IOException, InvalidSurveyFormatException, InvalidFormatException {
 		GosplSurveyFactory sf = new GosplSurveyFactory();
-		this.distributions = new HashSet<>();
+		this.inputData = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (!wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				this.distributions.addAll(getDistribution(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()==null?null:this.configuration.getBaseDirectory()), 
+				this.inputData.addAll(getDataTables(sf.getSurvey(wrapper, this.configuration.getBaseDirectory() == null ? 
+						null : this.configuration.getBaseDirectory()), 
 						this.configuration.getAttributes()));
 	}
 
@@ -129,7 +130,8 @@ public class GosplInputDataManager {
 		samples = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), this.configuration.getAttributes()));
+				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
+						this.configuration.getAttributes()));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -137,11 +139,22 @@ public class GosplInputDataManager {
 	/////////////////////////////////////////////////////////////////////////////////
 	
 	/**
-	 * Returns an unmodifiable view of the distributions, as a raw distributions i.e. without any prior checking
+	 * Returns an unmodifiable view of input data tables, as a raw set of matrices
 	 * @return
 	 */
-	public Set<INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number>> getRawDistributions() {
-		return Collections.unmodifiableSet(this.distributions);
+	public Set<INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number>> getRawDataTables() {
+		return Collections.unmodifiableSet(this.inputData);
+	}
+	
+	/**
+	 * Returns an unmodifiable view of input contingency tables. If there is not any
+	 * contingency data in input tables, then return an empty set
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public Set<AFullNDimensionalMatrix<Integer>> getContingencyTables(){
+		return this.inputData.stream().filter(matrix -> matrix.getMetaDataType().equals(GSSurveyType.ContingencyTable))
+				.map(matrix -> (AFullNDimensionalMatrix<Integer>) matrix).collect(Collectors.toSet());
 	}
 	
 	/**
@@ -154,7 +167,7 @@ public class GosplInputDataManager {
 	
 	/**
 	 * 
-	 * Create a matrix from all matrices build with this factory
+	 * Create a frequency matrix from all input data tables
 	 * 
 	 * @return
 	 * @throws IllegalDistributionCreation
@@ -162,20 +175,20 @@ public class GosplInputDataManager {
 	 * @throws MatrixCoordinateException
 	 *
 	 */
-	public INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> collapseDistributions()
+	public INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> collapseDataTablesIntoDistributions()
 			throws IllegalDistributionCreation, IllegalControlTotalException {
-		if (distributions.isEmpty())
+		if (inputData.isEmpty())
 			throw new IllegalArgumentException(
 					"To collapse matrices you must build at least one first: see buildDistributions method");
-		if (distributions.size() == 1)
-			return getFrequency(distributions.iterator().next());
+		if (inputData.size() == 1)
+			return getFrequency(inputData.iterator().next());
 		final Set<AFullNDimensionalMatrix<Double>> fullMatrices = new HashSet<>();
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Proceed to distribution collapse", logger);
 		gspu.sysoStempPerformance(0, this);
 		
 		// Matrices that contain a record attribute
-		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : distributions.stream()
+		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> d.isRecordAttribute()))
 				.collect(Collectors.toSet())){
 			if(recordMatrices.getDimensions().stream().filter(d -> !d.isRecordAttribute())
@@ -187,7 +200,7 @@ public class GosplInputDataManager {
 		gspu.sysoStempMessage("Collapse record attribute: done");
 		
 		// Matrices that do not contain any record attribute
-		for (final AFullNDimensionalMatrix<? extends Number> mat : distributions.stream()
+		for (final AFullNDimensionalMatrix<? extends Number> mat : inputData.stream()
 				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !d.isRecordAttribute()))
 				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
@@ -205,7 +218,7 @@ public class GosplInputDataManager {
 	/*
 	 * Get the distribution matrix from data files
 	 */
-	private Set<AFullNDimensionalMatrix<? extends Number>> getDistribution(final IGSSurvey survey,
+	private Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
 			final Set<APopulationAttribute> attributes) throws IOException, InvalidSurveyFormatException {
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		
@@ -301,7 +314,7 @@ public class GosplInputDataManager {
 
 			// The most appropriate align referent matrix (the one that have most information about matrix to align,
 			// i.e. the highest number of shared dimensions)
-			final Optional<AFullNDimensionalMatrix<? extends Number>> optionalRef = distributions.stream()
+			final Optional<AFullNDimensionalMatrix<? extends Number>> optionalRef = inputData.stream()
 					.filter(ctFitter -> !ctFitter.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)
 							&& ctFitter.getDimensions().contains(localReferentDimension))
 					.sorted((jd1,
@@ -395,7 +408,7 @@ public class GosplInputDataManager {
 				else if(columnHeaders.get(idx).getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(columnHeaders.get(idx), columnHeaders.get(idx).getEmptyValue());
 				else{
-					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+					logger.trace("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
 							+columnHeaders.get(idx).getAttributeName());
 					unmatchSize++;
 				}

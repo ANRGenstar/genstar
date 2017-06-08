@@ -24,15 +24,14 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	}
 	
 	/**
-	 * Place the concrete type of collection you want this population be. If the propose
-	 * collection is not empty, then default inner collection type is choose.
+	 * Population with a given collection of entity within
 	 * 
 	 * @see GosplPopulation()
 	 * 
 	 * @param population
 	 */
 	public GosplPopulation(Collection<APopulationEntity> population){
-		if(!population.isEmpty())
+		if(population.isEmpty())
 			this.population = new HashSet<>();
 		else
 			this.population = population;

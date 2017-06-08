@@ -41,6 +41,5 @@ public interface IEntity<A extends IAttribute<V>, V extends IValue> {
 	 * @return
 	 */
 	public V getValueForAttribute(String property);
-	
-	
+
 }

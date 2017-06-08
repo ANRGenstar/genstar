@@ -489,7 +489,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			case GlobalFrequencyTable:
 				return Math.abs(getVal().getValue().doubleValue() - 1d) < Math.pow(10, -6);
 			case LocalFrequencyTable:
-				return false;
+				return true;
 			case Sample:
 				throw new IllegalStateException("This matrix cannot be of type "+dataType);
 			case ContingencyTable:

@@ -43,7 +43,7 @@ public class GosplIPFTest {
 
 	@Test
 	public void test() {
-		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new DistributionInferenceIPFAlgo(seed);
+		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new SRIPFAlgo(seed);
 		ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler = null;
 		try {
 			sampler = inferenceAlgo.inferSRSampler(marginals, new GosplBasicSampler());
