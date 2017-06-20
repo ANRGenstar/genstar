@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import core.metamodel.geo.AGeoEntity;
 
-public abstract class AbstractSpatialConstraint implements ISpatialConstraint{
+public abstract class ASpatialConstraint implements ISpatialConstraint{
 
 	protected int priority = 1;
 	protected boolean sortCandidates = false;

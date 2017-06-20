@@ -23,7 +23,7 @@ public class SPUniformLocalizer extends AbstratcLocalizer {
 	}
 
 	@Override
-	protected List localizationInNestOp(Collection<APopulationEntity> entities,
+	protected List<APopulationEntity> localizationInNestOp(Collection<APopulationEntity> entities,
 			List<AGeoEntity> possibleNests, Long val) {
 		Collection<APopulationEntity> chosenEntities = null;
 		if (val != null) {
@@ -43,17 +43,18 @@ public class SPUniformLocalizer extends AbstratcLocalizer {
 				break;
 			}
 			int index = rand.nextInt(possibleNests.size());
-			AGeoEntity nest = (AGeoEntity) possibleNests.get(index);
+			AGeoEntity nest = possibleNests.get(index);
 			boolean removeObject = false;
 			for (ISpatialConstraint constraint: constraints) {
-				removeObject = removeObject || constraint.updateConstraint(entity, nest);
+				removeObject = removeObject || constraint.updateConstraint(nest);
 			}
 			if (removeObject) possibleNests.remove(index);
 			entity.setNest(nest);
 			entity.setLocation(pointInLocalizer.pointIn(nest.getGeometry()));
 			
 		}
-		return entities.stream().filter(a -> a.getLocation() == null).collect(Collectors.toList());
+		return entities.stream().filter(a -> a.getLocation() == null)
+				.collect(Collectors.toList());
 	}
 }
 

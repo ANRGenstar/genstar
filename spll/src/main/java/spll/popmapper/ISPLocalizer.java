@@ -17,7 +17,6 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import spll.SpllPopulation;
-import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;

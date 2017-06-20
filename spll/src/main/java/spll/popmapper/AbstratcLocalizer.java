@@ -337,6 +337,7 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	// For each area concerned of the entityNbAreas shapefile  (all if not bounds is defined, only the one in the bounds if the one is not null),
 	//define the number of entities from the entities list to locate inside, then try to set a nest to this randomly chosen number of entities.
 	// NOTE: if no nest is located inside the area, not entities will be located inside.
+	@SuppressWarnings("unchecked")
 	private void localizationInNestWithNumbers(List<APopulationEntity> entities, Geometry spatialBounds) 
 			throws IOException, TransformException {
 		List<ISpatialConstraint> otherConstraints = new ArrayList<>(constraints);
