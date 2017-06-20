@@ -79,7 +79,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		}
 		
 		if(!matrix.checkGlobalSum())
-			throw new IllegalArgumentException("Input data does not satisfy the checkGlobalSum method requirement");
+			throw new IllegalArgumentException("Input data does not satisfy the checkGlobalSum method requirement:"
+					+ "\nSum of matri values = "+matrix.getVal().getValue());
 
 		// Reject attribute with referent, to only account for referent attribute
 		Set<APopulationAttribute> targetedDimensions = matrix.getDimensions()

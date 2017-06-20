@@ -193,8 +193,8 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			File reportFile = tmpDir.newFile("PopReport.csv");
 			
 			GosplSurveyFactory sf = new GosplSurveyFactory();
-			sf.createSurvey(exportFile, GSSurveyType.Sample, population);
-			sf.createSurvey(reportFile, GSSurveyType.GlobalFrequencyTable, population);
+			sf.createSummary(exportFile, GSSurveyType.Sample, population);
+			sf.createSummary(reportFile, GSSurveyType.GlobalFrequencyTable, population);
 		} catch (final IOException e) {
 			e.printStackTrace();
 		} catch (InvalidFormatException e) {

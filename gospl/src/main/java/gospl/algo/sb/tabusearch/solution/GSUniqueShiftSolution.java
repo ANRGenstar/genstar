@@ -11,6 +11,7 @@ import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import core.util.random.GenstarRandom;
 import gospl.GosplPopulation;
+import gospl.algo.sb.metamodel.AGSSampleBasedCOSolution;
 import gospl.algo.sb.metamodel.IGSSampleBasedCOSolution;
 
 /**
@@ -18,7 +19,7 @@ import gospl.algo.sb.metamodel.IGSSampleBasedCOSolution;
  * @author kevinchapuis
  *
  */
-public class GSUniqueShiftSolution extends AGSTabuSolution {
+public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 	
 	/**
 	 * 
@@ -45,7 +46,7 @@ public class GSUniqueShiftSolution extends AGSTabuSolution {
 
 	@Override
 	public Collection<IGSSampleBasedCOSolution> getNeighbors() {
-		return valueList.stream().map(value -> super.getNeighbor(value, false))
+		return valueList.stream().map(value -> this.getNeighbor(value))
 				.filter(solution -> solution != null)
 				.collect(Collectors.toList());
 	}
@@ -54,8 +55,8 @@ public class GSUniqueShiftSolution extends AGSTabuSolution {
 	public IGSSampleBasedCOSolution getRandomNeighbor() {
 		IGSSampleBasedCOSolution neighbor = null;
 		while(neighbor == null)
-			neighbor = super.getNeighbor(valueList.stream().skip(GenstarRandom
-					.getInstance().nextInt(valueList.size())).findFirst().get(), false);
+			neighbor = this.getNeighbor(valueList.stream().skip(GenstarRandom
+					.getInstance().nextInt(valueList.size())).findFirst().get());
 		return neighbor;
 	}
 
@@ -66,18 +67,32 @@ public class GSUniqueShiftSolution extends AGSTabuSolution {
 				skip(dimensionalShiftNumber > valueList.size() ? 
 						0 : valueList.size() - dimensionalShiftNumber)
 				.collect(Collectors.toList())){
-			Map<APopulationEntity, APopulationEntity> removeAddPair = this.findAnyTargetRemoveAddPair(value);
+			Map<APopulationEntity, APopulationEntity> removeAddPair = this.findAnyTargetRemoveAddPair(
+					newPopulation, value);
 			if(removeAddPair.isEmpty())
 				continue;
 			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
 			APopulationEntity newEntity = newPopulation.contains(removeAddPair.get(oldEntity)) ?
 					removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
-			if(!newPopulation.remove(oldEntity) || !newPopulation.add(newEntity))
-					throw new RuntimeException("Encounter a problem while switching between two entities:\n"
-							+ "remove entity = "+oldEntity.toString()+"\n"
-							+ "new entity = "+removeAddPair.get(oldEntity).toString());
+			newPopulation = super.deepSwitch(newPopulation, oldEntity, newEntity);
 		}
 		return new GSDuplicateShiftSolution(newPopulation, sample);
+	}
+
+	// ---------------- inner utility methods ---------------- //
+	
+	private GSUniqueShiftSolution getNeighbor(APopulationValue value){
+		if(!valueList.contains(value))
+			throw new RuntimeException();
+		Map<APopulationEntity, APopulationEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
+				this.population, value);
+		if(removeAddPair.isEmpty())
+			return null;
+		APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
+		APopulationEntity newEntity = this.population.contains(removeAddPair.get(oldEntity)) ? 
+						removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+		return new GSUniqueShiftSolution(super.deepSwitch(new GosplPopulation(this.population), 
+				oldEntity, newEntity), sample);
 	}
 
 

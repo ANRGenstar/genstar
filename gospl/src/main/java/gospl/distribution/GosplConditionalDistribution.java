@@ -138,7 +138,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			// Add new concerned bottomup/topdown values
 			concernedValues.addAll(Stream.concat(bottomup.keySet().stream().flatMap(set -> set.stream()),
 					topdown.keySet().stream().flatMap(set -> set.stream())).collect(Collectors.toSet()));
-			AControl<Double> newProbability = mat.getVal(concernedValues);
+			AControl<Double> newProbability = mat.getVal(concernedValues, true);
 
 			// If there is any empty value associated with mapped attribute, then exit with empty value
 			// It means attributes has divergent encoding values

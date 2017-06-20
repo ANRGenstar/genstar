@@ -1,15 +1,19 @@
 package gospl.algo.sb.metamodel;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import gospl.GosplPopulation;
-import gospl.algo.sb.tabusearch.solution.GSUniqueShiftSolution;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.validation.GosplIndicatorFactory;
@@ -84,13 +88,56 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		GSUniqueShiftSolution other = (GSUniqueShiftSolution) obj;
+		AGSSampleBasedCOSolution other = (AGSSampleBasedCOSolution) obj;
 		if (population == null) {
 			if (other.population != null)
 				return false;
 		} else if (!population.equals(other.population))
 			return false;
 		return true;
+	}
+	
+	/* (non-javadoc)
+	 * Inner purpose find a pair of entity from population & sample to be swap
+	 * knowing that their share all values but the value in argument.
+	 * <p>
+	 * May returns an empty map if no pair is find
+	 */
+	protected Map<APopulationEntity, APopulationEntity> findAnyTargetRemoveAddPair(
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
+			APopulationValue value){
+		Map<APopulationEntity, Collection<APopulationValue>> expectedRemove = population.stream()
+				.filter(entity -> entity.getValues().contains(value))
+				.collect(Collectors.toSet()).stream()
+				.collect(Collectors.toMap(Function.identity(), 
+						entity -> entity.getValues().stream().filter(val -> !val.equals(value))
+						.collect(Collectors.toList())));
+		Optional<APopulationEntity> newEntity = sample.stream().filter(entity -> expectedRemove.values()
+				.stream().anyMatch(values -> entity.getValues().containsAll(values)))
+				.findFirst();
+		if(newEntity.isPresent()){
+			APopulationEntity oldEntity = expectedRemove.keySet().stream().filter(entity -> newEntity.get().getValues()
+					.containsAll(expectedRemove.get(entity)))
+					.findFirst().get();
+			return Stream.of(oldEntity).collect(Collectors.toMap(Function.identity(), e -> newEntity.get()));
+		}
+		return Collections.emptyMap();
+	}
+	
+	/* (non-javadoc)
+	 * Swap the two entity in the encapsulated population. If the old entity
+	 * cannot be remove (population.remove(oldEntity) returns false) or if
+	 * the new entity cannot be add (population.add(newEntity) returns false)
+	 * the method throw an exception
+	 */
+	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> deepSwitch(
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, 
+			APopulationEntity oldEntity, APopulationEntity newEntity){
+		if(!population.remove(oldEntity) || !population.add(newEntity))
+				throw new RuntimeException("Encounter a problem while switching between two entities:\n"
+						+ "remove entity = "+oldEntity.toString()+"\n"
+						+ "new entity = "+newEntity.toString());
+		return population;
 	}
 	
 }

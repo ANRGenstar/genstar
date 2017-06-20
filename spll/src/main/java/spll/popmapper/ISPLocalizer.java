@@ -17,9 +17,11 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import spll.SpllPopulation;
+import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
+import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 
 /**
@@ -150,5 +152,35 @@ public interface ISPLocalizer {
 			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
 	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
 	
+	///////////////////////////////////////////////////
+	// -------------- CONSTRAINT PART -------------- //
+	// 	  constraint corresponds to variable that    // 
+	// 	  shapes final localization step: choose     //
+	//	  a nest whitin defined constraints and a    //
+	//	  x, y within it							 //
+	///////////////////////////////////////////////////
+	
+	/**
+	 * Add a new spatial constraint to this localizer
+	 * 
+	 * @see ISpatialConstraint
+	 * 
+	 * @param constraint
+	 */
+	public boolean addConstraint(ISpatialConstraint constraint);
+	
+	/**
+	 * Set the constraint all in a row
+	 * 
+	 * @param constraints
+	 */
+	public void setConstraints(List<ISpatialConstraint> constraints);
+	
+	/**
+	 * Returns all setted constraints
+	 * 
+	 * @return
+	 */
+	public List<ISpatialConstraint> getConstraints();
 	
 }

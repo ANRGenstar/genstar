@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +49,7 @@ import spll.entity.attribute.value.RawGeoData;
 import spll.io.SPLGeofileFactory;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
-import spll.popmapper.constraint.SpatialConstraint;
+import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.constraint.SpatialConstraintLocalization;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 import spll.popmapper.pointInalgo.PointInLocalizer;
@@ -68,7 +69,7 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	protected IGSGeofile<? extends AGeoEntity> match; //main referenced area for placing the agents (ex: Iris)
 	protected IGSGeofile<? extends AGeoEntity> map; //gives the number of entities per area (ex: regression cells)
 	
-	protected List<SpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest 
+	protected List<ISpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest 
 	protected SpatialConstraintLocalization localizationConstraint; //the localization constraint;
 	protected PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
 
@@ -229,8 +230,19 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	// -------------------- CONSTRIANTS -------------------- //
 	// ----------------------------------------------------- //
 
-	public void setConstraints(List<SpatialConstraint> constraints) {
+	@Override
+	public void setConstraints(List<ISpatialConstraint> constraints) {
 		this.constraints = constraints;
+	}
+	
+	@Override
+	public boolean addConstraint(ISpatialConstraint constraint){
+		return this.constraints.add(constraint);
+	}
+	
+	@Override
+	public List<ISpatialConstraint> getConstraints() {
+		return Collections.unmodifiableList(constraints);
 	}
 
 	// ----------------------------------------------------- //
@@ -239,15 +251,6 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 
 	public void setPointInLocalizer(PointInLocalizer pointInLocalizer) {
 		this.pointInLocalizer = pointInLocalizer;
-	}
-
-	// ----------------------------------------------------- //
-	// ---------------------- GETTERS ---------------------- //
-	// ----------------------------------------------------- //
-
-
-	public List<SpatialConstraint> getConstraints() {
-		return constraints;
 	}
 
 	public PointInLocalizer getPointInLocalizer() {
@@ -306,16 +309,16 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	//set to all the entities given as argument, a given nest chosen randomly in the possible geoEntities 
 	//of the localisation shapefile (all if not bounds is defined, only the one in the bounds if the one is not null)
 	protected void localizationInNest(Collection<APopulationEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
-		List<SpatialConstraint> otherConstraints = new ArrayList<>(constraints);
+		List<ISpatialConstraint> otherConstraints = new ArrayList<>(constraints);
 		otherConstraints.remove(localizationConstraint);
 		Collection<APopulationEntity> remainingEntities = entities;
 		localizationConstraint.setBounds(spatialBounds);
-		for (SpatialConstraint cr : constraints) {
+		for (ISpatialConstraint cr : constraints) {
 			while (!cr.isConstraintLimitReach()) {
 				List<AGeoEntity> possibleNests = new ArrayList<>(population.getGeography().getGeoEntity());
 				List<AGeoEntity> possibleNestsInit = localizationConstraint.getSortedCandidates(null);
 				possibleNests = new ArrayList<>(possibleNests);
-				for (SpatialConstraint constraint : otherConstraints) {
+				for (ISpatialConstraint constraint : otherConstraints) {
 					possibleNests = constraint.getSortedCandidates(possibleNests);
 				}
 				
@@ -328,14 +331,15 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 		}
 	}
 	
-	protected abstract List localizationInNestOp(Collection<APopulationEntity> entities, List<AGeoEntity> possibleNests, Long val);
+	protected abstract List<APopulationEntity> localizationInNestOp(Collection<APopulationEntity> entities, 
+			List<AGeoEntity> possibleNests, Long val);
 		
 	// For each area concerned of the entityNbAreas shapefile  (all if not bounds is defined, only the one in the bounds if the one is not null),
 	//define the number of entities from the entities list to locate inside, then try to set a nest to this randomly chosen number of entities.
 	// NOTE: if no nest is located inside the area, not entities will be located inside.
 	private void localizationInNestWithNumbers(List<APopulationEntity> entities, Geometry spatialBounds) 
 			throws IOException, TransformException {
-		List<SpatialConstraint> otherConstraints = new ArrayList<>(constraints);
+		List<ISpatialConstraint> otherConstraints = new ArrayList<>(constraints);
 		otherConstraints.remove(localizationConstraint);
 		
 		Collection<? extends AGeoEntity> areas = spatialBounds == null ? 
@@ -362,11 +366,11 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 			localizationConstraint.setBounds(feature.getGeometry());
 			long val = Math.round(population.size() *vals.get(feature.getGenstarName()) / tot);
 			if (entities.isEmpty()) break;
-			for (SpatialConstraint cr : constraints) {
+			for (ISpatialConstraint cr : constraints) {
 				while (!remainingEntities.isEmpty() && !cr.isConstraintLimitReach()) {
 					List<AGeoEntity> possibleNestsInit = localizationConstraint.getSortedCandidates(null);
 					List<AGeoEntity>  possibleNests = new ArrayList<>(possibleNestsInit);
-					for (SpatialConstraint constraint : otherConstraints) {
+					for (ISpatialConstraint constraint : otherConstraints) {
 						possibleNests = constraint.getSortedCandidates(possibleNests);
 					}
 					remainingEntities = localizationInNestOp(remainingEntities, possibleNests, val);

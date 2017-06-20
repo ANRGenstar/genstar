@@ -15,7 +15,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
@@ -213,6 +212,35 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			throw new NullPointerException("dimension "+dimension+" is not present in the joint distribution");
 		return Collections.unmodifiableSet(dimensions.get(dimension));
 	}
+	
+
+	@Override
+	public Set<APopulationValue> getValues(String... keyAndVal) throws IllegalArgumentException {
+
+		Set<APopulationValue> coordinateValues = new HashSet<>();
+		
+		// collect all the attributes and index their names
+		Map<String,APopulationAttribute> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
+															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
+
+		if (keyAndVal.length/2 != name2attribute.size()) {
+			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
+		}
+		
+		// lookup values
+		for (int i=0; i<keyAndVal.length; i=i+2) {
+			final String attributeName = keyAndVal[i];
+			final String attributeValueStr = keyAndVal[i+1];
+			
+			APopulationAttribute attribute = name2attribute.get(attributeName);
+			if (attribute == null)
+				throw new IllegalArgumentException("unknown attribute "+attributeName);
+			coordinateValues.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
+
+		}
+		
+		return coordinateValues;
+	}
 
 	@Override
 	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
@@ -260,54 +288,59 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		 
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	@Override
 	public AControl<T> getVal(APopulationValue aspect) {
+		return this.getVal(aspect, false);
+	}
+	
+	@Override
+	public AControl<T> getVal(APopulationValue aspect, boolean defaultToNul){
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
-			throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
-		AControl<T> result = getNulVal();
-		for(AControl<T> control : this.matrix.entrySet().stream()
-				.filter(e -> e.getKey().values().contains(aspect))
-				.map(Entry::getValue).collect(Collectors.toSet()))
-			getSummedControl(result, control);
-		return result;
+			if(defaultToNul)
+				return getNulVal();
+			else
+				throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
+		return this.matrix.entrySet().stream()
+				.filter(e -> e.getKey().values().contains(aspect)).map(Entry::getValue)
+				.reduce(getNulVal(), (c1, c2) -> getSummedControl(c1, c2));
 	}
 
+	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects) {
 		return getVal(aspects, false);
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * WARNING: make use of parallelism through {@link Stream#parallel()}
-	 */
 	@Override
 	public AControl<T> getVal(Collection<APopulationValue> aspects, boolean defaultToNul) {
-		if(aspects.stream().allMatch(a -> matrix.keySet().stream().noneMatch(coord -> coord.contains(a)))) {
-		
-			if (defaultToNul) {
+		if(!aspects.stream().allMatch(a -> matrix.keySet()
+				.stream().anyMatch(coord -> coord.contains(a))))
+			if (defaultToNul)
 				return getNulVal();
-			} else {
+			else
 				throw new NullPointerException("Aspect collection "+Arrays.toString(aspects.toArray())+" of size "
 					+ aspects.size()+" is absent from this matrix"
 					+ " (size = "+this.size()+" - attribute = "+Arrays.toString(this.getDimensions().toArray())+")");
-			}
-		}
+		
 		Map<APopulationAttribute, Set<APopulationValue>> attAsp = aspects.stream()
 				.collect(Collectors.groupingBy(aspect -> aspect.getAttribute(),
 				Collectors.mapping(Function.identity(), Collectors.toSet())));
 		
+		/*
+		 * TODO: seems not to be as worse as expected in term of efficiency
+		 * Rather strange because it collect and then reduce
 		AControl<T> result = getNulVal();
-		for(AControl<T> control : this.matrix.entrySet().parallelStream()
-				.filter(e -> attAsp.entrySet()
-						.stream().allMatch(aa -> aa.getValue()
-								.stream().anyMatch(a -> e.getKey().contains(a))))
-				.map(Entry::getValue).collect(Collectors.toSet()))
-			getSummedControl(result, control);
+		for(AControl<T> val : this.matrix.entrySet().stream().filter(e -> attAsp.values()
+				.stream().allMatch(set -> e.getKey().values().stream()
+						.anyMatch(a -> set.contains(a))))
+				.map(Entry::getValue).collect(Collectors.toList()))
+			getSummedControl(result, val);
 		return result;
+		*/
+		
+		return this.matrix.entrySet().stream().filter(e -> attAsp.values()
+						.stream().allMatch(set -> e.getKey().values().stream()
+								.anyMatch(a -> set.contains(a))))
+				.map(Entry::getValue).reduce(getNulVal(), (c1, c2) -> getSummedControl(c1, c2));
 	}
 	
 	public final AControl<T> getVal(String ... coordinates) {
@@ -377,6 +410,43 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.collect(Collectors.toList());
 	}
 
+	@Override
+	public APopulationAttribute getDimension(String name) throws IllegalArgumentException {
+		
+		for (APopulationAttribute a: dimensions.keySet())
+			if (a.getAttributeName().equals(name))
+				return a;
+
+		throw new IllegalArgumentException(
+				"unknown dimension "+name+"; available dimensions are "+
+				dimensions.keySet().stream().map(d -> d.getAttributeName()).reduce("", (u,t)->u+","+t)
+				);
+	}
+
+
+	@Override
+	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
+			throws IllegalArgumentException {
+
+		return getCoordinates(getValues(keyAndVal));
+	}
+	
+
+	@Override
+	public ACoordinate<APopulationAttribute, APopulationValue> getCoordinate(String... keyAndVal)
+			throws IllegalArgumentException {
+		
+		Collection<ACoordinate<APopulationAttribute, APopulationValue>> s = getCoordinates(keyAndVal);
+				
+		if (s.size() > 1) 
+			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
+		
+		if (s.isEmpty()) 
+			throw new IllegalArgumentException("these coordinates do not map to any cell in the matrix");
+
+		
+		return s.iterator().next();
+	}
 
 	/*
 	 * (non-Javadoc)
@@ -472,7 +542,6 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return csv;
 	}
 
-
 	@Override
 	public boolean checkAllCoordinatesHaveValues() {
 		
@@ -499,75 +568,6 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			
 		}
 		
-	}
-
-
-	@Override
-	public APopulationAttribute getDimension(String name) throws IllegalArgumentException {
-		
-		for (APopulationAttribute a: dimensions.keySet())
-			if (a.getAttributeName().equals(name))
-				return a;
-
-		throw new IllegalArgumentException(
-				"unknown dimension "+name+"; available dimensions are "+
-				dimensions.keySet().stream().map(d -> d.getAttributeName()).reduce("", (u,t)->u+","+t)
-				);
-	}
-
-
-	@Override
-	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
-			throws IllegalArgumentException {
-
-		return getCoordinates(getValues(keyAndVal));
-	}
-	
-
-
-	@Override
-	public Set<APopulationValue> getValues(String... keyAndVal) throws IllegalArgumentException {
-
-		Set<APopulationValue> coordinateValues = new HashSet<>();
-		
-		// collect all the attributes and index their names
-		Map<String,APopulationAttribute> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
-															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
-
-		if (keyAndVal.length/2 != name2attribute.size()) {
-			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
-		}
-		
-		// lookup values
-		for (int i=0; i<keyAndVal.length; i=i+2) {
-			final String attributeName = keyAndVal[i];
-			final String attributeValueStr = keyAndVal[i+1];
-			
-			APopulationAttribute attribute = name2attribute.get(attributeName);
-			if (attribute == null)
-				throw new IllegalArgumentException("unknown attribute "+attributeName);
-			coordinateValues.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
-
-		}
-		
-		return coordinateValues;
-	}
-	
-
-	@Override
-	public ACoordinate<APopulationAttribute, APopulationValue> getCoordinate(String... keyAndVal)
-			throws IllegalArgumentException {
-		
-		Collection<ACoordinate<APopulationAttribute, APopulationValue>> s = getCoordinates(keyAndVal);
-				
-		if (s.size() > 1) 
-			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
-		
-		if (s.isEmpty()) 
-			throw new IllegalArgumentException("these coordinates do not map to any cell in the matrix");
-
-		
-		return s.iterator().next();
 	}
 	
 	private AControl<T> getSummedControl(AControl<T> controlOne, AControl<T> controlTwo){

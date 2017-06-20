@@ -401,7 +401,8 @@ public class GosplIndicatorFactory {
 	 * @param report
 	 * @throws IOException 
 	 */
-	public void saveReport(File outputFile, Map<GosplIndicator, Number> report) 
+	public void saveReport(File outputFile, Map<GosplIndicator, Number> report,
+			String algo, int popSize) 
 			throws IOException {
 		DecimalFormat decimalFormat = new DecimalFormat("#.####");
 		String separator = ";";
@@ -412,6 +413,7 @@ public class GosplIndicatorFactory {
 		for(GosplIndicator indicator : report.keySet())
 			bw.write(separator+indicator.toString());
 		bw.newLine();
+		bw.write(algo+separator+popSize);
 		for(GosplIndicator indicator : report.keySet())
 			bw.write(separator+decimalFormat.format(report.get(indicator).doubleValue()).toString());
 		bw.flush();

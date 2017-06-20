@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
 import gospl.algo.sb.metamodel.AGSOptimizationAlgorithm;
@@ -40,7 +40,7 @@ public class TabuSearch extends AGSOptimizationAlgorithm {
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil(
 				"Start Tabu Search algorithm in CO synthetic population generation process", 
-				LogManager.getLogger());
+				Level.DEBUG);
 		
 		Integer currentIteration = 0;
 		while (++currentIteration < this.maxIterations) {

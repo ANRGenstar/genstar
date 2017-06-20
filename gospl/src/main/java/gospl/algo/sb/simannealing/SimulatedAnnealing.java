@@ -1,5 +1,8 @@
 package gospl.algo.sb.simannealing;
 
+import org.apache.logging.log4j.Level;
+
+import core.util.GSPerformanceUtil;
 import gospl.algo.sb.metamodel.AGSOptimizationAlgorithm;
 import gospl.algo.sb.metamodel.IGSSampleBasedCOSolution;
 import gospl.algo.sb.simannealing.transition.GSSADefautTransFunction;
@@ -43,6 +46,10 @@ public class SimulatedAnnealing extends AGSOptimizationAlgorithm {
 		IGSSampleBasedCOSolution currentState = initialSolution;
 		IGSSampleBasedCOSolution bestState = initialSolution;
 		
+		GSPerformanceUtil gspu = new GSPerformanceUtil(
+				"Start Simulated annealing algorithm in CO synthetic population generation process", 
+				Level.DEBUG);
+		
 		double currentEnergy = currentState.getFitness(this.getObjectives());
 		double bestEnergy = currentEnergy;
 		
@@ -50,15 +57,18 @@ public class SimulatedAnnealing extends AGSOptimizationAlgorithm {
 		// OR while system energy is above minimum state energy
 		while(temperature < bottomTemp ||
 				currentEnergy > minStateEnergy){
-			// Elicit a random new candidate for a transition state
+			
+			gspu.sysoStempPerformance("Elicit a random new candidate for a transition state", this);
 			IGSSampleBasedCOSolution systemStateCandidate = currentState.getRandomNeighbor();
 			double candidateEnergy = systemStateCandidate.getFitness(this.getObjectives());
 			
 			// IF probability function elicit transition state
 			// THEN change current state to be currentCandidate 
 			if(transFunction.getTransitionProbability(currentEnergy, candidateEnergy, temperature)){
+				gspu.sysoStempPerformance("Current state have been updated from "
+						+ currentEnergy+" to "+candidateEnergy, this);
 				currentState = systemStateCandidate;
-				currentEnergy = currentState.getFitness(this.getObjectives());
+				currentEnergy = candidateEnergy;
 			}
 			
 			// Keep track of best state visited
@@ -67,7 +77,8 @@ public class SimulatedAnnealing extends AGSOptimizationAlgorithm {
 				bestEnergy = currentEnergy;
 			}
 			
-			// Cool down system temperature
+			gspu.sysoStempPerformance("Cool down system from "
+					+ temperature+ " to " +(temperature*(1-coolingRate)), this);
 			temperature *= 1 - coolingRate;
 		}
 		
