@@ -78,9 +78,13 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			return sampler;
 		}
 		
-		if(!matrix.checkGlobalSum())
-			throw new IllegalArgumentException("Input data does not satisfy the checkGlobalSum method requirement:"
-					+ "\nSum of matri values = "+matrix.getVal().getValue());
+		/*
+		if(!matrix.checkGlobalSum()){
+			double diffFromFloor = Math.abs(Math.floor(matrix.getVal().getValue()) - matrix.getVal().getValue());
+				throw new IllegalArgumentException("Input data does not satisfy the checkGlobalSum method requirement:"
+					+ "\nDifference from floor = "+diffFromFloor);
+		}
+		*/
 
 		// Reject attribute with referent, to only account for referent attribute
 		Set<APopulationAttribute> targetedDimensions = matrix.getDimensions()
@@ -88,7 +92,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 				.collect(Collectors.toSet());
 
 		// Setup the matrix to estimate 
-		AFullNDimensionalMatrix<Double> freqMatrix = new GosplNDimensionalMatrixFactory().createEmptyDistribution(targetedDimensions);
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplNDimensionalMatrixFactory()
+				.createEmptyDistribution(targetedDimensions);
 
 		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
 
@@ -109,18 +114,19 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			}
 		}
 
+		gspu.sysoStempPerformance(1, this);
 		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
 
-		int iter = 1;
 		for(Set<APopulationValue> coordinate : coordinates){
-			if((gspu.getObjectif() / 100) % iter++ == 0)
-				gspu.sysoStempPerformance(0.1, this);
+			AControl<Double> nulVal = freqMatrix.getNulVal();
 			ACoordinate<APopulationAttribute, APopulationValue> coord = new GosplCoordinate(coordinate);
 			AControl<Double> freq = matrix.getVal(coord);
-			if(!freqMatrix.getNulVal().getValue().equals(freq.getValue()))
+			if(nulVal.getValue() != freq.getValue())
 				freqMatrix.addValue(coord, freq);
 			else {
 				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
+				gspu.sysoStempMessage("Goes into a referent empty correlate: "
+						+Arrays.toString(coordinate.toArray()));
 				Set<APopulationValue> emptyCorrelate = matrix.getEmptyReferentCorrelate(coord);
 				ACoordinate<APopulationAttribute, APopulationValue> newCoord = 
 						new GosplCoordinate(coord.values().stream()
@@ -137,8 +143,10 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			}
 		}
 		
-		// WARNING: cannot justify this normalization, hence find another way to fit 1 sum of probability
 		gspu.sysoStempMessage("Distribution has been estimated");
+		gspu.sysoStempPerformance(2, this);
+		
+		// WARNING: cannot justify this normalization, hence find another way to fit 1 sum of probability
 		freqMatrix.normalize();
 		/*
 		gspu.sysoStempMessage("Collapse matrix have been normalize:\n"

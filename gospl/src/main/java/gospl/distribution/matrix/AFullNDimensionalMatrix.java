@@ -556,7 +556,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		switch (dataType) {
 			
 			case GlobalFrequencyTable:
-				return Math.abs(getVal().getValue().doubleValue() - 1d) < Math.pow(10, -6);
+				return Math.abs(getVal().getValue().doubleValue() - 1d) < Math.pow(10, -4);
 			case LocalFrequencyTable:
 				return true;
 			case Sample:
