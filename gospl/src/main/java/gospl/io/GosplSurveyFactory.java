@@ -357,8 +357,8 @@ public class GosplSurveyFactory {
 			Map<Integer, List<APopulationValue>> columnHead = getTableHeader(columnHeaders);
 			Map<Integer, List<APopulationValue>> rowHead = getTableHeader(rowHeaders);
 
-			String blankHeadLine = rowHeaders.stream().map(rAtt -> " ")
-					.collect(Collectors.joining(String.valueOf(separator)));
+			String blankHeadLine = rowHeaders.stream().map(rAtt -> " "+String.valueOf(separator))
+					.collect(Collectors.joining());
 			report += IntStream.range(0, columnHeaders.size()).mapToObj(index ->
 			blankHeadLine + columnHead.values().stream().map(col -> col.get(index).getStringValue())
 			.collect(Collectors.joining(String.valueOf(separator))))
@@ -375,7 +375,9 @@ public class GosplSurveyFactory {
 				for(Integer colIdx : columnHead.keySet())
 					data.add(colIdx, popMatrix.getVal(Stream.concat(columnHead.get(colIdx).stream(), 
 							rowHead.get(rowIdx).stream()).collect(Collectors.toSet())).getValue());
-				report += "\n"+blankHeadLine+String.valueOf(separator)+data.stream().map(i -> i.toString())
+				report += "\n"+rowHead.get(rowIdx).stream().map(row -> row.getStringValue())
+								.collect(Collectors.joining(String.valueOf(separator)))
+							+String.valueOf(separator)+data.stream().map(i -> i.toString())
 						.collect(Collectors.joining(String.valueOf(separator)));
 				gspu.sysoStempMessage("New line ("+Arrays.toString(rowHead.get(rowIdx).toArray())
 						+") = "+Arrays.toString(data.toArray()));
