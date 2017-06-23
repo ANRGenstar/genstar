@@ -31,8 +31,8 @@ import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
 import spll.datamapper.variable.SPLVariable;
-import spll.entity.GSFeature;
-import spll.entity.GSPixel;
+import spll.entity.SpllFeature;
+import spll.entity.SpllPixel;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
 import spll.popmapper.normalizer.ASPLNormalizer;
@@ -175,7 +175,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	}
 
 	@Override
-	protected Map<GSFeature, Number> buildOutput(SPLVectorFile formatFile, boolean intersect, boolean integer, Number tagetPopulation) {
+	protected Map<SpllFeature, Number> buildOutput(SPLVectorFile formatFile, boolean intersect, boolean integer, Number tagetPopulation) {
 		// TODO Auto-generated method stub
 		
 		if(mapper == null)
@@ -202,7 +202,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 			gspu.sysoStempPerformance((pixelRendered+1) / (prop10for100 * 10.0), this);
 
 		// Get the current pixel value
-		GSPixel refPixel = null;
+		SpllPixel refPixel = null;
 		try {
 			refPixel = geotiff.getPixel(x, y);
 		} catch (TransformException e1) {
@@ -228,7 +228,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 * WARNING: the within function used define inclusion as: 
 	 * centroide of {@code refPixel} geometry is within the referent geometry
 	 */
-	private double computePixelWithin(GSPixel refPixel, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
+	private double computePixelWithin(SpllPixel refPixel, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
 			AGeoEntity entity, Map<SPLVariable, Double> regCoef, double corCoef){
 
 		// Retain info about pixel and his context
@@ -263,7 +263,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	/*
 	 * WARNING: intersection area calculation is very computation demanding, so this method is pretty slow 
 	 */
-	private double computePixelIntersectOutput(GSPixel refPixel, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
+	private double computePixelIntersectOutput(SpllPixel refPixel, SPLRasterFile geotiff, Collection<IGSGeofile<? extends AGeoEntity>> ancillaries,
 			Collection<? extends AGeoEntity> mainFeatures, Map<SPLVariable, Double> regCoef, Map<AGeoEntity, Double> pixResidual) {
 
 		// Retain main feature the pixel is within

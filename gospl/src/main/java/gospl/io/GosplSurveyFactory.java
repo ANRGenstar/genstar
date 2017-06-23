@@ -350,19 +350,21 @@ public class GosplSurveyFactory {
 			List<APopulationValue> vals = columnHeaders.stream().flatMap(att -> att.getValues().stream())
 					.collect(Collectors.toList());
 			report += vals.stream().map(val -> val.getStringValue())
-					.collect(Collectors.joining(String.valueOf(separator)))+"\n";
+					.collect(Collectors.joining(String.valueOf(separator)))
+					+String.valueOf(separator)+"TOTAL\n";
 			report += vals.stream().map(val -> popMatrix.getVal(val, true).getValue().toString())
-					.collect(Collectors.joining(String.valueOf(separator)));
+					.collect(Collectors.joining(String.valueOf(separator)))+String.valueOf(separator)
+					+vals.stream().mapToInt(val -> popMatrix.getVal(val, true).getValue()).sum();
 		} else {
 			Map<Integer, List<APopulationValue>> columnHead = getTableHeader(columnHeaders);
 			Map<Integer, List<APopulationValue>> rowHead = getTableHeader(rowHeaders);
 
 			String blankHeadLine = rowHeaders.stream().map(rAtt -> " "+String.valueOf(separator))
 					.collect(Collectors.joining());
-			report += IntStream.range(0, columnHeaders.size()).mapToObj(index ->
-			blankHeadLine + columnHead.values().stream().map(col -> col.get(index).getStringValue())
-			.collect(Collectors.joining(String.valueOf(separator))))
-					.collect(Collectors.joining("\n"));
+			report += IntStream.range(0, columnHeaders.size()).mapToObj(index -> blankHeadLine 
+							+ columnHead.values().stream().map(col -> col.get(index).getStringValue())
+						.collect(Collectors.joining(String.valueOf(separator))))
+					.collect(Collectors.joining("\n"))+String.valueOf(separator)+"TOTAL";
 			
 			gspu.sysoStempMessage("HEAD: "+report);
 			gspu.sysoStempMessage("ROW VALUE"+rowHead.keySet().stream().sorted()
@@ -379,9 +381,17 @@ public class GosplSurveyFactory {
 								.collect(Collectors.joining(String.valueOf(separator)))
 							+String.valueOf(separator)+data.stream().map(i -> i.toString())
 						.collect(Collectors.joining(String.valueOf(separator)));
+				report += String.valueOf(separator)+data.stream().reduce(0, (i1,i2) -> i1+i2);
 				gspu.sysoStempMessage("New line ("+Arrays.toString(rowHead.get(rowIdx).toArray())
 						+") = "+Arrays.toString(data.toArray()));
 			}
+			
+			List<Integer> colTotals = IntStream.range(0, columnHead.size())
+				.mapToObj(colIdx -> popMatrix.getVal(columnHead.get(colIdx)).getValue())
+				.collect(Collectors.toList());
+			report += "\n"+colTotals.stream().map(col -> col.toString())
+					.collect(Collectors.joining(String.valueOf(separator)))+String.valueOf(separator)
+					+colTotals.stream().reduce(1, (i1,i2) -> i1+i2);			
 		}
 
 		Files.write(surveyFile.toPath(), report.getBytes());

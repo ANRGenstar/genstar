@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Random;
 
 import core.util.random.GenstarRandom;
-import spll.entity.GSFeature;
+import spll.entity.SpllFeature;
 
 /**
  * TODO: make top value control, not just floor value 
@@ -58,8 +58,8 @@ public abstract class ASPLNormalizer {
 	 * @param integer
 	 * @return
 	 */
-	public Map<GSFeature, ? extends Number> process(Map<GSFeature, Double> featureOutput, double output, boolean integer){
-		Map<GSFeature, Double> outputMap = this.normalize(featureOutput, output);
+	public Map<SpllFeature, ? extends Number> process(Map<SpllFeature, Double> featureOutput, double output, boolean integer){
+		Map<SpllFeature, Double> outputMap = this.normalize(featureOutput, output);
 		if(integer)
 			return this.round(featureOutput, output);
 		return outputMap;
@@ -92,7 +92,7 @@ public abstract class ASPLNormalizer {
 	 * @param output
 	 * @return
 	 */
-	public abstract Map<GSFeature, Double> normalize(Map<GSFeature, Double> featureOutput, double output);
+	public abstract Map<SpllFeature, Double> normalize(Map<SpllFeature, Double> featureOutput, double output);
 	
 	/**
 	 * Round double values to integer and control sum to fit required output
@@ -101,7 +101,7 @@ public abstract class ASPLNormalizer {
 	 * @param output
 	 * @return
 	 */
-	public abstract Map<GSFeature, Integer> round(Map<GSFeature, Double> featureOutput, double output);
+	public abstract Map<SpllFeature, Integer> round(Map<SpllFeature, Double> featureOutput, double output);
 	
 	// ------------------ shared utility ------------------ //
 	

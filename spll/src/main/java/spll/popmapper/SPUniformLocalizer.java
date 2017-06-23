@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.pop.APopulationEntity;
 import spll.SpllPopulation;
+import spll.SpllPopulationEntity;
 import spll.popmapper.constraint.ISpatialConstraint;
 
 public class SPUniformLocalizer extends AbstratcLocalizer {
@@ -23,11 +23,11 @@ public class SPUniformLocalizer extends AbstratcLocalizer {
 	}
 
 	@Override
-	protected List<APopulationEntity> localizationInNestOp(Collection<APopulationEntity> entities,
+	protected List<SpllPopulationEntity> localizationInNestOp(Collection<SpllPopulationEntity> entities,
 			List<AGeoEntity> possibleNests, Long val) {
-		Collection<APopulationEntity> chosenEntities = null;
+		Collection<SpllPopulationEntity> chosenEntities = null;
 		if (val != null) {
-			List<APopulationEntity> ens = new ArrayList<>(entities);
+			List<SpllPopulationEntity> ens = new ArrayList<>(entities);
 			chosenEntities = new ArrayList<>();
 			val = Math.min(val, ens.size());
 			for (int i = 0; i < val; i++) {
@@ -38,7 +38,7 @@ public class SPUniformLocalizer extends AbstratcLocalizer {
 		}else {
 			chosenEntities = entities;
 		}
-		for (APopulationEntity entity : chosenEntities) {
+		for (SpllPopulationEntity entity : chosenEntities) {
 			if (possibleNests.isEmpty()) {
 				break;
 			}

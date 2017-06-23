@@ -10,7 +10,7 @@ import java.util.stream.IntStream;
 
 import core.util.stats.GSBasicStats;
 import core.util.stats.GSEnumStats;
-import spll.entity.GSFeature;
+import spll.entity.SpllFeature;
 
 public class SPLUniformNormalizer extends ASPLNormalizer {
 	
@@ -96,7 +96,7 @@ public class SPLUniformNormalizer extends ASPLNormalizer {
 	 * 
 	 */
 	@Override
-	public Map<GSFeature, Double> normalize(Map<GSFeature, Double> featureOutput, double output) {
+	public Map<SpllFeature, Double> normalize(Map<SpllFeature, Double> featureOutput, double output) {
 
 		// Two step upscale: (1) up values below floor (2) normalize to fit targeted total output
 		if(featureOutput.values()
@@ -125,8 +125,8 @@ public class SPLUniformNormalizer extends ASPLNormalizer {
 	 * 
 	 */
 	@Override
-	public Map<GSFeature, Integer> round(Map<GSFeature, Double> featureOutput, double output) {
-		Map<GSFeature, Integer> featOut = new HashMap<>();
+	public Map<SpllFeature, Integer> round(Map<SpllFeature, Double> featureOutput, double output) {
+		Map<SpllFeature, Integer> featOut = new HashMap<>();
 		// summed residue is spread to all non floor value
 		featureOutput.keySet().parallelStream()
 			.forEach(feature -> featOut.put(feature, (int) normalizedToInt(featureOutput.get(feature))));
@@ -136,12 +136,12 @@ public class SPLUniformNormalizer extends ASPLNormalizer {
 		
 		// uniformally spread overload (can visit pixel multiple time)
 		int iter = 0;
-		List<GSFeature> feats = featureOutput.entrySet()
+		List<SpllFeature> feats = featureOutput.entrySet()
 				.parallelStream().filter(e -> e.getValue() != noData.doubleValue())
 				.map(e -> e.getKey())
 				.collect(Collectors.toList());
 		while(Math.round(errorload) != 0 || iter++ > ITER_LIMIT + Math.abs(errorload)){
-			GSFeature feat = feats.get(super.random.nextInt(feats.size()));
+			SpllFeature feat = feats.get(super.random.nextInt(feats.size()));
 			int update = errorload < 0 ? -1 : 1;
 			featureOutput.put(feat, featureOutput.get(feat) + update);
 			errorload -= update;

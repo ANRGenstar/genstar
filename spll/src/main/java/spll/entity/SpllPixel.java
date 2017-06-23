@@ -11,14 +11,14 @@ import com.vividsolutions.jts.geom.Point;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 
-public class GSPixel extends AGeoEntity {
+public class SpllPixel extends AGeoEntity {
 	
 	private Envelope2D pixel;
 	
 	private int gridX;
 	private int gridY;
 	
-	protected GSPixel(Set<AGeoValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
+	protected SpllPixel(Set<AGeoValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
 		super(bandsData, "px ["+pixel.getCenterX()+";"+pixel.getCenterY()+"]");
 		this.gridX = gridX;
 		this.gridY = gridY;

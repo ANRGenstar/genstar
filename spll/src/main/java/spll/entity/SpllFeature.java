@@ -9,11 +9,11 @@ import com.vividsolutions.jts.geom.Geometry;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 
-public class GSFeature extends AGeoEntity {
+public class SpllFeature extends AGeoEntity {
  
 	private final Feature innerFeature;
 	
-	protected GSFeature(Set<AGeoValue> values, Feature innerFeature) {
+	protected SpllFeature(Set<AGeoValue> values, Feature innerFeature) {
 		super(values, innerFeature.getIdentifier().getID());
 		this.innerFeature = innerFeature;
 	}
