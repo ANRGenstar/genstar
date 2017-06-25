@@ -19,13 +19,13 @@ import core.util.GSPerformanceUtil;
 import gospl.algo.ipf.margin.AMargin;
 import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
 import gospl.algo.ipf.margin.MarginalsIPFBuilder;
-import gospl.algo.sampler.IDistributionSampler;
-import gospl.algo.sampler.IEntitySampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.sampler.IDistributionSampler;
+import gospl.sampler.IEntitySampler;
 
 /**
  * 

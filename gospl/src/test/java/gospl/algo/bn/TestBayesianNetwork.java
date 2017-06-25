@@ -12,8 +12,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import gospl.algo.bn.BayesianNetwork;
-import gospl.algo.bn.NodeCategorical;
+import gospl.algo.sr.bn.BayesianNetwork;
+import gospl.algo.sr.bn.NodeCategorical;
 
 public class TestBayesianNetwork {
 

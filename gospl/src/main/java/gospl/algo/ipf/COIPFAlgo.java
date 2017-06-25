@@ -4,12 +4,12 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import gospl.algo.ICombinatorialOptimizationAlgo;
-import gospl.algo.sampler.IEntitySampler;
-import gospl.algo.sampler.ISampler;
+import gospl.algo.co.ICombinatorialOptimizationAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.sampler.IEntitySampler;
+import gospl.sampler.ISampler;
 
 public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
 

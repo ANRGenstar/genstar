@@ -5,9 +5,9 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import gospl.algo.bn.BayesianNetwork;
-import gospl.algo.bn.NodeCategorical;
-import gospl.algo.bn.SimpleConditionningInferenceEngine;
+import gospl.algo.sr.bn.BayesianNetwork;
+import gospl.algo.sr.bn.NodeCategorical;
+import gospl.algo.sr.bn.SimpleConditionningInferenceEngine;
 
 public class TestSimpleConditionningInference {
 

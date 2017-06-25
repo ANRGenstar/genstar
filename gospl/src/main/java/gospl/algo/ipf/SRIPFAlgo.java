@@ -4,14 +4,14 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import gospl.algo.ISyntheticReconstructionAlgo;
-import gospl.algo.sampler.IDistributionSampler;
-import gospl.algo.sampler.ISampler;
+import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.sampler.IDistributionSampler;
+import gospl.sampler.ISampler;
 
 public class SRIPFAlgo extends AGosplIPF<Double> implements ISyntheticReconstructionAlgo<IDistributionSampler> {
 
