@@ -8,6 +8,15 @@
   </Appenders>
   <!-- LOGGER -->
   <Loggers>
+    <Logger name="gospl.algo.bn" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+    <Logger name="NodeCategorical" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
+    <Logger name="gospl.algo.bn.SimpleConditionningInferenceEngine" level="info" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
     <Logger name="test.util.R" level="trace" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>

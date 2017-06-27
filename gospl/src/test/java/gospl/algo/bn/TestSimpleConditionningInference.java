@@ -15,23 +15,20 @@ public class TestSimpleConditionningInference {
 	@Test
 	public void testSimpleInference() {
 
-		BayesianNetwork bn = new BayesianNetwork("test1");
+		BayesianNetwork<NodeCategorical> bn = new BayesianNetwork<>("test1");
 		
-		NodeCategorical nGender = new NodeCategorical("gender");
+		NodeCategorical nGender = new NodeCategorical(bn, "gender");
 		nGender.addDomain("male", "female");
 		nGender.setProbabilities(0.55, "male");
 		nGender.setProbabilities(0.45, "female");
 		
-		NodeCategorical nAge = new NodeCategorical("age");
+		NodeCategorical nAge = new NodeCategorical(bn, "age");
 		nAge.addParent(nGender);
 		nAge.addDomain("<15", ">=15");
 		nAge.setProbabilities(0.55, "<15", "gender", "male");
 		nAge.setProbabilities(0.45, ">=15", "gender", "male");
 		nAge.setProbabilities(0.50, "<15", "gender", "female");
 		nAge.setProbabilities(0.50, ">=15", "gender", "female");
-
-		bn.add(nGender);
-		bn.add(nAge);
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -64,12 +61,7 @@ public class TestSimpleConditionningInference {
 		assertEquals(1.0d, ie.getConditionalProbability(nAge, "<15").doubleValue(), 1e-5);
 		assertEquals(0.0d, ie.getConditionalProbability(nAge, ">=15").doubleValue(), 1e-5);
 
-		// but we cannot know anything about this one ! It should fail, as the engine is simply not able to compute it
-		try {
-			ie.getConditionalProbability(nGender, "male");
-			fail("we should not be able to compute this with simple conditionning");
-		} catch (IllegalArgumentException e) {
-		}
+		
 
 	}
 

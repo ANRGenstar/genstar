@@ -3,33 +3,47 @@ package gospl.algo.bn;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public abstract class AbstractNode<ParentType extends AbstractNode<?>> {
+public abstract class AbstractNode<N extends AbstractNode<N>> {
 
 	protected final String name;
+	protected final BayesianNetwork<N> network;
 	
-	protected final Set<ParentType> parents = new HashSet<>();
-	protected final Map<String,ParentType> name2parent = new HashMap<>();
+	protected final Set<N> parents = new HashSet<>();
+	protected final Map<String,N> name2parent = new HashMap<>();
 	
-	public AbstractNode(String name) {
+	
+	public AbstractNode(BayesianNetwork<N> net, String name) {
+		this.network = net;
 		this.name = name;
+		
+		if (network != null)
+			this.network.add((N) this);
 	}
 
-	public void addParent(ParentType parent) {
+	public void addParent(N parent) {
 		if (parents.contains(parent)) {
 			throw new IllegalArgumentException("parent "+parent.getName()+" already part of the node's parents");
 		}
 		parents.add(parent);
 		name2parent.put(parent.getName(), parent);
+		if (network != null)
+			network.notifyNodesChanged();
 	}
 	
-	public Set<ParentType> getParents() {
+	public Set<N> getParents() {
 		return Collections.unmodifiableSet(parents);
 	}
 	
-	protected ParentType getParent(String lbl) {
+	public Set<N> getChildren() {
+		
+		return this.network.getChildren(this);
+	}
+	
+	protected N getParent(String lbl) {
 		return name2parent.get(lbl);
 	}
 	
@@ -40,5 +54,11 @@ public abstract class AbstractNode<ParentType extends AbstractNode<?>> {
 	public final String getName() {
 		return name;
 	}
+	
+	public abstract boolean isValid();
+
+	public abstract List<String> collectInvalidityReasons();
+	
+	public abstract void toXMLBIF(StringBuffer sb);
 	
 }
