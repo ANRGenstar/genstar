@@ -98,8 +98,8 @@ public class TestFactors {
 		nCSP.setProbabilities(0.8, "++", "gender", "female");
 		
 
-		Factor f1 = Factor.createFromCPT(bn, nAge);
-		Factor f2 = Factor.createFromCPT(bn, nGender);
+		Factor f1 = nAge.asFactor();
+		Factor f2 = nGender.asFactor();
 		
 		Factor m = f1.multiply(f2);
 		
@@ -111,8 +111,8 @@ public class TestFactors {
 		assertEqualsBD(0.5*0.45, m.get("age","<15","gender","female"), 4);
 		
 		// another test
-		f1 = Factor.createFromCPT(bn, nAge);
-		f2 = Factor.createFromCPT(bn, nCSP);
+		f1 = nAge.asFactor();
+		f2 = nCSP.asFactor();
 
 		m = f1.multiply(f2);
 		

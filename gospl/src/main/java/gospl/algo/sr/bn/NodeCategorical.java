@@ -4,9 +4,11 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
@@ -32,11 +34,13 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 */
 	private int[] multipliers; 
 
+	protected final CategoricalBayesianNetwork cNetwork;
+	
 	public NodeCategorical(CategoricalBayesianNetwork net, String name) {
 		
 		super(net, name);
 		
-		
+		this.cNetwork = net;
 	}
 	
 
@@ -640,6 +644,27 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		
 	}
 	
+	public Factor asFactor() {
+		
+		Set<NodeCategorical> variables = new HashSet<>(parents);
+		variables.add(this);
+		
+		Factor f = new Factor(cNetwork, variables);
+		
+		for (IteratorCategoricalVariables it = cNetwork.iterateDomains(this.parents); it.hasNext(); ) {
+			Map<NodeCategorical,String> v2n = it.next();
+			for (String v: this.domain) {
+				BigDecimal d = this.getProbability(v, v2n);
+				HashMap<NodeCategorical,String> v2n2 = new HashMap<>(v2n);
+				v2n2.put(this, v);
+				f.setFactor(v2n2, d);
+			}
+		}
+		return f;
+	}
+	
+	
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("p(");
