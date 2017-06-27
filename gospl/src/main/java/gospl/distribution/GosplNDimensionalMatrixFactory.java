@@ -288,4 +288,36 @@ public class GosplNDimensionalMatrixFactory {
 		return matrix;
 	}
 	
+//////////////////////////////////////////////////
+//				    SAMPLE MATRIX				//
+//////////////////////////////////////////////////
+
+	/**
+	 * 
+	 * 
+	 * @param attributesToMeasure
+	 * @param population
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> createSample(
+			Set<APopulationAttribute> attributesToMeasure,
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) {
+		
+		// Init the output matrix
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(
+				attributesToMeasure.stream().collect(Collectors.toMap(att -> att, att -> att.getValues())));
+		
+		matrix.addGenesis("created from a population GosplNDimensionalMatrixFactory@createContigency");
+
+		// iterate the whole population
+		for (APopulationEntity entity : population) {
+			ACoordinate<APopulationAttribute, APopulationValue> entityCoord = new GosplCoordinate(
+					entity.getValues().stream().filter(pv -> attributesToMeasure.contains(pv.getAttribute())).collect(Collectors.toSet())
+					);
+			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
+				matrix.getVal(entityCoord).add(1);
+		}
+
+		return matrix;
+	}
 }
