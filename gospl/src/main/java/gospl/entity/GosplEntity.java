@@ -9,6 +9,11 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 
+/**
+ * A GoSPL Entity is a population entity with a geolocation
+ * 
+ *
+ */
 public class GosplEntity extends APopulationEntity {
 
 	private Point location = null;
@@ -18,6 +23,10 @@ public class GosplEntity extends APopulationEntity {
 		super(attributes);
 	}
 
+	public GosplEntity(){
+		super();
+	}
+	
 	@Override
 	public Point getLocation() {
 		return location;
