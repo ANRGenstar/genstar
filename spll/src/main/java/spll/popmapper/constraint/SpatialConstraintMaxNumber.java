@@ -6,9 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.pop.APopulationEntity;
 
-public class SpatialConstraintMaxNumber extends AbstractSpatialConstraint{
+public class SpatialConstraintMaxNumber extends ASpatialConstraint{
 
 	protected Map<String, Integer> nestCapacities;
 	
@@ -42,12 +41,7 @@ public class SpatialConstraintMaxNumber extends AbstractSpatialConstraint{
 	}
 	
 	@Override
-	public List<AGeoEntity> getSortedCandidates(List<AGeoEntity> nests, APopulationEntity entity) {
-		return getSortedCandidates(nests);
-	}
-	
-	@Override
-	public boolean updateConstraint(APopulationEntity entity, AGeoEntity nest) {
+	public boolean updateConstraint(AGeoEntity nest) {
 		int capacity = nestCapacities.get(nest.getGenstarName());
 		nestCapacities.put(nest.getGenstarName(), capacity - 1);
 		if (capacity <= 1) return true;

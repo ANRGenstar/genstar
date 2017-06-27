@@ -22,10 +22,10 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
-import spll.entity.GSFeature;
+import spll.entity.SpllFeature;
 import spll.entity.GeoEntityFactory;
 
-public class GSFeatureIterator implements Iterator<GSFeature> {
+public class GSFeatureIterator implements Iterator<SpllFeature> {
 
 	private GeoEntityFactory factory;
 
@@ -65,7 +65,7 @@ public class GSFeatureIterator implements Iterator<GSFeature> {
 	}
 
 	@Override
-	public GSFeature next() {
+	public SpllFeature next() {
 		SimpleFeature feature = fItt.next(); 
 		if(transformer != null){
 			SimpleFeatureType schema = null;

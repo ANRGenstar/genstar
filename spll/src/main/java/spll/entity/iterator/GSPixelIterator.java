@@ -10,10 +10,10 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.operation.TransformException;
 
-import spll.entity.GSPixel;
+import spll.entity.SpllPixel;
 import spll.entity.GeoEntityFactory;
 
-public class GSPixelIterator implements Iterator<GSPixel> {
+public class GSPixelIterator implements Iterator<SpllPixel> {
 
 	private final GridCoverage2D coverage;
 	private final GeoEntityFactory gef;
@@ -49,7 +49,7 @@ public class GSPixelIterator implements Iterator<GSPixel> {
 	 * http://gis.stackexchange.com/questions/106882/how-to-read-each-pixel-of-each-band-of-a-multiband-geotiff-with-geotools-java
 	 */
 	@Override
-	public GSPixel next() {
+	public SpllPixel next() {
 		if(!hasNext())
 			throw new NoSuchElementException();
 		double[] vals = new double[nbBands];

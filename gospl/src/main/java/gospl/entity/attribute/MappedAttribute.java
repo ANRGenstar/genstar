@@ -59,16 +59,28 @@ public class MappedAttribute extends APopulationAttribute {
 		// is val part of the values that map to a key ?
 		Optional<Entry<Set<String>, Set<String>>> optMap2 = mapper.entrySet().stream()
 				.filter(e -> e.getValue().contains(val.getInputStringValue())).findFirst();
-		if (optMap2.isPresent()) 
+		// is val part of the keys that map to something ?
+		Optional<Entry<Set<String>, Set<String>>> optMap = mapper.entrySet().stream()
+				.filter(e -> e.getKey().contains(val.getInputStringValue())).findFirst();
+		
+		boolean selfValAtt = false, referentValAtt = false;
+		if(optMap.isPresent() && optMap2.isPresent()){
+			selfValAtt = val.getAttribute().equals(this) ? true : false;
+			referentValAtt = val.getAttribute().equals(this.getReferentAttribute()) ? true : false;
+		}
+		
+		if(selfValAtt && referentValAtt)
+			throw new RuntimeException("Try to find mapped values but "+val+" pertain to "
+					+this.getAttributeName()+" and referent "
+					+this.getReferentAttribute().getAttributeName()+" attributes");
+		
+		if((optMap2.isPresent() && !optMap.isPresent()) || referentValAtt) 
 			return this.getValues().stream()
 					.filter(refVal -> optMap2.get().getKey().contains(refVal.getInputStringValue()) 
 							|| optMap2.get().getKey().contains(refVal.getStringValue()))
 					.collect(Collectors.toSet());
 		
-		// is val part of the keys that map to something ?
-		Optional<Entry<Set<String>, Set<String>>> optMap = mapper.entrySet().stream()
-				.filter(e -> e.getKey().contains(val.getInputStringValue())).findFirst();
-		if(optMap.isPresent())
+		if((optMap.isPresent() && !optMap2.isPresent()) || selfValAtt)
 			return this.getReferentAttribute().getValues().stream()
 					.filter(refVal -> optMap.get().getValue().contains(refVal.getInputStringValue())
 							|| optMap.get().getValue().contains(refVal.getStringValue()))

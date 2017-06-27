@@ -2,6 +2,7 @@ package spll.io;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -23,13 +24,14 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
@@ -37,7 +39,7 @@ import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
-import spll.entity.GSPixel;
+import spll.entity.SpllPixel;
 import spll.entity.GeoEntityFactory;
 import spll.entity.iterator.GSPixelIterator;
 import spll.util.SpllUtil;
@@ -53,7 +55,7 @@ import spll.util.SpllUtil;
  * @author kevinchapuis
  *
  */
-public class SPLRasterFile implements IGSGeofile<GSPixel> {
+public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 
 	private final GridCoverage2D coverage;
 	private final AbstractGridCoverage2DReader store;
@@ -62,6 +64,12 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	
 	public static Number DEF_NODATA = -9999; 
 	private Number noData;
+	
+	private Collection<SpllPixel> cacheGeoEntity = null;
+
+	private Collection<AGeoValue> cacheGeoValues = null;
+	
+	private Collection<AGeoAttribute> cacheGeoAttributes = null;
 
 	/**
 	 * 
@@ -107,7 +115,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	}
 	
 	@Override
-	public Envelope getEnvelope() {
+	public ReferencedEnvelope getEnvelope() {
 		return new ReferencedEnvelope(coverage.getEnvelope2D());
 	}
 	
@@ -116,7 +124,17 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
-		return thisCRS == null && fileCRS == null ? false : thisCRS.equals(fileCRS);
+		if (thisCRS == null && fileCRS == null) return false;
+		if (thisCRS.equals(fileCRS)) return true;
+		Integer codeThis = null;
+		Integer codeFile = null;
+		try {
+			codeThis = CRS.lookupEpsgCode(thisCRS, true);
+			codeFile = CRS.lookupEpsgCode(fileCRS, true);
+		} catch (FactoryException e) {
+			e.printStackTrace();
+		}
+		return codeThis == null && codeFile == null ? false : codeFile.equals(codeThis) ;
 	}
 
 	@Override
@@ -137,48 +155,56 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	 * 
 	 */
 	@Override
-	public Collection<GSPixel> getGeoEntity(){
-		Set<GSPixel> collection = new HashSet<>(); 
-		getGeoEntityIterator().forEachRemaining(collection::add);
-		return collection;
+	public Collection<SpllPixel> getGeoEntity(){
+		if (cacheGeoEntity == null) {
+			cacheGeoEntity = new ArrayList<>(); 
+			getGeoEntityIterator().forEachRemaining(cacheGeoEntity::add);
+		}
+		return cacheGeoEntity;
 	}
 	
 	@Override
 	public Collection<AGeoValue> getGeoValues() {
-		Set<AGeoValue> values = new HashSet<>();
-		getGeoEntityIterator().forEachRemaining(pix -> values.addAll(pix.getValues()));
-		return values;
+		if (cacheGeoValues == null) {
+			cacheGeoValues = new HashSet<>();
+			getGeoEntityIterator().forEachRemaining(pix -> cacheGeoValues.addAll(pix.getValues()));
+		}
+		return cacheGeoValues;
 	}
 	
 	@Override
 	public Collection<AGeoAttribute> getGeoAttributes(){
-		return getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
+		if (cacheGeoAttributes ==null) {
+			cacheGeoAttributes = getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
 				.collect(Collectors.toSet());
+		}
+		return cacheGeoAttributes;
+	
 	}
 	
 	// ------------------------------------- //
 	
 	@Override
-	public Collection<GSPixel> getGeoEntityWithin(Geometry geom) {
-		Set<GSPixel> collection = new HashSet<>(); 
+	public Collection<SpllPixel> getGeoEntityWithin(Geometry geom) {
+		ArrayList<SpllPixel> collection = new ArrayList<>(); 
 		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Collection<GSPixel> getGeoEntityIntersect(Geometry geom) {
-		Set<GSPixel> collection = new HashSet<>(); 
+	public Collection<SpllPixel> getGeoEntityIntersect(Geometry geom) {
+		Set<SpllPixel> collection = new HashSet<>(); 
 		getGeoEntityIteratorIntersect(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Iterator<GSPixel> getGeoEntityIterator() {
+	public Iterator<SpllPixel> getGeoEntityIterator() {
 		return new GSPixelIterator(store.getGridCoverageCount(), coverage);
 	}
 
 	@Override
-	public Iterator<GSPixel> getGeoEntityIteratorWithin(Geometry geom) {
+	public Iterator<SpllPixel> getGeoEntityIteratorWithin(Geometry geom) {
 		Crop cropper = new Crop(); 
 		ParameterValueGroup param = cropper.getParameters();
 		param.parameter("Source").setValue(coverage); // Nul nul nul et si jamais il change le nom du parametre ???
@@ -188,7 +214,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	}
 	
 	@Override 
-	public Iterator<GSPixel> getGeoEntityIteratorIntersect(Geometry geom) {
+	public Iterator<SpllPixel> getGeoEntityIteratorIntersect(Geometry geom) {
 		return getGeoEntityIteratorWithin(geom);
 	}
 	
@@ -218,7 +244,16 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		return store.getOriginalGridRange().getHigh(0)+1;
 	}
 	
-	public GSPixel getPixel(int x, int y) throws TransformException {
+	/**
+	 * Gives the pixel that can be found at coordinate {@code x y}
+	 * in 0 based coordinate (bottom left corner)
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 * @throws TransformException
+	 */
+	public SpllPixel getPixel(int x, int y) throws TransformException {
 		x += coverage.getGridGeometry().getGridRange2D().x;
 		y += coverage.getGridGeometry().getGridRange2D().y;
 		double[] vals = new double[store.getGridCoverageCount()]; 
@@ -226,8 +261,27 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		Double[] valsN = new Double[vals.length];
 		for(int k = 0; k < vals.length; k++)
 			valsN[k] = vals[k];
-		return gef.createGeoEntity(valsN, coverage.getGridGeometry().gridToWorld(new GridEnvelope2D(x, y, 1, 1)), x, y);
+		return gef.createGeoEntity(valsN, coverage.getGridGeometry()
+				.gridToWorld(new GridEnvelope2D(x, y, 1, 1)), x, y);
 	}
+	
+	/**
+	 * Gives the entire matrix of value for raster band number {@code i}
+	 * 
+	 * @param i
+	 * @return
+	 * @throws TransformException
+	 */
+	public float[][] getMatrix(int i) throws TransformException {
+		String bandName = GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+i;
+		float[][] matrix = new float[getColumnNumber()][getRowNumber()];
+		for (int row = 0; row < getRowNumber(); row++)
+			for (int col = 0; col < getColumnNumber(); col++)
+				matrix[col][row] = this.getPixel(col, row).getValueForAttribute(bandName)
+						.getNumericalValue().floatValue();
+		return matrix;
+	}
+
 
 	// --------------------------- Utilities --------------------------- // 
 	
@@ -257,6 +311,21 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 			s += "vals: " + (Arrays.toString((byte[])vals))+"\n";
 		}	
 		return s;
+	}
+	
+	public void clearCache(){
+		if(cacheGeoEntity != null) {
+			cacheGeoEntity.clear();
+			cacheGeoEntity = null;
+		}
+		if (cacheGeoAttributes != null) {
+			cacheGeoAttributes.clear();
+			cacheGeoAttributes = null;
+		}
+		if (cacheGeoValues != null) {
+			cacheGeoValues.clear();
+			cacheGeoValues = null;
+		}
 	}
 	
 	@Override

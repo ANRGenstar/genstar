@@ -17,6 +17,7 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlContingency;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -187,6 +188,19 @@ public class GosplNDimensionalMatrixFactory {
 		return matrix;
 	}
 	
+	/**
+	 * Create a frequency matrix from inner map collection
+	 * <p>
+	 * WARNING: there is not any guarantee on inner map collection consistency
+	 * 
+	 * @param matrix
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> createDistribution(
+			Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> matrix){
+		return new GosplJointDistribution(matrix);
+	}
+	
 	//////////////////////////////////////////////////
 	//				SEGMENTED MATRIX				//
 	//////////////////////////////////////////////////
@@ -235,6 +249,7 @@ public class GosplNDimensionalMatrixFactory {
 	//				CONTINGENCY MATRIX				//
 	//////////////////////////////////////////////////
 
+	
 	/**
 	 * Create a contingency matrix from entities' population characteristics
 	 * 
@@ -246,7 +261,7 @@ public class GosplNDimensionalMatrixFactory {
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(population.getPopulationAttributes().stream()
 				.collect(Collectors.toMap(att -> att, att -> att.getValues())));
-		matrix.addGenesis("created from a population GosplNDimensionalMatrixFactory@createContigency");
+		matrix.addGenesis("Created from a population GosplNDimensionalMatrixFactory@createContigency");
 
 		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
 		for(APopulationEntity entity : population){
@@ -255,7 +270,6 @@ public class GosplNDimensionalMatrixFactory {
 			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
 				matrix.getVal(entityCoord).add(1);
 		}
-		
 		return matrix;
 	}
 	

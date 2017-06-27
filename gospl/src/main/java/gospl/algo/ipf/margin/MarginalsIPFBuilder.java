@@ -21,7 +21,6 @@ import core.util.GSPerformanceUtil;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 
 public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 
@@ -132,6 +131,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 			
+			/*
 			if(mrg.size() != 0 && Math.abs(totalMRG - 1d) > 0.01){
 				// oops, the margins are higher than 1.
 				// let's reweight (???? is it even relevant here ???)
@@ -153,6 +153,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 				logger.error(msg);
 				throw new RuntimeException("wrong marginals total "+totalMRG+" ("+seed.getGenesisAsList()+")"+": "+msg);
 			}
+			*/
 		}
 
 		return marginals;

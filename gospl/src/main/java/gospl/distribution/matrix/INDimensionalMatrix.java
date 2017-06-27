@@ -59,6 +59,18 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(A aspect) throws IllegalNDimensionalMatrixAccess;
 	
 	/**
+	 * Compute the matrix aggregated value according to one dimension's aspect.
+	 * if {@code defaultToNul} is true, then a missing value will return a null {@link AControl} value
+	 * 
+	 * @see #getVal(aspect)
+	 * 
+	 * @param aspect
+	 * @param defaultToNul
+	 * @return
+	 */
+	public AControl<T> getVal(A aspect, boolean defaultToNul);
+	
+	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension
 	 * 
 	 * @param aspects
@@ -68,7 +80,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	
 	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension.
-	 * if defaultToNul is true, then a missing value will return null.
+	 * if defaultToNul is true, then a missing value will return a null {@link AControl} value.
 	 * 
 	 * @param aspects
 	 * @param defaultToNul
@@ -233,6 +245,22 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public Set<A> getAspects(D dimension);
 	
+	/**
+	 * Test and apply referent mapping values to account for diverging
+	 * encoding between referent attribute.
+	 * <p>
+	 * For exemple, an attribute age can start at 15 years old when joint
+	 * distribution with occupation is stated, but will start at 0 when 
+	 * joint distribution with gender is stated. Hence people under 15 years
+	 * old can not be linked to occupation. To avoid such fallacious link
+	 * between unknown values, this method will return a coordinate with
+	 * empty occupation 
+	 * 
+	 * @param aspects
+	 * @return
+	 */
+	public Set<A> getEmptyReferentCorrelate(ACoordinate<D, A> aspects);
+	
 // ------------------------- descriptors ------------------------- //
 	
 	/**
@@ -269,6 +297,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public boolean isCoordinateCompliant(ACoordinate<D, A> coordinate);
+	
 	
 	/**
 	 * Retrieve all coordinate that describe this set of value.

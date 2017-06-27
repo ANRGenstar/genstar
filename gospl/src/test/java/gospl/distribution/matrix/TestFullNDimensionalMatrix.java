@@ -184,6 +184,43 @@ public class TestFullNDimensionalMatrix {
 			throw new RuntimeException("the developer screwed up when writing unit tests. Just kill him, get rid of the body, and hire someone better.", e);
 		}
 	}
+	
+	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge3CSP() {
+
+		try {
+			final GosplAttributeFactory gaf = new GosplAttributeFactory();
+
+			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
+			Set<APopulationAttribute> attributes = new HashSet<>();
+				Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
+				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("16-25"), Arrays.asList("16-25"));
+				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
+				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
+				attributes.add(gaf.createAttribute("Age3", GSEnumDataType.Integer, 
+						Arrays.asList("16-25", "26-55", "55 et plus"), GSEnumAttributeType.range, 
+						ageCSP.getDimension("Age"), mapperAge2toAge));
+			attributes.add(ageCSP.getDimension("Activite"));
+
+			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
+
+			for(APopulationValue value : ageCSP.getDimension("Activite").getValues()){
+				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "16-25").getValue(), 
+						"Activite", value.getInputStringValue(), "Age3", "16-25");
+				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "26-40").getValue() + 
+						ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "40-55").getValue(), 
+						"Activite", value.getInputStringValue(), "Age3", "26-55");
+				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "55 et plus").getValue(), 
+						"Activite", value.getInputStringValue(), "Age3", "55 et plus");
+			}
+
+			m.normalize();
+			
+			return m;
+
+		} catch (GSIllegalRangedData e) {
+			throw new RuntimeException("the developer screwed up when writing unit tests. Just kill him, get rid of the body, and hire someone better.", e);
+		}
+	}
 
 	/**
 	 * generates a segmented matrix with no mapping, based on age X gender and age X csp
@@ -225,6 +262,22 @@ public class TestFullNDimensionalMatrix {
 		}
 
 	}
+	
+	@SuppressWarnings("unchecked")
+	private ASegmentedNDimensionalMatrix<Double> generateSegmentedWithPartialMappingAgePyramideAndCSP() {
+		try {
+
+			return GosplNDimensionalMatrixFactory.getFactory().createDistributionFromDistributions(
+					generateGlobalFrequencyAgeGender(), 
+					generateGlobalFrequencyAge3CSP()
+					);
+		} catch (IllegalDistributionCreation e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			throw new RuntimeException("error in the construction of the test case", e);
+		}
+	}
+
 
 
 	@Test
@@ -326,5 +379,37 @@ public class TestFullNDimensionalMatrix {
 
 		assertEquals("joined probability does not sum to 1", seg.getMatrices().size(), seg2.getVal().getValue(), delta);
 	}
+	
+	@Test
+	public void testGetValSegementedWithPartialMapping(){
+		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
+		ASegmentedNDimensionalMatrix<Double> segPartial = generateSegmentedWithPartialMappingAgePyramideAndCSP();
+		
+		// Is segmented matrix composed of sum-to-one matrices ?
+		assertEquals("joined probability does not sum to 1", 
+				seg.getMatrices().size(), segPartial.getVal().getValue(), delta);
+		
+		// Test if no relationship between age under 15 and occupation have correctly been estimated by getVal()
+		assertEquals("Partially mapped segmented matrix fail to identify empty coordinate",  segPartial.getNulVal().getValue(),
+				segPartial.getVal("Age","0-5", "Age", "6-15", "Activite", "Précaire").getValue());
+		
+		AControl<Double> cAge = seg.getVal("Age", "26-40", "Age", "40-55");
+		AControl<Double> cAge2 = segPartial.getVal("Age3","26-55");
+		
+		assertEquals("Matrix have not been correctly init.", cAge.getValue(), 
+				cAge2.getValue(), delta);
+		
+		AControl<Double> segPartialValue = segPartial.getVal("Age3","26-55","Genre","Homme","Activite","Sans emploi");
+		AControl<Double> givenProba = seg.getVal("Age", "26-40", "Age", "40-55", "Genre","Homme", "Activite","Sans emploi");
+		AControl<Double> calculatedProba = seg.getVal("Age", "26-40", "Age", "40-55", "Genre","Homme")
+				.multiply(seg.getVal("Age", "26-40", "Age", "40-55", "Activite","Sans emploi")
+						.multiply(1 / cAge.getValue())); 
 
+		assertEquals("Computed value is not equal to mapped-diverging-based-matrix computation", calculatedProba.getValue(), 
+				segPartialValue.getValue(), delta);
+		assertEquals("Given value is not equal to mapped-diverging-based-matrix computation", 
+				givenProba.getValue(), segPartialValue.getValue(), delta);
+		
+	}
+	
 }

@@ -14,17 +14,19 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationValue;
 import core.metamodel.pop.io.GSSurveyType;
 import gospl.GosplPopulation;
-import gospl.algo.ISyntheticReconstructionAlgo;
-import gospl.algo.generator.DistributionBasedGenerator;
-import gospl.algo.generator.ISyntheticGosplPopGenerator;
-import gospl.distribution.GosplDistributionBuilder;
+import gospl.algo.sr.ISyntheticReconstructionAlgo;
+import gospl.distribution.GosplInputDataManager;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.entity.attribute.GosplAttributeFactory;
+import gospl.generator.DistributionBasedGenerator;
+import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
+import gospl.sampler.IHierarchicalSampler;
+import gospl.sampler.ISampler;
 
 public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
 
@@ -98,11 +100,11 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		GosplPopulation population = null;
 
 		// INSTANCIATE FACTORY
-		GosplDistributionBuilder df = new GosplDistributionBuilder(confFile);
+		GosplInputDataManager df = new GosplInputDataManager(confFile);
 		
 		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS
 		try {
-			df.buildDistributions();
+			df.buildDataTables();
 		} catch (final RuntimeException e) {
 			e.printStackTrace();
 		} catch (final IOException e) {
@@ -141,7 +143,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// so we collapse all distribution build from the data
 		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
 		try {
-			distribution = df.collapseDistributions();
+			distribution = df.collapseDataTablesIntoDistributions();
 		} catch (final IllegalDistributionCreation e1) {
 			e1.printStackTrace();
 		} catch (final IllegalControlTotalException e1) {
@@ -193,8 +195,8 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			File reportFile = tmpDir.newFile("PopReport.csv");
 			
 			GosplSurveyFactory sf = new GosplSurveyFactory();
-			sf.createSurvey(exportFile, GSSurveyType.Sample, population);
-			sf.createSurvey(reportFile, GSSurveyType.GlobalFrequencyTable, population);
+			sf.createSummary(exportFile, GSSurveyType.Sample, population);
+			sf.createSummary(reportFile, GSSurveyType.GlobalFrequencyTable, population);
 		} catch (final IOException e) {
 			e.printStackTrace();
 		} catch (InvalidFormatException e) {

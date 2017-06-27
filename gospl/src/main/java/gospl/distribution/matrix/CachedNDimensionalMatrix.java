@@ -1,6 +1,5 @@
 package gospl.distribution.matrix;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -71,6 +70,12 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	@Override
 	public final AControl<T> getVal(A aspect) throws IllegalNDimensionalMatrixAccess {
 		
+		return this.getVal(aspect, false);
+	}
+	
+	@Override
+	public AControl<T> getVal(A aspect, boolean defaultToNul) {
+		
 		// search cache 
 		AControl<T> res = cachedAspect2value.get(aspect);
 		
@@ -128,6 +133,7 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 		return res;
 	}
 
+	@SafeVarargs
 	@Override
 	public final AControl<T> getVal(A... aspects) {
 		
@@ -265,6 +271,11 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	public final boolean isCoordinateCompliant(ACoordinate<D, A> coordinate) {
 		return m.isCoordinateCompliant(coordinate);
 	}
+	
+	@Override
+	public Set<A> getEmptyReferentCorrelate(ACoordinate<D, A> aspect) {
+		return m.getEmptyReferentCorrelate(aspect);
+	} 
 
 	@Override
 	public final Collection<ACoordinate<D, A>> getCoordinates(Set<A> values) {

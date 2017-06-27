@@ -22,6 +22,10 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  *
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
+	
+	protected GosplJointDistribution(Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> matrix){
+		super(matrix);
+	}
 
 	public GosplJointDistribution(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, 
 			GSSurveyType metaDataType) {
@@ -34,7 +38,6 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 			metaDataType
 			);
 	}
-
 
 		
 	// ----------------------- SETTER CONTRACT ----------------------- //
@@ -55,7 +58,7 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	@Override
 	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
-			coordinate.setHashIndex(matrix.size()+1+matrix.hashCode());
+			coordinate.setHashIndex(matrix.size());
 			matrix.put(coordinate, new ControlFrequency(value.getValue().doubleValue()));
 			return true;
 		}

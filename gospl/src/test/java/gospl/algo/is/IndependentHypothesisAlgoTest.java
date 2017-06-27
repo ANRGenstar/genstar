@@ -5,17 +5,25 @@ import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import core.metamodel.IPopulation;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.APopulationValue;
 import gospl.algo.GosplAlgoUtilTest;
-import gospl.algo.sampler.IDistributionSampler;
-import gospl.algo.sampler.sr.GosplBasicSampler;
+import gospl.algo.sr.ISyntheticReconstructionAlgo;
+import gospl.algo.sr.is.IndependantHypothesisAlgo;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
+import gospl.generator.DistributionBasedGenerator;
+import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.sampler.IDistributionSampler;
+import gospl.sampler.sr.GosplBasicSampler;
 
 public class IndependentHypothesisAlgoTest {
 	
 	public static ASegmentedNDimensionalMatrix<Double> partialDistribution; 
 	
-	public static int SEGMENT_SIZE = 10000;
+	public static int SEGMENT_SIZE = 100000;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -29,25 +37,21 @@ public class IndependentHypothesisAlgoTest {
 		
 		System.out.println(partialDistribution.toString());
 		
-		IndependantHypothesisAlgo isAlgo = new IndependantHypothesisAlgo();
-		IDistributionSampler aggSampler = new GosplBasicSampler();
-		IDistributionSampler valSampler = new GosplBasicSampler();
+		IDistributionSampler sampler = new GosplBasicSampler();
+		ISyntheticGosplPopGenerator generator = new DistributionBasedGenerator(sampler);
+		ISyntheticReconstructionAlgo<IDistributionSampler> isAlgo = new IndependantHypothesisAlgo();
 		
 		try {
-			isAlgo.inferSRSampler(partialDistribution, valSampler);
+			isAlgo.inferSRSampler(partialDistribution, sampler);
 		} catch (IllegalDistributionCreation e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		try {
-			isAlgo.inferSRSamplerWithReferentProcess(partialDistribution, aggSampler);
-		} catch (IllegalDistributionCreation e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> pop = generator.generate(SEGMENT_SIZE);
+
+		assertEquals(pop.size(), SEGMENT_SIZE, 0.01);
 		
-		// TODO: compare the two resulted sampler
 	}
 
 }

@@ -23,7 +23,7 @@
     <Logger name="gospl.algo.ipf.margin.MarginalsIPFProcessor" level="info" additivity="false">
     	<AppenderRef ref="Console"/>
     </Logger>
-     <Logger name="gospl.algo.sampler.sr.GosplHierarchicalSampler" level="info" additivity="false">
+     <Logger name="gospl.algo.sampler.sr.GosplHierarchicalSampler" level="error" additivity="false">
     	<AppenderRef ref="Console"/>
     </Logger>
     

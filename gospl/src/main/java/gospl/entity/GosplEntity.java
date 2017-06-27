@@ -2,9 +2,6 @@ package gospl.entity;
 
 import java.util.Map;
 
-import com.vividsolutions.jts.geom.Point;
-
-import core.metamodel.geo.AGeoEntity;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
@@ -16,9 +13,6 @@ import core.metamodel.pop.APopulationValue;
  */
 public class GosplEntity extends APopulationEntity {
 
-	private Point location = null;
-	private AGeoEntity nest = null;
-
 	public GosplEntity(Map<APopulationAttribute, APopulationValue> attributes){
 		super(attributes);
 	}
@@ -28,26 +22,8 @@ public class GosplEntity extends APopulationEntity {
 	}
 	
 	@Override
-	public Point getLocation() {
-		return location;
+	public GosplEntity clone(){
+		return new GosplEntity(this.getAttributesMap());
 	}
-
-	@Override
-	public AGeoEntity getNest() {
-		return nest;
-	}
-
-	@Override
-	public void setLocation(Point location) {
-		this.location = location;
-	}
-
-	@Override
-	public void setNest(AGeoEntity entity) {
-		this.nest = entity;
-	}
-
-
-	
 
 }

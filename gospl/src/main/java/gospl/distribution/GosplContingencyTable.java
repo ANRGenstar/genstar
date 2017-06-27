@@ -56,7 +56,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	@Override
 	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
-			coordinate.setHashIndex(matrix.size()+1+matrix.hashCode());
+			coordinate.setHashIndex(matrix.size());
 			matrix.put(coordinate, new ControlContingency(value.getValue().intValue()));
 			return true;
 		}

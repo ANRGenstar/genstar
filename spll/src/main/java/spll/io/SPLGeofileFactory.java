@@ -63,7 +63,7 @@ import core.metamodel.pop.APopulationEntity;
 import core.util.stats.GSBasicStats;
 import core.util.stats.GSEnumStats;
 import spll.SpllPopulation;
-import spll.entity.GSFeature;
+import spll.entity.SpllFeature;
 import spll.io.exception.InvalidGeoFormatException;
 
 public class SPLGeofileFactory {
@@ -163,15 +163,13 @@ public class SPLGeofileFactory {
 
 		GridSampleDimension[] bands = new GridSampleDimension[] { 
 				new GridSampleDimension("Dimension", new Category[] { nan, values }, null)}; 
-
+		
 		WritableRaster raster = RasterFactory.createBandedRaster(DataBuffer.TYPE_FLOAT,
 				pixels.length, pixels[0].length, 1, null);
-		for (int y=0; y<pixels[0].length; y++) {
-			for (int x=0; x<pixels.length; x++) {
+		for (int y=0; y<pixels[0].length; y++)
+			for (int x=0; x<pixels.length; x++)
 				raster.setSample(x, y, 0, pixels[x][y]);
-			}
-		}
-		
+				
 		return writeRasterFile(rasterfile, 
 				new GridCoverageFactory().create(rasterfile.getName(), raster, envelope, bands));
 	}
@@ -246,7 +244,8 @@ public class SPLGeofileFactory {
 		}
 		ShapefileDataStore newDataStore = new ShapefileDataStore(shapefile.toURI().toURL());
 
-		Map<APopulationEntity, Geometry> geoms = population.stream().filter(e -> e.getLocation() != null)
+		Map<APopulationEntity, Geometry> geoms = population.getSpllPopulation()
+				.stream().filter(e -> e.getLocation() != null)
 				.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		String geomType = getGeometryType(geoms.values());
@@ -302,7 +301,7 @@ public class SPLGeofileFactory {
 	 * @throws IOException
 	 * @throws SchemaException
 	 */
-	public SPLVectorFile createShapeFile(File shapefile, Collection<GSFeature> features) throws IOException, SchemaException {
+	public SPLVectorFile createShapeFile(File shapefile, Collection<SpllFeature> features) throws IOException, SchemaException {
 		if(features.isEmpty())
 			throw new IllegalStateException("GSFeature collection ("+Arrays.toString(features.toArray())+") in methode createShapeFile cannot be empty");
 		ShapefileDataStoreFactory dataStoreFactory = new ShapefileDataStoreFactory();

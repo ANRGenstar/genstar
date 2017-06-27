@@ -93,7 +93,7 @@ public class GeoEntityFactory {
 	 * @param feature
 	 * @return
 	 */
-	public GSFeature createGeoEntity(Feature feature, List<String> attList) {
+	public SpllFeature createGeoEntity(Feature feature, List<String> attList) {
 		Set<AGeoValue> values = new HashSet<>();
 		NumberFormat defaultFormat = NumberFormat.getInstance();
 		for(Property property : feature.getProperties()){
@@ -116,7 +116,7 @@ public class GeoEntityFactory {
 			}
 			values.add(value);
 		}
-		return new GSFeature(values, feature);
+		return new SpllFeature(values, feature);
 	}
 	
 	/**
@@ -126,7 +126,7 @@ public class GeoEntityFactory {
 	 * @param featureValues
 	 * @return
 	 */
-	public GSFeature createGeoEntity(Geometry the_geom, Set<AGeoValue> featureValues){
+	public SpllFeature createGeoEntity(Geometry the_geom, Set<AGeoValue> featureValues){
 		// Use factory defined feature constructor to build the inner feature
 		contingencyFeatureBuilder.add(the_geom);
 		featureValues.stream().forEach(values -> 
@@ -141,7 +141,7 @@ public class GeoEntityFactory {
 		}
 		
 		// Return created GSFeature
-		return new GSFeature(featureValues, feat);
+		return new SpllFeature(featureValues, feat);
 	}
 
 	/**
@@ -153,7 +153,7 @@ public class GeoEntityFactory {
 	 * @param gridY
 	 * @return
 	 */
-	public GSPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
+	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
 		Set<AGeoValue> values = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
@@ -172,7 +172,7 @@ public class GeoEntityFactory {
 				attribute.addValue(value);
 			values.add(value);
 		}
-		return new GSPixel(values, pixel, gridX, gridY);
+		return new SpllPixel(values, pixel, gridX, gridY);
 	}
 
 }

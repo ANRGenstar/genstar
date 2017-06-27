@@ -244,7 +244,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
-		return getVal(coordinate.values());
+		return getVal(new HashSet<>(coordinate.values()), true);
 	}
 
 	/* (non-Javadoc)
@@ -252,17 +252,20 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public AControl<T> getVal(APopulationValue aspect) throws IllegalNDimensionalMatrixAccess {
+		return this.getVal(aspect, false);
+	}
+	
+	@Override
+	public AControl<T> getVal(APopulationValue aspect, boolean defaultToNull){
 		AControl<T> val = null;
 		for(AFullNDimensionalMatrix<T> distribution : jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().contains(aspect.getAttribute())).collect(Collectors.toList()))
 			if(val == null)
-				val = distribution.getVal(aspect);
+				val = distribution.getVal(aspect, defaultToNull);
 			else if(!val.getValue().equals(distribution.getVal(aspect).getValue()))
 				throw new IllegalNDimensionalMatrixAccess("Incongruent probability in underlying distributions");
 		return val;
 	}
-
-	
 
 	/* (non-Javadoc)
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal(core.metamodel.pop.APopulationValue)
@@ -272,7 +275,15 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		return getVal(Arrays.asList(aspects));
 	}
 
-
+	@Override
+	public final AControl<T> getVal(String... coordinate){
+		return getVal(this.getValues(coordinate));
+	}
+	
+	@Override
+	public final AControl<T> getVal(Collection<APopulationValue> aspects, boolean defaultToNul){
+		return getVal(aspects);
+	}
 
 	// ---------------------- Inner utilities ---------------------- //
 

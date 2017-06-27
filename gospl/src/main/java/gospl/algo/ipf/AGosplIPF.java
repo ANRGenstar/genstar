@@ -1,6 +1,5 @@
 package gospl.algo.ipf;
 
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -20,13 +19,13 @@ import core.util.GSPerformanceUtil;
 import gospl.algo.ipf.margin.AMargin;
 import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
 import gospl.algo.ipf.margin.MarginalsIPFBuilder;
-import gospl.algo.sampler.IDistributionSampler;
-import gospl.algo.sampler.IEntitySampler;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.sampler.IDistributionSampler;
+import gospl.sampler.IEntitySampler;
 
 /**
  * 
@@ -57,10 +56,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public abstract class AGosplIPF<T extends Number> {
 
-	private int step = 1000;
-	private double delta = Math.pow(10, -2);
-
-	public static double ZERO_CELL_RATIO = Math.pow(10, -3);
+	private int step = 100;
+	private double delta = Math.pow(10, -5);
 
 	private Logger logger = LogManager.getLogger();
 

@@ -40,7 +40,8 @@ public class GSBasicStats<T extends Number> {
 		map.put(GSEnumStats.sum, Math.round(stats.getSum() / floatPrecision) * floatPrecision);
 		
 		tempList.sort((n1, n2) -> Double.valueOf(n1.doubleValue()).compareTo(Double.valueOf(n2.doubleValue())));
-		map.put(GSEnumStats.med, Math.round(list.get(list.size() % 2 == 0 ? list.size() / 2 : (list.size() + 1) / 2).doubleValue() / floatPrecision) * floatPrecision);
+		map.put(GSEnumStats.med, Math.round(list.get(list.size() % 2 == 0 ? list.size() / 2 : 
+			(list.size() + 1) / 2).doubleValue() / floatPrecision) * floatPrecision);
 		
 		int rest = tempList.size() % 5;
 		int quartil = tempList.size() % 5 == 0 ? tempList.size() / 5 : (tempList.size() - rest) / 5;
