@@ -35,14 +35,14 @@ import org.apache.logging.log4j.Logger;
  * @author Samuel Thiriot
  *
  */
-public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine<NodeCategorical> {
+public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine {
 
 	private Logger logger = LogManager.getLogger();
 
 	private Map<NodeCategorical,Map<String,BigDecimal>> computed = new HashMap<>();
 	
 
-	public SimpleConditionningInferenceEngine(BayesianNetwork<NodeCategorical> bn) {
+	public SimpleConditionningInferenceEngine(CategoricalBayesianNetwork bn) {
 		super(bn);
 
 	}

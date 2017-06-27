@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-public abstract class FiniteNode<N extends FiniteNode<N>>  extends AbstractNode<N> {
+public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode<N> {
 
 	protected List<String> domain = new LinkedList<>();
 	

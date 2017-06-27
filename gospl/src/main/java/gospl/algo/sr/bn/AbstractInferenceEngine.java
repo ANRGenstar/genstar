@@ -7,16 +7,16 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractInferenceEngine<N extends FiniteNode<N>> {
+public abstract class AbstractInferenceEngine {
 
 	private Logger logger = LogManager.getLogger();
 
-	protected final BayesianNetwork<N> bn;
+	protected final CategoricalBayesianNetwork bn;
 	
 	/**
 	 * evidence
 	 */
-	protected Map<N,String> variable2value = new HashMap<>();
+	protected Map<NodeCategorical,String> variable2value = new HashMap<>();
 	
 	/**
 	 * should we recompute probabilities ?
@@ -24,7 +24,7 @@ public abstract class AbstractInferenceEngine<N extends FiniteNode<N>> {
 	protected boolean dirty = true;
 	
 	
-	public AbstractInferenceEngine(BayesianNetwork<N> bn) {
+	public AbstractInferenceEngine(CategoricalBayesianNetwork bn) {
 		this.bn = bn;
 		
 		
@@ -36,7 +36,7 @@ public abstract class AbstractInferenceEngine<N extends FiniteNode<N>> {
 	 * @param n
 	 * @param s
 	 */
-	public void addEvidence(N n, String s) {
+	public void addEvidence(NodeCategorical n, String s) {
 		
 		if (!this.bn.containsNode(n))
 			throw new IllegalArgumentException("this node is not in the bn: "+n);
@@ -49,7 +49,7 @@ public abstract class AbstractInferenceEngine<N extends FiniteNode<N>> {
 	}
 	
 	public void addEvidence(String n, String s) {
-		N node = this.bn.getVariable(n);
+		NodeCategorical node = this.bn.getVariable(n);
 		if (node == null)
 			throw new IllegalArgumentException("unknown node "+n);
 		this.addEvidence(node, s);
@@ -82,9 +82,9 @@ public abstract class AbstractInferenceEngine<N extends FiniteNode<N>> {
 	 * Note this is most of the time useless.
 	 */
 	public void computeAll() {
-		for (N n: bn.nodes) {
+		for (NodeCategorical n: bn.nodes) {
 			logger.info("computing probability for {} ({} values: {})", n, n.getDomainSize(), n.getDomain());
-			retrieveConditionalProbability((NodeCategorical) n);	
+			retrieveConditionalProbability(n);	
 			InferencePerformanceUtils.singleton.display();
 
 		}
@@ -112,7 +112,7 @@ public abstract class AbstractInferenceEngine<N extends FiniteNode<N>> {
 	 * @return
 	 */
 	public final BigDecimal getConditionalProbability(String variableName, String s) {
-		NodeCategorical v = (NodeCategorical) bn.getVariable(variableName);
+		NodeCategorical v = bn.getVariable(variableName);
 		if (v == null)
 			throw new IllegalArgumentException("this Bayesian network does not contains a variable named "+variableName);
 		return this.getConditionalProbability(v, s);

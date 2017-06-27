@@ -14,7 +14,7 @@ public class TestSimpleConditionningInference {
 	@Test
 	public void testSimpleInference() {
 
-		BayesianNetwork<NodeCategorical> bn = new BayesianNetwork<>("test1");
+		CategoricalBayesianNetwork bn = new CategoricalBayesianNetwork("test1");
 		
 		NodeCategorical nGender = new NodeCategorical(bn, "gender");
 		nGender.addDomain("male", "female");

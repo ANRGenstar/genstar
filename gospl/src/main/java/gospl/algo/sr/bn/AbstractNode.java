@@ -1,5 +1,6 @@
 package gospl.algo.sr.bn;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -61,4 +62,9 @@ public abstract class AbstractNode<N extends AbstractNode<N>> {
 	
 	public abstract void toXMLBIF(StringBuffer sb);
 	
+
+	public Collection<N> getAllAncestors() {
+		return network.getAllAncestors((N) this);
+	}
+
 }

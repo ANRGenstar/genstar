@@ -39,21 +39,21 @@ public abstract class AbstractTestAnyBayesianNetwork {
 	 * Loads the network
 	 * @return
 	 */
-	protected BayesianNetwork<NodeCategorical> loadFile() {
+	protected CategoricalBayesianNetwork loadFile() {
 
-		return BayesianNetwork.loadFromXMLBIF(f);
+		return CategoricalBayesianNetwork.loadFromXMLBIF(f);
 		
 	}
 	
 
 	@Test
 	public void testLoadNetwork() {
-		BayesianNetwork<NodeCategorical> bn = loadFile();
+		CategoricalBayesianNetwork bn = loadFile();
 	}
 	
 	public void testInference(Map<String,String> evidence, Map<String,Map<String,Double>> expected) {
 		
-		BayesianNetwork<NodeCategorical> bn = loadFile();
+		CategoricalBayesianNetwork bn = loadFile();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 
@@ -89,7 +89,7 @@ public abstract class AbstractTestAnyBayesianNetwork {
 	@Test
 	public void testComputeAll() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadFile();
+		CategoricalBayesianNetwork bn = loadFile();
 
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -103,7 +103,7 @@ public abstract class AbstractTestAnyBayesianNetwork {
 	@Test
 	public void testGenerate() {
 	
-		BayesianNetwork<NodeCategorical> bn = loadFile();
+		CategoricalBayesianNetwork bn = loadFile();
 
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		

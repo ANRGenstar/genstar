@@ -2,7 +2,6 @@ package gospl.algo.sr.bn;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -33,7 +32,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 */
 	private int[] multipliers; 
 
-	public NodeCategorical(BayesianNetwork<NodeCategorical> net, String name) {
+	public NodeCategorical(CategoricalBayesianNetwork net, String name) {
 		
 		super(net, name);
 		
@@ -371,9 +370,12 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		
 	}
 	
-	public BigDecimal getConditionalProbabilityPosterior(String att, Map<NodeCategorical,String> evidence, Map<NodeCategorical,Map<String,BigDecimal>> alreadyComputed) {
+	public BigDecimal getConditionalProbabilityPosterior(
+						String att, 
+						Map<NodeCategorical,String> evidence, 
+						Map<NodeCategorical,Map<String,BigDecimal>> alreadyComputed) {
 
-		return getConditionalProbabilityPosterior(att, evidence, alreadyComputed, Collections.EMPTY_MAP);
+		return getConditionalProbabilityPosterior(att, evidence, alreadyComputed, Collections.emptyMap());
 	}
 	
 
@@ -382,7 +384,11 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 * @param d
 	 * @return
 	 */
-	public BigDecimal getConditionalProbabilityPosterior(String att, Map<NodeCategorical,String> evidence, Map<NodeCategorical,Map<String,BigDecimal>> alreadyComputed, Map<NodeCategorical,String> forcedValue) {
+	public BigDecimal getConditionalProbabilityPosterior(
+							String att, 
+							Map<NodeCategorical,String> evidence, 
+							Map<NodeCategorical,Map<String,BigDecimal>> alreadyComputed, 
+							Map<NodeCategorical,String> forcedValue) {
 		
 		logger.trace("computing posteriors for p({}={}|{})", name, att, evidence);
 		logger.trace("alreadyComputed: {}", alreadyComputed);
@@ -550,7 +556,12 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	
 	public BigDecimal getConditionalProbabilityPosterior(String att) {
 		
-		return getConditionalProbabilityPosterior(att, Collections.EMPTY_MAP, Collections.EMPTY_MAP, Collections.EMPTY_MAP);
+		return getConditionalProbabilityPosterior(
+				att, 
+				Collections.emptyMap(), 
+				Collections.emptyMap(), 
+				Collections.emptyMap()
+				);
 		
 	}
 	
@@ -647,10 +658,6 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		}
 		sb.append(")");
 		return sb.toString();
-	}
-
-	public Collection<? extends NodeCategorical> getAllAncestors() {
-		return network.getAllAncestors(this);
 	}
 
 	

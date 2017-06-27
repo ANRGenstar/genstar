@@ -27,11 +27,11 @@ public class TestSprinklers {
 	public void tearDown() throws Exception {
 	}
 
-	protected BayesianNetwork<NodeCategorical> loadGerlandNetwork() {
+	protected CategoricalBayesianNetwork loadGerlandNetwork() {
 
 		File f = new File("./src/test/resources/bayesiannetworks/sprinkler_rain_grasswet.xmlbif");
 		
-		return BayesianNetwork.loadFromXMLBIF(f);
+		return CategoricalBayesianNetwork.loadFromXMLBIF(f);
 		
 	}
 	
@@ -105,7 +105,7 @@ public class TestSprinklers {
 	@Test
 	public void testSumProba() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -141,7 +141,7 @@ public class TestSprinklers {
 	@Test
 	public void testBackwardsInferenceFromEvidenceOne() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 
@@ -182,7 +182,7 @@ public class TestSprinklers {
 	@Test
 	public void testBackwardsInferenceFromEvidenceTwo() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 

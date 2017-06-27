@@ -27,11 +27,11 @@ public class TestGerland {
 	public void tearDown() throws Exception {
 	}
 
-	protected BayesianNetwork<NodeCategorical> loadGerlandNetwork() {
+	protected CategoricalBayesianNetwork loadGerlandNetwork() {
 
 		File f = new File("./src/test/resources/bayesiannetworks/gerland.xbif");
 		
-		return BayesianNetwork.loadFromXMLBIF(f);
+		return CategoricalBayesianNetwork.loadFromXMLBIF(f);
 		
 	}
 	
@@ -62,7 +62,7 @@ public class TestGerland {
 	@Test
 	public void testGenerate() {
 
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -105,7 +105,7 @@ public class TestGerland {
 	@Test
 	public void testBackwardsInferenceFromEvidenceOne() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -157,7 +157,7 @@ public class TestGerland {
 	@Test
 	public void testBackwardsInferenceFromEvidenceTwo() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -207,7 +207,7 @@ public class TestGerland {
 	@Test
 	public void testBackwardsAndForwardsInferenceFromEvidenceOne() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		
@@ -260,7 +260,7 @@ public class TestGerland {
 	@Test
 	public void testBackwardsAndForwardsInferenceFromEvidenceOneComplete() {
 		
-		BayesianNetwork<NodeCategorical> bn = loadGerlandNetwork();
+		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 		

@@ -289,7 +289,7 @@ public class TestBayesianNetwork {
 	
 	protected void testOrderNodes1() {
 		
-		BayesianNetwork<NodeCategorical> bn = new BayesianNetwork("test1");
+		CategoricalBayesianNetwork bn = new CategoricalBayesianNetwork("test1");
 		
 		NodeCategorical nGender = new NodeCategorical(bn, "gender");
 		nGender.addDomain("male", "female");
@@ -316,7 +316,7 @@ public class TestBayesianNetwork {
 	@Test
 	public void testWrite() {
 		
-		BayesianNetwork<NodeCategorical> bn = new BayesianNetwork("test1");
+		CategoricalBayesianNetwork bn = new CategoricalBayesianNetwork("test1");
 		
 		NodeCategorical nGender = new NodeCategorical(bn, "gender");
 		nGender.addDomain("male", "female");
@@ -345,7 +345,7 @@ public class TestBayesianNetwork {
 		
 		// TODO now try to read the network and check it work
 		
-		BayesianNetwork<NodeCategorical> bn2 = BayesianNetwork.loadFromXMLBIF(f);
+		CategoricalBayesianNetwork bn2 = CategoricalBayesianNetwork.loadFromXMLBIF(f);
 		assertEquals(bn.getNodes().size(), bn2.getNodes().size());
 		
 		assertEquals(bn.getVariable("gender").getCardinality(), bn2.getVariable("gender").getCardinality());
