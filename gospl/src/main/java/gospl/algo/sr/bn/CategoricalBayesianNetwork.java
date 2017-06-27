@@ -202,6 +202,17 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		return new ArrayList<NodeCategorical>(nodes);
 	}
 	
+	public IteratorCategoricalVariables iterateDomains() {
+		
+		return new IteratorCategoricalVariables(this.nodesEnumeration);
+	}
+	
+	public IteratorCategoricalVariables iterateDomains(Collection<NodeCategorical> nn) {
+		if (!this.nodes.containsAll(nn))
+			throw new IllegalArgumentException("some of these nodes "+nn+" do not belong this Bayesian network "+this.nodes);
+		return new IteratorCategoricalVariables(nn);
+	}
+	
 	/**
 	 * For a list of variable and values, computes the corresponding joint probability.
 	 * Takes as an input all the 
@@ -221,7 +232,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 
 		BigDecimal res = BigDecimal.ONE;
 		
-		for (NodeCategorical n: rankVariablesForMultiplication(node2value.keySet())) {
+		for (NodeCategorical n: rankVariablesPerZeros(node2value.keySet())) {
 			
 			// optimisation: compute first the nodes having a lot of zeros to stop computation asap
 			String v = node2value.get(n);

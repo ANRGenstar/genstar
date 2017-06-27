@@ -245,52 +245,40 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		Set<NodeCategorical> nuisanceS = new HashSet<>(nuisanceRaw);
 		nuisanceS.removeAll(known.keySet());
 		
+		// quick exit
+		if (nuisanceRaw.isEmpty() && known.isEmpty())
+			return BigDecimal.ONE;
+		
+		// is it cached ?
 		BigDecimal res = getCached(known, nuisanceS); // optimisation: cache !
 		if (res != null)
 			return res;
 		
+		
 		res = BigDecimal.ZERO;
-				
+						
 		logger.debug("summing probabilities for nuisance {}, and known {}", known, nuisanceS);
-		
-		// the nodes we have to explore the values for 
-		NodeCategorical[] nuisance = new NodeCategorical[nuisanceS.size()];
-		nuisance = nuisanceS.toArray(nuisance);
-		
-		// the current values we are exploring for each node
-		int[] nodeIdx2valueIdx = new int[nuisance.length];
-		
-		main: while (true) {
+
+		for (IteratorCategoricalVariables it = bn.iterateDomains(nuisanceS); it.hasNext(); ) {
 			
-			// store the current explored values in a map
-			Map<NodeCategorical,String> n2v = new HashMap<>(known);
-			for (int i=0; i<nodeIdx2valueIdx.length; i++) {
-				n2v.put(nuisance[i], nuisance[i].getValueIndexed(nodeIdx2valueIdx[i]));
-			}
+			Map<NodeCategorical,String> n2v = it.next();
+			n2v.putAll(known);
 			
 			BigDecimal p = this.bn.jointProbability(n2v, Collections.emptyMap());
 			
-			logger.debug("p({})={}", n2v,p);
+			logger.info("p({})={}", n2v, p);
 			
 			res = res.add(p);
 			InferencePerformanceUtils.singleton.incAdditions();
-			
-			if (nodeIdx2valueIdx.length == 0)
+
+			// if over one, stop.
+			if (BigDecimal.ONE.compareTo(res) < 0) {
+				res = BigDecimal.ONE;
 				break;
-			// skip to the next index
-			int cursorParents = nodeIdx2valueIdx.length-1;
-			nodeIdx2valueIdx[cursorParents]++;
-			// ... if we are at the max of the domain size of the current node, then shift back
-			while (nodeIdx2valueIdx[cursorParents]>=nuisance[cursorParents].getDomainSize()) {
-				nodeIdx2valueIdx[cursorParents] = 0;
-				cursorParents--;
-				// maybe we finished the exploration ?
-				if (cursorParents < 0) 
-					break main;
-				// skip to the next one 
-				nodeIdx2valueIdx[cursorParents]++;
 			}
+
 		}
+		
 		
 		storeCache(known, nuisanceS, res);
 		
@@ -387,7 +375,6 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 						
 		BigDecimal pFree = this.sumProbabilities(evidence, selectRelevantVariables(null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
 
-		
 		logger.debug("computing p(*=*|{}={})", n.name, nv);
 						
 		Map<NodeCategorical,String> punctualEvidence = new HashMap<>(evidence);

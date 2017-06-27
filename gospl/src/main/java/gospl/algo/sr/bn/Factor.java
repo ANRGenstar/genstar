@@ -13,26 +13,45 @@ import java.util.Set;
  * 
  * @author Samuel Thiriot
  *
- * @param <N>
  */
-public class Factor<N extends FiniteNode<N>> {
+public class Factor {
 
-	private final BayesianNetwork<N> bn;
-	private final Set<N> variables;
+	private final CategoricalBayesianNetwork bn;
+	protected final Set<NodeCategorical> variables;
 	
-	private Map<Map<N,String>,BigDecimal> values = new HashMap<>();
+	protected Map<Map<NodeCategorical,String>,BigDecimal> values = new HashMap<>();
+	
+	
+	public static Factor createFromCPT(CategoricalBayesianNetwork bn, NodeCategorical var) {
+		
+		Set<NodeCategorical> variables = new HashSet<>(var.getParents());
+		variables.add(var);
+		
+		Factor f = new Factor(bn, variables);
+		
+		for (IteratorCategoricalVariables it = bn.iterateDomains(var.getParents()); it.hasNext(); ) {
+			Map<NodeCategorical,String> v2n = it.next();
+			for (String v: var.getDomain()) {
+				BigDecimal d = var.getProbability(v, v2n);
+				HashMap<NodeCategorical,String> v2n2 = new HashMap<>(v2n);
+				v2n2.put(var, v);
+				f.setFactor(v2n2, d);
+			}
+		}
+		return f;
+	}
 	
 	/**
 	 * Creates a factor over these variables
 	 * @param bn
 	 * @param variables
 	 */
-	public Factor(BayesianNetwork<N> bn, Set<N> variables) {
+	public Factor(CategoricalBayesianNetwork bn, Set<NodeCategorical> variables) {
 		this.bn = bn;
 		this.variables = variables;
 	}
 	
-	public void setFactor(Map<N,String> instanciations, BigDecimal p) {
+	public void setFactor(Map<NodeCategorical,String> instanciations, BigDecimal p) {
 		values.put(instanciations, p);	
 	}
 	
@@ -41,7 +60,7 @@ public class Factor<N extends FiniteNode<N>> {
 	 * @param instantiations
 	 * @return
 	 */
-	public BigDecimal get(Map<N,String> instantiations) {
+	public BigDecimal get(Map<NodeCategorical,String> instantiations) {
 		
 		// are parameters valid ? 
 		if (!variables.equals(instantiations.keySet())) {
@@ -61,16 +80,78 @@ public class Factor<N extends FiniteNode<N>> {
 		return p;
 	}
 	
-	public Factor<N> sumOut(N var) {
-		Set<N> novelSet = new HashSet<>(variables);
-		novelSet.remove(var);
-		Factor<N> res = new Factor<>(bn, novelSet);
+	public BigDecimal get(String... sss) {
+		if (sss.length != variables.size()*2)
+			throw new IllegalArgumentException("invalid keys and values");
+		Map<NodeCategorical,String> n2s = new HashMap<>(variables.size());
+		for (int i=0; i<sss.length; i+=2) {
+			NodeCategorical n = bn.getVariable(sss[i]);
+			if (n == null || !variables.contains(n))
+				throw new IllegalArgumentException("Unknown variable "+sss[i]);
+			String v = sss[i+1];
+			if (!n.getDomain().contains(v))
+				throw new IllegalArgumentException("unknown value "+v+" for variable "+sss[i]);
+			n2s.put(n, v);
+		}
+		return this.get(n2s);
+	}
+	
+	
+	public Factor sumOut(String varName) {
+		return this.sumOut(bn.getVariable(varName));
+	}
+	
+	public Factor sumOut(NodeCategorical var) {
 		
-		// TODO
-		Set<Map<N,String>> done = new HashSet<>(values.size()/2);
-		for (Map<N,String> instanciation: values.keySet()) {
-			BigDecimal p1 = values.get(instanciation);
-			
+		// the novel factor will target all the values but the one we sum
+		Set<NodeCategorical> novelSet = new HashSet<>(variables);
+		novelSet.remove(var);
+		
+		Factor res = new Factor(bn, novelSet);
+		
+		Set<Map<NodeCategorical,String>> done = new HashSet<>(values.size()/2);
+		for (IteratorCategoricalVariables it = bn.iterateDomains(novelSet); it.hasNext();) {
+			Map<NodeCategorical,String> v2n = it.next();
+			BigDecimal d = BigDecimal.ZERO;
+			for (String v: var.getDomain()) {
+				v2n.put(var, v);
+				d = d.add(get(v2n));
+			}
+			v2n.remove(var);
+			res.setFactor(v2n, d);
+		}
+		
+		return res;
+	}
+	
+	public Factor multiply(Factor f) {
+		if (!bn.getNodes().containsAll(f.variables))
+			throw new IllegalArgumentException("the other factor variables do not all belong this network");
+		
+		Set<NodeCategorical> vvs = new HashSet<>(this.variables);
+		vvs.addAll(f.variables);
+		
+		Set<NodeCategorical> varsDiff = new HashSet<>(f.variables);
+		varsDiff.removeAll(this.variables);
+		
+		Factor res = new Factor(bn, vvs);
+		
+		for (IteratorCategoricalVariables it1=bn.iterateDomains(this.variables); it1.hasNext(); ) {
+			Map<NodeCategorical,String> it1m = it1.next(); 
+			BigDecimal d1 = this.get(it1m);
+			for (IteratorCategoricalVariables it2=bn.iterateDomains(varsDiff); it2.hasNext(); ) {
+				Map<NodeCategorical,String> it2m = new HashMap<>(it2.next()); 
+				for (NodeCategorical n: this.variables) {
+					if (f.variables.contains(n))
+						it2m.put(n,it1m.get(n));
+				}
+				BigDecimal d2 = f.get(it2m);
+				
+				it2m.putAll(it1m);
+				
+				BigDecimal times = d1.multiply(d2);
+				res.setFactor(it2m, times);
+			}
 		}
 		
 		return res;
@@ -80,7 +161,7 @@ public class Factor<N extends FiniteNode<N>> {
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("factor(");
-		for (N n: variables) {
+		for (NodeCategorical n: variables) {
 			if (sb.length() > "factor(".length()) {
 				sb.append(",");
 			}
