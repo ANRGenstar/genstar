@@ -23,6 +23,16 @@ public class JUnitBigDecimals {
 				);
 	}
 	
+
+	public static void assertEqualsBD(BigDecimal ref, BigDecimal d, int precision) {
+		System.out.println("comparing "+ref+" with "+d.setScale(precision, BigDecimal.ROUND_HALF_UP).doubleValue()+" prec "+Math.pow(10, -precision));
+		assertEquals(
+				ref.setScale(precision, BigDecimal.ROUND_HALF_UP).doubleValue(),
+				d.setScale(precision, BigDecimal.ROUND_HALF_UP).doubleValue(),
+				Math.pow(10, -precision)
+				);
+	}
+	
 	private JUnitBigDecimals() {}
 
 }

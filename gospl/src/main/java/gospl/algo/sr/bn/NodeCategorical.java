@@ -644,6 +644,10 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		
 	}
 	
+	/**
+	 * Gets this variable as a factor
+	 * @return
+	 */
 	public Factor asFactor() {
 		
 		Set<NodeCategorical> variables = new HashSet<>(parents);

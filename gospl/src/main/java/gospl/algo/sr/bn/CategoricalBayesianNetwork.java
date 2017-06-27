@@ -29,11 +29,30 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 
 	private Logger logger = LogManager.getLogger();
 
+	protected Map<NodeCategorical,Factor> node2factor = new HashMap<>();
+	
 	public CategoricalBayesianNetwork(String name) {
 		super(name);
 
 	}
 	
+	/**
+	 * Returns the node as a factor, or the corresponding value 
+	 * @param n
+	 * @return
+	 */
+	public Factor getFactor(NodeCategorical n) {
+		
+		// cached ? 
+		Factor res = node2factor.get(n);
+		
+		if (res == null) {
+			res = n.asFactor();
+			node2factor.put(n, res);
+		}
+		
+		return res;
+	}
 
 	/**
 	 * ranks the nodes per count of zeros in the CPT 
@@ -204,7 +223,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	
 	public IteratorCategoricalVariables iterateDomains() {
 		
-		return new IteratorCategoricalVariables(this.nodesEnumeration);
+		return new IteratorCategoricalVariables(this.enumerateNodes());
 	}
 	
 	public IteratorCategoricalVariables iterateDomains(Collection<NodeCategorical> nn) {
@@ -280,6 +299,23 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		
 	}
 	
+	public BigDecimal jointProbabilityFromFactors(Map<NodeCategorical,String> node2value) {
+		
+		Map<NodeCategorical,String> remaining = new HashMap<>(node2value);
+		
+		Factor f = null;
+		
+		for (NodeCategorical n: enumerateNodes()) {
+			Factor fn = n.asFactor();
+			if (f == null)
+				f = fn;
+			else 
+				f = f.multiply(fn);
+		}
+		
+		return f.get(node2value);
+	}
+
 	/**
 	 * Prunes the Bayesian network by removing the variable n, and updating all the probabilities for
 	 * other nodes in the network. 

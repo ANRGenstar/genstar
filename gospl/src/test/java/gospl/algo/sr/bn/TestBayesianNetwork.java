@@ -6,14 +6,14 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import gospl.algo.sr.bn.BayesianNetwork;
-import gospl.algo.sr.bn.NodeCategorical;
 
 public class TestBayesianNetwork {
 
@@ -287,6 +287,7 @@ public class TestBayesianNetwork {
 			testOrderNodes1();
 	}
 	
+	
 	protected void testOrderNodes1() {
 		
 		CategoricalBayesianNetwork bn = new CategoricalBayesianNetwork("test1");
@@ -351,6 +352,54 @@ public class TestBayesianNetwork {
 		assertEquals(bn.getVariable("gender").getCardinality(), bn2.getVariable("gender").getCardinality());
 		assertEquals(bn.getVariable("age").getCardinality(), bn2.getVariable("age").getCardinality());
 
+		
+	}
+
+	@Test
+	public void testProbabilityDistribution() {
+		
+		CategoricalBayesianNetwork bn = new CategoricalBayesianNetwork("test1");
+		
+		NodeCategorical nGender = new NodeCategorical(bn, "gender");
+		nGender.addDomain("male", "female");
+		nGender.setProbabilities(0.55, "male");
+		nGender.setProbabilities(0.45, "female");
+		
+		NodeCategorical nAge = new NodeCategorical(bn, "age");
+		nAge.addParent(nGender);
+		nAge.addDomain("<15", ">=15");
+		nAge.setProbabilities(0.55, "<15", "gender", "male");
+		nAge.setProbabilities(0.45, ">=15", "gender", "male");
+		nAge.setProbabilities(0.50, "<15", "gender", "female");
+		nAge.setProbabilities(0.50, ">=15", "gender", "female");
+
+		Map<NodeCategorical, String> node2value = new HashMap<>();
+		node2value.put(nGender, "male");
+		node2value.put(nAge, "<15");
+		JUnitBigDecimals.assertEqualsBD(
+				0.55*0.55,
+				bn.jointProbability(node2value, Collections.emptyMap()),
+				8
+				);
+		JUnitBigDecimals.assertEqualsBD(
+				bn.jointProbability(node2value, Collections.emptyMap()),
+				bn.jointProbabilityFromFactors(node2value),
+				8
+				);
+		node2value.put(nGender, "male");
+		node2value.put(nAge, ">=15");
+		JUnitBigDecimals.assertEqualsBD(
+				0.55*0.45,
+				bn.jointProbability(node2value, Collections.emptyMap()),
+				8
+				);
+		
+		JUnitBigDecimals.assertEqualsBD(
+				bn.jointProbability(node2value, Collections.emptyMap()),
+				bn.jointProbabilityFromFactors(node2value),
+				8
+				);
+		
 		
 	}
 	
