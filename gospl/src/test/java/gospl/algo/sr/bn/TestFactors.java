@@ -1,7 +1,8 @@
 package gospl.algo.sr.bn;
 
-import static org.junit.Assert.*;
 import static gospl.algo.sr.bn.JUnitBigDecimals.assertEqualsBD;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import org.junit.After;
 import org.junit.Before;
@@ -35,7 +36,7 @@ public class TestFactors {
 		nAge.setProbabilities(0.50, "<15", "gender", "female");
 		nAge.setProbabilities(0.50, ">=15", "gender", "female");
 		
-		Factor f = Factor.createFromCPT(bn, nAge);
+		Factor f = nAge.asFactor();
 		
 		// is the factor having the right size? 
 		assertEquals(2*2, f.values.size());

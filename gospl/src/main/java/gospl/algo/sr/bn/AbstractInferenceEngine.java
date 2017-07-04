@@ -2,7 +2,10 @@ package gospl.algo.sr.bn;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,7 +19,7 @@ public abstract class AbstractInferenceEngine {
 	/**
 	 * evidence
 	 */
-	protected Map<NodeCategorical,String> variable2value = new HashMap<>();
+	protected Map<NodeCategorical,String> evidenceVariable2value = new HashMap<>();
 	
 	/**
 	 * should we recompute probabilities ?
@@ -44,7 +47,7 @@ public abstract class AbstractInferenceEngine {
 		if (!n.getDomain().contains(s))
 			throw new IllegalArgumentException("value "+s+" unknown in node "+n);
 		
-		dirty = (s != variable2value.put(n, s)) || dirty;
+		dirty = (s != evidenceVariable2value.put(n, s)) || dirty;
 		
 	}
 	
@@ -56,15 +59,17 @@ public abstract class AbstractInferenceEngine {
 	}
 	
 	public void removeEvidence(NodeCategorical n) {
-		dirty = variable2value.remove(n)!=null || dirty;
+		dirty = evidenceVariable2value.remove(n)!=null || dirty;
 	}
 	
 	public void clearEvidence() {
 		
-		if (!variable2value.isEmpty())
+		if (!evidenceVariable2value.isEmpty()) {
 			dirty = true;
+			evidenceVariable2value = new HashMap<>(); // not clear: other places might keep references to the past evidence
+		}
 
-		variable2value.clear();
+		
 	}
 	
 	public void compute() {
@@ -118,5 +123,59 @@ public abstract class AbstractInferenceEngine {
 		return this.getConditionalProbability(v, s);
 	}
 	
+
+	/**
+	 * Selects the variables relevant to assess the probability of node toCompute 
+	 * knowing evidence and all the nodes that might be considered.
+	 * @param toCompute
+	 * @param evidence
+	 * @param all
+	 * @return
+	 */
+	protected Set<NodeCategorical> selectRelevantVariables(
+			NodeCategorical toCompute,
+			Map<NodeCategorical,String> evidence,
+			Set<NodeCategorical> all
+			) {
+		Set<NodeCategorical>  relevant = new HashSet<>(all.size());
+		
+		if (toCompute != null)
+			relevant.addAll(toCompute.getAllAncestors());
+		
+		for (NodeCategorical n: evidence.keySet()) {
+			relevant.addAll(n.getAllAncestors());
+		}
+		
+		return relevant;
+	}
+	
+	
+	protected Set<NodeCategorical> selectRelevantVariables(
+			Set<NodeCategorical> toCompute,
+			Map<NodeCategorical,String> evidence,
+			Set<NodeCategorical> all
+			) {
+		Set<NodeCategorical>  relevant = new HashSet<>(all.size());
+		
+
+		for (NodeCategorical n: toCompute)
+			relevant.addAll(n.getAllAncestors());
+		
+		for (NodeCategorical n: evidence.keySet()) {
+			relevant.addAll(n.getAllAncestors());
+		}
+		
+		return relevant;
+	}
+
+	public Factor computeFactorPriorMarginalsFromString(Set<String> variables) {
+		return this.computeFactorPriorMarginals(
+				variables.stream().map(s -> bn.getVariable(s)).collect(Collectors.toSet())
+				);
+	}
+	
+	public Factor computeFactorPriorMarginals(Set<NodeCategorical> variables) {
+		throw new UnsupportedOperationException("this inference engine does not computes prior marginals as factors");
+	}
 	
 }

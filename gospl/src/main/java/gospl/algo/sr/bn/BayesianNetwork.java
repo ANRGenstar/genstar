@@ -31,6 +31,8 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 
 	protected Set<N> nodes = new HashSet<>();
 	
+	protected Map<String,N> name2node = new HashMap<>();
+	
 	protected List<N> nodesEnumeration;
 
 	private final String name;
@@ -76,9 +78,16 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 	 * @return
 	 */
 	public N getVariable(String id) {
+		
+		N res = name2node.get(id);
+		if (res != null)
+			return res;
+		
 		for (N n: nodes) {
-			if (n.getName().equals(id))
+			if (n.getName().equals(id)) {
+				name2node.put(id, n);
 				return n;
+			}
 		}
 		return null;
 	}
@@ -89,6 +98,7 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 	 */
 	public void notifyNodesChanged() {
 		nodesEnumeration = null;
+		name2node.clear();
 	}
 	
 	/**
@@ -261,7 +271,6 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 		res.put(node2value, d);
 	}
 	*/
-	
 	
 	
 	

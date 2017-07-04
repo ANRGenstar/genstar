@@ -36,6 +36,12 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 
 	}
 	
+	@Override
+	public void notifyNodesChanged() {
+		super.notifyNodesChanged();
+		node2factor.clear();
+	}
+	
 	/**
 	 * Returns the node as a factor, or the corresponding value 
 	 * @param n
@@ -322,7 +328,44 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	 * @param node
 	 */
 	public void prune(NodeCategorical n) {
-		
+		// TODO !!!
 	}
+
+
+	/**
+	 * Returns a map of variable (node) and value by parsing the string values
+	 * @param sss
+	 * @return
+	 */
+	public Map<NodeCategorical, String> toNodeAndValue(String... sss) {
 		
+		return this.toNodeAndValue(this.nodes, sss);
+	}	
+	
+	/**
+	 * Returns a map of variable (node) and value by parsing the string values
+	 * @param sss
+	 * @return
+	 */
+	public Map<NodeCategorical, String> toNodeAndValue(Collection<NodeCategorical> nodes, String... sss) {
+		
+		if (nodes != null && !this.nodes.containsAll(nodes))
+			throw new IllegalArgumentException("Not all the nodes "+nodes+" are in this Bayesian network");
+		if (nodes != null && sss.length != nodes.size()*2)
+			throw new IllegalArgumentException("invalid keys and values");
+		
+		Map<NodeCategorical,String> n2s = new HashMap<>(nodes != null?nodes.size():this.nodes.size());
+		for (int i=0; i<sss.length; i+=2) {
+			NodeCategorical n = getVariable(sss[i]);
+			if (n == null || (nodes != null && !nodes.contains(n)))
+				throw new IllegalArgumentException("Unknown variable "+sss[i]);
+			String v = sss[i+1];
+			if (!n.getDomain().contains(v))
+				throw new IllegalArgumentException("unknown value "+v+" for variable "+sss[i]);
+			n2s.put(n, v);
+		}
+		return n2s;
+	}	
+	
+
 }

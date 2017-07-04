@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
+// TODO remove
 public class TestSachs extends AbstractTestAnyBayesianNetwork {
 
 	public TestSachs() {
@@ -13,9 +14,31 @@ public class TestSachs extends AbstractTestAnyBayesianNetwork {
 	}
 
 	@Test
-	public void testInferenceTwo() {
+	public void testInferenceTwoConditionning() {
 		
-		super.testInference(
+		super.testInferenceSimpleConditionning(
+				new HashMap<String,String>(){{
+					put("PIP3", "1");
+					put("Akt", "2");
+				}}, 
+				new HashMap<String,Map<String,Double>>(){{
+					put("Plcg", new HashMap<String,Double>() {{ 
+						put("2", 0.0284);
+						put("3", 0.1940);
+					}});
+					put("Jnk", new HashMap<String,Double>() {{
+						put("1", 0.5309);
+					}});
+				}}
+				);
+		
+	}
+	
+
+	@Test
+	public void testInferenceTwoElimination() {
+		
+		super.testInferenceElimination(
 				new HashMap<String,String>(){{
 					put("PIP3", "1");
 					put("Akt", "2");

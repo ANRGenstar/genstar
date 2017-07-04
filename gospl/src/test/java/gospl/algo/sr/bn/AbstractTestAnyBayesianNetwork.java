@@ -13,10 +13,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import core.util.random.GenstarRandom;
-import gospl.algo.sr.bn.BayesianNetwork;
-import gospl.algo.sr.bn.InferencePerformanceUtils;
-import gospl.algo.sr.bn.NodeCategorical;
-import gospl.algo.sr.bn.SimpleConditionningInferenceEngine;
 
 public abstract class AbstractTestAnyBayesianNetwork {
 
@@ -51,12 +47,28 @@ public abstract class AbstractTestAnyBayesianNetwork {
 		CategoricalBayesianNetwork bn = loadFile();
 	}
 	
-	public void testInference(Map<String,String> evidence, Map<String,Map<String,Double>> expected) {
+	public void testInferenceSimpleConditionning(Map<String,String> evidence, Map<String,Map<String,Double>> expected) {
 		
 		CategoricalBayesianNetwork bn = loadFile();
 		
 		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
 
+		testInference(bn, ie, evidence, expected);
+	}
+	
+
+	public void testInferenceElimination(Map<String,String> evidence, Map<String,Map<String,Double>> expected) {
+		
+		CategoricalBayesianNetwork bn = loadFile();
+		
+		EliminationInferenceEngine ie = new EliminationInferenceEngine(bn);
+
+		testInference(bn, ie, evidence, expected);
+	}
+
+	public void testInference(CategoricalBayesianNetwork bn, AbstractInferenceEngine ie, Map<String,String> evidence, Map<String,Map<String,Double>> expected) {
+		
+		
 		// set inference
 		for (String nodeName: evidence.keySet()) {
 			
@@ -101,12 +113,24 @@ public abstract class AbstractTestAnyBayesianNetwork {
 	}
 	
 	@Test
-	public void testGenerate() {
-	
+	public void testGenerateWithSimpleConditionning() {
+
 		CategoricalBayesianNetwork bn = loadFile();
 
-		SimpleConditionningInferenceEngine ie = new SimpleConditionningInferenceEngine(bn);
-		
+		testGenerateWith(bn, new SimpleConditionningInferenceEngine(bn));
+	}
+	
+	@Test
+	public void testGenerateWithElimination() {
+
+		CategoricalBayesianNetwork bn = loadFile();
+
+		testGenerateWith(bn, new EliminationInferenceEngine(bn));
+	}
+	
+	public void testGenerateWith(CategoricalBayesianNetwork bn, AbstractInferenceEngine ie) {
+	
+
 		for (int i=0; i<100; i++) {
 			Map<NodeCategorical,String> node2attribute = new HashMap<>();
 			// define values for each individual

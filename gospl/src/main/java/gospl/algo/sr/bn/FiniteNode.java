@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,7 +58,7 @@ public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode
 
 	protected abstract void adaptContentSize();
 	
-	public Collection<String> getDomain() {
+	public List<String> getDomain() {
 		return Collections.unmodifiableList(domain);
 	}
 	

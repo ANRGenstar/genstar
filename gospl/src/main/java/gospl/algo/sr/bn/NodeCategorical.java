@@ -667,6 +667,16 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		return f;
 	}
 	
+	/**
+	 * A node together its parents set is defined as a family
+	 * @return
+	 */
+	public Set<NodeCategorical> family() {
+		HashSet<NodeCategorical> res = new HashSet<>(this.getParents());
+		res.add(this);
+		return res;
+	}
+	
 	
 	@Override
 	public String toString() {
@@ -677,7 +687,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 			sb.append("|");
 		boolean first = true;
 		for (NodeCategorical p: getParents()) {
-			sb.append(p.getName());
+			//sb.append(p.getName());
 			if (first) 
 				first = false;
 			else

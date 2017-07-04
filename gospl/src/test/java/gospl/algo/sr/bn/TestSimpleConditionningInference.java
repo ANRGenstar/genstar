@@ -4,10 +4,6 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import gospl.algo.sr.bn.BayesianNetwork;
-import gospl.algo.sr.bn.NodeCategorical;
-import gospl.algo.sr.bn.SimpleConditionningInferenceEngine;
-
 public class TestSimpleConditionningInference {
 
 
