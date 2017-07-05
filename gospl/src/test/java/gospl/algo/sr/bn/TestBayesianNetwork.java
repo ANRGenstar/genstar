@@ -84,11 +84,11 @@ public class TestBayesianNetwork {
 		nGender.setProbabilities(0.55, "male");
 		nGender.setProbabilities(0.45, "female");
 
-		assertEquals(0.55, nGender.getProbability("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getProbability("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getProbability("male"), 1e-5);
+		assertEquals(0.45, nGender.getProbability("female"), 1e-5);
 		
-		assertEquals(0.55, nGender.getConditionalProbability("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getConditionalProbability("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getConditionalProbability("male"), 1e-5);
+		assertEquals(0.45, nGender.getConditionalProbability("female"), 1e-5);
 
 		assertTrue("CPT should be valid", nGender.isValid());
 		
@@ -106,11 +106,11 @@ public class TestBayesianNetwork {
 		nGender.setProbabilities(0.55, "male");
 		nGender.setProbabilities(0.45, "female");
 
-		assertEquals(0.55, nGender.getProbability("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getProbability("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getProbability("male"), 1e-5);
+		assertEquals(0.45, nGender.getProbability("female"), 1e-5);
 		
-		assertEquals(0.55, nGender.getConditionalProbability("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getConditionalProbability("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getConditionalProbability("male"), 1e-5);
+		assertEquals(0.45, nGender.getConditionalProbability("female"), 1e-5);
 
 		assertTrue("CPT should be valid", nGender.isValid());
 		
@@ -129,8 +129,8 @@ public class TestBayesianNetwork {
 		nAge.setProbabilities(0.50, "<15", "gender", "female");
 		nAge.setProbabilities(0.50, ">=15", "gender", "female");
 
-		assertEquals(0.50, nAge.getProbability("<15","gender","female").doubleValue(), 1e-5);
-		assertEquals(0.55, nAge.getProbability("<15","gender","male").doubleValue(), 1e-5);
+		assertEquals(0.50, nAge.getProbability("<15","gender","female"), 1e-5);
+		assertEquals(0.55, nAge.getProbability("<15","gender","male"), 1e-5);
 
 		assertTrue("CPT should be valid", nAge.isValid());		
 	}
@@ -146,11 +146,11 @@ public class TestBayesianNetwork {
 		nGender.setProbabilities(0.55, "male");
 		nGender.setProbabilities(0.45, "female");
 
-		assertEquals(0.55, nGender.getProbability("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getProbability("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getProbability("male"), 1e-5);
+		assertEquals(0.45, nGender.getProbability("female"), 1e-5);
 		
-		assertEquals(0.55, nGender.getConditionalProbability("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getConditionalProbability("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getConditionalProbability("male"), 1e-5);
+		assertEquals(0.45, nGender.getConditionalProbability("female"), 1e-5);
 
 		assertTrue("CPT should be valid", nGender.isValid());
 		
@@ -163,8 +163,8 @@ public class TestBayesianNetwork {
 		nAge.setProbabilities(0.50, "<15", "gender", "female");
 		nAge.setProbabilities(0.50, ">=15", "gender", "female");
 
-		assertEquals(0.50, nAge.getProbability("<15","gender","female").doubleValue(), 1e-5);
-		assertEquals(0.55, nAge.getProbability("<15","gender","male").doubleValue(), 1e-5);
+		assertEquals(0.50, nAge.getProbability("<15","gender","female"), 1e-5);
+		assertEquals(0.55, nAge.getProbability("<15","gender","male"), 1e-5);
 
 		assertTrue("CPT should be valid", nAge.isValid());		
 		
@@ -184,17 +184,17 @@ public class TestBayesianNetwork {
 		nActif.setProbabilities(0.9, "oui", "gender", "female", "age", ">=15");
 		nActif.setProbabilities(0.1, "non", "gender", "female", "age", ">=15");
 		
-		assertEquals(0.0, nActif.getProbability("oui","gender","male", "age", "<15").doubleValue(), 1e-5);
-		assertEquals(1.0, nActif.getProbability("non","gender","male", "age", "<15").doubleValue(), 1e-5);
+		assertEquals(0.0, nActif.getProbability("oui","gender","male", "age", "<15"), 1e-5);
+		assertEquals(1.0, nActif.getProbability("non","gender","male", "age", "<15"), 1e-5);
 
-		assertEquals(0.05, nActif.getProbability("oui","gender","female", "age", "<15").doubleValue(), 1e-5);
-		assertEquals(0.95, nActif.getProbability("non","gender","female", "age", "<15").doubleValue(), 1e-5);
+		assertEquals(0.05, nActif.getProbability("oui","gender","female", "age", "<15"), 1e-5);
+		assertEquals(0.95, nActif.getProbability("non","gender","female", "age", "<15"), 1e-5);
 
-		assertEquals(0.8, nActif.getProbability("oui","gender","male", "age", ">=15").doubleValue(), 1e-5);
-		assertEquals(0.2, nActif.getProbability("non","gender","male", "age", ">=15").doubleValue(), 1e-5);
+		assertEquals(0.8, nActif.getProbability("oui","gender","male", "age", ">=15"), 1e-5);
+		assertEquals(0.2, nActif.getProbability("non","gender","male", "age", ">=15"), 1e-5);
 		
-		assertEquals(0.9, nActif.getProbability("oui","gender","female", "age", ">=15").doubleValue(), 1e-5);
-		assertEquals(0.1, nActif.getProbability("non","gender","female", "age", ">=15").doubleValue(), 1e-5);
+		assertEquals(0.9, nActif.getProbability("oui","gender","female", "age", ">=15"), 1e-5);
+		assertEquals(0.1, nActif.getProbability("non","gender","female", "age", ">=15"), 1e-5);
 
 		assertTrue("CPT should be valid", nActif.isValid());		
 	}
@@ -221,8 +221,8 @@ public class TestBayesianNetwork {
 
 		assertTrue("the test node is not valid", nAge.isValid());
 		
-		nGender.getConditionalProbabilityPosterior("male").doubleValue();
-		nGender.getConditionalProbabilityPosterior("female").doubleValue();
+		nGender.getConditionalProbabilityPosterior("male");
+		nGender.getConditionalProbabilityPosterior("female");
 		nAge.getConditionalProbabilityPosterior("A");
 		nAge.getConditionalProbabilityPosterior("B");
 		nAge.getConditionalProbabilityPosterior("C");
@@ -246,12 +246,12 @@ public class TestBayesianNetwork {
 		nAge.setProbabilities(0.50, "<15", "gender", "female");
 		nAge.setProbabilities(0.50, ">=15", "gender", "female");
 
-		assertEquals(0.55, nGender.getConditionalProbabilityPosterior("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getConditionalProbabilityPosterior("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getConditionalProbabilityPosterior("male"), 1e-5);
+		assertEquals(0.45, nGender.getConditionalProbabilityPosterior("female"), 1e-5);
 
 		
-		assertEquals(0.5275, nAge.getConditionalProbabilityPosterior("<15").doubleValue(), 1e-5);
-		assertEquals(0.4725, nAge.getConditionalProbabilityPosterior(">=15").doubleValue(), 1e-5);
+		assertEquals(0.5275, nAge.getConditionalProbabilityPosterior("<15"), 1e-5);
+		assertEquals(0.4725, nAge.getConditionalProbabilityPosterior(">=15"), 1e-5);
 
 	}
 
@@ -263,8 +263,8 @@ public class TestBayesianNetwork {
 		nGender.setProbabilities(0.55, "male");
 		nGender.setProbabilities(0.45, "female");
 
-		assertEquals(0.55, nGender.getConditionalProbabilityPosterior("male").doubleValue(), 1e-5);
-		assertEquals(0.45, nGender.getConditionalProbabilityPosterior("female").doubleValue(), 1e-5);
+		assertEquals(0.55, nGender.getConditionalProbabilityPosterior("male"), 1e-5);
+		assertEquals(0.45, nGender.getConditionalProbabilityPosterior("female"), 1e-5);
 
 		
 		NodeCategorical nAge = new NodeCategorical(null, "age");
@@ -376,28 +376,28 @@ public class TestBayesianNetwork {
 		Map<NodeCategorical, String> node2value = new HashMap<>();
 		node2value.put(nGender, "male");
 		node2value.put(nAge, "<15");
-		JUnitBigDecimals.assertEqualsBD(
+		assertEquals(
 				0.55*0.55,
 				bn.jointProbability(node2value, Collections.emptyMap()),
-				8
+				1e-8
 				);
-		JUnitBigDecimals.assertEqualsBD(
+		assertEquals(
 				bn.jointProbability(node2value, Collections.emptyMap()),
 				bn.jointProbabilityFromFactors(node2value),
-				8
+				1e-8
 				);
 		node2value.put(nGender, "male");
 		node2value.put(nAge, ">=15");
-		JUnitBigDecimals.assertEqualsBD(
+		assertEquals(
 				0.55*0.45,
 				bn.jointProbability(node2value, Collections.emptyMap()),
-				8
+				1e-8
 				);
 		
-		JUnitBigDecimals.assertEqualsBD(
+		assertEquals(
 				bn.jointProbability(node2value, Collections.emptyMap()),
 				bn.jointProbabilityFromFactors(node2value),
-				8
+				1e-8
 				);
 		
 		

@@ -255,7 +255,7 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	
 
 	@Override
-	protected BigDecimal retrieveConditionalProbability(NodeCategorical n, String s) {
+	protected double retrieveConditionalProbability(NodeCategorical n, String s) {
 
 		Set<NodeCategorical> set = new HashSet<>(1);
 		set.add(n);
@@ -266,13 +266,19 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	}
 
 	@Override
-	protected Map<String, BigDecimal> retrieveConditionalProbability(NodeCategorical n) {
+	protected double[] retrieveConditionalProbability(NodeCategorical n) {
+		
 		Set<NodeCategorical> set = new HashSet<>(1);
 		set.add(n);
 		Factor f = computeFactorPriorMarginals(set);
 		f.normalize();
 		// TODO optimiser access à facteur avec une variable
-		return n.getDomain().stream().collect(Collectors.toMap(s->s, s->f.get(n.name,s)));
+		double[] res = new double[n.getDomainSize()];
+		for (int i=0; i<n.getDomainSize(); i++) {
+			res[i] = f.get(n.name, n.getValueIndexed(i));
+		}
+		return res;
+		//return n.getDomain().stream().collect(Collectors.toMap(s->s, s->f.get(n.name,s)));
 	}
 
 }

@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +21,7 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 	/**
 	 * normalizing factor for this evidence
 	 */
-	protected BigDecimal norm = null;
+	protected Double norm = null;
 
 	
 	public RecursiveConditionningEngine(CategoricalBayesianNetwork bn) {
@@ -74,7 +73,7 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 
 		// compute the evidence proba
 		if (evidenceVariable2value.isEmpty())
-			norm = BigDecimal.ONE;
+			norm = 1.;
 		else {
 			logger.debug("computing p(evidence)...");
 
@@ -89,46 +88,47 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 	}
 	
 	@Override
-	protected BigDecimal retrieveConditionalProbability(NodeCategorical n, String s) {
+	protected double retrieveConditionalProbability(NodeCategorical n, String s) {
 
 		if (evidenceVariable2value.containsKey(n)) {
 			if (evidenceVariable2value.get(n).equals(s))
-				return BigDecimal.ONE;
+				return 1.;
 			else 
-				return BigDecimal.ZERO;
+				return 0.;
 		}
 		Map<NodeCategorical,String> n2v = new HashMap<>(evidenceVariable2value);
 		n2v.put(n, s);
 		
-		BigDecimal r = dtree.recursiveConditionning(n2v);
-		return r.divide(norm, BigDecimal.ROUND_HALF_UP);
+		double r = dtree.recursiveConditionning(n2v);
+		return r / norm;
 		
 	}
 
 	@Override
-	protected Map<String, BigDecimal> retrieveConditionalProbability(NodeCategorical n) {
+	protected double[] retrieveConditionalProbability(NodeCategorical n) {
 		
-		Map<String, BigDecimal> res = new HashMap<>();
+		double[] res = new double[n.getDomainSize()];
 		
-		BigDecimal total = BigDecimal.ZERO;
+		double total = 0.;
 		
-		for (String v: n.getDomain().subList(0, n.getDomainSize()-2)) {
-			BigDecimal p = null;
+		for (int i=0; i<n.getDomainSize()-1; i++) {
+			String v = n.getValueIndexed(i);
+			double p;
 			if (evidenceVariable2value.containsKey(n)) {
 				if (evidenceVariable2value.get(n).equals(v))
-					p = BigDecimal.ONE;
+					p = 1.;
 				else 
-					p = BigDecimal.ZERO;
+					p = 0;
 			} else {
 				Map<NodeCategorical,String> n2v = new HashMap<>(evidenceVariable2value);
 				n2v.put(n, v);
-				p = dtree.recursiveConditionning(n2v).divide(norm, BigDecimal.ROUND_HALF_UP);
+				p = dtree.recursiveConditionning(n2v) / norm;
 			}
-			res.put(v, p);
-			total = total.add(p);
+			res[i] = p;
+			total += p;
 		}
 		
-		res.put(n.getDomain().get(n.getDomainSize()-1), BigDecimal.ONE.subtract(total));
+		res[n.getDomainSize()-1] = 1.0 - total;
 		
 		return res;
 		

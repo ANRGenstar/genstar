@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -96,12 +95,12 @@ public abstract class AbstractInferenceEngine {
 		
 	}
 	
-	protected abstract BigDecimal retrieveConditionalProbability(NodeCategorical n, String s);
+	protected abstract double retrieveConditionalProbability(NodeCategorical n, String s);
 	
-	protected abstract Map<String,BigDecimal> retrieveConditionalProbability(NodeCategorical n);
+	protected abstract double[] retrieveConditionalProbability(NodeCategorical n);
 
 	
-	public final BigDecimal getConditionalProbability(NodeCategorical n, String s) {
+	public final double getConditionalProbability(NodeCategorical n, String s) {
 		if (!n.getDomain().contains(s))
 			throw new IllegalArgumentException("there is no value "+s+" in the domain of variable "+n+" (use one of "+n.getDomain()+")");
 		if (dirty)
@@ -116,7 +115,7 @@ public abstract class AbstractInferenceEngine {
 	 * @param s
 	 * @return
 	 */
-	public final BigDecimal getConditionalProbability(String variableName, String s) {
+	public final double getConditionalProbability(String variableName, String s) {
 		NodeCategorical v = bn.getVariable(variableName);
 		if (v == null)
 			throw new IllegalArgumentException("this Bayesian network does not contains a variable named "+variableName);
@@ -176,6 +175,12 @@ public abstract class AbstractInferenceEngine {
 	
 	public Factor computeFactorPriorMarginals(Set<NodeCategorical> variables) {
 		throw new UnsupportedOperationException("this inference engine does not computes prior marginals as factors");
+	}
+
+	public void addEvidence(Map<NodeCategorical, String> systematicEvidence) {
+		for (Map.Entry<NodeCategorical,String> e: systematicEvidence.entrySet()) {
+			addEvidence(e.getKey(), e.getValue());
+		}
 	}
 	
 }

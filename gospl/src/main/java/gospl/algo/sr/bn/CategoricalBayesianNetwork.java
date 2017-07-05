@@ -2,7 +2,6 @@ package gospl.algo.sr.bn;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
@@ -153,17 +153,18 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	        	
 	        	// now set the probabilities
 	        	final String tableContent = nodeDefinition.selectSingleNode("./TABLE").getText().trim();
-	        	List<BigDecimal> values = new LinkedList<>();
+	        	List<Double> values = new LinkedList<>();
 	        	for (String tok : tableContent.split("[ \t]+")) {
 	        		try {
-	        			values.add(new BigDecimal(tok));
+	        			//System.out.println("decoding "+tok+" to "+new Double(tok));
+	        			values.add(new Double(tok));
 	        		} catch (NumberFormatException e) {
 	        			throw new IllegalArgumentException("error while parsing this value as a BigDecimal: "+tok,e);
 	        		}
 	        	}
-	        	BigDecimal[] valuesA = new BigDecimal[values.size()];
+	        	Double[] valuesA = new Double[values.size()];
 	        	values.toArray(valuesA);
-	        	n.setProbabilities(valuesA);
+	        	n.setProbabilities(ArrayUtils.toPrimitive(valuesA));
 	        
 	        }
 		
@@ -245,7 +246,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	 * @param node2probabilities 
 	 * @return
 	 */
-	public BigDecimal jointProbability(
+	public double jointProbability(
 			Map<NodeCategorical,String> node2value, 
 			Map<NodeCategorical,String> evidence) {
 		
@@ -255,7 +256,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		*/
 		logger.trace("computing joint probability p({})", node2value);
 
-		BigDecimal res = BigDecimal.ONE;
+		double res = 1.;
 		
 		for (NodeCategorical n: rankVariablesPerZeros(node2value.keySet())) {
 			
@@ -265,14 +266,14 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 			if (!node2value.keySet().containsAll(n.getParents())) {
 				throw new InvalidParameterException("wrong parameters: expected values for each parent of "+n+": "+n.getParents());
 			}
-			BigDecimal p = null;
+			double p;
 			
 			// find the probability to be used
 			if (evidence.containsKey(n)) {
 				if (evidence.get(n).equals(v)) {
-					p = BigDecimal.ONE;
+					p = 1.;
 				} else {
-					p = BigDecimal.ZERO;
+					p = 0.;
 				}
 			} else if (n.hasParents()) {
 				// if there are parent values, let's create the probability by reading the CPT 
@@ -285,13 +286,13 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 			logger.trace("p({}={})={}", n.name, v, p);
 
 			// use it
-			if (p.compareTo(BigDecimal.ZERO)==0) {
+			if (p==0.) {
 				// optimisation: stop if multiplication by 0
-				res = BigDecimal.ZERO;
+				res = 0.;
 				break;
-			} else if (p.compareTo(BigDecimal.ONE) != 0) {
+			} else if (p != 1) {
 				// optimisation: multiply only if useful
-				res = res.multiply(p);
+				res = res* p;
 				InferencePerformanceUtils.singleton.incMultiplications();
 			}
 			
@@ -305,7 +306,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		
 	}
 	
-	public BigDecimal jointProbabilityFromFactors(Map<NodeCategorical,String> node2value) {
+	public double jointProbabilityFromFactors(Map<NodeCategorical,String> node2value) {
 		
 		Map<NodeCategorical,String> remaining = new HashMap<>(node2value);
 		

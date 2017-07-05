@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +23,7 @@ public class Factor {
 	
 	protected final boolean keepZeros = false;
 	
-	protected Map<Map<NodeCategorical,String>,BigDecimal> values = new HashMap<>();
+	protected Map<Map<NodeCategorical,String>,Double> values = new HashMap<>();
 	
 	
 	/**
@@ -42,7 +41,7 @@ public class Factor {
 	 */
 	public Factor clone() {
 		Factor res = new Factor(bn, new HashSet<>(variables));
-		for (Map.Entry<Map<NodeCategorical,String>,BigDecimal> e: values.entrySet()) {
+		for (Map.Entry<Map<NodeCategorical,String>,Double> e: values.entrySet()) {
 			res.setFactor(e.getKey(), e.getValue());
 		}
 		return res;
@@ -64,7 +63,7 @@ public class Factor {
 				if (!k.get(n).equals(evidence.get(n))) {
 					// and is contradicting evidence
 					if (keepZeros)
-						values.put(k, BigDecimal.ZERO);
+						values.put(k, 0.);
 					else 
 						it.remove();
 					// stop there for this line
@@ -85,8 +84,8 @@ public class Factor {
 		return res;
 	}
 	
-	public void setFactor(Map<NodeCategorical,String> instanciations, BigDecimal p) {
-		if (!keepZeros && BigDecimal.ZERO.compareTo(p)==0)
+	public void setFactor(Map<NodeCategorical,String> instanciations, double p) {
+		if (!keepZeros && p==0)
 			values.remove(instanciations);
 		else 
 			values.put(instanciations, p);	
@@ -97,21 +96,21 @@ public class Factor {
 	 * @param instantiations
 	 * @return
 	 */
-	public BigDecimal get(Map<NodeCategorical,String> instantiations) {
+	public double get(Map<NodeCategorical,String> instantiations) {
 		
 		// are parameters valid ? 
 		if (!variables.equals(instantiations.keySet())) {
 			throw new IllegalArgumentException("invalid variables "+instantiations.keySet()+" for factor "+this);
 		}
 		
-		BigDecimal p = values.get(instantiations);
+		Double p = values.get(instantiations);
 		
 		// maybe it's already computed
 		if (p != null)
 			return p;
 		
 		if (!keepZeros)
-			return BigDecimal.ZERO;
+			return 0;
 		
 		// compute on demand
 		//p = bn.jointProbability(instantiations, Collections.emptyMap());
@@ -120,7 +119,7 @@ public class Factor {
 		return p;
 	}
 	
-	public BigDecimal get(String... sss) {
+	public double get(String... sss) {
 		return this.get(bn.toNodeAndValue(this.variables, sss));
 	}
 	
@@ -140,10 +139,10 @@ public class Factor {
 		Set<Map<NodeCategorical,String>> done = new HashSet<>(values.size()/2);
 		for (IteratorCategoricalVariables it = bn.iterateDomains(novelSet); it.hasNext();) {
 			Map<NodeCategorical,String> v2n = it.next();
-			BigDecimal d = BigDecimal.ZERO;
+			double d = 0;
 			for (String v: var.getDomain()) {
 				v2n.put(var, v);
-				d = d.add(get(v2n));
+				d += get(v2n);
 				InferencePerformanceUtils.singleton.incAdditions();
 			}
 			v2n.remove(var);
@@ -167,18 +166,18 @@ public class Factor {
 		
 		for (IteratorCategoricalVariables it1=bn.iterateDomains(this.variables); it1.hasNext(); ) {
 			Map<NodeCategorical,String> it1m = it1.next(); 
-			BigDecimal d1 = this.get(it1m);
+			double d1 = this.get(it1m);
 			for (IteratorCategoricalVariables it2=bn.iterateDomains(varsDiff); it2.hasNext(); ) {
 				Map<NodeCategorical,String> it2m = new HashMap<>(it2.next()); 
 				for (NodeCategorical n: this.variables) {
 					if (f.variables.contains(n))
 						it2m.put(n,it1m.get(n));
 				}
-				BigDecimal d2 = f.get(it2m);
+				double d2 = f.get(it2m);
 				
 				it2m.putAll(it1m);
 				
-				BigDecimal times = d1.multiply(d2);
+				double times = d1 * d2;
 				InferencePerformanceUtils.singleton.incMultiplications();
 				
 				res.setFactor(it2m, times);
@@ -232,8 +231,8 @@ public class Factor {
 	public String toStringLong() {
 		StringBuffer sb = new StringBuffer(toString());
 		sb.append(":\n");
-		for (Map.Entry<Map<NodeCategorical,String>,BigDecimal> e: values.entrySet()) {
-			sb.append(e.getKey()).append(":").append(e.getValue().setScale(8, BigDecimal.ROUND_HALF_UP)).append("\n");
+		for (Map.Entry<Map<NodeCategorical,String>,Double> e: values.entrySet()) {
+			sb.append(e.getKey()).append(":").append(e.getValue()).append("\n");
 		}
 		return sb.toString();
 	}
@@ -244,19 +243,19 @@ public class Factor {
 	public void normalize() {
 		
 		// sum ?
-		BigDecimal total = BigDecimal.ZERO;
-		for (BigDecimal d: values.values()) {
-			total = total.add(d);
+		double total = 0;
+		for (double d: values.values()) {
+			total += d;
 			InferencePerformanceUtils.singleton.incAdditions();
 		}
 		
 		// do nothing if good already !
-		if (total.compareTo(BigDecimal.ONE)==0)
+		if (total==1)
 			return;
 		
 		// norm !
-		for (Entry<Map<NodeCategorical, String>, BigDecimal> e: values.entrySet()) {
-			values.put(e.getKey(), e.getValue().divide(total, BigDecimal.ROUND_HALF_UP));
+		for (Entry<Map<NodeCategorical, String>, Double> e: values.entrySet()) {
+			values.put(e.getKey(), e.getValue()/total);
 			InferencePerformanceUtils.singleton.incMultiplications();
 		}
 		

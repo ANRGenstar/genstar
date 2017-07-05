@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -66,7 +65,7 @@ public final class DNode {
 
 	private NodeCategorical eliminated = null;
 	
-	private LRUMap<Map<NodeCategorical,String>,BigDecimal> cacheEvidenceInContext2proba = null;
+	private LRUMap<Map<NodeCategorical,String>,Double> cacheEvidenceInContext2proba = null;
 	
 	/**
 	 * creates a node with no specific role. 
@@ -85,7 +84,7 @@ public final class DNode {
 	 * and the parameters for cache ration, min and max.
 	 * @return
 	 */
-	private final LRUMap<Map<NodeCategorical,String>,BigDecimal> getCache() {
+	private final LRUMap<Map<NodeCategorical,String>,Double> getCache() {
 		
 		if (cacheEvidenceInContext2proba == null) {
 			// create a cache with the right loading factor 
@@ -104,7 +103,7 @@ public final class DNode {
 			if (toCache < 1)
 				toCache = 1; // technical for LRUMap
 			logger.debug("cache: max values to query: {}, will cache {}", card, toCache);
-			cacheEvidenceInContext2proba = new LRUMap<Map<NodeCategorical,String>, BigDecimal>(toCache);
+			cacheEvidenceInContext2proba = new LRUMap<Map<NodeCategorical,String>, Double>(toCache);
 		}
 		return cacheEvidenceInContext2proba;
 		
@@ -329,7 +328,7 @@ public final class DNode {
 		return mine;
 	}
 	
-	public BigDecimal lookup(Map<NodeCategorical,String> n2v) {
+	protected double lookup(Map<NodeCategorical,String> n2v) {
 		
 		logger.debug("Lookup on {} for {}", f, n2v);
 
@@ -338,7 +337,7 @@ public final class DNode {
 		if (!n2v.containsKey(this.n)) {
 			logger.trace("Not concerned by evidence => 1.");
 			// our variable is not instantiated
-			return BigDecimal.ONE;
+			return 1.;
 		}
 		/*
 		if (!n2v.keySet().containsAll(this.f.variables)) {
@@ -394,7 +393,7 @@ public final class DNode {
 	 * @param n2v
 	 * @return
 	 */
-	public BigDecimal recursiveConditionning(Map<NodeCategorical,String> n2v) {
+	public double recursiveConditionning(Map<NodeCategorical,String> n2v) {
 		
 		logger.debug("Recursive Conditionning on {} for {}", this, n2v);
 		
@@ -418,7 +417,7 @@ public final class DNode {
 		y.keySet().retainAll(this.vars()); 
 				
 		logger.trace("search in cache {}", y);
-		BigDecimal cached = getCache().get(y);
+		Double cached = getCache().get(y);
 		if (cached != null) {
 			//logger.info("cached :-)");
 			return cached;
@@ -429,7 +428,7 @@ public final class DNode {
 		
 
 		logger.trace("no leaf => summing over cutset {}", cutset());
-		BigDecimal p = BigDecimal.ZERO;
+		double p = 0.;
 
 		// for each instantiation c of uninstantiated variables in cutset()
 		Set<NodeCategorical> uninstantiated = new HashSet<>(cutset());
@@ -446,24 +445,24 @@ public final class DNode {
 			
 			logger.trace("Sum of {} over {} ", this, instantiation);
 
-			BigDecimal pLeft = left.recursiveConditionning(instantiation);
+			double pLeft = left.recursiveConditionning(instantiation);
 			logger.trace("Sum of {} over {} = {}", left, instantiation, pLeft);
-			if (BigDecimal.ZERO.compareTo(pLeft) == 0)
+			if (pLeft == 0)
 				// if pLeft is zero, then why computing the recursive conditionning of right ?
 				continue; 
 
-			BigDecimal pRight = right.recursiveConditionning(instantiation);
+			double pRight = right.recursiveConditionning(instantiation);
 			logger.trace("Sum of {} over {} = {}", left, instantiation, pRight);
 
-			BigDecimal m = pLeft.multiply(pRight);
-			p = p.add(m);
+			double m = pLeft * pRight;
+			p += m;
 			
 			InferencePerformanceUtils.singleton.incAdditions();
 			InferencePerformanceUtils.singleton.incMultiplications();
 			
-			if (BigDecimal.ONE.compareTo(p) == 0) {
+			if (p >= 1) {
 				//logger.info("1 is reached in the sum already, stopping computations!");
-				p = BigDecimal.ONE;
+				p = 1;
 				break;
 			}
 			

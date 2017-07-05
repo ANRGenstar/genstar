@@ -1,9 +1,9 @@
 package gospl.algo.sr.bn;
 
 import static gospl.algo.sr.bn.JUnitBigDecimals.assertEqualsBD;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -107,11 +107,11 @@ public class TestInferenceEnginesOnData {
 			for (String s: expected.keySet()) {
 				for (String value: expected.get(s).keySet()) {
 					Double p = expected.get(s).get(value);
-					assertEqualsBD(
+					assertEquals(
 							"for dataset "+data.name+", expecting p("+s+"="+value+")="+p,
 							p, 
 							factor.get(s,value),
-							data.precision
+							Math.pow(1, -data.precision)
 							);
 				}
 			}
@@ -158,11 +158,11 @@ public class TestInferenceEnginesOnData {
 		// now iterate these variables and question their values
 		for (int i=0; i<3; i++) {
 			for (NodeCategorical n: toQuery) {
-				BigDecimal total = BigDecimal.ZERO;
+				double total = 0.;
 				for (String s: n.getDomain()) {
-					BigDecimal d = ie.getConditionalProbability(n, s);
+					double d = ie.getConditionalProbability(n, s);
 					System.err.println("p("+n.name+"="+s+"|evidence)="+d);
-					total = total.add(d);
+					total = total += d;
 				}
 				System.err.println("=> p("+n.name+"=*|evidence)="+total);
 			}
@@ -193,20 +193,20 @@ public class TestInferenceEnginesOnData {
 			// ensure evidence is respected 
 			for (Map.Entry<String,String> k2v: evidence.entrySet()) {
 				ie.addEvidence(k2v.getKey(), k2v.getValue());
-				assertEqualsBD(
+				assertEquals(
 						"for inference engine "+ieClass.getSimpleName()+" and dataset "+data.name+", expecting p("+k2v.getKey()+"="+k2v.getValue()+"|direct evidence)=1.0",
-						BigDecimal.ONE, 
+						1., 
 						ie.getConditionalProbability(k2v.getKey(), k2v.getValue()),
-						data.precision
+						Math.pow(1, -data.precision)
 						);
 				for (String other: bn.getVariable(k2v.getKey()).getDomain()) {
 					if (other.equals(k2v.getValue()))
 						continue;
-					assertEqualsBD(
+					assertEquals(
 							"for inference engine "+ieClass.getSimpleName()+" and dataset "+data.name+", expecting p("+k2v.getKey()+"="+other+"|direct evidence)=0.0",
-							BigDecimal.ZERO, 
+							1., 
 							ie.getConditionalProbability(k2v.getKey(), other),
-							data.precision
+							Math.pow(1, -data.precision)
 							);
 				}
 			}
@@ -218,11 +218,11 @@ public class TestInferenceEnginesOnData {
 			for (String s: expected.keySet()) {
 				for (String value: expected.get(s).keySet()) {
 					Double p = expected.get(s).get(value);
-					assertEqualsBD(
+					assertEquals(
 							"for inference engine "+ieClass.getSimpleName()+" and dataset "+data.name+", expecting p("+s+"="+value+"|"+evidence+")="+p,
 							p, 
 							ie.getConditionalProbability(s, value),
-							data.precision
+							Math.pow(1, -data.precision)
 							);
 				}
 			}
@@ -236,23 +236,92 @@ public class TestInferenceEnginesOnData {
 		
 	}
 	
-
 	@Test(timeout=20000)
-	public void testGenerate() {
-		
+	public void testGenerateWithEvidence() {
+
+		ie.clearEvidence();
 		InferencePerformanceUtils.singleton.reset();
 		
-		for (int i=0; i<1000; i++) {
+		// define some evidence to be asserted for any individual
+		// sets evidence for the two last nodes of the network
+		List<NodeCategorical> varsOrdered = bn.enumerateNodes();
+		int evidenceToSet = bn.getNodes().size()/2;
+		Map<NodeCategorical,String> systematicEvidence = new HashMap<>();
+		
+		for (int i=0; i<evidenceToSet; i++) {
+			// take the one variable from the last of the network (to test retropropagation, the most difficult case)
+			NodeCategorical n = varsOrdered.get(varsOrdered.size()-i-1);
+			// take one value which does not has probability 0
+			String v = null;
+			v = n.getDomain().get(n.getDomainSize()-1);
+			/*for (String cv: n.getDomain()) {
+				if (BigDecimal.ZERO.compareTo(n.getConditionalProbabilityPosterior(cv)) < 0) {
+					v = cv;
+					break;
+				}
+			}
+			*/
+			//String v = GenstarRandomUtils.oneOf(n.getDomain().stream().filter(m ->)<0).collect(Collectors.toList()));
+			System.err.println("will define evidence "+n.name+"="+v);
+			systematicEvidence.put(n, v);
+		}
+		
+		for (int i=0; i<100; i++) {
+			
+			ie.addEvidence(systematicEvidence);
 			Map<NodeCategorical,String> node2attribute = new HashMap<>();
 			// define values for each individual
 			for (NodeCategorical n: bn.enumerateNodes()) {
 				double random = GenstarRandom.getInstance().nextDouble();
 				// pick up a value
-				BigDecimal cumulated = BigDecimal.ZERO;
+				double cumulated = 0.;
 				String value = null;
 				for (String v : n.getDomain()) {
-					cumulated = cumulated.add(ie.getConditionalProbability(n, v));
-					if (cumulated.doubleValue() >= random) {
+					cumulated += ie.getConditionalProbability(n, v);
+					if (cumulated >= random) {
+						value = v;
+						break;
+					}
+				}
+				if (value == null)
+					throw new RuntimeException("oops, should have picked a value!");
+				// that' the property of this individual
+				node2attribute.put(n, value);
+				// store this novel value as evidence for this individual
+				ie.addEvidence(n, value);
+			}
+			// we finished an individual
+			// reset evidence
+			ie.clearEvidence();
+			System.err.println(i+": "+node2attribute.entrySet().stream().map(e -> e.getKey().name+"="+e.getValue()).collect(Collectors.joining(",\t")));
+		}
+		
+		InferencePerformanceUtils.singleton.display();
+	}
+
+	public Map<NodeCategorical,String> generateFromFactorInferenceEngine () {
+		Map<NodeCategorical,String> res = new HashMap<>(bn.getNodes().size());
+		
+		
+	}
+	
+	@Test(timeout=20000)
+	public void testGenerate() {
+		
+		ie.clearEvidence();
+		InferencePerformanceUtils.singleton.reset();
+		
+		for (int i=0; i<100; i++) {
+			Map<NodeCategorical,String> node2attribute = new HashMap<>();
+			// define values for each individual
+			for (NodeCategorical n: bn.enumerateNodes()) {
+				double random = GenstarRandom.getInstance().nextDouble();
+				// pick up a value
+				double cumulated = 0.;
+				String value = null;
+				for (String v : n.getDomain()) {
+					cumulated += ie.getConditionalProbability(n, v);
+					if (cumulated >= random) {
 						value = v;
 						break;
 					}
