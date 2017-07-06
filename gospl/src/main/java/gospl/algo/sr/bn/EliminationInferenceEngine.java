@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,7 +44,7 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 
 
 	@Override
-	public Factor computeFactorPriorMarginals(Set<NodeCategorical> variables) {
+	public Factor computeFactorPosteriorMarginals(Set<NodeCategorical> variables) {
 		
 		// TODO efficient order !
 		LinkedHashSet<NodeCategorical> remainingVariables = new LinkedHashSet<>(bn.enumerateNodes());
@@ -92,7 +91,7 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 		
 		// Collections.shuffle(sorted);
 				
-		return computeFactorPriorMarginals(variables, sorted);
+		return computeFactorPosteriorMarginals(variables, sorted);
 		
 	}
 	
@@ -103,7 +102,9 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	 * @param orderOtherVariables
 	 * @return
 	 */
-	protected Factor computeFactorPriorMarginals(Set<NodeCategorical> variables, List<NodeCategorical> orderOtherVariables) {
+	protected Factor computeFactorPosteriorMarginals(
+			Set<NodeCategorical> variables, 
+			List<NodeCategorical> orderOtherVariables) {
 		
 		int biggestCPT = 0;
 		
@@ -181,7 +182,7 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 		}
 		
 		
-		Factor res = null;
+		Factor res = new Factor(bn, Collections.emptySet());
 		for (Factor f: node2factor.values()) {
 			if (res == null)
 				res = f;
@@ -257,9 +258,21 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	@Override
 	protected double retrieveConditionalProbability(NodeCategorical n, String s) {
 
+		
+		{
+			String valueFromEvidence = evidenceVariable2value.get(n);
+			if (valueFromEvidence != null) {
+				if (valueFromEvidence.equals(s))
+					return 1.;
+				else
+					return 0.;
+				
+			}
+		}
+		
 		Set<NodeCategorical> set = new HashSet<>(1);
 		set.add(n);
-		Factor f = computeFactorPriorMarginals(set);
+		Factor f = computeFactorPosteriorMarginals(set);
 		 // TODO optimser avvess a une facteur avec 1 var
 		f.normalize();
 		return f.get(n.name,s);
@@ -268,9 +281,23 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	@Override
 	protected double[] retrieveConditionalProbability(NodeCategorical n) {
 		
+		
+		{
+			String valueFromEvidence = evidenceVariable2value.get(n);
+			if (valueFromEvidence != null) {
+				double[] values = new double[n.getDomainSize()];
+				for (int i=0; i<n.getDomainSize(); i++) {
+					if (valueFromEvidence.equals(n.getValueIndexed(i)))
+							values[i] = 1.;
+					else
+						values[i] = 0.;
+				}
+			}
+		}
+		
 		Set<NodeCategorical> set = new HashSet<>(1);
 		set.add(n);
-		Factor f = computeFactorPriorMarginals(set);
+		Factor f = computeFactorPosteriorMarginals(set);
 		f.normalize();
 		// TODO optimiser access à facteur avec une variable
 		double[] res = new double[n.getDomainSize()];
@@ -279,6 +306,19 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 		}
 		return res;
 		//return n.getDomain().stream().collect(Collectors.toMap(s->s, s->f.get(n.name,s)));
+	}
+
+
+	@Override
+	public double getProbabilityEvidence() {
+		
+		// easy solution if evidence is empty
+		if (evidenceVariable2value.isEmpty())
+			return 1.0;
+		
+		Factor f = computeFactorPosteriorMarginals(Collections.emptySet());
+				
+		return f.getUniqueValue();
 	}
 
 }

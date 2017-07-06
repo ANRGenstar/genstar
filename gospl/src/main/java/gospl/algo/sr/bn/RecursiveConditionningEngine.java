@@ -1,7 +1,5 @@
 package gospl.algo.sr.bn;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +8,17 @@ import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.util.random.GenstarRandom;
+
 public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 
 	private Logger logger = LogManager.getLogger();
 
-	private LRUMap<Map<NodeCategorical,String>,DNode> cacheEvidenceToDTree = new LRUMap<>(50);
+	private LRUMap<Map<NodeCategorical,String>,DNode> cacheEvidenceToDTree = new LRUMap<>(1000);
 
-	protected DNode dtree = null;
+	private LRUMap<Map<NodeCategorical,String>,Double> cacheEvidenceToNorm = new LRUMap<>(1000);
+
+	protected DNode dtreeWithoutEvidence = null;
 	
 	/**
 	 * normalizing factor for this evidence
@@ -46,23 +48,26 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 		
 		// built the dtree for this network
 		//dtree = cacheEvidence2dtree.get(evidenceVariable2value);
-		dtree = cacheEvidenceToDTree.get(evidenceVariable2value);
+		//dtree = cacheEvidenceToDTree.get(evidenceVariable2value);
 		
-		if (dtree == null) {
+		if (dtreeWithoutEvidence == null) {
 			
 			// should build this dtree
 			
-			List<NodeCategorical> variables = new ArrayList<>(bn.getNodes());
+			/*List<NodeCategorical> variables = new ArrayList<>(bn.getNodes());
 			Collections.shuffle(variables);
+			*/
+			
+			List<NodeCategorical> variables = EliminationOrderDeepFirstSearch.computeEliminationOrderDeepFirstSearch(bn);
 			
 			//Hypergraph hg = new Hypergraph(bn);
 			//logger.info("hypergraph is:\n{}",hg.getDetailedRepresentation());
 			
 			logger.debug("building the dtree for evidence {}...", evidenceVariable2value);
-			dtree = DNode.eliminationOrder2DTree(bn, variables);
-			logger.debug("eliminating in the dtree the variables {}...", evidenceVariable2value);
-			dtree.instanciate(evidenceVariable2value);
-			cacheEvidenceToDTree.put(evidenceVariable2value, dtree);
+			dtreeWithoutEvidence = DNode.eliminationOrder2DTree(bn, variables);
+			//logger.debug("eliminating in the dtree the variables {}...", evidenceVariable2value);
+			//dtree.instanciate(evidenceVariable2value);
+			//cacheEvidenceToDTree.put(evidenceVariable2value, dtree);
 			
 		} else {
 			//logger.debug("retrieve dtree from cache for evidence {}", evidenceVariable2value);
@@ -75,12 +80,19 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 		if (evidenceVariable2value.isEmpty())
 			norm = 1.;
 		else {
-			logger.debug("computing p(evidence)...");
-
-			norm = dtree.recursiveConditionning(evidenceVariable2value);
+			
+			norm = cacheEvidenceToNorm.get(evidenceVariable2value);
+			if (norm == null) {
+				logger.info("computing p(evidence)...");
+				norm = dtreeWithoutEvidence.recursiveConditionning(evidenceVariable2value);
+				cacheEvidenceToNorm.put(evidenceVariable2value, norm);
+			} else {
+				logger.info("retrieve p(evidence) from cache: {}", norm);
+			}
+			
 		}
 		
-		logger.debug("dtree is: {}", dtree);
+		logger.debug("dtree is: {}", dtreeWithoutEvidence);
 		logger.debug("probability for evidence  p({})={}", evidenceVariable2value, norm);
 
 		
@@ -90,16 +102,20 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 	@Override
 	protected double retrieveConditionalProbability(NodeCategorical n, String s) {
 
-		if (evidenceVariable2value.containsKey(n)) {
-			if (evidenceVariable2value.get(n).equals(s))
-				return 1.;
-			else 
-				return 0.;
+		{
+			String evidenceV = evidenceVariable2value.get(n); 
+			if (evidenceV != null) {
+				if (evidenceV.equals(s))
+					return 1.;
+				else 
+					return 0.;
+			}
 		}
+		
 		Map<NodeCategorical,String> n2v = new HashMap<>(evidenceVariable2value);
 		n2v.put(n, s);
 		
-		double r = dtree.recursiveConditionning(n2v);
+		double r = dtreeWithoutEvidence.recursiveConditionning(n2v);
 		return r / norm;
 		
 	}
@@ -122,7 +138,7 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 			} else {
 				Map<NodeCategorical,String> n2v = new HashMap<>(evidenceVariable2value);
 				n2v.put(n, v);
-				p = dtree.recursiveConditionning(n2v) / norm;
+				p = dtreeWithoutEvidence.recursiveConditionning(n2v) / norm;
 			}
 			res[i] = p;
 			total += p;
@@ -134,4 +150,32 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 		
 	}
 
+	@Override
+	public double getProbabilityEvidence() {
+		if (dirty)
+			this.compute();
+		
+		return norm;
+	}
+	
+
+	/*
+	 * In the case of a dtree, its better to explore evidence in the order of the dtree ! 
+	 *
+	@Override
+	public Map<NodeCategorical,String> sampleOne() {
+		
+		if (dirty)
+			compute();
+		
+		// create a dtree for this specific evidence 
+		// so later the factors will be adapted and efficient.
+		
+		Map<NodeCategorical,String> modifiedEvidence = new HashMap<>(evidenceVariable2value);
+		 
+		dtreeWithoutEvidence.generate(modifiedEvidence);
+		
+		return modifiedEvidence;
+	}
+	*/
 }

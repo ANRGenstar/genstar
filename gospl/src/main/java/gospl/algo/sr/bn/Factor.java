@@ -13,10 +13,12 @@ import java.util.Set;
  * A factor f over variables X is a function that maps each instantiation 
  * x of variables X to a non-negative number, denoted f (x).1
  * 
+ * TODO optimisation for storage ? use double[] instead of a map ? 
+ * 
  * @author Samuel Thiriot
  *
  */
-public class Factor {
+public final class Factor {
 
 	private final CategoricalBayesianNetwork bn;
 	protected final Set<NodeCategorical> variables;
@@ -37,6 +39,19 @@ public class Factor {
 	}
 	
 	/**
+	 * Returns the unique value for a factor which as no variable, 
+	 * else throws a 
+	 * @return
+	 */
+	public double getUniqueValue() {
+		
+		if (!variables.isEmpty())
+			throw new IllegalArgumentException("Factor "+this+" has more than one variable, cannot return a unique value.");
+		
+		return values.values().iterator().next();
+	}
+	
+	/**
 	 * Clones a factor.
 	 */
 	public Factor clone() {
@@ -45,6 +60,20 @@ public class Factor {
 			res.setFactor(e.getKey(), e.getValue());
 		}
 		return res;
+	}
+	
+	public double sum() {
+		
+		// convention
+		if (values.isEmpty()) {
+			return 1.0;
+		}
+	
+		double total = 0;
+		for (Double d: values.values()) {
+			total += d;
+		}
+		return total;
 	}
 	
 	/**
@@ -79,6 +108,7 @@ public class Factor {
 	 * @return
 	 */
 	public Factor reduction(Map<NodeCategorical,String> evidence) {
+		// TODO optimization: if the evidence is not related to us, we might return us. 
 		Factor res = this.clone();
 		res.reduce(evidence);
 		return res;
@@ -116,6 +146,8 @@ public class Factor {
 		//p = bn.jointProbability(instantiations, Collections.emptyMap());
 		//values.put(instantiations, p);
 		
+		// should never come here...
+		// TODO
 		return p;
 	}
 	
@@ -153,8 +185,15 @@ public class Factor {
 	}
 	
 	public Factor multiply(Factor f) {
+		
 		if (!bn.getNodes().containsAll(f.variables))
 			throw new IllegalArgumentException("the other factor variables do not all belong this network");
+		
+		// special case of the empty factor: it is invariant, so we can return the other factor 
+		if (this.values.isEmpty())
+			return f.clone();
+		if (f.values.isEmpty())
+			return this.clone();
 		
 		Set<NodeCategorical> vvs = new HashSet<>(this.variables);
 		vvs.addAll(f.variables);

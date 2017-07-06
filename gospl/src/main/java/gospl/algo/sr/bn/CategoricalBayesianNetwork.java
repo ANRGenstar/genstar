@@ -307,9 +307,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	}
 	
 	public double jointProbabilityFromFactors(Map<NodeCategorical,String> node2value) {
-		
-		Map<NodeCategorical,String> remaining = new HashMap<>(node2value);
-		
+				
 		Factor f = null;
 		
 		for (NodeCategorical n: enumerateNodes()) {

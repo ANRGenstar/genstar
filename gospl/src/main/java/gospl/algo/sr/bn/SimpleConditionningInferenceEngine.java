@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -175,7 +176,7 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 	}
 
 
-	private Map<Map<NodeCategorical,String>,Map<Set<NodeCategorical>,Double>> known2nuisance2value = new HashMap<>();
+	private LRUMap<Map<NodeCategorical,String>,Map<Set<NodeCategorical>,Double>> known2nuisance2value = new LRUMap<>();
 	
 	private Double getCached(
 			Map<NodeCategorical,String> known, 
@@ -203,7 +204,9 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 	}
 	
 	/**
-	 * Given a set of known values for variables, lists all the combinations of variables / value to be investigated 
+	 * Given a set of known values for variables, and the list of the remaining variables not 
+	 * covered by this evidence (refered to as nuisance variables),
+	 * sums probabilities over the relevant variables to computed the expected probability.
 	 * @param known
 	 * @param node2probabilities 
 	 */
@@ -370,6 +373,18 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		// mark it clean
 		super.compute();
 		
+	}
+
+
+	@Override
+	public double getProbabilityEvidence() {
+
+		// quick answer
+		if (evidenceVariable2value.isEmpty())
+			return 1.;
+		
+		return this.sumProbabilities(evidenceVariable2value, selectRelevantVariables((NodeCategorical)null, evidenceVariable2value, bn.nodes)); // optimisation: elimination of irrelevant variables
+
 	}
 
 

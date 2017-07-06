@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.util.random.GenstarRandom;
+
 public abstract class AbstractInferenceEngine {
 
 	private Logger logger = LogManager.getLogger();
@@ -157,23 +159,25 @@ public abstract class AbstractInferenceEngine {
 		Set<NodeCategorical>  relevant = new HashSet<>(all.size());
 		
 
+		// for sure, we need to compute the probabilities of the parents of the probabilities questionned here
 		for (NodeCategorical n: toCompute)
 			relevant.addAll(n.getAllAncestors());
 		
+		// for sure, nodes with evidence are impacted
 		for (NodeCategorical n: evidence.keySet()) {
 			relevant.addAll(n.getAllAncestors());
 		}
-		
+				
 		return relevant;
 	}
 
 	public Factor computeFactorPriorMarginalsFromString(Set<String> variables) {
-		return this.computeFactorPriorMarginals(
+		return this.computeFactorPosteriorMarginals(
 				variables.stream().map(s -> bn.getVariable(s)).collect(Collectors.toSet())
 				);
 	}
 	
-	public Factor computeFactorPriorMarginals(Set<NodeCategorical> variables) {
+	public Factor computeFactorPosteriorMarginals(Set<NodeCategorical> variables) {
 		throw new UnsupportedOperationException("this inference engine does not computes prior marginals as factors");
 	}
 
@@ -182,5 +186,57 @@ public abstract class AbstractInferenceEngine {
 			addEvidence(e.getKey(), e.getValue());
 		}
 	}
+	
+	/**
+	 * Generates an instanciation of the network given current evidence. 
+	 * The default implementation works for any inference engine, but inheriting classes
+	 * might define more efficient methods.
+	 * @return
+	 */
+	public Map<NodeCategorical,String> sampleOne() {
+		
+		Map<NodeCategorical,String> originalEvidence = new HashMap<>(evidenceVariable2value);
+		
+		// we start with the original evidence. 
+		
+		Map<NodeCategorical,String> node2attribute = new HashMap<>();
+		// define values for each individual
+		for (NodeCategorical n: bn.enumerateNodes()) {
+			double random = GenstarRandom.getInstance().nextDouble();
+			// pick up a value
+			double cumulated = 0.;
+			String value = null;
+			//System.err.println("should pick a value for "+n.name);
+			for (String v : n.getDomain()) {
+				double p = this.getConditionalProbability(n, v);
+				cumulated += p;
+				//System.err.println("p("+n.name+"="+v+")="+p+" => "+cumulated+" ("+random+")");
+
+				if (cumulated >= random) {
+					value = v;
+					break;
+				}
+			}
+			if (value == null)
+				throw new RuntimeException("oops, should have picked a value based on postererior probabilities, but they sum to "+cumulated);
+			// that' the property of this individual
+			node2attribute.put(n, value);
+			// store this novel value as evidence for this individual
+			this.addEvidence(n, value);
+		}
+				
+		// reset evidence to its original value
+		this.clearEvidence();
+		this.addEvidence(originalEvidence);
+		
+		return node2attribute;
+	}
+	
+	/**
+	 * returns the probability for the current evidence.
+	 * @return
+	 */
+	public abstract double getProbabilityEvidence();
+	
 	
 }

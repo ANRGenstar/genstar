@@ -13,6 +13,17 @@ import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.util.random.GenstarRandom;
+
+/**
+ * A DNode of a DTree - by extension, a DNode is the DTree rooted on this node. 
+ * 
+ * You might tune the cache ratio and other characteristics by tuning the static variables prior 
+ * to computation.
+ * 
+ * @author Samuel Thiriot
+ *
+ */
 public final class DNode {
 	
 	/**
@@ -65,6 +76,9 @@ public final class DNode {
 
 	private NodeCategorical eliminated = null;
 	
+	/**
+	 * The cache which associates to each evidence (of interest to this node) the computed probability.
+	 */
 	private LRUMap<Map<NodeCategorical,String>,Double> cacheEvidenceInContext2proba = null;
 	
 	/**
@@ -146,7 +160,7 @@ public final class DNode {
 	 * @param toCompose
 	 * @return
 	 */
-	public static DNode compose(CategoricalBayesianNetwork bn, Set<DNode> toCompose) {
+	protected static DNode compose(CategoricalBayesianNetwork bn, Set<DNode> toCompose) {
 		
 		if (toCompose.size() == 1)
 			return toCompose.iterator().next();
@@ -174,7 +188,7 @@ public final class DNode {
 	 * @param cutset
 	 * @return
 	 */
-	public static DNode eliminationOrder2DTree(CategoricalBayesianNetwork bn, List<NodeCategorical> cutset) {
+	protected static DNode eliminationOrder2DTree(CategoricalBayesianNetwork bn, List<NodeCategorical> cutset) {
 		
 		logger.debug("create DTree from elimination order {}", cutset);
 
@@ -328,6 +342,11 @@ public final class DNode {
 		return mine;
 	}
 	
+	/**
+	 * Lookup algorithm as defined by Derwiche 
+	 * @param n2v
+	 * @return
+	 */
 	protected double lookup(Map<NodeCategorical,String> n2v) {
 		
 		logger.debug("Lookup on {} for {}", f, n2v);
@@ -394,6 +413,9 @@ public final class DNode {
 	 * @return
 	 */
 	public double recursiveConditionning(Map<NodeCategorical,String> n2v) {
+		
+		if (n2v.isEmpty())
+			return 1.0;
 		
 		logger.debug("Recursive Conditionning on {} for {}", this, n2v);
 		
@@ -581,6 +603,106 @@ public final class DNode {
 		}
 		
  	}
+
+	public void generate(Map<NodeCategorical, String> defined) {
+
+		logger.trace("generating for {} and known {}", this, defined);
+		 
+		double random = GenstarRandom.getInstance().nextDouble();
+
+		if (isLeaf()){
+			
+			if (defined.containsKey(n))
+				return;
+			
+			// that's a leaf ! 
+			// it means we have a factor to take values from :-)
+			logger.trace("picking a value from our factor {}", this.f);
+			
+			Factor reduced = f.reduction(defined);
+			//logger.trace("reduced: {} sums up to {}", reduced, reduced.sum());
+
+			// random should be updated, because this factor corresponds to conditional probabilities which sum up to 1 for each value
+			random = random * this.n.getParents().size();
+			
+			double cumulated = 0.;
+			for (Map.Entry<Map<NodeCategorical,String>,Double> e: reduced.values.entrySet()) {
+				cumulated += e.getValue();
+				if (cumulated >= random) {
+					defined.putAll(e.getKey());
+					logger.trace("picked from CPT: {}", e.getKey());
+					return; // stop all !
+				} 
+			}
+			
+		} else {
+			// not a leaf ! should call left and right
+			logger.trace("calling left {}", left);
+			left.generate(defined);
+			logger.trace("calling right {}", right);
+			right.generate(defined);	
+		} 
+
+		
+		/*
+		// if we know which variable we eliminate on this node, the process is ideal !
+		if (eliminated != null) {
+			
+			if (defined.containsKey(eliminated)) {
+				logger.trace("not computing {} which was already defined", eliminated);
+				return;
+			}
+				
+			logger.trace("we know we eliminate here {}", eliminated);
+			
+			double cumulated = 0.;
+
+			// we know which variable we play with here !
+			String value = null;
+
+
+			double norm = recursiveConditionning(defined);
+			
+			for (String v: eliminated.getDomain()) {
+				
+				defined.put(eliminated, v);
+				double p = recursiveConditionning(defined)/norm;
+				cumulated += p;
+				if (cumulated >= random) {
+					value = v;
+					logger.trace("picked {}={}", eliminated.name, v);
+					break;
+				}
+			}
+
+			if (value == null)
+				throw new RuntimeException("oops, should have picked a value based on postererior probabilities, but they sum to "+cumulated);
+
+		} else {
+			// we have to compute over the set of our variable... 
+			logger.trace("we don't know what we eliminate here; exploring all the variables {}", this.vars());
+			
+			
+			double cumulated = 0.;
+			for (
+					IteratorCategoricalVariables it = new IteratorCategoricalVariables(this.vars()); 
+					it.hasNext();
+					) {
+				
+				Map<NodeCategorical,String> c = it.next();
+				
+				c.putAll(defined);
+				double p = recursiveConditionning(c);
+				cumulated += p;
+				if (cumulated >= random) {
+					defined.putAll(c);
+					logger.trace("picked {}", c);
+					break;
+				}
+			}
+		}
+		*/
+	}
 
 
 }
