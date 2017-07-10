@@ -113,7 +113,7 @@ public class SpinNetwork implements INetProperties{
 	 * @return sampleGraph the sample Graph
 	 */
 	public Graph randomWalkSample(int sampleSize) {
-		System.out.println("Debut de la generation du sample graph");
+		//System.out.println("Debut de la generation du sample graph");
 		
 		// List of nodes from the original graph
 		List<Node> nodes = new ArrayList<>(getNodes());
@@ -173,7 +173,7 @@ public class SpinNetwork implements INetProperties{
 		while(nbNodes>0) {
 			// Check if the program is stuck and change the starting point if necessary
 			if(nbSteps>5*nodes.size()) {
-				System.out.println("Reset");
+				//System.out.println("Reset");
 				// Clear sampleGraph, sampleNodes and the maps
 				sampleGraph.clear();
 				sampleNodes.clear();
@@ -249,7 +249,7 @@ public class SpinNetwork implements INetProperties{
 			}
 		}
 		
-		System.out.println("Fin de generation du sample graph");
+		//System.out.println("Fin de generation du sample graph");
 		return sampleGraph;
 	}
 	
@@ -337,11 +337,11 @@ public class SpinNetwork implements INetProperties{
 	public Set<APopulationEntity> getNeighboor(APopulationEntity entite) {
 		Node node = kvEntityNodeFastList.get(entite);
 		Set<APopulationEntity> neighbors = new HashSet<APopulationEntity>();
-		for(Node n : network.getEachNode()) {
-			if(!n.equals(node) && n.hasEdgeBetween(node)) {
-				APopulationEntity e = n.getAttribute("entity");
-				neighbors.add(e);
-			}
+		int d = node.getDegree();
+		for(int i=0 ; i<d ; i++) {
+			Node n = node.getEdge(i).getOpposite(node);
+			APopulationEntity e = kvNodeEntityFastList.get(n);
+			neighbors.add(e);
 		}
 		return neighbors;
 	}

@@ -25,12 +25,28 @@ public class RegularNetworkGenerator {
 		
 		// for each node i, create a link to i+1 ... i+k/2
 		int link_id = 0;
-		for (int i=0; i<nodes.size();i++){
+		for(int i=0; i<nodes.size();i++) {
 			for (int j=1;j<=k/2;j++){
 				myNetwork.putLink(String.valueOf(link_id), nodes.get(i), nodes.get((i+j)%nodes.size()));
 				link_id++;				
 			}
 		}
+		
+		if(k%2 == 1 && nodes.size()%2 == 0) {
+			for(int i=0 ; i<nodes.size() ; i++) {
+				Node n1 = nodes.get(i);
+				int j = (k/2)+1;
+				while(n1.getDegree()<k) {
+					Node n2 = nodes.get((i+j)%nodes.size());
+					if(n2.getDegree()<k && !n1.hasEdgeBetween(n2)) {
+						myNetwork.putLink(String.valueOf(link_id), n1, n2);
+						link_id++;
+					}
+					j++;
+				}
+			}
+		}
+		
 		return myNetwork;
 	}
 	

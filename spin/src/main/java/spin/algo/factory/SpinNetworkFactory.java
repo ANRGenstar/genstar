@@ -62,11 +62,11 @@ public class SpinNetworkFactory {
 	public SpinPopulation generateNetwork(ENetworkGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
-			network = new SWNetworkGenerator().generateNetwork(baseNetwork,4, .1); 
+			network = new SWNetworkGenerator().generateNetwork(baseNetwork, 5, .1); 
 		if(typeGenerator.equals(ENetworkGenerator.Random))	
-			network = new RandomNetworkGenerator().generateNetwork(baseNetwork, .1);
+			network = new RandomNetworkGenerator().generateNetwork(baseNetwork, .05);
 		if(typeGenerator.equals(ENetworkGenerator.Regular))	
-			network = new RegularNetworkGenerator().generateNetwork(baseNetwork, 4);
+			network = new RegularNetworkGenerator().generateNetwork(baseNetwork, 5);
 		if(typeGenerator.equals(ENetworkGenerator.ScaleFree))	
 			network = new SFNetworkGenerator().generateNetwork(baseNetwork);
 		
