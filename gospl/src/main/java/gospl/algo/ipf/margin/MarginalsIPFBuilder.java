@@ -21,7 +21,6 @@ import core.util.GSPerformanceUtil;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 
 public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 

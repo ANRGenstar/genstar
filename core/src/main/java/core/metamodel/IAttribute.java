@@ -27,6 +27,14 @@ public interface IAttribute<V extends IValue> {
 	 */
 	public Set<V> getValues();
 
+
+	/**
+	 * All values this attribute can take as part of an entity
+	 * 
+	 * @return
+	 */
+	public Set<String> getValuesAsString();
+
 	/**
 	 * 
 	 * If the value set for this {@link IAttribute} is empty then values could be set to the ones in parameter. 

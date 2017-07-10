@@ -20,7 +20,7 @@ import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
-import spll.entity.GSFeature;
+import spll.entity.SpllFeature;
 import spll.io.SPLGeofileFactory;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
@@ -167,7 +167,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	/*
 	 * The method to implement to compute regression output with vector output format
 	 */
-	protected abstract Map<GSFeature, Number> buildOutput(SPLVectorFile formatFile, boolean intersect, boolean integer, Number tagetPopulation);
+	protected abstract Map<SpllFeature, Number> buildOutput(SPLVectorFile formatFile, boolean intersect, boolean integer, Number tagetPopulation);
 	
 	/**
 	 * build the output of Spll regression based localization as vector based format output.
@@ -183,8 +183,8 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 			boolean intersect, boolean integer, Number tagetPopulation) 
 			throws IOException, SchemaException{
 		@SuppressWarnings("unused")
-		Map<GSFeature, Number> map = this.buildOutput(formatFile, intersect, integer, tagetPopulation);
-		Collection<GSFeature> features = new ArrayList<>();
+		Map<SpllFeature, Number> map = this.buildOutput(formatFile, intersect, integer, tagetPopulation);
+		Collection<SpllFeature> features = new ArrayList<>();
 		
 		// TODO compute feature from map
 		

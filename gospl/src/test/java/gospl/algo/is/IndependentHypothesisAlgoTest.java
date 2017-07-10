@@ -10,13 +10,14 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import gospl.algo.GosplAlgoUtilTest;
-import gospl.algo.ISyntheticReconstructionAlgo;
-import gospl.algo.generator.DistributionBasedGenerator;
-import gospl.algo.generator.ISyntheticGosplPopGenerator;
-import gospl.algo.sampler.IDistributionSampler;
-import gospl.algo.sampler.sr.GosplBasicSampler;
+import gospl.algo.sr.ISyntheticReconstructionAlgo;
+import gospl.algo.sr.is.IndependantHypothesisAlgo;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
+import gospl.generator.DistributionBasedGenerator;
+import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.sampler.IDistributionSampler;
+import gospl.sampler.sr.GosplBasicSampler;
 
 public class IndependentHypothesisAlgoTest {
 	

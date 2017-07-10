@@ -24,9 +24,11 @@ import org.geotools.gce.geotiff.GeoTiffReader;
 import org.geotools.geometry.DirectPosition2D;
 import org.geotools.geometry.GeneralEnvelope;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.opengis.parameter.GeneralParameterValue;
 import org.opengis.parameter.ParameterValue;
 import org.opengis.parameter.ParameterValueGroup;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
@@ -37,7 +39,7 @@ import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
-import spll.entity.GSPixel;
+import spll.entity.SpllPixel;
 import spll.entity.GeoEntityFactory;
 import spll.entity.iterator.GSPixelIterator;
 import spll.util.SpllUtil;
@@ -53,7 +55,7 @@ import spll.util.SpllUtil;
  * @author kevinchapuis
  *
  */
-public class SPLRasterFile implements IGSGeofile<GSPixel> {
+public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 
 	private final GridCoverage2D coverage;
 	private final AbstractGridCoverage2DReader store;
@@ -63,7 +65,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	public static Number DEF_NODATA = -9999; 
 	private Number noData;
 	
-	private Collection<GSPixel> cacheGeoEntity = null;
+	private Collection<SpllPixel> cacheGeoEntity = null;
 
 	private Collection<AGeoValue> cacheGeoValues = null;
 	
@@ -122,7 +124,17 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
-		return thisCRS == null && fileCRS == null ? false : thisCRS.equals(fileCRS);
+		if (thisCRS == null && fileCRS == null) return false;
+		if (thisCRS.equals(fileCRS)) return true;
+		Integer codeThis = null;
+		Integer codeFile = null;
+		try {
+			codeThis = CRS.lookupEpsgCode(thisCRS, true);
+			codeFile = CRS.lookupEpsgCode(fileCRS, true);
+		} catch (FactoryException e) {
+			e.printStackTrace();
+		}
+		return codeThis == null && codeFile == null ? false : codeFile.equals(codeThis) ;
 	}
 
 	@Override
@@ -143,7 +155,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	 * 
 	 */
 	@Override
-	public Collection<GSPixel> getGeoEntity(){
+	public Collection<SpllPixel> getGeoEntity(){
 		if (cacheGeoEntity == null) {
 			cacheGeoEntity = new ArrayList<>(); 
 			getGeoEntityIterator().forEachRemaining(cacheGeoEntity::add);
@@ -173,26 +185,26 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	// ------------------------------------- //
 	
 	@Override
-	public Collection<GSPixel> getGeoEntityWithin(Geometry geom) {
-		ArrayList<GSPixel> collection = new ArrayList<>(); 
+	public Collection<SpllPixel> getGeoEntityWithin(Geometry geom) {
+		ArrayList<SpllPixel> collection = new ArrayList<>(); 
 		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Collection<GSPixel> getGeoEntityIntersect(Geometry geom) {
-		Set<GSPixel> collection = new HashSet<>(); 
+	public Collection<SpllPixel> getGeoEntityIntersect(Geometry geom) {
+		Set<SpllPixel> collection = new HashSet<>(); 
 		getGeoEntityIteratorIntersect(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 	
 	@Override
-	public Iterator<GSPixel> getGeoEntityIterator() {
+	public Iterator<SpllPixel> getGeoEntityIterator() {
 		return new GSPixelIterator(store.getGridCoverageCount(), coverage);
 	}
 
 	@Override
-	public Iterator<GSPixel> getGeoEntityIteratorWithin(Geometry geom) {
+	public Iterator<SpllPixel> getGeoEntityIteratorWithin(Geometry geom) {
 		Crop cropper = new Crop(); 
 		ParameterValueGroup param = cropper.getParameters();
 		param.parameter("Source").setValue(coverage); // Nul nul nul et si jamais il change le nom du parametre ???
@@ -202,7 +214,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	}
 	
 	@Override 
-	public Iterator<GSPixel> getGeoEntityIteratorIntersect(Geometry geom) {
+	public Iterator<SpllPixel> getGeoEntityIteratorIntersect(Geometry geom) {
 		return getGeoEntityIteratorWithin(geom);
 	}
 	
@@ -241,7 +253,7 @@ public class SPLRasterFile implements IGSGeofile<GSPixel> {
 	 * @return
 	 * @throws TransformException
 	 */
-	public GSPixel getPixel(int x, int y) throws TransformException {
+	public SpllPixel getPixel(int x, int y) throws TransformException {
 		x += coverage.getGridGeometry().getGridRange2D().x;
 		y += coverage.getGridGeometry().getGridRange2D().y;
 		double[] vals = new double[store.getGridCoverageCount()]; 

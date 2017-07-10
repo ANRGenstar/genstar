@@ -30,12 +30,14 @@ import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.geotools.referencing.CRS;
 import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
+import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
@@ -47,7 +49,7 @@ import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
-import spll.entity.GSFeature;
+import spll.entity.SpllFeature;
 import spll.entity.GeoEntityFactory;
 import spll.entity.attribute.RawGeoAttribute;
 import spll.entity.attribute.value.RawGeoData;
@@ -63,22 +65,22 @@ import spll.util.SpllUtil;
  * @author kevinchapuis
  *
  */
-public class SPLVectorFile implements IGSGeofile<GSFeature> {
+public class SPLVectorFile implements IGSGeofile<SpllFeature> {
 
-	private Set<GSFeature> features = null;
+	private Set<SpllFeature> features = null;
 
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
 
 	/**
-	 * In this constructor {@link GSFeature} and {@code dataStore} provide the side of the
-	 * same coin: {@link GSFeature} set must contains all {@link Feature} of the {@code dataStore}
+	 * In this constructor {@link SpllFeature} and {@code dataStore} provide the side of the
+	 * same coin: {@link SpllFeature} set must contains all {@link Feature} of the {@code dataStore}
 	 * 
 	 * @param dataStore
 	 * @param features
 	 * @throws IOException
 	 */
-	protected SPLVectorFile(DataStore dataStore, Set<GSFeature> features) throws IOException {
+	protected SPLVectorFile(DataStore dataStore, Set<SpllFeature> features) throws IOException {
 		this.dataStore = dataStore;
 		SimpleFeatureType schema = dataStore.getSchema(dataStore.getTypeNames()[0]);
 		this.crs = schema.getCoordinateReferenceSystem();
@@ -93,7 +95,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 			SimpleFeature feat = fItt.next();
 			for(Property prop : feat.getProperties()){
 				boolean match = false;
-				for(GSFeature feature : features){
+				for(SpllFeature feature : features){
 					if(prop.getName().toString().equals(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME)){
 						if(prop.getValue().toString().equals(feature.getGeometry().toString()))
 							match = true;
@@ -118,7 +120,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 	}
 
 	/**
-	 * In this constructor {@link GSFeature} are build from the {@link Feature} contains in the {@code dataStore}
+	 * In this constructor {@link SpllFeature} are build from the {@link Feature} contains in the {@code dataStore}
 	 * 
 	 * @param dataStore
 	 * @param attributes
@@ -164,7 +166,17 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
-		return thisCRS == null && fileCRS == null ? false : thisCRS.equals(fileCRS);
+		if (thisCRS == null && fileCRS == null) return false;
+		if (thisCRS.equals(fileCRS)) return true;
+		Integer codeThis = null;
+		Integer codeFile = null;
+		try {
+			codeThis = CRS.lookupEpsgCode(thisCRS, true);
+			codeFile = CRS.lookupEpsgCode(fileCRS, true);
+		} catch (FactoryException e) {
+			e.printStackTrace();
+		}
+		return codeThis == null && codeFile == null ? false : codeFile.equals(codeThis) ;
 	}
 
 	@Override
@@ -183,7 +195,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 
 
 	@Override
-	public Collection<GSFeature> getGeoEntity() {
+	public Collection<SpllFeature> getGeoEntity() {
 		return Collections.unmodifiableSet(features);
 	}
 
@@ -212,12 +224,12 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 	}
 
 	@Override
-	public Iterator<GSFeature> getGeoEntityIterator() {
+	public Iterator<SpllFeature> getGeoEntityIterator() {
 		return new GSFeatureIterator(dataStore);
 	}
 
 	@Override
-	public Iterator<GSFeature> getGeoEntityIteratorWithin(Geometry geom) {
+	public Iterator<SpllFeature> getGeoEntityIteratorWithin(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.within(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
@@ -225,22 +237,22 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 
 
 	@Override
-	public Collection<GSFeature> getGeoEntityWithin(Geometry geom) {
-		Set<GSFeature> collection = new HashSet<>(); 
+	public Collection<SpllFeature> getGeoEntityWithin(Geometry geom) {
+		Set<SpllFeature> collection = new HashSet<>(); 
 		getGeoEntityIteratorWithin(geom).forEachRemaining(collection::add);
 		return collection;
 	}
 
 	@Override
-	public Iterator<GSFeature> getGeoEntityIteratorIntersect(Geometry geom) {
+	public Iterator<SpllFeature> getGeoEntityIteratorIntersect(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.intersects(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
 		return new GSFeatureIterator(dataStore, filter);
 	}
 
 	@Override
-	public Collection<GSFeature> getGeoEntityIntersect(Geometry geom) {
-		Set<GSFeature> collection = new HashSet<>(); 
+	public Collection<SpllFeature> getGeoEntityIntersect(Geometry geom) {
+		Set<SpllFeature> collection = new HashSet<>(); 
 		getGeoEntityIteratorIntersect(geom).forEachRemaining(collection::add);
 		return collection;
 	}
@@ -281,7 +293,7 @@ public class SPLVectorFile implements IGSGeofile<GSFeature> {
 				values.put(id, vals);
 			}
 			NumberFormat defaultFormat = NumberFormat.getInstance();
-			for (GSFeature ft : features) {
+			for (SpllFeature ft : features) {
 				Collection<String> properties = ft.getPropertiesAttribute();
 				if (!properties.contains(keyAttribute)) continue;
 				String objid = ft.getValueForAttribute(keyAttribute).getStringValue();

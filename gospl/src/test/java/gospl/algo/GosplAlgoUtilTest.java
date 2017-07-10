@@ -18,14 +18,14 @@ import core.metamodel.pop.APopulationValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
-import gospl.algo.generator.ISyntheticGosplPopGenerator;
-import gospl.algo.generator.UtilGenerator;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.entity.attribute.GSEnumAttributeType;
 import gospl.entity.attribute.GosplAttributeFactory;
+import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.generator.UtilGenerator;
 
 public class GosplAlgoUtilTest {
 

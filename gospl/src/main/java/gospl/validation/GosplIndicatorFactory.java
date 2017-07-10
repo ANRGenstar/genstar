@@ -1,6 +1,10 @@
 package gospl.validation;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
@@ -12,7 +16,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
-import gospl.GosplPopulation;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -30,16 +33,20 @@ public class GosplIndicatorFactory {
 
 	private static GosplIndicatorFactory gif = new GosplIndicatorFactory();
 	private double criticalPValue = 0.05;
-	
+
 	private GosplIndicatorFactory(){}
-	
+
 	public static GosplIndicatorFactory getFactory() {
 		return gif;
 	}
-	
+
 	public void setChiSquareCritivalPValue(double criticalPValue){
 		this.criticalPValue  = criticalPValue;
 	}
+	
+	
+	// ---------------------- Total Absolute Cell Error ---------------------- //
+
 	
 	/**
 	 * Home made indicator that follow down the path of RSSZ* indicator but with
@@ -58,21 +65,12 @@ public class GosplIndicatorFactory {
 		double chiFiveCritical = new ChiSquaredDistribution(1)
 				.inverseCumulativeProbability(criticalPValue);
 		switch (inputMatrix.getMetaDataType()) {
-		case ContingencyTable:
-			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createContingency(population); 
-			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.pow(contingencyTable.getVal(e.getKey().values(), true)
-							.getValue() - e.getValue().getValue().intValue(), 2) / 
-							e.getValue().getValue().doubleValue() > chiFiveCritical ? 1 : 0)
-					.sum();
+		case ContingencyTable: 
+			return getIntegerTACE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createContingency(population), chiFiveCritical);
 		case GlobalFrequencyTable:
-			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createDistribution(population);
-			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.pow(frequencyTable.getVal(e.getKey().values(), true)
-							.getValue() - e.getValue().getValue().doubleValue(), 2) > chiFiveCritical ? 1 : 0)
-					.sum();
+			return getDoubleTACE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createDistribution(population), chiFiveCritical);
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -81,7 +79,7 @@ public class GosplIndicatorFactory {
 					+ "a segmented matrix with multiple matrix meta data type");
 		}
 	}
-	
+
 	/**
 	 * Home made indicator that follow down the path of RSSZ* indicator but with
 	 * a very simple expression of "cell based error": it count the number of cells
@@ -97,21 +95,12 @@ public class GosplIndicatorFactory {
 	public int getTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double delta){
 		switch (inputMatrix.getMetaDataType()) {
-		case ContingencyTable:
-			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createContingency(population); 
-			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values(), true)
-							.getValue() - e.getValue().getValue().intValue()) / 
-							e.getValue().getValue().doubleValue() > delta ? 1 : 0)
-					.sum();
+		case ContingencyTable: 
+			return getIntegerTACE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createContingency(population), delta);
 		case GlobalFrequencyTable:
-			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createDistribution(population);
-			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToInt(e -> Math.abs(frequencyTable.getVal(e.getKey().values(), true)
-							.getValue() - e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
-					.sum();
+			return getDoubleTACE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createDistribution(population), delta);
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -121,7 +110,45 @@ public class GosplIndicatorFactory {
 		}
 	}
 	
+	/**
+	 * Total Absolute Cell error with population transposed and input data as contingency tables
+	 * 
+	 * @see #getDoubleTACE(INDimensionalMatrix, AFullNDimensionalMatrix, double)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @param delta
+	 * @return
+	 */
+	public int getIntegerTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Integer> populationMatrix, double delta){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
+						.getValue() - e.getValue().getValue().intValue()) / 
+						e.getValue().getValue().doubleValue() > delta ? 1 : 0)
+				.sum();
+	}
 	
+	/**
+	 * Total Absolute Cell error with population transposed and input data as frequency tables
+	 * 
+	 * @see #getDoubleTACE(INDimensionalMatrix, AFullNDimensionalMatrix, double)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @param delta
+	 * @return
+	 */
+	public int getDoubleTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Double> populationMatrix, double delta){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
+						.getValue() - e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
+				.sum();
+	}
+
+	// ---------------------- Total Absolute Error ---------------------- //
+
 	/**
 	 * Return total absolute error (TAE) for this {@code population}. The indicator
 	 * just compute the number of misclassified individual from the population
@@ -140,21 +167,12 @@ public class GosplIndicatorFactory {
 	public double getTAE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		switch (inputMatrix.getMetaDataType()) {
-		case ContingencyTable:
-			AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createContingency(population); 
-			return inputMatrix.getMatrix().entrySet()
-					.stream()
-					.mapToInt(e -> Math.abs(contingencyTable.getVal(e.getKey().values(), true)
-							.getValue() - e.getValue().getValue().intValue()))
-					.sum();
+		case ContingencyTable: 
+			return getIntegerTAE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createContingency(population));
 		case GlobalFrequencyTable:
-			AFullNDimensionalMatrix<Double> frequencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createDistribution(population);
-			return inputMatrix.getMatrix().entrySet()
-					.stream().mapToDouble(e -> Math.abs(frequencyTable.getVal(e.getKey().values(), true)
-							.getValue() - e.getValue().getValue().doubleValue()))
-					.sum();
+			return getDoubleTAE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createDistribution(population));
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -163,7 +181,45 @@ public class GosplIndicatorFactory {
 					+ "a segmented matrix with multiple matrix meta data type");
 		}
 	}
+	
+	/**
+	 * Total absolute error with population transposed and input data as contingency tables
+	 * 
+	 * @see {@link #getTAE(INDimensionalMatrix, IPopulation)}
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @return
+	 */
+	public double getIntegerTAE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Integer> populationMatrix){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
+						.getValue() - e.getValue().getValue().intValue()))
+				.sum();
+	}
+	
+	/**
+	 * Total absolute error with population transposed and input data as frequency tables
+	 * 
+	 * @see {@link #getTAE(INDimensionalMatrix, IPopulation)}
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @return
+	 */
+	public double getDoubleTAE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Double> populationMatrix){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToDouble(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
+						.getValue() - e.getValue().getValue().doubleValue()))
+				.sum();
+	}
+	
+	
+	// ---------------------- Average Absolute Pourcentage Error ---------------------- //
 
+	
 	/**
 	 * Return the average absolute percentage difference (AAPD) for this {@code population}. This indicator
 	 * aggregates relative difference between known multi-way marginal total from input data and those of
@@ -182,6 +238,10 @@ public class GosplIndicatorFactory {
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		return this.getTAE(inputMatrix, population) / inputMatrix.size();
 	}
+
+	
+	// ---------------------- Standardize Root Mean Square Error ---------------------- //
+	
 	
 	/**
 	 * Return the square root mean square error (SRMSE) for this {@code population}. This indicator
@@ -201,30 +261,13 @@ public class GosplIndicatorFactory {
 	 */
 	public double getSRMSE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
-		int nbCells = inputMatrix.size();
-		double expectedValue = 0d;
-		double actualValue = 0d;
-		double s = 0d;
-		double rmse = 0d;
-		AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createContingency(population);
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable:
-			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
-				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
-				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
-				rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
-				s += Math.pow(actualValue, 2) / nbCells;
-			}
-			return Math.sqrt(rmse) / inputMatrix.getVal().getValue().intValue();
+			return getIntegerSRMSE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createContingency(population));
 		case GlobalFrequencyTable:
-			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
-				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
-				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
-				rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
-				s += Math.pow(actualValue, 2) / nbCells;
-			}
-			return Math.sqrt(rmse) / s;
+			return getDoubleSRMSE(inputMatrix, GosplNDimensionalMatrixFactory
+				.getFactory().createContingency(population), population.size());
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -233,7 +276,55 @@ public class GosplIndicatorFactory {
 					+ "a segmented matrix with multiple matrix meta data type");
 		}
 	}
+	
+	/**
+	 * Standardized Root Mean Square Error with population transposed and input data as a contingency table
+	 * <p>
+	 * @see #getSRMSE(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @return
+	 */
+	public double getIntegerSRMSE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Integer> populationMatrix){
+		int nbCells = inputMatrix.size();
+		double expectedValue, actualValue, rmse = 0d;
+		for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
+			actualValue = populationMatrix.getVal(coord.values(), true).getValue();
+			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
+		}
+		return Math.sqrt(rmse) / inputMatrix.getVal().getValue().intValue();
+	}
 
+	/**
+	 * Standardized Root Mean Square Error with population transposed as a contingency table and
+	 * input data as a frequency table matrix
+	 * <p>
+	 * @see #getSRMSE(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @param popSize
+	 * @return
+	 */
+	public double getDoubleSRMSE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Integer> populationMatrix, int popSize){
+		int nbCells = inputMatrix.size();
+		double expectedValue, actualValue, s = 0d, rmse = 0d;
+		for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * popSize;
+			actualValue = populationMatrix.getVal(coord.values(), true).getValue();
+			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
+			s += Math.pow(actualValue, 2) / nbCells;
+		}
+		return Math.sqrt(rmse) / s;
+	}
+	
+	// ---------------------- Relative Sum of Square Modified Z-Score ---------------------- //
+	
+	
 	/**
 	 * RSSZ is an overall estimation of goodness of fit based on several indicator.
 	 * It is first based on Z-score that focus on cell based indicator of error. SSZ is
@@ -281,7 +372,13 @@ public class GosplIndicatorFactory {
 					+ "a segmented matrix with multiple matrix meta data type");
 		}
 	}
-
+	
+	
+	///////////////////////////////////////////////////////////////////////////////
+	// ---------------------- MAIN REPORT UTILITY METHODS ---------------------- //
+	///////////////////////////////////////////////////////////////////////////////
+	
+	
 	/**
 	 * Give a statistical summary
 	 * 
@@ -292,14 +389,41 @@ public class GosplIndicatorFactory {
 	 */
 	public Map<GosplIndicator, Number> getReport(Collection<GosplIndicator> indicators,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution,
-			GosplPopulation population) throws IOException {		
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) throws IOException {		
 		return indicators.stream().collect(Collectors.toMap(Function.identity(), 
-						indicator -> this.getStats(indicator, distribution, population)));
+				indicator -> this.getStats(indicator, distribution, population)));
 	}
+
+	/**
+	 * Save report to file
+	 * 
+	 * @param outputFile
+	 * @param report
+	 * @throws IOException 
+	 */
+	public void saveReport(File outputFile, Map<GosplIndicator, Number> report,
+			String algo, int popSize) 
+			throws IOException {
+		DecimalFormat decimalFormat = new DecimalFormat("#.####");
+		String separator = ";";
+		BufferedWriter bw;
+
+		bw = Files.newBufferedWriter(outputFile.toPath());
+		bw.write("Algo"+separator+"Pop size");
+		for(GosplIndicator indicator : report.keySet())
+			bw.write(separator+indicator.toString());
+		bw.newLine();
+		bw.write(algo+separator+popSize);
+		for(GosplIndicator indicator : report.keySet())
+			bw.write(separator+decimalFormat.format(report.get(indicator).doubleValue()).toString());
+		bw.flush();
+	}
+
+	// -------------------- Private inner methods -------------------- //
 	
 	private Number getStats(GosplIndicator indicator,
 			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution,
-			GosplPopulation population){
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		switch (indicator) {
 		case TAE:
 			return this.getTAE(distribution, population);

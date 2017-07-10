@@ -37,7 +37,7 @@ public class SpinNetworkFactory {
 	 * @param population
 	 * @return SpinNetwork. 
 	 */
-	public SpinNetwork loadPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public SpinNetwork loadPopulation(IPopulation<? extends APopulationEntity, APopulationAttribute, APopulationValue> population){
 		// Create a SpinNetwork with nodes linked to population entities
 		// The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
@@ -59,7 +59,8 @@ public class SpinNetworkFactory {
 	 * @param population Population en parametre. 
 	 * @return SpinPopulation
 	 */
-	public SpinPopulation generateNetwork(ENetworkGenerator typeGenerator, IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public SpinPopulation generateNetwork(ENetworkGenerator typeGenerator, 
+			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
 		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
 			network = new SWNetworkGenerator().generateNetwork(baseNetwork, 5, .1); 

@@ -9,9 +9,8 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.APopulationEntity;
 
-public class SpatialConstraintLocalization extends AbstractSpatialConstraint{
+public class SpatialConstraintLocalization extends ASpatialConstraint {
 
 	Geometry bounds;
 	protected IGSGeofile<? extends AGeoEntity> referenceFile;
@@ -33,25 +32,26 @@ public class SpatialConstraintLocalization extends AbstractSpatialConstraint{
 			cands = nests.stream().filter(a -> a.getGeometry().intersects(bounds)).collect(Collectors.toList());
 		}
 		if (sortCandidates) 
-			return cands.stream().sorted((n1, n2) -> Double.compare(bounds.getCentroid().distance(n1.getGeometry()),bounds.getCentroid().distance(n2.getGeometry()))).collect(Collectors.toList());
+			return cands.stream().sorted((n1, n2) -> Double.compare(bounds.getCentroid()
+					.distance(n1.getGeometry()),bounds.getCentroid().distance(n2.getGeometry())))
+					.collect(Collectors.toList());
 		return cands;
 	}
 
 	@Override
-	public List<AGeoEntity> getSortedCandidates(List<AGeoEntity> nests, APopulationEntity entity) {
-		return getSortedCandidates(nests);
-	}
-
-	@Override
-	public boolean updateConstraint(APopulationEntity entity, AGeoEntity nest) {
+	public boolean updateConstraint(AGeoEntity nest) {
 		return false;
 	}
 
 	@Override
 	public void relaxConstraintOp(Collection<AGeoEntity> nests) {
-		if (bounds != null)bounds = bounds.buffer(increaseStep);
-		else currentValue = maxIncrease;
+		if (bounds != null) 
+			bounds = bounds.buffer(increaseStep);
+		else 
+			currentValue = maxIncrease;
 	}
+	
+	// ---------------------- //
 	
 	public Geometry getBounds() {
 		return bounds;

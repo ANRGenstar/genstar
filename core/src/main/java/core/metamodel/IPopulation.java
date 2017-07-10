@@ -16,7 +16,8 @@ import java.util.Set;
  * @author gospl-team
  *
  */
-public interface IPopulation<E extends IEntity<A, V>, A extends IAttribute<V>, V extends IValue> extends Collection<E> {
+public interface IPopulation<E extends IEntity<A, V>, A extends IAttribute<V>, V extends IValue> 
+								extends Collection<E> {
 
 	public Set<A> getPopulationAttributes();
 	

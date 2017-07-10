@@ -11,16 +11,16 @@ import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
 import gospl.algo.GosplAlgoUtilTest;
-import gospl.algo.ISyntheticReconstructionAlgo;
-import gospl.algo.generator.DistributionBasedGenerator;
-import gospl.algo.generator.ISyntheticGosplPopGenerator;
-import gospl.algo.sampler.IDistributionSampler;
-import gospl.algo.sampler.ISampler;
-import gospl.algo.sampler.sr.GosplBasicSampler;
+import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.generator.DistributionBasedGenerator;
+import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.sampler.IDistributionSampler;
+import gospl.sampler.ISampler;
+import gospl.sampler.sr.GosplBasicSampler;
 import gospl.validation.GosplIndicatorFactory;
 
 public class GosplIPFTest {
@@ -43,7 +43,7 @@ public class GosplIPFTest {
 
 	@Test
 	public void test() {
-		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new DistributionInferenceIPFAlgo(seed);
+		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new SRIPFAlgo(seed);
 		ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler = null;
 		try {
 			sampler = inferenceAlgo.inferSRSampler(marginals, new GosplBasicSampler());

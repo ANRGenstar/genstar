@@ -14,6 +14,7 @@ public class CachedSegmentedNDimensionalMatrix<T extends Number>
 		extends CachedNDimensionalMatrix<APopulationAttribute, APopulationValue, T>
 		implements ISegmentedNDimensionalMatrix<T> {
 
+	@SuppressWarnings("unused")
 	private final ISegmentedNDimensionalMatrix<T> mSeg;
 	
 	private final Collection<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> cachedSubMatrices;
@@ -53,6 +54,7 @@ public class CachedSegmentedNDimensionalMatrix<T extends Number>
 	}
 	
 
+	@SuppressWarnings("unchecked")
 	public long getHits() {
 		
 		long total = super.getHits();
@@ -64,6 +66,7 @@ public class CachedSegmentedNDimensionalMatrix<T extends Number>
 		return total;
 	}
 	
+	@SuppressWarnings("unchecked")
 	public long getMissed() {
 		
 		long total = super.getMissed();

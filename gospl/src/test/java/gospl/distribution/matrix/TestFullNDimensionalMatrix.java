@@ -27,15 +27,13 @@ import gospl.entity.attribute.GosplAttributeFactory;
 
 public class TestFullNDimensionalMatrix {
 
-	private double probaHomme;
-	private double probaFemme;
-	private double delta;
+	private static double probaHomme = 0.47;
+	private static double probaFemme = 0.53;
+	private static double delta = 0.001;
 
 	@Before
 	public void setUp() throws Exception {
-		probaHomme = 0.47;
-		probaFemme = 0.53;
-		delta = 0.001;
+		
 	}	
 
 	@After
@@ -43,7 +41,11 @@ public class TestFullNDimensionalMatrix {
 	}
 
 
-	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeGender() {
+	/**
+	 * generates a global frequency table 
+	 * @return
+	 */
+	public static AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeGender() {
 
 		try {
 			final GosplAttributeFactory gaf = new GosplAttributeFactory();

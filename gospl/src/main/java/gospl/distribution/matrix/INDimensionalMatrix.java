@@ -59,6 +59,18 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public AControl<T> getVal(A aspect) throws IllegalNDimensionalMatrixAccess;
 	
 	/**
+	 * Compute the matrix aggregated value according to one dimension's aspect.
+	 * if {@code defaultToNul} is true, then a missing value will return a null {@link AControl} value
+	 * 
+	 * @see #getVal(aspect)
+	 * 
+	 * @param aspect
+	 * @param defaultToNul
+	 * @return
+	 */
+	public AControl<T> getVal(A aspect, boolean defaultToNul);
+	
+	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension
 	 * 
 	 * @param aspects
@@ -68,7 +80,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	
 	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension.
-	 * if defaultToNul is true, then a missing value will return null.
+	 * if defaultToNul is true, then a missing value will return a null {@link AControl} value.
 	 * 
 	 * @param aspects
 	 * @param defaultToNul

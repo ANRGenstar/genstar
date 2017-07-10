@@ -75,6 +75,10 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 		return Collections.unmodifiableSet(values);
 	}
 
+	public Set<String> getValuesAsString() {
+		return values.stream().map(att -> att.getStringValue()).collect(Collectors.toSet());
+	}
+
 	@Override
 	public boolean setValues(Set<APopulationValue> values) {
 		
