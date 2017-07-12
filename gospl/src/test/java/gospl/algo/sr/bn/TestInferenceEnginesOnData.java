@@ -73,7 +73,8 @@ public class TestInferenceEnginesOnData {
            });
     }
     
-    @Parameter(0)
+    @SuppressWarnings("rawtypes")
+	@Parameter(0)
     public Class ieClass;
     
     @Parameter(1)
@@ -83,6 +84,7 @@ public class TestInferenceEnginesOnData {
     
     private CategoricalBayesianNetwork bn;
     
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		

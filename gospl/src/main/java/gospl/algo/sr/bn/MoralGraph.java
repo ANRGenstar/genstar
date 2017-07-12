@@ -88,9 +88,7 @@ public class MoralGraph extends SingleGraph {
 			
 			if (!nodes.contains(n))
 				continue;
-			
-			String id = variable2nodeId.get(n);
-			
+						
 			for (NodeCategorical p: n.getParents()) {
 				
 				if (!nodes.contains(p))

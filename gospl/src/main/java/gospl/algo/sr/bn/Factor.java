@@ -272,7 +272,6 @@ public final class Factor {
 		
 		Factor res = new Factor(bn, novelSet);
 		
-		Set<Map<NodeCategorical,String>> done = new HashSet<>(values.size()/2);
 		for (IteratorCategoricalVariables it = bn.iterateDomains(novelSet); it.hasNext();) {
 			Map<NodeCategorical,String> v2n = it.next();
 			double d = 0;
