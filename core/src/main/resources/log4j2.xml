@@ -32,7 +32,7 @@
      <Logger name="gospl.algo.sr.bn.RecursiveConditionningEngine" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
-     <Logger name="gospl.algo.sr.bn.MoralGraph" level=""info"" additivity="false">
+     <Logger name="gospl.algo.sr.bn.MoralGraph" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
     <Logger name="gospl.algo.sr.bn.EliminationOrderDeepFirstSearch" level="info" additivity="false">
