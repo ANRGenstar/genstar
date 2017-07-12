@@ -129,10 +129,8 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 		
 		Map<NodeCategorical,String> n2v = new HashMap<>(evidenceVariable2value);
 		n2v.put(n, s);
-		
-		//double r = dtreeWithoutEvidence.recursiveConditionning(n2v);
-		double r = getDtreeWithEvidence().recursiveConditionning(n2v);
-		return r / getProbabilityEvidence();
+	
+		return getDtreeWithEvidence().recursiveConditionning(n2v) * getProbabilityEvidence();
 		
 	}
 
@@ -169,18 +167,13 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 	@Override
 	protected double computeProbabilityEvidence() {
 		
-		/*
+		
 		if (norm == null)
 			norm = getDtreeWithoutEvidence().recursiveConditionning(evidenceVariable2value);
 		 
-			
-		//norm = dtreeWithoutEvidence.recursiveConditionning(evidenceVariable2value);
-		return norm;
-		//return 1.0; // TODO?
-		 * 
-		 */
 		
-		return getDtreeWithoutEvidence().recursiveConditionning(evidenceVariable2value);
+		return norm;
+	
 	}
 	
 	private DNode getDtreeWithoutEvidence() {

@@ -85,7 +85,7 @@ public final class DNode {
 	 * The cache which associates to each evidence (of interest to this node) the computed probability.
 	 */
 	private LRUMap<Map<NodeCategorical,String>,Double> cacheEvidenceInContext2proba = null;
-
+	
 	
 	/**
 	 * creates a node with no specific role. 
@@ -177,7 +177,7 @@ public final class DNode {
 			}
 			if (toCache < 1)
 				toCache = 1; // technical for LRUMap
-			logger.info("cache: max values to query: {}, will cache {}", card, toCache);
+			logger.info("cache: max values to query: {}, will cache {}\n{}", card, toCache,this);
 			cacheEvidenceInContext2proba = new LRUMap<Map<NodeCategorical,String>, Double>(toCache);
 		}
 		return cacheEvidenceInContext2proba;
@@ -404,7 +404,7 @@ public final class DNode {
 		
 		if (context == null) {
 			context = new HashSet<>(varsUnion());
-			context.retainAll(acutset());
+			context.removeAll(acutset());
 		}
 		
 		return context;
@@ -538,7 +538,7 @@ public final class DNode {
 		// NOT WORKING ! 
 		//y.keySet().retainAll(context()); 
 		
-		if (!y.isEmpty()) {
+		if (!context().isEmpty() && !y.isEmpty()) {
 			logger.trace("search in cache {}", y);
 			Double cached = getCache().get(y);
 			if (cached != null) {
@@ -648,7 +648,7 @@ public final class DNode {
 			
 		}
 		
-		if (!y.isEmpty())
+		if (cacheEvidenceInContext2proba != null && !y.isEmpty())
 			cacheEvidenceInContext2proba.put(y,p);
 		
 		return p;

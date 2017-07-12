@@ -208,7 +208,7 @@ public class TestInferenceEnginesOnData {
 		
 	}
 	
-	@Test(timeout=60000)
+	@Test //(timeout=60000)
 	public void testEvidencePropagation() {
 		
 		InferencePerformanceUtils.singleton.reset();
@@ -218,7 +218,7 @@ public class TestInferenceEnginesOnData {
 			// assert evidence
 			Map<String,String> evidence = evidence2expected.getKey();
 			for (Map.Entry<String,String> k2v: evidence.entrySet()) {
-				System.out.println("set evidence: "+k2v.getKey()+" = "+k2v.getValue());
+				System.err.println("set evidence: "+k2v.getKey()+" = "+k2v.getValue());
 				ie.addEvidence(k2v.getKey(), k2v.getValue());
 			}
 
