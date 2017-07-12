@@ -13,7 +13,7 @@ import org.apache.commons.collections4.map.LRUMap;
 
 /**
  * A factor f over variables X is a function that maps each instantiation 
- * x of variables X to a non-negative number, denoted f (x).1
+ * x of variables X to a non-negative number.
  * 
  * TODO optimisation for storage ? use double[] instead of a map ? 
  * 
@@ -30,6 +30,10 @@ public final class Factor {
 	protected Map<Map<NodeCategorical,String>,Double> values = new HashMap<>();
 	
 	protected LRUMap<NodeCategorical,Map<String,Factor>> cacheReductionVariable2ValueToResult = null;
+	
+	public static int CACHE_LEVEL1 = 50;
+	public static int CACHE_LEVEL2 = 100;
+	
 	
 	/**
 	 * Creates a factor over these variables
@@ -156,9 +160,6 @@ public final class Factor {
 		res.reduce(evidence);
 		return res;
 	}
-	
-	public static int CACHE_LEVEL1 = 50;
-	public static int CACHE_LEVEL2 = 100;
 	
 	public Factor reduction(NodeCategorical n, String s) {
 		
