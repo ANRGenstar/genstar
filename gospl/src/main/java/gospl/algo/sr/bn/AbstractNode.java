@@ -44,11 +44,11 @@ public abstract class AbstractNode<N extends AbstractNode<N>> {
 		return this.network.getChildren(this);
 	}
 	
-	protected N getParent(String lbl) {
+	protected final N getParent(String lbl) {
 		return name2parent.get(lbl);
 	}
 	
-	public boolean hasParents() {
+	public final boolean hasParents() {
 		return !parents.isEmpty();
 	}
 	

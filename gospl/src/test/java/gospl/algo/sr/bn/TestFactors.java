@@ -1,6 +1,5 @@
 package gospl.algo.sr.bn;
 
-import static gospl.algo.sr.bn.JUnitBigDecimals.assertEqualsBD;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -41,12 +40,12 @@ public class TestFactors {
 		// is the factor having the right size? 
 		assertEquals(2*2, f.values.size());
 		
-		assertEqualsBD(0.55, f.get("age","<15","gender","male"), 4);
+		assertEquals(0.55, f.get("age","<15","gender","male"), Math.pow(1, -4));
 		
 		// test sum
 		Factor summed = f.sumOut("gender");
-		assertEqualsBD(1.05, summed.get("age","<15"), 4);
-		assertEqualsBD(0.95, summed.get("age",">=15"), 4);
+		assertEquals(1.05, summed.get("age","<15"), Math.pow(1, -4));
+		assertEquals(0.95, summed.get("age",">=15"), Math.pow(1, -4));
 		
 		try {
 			summed.get("age");
@@ -67,8 +66,8 @@ public class TestFactors {
 			// all's right.
 		}
 		summed = f.sumOut("age");
-		assertEqualsBD(1., summed.get("gender","male"), 4);
-		assertEqualsBD(1., summed.get("gender","female"), 4);
+		assertEquals(1., summed.get("gender","male"), Math.pow(1, -4));
+		assertEquals(1., summed.get("gender","female"), Math.pow(1, -4));
 
 	}
 	
@@ -108,8 +107,8 @@ public class TestFactors {
 		assertEquals(2*2, m.values.size());
 				
 		// test mult
-		assertEqualsBD(0.45*0.55, m.get("age",">=15","gender","male"), 4);
-		assertEqualsBD(0.5*0.45, m.get("age","<15","gender","female"), 4);
+		assertEquals(0.45*0.55, m.get("age",">=15","gender","male"), Math.pow(1, -4));
+		assertEquals(0.5*0.45, m.get("age","<15","gender","female"), Math.pow(1, -4));
 		
 		// another test
 		f1 = nAge.asFactor();
@@ -121,8 +120,8 @@ public class TestFactors {
 		assertEquals(2*2*2, m.values.size());
 		
 		// test mult
-		assertEqualsBD(0.45*0.1, m.get("age",">=15","gender","male","CSP","+"), 4);
-		assertEqualsBD(0.55*0.1, m.get("age","<15","gender","male","CSP","+"), 4);
+		assertEquals(0.45*0.1, m.get("age",">=15","gender","male","CSP","+"), Math.pow(1, -4));
+		assertEquals(0.55*0.1, m.get("age","<15","gender","male","CSP","+"), Math.pow(1, -4));
 		
 	}
 

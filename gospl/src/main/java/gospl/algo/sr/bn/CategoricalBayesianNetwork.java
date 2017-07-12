@@ -27,7 +27,7 @@ import org.dom4j.Node;
 
 public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical> {
 
-	private Logger logger = LogManager.getLogger();
+	private static Logger logger = LogManager.getLogger();
 
 	protected Map<NodeCategorical,Factor> node2factor = new HashMap<>();
 	
@@ -103,8 +103,6 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 			throw new IllegalArgumentException("invalid XML BIF format", e);
 		}
 
-
-		
     	final String networkName = document.selectSingleNode("/BIF/NETWORK/NAME").getText().trim();
 
 		// add them all into a Bayesian net
@@ -194,7 +192,11 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	public static CategoricalBayesianNetwork loadFromXMLBIF(File f) {
 		
 		try {
-			return readFromXMLBIF(FileUtils.readFileToString(f));
+			logger.debug("reading a CategoricalBayesianNetwork from XML BIF file {}", f);
+			CategoricalBayesianNetwork bn = readFromXMLBIF(FileUtils.readFileToString(f));
+			logger.debug("reading a CategoricalBayesianNetwork from XML BIF file {}", f);
+
+			return bn;
 		} catch (IOException e) {
 			throw new IllegalArgumentException("unable to read file "+f, e);
 		}

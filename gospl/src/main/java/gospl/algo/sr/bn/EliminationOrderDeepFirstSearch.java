@@ -2,24 +2,28 @@ package gospl.algo.sr.bn;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * Implements the elimination order as defined by Derwiche in algo DFS_OEO,  
- * with an optimization based on his theorem 9.2
+ * with an optimization based on his theorem 9.2.
+ * 
+ * TODO for performance: add the seed order 
+ * TODO for performance: implement a best-first algo as in 
  * 
  * @author Samuel Thiriot
  *
  */
-public class EliminationOrderDeepFirstSearch {
+public final class EliminationOrderDeepFirstSearch {
 
+	public static int CACHE_ALREADY_EXPLORED = 100000;
+	
 	private Logger logger = LogManager.getLogger();
 
 	private final MoralGraph g;
@@ -27,16 +31,31 @@ public class EliminationOrderDeepFirstSearch {
 	private List<NodeCategorical> bestEliminationOrder = null;
 	private int bestWidth = Integer.MAX_VALUE;
 	
-	private Map<Set<NodeCategorical>,Set<Set<NodeCategorical>>> alreadyExplored = new HashMap<>();
+	private LRUMap<Set<NodeCategorical>,Set<Set<NodeCategorical>>> alreadyExplored = new LRUMap<>(CACHE_ALREADY_EXPLORED);
 	
+	private long totalExplored =  0;
+
 	private EliminationOrderDeepFirstSearch(MoralGraph g) {
 		
 		this.g = g;
 	}
 	
-	public static List<NodeCategorical> computeEliminationOrderDeepFirstSearch(CategoricalBayesianNetwork bn) {
+	public static List<NodeCategorical> computeEliminationOrder(CategoricalBayesianNetwork bn) {
+		return computeEliminationOrder(bn, 5);
+	}
+	
+	public static List<NodeCategorical> computeEliminationOrder(CategoricalBayesianNetwork bn, int maxTimeToSearchMinutes) {
 		EliminationOrderDeepFirstSearch dfs = new EliminationOrderDeepFirstSearch(new MoralGraph(bn));
-		return dfs.computeEliminationOrderDeepFirstSearch();
+		return dfs.computeEliminationOrder(maxTimeToSearchMinutes);
+	}
+	
+	public static List<NodeCategorical> computeEliminationOrder(CategoricalBayesianNetwork bn, Set<NodeCategorical> consideredNodes) {
+		return computeEliminationOrder(bn, consideredNodes, 5);
+	}
+	
+	public static List<NodeCategorical> computeEliminationOrder(CategoricalBayesianNetwork bn, Set<NodeCategorical> consideredNodes, int maxTimeToSearchMinutes) {
+		EliminationOrderDeepFirstSearch dfs = new EliminationOrderDeepFirstSearch(new MoralGraph(bn, consideredNodes));
+		return dfs.computeEliminationOrder(maxTimeToSearchMinutes);
 	}
 
 	/**
@@ -44,27 +63,41 @@ public class EliminationOrderDeepFirstSearch {
 	 * (see algo 19 named DFS_OEO Darwiche p291)
 	 * @return
 	 */
-	protected List<NodeCategorical> computeEliminationOrderDeepFirstSearch() {
+	protected List<NodeCategorical> computeEliminationOrder(int maxTimeToSearchMinutes) {
 		
-		computeEliminationOrderDeepFirstSearchAux(
+		totalExplored = 0;
+		
+		computeEliminationOrderAux(
 				this.g,
 				Collections.emptyList(),
-				0
+				0,
+				maxTimeToSearchMinutes*60*1000,
+				System.currentTimeMillis()
 				);
 		
-		logger.info("found best elimination order having width {} : {}", bestWidth, bestEliminationOrder);
+		logger.info("found best elimination order having width {} : {} (in {} iterations)", bestWidth, bestEliminationOrder, totalExplored);
+		
+		alreadyExplored.clear();
+		// suggest a gc, as we released quiet a large amount of memory 
+		Runtime.getRuntime().gc();
 		return bestEliminationOrder;
 		
 	}
 	
 	
-	protected void computeEliminationOrderDeepFirstSearchAux(
+	protected void computeEliminationOrderAux(
 			MoralGraph subGraph,
 			List<NodeCategorical> eliminationPrefix,
-			int width
+			int width,
+			long maxTimeToSearchMilli,
+			long timestampStarted
 			) {
 		
-		logger.debug("studying subgraph {} having width {}", subGraph, width);
+		if (bestEliminationOrder != null & System.currentTimeMillis() - timestampStarted > maxTimeToSearchMilli) {
+			logger.warn("don't have more time to explore the elimination order. stopping there");
+			return;
+		}
+		logger.trace("studying subgraph {} having width {}", subGraph, width);
 
 		if (subGraph.isEmpty()) {
 			// we have a complete order !
@@ -87,6 +120,8 @@ public class EliminationOrderDeepFirstSearch {
 			
 			for (NodeCategorical n: subGraph.variables()) {
 				
+				totalExplored++;
+				
 				logger.trace("exploring {}", n);
 
 				int countNeighboors = subGraph.getNeighboors(n);
@@ -102,16 +137,19 @@ public class EliminationOrderDeepFirstSearch {
 				if (computedForThisSubgraph == null) {
 					computedForThisSubgraph = new HashSet<>();
 					alreadyExplored.put(subGraph2.variables(), new HashSet<>());
+					InferencePerformanceUtils.singleton.incCacheMiss();
+				} else {
 				}
 				if (computedForThisSubgraph.contains(eliminationPrefix2set)) {
 					logger.trace("we already explored the prefix {}, pruning", eliminationPrefix2);
+					InferencePerformanceUtils.singleton.incCacheHit();
 					continue;
 				}
 				
 				int width2 = Math.max(width, countNeighboors);
 				
 				// recursive search
-				computeEliminationOrderDeepFirstSearchAux(subGraph2, eliminationPrefix2, width2);
+				computeEliminationOrderAux(subGraph2, eliminationPrefix2, width2, maxTimeToSearchMilli, timestampStarted);
 				
 				// store in cache to avoid useless further computations
 				computedForThisSubgraph.add(eliminationPrefix2set);

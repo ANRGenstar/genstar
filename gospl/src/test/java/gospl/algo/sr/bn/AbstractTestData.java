@@ -17,7 +17,7 @@ public abstract class AbstractTestData {
 	 */
 	public final Map<Map<String,String>,Map<String,Map<String,Double>>> evidence2expectedResults = new HashMap<>();
 	
-	public final Map<Set<String>,Map<String,Map<String,Double>>> variables2expectedPriors = new HashMap<>();
+	public final Map<String,Map<String,Double>> variables2expectedPriors = new HashMap<>();
 	
 	public AbstractTestData(String name, String filename, int precision) {
 		this.name = name;
@@ -25,21 +25,12 @@ public abstract class AbstractTestData {
 		this.precision = precision;
 	}
 	
-	protected void addExpectedPrior(List<String> variables, String variable, String value, Double proba) {
-		addExpectedPrior(new HashSet<>(variables), variable, value, proba);
-	}
-	
-	protected void addExpectedPrior(Set<String> variables, String variable, String value, Double proba) {
+	protected void addExpectedPrior(String variable, String value, Double proba) {
 
-		Map<String,Map<String,Double>> forEvidence = variables2expectedPriors.get(variables);
-		if (forEvidence == null) {
-			forEvidence = new HashMap<>();
-			variables2expectedPriors.put(variables, forEvidence);
-		}
-		Map<String,Double> values = forEvidence.get(variable);
+		Map<String,Double> values = variables2expectedPriors.get(variable);
 		if (values == null) {
 			values = new HashMap<>();
-			forEvidence.put(variable, values);
+			variables2expectedPriors.put(variable, values);
 		}
 		
 		values.put(value, proba);

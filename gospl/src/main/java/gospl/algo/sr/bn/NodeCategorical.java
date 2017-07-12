@@ -16,14 +16,13 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NodeCategorical extends FiniteNode<NodeCategorical> {
+public final class NodeCategorical extends FiniteNode<NodeCategorical> {
 
-	private Logger logger = LogManager.getLogger();
+	private static Logger logger = LogManager.getLogger();
 	
 	protected NodeCategorical[] parentsArray = new NodeCategorical[0];
+	protected Map<NodeCategorical,Integer> parent2index = new HashMap<>(50);
 	
-	protected SortedMap<NodeCategorical,Integer> variable2size = new TreeMap<>();
-
 	private Integer countZeros = null;
 		
 	private double[] content;
@@ -77,6 +76,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		parentsArray = Arrays.copyOf(parentsArray, parentsArray.length + 1);
 		parentsArray[parentsArray.length-1] = parent;
 		adaptContentSize();
+		parent2index.put(parent, parent2index.size());
 	}
 
 
@@ -158,13 +158,6 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		return idx;
 	}
 	
-/* TODO remove
-	public void setProbabilities(double p, String key, Object ... parentAndValue) {
-		setProbabilities(p, key, parentAndValue);
-	}
-	
-*/
-	
 	public void setProbabilities(double p, String key, Object ... parentAndValue) {
 		countZeros = null;
 		content[_getIndex(key, parentAndValue)] = p;
@@ -229,7 +222,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 * @param parentAndValue
 	 * @return
 	 */
-	protected int[] _getParentIndices(Object ... parentAndValue) {
+	protected final int[] _getParentIndices(Object ... parentAndValue) {
 		
 		if (parentAndValue.length % 2 != 0)
 			throw new IllegalArgumentException("expecting a list of parameters such as gender, male, age, 0-15");
@@ -255,8 +248,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 				throw new IllegalArgumentException("unable to find parent "+parentRaw);
 			}
 
-			// TODO inefficient
-			idxParent = Arrays.asList(parentsArray).indexOf(parent);
+			idxParent = parent2index.get(parent);
 			
 			// find attribute
 			String value = (String)parentAndValue[i+1];
@@ -266,36 +258,6 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		}
 		
 		return parentIndices;
-	}
-	
-	private void _addDomain(String vv) {
-		domain.add(vv);
-	}
-	
-	public void addDomain(String vv) {
-		if (domain.contains(vv)) {
-			throw new IllegalArgumentException(vv+" is already part of the domain");
-		}
-		this._addDomain(vv);
-		adaptContentSize();
-	}
-	
-	public void addDomain(String ... vvs) {
-		
-		// check params
-		for (String vv : vvs) {
-			if (domain.contains(vv)) {
-				throw new IllegalArgumentException(vv+" is already part of the domain");
-			}
-		}
-		
-		// add values
-		for (String vv : vvs) {
-			_addDomain(vv);
-		}
-		
-		// adapt cpt size
-		adaptContentSize();
 	}
 	
 	
@@ -368,7 +330,8 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 				idxParents[cursorParents]++;
 				
 			res += getProbability(idxAtt, idxParents);
-
+			InferencePerformanceUtils.singleton.incAdditions();
+			
 		}
 	
 		logger.trace("computed conditional probability p({}={})={}", name, att, res);
@@ -484,7 +447,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 				logger.trace("cumulated * {} = {}", cpp, pSomething);
 
 				if (pSomething == 0.) {
-					// we can even break that loop: no multiplication will even change that result !
+					// we can even break that loop: no multiplication will ever change that result !
 					logger.trace("reached p=0, stopping there");
 					break;
 				} 

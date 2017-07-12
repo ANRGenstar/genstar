@@ -33,9 +33,10 @@ import org.junit.runners.Parameterized.Parameters;
 public class TestCompareInferenceEngines {
 
 	public static List<Class<?>> enginesToCompare = Arrays.asList(new Class<?>[] {
-		SimpleConditionningInferenceEngine.class,
 		EliminationInferenceEngine.class,
-		RecursiveConditionningEngine.class
+		BestInferenceEngine.class,
+		RecursiveConditionningEngine.class,
+		SimpleConditionningInferenceEngine.class
 	});
 	
 	@Parameters(name="{0}")
@@ -44,9 +45,10 @@ public class TestCompareInferenceEngines {
         	{ new DataSprinkler() },
         	{ new DataGerland1() },
         	{ new DataCancerSmall() },
-        	// TODO activate
         	{ new DataSachs() },
-        	//{ new DataBarley() }
+        	// some engines are too slow for this data
+        	// { new DataAlarm() },
+        	// { new DataBarley() }
            });
     }
     
@@ -328,7 +330,6 @@ public class TestCompareInferenceEngines {
 			// assert evidence
 			ie.clearEvidence();
 			ie.addEvidence(evidenceForTest);
-			
 			
 			System.err.println("testing "+ie.getClass().getSimpleName());
 

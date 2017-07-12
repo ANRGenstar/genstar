@@ -42,8 +42,7 @@ public class DataGerland1 extends AbstractTestData {
 		
 		// with no inference
 		evidence = Collections.emptyMap();
-		addExpectedPrior(Arrays.asList("type_salarie"), "type_salarie", "nonpertinent", .60643944);
-		
+		addExpectedPrior("type_salarie", "nonpertinent", .60643944);
 		
 		// with evidence
 		

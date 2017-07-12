@@ -101,18 +101,47 @@ public abstract class AbstractInferenceEngine {
 	
 	protected abstract double[] retrieveConditionalProbability(NodeCategorical n);
 
-	
+	/**
+	 * Returns the conditional probability based on the initial probability distribution of the network 
+	 * conditioned by evidence. Note that if no evidence is defined, it will return directly the prior conditional probability
+	 * from the Bayesian network.
+	 * @param variableName
+	 * @param s
+	 * @return
+	 */
 	public final double getConditionalProbability(NodeCategorical n, String s) {
+		
+		// check args
 		if (!n.getDomain().contains(s))
 			throw new IllegalArgumentException("there is no value "+s+" in the domain of variable "+n+" (use one of "+n.getDomain()+")");
+		
+		// if there is no evidence, just return the prior probability !
+		if (evidenceVariable2value.isEmpty()) {
+			// TODO ? return n.getConditionalProbabilityPosterior(s);
+		}
+		
+		// if that is directly conditionned by evidence, return it
+		{
+			String v = evidenceVariable2value.get(n);
+			if (v != null) {
+				if (v.equals(s))
+					return 1.0;
+				else 
+					return 0.0;
+			}
+		}
+		
+		// compute if evidence is new
 		if (dirty)
 			compute();
+		
 		return retrieveConditionalProbability(n, s);
 	}
 	
 	/**
 	 * Returns the conditional probability based on the initial probability distribution of the network 
-	 * conditionned by evidence.
+	 * conditioned by evidence. Note that if no evidence is defined, it will return directly the prior conditional probability
+	 * from the Bayesian network.
 	 * @param variableName
 	 * @param s
 	 * @return
@@ -195,6 +224,9 @@ public abstract class AbstractInferenceEngine {
 	 */
 	public Map<NodeCategorical,String> sampleOne() {
 		
+		if (getProbabilityEvidence() == 0.0)
+			throw new IllegalArgumentException("cannot generate if the probability of evidence is 0 - evidence is not possible");
+		
 		Map<NodeCategorical,String> originalEvidence = new HashMap<>(evidenceVariable2value);
 		
 		// we start with the original evidence. 
@@ -236,7 +268,51 @@ public abstract class AbstractInferenceEngine {
 	 * returns the probability for the current evidence.
 	 * @return
 	 */
-	public abstract double getProbabilityEvidence();
+	public final double getProbabilityEvidence() {
+		
+		// quick exit 
+		if (evidenceVariable2value.isEmpty())
+			return 1.0;
+		
+		// another quick exit
+		/*
+		if (evidenceVariable2value.size()==1) {
+			NodeCategorical n = evidenceVariable2value.keySet().iterator().next();
+			String v = evidenceVariable2value.get(n);
+			
+			return n.getConditionalProbabilityPosterior(v);
+			
+		}
+		*/
+		
+		// we cannot be quick. Let's delegate.
+		if (dirty)
+			this.compute();
+		
+		return computeProbabilityEvidence();
+	}
 	
+	protected abstract double computeProbabilityEvidence();
+
+	
+
+	/**
+	 * if this node is part of evidence, returns an array of double 
+	 * with 1. when compliant with evidence or else 0.
+	 * @param n
+	 * @return
+	 */
+	protected double[] getEvidenceAsDoubleArray(NodeCategorical n) {
+
+		String valueFromEvidence = evidenceVariable2value.get(n);
+		
+		if (valueFromEvidence == null)
+			throw new IllegalArgumentException("cannot return evidence as a double array if there is not evidence for the current node");
+		
+		double[] values = new double[n.getDomainSize()]; // initialized to 0. by java
+		values[n.getDomainIndex(valueFromEvidence)] = 1.0;
+		
+		return values;
+	}
 	
 }

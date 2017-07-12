@@ -1,5 +1,8 @@
 package gospl.algo.sr.bn;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.map.LRUMap;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,7 +38,7 @@ public final class DNode {
 	/**
 	 * Always accept to cache up to that amount of values (makes no sense to cache only 1 result over 2 possible !)
 	 */
-	public static int minCachedCount = 100;
+	public static int minCachedCount = 500;
 	public static int maxCachedCount = 100000;
 
 	
@@ -58,7 +62,9 @@ public final class DNode {
 	/**
 	 * Cached computation of left.vars() <intersect> right.vars()
 	 */
-	public Set<NodeCategorical> vars = null;
+	public Set<NodeCategorical> varsUnion = null;
+	public Set<NodeCategorical> varsInter = null;
+
 	
 	/** 
 	 * Cached computation of left.varts() <intersect> right.vars - acutset()
@@ -74,12 +80,12 @@ public final class DNode {
 	
 	public Set<NodeCategorical> cluster = null;
 
-	private NodeCategorical eliminated = null;
 	
 	/**
 	 * The cache which associates to each evidence (of interest to this node) the computed probability.
 	 */
 	private LRUMap<Map<NodeCategorical,String>,Double> cacheEvidenceInContext2proba = null;
+
 	
 	/**
 	 * creates a node with no specific role. 
@@ -93,6 +99,61 @@ public final class DNode {
 		
 	}
 	
+	
+	/**
+	 * Creates a node which is a clone of another node
+	 * @param o
+	 */
+	protected DNode(DNode o) {
+		this.n = o.n;
+		this.f = o.f==null?null:o.f.clone();
+		this.bn = o.bn;
+		this.acutset = o.acutset;
+		this.cacheEvidenceInContext2proba = o.cacheEvidenceInContext2proba;
+		this.cluster = o.cluster;
+		this.context = o.context;
+		this.cutset = o.cutset;
+		this.parent = null; // to be replaced later by the cloning process
+		
+		// duplicate recursively our children
+		if (o.right != null) {
+			this.right = o.right.clone();
+			this.right.parent = this;
+			this.right.resetCache();
+		}
+		if (o.left != null) {
+			this.left = o.left.clone();
+			this.left.parent = this;	
+			this.left.resetCache();
+		}
+	}
+	
+
+	protected void resetCache() {
+		if (cacheEvidenceInContext2proba != null)
+			cacheEvidenceInContext2proba.clear();
+		cluster = null;
+		context = null;
+		acutset = null;
+		cutset = null;
+		varsUnion = null;
+		varsInter = null;
+	}
+	
+	public int getDepth() {
+		if (this.parent == null)
+			return 0;
+		else 
+			return this.parent.getDepth()+1;
+	}
+	
+	/**
+	 * Deep clone of this node
+	 */
+	public DNode clone() {
+		return new DNode(this);
+	}
+	
 	/**
 	 * Returns (and constructs) the cache depending to the characteristics of the dnode, 
 	 * and the parameters for cache ration, min and max.
@@ -103,20 +164,20 @@ public final class DNode {
 		if (cacheEvidenceInContext2proba == null) {
 			// create a cache with the right loading factor 
 			// how many values should we compute at most ? 
-			int card = 1;
-			for (NodeCategorical n: vars()) {
+			long card = 1;
+			for (NodeCategorical n: context()) { // TODO
 				card *= n.getDomainSize();
 			}
 			int toCache = (int) Math.round(cacheRatio*card);
-			if (toCache < minCachedCount) {
-				toCache = Math.min(card, minCachedCount);
+			if (toCache < minCachedCount && card > 0) {
+				toCache = (int)Math.min(card, minCachedCount);
 			}
-			if (toCache > maxCachedCount) {
+			if (toCache > maxCachedCount || card < 0) { // in case we overflow... for sure we better use as much storage as possible !
 				toCache = maxCachedCount;
 			}
 			if (toCache < 1)
 				toCache = 1; // technical for LRUMap
-			logger.debug("cache: max values to query: {}, will cache {}", card, toCache);
+			logger.info("cache: max values to query: {}, will cache {}", card, toCache);
 			cacheEvidenceInContext2proba = new LRUMap<Map<NodeCategorical,String>, Double>(toCache);
 		}
 		return cacheEvidenceInContext2proba;
@@ -124,15 +185,6 @@ public final class DNode {
 	}
 	
 	
-	/**
-	 * creates an intermediate node
-	 * @param m
-	 */
-	public DNode(DNode m) {
-		this.n = null;
-		this.f = null;
-		this.bn = m.bn;
-	}
 	
 	/**
 	 * creates a leaf node for the given variable
@@ -179,6 +231,8 @@ public final class DNode {
 		
 		logger.debug("composed {} into {}", toCompose, res);
 
+		res.resetCache();
+		
 		return res;
 	}
 
@@ -193,13 +247,16 @@ public final class DNode {
 		logger.debug("create DTree from elimination order {}", cutset);
 
 		// create the leafs of the future tree for each variable
-		Set<DNode> nodes = bn.getNodes().stream().map(m->new DNode(m)).collect(Collectors.toSet());
+		Set<DNode> nodes = bn.getNodes().stream()
+				.filter(v -> cutset.contains(v))
+				.map(m->new DNode(m))
+				.collect(Collectors.toSet());
 		
 		for (NodeCategorical toCut: cutset) {
 			
 			logger.debug("now decomposing on {}", toCut);
 
-			Set<DNode> toCompose = nodes.stream().filter(t -> t.vars().contains(toCut)).collect(Collectors.toSet());
+			Set<DNode> toCompose = nodes.stream().filter(t -> t.varsInter().contains(toCut)).collect(Collectors.toSet());
 			
 			if (toCompose.size() <= 1)
 				continue;
@@ -208,7 +265,6 @@ public final class DNode {
 			nodes.removeAll(toCompose);
 			
 			DNode composed = compose(bn, toCompose);
-			composed.setEliminated(toCut);
 			nodes.add(composed);
 			
 		}
@@ -228,12 +284,14 @@ public final class DNode {
 		if (this.f != null)
 			throw new IllegalArgumentException("cannot add a child to a factor node");
 		this.left = left;
+		resetCache();
 	}
 	
 	public void setRight(DNode right) {
 		if (this.f != null)
 			throw new IllegalArgumentException("cannot add a child to a factor node");
 		this.right = right;
+		resetCache();
 	}
 	
 	public boolean isRoot() {
@@ -254,22 +312,47 @@ public final class DNode {
 	 * or the variables of this variable if it is a leaf
 	 * @return
 	 */
-	public Set<NodeCategorical> vars() {
+	public Set<NodeCategorical> varsUnion() {
 		
 		if (left == null && right == null) {
 			return f.variables;
 		}
 		
-		if (vars == null) {
-			vars = new HashSet<>(left.vars());
+		if (varsUnion == null) {
+			varsUnion = new HashSet<>(left.varsUnion());
 			// in its 2001 paper Darwich defines it as intersection: 
 			//vars.retainAll(right.vars());
 			// but in its book its actually union !
-			vars.addAll(right.vars());
-			logger.trace("computed vars {}", vars);
+			varsUnion.addAll(right.varsUnion());
+			logger.trace("computed vars {}", varsUnion);
 		}
 		
-		return vars;
+		return varsUnion;
+	}
+	
+	public Set<NodeCategorical> varsInter() {
+		
+		if (left == null && right == null) {
+			return f.variables;
+		}
+		
+		if (varsInter == null) {
+			varsInter = new HashSet<>(left.varsInter());
+			// in its 2001 paper Darwich defines it as intersection: 
+			//vars.retainAll(right.vars());
+			// but in its book its actually union !
+			varsInter.retainAll(right.varsInter());
+			logger.trace("computed varsInter {}", varsInter);
+		}
+		
+		return varsInter;
+	}
+	
+	private Set<NodeCategorical> cutsetWithACutset() {
+		Set<NodeCategorical> cutset = new HashSet<>(left.varsUnion());
+		cutset.retainAll(right.varsUnion());
+		
+		return cutset;
 	}
 
 	/**
@@ -279,17 +362,25 @@ public final class DNode {
 	 */
 	public Set<NodeCategorical> cutset() {
 		
-		if (isRoot())
-			return this.vars();
-		
 		if (cutset == null) {
-			cutset = new HashSet<>(this.vars());
+			cutset = new HashSet<>(left.varsUnion());
+			cutset.retainAll(right.varsUnion());
+			
 			cutset.removeAll(this.acutset());
+			
 			logger.trace("computed cutset {}", cutset);
 		}
 		return cutset;
 	}
 
+	protected void getUnionCutsetParents(Set<NodeCategorical> result) {
+		
+		result.addAll(cutsetWithACutset());
+		
+		if (parent != null)
+			result.addAll(parent.cutsetWithACutset());
+	}
+	
 	/**
 	 * Returns the parent cutset
 	 * @return
@@ -300,9 +391,10 @@ public final class DNode {
 			return Collections.emptySet();
 		
 		if (acutset == null) {
-			acutset = new HashSet<>(parent.acutset());
+			acutset = new HashSet<>(bn.getNodes().size());
+			parent.getUnionCutsetParents(acutset);
 			//acutset.addAll(this.cutset());
-			logger.trace("computed acutset {}", cutset);
+			logger.trace("computed acutset {}", acutset);
 		}
 		
 		return acutset;
@@ -311,7 +403,7 @@ public final class DNode {
 	public Set<NodeCategorical> context() {
 		
 		if (context == null) {
-			context = new HashSet<>(vars());
+			context = new HashSet<>(varsUnion());
 			context.retainAll(acutset());
 		}
 		
@@ -321,7 +413,7 @@ public final class DNode {
 	public Set<NodeCategorical> cluster() {
 		
 		if (isLeaf())
-			return vars();
+			return varsUnion();
 					
 		if (cluster == null) {
 			cluster = new HashSet<>(cutset());
@@ -406,6 +498,10 @@ public final class DNode {
 		*/
 	}
 	
+	public double recursiveConditionning(String ... ss) {
+		return recursiveConditionning(bn.toNodeAndValue(ss));
+	}
+	
 	/**
 	 * Implements RC1 by Derwiche
 	 * 
@@ -417,7 +513,8 @@ public final class DNode {
 		if (n2v.isEmpty())
 			return 1.0;
 		
-		logger.debug("Recursive Conditionning on {} for {}", this, n2v);
+		if (logger.isDebugEnabled()) 
+			logger.debug("Recursive Conditionning for {} on:\n {}", n2v, this);
 		
 		if (isLeaf()) {
 			logger.trace("is leaf => lookup");
@@ -436,20 +533,29 @@ public final class DNode {
 		// start from evidence (which has to be taken in the cache, else results would not depend on it)
 		// keep only our variables defined as the union of children variable (because the others will not play any role for us, so the result would be the same)
 		Map<NodeCategorical,String> y = new HashMap<>(n2v);
-		y.keySet().retainAll(this.vars()); 
-				
-		logger.trace("search in cache {}", y);
-		Double cached = getCache().get(y);
-		if (cached != null) {
-			//logger.info("cached :-)");
-			return cached;
-		} else {
-			//logger.info("Not found in the {} cached items evidences", cacheEvidenceInContext2proba.size());
+		y.keySet().retainAll(varsUnion());
+		
+		// NOT WORKING ! 
+		//y.keySet().retainAll(context()); 
+		
+		if (!y.isEmpty()) {
+			logger.trace("search in cache {}", y);
+			Double cached = getCache().get(y);
+			if (cached != null) {
+				//logger.info("cached :-)");
+				InferencePerformanceUtils.singleton.incCacheHit();
+				// TODO reactivate !!! 
+				return cached;
+			} else {
+				//logger.info("Not found in the {} cached items evidences", cacheEvidenceInContext2proba.size());
+				InferencePerformanceUtils.singleton.incCacheMiss();
+	
+			}
 		}
 		
-		
-
-		logger.trace("no leaf => summing over cutset {}", cutset());
+		if (logger.isTraceEnabled()) {
+			logger.trace("no leaf => summing over cutset {}", cutset().stream().map(v->v.name).collect(Collectors.joining(",")));
+		}
 		double p = 0.;
 
 		// for each instantiation c of uninstantiated variables in cutset()
@@ -457,24 +563,76 @@ public final class DNode {
 		// don't explore all the combinations already defined by evidence
 		uninstantiated.removeAll(n2v.keySet());
 		
-		logger.trace("no leaf => exploring combinations over {}", uninstantiated);
+		if (logger.isTraceEnabled()) {
+			logger.trace("no leaf => exploring combinations over {}", uninstantiated.stream().map(v->v.name).collect(Collectors.joining(",")));
+		}
+		
+		// before optim:
+		// A => multiplication: 655, additions:655, cache hits:20245 and miss:616
+		// B => multiplication: 9787, additions:9787, cache hits:40218 and miss:7659
+		// C => multiplication: 761, additions:761, cache hits:20558 and miss:727
 
-			
+		// after optim based on union of variable sizes
+		// A => multiplication: 620, additions:620, cache hits:20638 and miss:643
+		// B => multiplication: 7446, additions:7446, cache hits:38222 and miss:5221
+		
+		// after optim based on cutset size
+		// C => multiplication: 658, additions:658, cache hits:20474 and miss:622
+
+		// on sachs:
+		// without
+		// multiplication: 5712, additions:5712, cache hits:34504 and miss:5121
+		// multiplication: 7303, additions:7303, cache hits:37831 and miss:5135
+		// with 
+		// multiplication: 7418, additions:7418, cache hits:37979 and miss:4990
+		// multiplication: 6014, additions:6014, cache hits:34585 and miss:5395
+		// multiplication: 5782, additions:5782, cache hits:34420 and miss:5178
+		// multiplication: 5782, additions:5782, cache hits:34420 and miss:5178
+
+		// on gerland: 
+		// before optim
+		// multiplication: 799, additions:799, cache hits:201907 and miss:822
+		// multiplication: 831, additions:831, cache hits:201685 and miss:823
+		// multiplication: 656, additions:656, cache hits:202072 and miss:686
+		// multiplication: 720, additions:720, cache hits:201665 and miss:692
+		
+		// after optim
+		// multiplication: 737, additions:737, cache hits:202236 and miss:692
+		// multiplication: 701, additions:701, cache hits:202227 and miss:721
+		// multiplication: 674, additions:674, cache hits:201963 and miss:727
+		// multiplication: 783, additions:783, cache hits:202301 and miss:831
+		
+		DNode first = left;
+		DNode last = right;
+		/*
+		if (shouldComputeFirst(left, right, n2v)) {
+			first = left;
+			last = right;
+		} else {
+			first = right;
+			last = left;
+		}*/
+		
 		for (IteratorCategoricalVariables it = bn.iterateDomains(uninstantiated); it.hasNext(); ) {
 		
 			Map<NodeCategorical,String> instantiation = it.next();
 			instantiation.putAll(n2v);
 			
-			logger.trace("Sum of {} over {} ", this, instantiation);
+			if (logger.isTraceEnabled())
+				logger.trace("Sum of {} over\n {}", instantiation, this);
 
-			double pLeft = left.recursiveConditionning(instantiation);
-			logger.trace("Sum of {} over {} = {}", left, instantiation, pLeft);
-			if (pLeft == 0)
+			
+				
+			double pLeft = first.recursiveConditionning(instantiation);
+			if (logger.isTraceEnabled())
+				logger.trace("Sum of {} = {}  ", instantiation, pLeft);
+			if (pLeft == 0.)
 				// if pLeft is zero, then why computing the recursive conditionning of right ?
 				continue; 
 
-			double pRight = right.recursiveConditionning(instantiation);
-			logger.trace("Sum of {} over {} = {}", left, instantiation, pRight);
+			double pRight = last.recursiveConditionning(instantiation);
+			if (logger.isTraceEnabled())
+				logger.trace("Sum of {} = {}", instantiation, pRight);
 
 			double m = pLeft * pRight;
 			p += m;
@@ -490,15 +648,50 @@ public final class DNode {
 			
 		}
 		
-		cacheEvidenceInContext2proba.put(y,p);
+		if (!y.isEmpty())
+			cacheEvidenceInContext2proba.put(y,p);
 		
 		return p;
 	}
 	
-	public void notifyDTreeChanged() {
-		vars = null;
-		cutset = null;
-		acutset = null;
+
+	/**
+	 * determines which one of these nodes should be computed first, 
+	 * that is which one is more prone to quickly give a zero, so we can hopefully stop computations 
+	 * earlier 
+	 * @param left2
+	 * @param right2
+	 * @return
+	 */
+	private final boolean shouldComputeFirst(DNode candidate, DNode challenger, Map<NodeCategorical,String> n2v) {
+		
+		/*Set<NodeCategorical> left = new HashSet<>(candidate.varsUnion());
+		left.removeAll(n2v.keySet());
+		
+		Set<NodeCategorical> right = new HashSet<>(challenger.varsUnion());
+		right.removeAll(n2v.keySet());
+		
+		return left.size() < right.size();
+		
+		*/
+		
+		//return candidate.varsUnion().size() < challenger.varsUnion().size();
+		
+		if (candidate.isLeaf()) {
+			if (challenger.isLeaf()) {
+				return candidate.f.variables.size() <= challenger.f.variables.size();
+			} else {
+				return true;
+			}
+		} else {
+			if (challenger.isLeaf()) {
+				return false;
+			} else {
+				return candidate.cutset().size() <= challenger.cutset().size();
+			}
+		}
+		
+		//return candidate.cutset().size() <= challenger.cutset().size();
 	}
 
 
@@ -533,24 +726,22 @@ public final class DNode {
 	
 	@Override
 	public String toString() {
+		
 		StringBuffer sb = new StringBuffer();
-		
-		if (isLeaf())
-			sb.append(n.toString());
-		else {
+		sb.append(StringUtils.repeat("\t", getDepth()));
+		if (isLeaf()) {
+			sb.append("|-- ").append(n.toString()).append("\n");
+		} else {
+			sb.append("|-- vars: ").append(varsInter().stream().map(v->v.name).collect(Collectors.joining(",")));
 			
-			sb.append("[ ").append(left.toString());
+			sb.append(" cutset: ").append(cutset().stream().map(v->v.name).collect(Collectors.joining(",")));
+			sb.append(" acutset:").append(acutset().stream().map(v->v.name).collect(Collectors.joining(",")));
+			sb.append(" context:").append(context().stream().map(v->v.name).collect(Collectors.joining(",")));
+			sb.append("\n");
+			sb.append(left.toString());
+			sb.append(right.toString());
 			
-			sb.append(" /");
-			if (this.eliminated == null)
-				sb.append("?");
-			else 
-				sb.append(this.eliminated.name);
-			sb.append("\\ ");
-				
-			sb.append(right.toString()).append(" ]");
 		}
-		
 		return sb.toString();
 		
 	}
@@ -564,6 +755,8 @@ public final class DNode {
 			parent.right.parent = null;
 		}
 		parent.setRight(this);
+		resetCache();
+
 	}
 	
 	public void becomeLeftChild(DNode parent) {
@@ -574,6 +767,7 @@ public final class DNode {
 			parent.left.parent = null;
 		}
 		parent.setLeft(this);
+		resetCache();
 	}
 
 
@@ -581,16 +775,6 @@ public final class DNode {
 		this.bn = bn;
 	}
 	
-
-	public NodeCategorical getEliminated() {
-		return eliminated;
-	}
-
-
-	public void setEliminated(NodeCategorical eliminated) {
-		this.eliminated = eliminated;
-	}
-
 
 	public void instanciate(Map<NodeCategorical, String> evidenceVariable2value) {
 
@@ -601,6 +785,9 @@ public final class DNode {
 			right.instanciate(evidenceVariable2value);
 			left.instanciate(evidenceVariable2value);
 		}
+		
+		// our caches are not valid anymore ! let's forget everything.
+		resetCache();
 		
  	}
 
@@ -704,5 +891,73 @@ public final class DNode {
 		*/
 	}
 
+	/**
+	 * writes this dtree (or subtree) as a graphviz network
+	 * @param file
+	 */
+	public final void exportAsGraphviz(File file) {
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("# to generate it, use:\n# dot -Tjpg "+file.getAbsolutePath()+" -o "+file.getAbsolutePath()+".jpg\n");
+		sb.append("# if you also want to open it under linux:\n# dot -Tjpg "+file.getAbsolutePath()+" -o "+file.getAbsolutePath()+".jpg && xdg-open "+file.getAbsolutePath()+".jpg\n");
+		sb.append("digraph dtree {\n");
+		sb.append("\trankdir=TB;\n");
+		this.exportAsGraphvizInto(sb, new HashMap<DNode,String>());
+		sb.append("}\n");
+		
+		FileWriter fw;
+		try {
+			fw = new FileWriter(file);
+			fw.write(sb.toString());
+			fw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("error while exporting dtree into file "+file, e);
+		}
+		
+	}
+
+	private void exportAsGraphvizInto(StringBuffer sb, Map<DNode,String> node2id) {
+		
+		String thisId = node2id.get(this);
+		if (thisId == null) {
+			thisId = Integer.toString(node2id.size());
+			node2id.put(this, thisId);
+		}
+		
+		// add this node with its name
+		sb.append("\t\"").append(thisId).append("\" [label=\"");
+		if (this.n != null)
+			sb.append(this.n);
+		else {
+			
+			Set<NodeCategorical> eliminated = new HashSet<>(cluster());
+			eliminated.removeAll(context());
+			
+			Set<NodeCategorical> toDisplay = cutset();
+			sb.append(toDisplay.stream().map(v->v.name).collect(Collectors.joining(",")));
+
+			/*
+			sb.append("cutset:");
+			sb.append(cutset().stream().map(v->v.name).collect(Collectors.joining(",")));
+			sb.append(", acutset:");
+			sb.append(acutset().stream().map(v->v.name).collect(Collectors.joining(",")));
+			*/
+		}
+		sb.append("\"];\n");
+		
+		// add the link between the parent and us - if the parent was added already
+		if (parent != null && node2id.containsKey(parent)) {
+			sb.append("\t\"").append(node2id.get(parent)).append("\" -> ").append("\"").append(thisId).append("\";\n");
+		}
+		
+		// recursively add the children nodes
+		if (left != null)
+			left.exportAsGraphvizInto(sb, node2id);
+		if (right != null)
+			right.exportAsGraphvizInto(sb, node2id);
+		
+		 	
+	}
 
 }

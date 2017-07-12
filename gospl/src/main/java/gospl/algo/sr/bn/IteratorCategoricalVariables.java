@@ -11,7 +11,7 @@ import java.util.Map;
  * @author Samuel Thiriot
  *
  */
-public class IteratorCategoricalVariables implements Iterator<Map<NodeCategorical,String>> {
+public final class IteratorCategoricalVariables implements Iterator<Map<NodeCategorical,String>> {
 
 	
 	/**

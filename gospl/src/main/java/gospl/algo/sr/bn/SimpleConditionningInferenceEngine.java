@@ -10,6 +10,7 @@ import java.util.Set;
 import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.util.PerformanceSensitive;
 
 /**
  * Simple conditioning stands as the simplest exact inference engine possible to propagate evidence 
@@ -21,7 +22,7 @@ import org.apache.logging.log4j.Logger;
  * either its original probabilities, or based on evidence on the variable or on one parent of the variable. 
  * 
  * Only computes probabilities on demand, so few demands will lead to few computations.
- * Caches all the computed probabilities so many demands will not increase computations anymore.
+ * Caches all the computed probabilities so many demands will not increase computations anymore - at the expense of memory, as usual.
  * 
  * Simple optimizations were implemented, including: <ul>
  * <li>excluding irrelevant variables during computation</li>
@@ -40,7 +41,16 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 
 	private Map<NodeCategorical,double[]> computed = new HashMap<>();
 	
+	// note that cache 1 and 2 are combinatory: for each cache level 1, there will be CACHE_MAXITEMS2 level2!
+	private static int CACHE_MAXITEMS = 100;
+	private static int CACHE_MAXITEMS2 = 100;
 
+	private static int CACHE_EVIDENCE = 5000;
+
+	
+	private LRUMap<Map<NodeCategorical,String>,Map<Set<NodeCategorical>,Double>> known2nuisance2value = null;
+	private LRUMap<Map<NodeCategorical,String>,Double> evidence2proba = null;
+	
 	public SimpleConditionningInferenceEngine(CategoricalBayesianNetwork bn) {
 		super(bn);
 
@@ -175,17 +185,21 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		
 	}
 
-
-	private LRUMap<Map<NodeCategorical,String>,Map<Set<NodeCategorical>,Double>> known2nuisance2value = new LRUMap<>();
 	
 	private Double getCached(
 			Map<NodeCategorical,String> known, 
 			Set<NodeCategorical> nuisance
 			) {
 		
+		if (known2nuisance2value == null)
+			known2nuisance2value = new LRUMap<>(CACHE_MAXITEMS);
+		
 		Map<Set<NodeCategorical>,Double> res = known2nuisance2value.get(known);
-		if (res == null)
+		if (res == null) {
+			InferencePerformanceUtils.singleton.incCacheMiss();
 			return null;
+		}
+		InferencePerformanceUtils.singleton.incCacheHit();
 		return res.get(nuisance);
 		
 	}
@@ -197,7 +211,7 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 			) {
 		Map<Set<NodeCategorical>,Double> res = known2nuisance2value.get(known);
 		if (res == null) {
-			res = new HashMap<>();
+			res = new LRUMap<>(CACHE_MAXITEMS2);
 			known2nuisance2value.put(known, res);
 		}
 		res.put(nuisance, d);
@@ -273,7 +287,7 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		
 		double[] v2p = new double[n.getDomainSize()];
 
-		double pFree = this.sumProbabilities(evidence, selectRelevantVariables((NodeCategorical)null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
+		double pFree = getProbabilityEvidence(); // this.sumProbabilities(evidence, selectRelevantVariables((NodeCategorical)null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
 
 		for (int i=0; i<n.getDomainSize(); i++) {
 			String nv = n.getValueIndexed(i);
@@ -377,14 +391,22 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 
 
 	@Override
-	public double getProbabilityEvidence() {
+	protected double computeProbabilityEvidence() {
 
-		// quick answer
-		if (evidenceVariable2value.isEmpty())
-			return 1.;
+		if (evidence2proba == null)
+			evidence2proba = new LRUMap<>(CACHE_EVIDENCE);
 		
-		return this.sumProbabilities(evidenceVariable2value, selectRelevantVariables((NodeCategorical)null, evidenceVariable2value, bn.nodes)); // optimisation: elimination of irrelevant variables
+		Double res = evidence2proba.get(evidence2proba);
+		
+		if (res == null) {
+			InferencePerformanceUtils.singleton.incCacheMiss();
+			res = this.sumProbabilities(evidenceVariable2value, selectRelevantVariables((NodeCategorical)null, evidenceVariable2value, bn.nodes)); // optimisation: elimination of irrelevant variables
+			evidence2proba.put(evidenceVariable2value, res);
+		} else {
+			InferencePerformanceUtils.singleton.incCacheHit();
+		}
 
+		return res;
 	}
 
 

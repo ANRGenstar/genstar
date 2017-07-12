@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.graphstream.algorithm.Toolkit;
 import org.graphstream.graph.EdgeRejectedException;
+import org.graphstream.graph.IdAlreadyInUseException;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.SingleGraph;
 
@@ -118,6 +119,8 @@ public class MoralGraph extends SingleGraph {
 
 						
 					} catch (EdgeRejectedException e) {
+						// ignore it
+					} catch (IdAlreadyInUseException e2) {
 						// ignore it
 					}
 				}

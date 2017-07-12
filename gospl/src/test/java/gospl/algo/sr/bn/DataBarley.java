@@ -29,7 +29,10 @@ public class DataBarley extends AbstractTestData {
 		evidence.put("nprot", "x_160");
 		evidence.put("ntilg", "x_75");
 		this.addExpectedPosteriorForEvidence(evidence, "forfrugt", "Cereals", 0.3710);
-		
+		this.addExpectedPosteriorForEvidence(evidence, "forfrugt", "Beets", 0.1441);
+		this.addExpectedPosteriorForEvidence(evidence, "protein", "x_9", 0.0093);
+		this.addExpectedPosteriorForEvidence(evidence, "jordn", "x_120", 0.0022);
+
 
 
 	}

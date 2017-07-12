@@ -1,6 +1,6 @@
 package gospl.algo.sr.bn;
 
-import static gospl.algo.sr.bn.JUnitBigDecimals.assertEqualsBD;
+import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -50,7 +50,7 @@ public class TestDTree {
 		DNode nodeRain		= new DNode(bn.getVariable("rain"));
 		nodeRain.becomeLeftChild(nodeRoot);
 		
-		DNode nodeTwo 		= new DNode(nodeRoot);
+		DNode nodeTwo 		= new DNode();
 		nodeTwo.becomeRightChild(nodeRoot);
 				
 		DNode nodeGrassWet 	= new DNode(bn.getVariable("grass_wet"));
@@ -79,37 +79,37 @@ public class TestDTree {
 		System.out.println(nodeRoot.cutset());
 		System.out.println(nodeTwo.cutset());
 		
-		assertEqualsBD(
+		assertEquals(
 				0.002, 
 				nodeRoot.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"rain",			"true",
 						"sprinkler",	"true"
 						//"grass_wet",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.00198, 
 				nodeRoot.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"rain",			"true",
 						"sprinkler",	"true",
 						"grass_wet",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.322, 
 				nodeRoot.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"sprinkler",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.44838, 
 				nodeRoot.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"grass_wet",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
 		InferencePerformanceUtils.singleton.display();
@@ -130,36 +130,36 @@ public class TestDTree {
 		DNode dtree = DNode.eliminationOrder2DTree(bn, variables);
 		System.out.println(dtree);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.00198, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"rain",			"true",
 						"sprinkler",	"true",
 						"grass_wet",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.002, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"rain",			"true",
 						"sprinkler",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.322, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"sprinkler",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.44838, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"grass_wet",	"true"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		InferencePerformanceUtils.singleton.display();
 	}
@@ -177,36 +177,36 @@ public class TestDTree {
 		DNode dtree = DNode.eliminationOrder2DTree(bn, variables);
 		System.out.println(dtree);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.44231461, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"actif",	"oui"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.0487540568, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"salarie",	"nonsalarie"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.5, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"gender",	"male"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.0349228141, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"gender",	"male",
 						"salarie",	"nonsalarie"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
 		InferencePerformanceUtils.singleton.display();
@@ -219,41 +219,41 @@ public class TestDTree {
 		
 		CategoricalBayesianNetwork bn = loadGerlandNetwork();
 
-		List<NodeCategorical> eliminationOrder = EliminationOrderDeepFirstSearch.computeEliminationOrderDeepFirstSearch(bn);
+		List<NodeCategorical> eliminationOrder = EliminationOrderDeepFirstSearch.computeEliminationOrder(bn);
 			
 		DNode dtree = DNode.eliminationOrder2DTree(bn, eliminationOrder);
 		System.out.println(dtree);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.44231461, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"actif",	"oui"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.0487540568, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"salarie",	"nonsalarie"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
-		assertEqualsBD(
+		assertEquals(
 				0.5, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"gender",	"male"
 						)),
-				8
+				Math.pow(1, -8)
 				);
-		assertEqualsBD(
+		assertEquals(
 				0.0349228141, 
 				dtree.recursiveConditionning(bn.toNodeAndValue((Collection<NodeCategorical>)null,
 						"gender",	"male",
 						"salarie",	"nonsalarie"
 						)),
-				8
+				Math.pow(1, -8)
 				);
 		
 		InferencePerformanceUtils.singleton.display();

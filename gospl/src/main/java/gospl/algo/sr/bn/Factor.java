@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
+import org.apache.commons.collections4.map.LRUMap;
+
 /**
  * A factor f over variables X is a function that maps each instantiation 
  * x of variables X to a non-negative number, denoted f (x).1
@@ -27,6 +29,7 @@ public final class Factor {
 	
 	protected Map<Map<NodeCategorical,String>,Double> values = new HashMap<>();
 	
+	protected LRUMap<NodeCategorical,Map<String,Factor>> cacheReductionVariable2ValueToResult = null;
 	
 	/**
 	 * Creates a factor over these variables
@@ -36,6 +39,10 @@ public final class Factor {
 	public Factor(CategoricalBayesianNetwork bn, Set<NodeCategorical> variables) {
 		this.bn = bn;
 		this.variables = variables;
+	}
+	
+	public boolean hasUniqueValue() {
+		return variables.isEmpty() && values.size()==1;
 	}
 	
 	/**
@@ -77,29 +84,65 @@ public final class Factor {
 	}
 	
 	/**
+	 * Reduces this factor by removing any reference to nEvidence: keeps only the lines
+	 * compliant with nEvidence=vEvidence and removes the other ones. 
+	 * after this operation there is one less variables in the factor.
+	 * @param nEvidence
+	 * @param vEvidence
+	 */
+	public void reduce(NodeCategorical nEvidence, String vEvidence) {
+		
+		// quick exit
+		if (!variables.contains(nEvidence))
+			return;
+		
+		// for each value in our map...
+		
+		Map<Map<NodeCategorical,String>,Double> novelvalues = new HashMap<>(values.size()/nEvidence.getDomainSize());
+		
+		for (Iterator<Map.Entry<Map<NodeCategorical,String>,Double>> itValues = values.entrySet().iterator(); itValues.hasNext();) {
+			
+			Map.Entry<Map<NodeCategorical,String>,Double> eValues = itValues.next();
+			
+			Map<NodeCategorical,String> keys = eValues.getKey();
+			Double p = eValues.getValue();
+			
+			String vLine = keys.get(nEvidence);
+			if (vLine.equals(vEvidence)) {
+				// keep it !
+				Map<NodeCategorical,String> n2s = new HashMap<>(keys);
+				n2s.remove(nEvidence);
+				Double previousp = novelvalues.put(n2s, p);
+
+				if (previousp != null) {
+					// oops, we knew this one already. Let's sum instead. 
+					novelvalues.put(n2s, p+previousp);
+					InferencePerformanceUtils.singleton.incAdditions();
+				}
+			} else {
+				// in fact we want to drop that one 
+			}
+			
+			
+		}
+		
+		variables.remove(nEvidence);
+		values = novelvalues;
+
+	}
+	
+	/**
 	 * reduces this factor given evidence, that is replaces values with 0 for each 
 	 * combination of values which is not compliant with evidence
 	 * 
 	 */
 	public void reduce(Map<NodeCategorical,String> evidence) {
 		
-		for (Iterator<Map<NodeCategorical,String>> it = values.keySet().iterator(); it.hasNext();) {
-			Map<NodeCategorical,String> k = it.next();
-			for (NodeCategorical n: k.keySet()) {
-				if (!evidence.containsKey(n))
-					continue;
-				// n is concerned by evidence 
-				if (!k.get(n).equals(evidence.get(n))) {
-					// and is contradicting evidence
-					if (keepZeros)
-						values.put(k, 0.);
-					else 
-						it.remove();
-					// stop there for this line
-					break;
-				}
-			}
+		for (Map.Entry<NodeCategorical,String> e: evidence.entrySet()) {
+			reduce(e.getKey(), e.getValue());
+			
 		}
+	
 	}
 	
 	/**
@@ -112,6 +155,44 @@ public final class Factor {
 		Factor res = this.clone();
 		res.reduce(evidence);
 		return res;
+	}
+	
+	public static int CACHE_LEVEL1 = 50;
+	public static int CACHE_LEVEL2 = 100;
+	
+	public Factor reduction(NodeCategorical n, String s) {
+		
+		// optimisation: in case we are not concerned by this variable, return this
+		if (!variables.contains(n))
+			return this;
+		
+		if (cacheReductionVariable2ValueToResult == null)
+			cacheReductionVariable2ValueToResult = new LRUMap<>(Math.min(CACHE_LEVEL1,variables.size()));
+		
+		Map<String,Factor> cacheForVariable = cacheReductionVariable2ValueToResult.get(n);
+		
+		if (cacheForVariable == null) {
+			cacheForVariable = new LRUMap<>(Math.min(CACHE_LEVEL2, n.getDomainSize()));
+			cacheReductionVariable2ValueToResult.put(n, cacheForVariable);
+		}
+		
+		Factor res = cacheForVariable.get(s);
+		
+		if (res == null) {
+			InferencePerformanceUtils.singleton.incCacheMiss();
+			res = this.clone();
+			res.reduce(n, s);
+			cacheForVariable.put(s, res);
+		} else {
+			InferencePerformanceUtils.singleton.incCacheHit();
+		}
+		
+		return res;
+		
+		// TODO optimization: if the evidence is not related to us, we might return us. 
+		//Factor res = this.clone();
+		//res.reduce(n, s);
+		//return res;
 	}
 	
 	public void setFactor(Map<NodeCategorical,String> instanciations, double p) {
@@ -129,32 +210,55 @@ public final class Factor {
 	public double get(Map<NodeCategorical,String> instantiations) {
 		
 		// are parameters valid ? 
-		if (!variables.equals(instantiations.keySet())) {
+		if (!variables.containsAll(instantiations.keySet())) {
 			throw new IllegalArgumentException("invalid variables "+instantiations.keySet()+" for factor "+this);
 		}
 		
-		Double p = values.get(instantiations);
+		double p;
 		
-		// maybe it's already computed
-		if (p != null)
-			return p;
+		if (instantiations.size() == variables.size()) {
+			// perfect solution: just read one single value in this factor 
+			
+			// get it 
+			Double v = values.get(instantiations);
+			
+			if (v==null & !keepZeros)
+				// the fact we red nothing means this is 0.
+				p=0.;
+			else 
+				p = v;
+				
+		} else {
+			throw new IllegalArgumentException("not enough coordinates to get factor data");
+			/*
+			// seems like we don't have all the values required for reading our index ! 
+			// let's sum over it 
+			double total = 0.;
+			for (IteratorCategoricalVariables itDomain = bn.iterateDomains(variables.stream().filter(v -> !instantiations.containsKey(v)).collect(Collectors.toSet())); itDomain.hasNext(); ) {
+				Map<NodeCategorical,String> n2v = itDomain.next();
+				n2v.putAll(instantiations);
+				Double read = values.get(n2v);
+				if (read != null) {
+					total += read; // notice we ignore null lines here... for some reason...
+					if (total >= 1)
+						break;
+				}
+			}
+			p = total;*/
+		}
 		
-		if (!keepZeros)
-			return 0;
 		
 		// compute on demand
 		//p = bn.jointProbability(instantiations, Collections.emptyMap());
 		//values.put(instantiations, p);
 		
-		// should never come here...
-		// TODO
 		return p;
 	}
 	
 	public double get(String... sss) {
 		return this.get(bn.toNodeAndValue(this.variables, sss));
 	}
-	
+
 	
 	public Factor sumOut(String varName) {
 		return this.sumOut(bn.getVariable(varName));
