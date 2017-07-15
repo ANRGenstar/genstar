@@ -44,7 +44,7 @@ public class GSSAState extends AGSSampleBasedCOSolution {
 					newPop, value);
 			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
 			APopulationEntity newEntity = newPop.contains(removeAddPair.get(oldEntity)) ?
-					removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+					(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 			newPop = super.deepSwitch(newPop, oldEntity, newEntity);
 		}
 		return new GSSAState(newPop, super.sample);
@@ -58,7 +58,7 @@ public class GSSAState extends AGSSampleBasedCOSolution {
 					super.population, value);
 			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
 			APopulationEntity newEntity = super.population.contains(removeAddPair.get(oldEntity)) ?
-					removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+					(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 					neighbors.add(new GSSAState(super.deepSwitch(new GosplPopulation(super.population), oldEntity, newEntity),
 							super.sample));
 		}

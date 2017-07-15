@@ -73,7 +73,7 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 				continue;
 			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
 			APopulationEntity newEntity = newPopulation.contains(removeAddPair.get(oldEntity)) ?
-					removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+					(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 			newPopulation = super.deepSwitch(newPopulation, oldEntity, newEntity);
 		}
 		return new GSDuplicateShiftSolution(newPopulation, sample);
@@ -90,7 +90,7 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 			return null;
 		APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
 		APopulationEntity newEntity = this.population.contains(removeAddPair.get(oldEntity)) ? 
-						removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+						(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 		return new GSUniqueShiftSolution(super.deepSwitch(new GosplPopulation(this.population), 
 				oldEntity, newEntity), sample);
 	}

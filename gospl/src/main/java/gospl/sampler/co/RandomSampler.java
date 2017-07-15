@@ -36,7 +36,7 @@ public class RandomSampler implements IEntitySampler {
 		for(int i = 0; i < numberOfDraw; i++){
 			APopulationEntity newEntity = this.draw();
 			draws.add(tmpSample.remove(newEntity) ? 
-					newEntity : newEntity.clone());
+					newEntity : (APopulationEntity) newEntity.clone());
 		}
 		return draws;
 	}

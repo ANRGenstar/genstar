@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.management.AttributeValueExp;
-
 import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.IEntity;
@@ -45,6 +43,12 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 		}
 	}
 	
+	@Override
+	/**
+	 * Clone returns a similar population entity whose values might be modified without modifying the 
+	 * parent one.
+	 */
+	public abstract Object clone();
 	
 	/** 
 	 * sets the value for the attribute or updates this value
@@ -95,6 +99,10 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 		this.attributes.put(attribute, attribute.getValue(valueString));
 	}
 	
+
+	public Map<APopulationAttribute, APopulationValue> getAttributesMap() {
+		return Collections.unmodifiableMap(attributes);
+	}
 	
 	@Override
 	public Collection<APopulationAttribute> getAttributes() {
