@@ -132,7 +132,7 @@ public class GosplAttributeFactory {
 				throw new IllegalArgumentException("cannot instantiate aggregated value without mapper");
 			break;
 		case range:
-			if(mapper.isEmpty())
+			if(mapper==null || mapper.isEmpty())
 				att = new RangeAttribute(name, dataType);
 			else if(referentAttribute != null)
 				att = new MappedAttribute(name, dataType, referentAttribute, mapper);
