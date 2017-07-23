@@ -1,6 +1,8 @@
 package gospl.io;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,14 +10,22 @@ import java.io.InputStreamReader;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.IGSSurvey;
 
-class CsvInputHandler implements IGSSurvey {
+public class CsvInputHandler implements IGSSurvey {
 	
 	private List<String[]> dataTable;
 	
@@ -199,6 +209,103 @@ class CsvInputHandler implements IGSSurvey {
 		s+="\tline number: "+dataTable.size();
 		s+="\tcolumn number: "+dataTable.get(0).length;
 		return s;
+	}
+	
+	private static final char[] CSV_SEPARATORS_FROM_DETECTION = new char[] {',',';',':','|',' '};
+	
+	/**
+	 * From a given CSV file, tries to detect a plausible separator. 
+	 * Will take the one which is used in most lines with the lowest variance.
+	 * 
+	 * @param f
+	 * @return
+	 * @throws IOException
+	 */
+	public static char detectSeparator(File f) throws IOException {
+		return detectSeparator(f, CSV_SEPARATORS_FROM_DETECTION);
+	}
+		
+	/**
+	 * From a given CSV file, tries to detect a plausible separator. 
+	 * Will take the one which is used in most lines with the lowest variance.
+	 * 
+	 * @param f
+	 * @param candidates
+	 * @return
+	 * @throws IOException
+	 */
+	public static char detectSeparator(File f, char[] candidates) throws IOException {
+		
+		int countLines = 20;
+		
+		// read the first n lines
+		BufferedReader bf = new BufferedReader(new FileReader(f));
+		List<String> firstLines = new ArrayList<>(countLines);
+		while (bf.ready()) {
+			firstLines.add(bf.readLine());
+		}
+		// close the file
+		bf.close();
+			
+		countLines = firstLines.size();
+		
+		if (countLines < 3)
+			throw new IllegalArgumentException("cannot detect automatically the CSV separators from so few lines, sorry");
+
+		// we will count the number of occurences of each char in each line
+		int[][] counts = new int[countLines][candidates.length]; // automatically init to 0
+	
+		for (int iline=0; iline<countLines; iline++) {
+			for (int i=0; i<candidates.length; i++) {
+				counts[iline][i] = StringUtils.countMatches(firstLines.get(iline), ""+candidates[i]);
+			}
+		}
+		
+		// so at the end we now how many instances of each separator were found
+		double[] averageOccurences = new double[candidates.length];
+		double[] variance = new double[candidates.length];
+		for (int i=0; i<candidates.length; i++) {
+			
+			// what is the average of this column?
+			for (int iline=0; iline<countLines; iline++) {
+				averageOccurences[i] += counts[iline][i];
+			}
+			averageOccurences[i] = averageOccurences[i]/countLines;
+			
+			// and so, was is its variance ?
+			for (int iline=0; iline<countLines; iline++) {
+				variance[i] += Math.pow(counts[iline][i] - averageOccurences[i], 2);
+			}
+			variance[i] = variance[i]/countLines;
+			
+		}
+		
+		String msg = "";
+		for (int i=0; i<candidates.length; i++) {
+			msg += candidates[i]+": "+averageOccurences[i]+" ~ "+variance[i]+" \n";
+		}
+		System.out.println(msg);
+		
+		// now select the ones which might be relevant, that is the ones with more than one occurence per line
+		List<Integer> relevant = new LinkedList<>();
+		for (int i=0; i<candidates.length; i++) {
+			if (averageOccurences[i]>=1)
+				relevant.add(i);
+		}
+		
+		// and select the one with the lowest variance
+		Collections.sort(relevant, new Comparator<Integer>() {
+
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return Double.compare(variance[o1], variance[o2]);
+			}
+			
+		});
+		
+		System.out.println("order of merit: "+relevant);
+		return candidates[relevant.get(0)];
+		
 	}
 
 }
