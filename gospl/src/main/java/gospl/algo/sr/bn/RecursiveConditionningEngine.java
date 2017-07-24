@@ -187,7 +187,14 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 			logger.debug("building the generic dtree without evidence...");
 			dtreeWithoutEvidence = DNode.eliminationOrder2DTree(bn, eliminationOrder);
 			logger.info("created dtree:\n{}", dtreeWithoutEvidence);
-			dtreeWithoutEvidence.exportAsGraphviz(new File("/tmp/dtree.dot"));
+			//dtreeWithoutEvidence.exportAsGraphviz(new File("/tmp/dtree.dot"));
+			
+			// for debug : export graphs
+			//this.dtreeWithoutEvidence.exportAsGraphviz(new File("/tmp/dtree_cutset.dot"), "cutset");
+			//this.dtreeWithoutEvidence.exportAsGraphviz(new File("/tmp/dtree_acutset.dot"), "acutset");
+			//this.dtreeWithoutEvidence.exportAsGraphviz(new File("/tmp/dtree_context.dot"), "context");
+			//this.dtreeWithoutEvidence.exportAsGraphviz(new File("/tmp/dtree_varsUnion.dot"), "varsUnion");
+
 			//logger.debug("eliminating in the dtree the variables {}...", evidenceVariable2value);
 			//dtree.instanciate(evidenceVariable2value);
 			//cacheEvidenceToDTree.put(evidenceVariable2value, dtree);
@@ -218,7 +225,10 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 			
 			
 			this.dtreeWithEvidence = DNode.eliminationOrder2DTree(bn, eliminationOrderWithEvidence);
-			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence.dot"));
+			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence_cutset.dot"), "cutset");
+			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence_context.dot"), "context");
+			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence_varsUnion.dot"), "varsUnion");
+
 
 			logger.info("generated dtree with evidence {}:\n{}", evidenceVariable2value, dtreeWithEvidence);
 		

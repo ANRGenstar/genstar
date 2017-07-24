@@ -2,72 +2,69 @@ package gospl.io;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
 
-public class CsvInputHandler implements IGSSurvey {
-	
+public class CsvInputHandler extends AbstractInputHandler {
+
+	/**
+	 * The list of the separators which might be detected automatically.
+	 */
+	private static final char[] CSV_SEPARATORS_FROM_DETECTION = new char[] {',',';',':','|',' '};
+
 	private List<String[]> dataTable;
 	
 	private int firstRowDataIndex;
 	private int firstColumnDataIndex;
-	private GSSurveyType dataFileType;
 
-	private String surveyFileName;
-	private String surveyFilePath;
 	
 	protected CsvInputHandler(String fileName, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
-		CSVReader reader = new CSVReader(new FileReader(fileName), csvSeparator);
+		super(dataFileType, fileName);
+		
+		CSVReader reader = new CSVReader(new FileReader(surveyCompleteFile), csvSeparator);
 		dataTable = reader.readAll();
-		this.surveyFileName = Paths.get(fileName).getFileName().toString();
-		this.surveyFilePath = Paths.get(fileName).toAbsolutePath().toString();
+		
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
 		reader.close();
 	}
 	
 	protected CsvInputHandler(File file, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(file), csvSeparator);
+		
+		super(dataFileType, file);
+		
+		CSVReader reader = new CSVReader(new FileReader(surveyCompleteFile), csvSeparator);
 		dataTable = reader.readAll();
-		surveyFileName = file.getName();
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
 		reader.close();
 	}
 
 	protected CsvInputHandler(String fileName, InputStream surveyIS, char csvSeparator, 
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException {
+		super(dataFileType, fileName);
+
 		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS), csvSeparator);
 		dataTable = reader.readAll();
-		surveyFileName = fileName;
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
 		reader.close();
 	}
 
@@ -165,21 +162,6 @@ public class CsvInputHandler implements IGSSurvey {
 	}
 	
 	@Override
-	public String getSurveyFilePath() {
-		return surveyFilePath;
-	}
-
-	@Override
-	public void setSurveyFilePath(String surveyFilePath) {
-		this.surveyFilePath = surveyFilePath;
-	}
-	
-	@Override
-	public GSSurveyType getDataFileType() {
-		return dataFileType;
-	}
-
-	@Override
 	public int getFirstRowIndex() {
 		return firstRowDataIndex;
 	}
@@ -211,7 +193,6 @@ public class CsvInputHandler implements IGSSurvey {
 		return s;
 	}
 	
-	private static final char[] CSV_SEPARATORS_FROM_DETECTION = new char[] {',',';',':','|',' '};
 	
 	/**
 	 * From a given CSV file, tries to detect a plausible separator. 
@@ -307,5 +288,6 @@ public class CsvInputHandler implements IGSSurvey {
 		return candidates[relevant.get(0)];
 		
 	}
+
 
 }

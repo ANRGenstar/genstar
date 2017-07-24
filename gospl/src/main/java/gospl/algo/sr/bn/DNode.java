@@ -3,6 +3,7 @@ package gospl.algo.sr.bn;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -119,16 +120,34 @@ public final class DNode {
 		if (o.right != null) {
 			this.right = o.right.clone();
 			this.right.parent = this;
-			this.right.resetCache();
 		}
 		if (o.left != null) {
 			this.left = o.left.clone();
-			this.left.parent = this;	
-			this.left.resetCache();
+			this.left.parent = this;
 		}
+		
+		resetCacheAll();
 	}
 	
 
+	protected void resetCacheParents() {
+		if (parent != null) {
+			parent.resetCache();
+			parent.resetCacheParents();
+		}
+	}
+	
+	protected void resetCacheChildren() {
+		if (left != null) {
+			left.resetCache();
+			left.resetCacheChildren();
+		}
+		if (right != null) {
+			right.resetCache();
+			right.resetCacheChildren();
+		}
+	}
+	
 	protected void resetCache() {
 		if (cacheEvidenceInContext2proba != null)
 			cacheEvidenceInContext2proba.clear();
@@ -138,6 +157,23 @@ public final class DNode {
 		cutset = null;
 		varsUnion = null;
 		varsInter = null;
+		
+	}
+	
+	protected void resetCacheAll() {
+		resetCache();
+
+		resetCacheChildren();
+		resetCacheParents();
+	}
+	
+	private void computeVarsUnion() {
+		this.varsUnion();
+	}
+	
+	private void compute() {
+		computeVarsUnion();
+		
 	}
 	
 	public int getDepth() {
@@ -231,7 +267,7 @@ public final class DNode {
 		
 		logger.debug("composed {} into {}", toCompose, res);
 
-		res.resetCache();
+		res.resetCacheAll();
 		
 		return res;
 	}
@@ -284,14 +320,14 @@ public final class DNode {
 		if (this.f != null)
 			throw new IllegalArgumentException("cannot add a child to a factor node");
 		this.left = left;
-		resetCache();
+		resetCacheAll();
 	}
 	
 	public void setRight(DNode right) {
 		if (this.f != null)
 			throw new IllegalArgumentException("cannot add a child to a factor node");
 		this.right = right;
-		resetCache();
+		resetCacheAll();
 	}
 	
 	public boolean isRoot() {
@@ -349,6 +385,7 @@ public final class DNode {
 	}
 	
 	private Set<NodeCategorical> cutsetWithACutset() {
+		
 		Set<NodeCategorical> cutset = new HashSet<>(left.varsUnion());
 		cutset.retainAll(right.varsUnion());
 		
@@ -363,11 +400,20 @@ public final class DNode {
 	public Set<NodeCategorical> cutset() {
 		
 		if (cutset == null) {
-			cutset = new HashSet<>(left.varsUnion());
+			
+			// meaningless: keeps everything at the top!
+			//Set<NodeCategorical> cutset = new HashSet<>(varsUnion());
+			
+			// worked
+			// Set<NodeCategorical> cutset = new HashSet<>(left.varsUnion());
+			// cutset.retainAll(right.varsUnion());
+			
+			Set<NodeCategorical> cutset = new HashSet<>(left.varsUnion());
 			cutset.retainAll(right.varsUnion());
 			
 			cutset.removeAll(this.acutset());
 			
+			this.cutset = cutset;
 			logger.trace("computed cutset {}", cutset);
 		}
 		return cutset;
@@ -375,10 +421,10 @@ public final class DNode {
 
 	protected void getUnionCutsetParents(Set<NodeCategorical> result) {
 		
-		result.addAll(cutsetWithACutset());
+		result.addAll(cutset()); // WithACutset
 		
 		if (parent != null)
-			result.addAll(parent.cutsetWithACutset());
+			parent.getUnionCutsetParents(result);
 	}
 	
 	/**
@@ -391,9 +437,10 @@ public final class DNode {
 			return Collections.emptySet();
 		
 		if (acutset == null) {
-			acutset = new HashSet<>(bn.getNodes().size());
+			Set<NodeCategorical> acutset = new HashSet<>(bn.getNodes().size());
 			parent.getUnionCutsetParents(acutset);
 			//acutset.addAll(this.cutset());
+			this.acutset = acutset;
 			logger.trace("computed acutset {}", acutset);
 		}
 		
@@ -403,8 +450,9 @@ public final class DNode {
 	public Set<NodeCategorical> context() {
 		
 		if (context == null) {
-			context = new HashSet<>(varsUnion());
-			context.removeAll(acutset());
+			Set<NodeCategorical> context = new HashSet<>(varsUnion());
+			context.retainAll(acutset());
+			this.context = context;
 		}
 		
 		return context;
@@ -533,10 +581,10 @@ public final class DNode {
 		// start from evidence (which has to be taken in the cache, else results would not depend on it)
 		// keep only our variables defined as the union of children variable (because the others will not play any role for us, so the result would be the same)
 		Map<NodeCategorical,String> y = new HashMap<>(n2v);
-		y.keySet().retainAll(varsUnion());
+		//y.keySet().retainAll(varsUnion());
 		
 		// NOT WORKING ! 
-		//y.keySet().retainAll(context()); 
+		y.keySet().retainAll(context()); 
 		
 		if (!context().isEmpty() && !y.isEmpty()) {
 			logger.trace("search in cache {}", y);
@@ -755,7 +803,7 @@ public final class DNode {
 			parent.right.parent = null;
 		}
 		parent.setRight(this);
-		resetCache();
+		resetCacheAll();
 
 	}
 	
@@ -767,7 +815,7 @@ public final class DNode {
 			parent.left.parent = null;
 		}
 		parent.setLeft(this);
-		resetCache();
+		resetCacheAll();
 	}
 
 
@@ -787,7 +835,7 @@ public final class DNode {
 		}
 		
 		// our caches are not valid anymore ! let's forget everything.
-		resetCache();
+		resetCacheAll();
 		
  	}
 
@@ -890,19 +938,23 @@ public final class DNode {
 		}
 		*/
 	}
+	
+	public final void exportAsGraphviz(File file) {
+		this.exportAsGraphviz(file, "cutset");
+	}
 
 	/**
 	 * writes this dtree (or subtree) as a graphviz network
 	 * @param file
 	 */
-	public final void exportAsGraphviz(File file) {
+	public final void exportAsGraphviz(File file, String toDisplayFunc) {
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("# to generate it, use:\n# dot -Tjpg "+file.getAbsolutePath()+" -o "+file.getAbsolutePath()+".jpg\n");
 		sb.append("# if you also want to open it under linux:\n# dot -Tjpg "+file.getAbsolutePath()+" -o "+file.getAbsolutePath()+".jpg && xdg-open "+file.getAbsolutePath()+".jpg\n");
 		sb.append("digraph dtree {\n");
 		sb.append("\trankdir=TB;\n");
-		this.exportAsGraphvizInto(sb, new HashMap<DNode,String>());
+		this.exportAsGraphvizInto(sb, new HashMap<DNode,String>(), toDisplayFunc);
 		sb.append("}\n");
 		
 		FileWriter fw;
@@ -917,7 +969,7 @@ public final class DNode {
 		
 	}
 
-	private void exportAsGraphvizInto(StringBuffer sb, Map<DNode,String> node2id) {
+	private void exportAsGraphvizInto(StringBuffer sb, Map<DNode,String> node2id, String toDisplayFunc) {
 		
 		String thisId = node2id.get(this);
 		if (thisId == null) {
@@ -931,11 +983,16 @@ public final class DNode {
 			sb.append(this.n);
 		else {
 			
-			Set<NodeCategorical> eliminated = new HashSet<>(cluster());
-			eliminated.removeAll(context());
+			Set<NodeCategorical> toDisplay;
+			try {
+				toDisplay = (Set<NodeCategorical>) this.getClass().getDeclaredMethod(toDisplayFunc).invoke(this);
+				sb.append(toDisplayFunc).append(": {").append(toDisplay.stream().map(v->v.name).collect(Collectors.joining(","))).append("}");
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException
+					| NoSuchMethodException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} //cutset();
 			
-			Set<NodeCategorical> toDisplay = cutset();
-			sb.append(toDisplay.stream().map(v->v.name).collect(Collectors.joining(",")));
 
 			/*
 			sb.append("cutset:");
@@ -953,9 +1010,9 @@ public final class DNode {
 		
 		// recursively add the children nodes
 		if (left != null)
-			left.exportAsGraphvizInto(sb, node2id);
+			left.exportAsGraphvizInto(sb, node2id, toDisplayFunc);
 		if (right != null)
-			right.exportAsGraphvizInto(sb, node2id);
+			right.exportAsGraphvizInto(sb, node2id, toDisplayFunc);
 		
 		 	
 	}

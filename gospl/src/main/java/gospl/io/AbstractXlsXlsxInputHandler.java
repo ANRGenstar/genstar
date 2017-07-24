@@ -1,6 +1,5 @@
 package gospl.io;
 
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -12,7 +11,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
 
 /**
  * Abstract class that define the general contract for
@@ -24,38 +22,34 @@ import core.metamodel.pop.io.IGSSurvey;
  * @author chapuisk
  *
  */
-public abstract class AbstractXlsXlsxInputHandler implements IGSSurvey {
+public abstract class AbstractXlsXlsxInputHandler extends AbstractInputHandler {
 
 	protected Workbook wb;
 	private Sheet currentSheet;
 	private DataFormatter dataFormatter = new DataFormatter();
 	
-	private String surveyFileName;
-	private String surveyFilePath;
-	
 	private int firstRowDataIndex;
 	private int firstColumnDataIndex;
-	private GSSurveyType dataFileType;
 	
 	public AbstractXlsXlsxInputHandler(String surveyFileName, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) {
-		this.surveyFileName = Paths.get(surveyFileName).getFileName().toString();
-		this.surveyFilePath = Paths.get(surveyFileName).toAbsolutePath().toString();
+		super(dataFileType, surveyFileName);
+
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
+
 	}
 
 // ------------------------ unique value parser ------------------------ //
 	
-		@Override
-		public String read(int rowIndex, int columnIndex){
-			Cell theCell = getCurrentSheet().getRow(rowIndex).getCell(columnIndex);
-			if(theCell.getCellType() == Cell.CELL_TYPE_STRING)
-				return theCell.getStringCellValue();
-			else
-				return getDataFormatter().formatCellValue(theCell);
-		}
+	@Override
+	public String read(int rowIndex, int columnIndex){
+		Cell theCell = getCurrentSheet().getRow(rowIndex).getCell(columnIndex);
+		if(theCell.getCellType() == Cell.CELL_TYPE_STRING)
+			return theCell.getStringCellValue();
+		else
+			return getDataFormatter().formatCellValue(theCell);
+	}
 	
 // ------------------------ Line-parser methods ------------------------ //
 	
@@ -158,21 +152,6 @@ public abstract class AbstractXlsXlsxInputHandler implements IGSSurvey {
 	@Override
 	public String getName(){
 		return surveyFileName;
-	}
-	
-	@Override
-	public String getSurveyFilePath() {
-		return surveyFilePath;
-	}
-
-	@Override
-	public void setSurveyFilePath(String surveyFilePath) {
-		this.surveyFilePath = surveyFilePath;
-	}
-	
-	@Override
-	public GSSurveyType getDataFileType() {
-		return dataFileType;
 	}
 	
 	@Override

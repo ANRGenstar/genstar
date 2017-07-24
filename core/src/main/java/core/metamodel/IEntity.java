@@ -17,6 +17,13 @@ public interface IEntity<A extends IAttribute<V>, V extends IValue> {
 	public Collection<A> getAttributes();
 	
 	/**
+	 * Returns true if this entity contains this attribute
+	 * @param a
+	 * @return
+	 */
+	public boolean hasAttribute(A a);
+
+	/**
 	 * returns values for each attributes of the entity
 	 * 
 	 * @return

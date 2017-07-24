@@ -6,6 +6,7 @@ import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 
@@ -41,5 +42,6 @@ public class SpllFeature extends AGeoEntity {
 	public String toString() {
 		return "Feature of type: "+innerFeature.getType()+" with default geometry being "+this.getGeometry().getGeometryType();
 	}
+
 
 }

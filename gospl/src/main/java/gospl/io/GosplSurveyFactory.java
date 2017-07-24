@@ -385,8 +385,7 @@ public class GosplSurveyFactory {
 	 */
 	public IGSSurvey getSurvey(final String fileName, final InputStream surveyIS, GSSurveyType dataFileType) 
 			throws IOException, InvalidFormatException, InvalidSurveyFormatException {
-		return this.getSurvey(fileName, surveyIS, sheetNb, separator, 
-				firstRowDataIdx, firstColumnDataIdx, dataFileType);
+		return this.getSurvey(fileName, surveyIS, sheetNb, separator, firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
 
 	// ----------------------------------------------------------------------- //

@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -110,6 +111,11 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 	}
 	
 	@Override
+	public final boolean hasAttribute(APopulationAttribute a) {
+		return attributes.containsKey(a);
+	}
+
+	@Override
 	public Collection<APopulationValue> getValues() {
 		return Collections.unmodifiableCollection(attributes.values());
 	}
@@ -157,4 +163,9 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 	 */
 	public abstract void setNest(AGeoEntity entity);
 
+	
+	public String toString() {
+		return attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()+":"+e.getValue().getStringValue()).collect(Collectors.joining(",\t"));
+	}
+	
 }

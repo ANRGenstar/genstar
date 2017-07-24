@@ -3,20 +3,12 @@
 <!--
   Bayesian network in XMLBIF v0.3 (BayesNet Interchange Format)
   Produced by SamIam http://reasoning.cs.ucla.edu/samiam
-  Output created 15 juin 2017 12:00:52
+  Output created 6 juil. 2017 08:59:53
 -->
 
 <BIF VERSION="0.3">
 <NETWORK>
   <NAME>bayesiannetwork</NAME>
-
-  <VARIABLE TYPE="nature">
-    <NAME>salarie</NAME>
-    <OUTCOME>nonpertinent</OUTCOME>
-    <OUTCOME>salarie</OUTCOME>
-    <OUTCOME>nonsalarie</OUTCOME>
-    <PROPERTY>position = (0, 0)</PROPERTY>
-  </VARIABLE>
 
   <VARIABLE TYPE="nature">
     <NAME>type_salarie</NAME>
@@ -26,7 +18,22 @@
     <OUTCOME>interim</OUTCOME>
     <OUTCOME>aide</OUTCOME>
     <OUTCOME>apprentissage_stage</OUTCOME>
-    <PROPERTY>position = (0, 0)</PROPERTY>
+    <PROPERTY>position = (70, 333)</PROPERTY>
+  </VARIABLE>
+
+  <VARIABLE TYPE="nature">
+    <NAME>actif</NAME>
+    <OUTCOME>unknown</OUTCOME>
+    <OUTCOME>oui</OUTCOME>
+    <OUTCOME>non</OUTCOME>
+    <PROPERTY>position = (316, 11)</PROPERTY>
+  </VARIABLE>
+
+  <VARIABLE TYPE="nature">
+    <NAME>gender</NAME>
+    <OUTCOME>male</OUTCOME>
+    <OUTCOME>female</OUTCOME>
+    <PROPERTY>position = (55, -139)</PROPERTY>
   </VARIABLE>
 
   <VARIABLE TYPE="nature">
@@ -35,15 +42,7 @@
     <OUTCOME>independant</OUTCOME>
     <OUTCOME>employeur</OUTCOME>
     <OUTCOME>aidesfamiliaux</OUTCOME>
-    <PROPERTY>position = (0, 0)</PROPERTY>
-  </VARIABLE>
-
-  <VARIABLE TYPE="nature">
-    <NAME>gender</NAME>
-    <OUTCOME>male</OUTCOME>
-    <OUTCOME>female</OUTCOME>
-    <OBSERVED>0</OBSERVED>
-    <PROPERTY>position = (45, -103)</PROPERTY>
+    <PROPERTY>position = (456, 212)</PROPERTY>
   </VARIABLE>
 
   <VARIABLE TYPE="nature">
@@ -55,8 +54,15 @@
     <OUTCOME>from60to74</OUTCOME>
     <OUTCOME>from75to89</OUTCOME>
     <OUTCOME>from90toMore</OUTCOME>
-    <OBSERVED>4</OBSERVED>
-    <PROPERTY>position = (255, -157)</PROPERTY>
+    <PROPERTY>position = (368, -153)</PROPERTY>
+  </VARIABLE>
+
+  <VARIABLE TYPE="nature">
+    <NAME>salarie</NAME>
+    <OUTCOME>nonpertinent</OUTCOME>
+    <OUTCOME>salarie</OUTCOME>
+    <OUTCOME>nonsalarie</OUTCOME>
+    <PROPERTY>position = (151, 197)</PROPERTY>
   </VARIABLE>
 
   <VARIABLE TYPE="nature">
@@ -65,29 +71,26 @@
     <OUTCOME>from15to24</OUTCOME>
     <OUTCOME>from25to54</OUTCOME>
     <OUTCOME>from55to64</OUTCOME>
-    <PROPERTY>position = (0, 0)</PROPERTY>
+    <PROPERTY>position = (449, -67)</PROPERTY>
   </VARIABLE>
-
-  <VARIABLE TYPE="nature">
-    <NAME>actif</NAME>
-    <OUTCOME>unknown</OUTCOME>
-    <OUTCOME>oui</OUTCOME>
-    <OUTCOME>non</OUTCOME>
-    <PROPERTY>position = (0, 0)</PROPERTY>
-  </VARIABLE>
-
-  <DEFINITION>
-    <FOR>salarie</FOR>
-    <GIVEN>gender</GIVEN>
-    <GIVEN>actif</GIVEN>
-    <TABLE>1.0 0.0 0.0 0.0 0.838 0.162 1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.939 0.061 1.0 0.0 0.0 </TABLE>
-  </DEFINITION>
 
   <DEFINITION>
     <FOR>type_salarie</FOR>
     <GIVEN>salarie</GIVEN>
     <GIVEN>gender</GIVEN>
-    <TABLE>1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.9082240762812872 0.04529201430274136 0.011918951132300357 0.0 0.03456495828367104 0.0 0.9440860215053763 0.054838709677419356 0.0 0.0 0.001075268817204301 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 </TABLE>
+    <TABLE>1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.9082240762812873 0.045292014302741365 0.011918951132300359 0.0 0.034564958283671045 0.0 0.9440860215053763 0.054838709677419356 0.0 0.0 0.001075268817204301 1.0 0.0 0.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 0.0 0.0 </TABLE>
+  </DEFINITION>
+
+  <DEFINITION>
+    <FOR>actif</FOR>
+    <GIVEN>age3</GIVEN>
+    <GIVEN>gender</GIVEN>
+    <TABLE>1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.391 0.609 0.0 0.308 0.692 0.0 0.978 0.02200000000000002 0.0 0.922 0.07799999999999996 0.0 0.286 0.714 0.0 0.455 0.5449999999999999 </TABLE>
+  </DEFINITION>
+
+  <DEFINITION>
+    <FOR>gender</FOR>
+    <TABLE>0.5 0.5 </TABLE>
   </DEFINITION>
 
   <DEFINITION>
@@ -98,27 +101,22 @@
   </DEFINITION>
 
   <DEFINITION>
-    <FOR>gender</FOR>
-    <TABLE>0.5 0.5 </TABLE>
-  </DEFINITION>
-
-  <DEFINITION>
     <FOR>age6</FOR>
     <GIVEN>gender</GIVEN>
     <TABLE>0.23676323676323677 0.14885114885114886 0.18581418581418582 0.24675324675324675 0.15784215784215785 0.01898101898101898 0.004995004995004995 0.21975806451612903 0.1280241935483871 0.24092741935483872 0.24092741935483872 0.13306451612903225 0.036290322580645164 0.0010080645161290322 </TABLE>
   </DEFINITION>
 
   <DEFINITION>
-    <FOR>age3</FOR>
-    <GIVEN>age6</GIVEN>
-    <TABLE>1.0 0.0 0.0 0.0 0.0 0.5 0.5 0.0 0.0 0.5 0.5 0.0 0.0 0.0 0.5 0.5 0.0 0.0 0.0 1.0 1.0 0.0 0.0 0.0 0.5 0.5 0.0 0.0 </TABLE>
+    <FOR>salarie</FOR>
+    <GIVEN>gender</GIVEN>
+    <GIVEN>actif</GIVEN>
+    <TABLE>1.0 0.0 0.0 0.0 0.838 0.162 1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.939 0.061 1.0 0.0 0.0 </TABLE>
   </DEFINITION>
 
   <DEFINITION>
-    <FOR>actif</FOR>
-    <GIVEN>age3</GIVEN>
-    <GIVEN>gender</GIVEN>
-    <TABLE>1.0 0.0 0.0 1.0 0.0 0.0 0.0 0.391 0.609 0.0 0.308 0.692 0.0 0.978 0.02200000000000002 0.0 0.922 0.07799999999999996 0.0 0.286 0.714 0.0 0.455 0.5449999999999999 </TABLE>
+    <FOR>age3</FOR>
+    <GIVEN>age6</GIVEN>
+    <TABLE>1.0 0.0 0.0 0.0 0.0 0.5 0.5 0.0 0.0 0.5 0.5 0.0 0.0 0.0 0.5 0.5 0.0 0.0 0.0 1.0 1.0 0.0 0.0 0.0 0.5 0.5 0.0 0.0 </TABLE>
   </DEFINITION>
 
 </NETWORK>
