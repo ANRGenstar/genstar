@@ -41,6 +41,7 @@ import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;
 import core.util.GSPerformanceUtil;
+import core.util.data.GSEnumDataType;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.io.exception.InvalidSurveyFormatException;
@@ -579,14 +580,22 @@ public class GosplSurveyFactory {
 			for (final APopulationAttribute attribute : attributes) {
 				bw.write(separator);
 				try {
-					bw.write(e.getValueForAttribute(attribute).getStringValue());
+		
+					if (attribute.getDataType() == GSEnumDataType.String) {
+						bw.write("\"");
+						bw.write(e.getValueForAttribute(attribute).getStringValue());
+						bw.write("\"");
+					} else {
+						bw.write(e.getValueForAttribute(attribute).getStringValue());
+					}
+					
 				} catch (NullPointerException e2) {
 					bw.write("???");
 				}
 			}
 			bw.write("\n");
 		}
-		bw.flush();
+		bw.close();
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}
 
