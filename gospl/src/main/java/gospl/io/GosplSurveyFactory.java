@@ -517,24 +517,30 @@ public class GosplSurveyFactory {
 
 	private IGSSurvey createTableSummary(File surveyFile, GSSurveyType surveyType,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) throws IOException, InvalidFormatException, InvalidSurveyFormatException {
+		
 		Set<APopulationAttribute> attributes = population.getPopulationAttributes();
+		
 		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
 				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
 		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValues().size()+1).max().getAsInt())
 				.mapToObj(i -> "").collect(Collectors.toList());
 
-		Map<APopulationValue, Integer> mapReport = attributes.stream().flatMap(att -> 
-		Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue()))
-		.collect(Collectors.toSet()).stream())
-				.collect(Collectors.toMap(Function.identity(), value -> 0)); 
+		Map<APopulationValue, Integer> mapReport = attributes.stream()
+				.flatMap(att -> Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue()))
+				.collect(Collectors.toSet()).stream())
+				.collect(Collectors.toMap(Function.identity(), value -> 0));
+		
 		population.stream().forEach(entity -> entity.getValues()
 				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));
 
 		for(APopulationAttribute attribute : attributes){
+			
 			int lineNumber = 0;
+			
 			Set<APopulationValue> attValues = Stream.concat(attribute.getValues().stream(), 
 					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
-			for(APopulationValue value : attValues){
+			
+			for(APopulationValue value : attValues) {
 				String val = "";
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
 					val = String.valueOf(mapReport.get(value));
@@ -544,9 +550,12 @@ public class GosplSurveyFactory {
 						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
 						value.getStringValue() + separator + val);
 			}
+			
 			for(int i = lineNumber; i < lines.size(); i++)
-				lines.set(i, lines.get(i)
-						.concat(lines.get(i).isEmpty() ? "" : separator + "") + separator + "");
+				lines.set(
+						i, 
+						lines.get(i).concat(lines.get(i).isEmpty() ? "" : separator + "") + separator + ""
+						);
 		}
 
 		report += String.join("\n", lines);
@@ -568,6 +577,7 @@ public class GosplSurveyFactory {
 	private IGSSurvey createSample(File surveyFile, 
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
+		
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();

@@ -32,6 +32,7 @@ import core.util.excpetion.GSIllegalRangedData;
 import gospl.entity.attribute.GSEnumAttributeType;
 import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.io.CsvInputHandler;
+import gospl.io.ReadDictionaryUtils;
 
 /**
  * provides utils to parse dictionaries describing data from various sources
@@ -217,8 +218,8 @@ public class ReadINSEEDictionaryUtils {
 			}
 				
 			final Map<String,String> modalities = e.getValue();
-			final boolean isRange = detectIsRange(modalities);
-			final boolean isInteger = !isRange && detectIsInteger(modalities);
+			final boolean isRange = ReadDictionaryUtils.detectIsRange(modalities.values());
+			final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalities.values());
 			
 			GSEnumDataType dataType = GSEnumDataType.String;
 			GSEnumAttributeType attType = GSEnumAttributeType.unique;
@@ -250,56 +251,6 @@ public class ReadINSEEDictionaryUtils {
 		}
 		
         return attributes;
-	}
-	
-	/**
-	 * return true if the modalities are numeric
-	 * @param modalities
-	 * @return
-	 */
-	private static boolean detectIsInteger(Map<String, String> modalities) {
-		for (String s: modalities.values()) {
-			try {
-				Integer.parseInt(s);
-			} catch (NumberFormatException e) {
-				return false;
-			}
-		}
-		return true;
-	}
-	
-
-	/**
-	 * returns true if these modalities seem to be ranges
-	 * @param modalities
-	 * @return
-	 */
-	private static boolean detectIsRange(Map<String, String> modalities) {
-		
-		if (modalities.size()<2)
-			return false;
-		
-		Pattern oneNumber = Pattern.compile("[\\D]*\\d+[\\D]*");
-		
-		List<String> mods = new ArrayList<>(modalities.values());
-		
-		// if there is not one number in the first one, it's not a range
-		if (!oneNumber.matcher(mods.get(0)).matches())
-			return false;
-		
-		// there should also be only one number in the last one
-		if (!oneNumber.matcher(mods.get(mods.size()-1)).matches())
-			return false;
-		
-		Pattern twoNumbers = Pattern.compile("[\\D]*\\d+[\\D]*\\d+[\\D]*");
-
-		// and then two numbers inbetween
-		for (int i=1; i<mods.size()-2; i++) {
-			if (!twoNumbers.matcher(mods.get(i)).matches())
-				return false;
-		}
-		
-		return true;
 	}
 
 	
@@ -365,8 +316,8 @@ public class ReadINSEEDictionaryUtils {
 						// we finished the previous attribute, let's create it
 						// TODO
 						
-						final boolean isRange = detectIsRange(modalitiesCode2Lib);
-						final boolean isInteger = !isRange && detectIsInteger(modalitiesCode2Lib);
+						final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
+						final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
 						
 						GSEnumDataType dataType = GSEnumDataType.String;
 						GSEnumAttributeType attType = GSEnumAttributeType.unique;
