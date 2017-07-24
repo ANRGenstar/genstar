@@ -23,6 +23,7 @@ public final class BestInferenceEngine extends AbstractInferenceEngine {
 	private RecursiveConditionningEngine getRecursiveConditionningEngine() {
 		if (recursiveConditionningEngine == null) {
 			recursiveConditionningEngine = new RecursiveConditionningEngine(bn);
+			recursiveConditionningEngine.addEvidence(evidenceVariable2value);
 			recursiveConditionningEngine.compute();
 		}
 		return recursiveConditionningEngine;
@@ -30,6 +31,7 @@ public final class BestInferenceEngine extends AbstractInferenceEngine {
 	private EliminationInferenceEngine getEliminationInferenceEngine() {
 		if (eliminationInferenceEngine == null) {
 			eliminationInferenceEngine = new EliminationInferenceEngine(bn);
+			eliminationInferenceEngine.addEvidence(evidenceVariable2value);
 			eliminationInferenceEngine.compute();
 		}
 		return eliminationInferenceEngine;
@@ -38,6 +40,7 @@ public final class BestInferenceEngine extends AbstractInferenceEngine {
 	private SimpleConditionningInferenceEngine getSimpleConditionningInferenceEngine() {
 		if (simpleConditionningInferenceEngine == null) {
 			simpleConditionningInferenceEngine = new SimpleConditionningInferenceEngine(bn);
+			simpleConditionningInferenceEngine.addEvidence(evidenceVariable2value);
 			simpleConditionningInferenceEngine.compute();
 		}
 		return simpleConditionningInferenceEngine;
