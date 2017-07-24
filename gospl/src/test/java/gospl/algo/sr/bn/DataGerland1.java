@@ -98,6 +98,16 @@ public class DataGerland1 extends AbstractTestData {
 		this.addExpectedPosteriorForEvidence(evidence, "age3", "from25to54", .6517);
 		this.addExpectedPosteriorForEvidence(evidence, "age3", "from55to64", .1999);
 
+		// test 6
+		evidence = new HashMap<>();
+		evidence.put("actif", "oui");
+		evidence.put("age3", "from15to24");
+		evidence.put("gender", "female");
+		// ... direct backwards
+		this.addExpectedPosteriorForEvidence(evidence, "age6", "from90toMore", 7.7620e-5);
+		this.addExpectedPosteriorForEvidence(evidence, "salarie", "nonsalarie", 0.0017377);
+		this.addExpectedPosteriorForEvidence(evidence, "type_salarie", "fonctionpublique_cdi", 0.8865);
+
 	}
 
 }
