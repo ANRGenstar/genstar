@@ -581,16 +581,18 @@ public class GosplSurveyFactory {
 				bw.write(separator);
 				try {
 		
+					String v = e.getValueForAttribute(attribute).getStringValue();
+					
 					if (attribute.getDataType() == GSEnumDataType.String) {
 						bw.write("\"");
-						bw.write(e.getValueForAttribute(attribute).getStringValue());
+						bw.write(v);
 						bw.write("\"");
 					} else {
-						bw.write(e.getValueForAttribute(attribute).getStringValue());
+						bw.write(v);
 					}
 					
 				} catch (NullPointerException e2) {
-					bw.write("???");
+					bw.write("\"?\"");
 				}
 			}
 			bw.write("\n");
