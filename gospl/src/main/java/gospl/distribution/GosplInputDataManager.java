@@ -218,6 +218,7 @@ public class GosplInputDataManager {
 	 */
 	private Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
 			final Set<APopulationAttribute> attributes) throws IOException, InvalidSurveyFormatException {
+		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		
 		// Read headers and store possible variables by line index
@@ -229,15 +230,18 @@ public class GosplInputDataManager {
 		final Set<Set<APopulationAttribute>> columnSchemas = columnHeaders.values().stream()
 				.map(head -> head.stream().map(v -> v.getAttribute()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
+		
 		// Remove lower generality schema: e.g. if we have scheam [A,B] then [A] or [B] will be skiped
 		columnSchemas.removeAll(columnSchemas.stream().filter(schema -> 
 			columnSchemas.stream().anyMatch(higherSchema -> schema.stream()
 					.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
 				.collect(Collectors.toSet()));
+		
 		// Store line related attributes while keeping unrelated attributes separated
 		final Set<Set<APopulationAttribute>> rowSchemas = rowHeaders.values().stream()
 				.map(line -> line.stream().map(v -> v.getAttribute()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
+		
 		rowSchemas.removeAll(rowSchemas.stream().filter(schema -> 
 			rowSchemas.stream().anyMatch(higherSchema -> schema.stream()
 				.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
@@ -294,6 +298,7 @@ public class GosplInputDataManager {
 	 */
 	private AFullNDimensionalMatrix<Double> getFrequency(final AFullNDimensionalMatrix<? extends Number> matrix)
 			throws IllegalControlTotalException {
+		
 		// returned matrix
 		AFullNDimensionalMatrix<Double> freqMatrix = null;
 		
@@ -321,6 +326,7 @@ public class GosplInputDataManager {
 									- (int) jd1.getDimensions().stream().filter(d -> matrix.getDimensions().contains(d))
 											.count())
 					.findFirst();
+			
 			if (optionalRef.isPresent()) {
 				freqMatrix = new GosplJointDistribution(
 						matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
@@ -406,7 +412,7 @@ public class GosplInputDataManager {
 		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
 			
 			// too much ?
-			if (maxIndividuals != null && sampleSet.size() >= maxIndivSize)
+			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
 				break;
 			
 			final Map<APopulationAttribute, APopulationValue> entityAttributes = new HashMap<>();
@@ -435,9 +441,9 @@ public class GosplInputDataManager {
 				
 				if (val!=null)
 					entityAttributes.put(att, val);
-				else if(att.getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
+				else if (att.getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(att, att.getEmptyValue());
-				else{
+				else {
 					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
 							+att.getAttributeName());
 					unmatchSize++;
