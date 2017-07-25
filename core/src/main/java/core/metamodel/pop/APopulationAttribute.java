@@ -208,7 +208,7 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 		int result = 1;
 		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((values == null) ? 0 : values.size());
+		//result = prime * result + ((values == null) ? 0 : values.size());
 		return result;
 	}
 
@@ -231,18 +231,20 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (values == null) {
+		
+		/*if (values == null) {
 			if (other.values != null)
 				return false;
 		} else if (values.size() != other.values.size())
 			return false;
+			*/
 		return true;
 	}
 	
 	@Override
 	public APopulationValue getValue(String name) {
 		
-		APopulationValue res = getInputString2value().get(name.trim());
+		APopulationValue res = getInputString2value().get(name);
 		
 		if (res == null)
 			throw new IllegalArgumentException(
