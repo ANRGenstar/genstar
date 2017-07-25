@@ -2,6 +2,7 @@ package gospl.io.insee;
 
 import static org.junit.Assert.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
@@ -99,7 +100,7 @@ public class TestDBaseConnection {
 			pop = GosplInputDataManager.getSample(
 					survey, 
 					new HashSet<>(attributes), 
-					10,
+					100,
 					keepOnlyEqual
 					);
 		} catch (IOException e) {
@@ -111,6 +112,19 @@ public class TestDBaseConnection {
 		for (APopulationEntity e: pop) {
 		
 			System.err.println(e);
+		}
+		
+		try {
+			new GosplSurveyFactory().createSummary(new File("/tmp/test1.csv"), GSSurveyType.Sample, pop);
+		} catch (InvalidFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (InvalidSurveyFormatException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 		
 		/*

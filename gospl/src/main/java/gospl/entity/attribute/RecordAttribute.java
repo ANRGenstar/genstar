@@ -44,7 +44,6 @@ public class RecordAttribute extends APopulationAttribute {
 				inputString2value.put(name, res);
 		}
 		
-		
 		return res;
 	}
 	

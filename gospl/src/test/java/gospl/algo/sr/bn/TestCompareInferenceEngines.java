@@ -33,7 +33,7 @@ public class TestCompareInferenceEngines {
 
 	public static List<Class<?>> enginesToCompare = Arrays.asList(new Class<?>[] {
 		EliminationInferenceEngine.class,
-		BestInferenceEngine.class,
+		//BestInferenceEngine.class,
 		RecursiveConditionningEngine.class,
 		SimpleConditionningInferenceEngine.class
 	});
@@ -86,7 +86,7 @@ public class TestCompareInferenceEngines {
 	}
 
 
-	@Test //(timeout=1000)
+	@Test(timeout=1000)
 	public void ensureProbabilityEvidenceNothingIsOne() {
 		
 		
@@ -125,7 +125,7 @@ public class TestCompareInferenceEngines {
 	 * Tests the computation of the probability of evidence for an evidence defined at
 	 * the level of the first variable in the network enumeration.
 	 */
-	@Test //(timeout=1000)
+	@Test(timeout=1000)
 	public void testProbabilityOneEvidenceInBNOrder() {
 		
 		final int rounding = 6;
@@ -183,7 +183,7 @@ public class TestCompareInferenceEngines {
 	 * Tests the computation of the probability of two peaces of evidence defined at
 	 * the level of the first variable in the network enumeration.
 	 */
-	@Test //(timeout=1000)
+	@Test(timeout=1000)
 	public void testProbabilityTwoEvidenceInBNOrder() {
 		
 		final int rounding = 6;
@@ -304,7 +304,7 @@ public class TestCompareInferenceEngines {
 	 * Tests the computation of the probability of two peaces of evidence defined at
 	 * the level of the first variable in the network enumeration.
 	 */
-	@Test //(timeout=1000)
+	@Test(timeout=1000)
 	public void testProbabilityOneEvidenceInTwoLastNodes() {
 		
 		final int rounding = 6;

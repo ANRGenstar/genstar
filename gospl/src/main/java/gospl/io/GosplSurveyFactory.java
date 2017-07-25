@@ -591,7 +591,9 @@ public class GosplSurveyFactory {
 				bw.write(separator);
 				try {
 		
-					String v = e.getValueForAttribute(attribute).getStringValue();
+					APopulationValue val = e.getValueForAttribute(attribute); 
+					String v = val.getStringValue();
+					
 					
 					if (attribute.getDataType() == GSEnumDataType.String) {
 						bw.write("\"");

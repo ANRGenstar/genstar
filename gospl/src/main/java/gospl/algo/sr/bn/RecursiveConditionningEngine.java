@@ -89,6 +89,8 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 			norm = 1.;
 		else {
 			
+			norm = getDtreeWithoutEvidence().recursiveConditionning(evidenceVariable2value);
+
 			/*
 			norm = cacheEvidenceToNorm.get(evidenceVariable2value);
 			if (norm == null) {
@@ -128,7 +130,7 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 		Map<NodeCategorical,String> n2v = new HashMap<>(evidenceVariable2value);
 		n2v.put(n, s);
 	
-		return getDtreeWithEvidence().recursiveConditionning(n2v) * getProbabilityEvidence();
+		return getDtreeWithEvidence().recursiveConditionning(n2v); //*getProbabilityEvidence(); 
 		
 	}
 
@@ -225,6 +227,7 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 			
 			
 			this.dtreeWithEvidence = DNode.eliminationOrder2DTree(bn, eliminationOrderWithEvidence);
+			this.dtreeWithEvidence.reduce(evidenceVariable2value);
 			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence_cutset.dot"), "cutset");
 			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence_context.dot"), "context");
 			this.dtreeWithEvidence.exportAsGraphviz(new File("/tmp/dtree_evidence_varsUnion.dot"), "varsUnion");
@@ -251,8 +254,8 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 	/*
 	 * In the case of a dtree, its better to explore evidence in the order of the dtree ! 
 	 */
-	@Override
-	public Map<NodeCategorical,String> sampleOne() {
+	//@Override
+	public Map<NodeCategorical,String> sampleOneTODO() {
 		
 		if (dirty)
 			compute();
@@ -300,11 +303,22 @@ public class RecursiveConditionningEngine extends AbstractInferenceEngine {
 			String value = null;
 
 			final double random = GenstarRandom.getInstance().nextDouble() * normEvidence;
+			
+			double total = 0;
+			for (String v: n.getDomain()) {
+				n2v.put(n, v);
+				total += dtreeWithEvidence.recursiveConditionning(n2v);
+			}
+			if (Math.abs(total - normEvidence) > 1e-8)
+				throw new RuntimeException("not summing to norm evidence "+normEvidence+" but to "+total+"...");
+			
 			double cumulated = 0.;				
 			for (String v: n.getDomain()) {
 				
 				n2v.put(n, v);
 				// TODO if no evidence, we should use prior instead (quicker !)
+				dtreeWithEvidence.resetCache();
+				dtreeWithEvidence.resetCacheChildren();
 				double thep = dtreeWithEvidence.recursiveConditionning(n2v);
 				logger.trace("p({}={}|{})={}", n, v, n2v, thep);
 				cumulated += thep;

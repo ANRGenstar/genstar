@@ -117,7 +117,8 @@ public abstract class AbstractInferenceEngine {
 		
 		// if there is no evidence, just return the prior probability !
 		if (evidenceVariable2value.isEmpty()) {
-			// TODO ? return n.getConditionalProbabilityPosterior(s);
+			// TODO ? 
+			//return n.getConditionalProbabilityPosterior(s);
 		}
 		
 		// if that is directly conditionned by evidence, return it
@@ -185,6 +186,14 @@ public abstract class AbstractInferenceEngine {
 			Map<NodeCategorical,String> evidence,
 			Set<NodeCategorical> all
 			) {
+		
+		if (logger.isTraceEnabled())
+			logger.trace(
+					"select relevant variables to compute {} for evidence {} among {}", 
+					toCompute.stream().map(NodeCategorical::getName).collect(Collectors.joining(",")),
+					evidence.entrySet().stream().map(e->e.getKey().name+"="+e.getValue()).collect(Collectors.joining(",")),
+					all.stream().map(NodeCategorical::getName).collect(Collectors.joining(","))
+					);
 		Set<NodeCategorical>  relevant = new HashSet<>(all.size());
 		
 
@@ -196,7 +205,14 @@ public abstract class AbstractInferenceEngine {
 		for (NodeCategorical n: evidence.keySet()) {
 			relevant.addAll(n.getAllAncestors());
 		}
+		
+		// TODO ? relevant.removeAll(evidence.keySet());
 				
+		if (logger.isTraceEnabled())
+			logger.trace(
+					"selected relevant variables {}", 
+					relevant.stream().map(NodeCategorical::getName).collect(Collectors.joining(","))
+					);
 		return relevant;
 	}
 
@@ -224,7 +240,9 @@ public abstract class AbstractInferenceEngine {
 	 */
 	public Map<NodeCategorical,String> sampleOne() {
 		
-		if (getProbabilityEvidence() == 0.0)
+		double pEvidence = getProbabilityEvidence() ;
+		
+		if (pEvidence == 0.0)
 			throw new IllegalArgumentException("cannot generate if the probability of evidence is 0 - evidence is not possible");
 		
 		Map<NodeCategorical,String> originalEvidence = new HashMap<>(evidenceVariable2value);
@@ -234,23 +252,33 @@ public abstract class AbstractInferenceEngine {
 		Map<NodeCategorical,String> node2attribute = new HashMap<>();
 		// define values for each individual
 		for (NodeCategorical n: bn.enumerateNodes()) {
-			double random = GenstarRandom.getInstance().nextDouble();
-			// pick up a value
-			double cumulated = 0.;
+			
 			String value = null;
-			//System.err.println("should pick a value for "+n.name);
-			for (String v : n.getDomain()) {
-				double p = this.getConditionalProbability(n, v);
-				cumulated += p;
-				//System.err.println("p("+n.name+"="+v+")="+p+" => "+cumulated+" ("+random+")");
-
-				if (cumulated >= random) {
-					value = v;
-					break;
+			
+			if (originalEvidence.containsKey(n))
+					value = originalEvidence.get(n);
+			else {
+				
+				double random = GenstarRandom.getInstance().nextDouble();
+				// pick up a value
+				double cumulated = 0.;
+				
+				//System.err.println("should pick a value for "+n.name);
+				for (String v : n.getDomain()) {
+					
+					double p = this.getConditionalProbability(n, v);
+					cumulated += p;
+					//System.err.println("p("+n.name+"="+v+")="+p+" => "+cumulated+" ("+random+")");
+	
+					if (cumulated >= random) {
+						value = v;
+						break;
+					}
 				}
+				if (value == null)
+					throw new RuntimeException("oops, should have picked a value based on postererior probabilities for variable "+n+" knowing "+evidenceVariable2value+", but they sum to "+cumulated);
+				
 			}
-			if (value == null)
-				throw new RuntimeException("oops, should have picked a value based on postererior probabilities, but they sum to "+cumulated);
 			// that' the property of this individual
 			node2attribute.put(n, value);
 			// store this novel value as evidence for this individual
@@ -292,6 +320,11 @@ public abstract class AbstractInferenceEngine {
 		return computeProbabilityEvidence();
 	}
 	
+	/**
+	 * Called when evidence is not empty to compute the probability of evidence. 
+	 * Ideally it might be computed once during the compute() method
+	 * @return
+	 */
 	protected abstract double computeProbabilityEvidence();
 
 	

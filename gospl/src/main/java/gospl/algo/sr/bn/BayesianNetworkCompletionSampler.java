@@ -26,8 +26,12 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 	private final GosplAttributeFactory attf = new GosplAttributeFactory();
 
 	public BayesianNetworkCompletionSampler(CategoricalBayesianNetwork bn) throws GSIllegalRangedData {
+		this(bn, new EliminationInferenceEngine(bn));
+	}
+	
+	public BayesianNetworkCompletionSampler(CategoricalBayesianNetwork bn, AbstractInferenceEngine engine) throws GSIllegalRangedData {
 		this.bn = bn;
-		this.engine = new RecursiveConditionningEngine(bn);// BestInferenceEngine(bn);
+		this.engine = engine;// BestInferenceEngine(bn);
 		
 		// will probably evolve in the future
 		

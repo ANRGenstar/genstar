@@ -3,8 +3,10 @@ package gospl.algo.sr.bn;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -158,7 +160,7 @@ public class TestInferenceEnginesOnData {
 	}
 		
 
-	@Test //(timeout=60000)
+	@Test(timeout=60000)
 	public void testEvidencePropagationAndManyRandomQueries() {
 		
 		InferencePerformanceUtils.singleton.reset();
@@ -209,8 +211,107 @@ public class TestInferenceEnginesOnData {
 		InferencePerformanceUtils.singleton.reset();
 		
 	}
+
+	@Test
+	public void testConditionalProbaOfNoEvidenceIsOne() {
+
+
+		InferencePerformanceUtils.singleton.reset();
+
+		ie.clearEvidence();
+
+		assertEquals(
+					"probability of no evidence should be 1.", 
+					1.0,
+					ie.getProbabilityEvidence(),
+					1e-8
+					);
+
+		InferencePerformanceUtils.singleton.display();
+		InferencePerformanceUtils.singleton.reset();
+	}
+
+	@Test
+	public void testConditionalProbaSums1withEvidence() {
+		
+		InferencePerformanceUtils.singleton.reset();
+
+		for (Map.Entry<Map<String,String>,Map<String,Map<String,Double>>> evidence2expected: data.evidence2expectedResults.entrySet()) {
+
+			// assert evidence
+			Map<String,String> evidence = evidence2expected.getKey();
+			for (Map.Entry<String,String> k2v: evidence.entrySet()) {
+				System.err.println("set evidence: "+k2v.getKey()+" = "+k2v.getValue());
+				ie.addEvidence(k2v.getKey(), k2v.getValue());
+			}
+			
+			double baseP = ie.getProbabilityEvidence();
+			
+			// also check that a few variables probas sums to 1.
+			List<NodeCategorical> toTest = new ArrayList<>(bn.getNodes());
+			Collections.shuffle(toTest);
+			toTest.subList(0, Math.min(5, toTest.size()));
+			for (NodeCategorical n: toTest) {
+				double total = 0;
+				for (String s: n.getDomain()) {
+					double p = ie.getConditionalProbability(n, s);
+					System.out.println("p("+n.name+"="+s+")="+p);
+					total += p;
+				}
+				System.out.print("Pr(evidence)="+baseP);
+				assertEquals(
+						"conditional probabilities for p("+n.name+"=*) should sum to 1. with evidence "+evidence2expected.getKey(), 
+						1.0,
+						total,
+						1e-8
+						);
+			}
+			
+			InferencePerformanceUtils.singleton.display();
+
+			ie.clearEvidence();
+			InferencePerformanceUtils.singleton.reset();
+			
+		}
+			
+			
+	}
 	
-	@Test //(timeout=60000)
+
+	@Test
+	public void testConditionalProbaSums1withoutEvidence() {
+		
+		InferencePerformanceUtils.singleton.reset();
+
+		ie.clearEvidence();
+
+		// also check that a few variables probas sums to 1.
+		List<NodeCategorical> toTest = new ArrayList<>(bn.getNodes());
+		Collections.shuffle(toTest);
+		toTest.subList(0, Math.min(5, toTest.size()));
+		for (NodeCategorical n: toTest) {
+			double total = 0;
+			for (String s: n.getDomain()) {
+				total += ie.getConditionalProbability(n, s);
+			}
+			assertEquals(
+					"conditional probabilities for p("+n.name+"=*) should sum to 1.", 
+					1.0,
+					total,
+					1e-8
+					);
+		}
+		
+		InferencePerformanceUtils.singleton.display();
+
+		ie.clearEvidence();
+		InferencePerformanceUtils.singleton.reset();
+			
+			
+	}
+	
+	
+	@Test(timeout=60000)
 	public void testEvidencePropagation() {
 		
 		InferencePerformanceUtils.singleton.reset();

@@ -201,7 +201,7 @@ public final class DNode {
 			// create a cache with the right loading factor 
 			// how many values should we compute at most ? 
 			long card = 1;
-			for (NodeCategorical n: context()) { // TODO
+			for (NodeCategorical n: varsUnion()) { // TODO in theory it should more be context(). 
 				card *= n.getDomainSize();
 			}
 			int toCache = (int) Math.round(cacheRatio*card);
@@ -581,10 +581,10 @@ public final class DNode {
 		// start from evidence (which has to be taken in the cache, else results would not depend on it)
 		// keep only our variables defined as the union of children variable (because the others will not play any role for us, so the result would be the same)
 		Map<NodeCategorical,String> y = new HashMap<>(n2v);
-		//y.keySet().retainAll(varsUnion());
+		y.keySet().retainAll(varsUnion());
 		
-		// NOT WORKING ! 
-		y.keySet().retainAll(context()); 
+		// NOT WORKING ! but should work in theory
+		//y.keySet().retainAll(context()); 
 		
 		if (!context().isEmpty() && !y.isEmpty()) {
 			logger.trace("search in cache {}", y);
@@ -1015,6 +1015,17 @@ public final class DNode {
 			right.exportAsGraphvizInto(sb, node2id, toDisplayFunc);
 		
 		 	
+	}
+
+
+	public void reduce(Map<NodeCategorical, String> evidenceVariable2value) {
+		if (this.f != null)
+			this.f.reduce(evidenceVariable2value);
+		if (this.right != null)
+			this.right.reduce(evidenceVariable2value);
+		if (this.left != null)
+			this.left.reduce(evidenceVariable2value);
+		this.resetCache();
 	}
 
 }

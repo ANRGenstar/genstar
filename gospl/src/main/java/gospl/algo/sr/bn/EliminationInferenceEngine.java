@@ -11,11 +11,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.util.random.GenstarRandom;
 
+// TODO caching of intermediate factors !
+// TODO sampleOne: maybe we can create bigger factors then randomly pick up a value with a roulette in the entire factor? 
 
 public class EliminationInferenceEngine extends AbstractInferenceEngine {
 
@@ -26,8 +29,11 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	
 	private Map<NodeCategorical,Factor> factorsForEvidence = null;
 	
+	private LRUMap<Set<NodeCategorical>,Factor> cacheNode2factorForEvidence = null;
+	
 	public EliminationInferenceEngine(CategoricalBayesianNetwork bn) {
 		super(bn);
+		cacheNode2factorForEvidence = new LRUMap<>(bn.getNodes().size()*100); // purely arbitrary
 	}
 	
 	
@@ -99,18 +105,55 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	@Override
 	public Factor computeFactorPosteriorMarginals(Set<NodeCategorical> variables) {
 		
+		Factor f = cacheNode2factorForEvidence.get(variables);
+		
+		if (f != null) {
+			InferencePerformanceUtils.singleton.incCacheHit();
+			return f;
+		}
+		InferencePerformanceUtils.singleton.incCacheMiss();
+		
 		// TODO efficient order !
 		LinkedHashSet<NodeCategorical> remainingVariables = new LinkedHashSet<>(bn.enumerateNodes());
-		remainingVariables.removeAll(variables);
 		
 		// optimisation: only focus on relevant variables
 		remainingVariables.retainAll(selectRelevantVariables(variables, evidenceVariable2value, bn.getNodes()));
-		
+
+		Set<NodeCategorical> all = new HashSet<>(remainingVariables);
+		remainingVariables.removeAll(variables);
+
 		// Collections.shuffle(sorted);
 				
-		return computeFactorPosteriorMarginals(remainingVariables, getEliminationOrderOptimalForZero(remainingVariables));
+		f = computeFactorPosteriorMarginals(all, getEliminationOrderOptimalForZero(remainingVariables));
 		
+		cacheNode2factorForEvidence.put(variables, f);
+
+		return f;
 	}
+	
+	/*
+	public Factor eliminationAsk(NodeCategorical variable) {
+
+		Factor f = null;
+		
+		List<NodeCategorical> variables = new LinkedList<>(bn.enumerateNodes());
+		Collections.reverse(variables);
+
+		for (NodeCategorical n: variables) {
+			if (f == null)
+				f = n.asFactor().reduction(evidenceVariable2value);
+			else 
+				f = n.asFactor().reduction(evidenceVariable2value).multiply(f);
+				
+			if (n != variable && f.variables.contains(n)) 
+				f.sumOut(n);
+			
+		}
+		
+		f.normalize();
+		
+		return f;
+	}*/
 	
 	/**
 	 * Computes prior (that is, without evidence) probabilities in the form of a factor. 
@@ -151,6 +194,8 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 																m->bn.getFactor(m).reduction(evidenceVariable2value)
 																));
 		
+		if (logger.isDebugEnabled())
+			logger.debug("reduced: {}", node2factor.entrySet().stream().map(e->e.getKey().name+":"+e.getValue().toStringLong()).collect(Collectors.joining(",")));
 
 		
 		for (NodeCategorical n: orderOtherVariables) {
@@ -170,8 +215,11 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 				if (f == null)
 					f = f2;
 				else {
-					logger.debug("mult {} X {}", f, f2);
+					if (logger.isDebugEnabled())
+						logger.debug("mult {} X {}", f.toStringLong(), f2.toStringLong());
 					f = f.multiply(f2);
+					if (logger.isDebugEnabled())
+						logger.debug("={}", f.toStringLong());
 				}
 				node2factor.remove(m);
 			}
@@ -182,12 +230,17 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 			if (f==null) {
 				// there was nothing to compute with this variable !
 				// let's remove it 
-				node2factor.remove(f);
+				 //node2factor.remove(f); // TODO???
 			} else {
 				biggestCPT = Math.max(biggestCPT, f.values.size());
+				if (logger.isDebugEnabled())
+					logger.debug("sum {} for {}", n.name, f.toStringLong());
+
 				// sum of all relevant factors
-				logger.debug("sum {} for {}", n, f);
 				f = f.sumOut(n);
+				if (logger.isDebugEnabled())
+					logger.debug("={}", f.toStringLong());
+
 				// now replace fk by fi
 				node2factor.put(n, f);
 			}
@@ -218,9 +271,12 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 				res = f;
 			else {
 				//logger.debug(res.toStringLong());
-
-				logger.debug("mult {} X {}", res, f);
+				if (logger.isDebugEnabled())
+					logger.debug("mult {} X {}", res, f.toStringLong());
 				res = res.multiply(f);
+				if (logger.isDebugEnabled())
+					logger.debug("= {}", res.toStringLong());
+				
 			}
 		}
 		
@@ -288,6 +344,9 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	@Override
 	protected double retrieveConditionalProbability(NodeCategorical n, String s) {
 
+		//if (2==2)
+		//	return eliminationAsk(n).get(n.name, s);
+		
 		// if there is no evidence, just return the prior probability !
 		if (evidenceVariable2value.isEmpty()) {
 			return n.getConditionalProbabilityPosterior(s);
@@ -295,35 +354,29 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 		
 		try {
 		
-		logger.trace("computing conditional probability p({}={}|evidence)", n.name, s);
-		if (n.getName().equals("type_nonsalarie")) {
-			logger.warn("should fail");
-		}
-		{
-			String valueFromEvidence = evidenceVariable2value.get(n);
-			if (valueFromEvidence != null) {
-				if (valueFromEvidence.equals(s))
-					return 1.;
-				else
-					return 0.;
-				
+			logger.trace("computing conditional probability p({}={}|evidence)", n.name, s);
+			{
+				String valueFromEvidence = evidenceVariable2value.get(n);
+				if (valueFromEvidence != null) {
+					if (valueFromEvidence.equals(s))
+						return 1.;
+					else
+						return 0.;
+					
+				}
 			}
-		}
-		
-		Set<NodeCategorical> set = new HashSet<>(1);
-		set.add(n);
-		Factor f = computeFactorPosteriorMarginals(set);
-		if (f.hasUniqueValue()) {
-			return f.getUniqueValue();
-		} else {
-				
+			
+			Set<NodeCategorical> set = new HashSet<>(1);
+			set.add(n);
+			Factor f = computeFactorPosteriorMarginals(set);
+			
 			 // TODO optimser avvess a une facteur avec 1 var
 			f.normalize();
 			if (f.variables.isEmpty()) {
-				logger.warn("going to fail here");
+				logger.warn("going to fail here for {}={}?", n, s);
 			}
 			return f.get(n.name,s);
-		}
+		
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			logger.warn("got exception while computing, checking if Pr(evidence)=0?");
@@ -362,6 +415,8 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 		
 		eliminationOrderForEvidence = null;
 		factorsForEvidence = null;
+		
+		cacheNode2factorForEvidence.clear();
 		
 		/*eliminationOrder = bn.enumerateNodes()
 				.stream()
@@ -403,11 +458,44 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	}
 	
 	private Map<NodeCategorical,Factor> getFactorsForEvidence() {
+		
 		if (factorsForEvidence == null) {
+			// first remove the useless dimensions in the factors
+			// bn.getNodes()
 			factorsForEvidence = getEliminationOrderForEvidence().stream().collect(Collectors.toMap(
 					m->m, 
 					m->bn.getFactor(m).reduction(evidenceVariable2value)
 					));
+			
+			/*
+			// now we should integrate into each factor the corresponding children related to evidence...
+			// start from evidence
+			Set<NodeCategorical> processedAlready = new HashSet<>();
+			List<NodeCategorical> affectedByEvidence = new LinkedList<>(evidenceVariable2value.keySet());
+			
+			for (NodeCategorical nWithEvidence: evidenceVariable2value.keySet()) {
+				
+				Factor fn = nWithEvidence.asFactor().reduction(evidenceVariable2value);
+				
+				for (NodeCategorical pWithEvidence: nWithEvidence.getParents()) {
+					
+					// skip the parent if it is constrained by evidence already
+					if (evidenceVariable2value.containsKey(pWithEvidence))
+						continue;
+					
+					// the factor for this parent should be modified by our evidence 
+					Factor fp = factorsForEvidence.get(pWithEvidence);
+					
+					fp = fn.multiply(fp);
+					
+					factorsForEvidence.put(pWithEvidence, fp);
+				}
+			}
+			
+			// then normalize
+			for (NodeCategorical n: factorsForEvidence.keySet()) {
+				factorsForEvidence.get(n).normalize();
+			}*/
 		}
 		return factorsForEvidence;
 	}
@@ -415,10 +503,11 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 	/*
 	 * Generates an instanciation of the network given current evidence. 
 	 * Manipulates factors to be more efficient
+	 * TODO buged now!
 	 * @return
 	 */
-	@Override
-	public final Map<NodeCategorical,String> sampleOne() {
+	//@Override
+	public final Map<NodeCategorical,String> sampleOneTODO() {
 		
 		// TODO just in case of error elsewhere
 		// double probabilityEvidence = getProbabilityEvidence();
@@ -457,11 +546,15 @@ public class EliminationInferenceEngine extends AbstractInferenceEngine {
 				));
 		*/
 		
+		
+		//LinkedList<NodeCategorical> reverse = new LinkedList<>(bn.enumerateNodes());
+		//Collections.reverse(reverse);
+		
 		for (NodeCategorical n: eliminationOrder) {
 			
 			// get the factor for this variable
 			Factor f = node2factor.get(n);
-
+			
 			// in theory, this factor should not have any parent, as it was reduced already :-)
 			if (f.variables.size() > 1)
 				throw new RuntimeException("wrong iteration order... factor "+f+" for variable "+n+" should not have more than one variable anymore !");

@@ -69,4 +69,8 @@ public abstract class AbstractNode<N extends AbstractNode<N>> {
 		return network.getAllAncestors((N) this);
 	}
 
+	public Collection<N> getAllChildren() {
+		return network.getAllChildren((N) this);
+	}
+
 }

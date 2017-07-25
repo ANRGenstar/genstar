@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Collectors;
 import java.util.Set;
 
 import org.apache.commons.collections4.map.LRUMap;
@@ -156,8 +157,10 @@ public final class Factor {
 	 */
 	public Factor reduction(Map<NodeCategorical,String> evidence) {
 		// TODO optimization: if the evidence is not related to us, we might return us. 
+		//System.err.println("factor before reduction: "+this.values);
 		Factor res = this.clone();
 		res.reduce(evidence);
+		//System.err.println("factor after reduction: "+res.values);
 		return res;
 	}
 	
@@ -375,7 +378,9 @@ public final class Factor {
 		StringBuffer sb = new StringBuffer(toString());
 		sb.append(":\n");
 		for (Map.Entry<Map<NodeCategorical,String>,Double> e: values.entrySet()) {
-			sb.append(e.getKey()).append(":").append(e.getValue()).append("\n");
+			sb.append("\t");
+			sb.append(e.getKey().entrySet().stream().map(e2->e2.getKey().name+"="+e2.getValue()).collect(Collectors.joining(",")));
+			sb.append(":").append(e.getValue()).append("\n");
 		}
 		return sb.toString();
 	}
@@ -398,10 +403,18 @@ public final class Factor {
 		
 		// norm !
 		for (Entry<Map<NodeCategorical, String>, Double> e: values.entrySet()) {
-			values.put(e.getKey(), e.getValue()/total);
+			values.put(e.getKey(), e.getValue()/total );
 			InferencePerformanceUtils.singleton.incMultiplications();
 		}
 		
+	}
+
+	public void divide(int size) {
+		// norm !
+		for (Entry<Map<NodeCategorical, String>, Double> e: values.entrySet()) {
+			values.put(e.getKey(), e.getValue()/size );
+			InferencePerformanceUtils.singleton.incMultiplications();
+		}
 	}
 
 }

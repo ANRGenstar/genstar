@@ -1,10 +1,10 @@
 package gospl.algo.sr.bn;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -22,7 +22,6 @@ import core.metamodel.pop.io.IGSSurvey;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplInputDataManager;
-import gospl.entity.GosplEntity;
 import gospl.io.CsvInputHandler;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.ReadDictionaryUtils;
@@ -38,8 +37,7 @@ public class TestBayesianNetworkCompletionSampler {
 	public void tearDown() throws Exception {
 	}
 
-	@Test
-	public void testCompletion() {
+	private void testCompletion(Class<? extends AbstractInferenceEngine> engineClass) {
 		
 		File fileCSVsample = new File("./src/test/resources/gerland_sample_incomplete.csv");
 		File fileBN = new File("./src/test/resources/bayesiannetworks/gerland.xbif");
@@ -105,8 +103,21 @@ public class TestBayesianNetworkCompletionSampler {
 		// then we can ask for a more complete population
 		BayesianNetworkCompletionSampler sampler ;
 		try {
-			sampler = new BayesianNetworkCompletionSampler(bn);
+			AbstractInferenceEngine engine = engineClass.getDeclaredConstructor(CategoricalBayesianNetwork.class).newInstance(bn);
+			sampler = new BayesianNetworkCompletionSampler(bn, engine);
 		} catch (GSIllegalRangedData e) {
+			throw new RuntimeException(e);
+		} catch (InstantiationException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalAccessException e) {
+			throw new RuntimeException(e);
+		} catch (IllegalArgumentException e) {
+			throw new RuntimeException(e);
+		} catch (InvocationTargetException e) {
+			throw new RuntimeException(e);
+		} catch (NoSuchMethodException e) {
+			throw new RuntimeException(e);
+		} catch (SecurityException e) {
 			throw new RuntimeException(e);
 		}
 		
@@ -134,6 +145,16 @@ public class TestBayesianNetworkCompletionSampler {
 		}
 		
 		//fail("Not yet implemented");
+	}
+	
+	@Test
+	public void testCompletionRecursive() {
+		this.testCompletion(RecursiveConditionningEngine.class);
+	}
+	
+	@Test
+	public void testCompletionEliminationInference() {
+		this.testCompletion(EliminationInferenceEngine.class);
 	}
 
 }

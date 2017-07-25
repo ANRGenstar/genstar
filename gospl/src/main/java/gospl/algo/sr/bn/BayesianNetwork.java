@@ -226,6 +226,27 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 		return res;
 	}
 	
+	public Set<N> getAllChildren(N n) {
+
+		Set<N> res = new HashSet<>(n.getChildren());
+		res.add(n);
+		
+		Set<N> toProcess = new HashSet<>(n.getChildren());
+		Set<N> processed = new HashSet<>();
+		
+		while (!toProcess.isEmpty()) {
+			Iterator<N> it = toProcess.iterator();
+			N c = it.next();
+			it.remove();
+			processed.add(c);
+			res.addAll(c.getChildren());
+			toProcess.addAll(c.getChildren());
+			toProcess.removeAll(processed);
+		}
+		
+		return res;
+	}
+	
 	public Set<N> getParents(AbstractNode<N> n) {
 		return n.getParents();
 	}		
