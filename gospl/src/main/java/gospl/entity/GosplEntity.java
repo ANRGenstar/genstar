@@ -1,5 +1,6 @@
 package gospl.entity;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.vividsolutions.jts.geom.Point;
@@ -29,7 +30,7 @@ public class GosplEntity extends APopulationEntity {
 	
 	@Override
 	public GosplEntity clone(){
-		return new GosplEntity(this.getAttributesMap());
+		return new GosplEntity(new HashMap<>(this.getAttributesMap()));
 	}
 
 	@Override

@@ -125,7 +125,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 		
 		// let's take these values and use them inside our BN
 		// TODO should clone here !!!
-		APopulationEntity resultEntity = originalEntity; 
+		APopulationEntity resultEntity = (APopulationEntity) originalEntity.clone(); 
 		
 		for (Map.Entry<NodeCategorical,String> eNew: variable2value.entrySet()) {
 			
