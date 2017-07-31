@@ -1,11 +1,13 @@
 package gospl.io.insee;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
@@ -254,8 +255,18 @@ public class ReadINSEEDictionaryUtils {
 	}
 
 	
+	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(String filename, String encoding) {
+		
+		if (encoding == null) {
+			// TODO automatic detection
+			
+		}
+		
+		return readDictionnaryFromMODFile(new File(filename), encoding);
+	}
+	
 	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(String filename) {
-		return readDictionnaryFromMODFile(new File(filename));
+		return readDictionnaryFromMODFile(filename, Charset.defaultCharset().name());
 	}
 	
 	/**
@@ -271,12 +282,13 @@ public class ReadINSEEDictionaryUtils {
 	 * @param f
 	 * @return
 	 */
-	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(File f) {
+	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(File f, String encoding) {
 		
 		logger.info("reading a dictionnary of data from file {}", f);
 		CSVReader reader = null;
 		try {
-			reader = new CSVReader(new FileReader(f), CsvInputHandler.detectSeparator(f)); // , '\t'
+			InputStreamReader isReader = new InputStreamReader(new FileInputStream(f), encoding);
+			reader = new CSVReader(isReader, CsvInputHandler.detectSeparator(f)); // , '\t'
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("unable to find file "+f);
 		} catch (IOException e) {

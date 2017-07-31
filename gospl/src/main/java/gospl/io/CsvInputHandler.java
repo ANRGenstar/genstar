@@ -2,10 +2,11 @@ package gospl.io;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,13 +31,23 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	private int firstRowDataIndex;
 	private int firstColumnDataIndex;
-
 	
+	private String charset;
+
 	protected CsvInputHandler(String fileName, char csvSeparator, int firstRowDataIndex, 
+			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
+		
+		this(fileName, Charset.defaultCharset().name(), csvSeparator, 
+				firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+	
+	protected CsvInputHandler(String fileName, String charset, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
 		super(dataFileType, fileName);
 		
-		CSVReader reader = new CSVReader(new FileReader(surveyCompleteFile), csvSeparator);
+		this.charset = charset;
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
 		dataTable = reader.readAll();
 		
 		this.firstRowDataIndex = firstRowDataIndex;
@@ -46,22 +57,39 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	protected CsvInputHandler(File file, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
+		this(file, Charset.defaultCharset().name(), csvSeparator, firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+	
+	protected CsvInputHandler(File file, String charset, char csvSeparator, int firstRowDataIndex, 
+			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
 		
 		super(dataFileType, file);
 		
-		CSVReader reader = new CSVReader(new FileReader(surveyCompleteFile), csvSeparator);
+		this.charset = charset;
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
 		dataTable = reader.readAll();
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
 		reader.close();
+		
 	}
 
+
 	protected CsvInputHandler(String fileName, InputStream surveyIS, char csvSeparator, 
+			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException { 
+		this(fileName, Charset.defaultCharset().name(), surveyIS, csvSeparator, 
+				firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+
+	protected CsvInputHandler(String fileName, String charset, InputStream surveyIS, char csvSeparator, 
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException {
 		super(dataFileType, fileName);
 
-		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS), csvSeparator);
+		this.charset = charset;
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS, this.charset), csvSeparator);
 		dataTable = reader.readAll();
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
@@ -193,7 +221,7 @@ public class CsvInputHandler extends AbstractInputHandler {
 		return s;
 	}
 	
-	
+
 	/**
 	 * From a given CSV file, tries to detect a plausible separator. 
 	 * Will take the one which is used in most lines with the lowest variance.
@@ -203,7 +231,19 @@ public class CsvInputHandler extends AbstractInputHandler {
 	 * @throws IOException
 	 */
 	public static char detectSeparator(File f) throws IOException {
-		return detectSeparator(f, CSV_SEPARATORS_FROM_DETECTION);
+		return detectSeparator(f, Charset.defaultCharset().name(), CSV_SEPARATORS_FROM_DETECTION);
+	}
+	
+	/**
+	 * From a given CSV file, tries to detect a plausible separator. 
+	 * Will take the one which is used in most lines with the lowest variance.
+	 * 
+	 * @param f
+	 * @return
+	 * @throws IOException
+	 */
+	public static char detectSeparator(File f, String charset) throws IOException {
+		return detectSeparator(f, charset, CSV_SEPARATORS_FROM_DETECTION);
 	}
 		
 	/**
@@ -215,12 +255,12 @@ public class CsvInputHandler extends AbstractInputHandler {
 	 * @return
 	 * @throws IOException
 	 */
-	public static char detectSeparator(File f, char[] candidates) throws IOException {
+	public static char detectSeparator(File f, String charset, char[] candidates) throws IOException {
 		
 		int countLines = 20;
 		
 		// read the first n lines
-		BufferedReader bf = new BufferedReader(new FileReader(f));
+		BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(f), charset));
 		List<String> firstLines = new ArrayList<>(countLines);
 		while (bf.ready()) {
 			firstLines.add(bf.readLine());

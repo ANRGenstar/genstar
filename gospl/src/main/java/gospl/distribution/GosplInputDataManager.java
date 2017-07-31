@@ -404,7 +404,7 @@ public class GosplInputDataManager {
 		final Map<Integer, APopulationAttribute> columnHeaders = survey.getColumnSample(attributes);
 
 		if (columnHeaders.isEmpty()) 
-			throw new RuntimeException("no column header was found in survey "+survey);
+			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
 		
 		int unmatchSize = 0;
 		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
