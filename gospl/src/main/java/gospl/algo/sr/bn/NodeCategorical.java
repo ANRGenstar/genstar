@@ -1,42 +1,42 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class NodeCategorical extends FiniteNode<NodeCategorical> {
+public final class NodeCategorical extends FiniteNode<NodeCategorical> {
 
-	private Logger logger = LogManager.getLogger();
+	private static Logger logger = LogManager.getLogger();
 	
 	protected NodeCategorical[] parentsArray = new NodeCategorical[0];
+	protected Map<NodeCategorical,Integer> parent2index = new HashMap<>(50);
 	
-	protected SortedMap<NodeCategorical,Integer> variable2size = new TreeMap<>();
-
 	private Integer countZeros = null;
 		
-	private BigDecimal[] content;
+	private double[] content;
 	
 	/**
 	 * stores multipliers to compute indices
 	 */
 	private int[] multipliers; 
 
+	protected final CategoricalBayesianNetwork cNetwork;
+	
 	public NodeCategorical(CategoricalBayesianNetwork net, String name) {
 		
 		super(net, name);
 		
-		
+		this.cNetwork = net;
 	}
 	
 
@@ -48,8 +48,8 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 
 	private void computeCountOfZeros() {
 		int count = 0;
-		for (BigDecimal x: content) {
-			if (x.compareTo(BigDecimal.ZERO) == 0)
+		for (double x: content) {
+			if (x == 0)
 				count++;
 		}
 		this.countZeros = count;
@@ -74,6 +74,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		parentsArray = Arrays.copyOf(parentsArray, parentsArray.length + 1);
 		parentsArray[parentsArray.length-1] = parent;
 		adaptContentSize();
+		parent2index.put(parent, parent2index.size());
 	}
 
 
@@ -100,7 +101,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		// TODO only if it changed ?
 		
 		// TODO keep the old array, reuse its probas, etc.
-		content = new BigDecimal[card];
+		content = new double[card];
 		
 		// adapt the association domain / size
 		
@@ -155,18 +156,12 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		return idx;
 	}
 	
-
 	public void setProbabilities(double p, String key, Object ... parentAndValue) {
-		setProbabilities(new BigDecimal(p), key, parentAndValue);
-	}
-	
-
-	public void setProbabilities(BigDecimal p, String key, Object ... parentAndValue) {
 		countZeros = null;
 		content[_getIndex(key, parentAndValue)] = p;
 	}
 	
-	public void setProbabilities(BigDecimal[] values) {
+	public void setProbabilities(double[] values) {
 		if (values.length != getParentsCardinality()*getDomainSize())
 			throw new IllegalArgumentException("wrong size for the content");
 		countZeros = null;
@@ -174,12 +169,12 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	}
 
 
-	public BigDecimal getProbability(String key, Object ... parentAndValue) {
+	public double getProbability(String key, Object ... parentAndValue) {
 		return content[_getIndex(key, parentAndValue)];
 	}
 	
 
-	public BigDecimal getProbability(String key, Map<NodeCategorical,String> parent2Value) {
+	public double getProbability(String key, Map<NodeCategorical,String> parent2Value) {
 		return content[_getIndex(key, parent2Value)];
 	}
 	
@@ -191,7 +186,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 * @param values
 	 * @return
 	 */
-	protected BigDecimal getProbability(int key, int[] values) {
+	protected double getProbability(int key, int[] values) {
 		//logger.trace("get probability for key {} in {} and values {} in {}", key, domain, values, parentsArray.length > 0 ? parentsArray[0].getDomain(): "");
 		//try {
 			return content[_getIndex(key, values)];
@@ -225,7 +220,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 * @param parentAndValue
 	 * @return
 	 */
-	protected int[] _getParentIndices(Object ... parentAndValue) {
+	protected final int[] _getParentIndices(Object ... parentAndValue) {
 		
 		if (parentAndValue.length % 2 != 0)
 			throw new IllegalArgumentException("expecting a list of parameters such as gender, male, age, 0-15");
@@ -251,8 +246,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 				throw new IllegalArgumentException("unable to find parent "+parentRaw);
 			}
 
-			// TODO inefficient
-			idxParent = Arrays.asList(parentsArray).indexOf(parent);
+			idxParent = parent2index.get(parent);
 			
 			// find attribute
 			String value = (String)parentAndValue[i+1];
@@ -264,44 +258,17 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		return parentIndices;
 	}
 	
-	private void _addDomain(String vv) {
-		domain.add(vv);
-	}
-	
-	public void addDomain(String vv) {
-		if (domain.contains(vv)) {
-			throw new IllegalArgumentException(vv+" is already part of the domain");
-		}
-		this._addDomain(vv);
-		adaptContentSize();
-	}
-	
-	public void addDomain(String ... vvs) {
-		
-		// check params
-		for (String vv : vvs) {
-			if (domain.contains(vv)) {
-				throw new IllegalArgumentException(vv+" is already part of the domain");
-			}
-		}
-		
-		// add values
-		for (String vv : vvs) {
-			_addDomain(vv);
-		}
-		
-		// adapt cpt size
-		adaptContentSize();
-	}
-	
 	
 	/**
 	 * returns the total of every single probability
 	 * @return
 	 */
-	public final BigDecimal getSum() {
-		// TODO not valid yet...
-		return Arrays.stream(content).reduce(BigDecimal.ZERO, BigDecimal::add);
+	public final double getSum() {
+		double r = 0;
+		for (double m: content) {
+			r += m;
+		}
+		return r;
 	}
 	
 	/**
@@ -324,7 +291,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 * @param d
 	 * @return
 	 */
-	public BigDecimal getConditionalProbability(String att) {
+	public double getConditionalProbability(String att) {
 		
 		logger.trace("computing conditional probability p({}={})", name, att);
 		
@@ -343,7 +310,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		// 1,2,2
 		// 1,2,3
 		
-		BigDecimal res = BigDecimal.ZERO;
+		double res = 0.;
 		for (int nb=0; nb<getParentsCardinality();nb++) {
 			
 			// shift next
@@ -360,8 +327,9 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 				// then shift next
 				idxParents[cursorParents]++;
 				
-			res = res.add(getProbability(idxAtt, idxParents));
-
+			res += getProbability(idxAtt, idxParents);
+			InferencePerformanceUtils.singleton.incAdditions();
+			
 		}
 	
 		logger.trace("computed conditional probability p({}={})={}", name, att, res);
@@ -370,10 +338,10 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		
 	}
 	
-	public BigDecimal getConditionalProbabilityPosterior(
+	public double getConditionalProbabilityPosterior(
 						String att, 
 						Map<NodeCategorical,String> evidence, 
-						Map<NodeCategorical,Map<String,BigDecimal>> alreadyComputed) {
+						Map<NodeCategorical,Map<String,Double>> alreadyComputed) {
 
 		return getConditionalProbabilityPosterior(att, evidence, alreadyComputed, Collections.emptyMap());
 	}
@@ -384,10 +352,10 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 * @param d
 	 * @return
 	 */
-	public BigDecimal getConditionalProbabilityPosterior(
+	public double getConditionalProbabilityPosterior(
 							String att, 
 							Map<NodeCategorical,String> evidence, 
-							Map<NodeCategorical,Map<String,BigDecimal>> alreadyComputed, 
+							Map<NodeCategorical,Map<String,Double>> alreadyComputed, 
 							Map<NodeCategorical,String> forcedValue) {
 		
 		logger.trace("computing posteriors for p({}={}|{})", name, att, evidence);
@@ -399,18 +367,18 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 			
 			if (evidence.get(this).equals(att)) {
 				logger.trace("from evidence, posteriors p({}={})=1.0", name, att);
-				return BigDecimal.ONE;
+				return 1.;
 			} else {
 				logger.trace("from evidence, posteriors p({}={})=0.0", name, att);
-				return BigDecimal.ZERO;
+				return 0.;
 			}
 		}
 		
 		// another quick exit: maybe that was already computed in the past, so why bother ? 
 		if (alreadyComputed != null) {
-			Map<String,BigDecimal> done = alreadyComputed.get(this);
+			Map<String,Double> done = alreadyComputed.get(this);
 			if (done != null) {
-				BigDecimal res = done.get(att);
+				Double res = done.get(att);
 				if (res != null) {
 					return res;
 				}
@@ -438,7 +406,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		// 1,2,2
 		// 1,2,3
 		
-		BigDecimal resCond = BigDecimal.ZERO;
+		double resCond = 0.;
 		//BigDecimal resNonCond = BigDecimal.ZERO;
 
 		// list all the dimensions to be explored
@@ -465,19 +433,19 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 					collect(Collectors.toMap(NodeCategorical::getName, p -> p.getValueIndexed(idxParents[Arrays.asList(parentsArray).indexOf(p)]))) 
 					);
 			
-			BigDecimal pUsGivenSomething = getProbability(idxAtt, idxParents);
-			BigDecimal pSomething = BigDecimal.ONE;
+			double pUsGivenSomething = getProbability(idxAtt, idxParents);
+			double pSomething = 1.;
 			for (NodeCategorical p: parents) {
 				int idxPValue = idxParents[Arrays.asList(parentsArray).indexOf(p)]; // TODO inefficient
 				String pAtt = p.getValueIndexed(idxPValue);
 								
 				logger.trace("computing posteriors for parent p({}={})", p.name, pAtt);
-				BigDecimal cpp = p.getConditionalProbabilityPosterior(pAtt, evidence, alreadyComputed); 
-				pSomething = pSomething.multiply(cpp);
+				double cpp = p.getConditionalProbabilityPosterior(pAtt, evidence, alreadyComputed); 
+				pSomething *= cpp;
 				logger.trace("cumulated * {} = {}", cpp, pSomething);
 
-				if (pSomething.compareTo(BigDecimal.ZERO) == 0) {
-					// we can even break that loop: no multiplication will even change that result !
+				if (pSomething == 0.) {
+					// we can even break that loop: no multiplication will ever change that result !
 					logger.trace("reached p=0, stopping there");
 					break;
 				} 
@@ -485,7 +453,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 			}
 					
 			//resNonCond = resNonCond.add(pUsGivenSomething);
-			resCond = resCond.add(pUsGivenSomething.multiply(pSomething));
+			resCond += pUsGivenSomething * pSomething;
 			logger.trace("the probability p({}={}|*) is now after addition {}", name, att, resCond);
 
 			/*
@@ -538,7 +506,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	
 		logger.debug("computed posteriors for p({}={}|{})={}", name, att, evidence, resCond);
 
-		Map<String,BigDecimal> v2p = alreadyComputed.get(this);
+		Map<String,Double> v2p = alreadyComputed.get(this);
 		if (v2p == null) {
 			v2p = new HashMap<>();
 			try {
@@ -554,7 +522,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	}
 	
 	
-	public BigDecimal getConditionalProbabilityPosterior(String att) {
+	public double getConditionalProbabilityPosterior(String att) {
 		
 		return getConditionalProbabilityPosterior(
 				att, 
@@ -566,7 +534,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	}
 	
 
-	public BigDecimal getPosterior(String key, Object ... parentAndValue) {
+	public double getPosterior(String key, Object ... parentAndValue) {
 		return content[_getIndex(key, parentAndValue)];
 	}
 	
@@ -576,25 +544,25 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 */
 	public boolean isValid() {
 		
-		BigDecimal sumConditionals = BigDecimal.ZERO;
+		double sumConditionals = 0.;
 				
 		// every single probability in our probas is non null and in [0:1]
 		for (int i=0; i<content.length; i++) {
-			if ( content[i] == null || (content[i].compareTo(BigDecimal.ZERO) < 0) || (content[i].compareTo(BigDecimal.ONE) > 0)) 
+			if ( /*content[i] == null ||*/ (content[i] < 0) || (content[i] > 1)) 
 				return false;
 		}
 		
 		// each conditional probability in our domain is summing to 1 for each combination of parents values
 		for (String v: domain) {
-			BigDecimal post = getConditionalProbability(v);
-			if (post.setScale(6, BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(getParentsDimensionality()).setScale(6)) == 1)
+			double post = getConditionalProbability(v);
+			if (post > getParentsDimensionality())
 				return false;
-			sumConditionals = sumConditionals.add(post);
+			sumConditionals += post;
 		}
 		
 		// TODO check the conditionals sum to 1 conditionnaly !
 		
-		return sumConditionals.setScale(6,BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(getParentsCardinality()).setScale(6))==0;
+		return (int)Math.round(sumConditionals) == getParentsCardinality();
 	}
 	
 	/**
@@ -603,8 +571,8 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 	 */
 	public List<String> collectInvalidityReasons() {
 
-		BigDecimal sum = getSum();
-		if (sum.setScale(6,BigDecimal.ROUND_HALF_UP).compareTo(new BigDecimal(getParentsDimensionality()).setScale(6))!=0) {
+		double sum = getSum();
+		if ((int)Math.round(sum) != getParentsDimensionality()) {
 			List<String> res = new LinkedList<>();
 			res.add("invalid sum: "+sum);
 			return res;
@@ -630,8 +598,8 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 			sb.append("\t<GIVEN>").append(n.getName()).append("</GIVEN>\n");
 
 		sb.append("\t<TABLE>");
-		for (BigDecimal p: content) {
-			sb.append(p.setScale(5,BigDecimal.ROUND_DOWN).toString()).append(" ");
+		for (Double p: content) {
+			sb.append(p.toString()).append(" ");
 		}
 		sb.append("</TABLE>\n");
 
@@ -640,6 +608,41 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 		
 	}
 	
+	/**
+	 * Gets this variable as a factor
+	 * @return
+	 */
+	public Factor asFactor() {
+		
+		Set<NodeCategorical> variables = new HashSet<>(parents);
+		variables.add(this);
+		
+		Factor f = new Factor(cNetwork, variables);
+		
+		for (IteratorCategoricalVariables it = cNetwork.iterateDomains(this.parents); it.hasNext(); ) {
+			Map<NodeCategorical,String> v2n = it.next();
+			for (String v: this.domain) {
+				double d = this.getProbability(v, v2n);
+				HashMap<NodeCategorical,String> v2n2 = new HashMap<>(v2n);
+				v2n2.put(this, v);
+				f.setFactor(v2n2, d);
+			}
+		}
+		return f;
+	}
+	
+	/**
+	 * A node together its parents set is defined as a family
+	 * @return
+	 */
+	public Set<NodeCategorical> family() {
+		HashSet<NodeCategorical> res = new HashSet<>(this.getParents());
+		res.add(this);
+		return res;
+	}
+	
+	
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("p(");
@@ -648,7 +651,7 @@ public class NodeCategorical extends FiniteNode<NodeCategorical> {
 			sb.append("|");
 		boolean first = true;
 		for (NodeCategorical p: getParents()) {
-			sb.append(p.getName());
+			//sb.append(p.getName());
 			if (first) 
 				first = false;
 			else

@@ -35,9 +35,15 @@ public class InferencePerformanceUtils {
 	private int countMultiply = 0;
 	private int countAdditions = 0;
 	
+	private int cacheHit = 0;
+	private int cacheMiss = 0;
+	
+	
 	public void reset() {
 		countMultiply = 0;
 		countAdditions = 0;
+		cacheHit = 0;
+		cacheMiss = 0;
 	}
 	
 	public void incAdditions() {
@@ -49,11 +55,19 @@ public class InferencePerformanceUtils {
 	}
 	
 	public void display() {
-		logger.info("multiplication: {}, additions:{}", countMultiply, countAdditions);
+		logger.info("multiplication: {}, additions:{}, cache hits:{} and miss:{}", countMultiply, countAdditions, cacheHit, cacheMiss);
 	}
 	
 	private InferencePerformanceUtils() {
 		
+	}
+
+	public void incCacheMiss() {
+		cacheMiss++;
+	}
+
+	public void incCacheHit() {
+		cacheHit++;		
 	}
 
 }

@@ -5,8 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.management.AttributeValueExp;
+import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Point;
 
@@ -45,6 +44,12 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 		}
 	}
 	
+	@Override
+	/**
+	 * Clone returns a similar population entity whose values might be modified without modifying the 
+	 * parent one.
+	 */
+	public abstract Object clone();
 	
 	/** 
 	 * sets the value for the attribute or updates this value
@@ -95,12 +100,21 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 		this.attributes.put(attribute, attribute.getValue(valueString));
 	}
 	
+
+	public Map<APopulationAttribute, APopulationValue> getAttributesMap() {
+		return Collections.unmodifiableMap(attributes);
+	}
 	
 	@Override
 	public Collection<APopulationAttribute> getAttributes() {
 		return attributes.keySet();
 	}
 	
+	@Override
+	public final boolean hasAttribute(APopulationAttribute a) {
+		return attributes.containsKey(a);
+	}
+
 	@Override
 	public Collection<APopulationValue> getValues() {
 		return Collections.unmodifiableCollection(attributes.values());
@@ -149,4 +163,9 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 	 */
 	public abstract void setNest(AGeoEntity entity);
 
+	
+	public String toString() {
+		return attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()+":"+e.getValue().getStringValue()).collect(Collectors.joining(",\t"));
+	}
+	
 }

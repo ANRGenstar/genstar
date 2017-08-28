@@ -76,5 +76,12 @@ public abstract class AGeoAttribute implements IAttribute<AGeoValue> {
 	public boolean hasValue(String name) {
 		return values.containsKey(name);
 	}
+	
+
+	@Override
+	public Set<String> getValuesAsString() {
+		return Collections.unmodifiableSet(values.keySet());
+	}
+
 
 }

@@ -1,6 +1,14 @@
 package core.metamodel.pop.io;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
 
 /**
  * Main interface for access to survey as a table (List of list) 
@@ -11,17 +19,36 @@ import java.util.List;
  */
 public interface IGSSurvey {
 	
-	public abstract String getName();
+	public String getName();
 	
-	public abstract String getSurveyFilePath();
-	public abstract void setSurveyFilePath(String string);
+	public String getSurveyFilePath();
 	
 	public GSSurveyType getDataFileType();
-	public abstract int getLastRowIndex();
-	public abstract int getLastColumnIndex();
-	public abstract int getFirstRowIndex();
-	public abstract int getFirstColumnIndex();
+	public int getLastRowIndex();
+	public int getLastColumnIndex();
+	public int getFirstRowIndex();
+	public int getFirstColumnIndex();
 
+	/**
+	 * Returns, for the underlying file format, the indices of each column associated with its possible values
+	 * @param attributes
+	 * @return
+	 */
+	public Map<Integer, Set<APopulationValue>> getColumnHeaders(Set<APopulationAttribute> attributes);
+	
+
+	/**
+	 * Returns, for the underlying file format, the indices of each row associated with its possible values
+	 * @param attributes
+	 * @return
+	 */
+	public Map<Integer, Set<APopulationValue>> getRowHeaders(Set<APopulationAttribute> attributes);
+	
+	/**
+	 * Retrieves column headers from a sample data file
+	 */
+	public Map<Integer, APopulationAttribute> getColumnSample(Set<APopulationAttribute> attributes);
+	
 	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}
 	 * 
@@ -29,7 +56,7 @@ public interface IGSSurvey {
 	 * @param columnIndex
 	 * @return {@link String}
 	 */
-	public abstract String read(int rowIndex, int columnIndex);
+	public String read(int rowIndex, int columnIndex);
 	
 	/**
 	 * Return an ordered list of String that gives the content 
@@ -41,7 +68,7 @@ public interface IGSSurvey {
 	 * @param rowIndex
 	 * @return List<String>
 	 */
-	public abstract List<String> readLine(int rowIndex);
+	public List<String> readLine(int rowIndex);
 
 	/**
 	 * Return an ordered list of lines (a list of string) from {@code fromFirstRowIndex} inclusive to 
@@ -52,7 +79,7 @@ public interface IGSSurvey {
 	 * @param toLastRowIndex
 	 * @return List<List<String>>
 	 */
-	public abstract List<List<String>> readLines(
+	public List<List<String>> readLines(
 			int fromFirstRowIndex, int toLastRowIndex);
 
 	/**
@@ -64,7 +91,7 @@ public interface IGSSurvey {
 	 * @param columnIndex
 	 * @return {@link List<String>}
 	 */
-	public abstract List<String> readLines(
+	public List<String> readLines(
 			int fromFirstRowIndex, int toLastRowIndex,
 			int columnIndex);
 	
@@ -79,7 +106,7 @@ public interface IGSSurvey {
 	 * @param toLastColumnIndex
 	 * @return {@link List<List<String>}
 	 */
-	public abstract List<List<String>> readLines(
+	public List<List<String>> readLines(
 			int fromFirstRowIndex, int toLastRowIndex, 
 			int fromFirstColumnIndex, int toLastColumnIndex);
 
@@ -90,7 +117,7 @@ public interface IGSSurvey {
 	 * @param columnIndex
 	 * @return {@link List<String>}
 	 */
-	public abstract List<String> readColumn(int columnIndex);
+	public List<String> readColumn(int columnIndex);
 
 	/**
 	 * Return an ordered list of variable (a list of list of variable values). It represents data 
@@ -100,7 +127,7 @@ public interface IGSSurvey {
 	 * @param toLastColumnIndex
 	 * @return {@link List<List<String>>}
 	 */
-	public abstract List<List<String>> readColumns(
+	public List<List<String>> readColumns(
 			int fromFirstColumnIndex, int toLastColumnIndex);
 
 	/**
@@ -113,7 +140,7 @@ public interface IGSSurvey {
 	 * @param rowIndex
 	 * @return {@link List<String>}
 	 */
-	public abstract List<String> readColumns(
+	public List<String> readColumns(
 			int fromFirstColumnIndex, int toLastColumnIndex, 
 			int rowIndex);
 	
@@ -128,11 +155,12 @@ public interface IGSSurvey {
 	 * @param toLastColumnIndex
 	 * @return {@link List<List<String>>}
 	 */
-	public abstract List<List<String>> readColumns(
+	public List<List<String>> readColumns(
 			int fromFirstRowIndex, int toLastRowIndex, 
 			int fromFirstColumnIndex, int toLastColumnIndex);
 	
+	
 	@Override
-	public abstract String toString();
+	public String toString();
 	
 }

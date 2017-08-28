@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import core.metamodel.IAttribute;
 import core.metamodel.IValue;
@@ -132,7 +133,7 @@ public class GosplAttributeFactory {
 				throw new IllegalArgumentException("cannot instantiate aggregated value without mapper");
 			break;
 		case range:
-			if(mapper.isEmpty())
+			if(mapper==null || mapper.isEmpty())
 				att = new RangeAttribute(name, dataType);
 			else if(referentAttribute != null)
 				att = new MappedAttribute(name, dataType, referentAttribute, mapper);
@@ -174,6 +175,7 @@ public class GosplAttributeFactory {
 
 	// ----------------------------- Back office ----------------------------- //
 
+	
 	private Set<APopulationValue> getValues(GSEnumAttributeType attributeType, GSEnumDataType dataType, List<String> inputValues, 
 			List<String> modelValues, APopulationAttribute attribute) throws GSIllegalRangedData{
 		if(inputValues.size() != modelValues.size())
@@ -241,6 +243,45 @@ public class GosplAttributeFactory {
 		default:
 			return new UniqueValue(dataType, attribute);
 		}
+	}
+
+
+	/**
+	 * In case we have better information about an attribute after its definition - for instance 
+	 * because the definition was imprecise but is better defined when reading the data - then 
+	 * we can create a novel attribute based on the past one by changing or or several of its properties
+	 * 
+	 * @param orignalAtt
+	 * @param datatype
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public APopulationAttribute createRefinedAttribute(APopulationAttribute orignalAtt, GSEnumDataType datatype) throws GSIllegalRangedData {
+		
+		GSEnumAttributeType attributeType = null;
+
+		Map<Set<String>, Set<String>> mapper = null;
+		
+		if (orignalAtt instanceof UniqueAttribute)
+			attributeType = GSEnumAttributeType.unique;
+		else if (orignalAtt instanceof MappedAttribute) {
+			attributeType = GSEnumAttributeType.unique;
+			mapper = ((MappedAttribute)orignalAtt).getMapper();
+		} else if (orignalAtt instanceof RangeAttribute)
+			attributeType = GSEnumAttributeType.record;
+		else if (orignalAtt instanceof RecordAttribute)
+			attributeType = GSEnumAttributeType.record;
+		
+		APopulationAttribute novel = createAttribute(
+				orignalAtt.getAttributeName(),
+				datatype, 
+				orignalAtt.getValues().stream().map(a->a.getInputStringValue()).collect(Collectors.toList()),
+				orignalAtt.getValues().stream().map(a->a.getStringValue()).collect(Collectors.toList()),
+				attributeType, 
+				orignalAtt.getReferentAttribute(), 
+				mapper
+				);
+		return novel;
 	}
 
 }

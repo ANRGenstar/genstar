@@ -31,6 +31,8 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 
 	protected Set<N> nodes = new HashSet<>();
 	
+	protected Map<String,N> name2node = new HashMap<>();
+	
 	protected List<N> nodesEnumeration;
 
 	private final String name;
@@ -76,9 +78,16 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 	 * @return
 	 */
 	public N getVariable(String id) {
+		
+		N res = name2node.get(id);
+		if (res != null)
+			return res;
+		
 		for (N n: nodes) {
-			if (n.getName().equals(id))
+			if (n.getName().equals(id)) {
+				name2node.put(id, n);
 				return n;
+			}
 		}
 		return null;
 	}
@@ -89,6 +98,7 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 	 */
 	public void notifyNodesChanged() {
 		nodesEnumeration = null;
+		name2node.clear();
 	}
 	
 	/**
@@ -216,6 +226,27 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 		return res;
 	}
 	
+	public Set<N> getAllChildren(N n) {
+
+		Set<N> res = new HashSet<>(n.getChildren());
+		res.add(n);
+		
+		Set<N> toProcess = new HashSet<>(n.getChildren());
+		Set<N> processed = new HashSet<>();
+		
+		while (!toProcess.isEmpty()) {
+			Iterator<N> it = toProcess.iterator();
+			N c = it.next();
+			it.remove();
+			processed.add(c);
+			res.addAll(c.getChildren());
+			toProcess.addAll(c.getChildren());
+			toProcess.removeAll(processed);
+		}
+		
+		return res;
+	}
+	
 	public Set<N> getParents(AbstractNode<N> n) {
 		return n.getParents();
 	}		
@@ -261,7 +292,6 @@ public class BayesianNetwork<N extends AbstractNode<N>> {
 		res.put(node2value, d);
 	}
 	*/
-	
 	
 	
 	

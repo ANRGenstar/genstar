@@ -2,7 +2,6 @@ package gospl.algo.sr.bn;
 
 import java.io.File;
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -18,6 +17,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.dom4j.Document;
@@ -27,13 +27,38 @@ import org.dom4j.Node;
 
 public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical> {
 
-	private Logger logger = LogManager.getLogger();
+	private static Logger logger = LogManager.getLogger();
 
+	protected Map<NodeCategorical,Factor> node2factor = new HashMap<>();
+	
 	public CategoricalBayesianNetwork(String name) {
 		super(name);
 
 	}
 	
+	@Override
+	public void notifyNodesChanged() {
+		super.notifyNodesChanged();
+		node2factor.clear();
+	}
+	
+	/**
+	 * Returns the node as a factor, or the corresponding value 
+	 * @param n
+	 * @return
+	 */
+	public Factor getFactor(NodeCategorical n) {
+		
+		// cached ? 
+		Factor res = node2factor.get(n);
+		
+		if (res == null) {
+			res = n.asFactor();
+			node2factor.put(n, res);
+		}
+		
+		return res;
+	}
 
 	/**
 	 * ranks the nodes per count of zeros in the CPT 
@@ -78,8 +103,6 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 			throw new IllegalArgumentException("invalid XML BIF format", e);
 		}
 
-
-		
     	final String networkName = document.selectSingleNode("/BIF/NETWORK/NAME").getText().trim();
 
 		// add them all into a Bayesian net
@@ -128,17 +151,18 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	        	
 	        	// now set the probabilities
 	        	final String tableContent = nodeDefinition.selectSingleNode("./TABLE").getText().trim();
-	        	List<BigDecimal> values = new LinkedList<>();
+	        	List<Double> values = new LinkedList<>();
 	        	for (String tok : tableContent.split("[ \t]+")) {
 	        		try {
-	        			values.add(new BigDecimal(tok));
+	        			//System.out.println("decoding "+tok+" to "+new Double(tok));
+	        			values.add(new Double(tok));
 	        		} catch (NumberFormatException e) {
 	        			throw new IllegalArgumentException("error while parsing this value as a BigDecimal: "+tok,e);
 	        		}
 	        	}
-	        	BigDecimal[] valuesA = new BigDecimal[values.size()];
+	        	Double[] valuesA = new Double[values.size()];
 	        	values.toArray(valuesA);
-	        	n.setProbabilities(valuesA);
+	        	n.setProbabilities(ArrayUtils.toPrimitive(valuesA));
 	        
 	        }
 		
@@ -168,7 +192,11 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	public static CategoricalBayesianNetwork loadFromXMLBIF(File f) {
 		
 		try {
-			return readFromXMLBIF(FileUtils.readFileToString(f));
+			logger.debug("reading a CategoricalBayesianNetwork from XML BIF file {}", f);
+			CategoricalBayesianNetwork bn = readFromXMLBIF(FileUtils.readFileToString(f));
+			logger.debug("reading a CategoricalBayesianNetwork from XML BIF file {}", f);
+
+			return bn;
 		} catch (IOException e) {
 			throw new IllegalArgumentException("unable to read file "+f, e);
 		}
@@ -202,6 +230,17 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		return new ArrayList<NodeCategorical>(nodes);
 	}
 	
+	public IteratorCategoricalVariables iterateDomains() {
+		
+		return new IteratorCategoricalVariables(this.enumerateNodes());
+	}
+	
+	public IteratorCategoricalVariables iterateDomains(Collection<NodeCategorical> nn) {
+		if (!this.nodes.containsAll(nn))
+			throw new IllegalArgumentException("some of these nodes "+nn+" do not belong this Bayesian network "+this.nodes);
+		return new IteratorCategoricalVariables(nn);
+	}
+	
 	/**
 	 * For a list of variable and values, computes the corresponding joint probability.
 	 * Takes as an input all the 
@@ -209,7 +248,7 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 	 * @param node2probabilities 
 	 * @return
 	 */
-	public BigDecimal jointProbability(
+	public double jointProbability(
 			Map<NodeCategorical,String> node2value, 
 			Map<NodeCategorical,String> evidence) {
 		
@@ -219,9 +258,9 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		*/
 		logger.trace("computing joint probability p({})", node2value);
 
-		BigDecimal res = BigDecimal.ONE;
+		double res = 1.;
 		
-		for (NodeCategorical n: rankVariablesForMultiplication(node2value.keySet())) {
+		for (NodeCategorical n: rankVariablesPerZeros(node2value.keySet())) {
 			
 			// optimisation: compute first the nodes having a lot of zeros to stop computation asap
 			String v = node2value.get(n);
@@ -229,14 +268,14 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 			if (!node2value.keySet().containsAll(n.getParents())) {
 				throw new InvalidParameterException("wrong parameters: expected values for each parent of "+n+": "+n.getParents());
 			}
-			BigDecimal p = null;
+			double p;
 			
 			// find the probability to be used
 			if (evidence.containsKey(n)) {
 				if (evidence.get(n).equals(v)) {
-					p = BigDecimal.ONE;
+					p = 1.;
 				} else {
-					p = BigDecimal.ZERO;
+					p = 0.;
 				}
 			} else if (n.hasParents()) {
 				// if there are parent values, let's create the probability by reading the CPT 
@@ -249,13 +288,13 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 			logger.trace("p({}={})={}", n.name, v, p);
 
 			// use it
-			if (p.compareTo(BigDecimal.ZERO)==0) {
+			if (p==0.) {
 				// optimisation: stop if multiplication by 0
-				res = BigDecimal.ZERO;
+				res = 0.;
 				break;
-			} else if (p.compareTo(BigDecimal.ONE) != 0) {
+			} else if (p != 1) {
 				// optimisation: multiply only if useful
-				res = res.multiply(p);
+				res = res* p;
 				InferencePerformanceUtils.singleton.incMultiplications();
 			}
 			
@@ -269,13 +308,65 @@ public class CategoricalBayesianNetwork extends BayesianNetwork<NodeCategorical>
 		
 	}
 	
+	public double jointProbabilityFromFactors(Map<NodeCategorical,String> node2value) {
+				
+		Factor f = null;
+		
+		for (NodeCategorical n: enumerateNodes()) {
+			Factor fn = n.asFactor();
+			if (f == null)
+				f = fn;
+			else 
+				f = f.multiply(fn);
+		}
+		
+		return f.get(node2value);
+	}
+
 	/**
 	 * Prunes the Bayesian network by removing the variable n, and updating all the probabilities for
 	 * other nodes in the network. 
 	 * @param node
 	 */
 	public void prune(NodeCategorical n) {
-		
+		// TODO !!!
 	}
+
+
+	/**
+	 * Returns a map of variable (node) and value by parsing the string values
+	 * @param sss
+	 * @return
+	 */
+	public Map<NodeCategorical, String> toNodeAndValue(String... sss) {
 		
+		return this.toNodeAndValue(this.nodes, sss);
+	}	
+	
+	/**
+	 * Returns a map of variable (node) and value by parsing the string values
+	 * @param sss
+	 * @return
+	 */
+	public Map<NodeCategorical, String> toNodeAndValue(Collection<NodeCategorical> nodes, String... sss) {
+		
+		if (nodes != null && !this.nodes.containsAll(nodes))
+			throw new IllegalArgumentException("Not all the nodes "+nodes+" are in this Bayesian network");
+		if (nodes != null && sss.length != nodes.size()*2)
+			throw new IllegalArgumentException("invalid keys and values");
+		
+		Map<NodeCategorical,String> n2s = new HashMap<>(nodes != null?nodes.size():this.nodes.size());
+		for (int i=0; i<sss.length; i+=2) {
+			NodeCategorical n = getVariable(sss[i]);
+			if (n == null || (nodes != null && !nodes.contains(n)))
+				throw new IllegalArgumentException("Unknown variable "+sss[i]);
+			String v = sss[i+1];
+			if (!n.getDomain().contains(v))
+				throw new IllegalArgumentException("unknown value "+v+" for variable "+sss[i]);
+			n2s.put(n, v);
+		}
+		return n2s;
+	}	
+	
+
 }

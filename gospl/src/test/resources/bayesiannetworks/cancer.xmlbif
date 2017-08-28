@@ -3,35 +3,12 @@
 <!--
   Bayesian network in XMLBIF v0.3 (BayesNet Interchange Format)
   Produced by SamIam http://reasoning.cs.ucla.edu/samiam
-  Output created 26 juin 2017 18:13:12
+  Output created 6 juil. 2017 08:59:53
 -->
 
 <BIF VERSION="0.3">
 <NETWORK>
   <NAME>bayesiannetwork</NAME>
-
-  <VARIABLE TYPE="nature">
-    <NAME>Xray</NAME>
-    <OUTCOME>positive</OUTCOME>
-    <OUTCOME>negative</OUTCOME>
-    <OBSERVED>0</OBSERVED>
-    <PROPERTY>position = (428, -428)</PROPERTY>
-  </VARIABLE>
-
-  <VARIABLE TYPE="nature">
-    <NAME>Cancer</NAME>
-    <OUTCOME>True</OUTCOME>
-    <OUTCOME>False</OUTCOME>
-    <PROPERTY>position = (540, -257)</PROPERTY>
-  </VARIABLE>
-
-  <VARIABLE TYPE="nature">
-    <NAME>Pollution</NAME>
-    <OUTCOME>low</OUTCOME>
-    <OUTCOME>high</OUTCOME>
-    <OBSERVED>1</OBSERVED>
-    <PROPERTY>position = (682, -55)</PROPERTY>
-  </VARIABLE>
 
   <VARIABLE TYPE="nature">
     <NAME>Smoker</NAME>
@@ -42,16 +19,38 @@
   </VARIABLE>
 
   <VARIABLE TYPE="nature">
+    <NAME>Cancer</NAME>
+    <OUTCOME>True</OUTCOME>
+    <OUTCOME>False</OUTCOME>
+    <PROPERTY>position = (540, -257)</PROPERTY>
+  </VARIABLE>
+
+  <VARIABLE TYPE="nature">
     <NAME>Dyspnoea</NAME>
     <OUTCOME>True</OUTCOME>
     <OUTCOME>False</OUTCOME>
     <PROPERTY>position = (693, -410)</PROPERTY>
   </VARIABLE>
 
+  <VARIABLE TYPE="nature">
+    <NAME>Xray</NAME>
+    <OUTCOME>positive</OUTCOME>
+    <OUTCOME>negative</OUTCOME>
+    <OBSERVED>0</OBSERVED>
+    <PROPERTY>position = (428, -428)</PROPERTY>
+  </VARIABLE>
+
+  <VARIABLE TYPE="nature">
+    <NAME>Pollution</NAME>
+    <OUTCOME>low</OUTCOME>
+    <OUTCOME>high</OUTCOME>
+    <OBSERVED>1</OBSERVED>
+    <PROPERTY>position = (682, -55)</PROPERTY>
+  </VARIABLE>
+
   <DEFINITION>
-    <FOR>Xray</FOR>
-    <GIVEN>Cancer</GIVEN>
-    <TABLE>0.9 0.1 0.2 0.8 </TABLE>
+    <FOR>Smoker</FOR>
+    <TABLE>0.3 0.7 </TABLE>
   </DEFINITION>
 
   <DEFINITION>
@@ -62,19 +61,20 @@
   </DEFINITION>
 
   <DEFINITION>
-    <FOR>Pollution</FOR>
-    <TABLE>0.9 0.1 </TABLE>
-  </DEFINITION>
-
-  <DEFINITION>
-    <FOR>Smoker</FOR>
-    <TABLE>0.3 0.7 </TABLE>
-  </DEFINITION>
-
-  <DEFINITION>
     <FOR>Dyspnoea</FOR>
     <GIVEN>Cancer</GIVEN>
     <TABLE>0.65 0.35 0.3 0.7 </TABLE>
+  </DEFINITION>
+
+  <DEFINITION>
+    <FOR>Xray</FOR>
+    <GIVEN>Cancer</GIVEN>
+    <TABLE>0.9 0.1 0.2 0.8 </TABLE>
+  </DEFINITION>
+
+  <DEFINITION>
+    <FOR>Pollution</FOR>
+    <TABLE>0.9 0.1 </TABLE>
   </DEFINITION>
 
 </NETWORK>

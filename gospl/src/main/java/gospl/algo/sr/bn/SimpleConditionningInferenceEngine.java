@@ -1,14 +1,13 @@
 package gospl.algo.sr.bn;
 
-import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +21,7 @@ import org.apache.logging.log4j.Logger;
  * either its original probabilities, or based on evidence on the variable or on one parent of the variable. 
  * 
  * Only computes probabilities on demand, so few demands will lead to few computations.
- * Caches all the computed probabilities so many demands will not increase computations anymore.
+ * Caches all the computed probabilities so many demands will not increase computations anymore - at the expense of memory, as usual.
  * 
  * Simple optimizations were implemented, including: <ul>
  * <li>excluding irrelevant variables during computation</li>
@@ -39,9 +38,18 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 
 	private Logger logger = LogManager.getLogger();
 
-	private Map<NodeCategorical,Map<String,BigDecimal>> computed = new HashMap<>();
+	private Map<NodeCategorical,double[]> computed = new HashMap<>();
 	
+	// note that cache 1 and 2 are combinatory: for each cache level 1, there will be CACHE_MAXITEMS2 level2!
+	private static int CACHE_MAXITEMS = 100;
+	private static int CACHE_MAXITEMS2 = 100;
 
+	private static int CACHE_EVIDENCE = 5000;
+
+	
+	private LRUMap<Map<NodeCategorical,String>,Map<Set<NodeCategorical>,Double>> known2nuisance2value = null;
+	private LRUMap<Map<NodeCategorical,String>,Double> evidence2proba = null;
+	
 	public SimpleConditionningInferenceEngine(CategoricalBayesianNetwork bn) {
 		super(bn);
 
@@ -49,9 +57,9 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 
 
 	@Override
-	protected BigDecimal retrieveConditionalProbability(NodeCategorical n, String s) {
+	protected double retrieveConditionalProbability(NodeCategorical n, String s) {
 		
-		logger.debug("p({}={}|{}", n.name, s, variable2value);
+		logger.debug("p({}={}|{}", n.name, s, evidenceVariable2value);
 
 		// can we even compute it ? 
 		// TODO ???if (blacklisted.contains(n))
@@ -59,44 +67,54 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		
 		// is it part of evidence ?
 		{
-			String ev = variable2value.get(n);
+			String ev = evidenceVariable2value.get(n);
 			if (ev != null) {
 				if (ev.equals(s))
-					return BigDecimal.ONE;
+					return 1.;
 				else 
-					return BigDecimal.ZERO;
+					return 0.;
 			}
 		}
 		
 		// did we computed it already ?
-		Map<String,BigDecimal> done = computed.get(n);
-		BigDecimal res = null;
+		double[] done = computed.get(n);
 		// did we stored anything for this node ? (if not, prepare for it)
 		if (done == null) {
-			done = new HashMap<>();
+			done = new double[n.getDomainSize()];
+			Arrays.fill(done, -1.);
 			computed.put(n, done);
 		} else {
-			res = done.get(s);
+			double res = done[n.getDomainIndex(s)];
+			if (res > 0)
+				return res;
 		}
 		
-		// did we computed that specific one ? if not, compute it
-		if (res == null) {
-			// did we already computed everything else than this single value? 
-			if (done.size() == n.getDomainSize()-1) {
-				logger.debug("we can save one computation here by doing p(X=x)=1 - sum(p(X=^x))");
-				BigDecimal total = BigDecimal.ONE;
-				for (BigDecimal d : done.values()) {
-					total = total.subtract(d);
-				}
-				res = total;
-			} else {
-				logger.trace("no value computed for p({}={}|{}), starting computation...", n.name, s, variable2value);
-				//res = n.getConditionalProbabilityPosterior(s, variable2value, computed);
-				res = computePosteriorConditionalProbability(n, s, variable2value);
+		double res;
+
+		// we did not computed this value.
+		// maybe we know everything but this one ?
+		int known = 0;
+		for (int i=0; i<done.length; i++) {
+			if (done[i] >= 0){ 
+				known++;
 			}
-			done.put(s, res);
 		}
-		logger.trace("returning p({}={}|{})={}", n.name, s, variable2value, res);
+		if (known == done.length-1) {
+			// we know all the values but one
+			logger.debug("we can save one computation here by doing p(X=x)=1 - sum(p(X=^x))");
+			double total = 1.;
+			for (double d : done) {
+				if (d>=0)
+					total -= d;
+			}
+			res = total;
+		} else {
+			logger.trace("no value computed for p({}={}|{}), starting computation...", n.name, s, evidenceVariable2value);
+			//res = n.getConditionalProbabilityPosterior(s, variable2value, computed);
+			res = computePosteriorConditionalProbability(n, s, evidenceVariable2value);
+		}
+		done[n.getDomainIndex(s)] = res;
+		logger.trace("returning p({}={}|{})={}", n.name, s, evidenceVariable2value, res);
 
 		return res;
 		
@@ -104,21 +122,25 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 	
 
 	@Override
-	protected Map<String, BigDecimal> retrieveConditionalProbability(NodeCategorical n) {
+	protected double[] retrieveConditionalProbability(NodeCategorical n) {
 		
-		Map<String, BigDecimal> done = null;
+		double[] done;
 	
 		// is it part of evidence ?
 		{
-			String ev = variable2value.get(n);
+			String ev = evidenceVariable2value.get(n);
 			if (ev != null) {
-				done = new HashMap<>(n.getDomainSize());
-				for (String v: n.getDomain()) {
+				done = new double[n.getDomainSize()];
+				for (int i=0; i<n.getDomainSize(); i++) {
+					String v = n.getValueIndexed(i);
 					if (ev.equals(v)) {
-						done.put(v, BigDecimal.ONE);
+						done[i] = 1.; 
+						break; // we can break there in fact (initialized to 0 !)
 					} else
-						done.put(v, BigDecimal.ZERO);
+						done[i] = 0.;
 				}
+				return done;
+
 			}
 		}
 		
@@ -132,11 +154,11 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		// did we computed that specific one ? if not, compute it
 		if (done == null) {
 			
-			done = computePosteriorConditionalProbability(n, variable2value);
+			done = computePosteriorConditionalProbability(n, evidenceVariable2value);
 			
 			computed.put(n, done);
 		}
-		logger.trace("returning p({}=*|{}) : {}", n.name, variable2value, done);
+		logger.trace("returning p({}=*|{}) : {}", n.name, evidenceVariable2value, done);
 
 		return done;
 		
@@ -161,60 +183,22 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		return leafs;
 		
 	}
-	
-	/**
-	 * Given a set of known values for variables, lists all the combinations of variables / value to be investigated 
-	 * @param known
-	 */
-	protected List<Map<NodeCategorical,String>> enumerateNuisanceVariableValues(Map<NodeCategorical,String> known, Set<NodeCategorical> nuisanceS) {
-		
-		List<Map<NodeCategorical,String>> res = new LinkedList<>();
-		
-		// the nodes we have to explore the values for 
-		NodeCategorical[] nuisance = new NodeCategorical[nuisanceS.size()];
-		nuisance = nuisanceS.toArray(nuisance);
-		
-		// the current values we are exploring for each node
-		int[] nodeIdx2valueIdx = new int[nuisance.length];
-		
-		main: while (true) {
-			
-			// store the current explored values in a map
-			Map<NodeCategorical,String> n2v = new HashMap<>(nuisance.length);
-			for (int i=0; i<nodeIdx2valueIdx.length; i++) {
-				n2v.put(nuisance[i], nuisance[i].getValueIndexed(nodeIdx2valueIdx[i]));
-			}
-			logger.debug("should explore: {}", n2v);
-			res.add(n2v);
-			
-			// skip to the next index
-			int cursorParents = nodeIdx2valueIdx.length-1;
-			nodeIdx2valueIdx[cursorParents]++;
-			// ... if we are at the max of the domain size of the current node, then shift back
-			while (nodeIdx2valueIdx[cursorParents]>=nuisance[cursorParents].getDomainSize()) {
-				nodeIdx2valueIdx[cursorParents] = 0;
-				cursorParents--;
-				// maybe we finished the exploration ?
-				if (cursorParents < 0) 
-					break main;
-				// skip to the next one 
-				nodeIdx2valueIdx[cursorParents]++;
-			}
-		}
-		
-		return res;
-	}
 
-	private Map<Map<NodeCategorical,String>,Map<Set<NodeCategorical>,BigDecimal>> known2nuisance2value = new HashMap<>();
 	
-	private BigDecimal getCached(
+	private Double getCached(
 			Map<NodeCategorical,String> known, 
 			Set<NodeCategorical> nuisance
 			) {
 		
-		Map<Set<NodeCategorical>,BigDecimal> res = known2nuisance2value.get(known);
-		if (res == null)
+		if (known2nuisance2value == null)
+			known2nuisance2value = new LRUMap<>(CACHE_MAXITEMS);
+		
+		Map<Set<NodeCategorical>,Double> res = known2nuisance2value.get(known);
+		if (res == null) {
+			InferencePerformanceUtils.singleton.incCacheMiss();
 			return null;
+		}
+		InferencePerformanceUtils.singleton.incCacheHit();
 		return res.get(nuisance);
 		
 	}
@@ -222,22 +206,24 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 	private void storeCache(
 			Map<NodeCategorical,String> known, 
 			Set<NodeCategorical> nuisance,
-			BigDecimal d
+			Double d
 			) {
-		Map<Set<NodeCategorical>,BigDecimal> res = known2nuisance2value.get(known);
+		Map<Set<NodeCategorical>,Double> res = known2nuisance2value.get(known);
 		if (res == null) {
-			res = new HashMap<>();
+			res = new LRUMap<>(CACHE_MAXITEMS2);
 			known2nuisance2value.put(known, res);
 		}
 		res.put(nuisance, d);
 	}
 	
 	/**
-	 * Given a set of known values for variables, lists all the combinations of variables / value to be investigated 
+	 * Given a set of known values for variables, and the list of the remaining variables not 
+	 * covered by this evidence (refered to as nuisance variables),
+	 * sums probabilities over the relevant variables to computed the expected probability.
 	 * @param known
 	 * @param node2probabilities 
 	 */
-	protected BigDecimal sumProbabilities(
+	protected double sumProbabilities(
 			Map<NodeCategorical,String> known, 
 			Set<NodeCategorical> nuisanceRaw) {
 		
@@ -245,82 +231,45 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		Set<NodeCategorical> nuisanceS = new HashSet<>(nuisanceRaw);
 		nuisanceS.removeAll(known.keySet());
 		
-		BigDecimal res = getCached(known, nuisanceS); // optimisation: cache !
+		// quick exit
+		if (nuisanceRaw.isEmpty() && known.isEmpty())
+			return 1.;
+		
+		// is it cached ?
+		Double res = getCached(known, nuisanceS); // optimisation: cache !
 		if (res != null)
 			return res;
 		
-		res = BigDecimal.ZERO;
-				
+		
+		res = 0.;
+						
 		logger.debug("summing probabilities for nuisance {}, and known {}", known, nuisanceS);
-		
-		// the nodes we have to explore the values for 
-		NodeCategorical[] nuisance = new NodeCategorical[nuisanceS.size()];
-		nuisance = nuisanceS.toArray(nuisance);
-		
-		// the current values we are exploring for each node
-		int[] nodeIdx2valueIdx = new int[nuisance.length];
-		
-		main: while (true) {
+
+		for (IteratorCategoricalVariables it = bn.iterateDomains(nuisanceS); it.hasNext(); ) {
 			
-			// store the current explored values in a map
-			Map<NodeCategorical,String> n2v = new HashMap<>(known);
-			for (int i=0; i<nodeIdx2valueIdx.length; i++) {
-				n2v.put(nuisance[i], nuisance[i].getValueIndexed(nodeIdx2valueIdx[i]));
-			}
+			Map<NodeCategorical,String> n2v = it.next();
+			n2v.putAll(known);
 			
-			BigDecimal p = this.bn.jointProbability(n2v, Collections.emptyMap());
+			double p = this.bn.jointProbability(n2v, Collections.emptyMap());
 			
-			logger.debug("p({})={}", n2v,p);
+			logger.info("p({})={}", n2v, p);
 			
-			res = res.add(p);
+			res += p;
 			InferencePerformanceUtils.singleton.incAdditions();
-			
-			if (nodeIdx2valueIdx.length == 0)
+
+			// if over one, stop.
+			if (res >= 1) {
+				res = 1.;
 				break;
-			// skip to the next index
-			int cursorParents = nodeIdx2valueIdx.length-1;
-			nodeIdx2valueIdx[cursorParents]++;
-			// ... if we are at the max of the domain size of the current node, then shift back
-			while (nodeIdx2valueIdx[cursorParents]>=nuisance[cursorParents].getDomainSize()) {
-				nodeIdx2valueIdx[cursorParents] = 0;
-				cursorParents--;
-				// maybe we finished the exploration ?
-				if (cursorParents < 0) 
-					break main;
-				// skip to the next one 
-				nodeIdx2valueIdx[cursorParents]++;
 			}
+
 		}
+		
 		
 		storeCache(known, nuisanceS, res);
 		
 		logger.debug("total {}", res);
 		return res;
-	}
-	
-	/**
-	 * Selects the variables relevant to assess the probability of node toCompute 
-	 * knowing evidence and all the nodes that might be considered.
-	 * @param toCompute
-	 * @param evidence
-	 * @param all
-	 * @return
-	 */
-	private Set<NodeCategorical> selectRelevantVariables(
-			NodeCategorical toCompute,
-			Map<NodeCategorical,String> evidence,
-			Set<NodeCategorical> all
-			) {
-		Set<NodeCategorical>  relevant = new HashSet<>(all.size());
-		
-		if (toCompute != null)
-			relevant.addAll(toCompute.getAllAncestors());
-		
-		for (NodeCategorical n: evidence.keySet()) {
-			relevant.addAll(n.getAllAncestors());
-		}
-		
-		return relevant;
 	}
 	
 	
@@ -331,22 +280,23 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 	 * Only computes if the value is not already present in cache 
 	 * @param n
 	 */
-	protected Map<String,BigDecimal> computePosteriorConditionalProbability(
+	protected double[] computePosteriorConditionalProbability(
 											NodeCategorical n, 
 											Map<NodeCategorical,String> evidence) {
 		
-		Map<String,BigDecimal> v2p = new HashMap<>(n.getDomainSize());
-				
-		BigDecimal pFree = this.sumProbabilities(evidence, selectRelevantVariables(null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
+		double[] v2p = new double[n.getDomainSize()];
 
-		for (String nv: n.getDomain()) {
-			
+		double pFree = getProbabilityEvidence(); // this.sumProbabilities(evidence, selectRelevantVariables((NodeCategorical)null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
+
+		for (int i=0; i<n.getDomainSize(); i++) {
+			String nv = n.getValueIndexed(i);
+		
 			logger.debug("computing p(*=*|{}={})", n.name, nv);
 							
 			Map<NodeCategorical,String> punctualEvidence = new HashMap<>(evidence);
 			punctualEvidence.put(n, nv);
 						
-			BigDecimal p = this.sumProbabilities(
+			double p = this.sumProbabilities(
 					punctualEvidence, 
 					selectRelevantVariables(n, evidence, bn.nodes) // optimisation: elimination of irrelevant variables
 					);
@@ -354,16 +304,19 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 			logger.debug("computed p({}={}|{},{}={})={}", n.name, nv, punctualEvidence, n.name, nv, p);
 			
 			logger.debug("computed p(*=*|{}={})={}", n.name, nv, p);
-			v2p.put(nv, p);
+			v2p[i] = p;
 			
 		}
 		
 		logger.debug("now computing the overall probas");
 
-		for (String nv : n.getDomain()) {
-			BigDecimal p = v2p.get(nv);
-			BigDecimal pp = p.divide(pFree, BigDecimal.ROUND_HALF_UP);
-			v2p.put(nv, pp);
+		for (int i=0; i<n.getDomainSize(); i++) {
+			String nv = n.getValueIndexed(i);
+
+			double p = v2p[i];
+			
+			double pp = p / pFree;
+			v2p[i] = pp;
 			logger.debug("computed p({}={}|evidence)= p({}={}|evidence)/p({}|evidence)={}/{}={}", n.name, nv, n.name, nv, n.name, p, pFree, pp);
 		}
 		
@@ -380,20 +333,19 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 	 * At the end, returns the probabilities for each value of the domain. 
 	 * @param n
 	 */
-	protected BigDecimal computePosteriorConditionalProbability(
+	protected double computePosteriorConditionalProbability(
 											NodeCategorical n, 
 											String nv,
 											Map<NodeCategorical,String> evidence) {
 						
-		BigDecimal pFree = this.sumProbabilities(evidence, selectRelevantVariables(null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
+		double pFree = this.sumProbabilities(evidence, selectRelevantVariables((NodeCategorical)null, evidence, bn.nodes)); // optimisation: elimination of irrelevant variables
 
-		
 		logger.debug("computing p(*=*|{}={})", n.name, nv);
 						
 		Map<NodeCategorical,String> punctualEvidence = new HashMap<>(evidence);
 		punctualEvidence.put(n, nv);
 					
-		BigDecimal p = this.sumProbabilities(
+		double p = this.sumProbabilities(
 				punctualEvidence, 
 				selectRelevantVariables(n, evidence, bn.nodes) // optimisation: elimination of irrelevant variables
 				);
@@ -405,12 +357,12 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		logger.debug("now computing the overall probas");
 
 		
-		BigDecimal pp = null;
+		double pp;
 		try {
-			pp = p.divide(pFree, BigDecimal.ROUND_HALF_UP);
+			pp = p / pFree;
 		} catch (ArithmeticException e) {
 			logger.error("unable to compute probability p({}={}|*): pfree={}, p={}", n.name, nv, pFree, p);
-			pp = BigDecimal.ZERO; // TODO ???
+			pp = 0.; // TODO ???
 		}
 		
 		
@@ -434,6 +386,26 @@ public class SimpleConditionningInferenceEngine extends AbstractInferenceEngine 
 		// mark it clean
 		super.compute();
 		
+	}
+
+
+	@Override
+	protected double computeProbabilityEvidence() {
+
+		if (evidence2proba == null)
+			evidence2proba = new LRUMap<>(CACHE_EVIDENCE);
+		
+		Double res = evidence2proba.get(evidence2proba);
+		
+		if (res == null) {
+			InferencePerformanceUtils.singleton.incCacheMiss();
+			res = this.sumProbabilities(evidenceVariable2value, selectRelevantVariables((NodeCategorical)null, evidenceVariable2value, bn.nodes)); // optimisation: elimination of irrelevant variables
+			evidence2proba.put(evidenceVariable2value, res);
+		} else {
+			InferencePerformanceUtils.singleton.incCacheHit();
+		}
+
+		return res;
 	}
 
 

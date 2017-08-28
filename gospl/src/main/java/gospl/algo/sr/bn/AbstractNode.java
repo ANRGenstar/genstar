@@ -17,6 +17,7 @@ public abstract class AbstractNode<N extends AbstractNode<N>> {
 	protected final Map<String,N> name2parent = new HashMap<>();
 	
 	
+	@SuppressWarnings("unchecked")
 	public AbstractNode(BayesianNetwork<N> net, String name) {
 		this.network = net;
 		this.name = name;
@@ -44,11 +45,11 @@ public abstract class AbstractNode<N extends AbstractNode<N>> {
 		return this.network.getChildren(this);
 	}
 	
-	protected N getParent(String lbl) {
+	protected final N getParent(String lbl) {
 		return name2parent.get(lbl);
 	}
 	
-	public boolean hasParents() {
+	public final boolean hasParents() {
 		return !parents.isEmpty();
 	}
 	
@@ -63,8 +64,13 @@ public abstract class AbstractNode<N extends AbstractNode<N>> {
 	public abstract void toXMLBIF(StringBuffer sb);
 	
 
+	@SuppressWarnings("unchecked")
 	public Collection<N> getAllAncestors() {
 		return network.getAllAncestors((N) this);
+	}
+
+	public Collection<N> getAllChildren() {
+		return network.getAllChildren((N) this);
 	}
 
 }

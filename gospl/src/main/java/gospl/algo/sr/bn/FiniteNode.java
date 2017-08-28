@@ -1,13 +1,15 @@
 package gospl.algo.sr.bn;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode<N> {
 
 	protected List<String> domain = new LinkedList<>();
+	protected Map<Object,Integer> domain2index = new HashMap<>(30);
 	
 	public FiniteNode(BayesianNetwork<N> net, String name) {
 		super(net, name);
@@ -18,7 +20,8 @@ public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode
 	 * (internal) Adds a value into the domain of the categorical variable with no verification. 
 	 * @param vv
 	 */
-	private void _addDomain(String vv) {
+	private final void _addDomain(String vv) {
+		domain2index.put(vv, domain.size());
 		domain.add(vv);
 	}
 	
@@ -27,8 +30,8 @@ public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode
 	 * and adapts the internal size for the content (thus loosing any data there before)
 	 * @param vv
 	 */
-	public void addDomain(String vv) {
-		if (domain.contains(vv)) {
+	public final void addDomain(String vv) {
+		if (domain2index.containsKey(vv)) {
 			throw new IllegalArgumentException(vv+" is already part of the domain");
 		}
 		this._addDomain(vv);
@@ -39,7 +42,7 @@ public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode
 	 * Adds several values in the domain and adapts internal storage .
 	 * @param vvs
 	 */
-	public void addDomain(String ... vvs) {
+	public final void addDomain(String ... vvs) {
 		
 		// check params
 		for (String vv : vvs) {
@@ -59,19 +62,25 @@ public abstract class FiniteNode<N extends AbstractNode<N>> extends AbstractNode
 
 	protected abstract void adaptContentSize();
 	
-	public Collection<String> getDomain() {
+	public final List<String> getDomain() {
 		return Collections.unmodifiableList(domain);
 	}
 	
-	public String getValueIndexed(int v) {
+	public final String getValueIndexed(int v) {
 		return domain.get(v);
 	}
 	
-	public int getDomainIndex(String value) {
-		return domain.indexOf(value);
+	public final int getDomainIndex(String value) {
+		try {
+			return domain2index.get(value);
+		} catch (NullPointerException e) {
+			if (!domain2index.containsKey(value))
+				throw new IllegalArgumentException("there is no value "+value+" in variable "+this);
+			throw e;
+		}
 	}
 
-	public int getDomainSize() {
+	public final int getDomainSize() {
 		return domain.size();
 	}
 	

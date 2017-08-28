@@ -1,63 +1,98 @@
 package gospl.io;
 
+import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Paths;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
 
-class CsvInputHandler implements IGSSurvey {
-	
+public class CsvInputHandler extends AbstractInputHandler {
+
+	/**
+	 * The list of the separators which might be detected automatically.
+	 */
+	private static final char[] CSV_SEPARATORS_FROM_DETECTION = new char[] {',',';',':','|',' '};
+
 	private List<String[]> dataTable;
 	
 	private int firstRowDataIndex;
 	private int firstColumnDataIndex;
-	private GSSurveyType dataFileType;
-
-	private String surveyFileName;
-	private String surveyFilePath;
 	
+	private String charset;
+
 	protected CsvInputHandler(String fileName, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
-		CSVReader reader = new CSVReader(new FileReader(fileName), csvSeparator);
+		
+		this(fileName, Charset.defaultCharset().name(), csvSeparator, 
+				firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+	
+	protected CsvInputHandler(String fileName, String charset, char csvSeparator, int firstRowDataIndex, 
+			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
+		super(dataFileType, fileName);
+		
+		this.charset = charset;
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
 		dataTable = reader.readAll();
-		this.surveyFileName = Paths.get(fileName).getFileName().toString();
-		this.surveyFilePath = Paths.get(fileName).toAbsolutePath().toString();
+		
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
 		reader.close();
 	}
 	
 	protected CsvInputHandler(File file, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
-		CSVReader reader = new CSVReader(new FileReader(file), csvSeparator);
+		this(file, Charset.defaultCharset().name(), csvSeparator, firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+	
+	protected CsvInputHandler(File file, String charset, char csvSeparator, int firstRowDataIndex, 
+			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
+		
+		super(dataFileType, file);
+		
+		this.charset = charset;
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
 		dataTable = reader.readAll();
-		surveyFileName = file.getName();
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
 		reader.close();
+		
 	}
 
+
 	protected CsvInputHandler(String fileName, InputStream surveyIS, char csvSeparator, 
+			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException { 
+		this(fileName, Charset.defaultCharset().name(), surveyIS, csvSeparator, 
+				firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+
+	protected CsvInputHandler(String fileName, String charset, InputStream surveyIS, char csvSeparator, 
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException {
-		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS), csvSeparator);
+		super(dataFileType, fileName);
+
+		this.charset = charset;
+		
+		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS, this.charset), csvSeparator);
 		dataTable = reader.readAll();
-		surveyFileName = fileName;
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		this.dataFileType = dataFileType;
 		reader.close();
 	}
 
@@ -155,21 +190,6 @@ class CsvInputHandler implements IGSSurvey {
 	}
 	
 	@Override
-	public String getSurveyFilePath() {
-		return surveyFilePath;
-	}
-
-	@Override
-	public void setSurveyFilePath(String surveyFilePath) {
-		this.surveyFilePath = surveyFilePath;
-	}
-	
-	@Override
-	public GSSurveyType getDataFileType() {
-		return dataFileType;
-	}
-
-	@Override
 	public int getFirstRowIndex() {
 		return firstRowDataIndex;
 	}
@@ -200,5 +220,114 @@ class CsvInputHandler implements IGSSurvey {
 		s+="\tcolumn number: "+dataTable.get(0).length;
 		return s;
 	}
+	
+
+	/**
+	 * From a given CSV file, tries to detect a plausible separator. 
+	 * Will take the one which is used in most lines with the lowest variance.
+	 * 
+	 * @param f
+	 * @return
+	 * @throws IOException
+	 */
+	public static char detectSeparator(File f) throws IOException {
+		return detectSeparator(f, Charset.defaultCharset().name(), CSV_SEPARATORS_FROM_DETECTION);
+	}
+	
+	/**
+	 * From a given CSV file, tries to detect a plausible separator. 
+	 * Will take the one which is used in most lines with the lowest variance.
+	 * 
+	 * @param f
+	 * @return
+	 * @throws IOException
+	 */
+	public static char detectSeparator(File f, String charset) throws IOException {
+		return detectSeparator(f, charset, CSV_SEPARATORS_FROM_DETECTION);
+	}
+		
+	/**
+	 * From a given CSV file, tries to detect a plausible separator. 
+	 * Will take the one which is used in most lines with the lowest variance.
+	 * 
+	 * @param f
+	 * @param candidates
+	 * @return
+	 * @throws IOException
+	 */
+	public static char detectSeparator(File f, String charset, char[] candidates) throws IOException {
+		
+		int countLines = 20;
+		
+		// read the first n lines
+		BufferedReader bf = new BufferedReader(new InputStreamReader(new FileInputStream(f), charset));
+		List<String> firstLines = new ArrayList<>(countLines);
+		while (bf.ready()) {
+			firstLines.add(bf.readLine());
+		}
+		// close the file
+		bf.close();
+			
+		countLines = firstLines.size();
+		
+		if (countLines < 3)
+			throw new IllegalArgumentException("cannot detect automatically the CSV separators from so few lines, sorry");
+
+		// we will count the number of occurences of each char in each line
+		int[][] counts = new int[countLines][candidates.length]; // automatically init to 0
+	
+		for (int iline=0; iline<countLines; iline++) {
+			for (int i=0; i<candidates.length; i++) {
+				counts[iline][i] = StringUtils.countMatches(firstLines.get(iline), ""+candidates[i]);
+			}
+		}
+		
+		// so at the end we now how many instances of each separator were found
+		double[] averageOccurences = new double[candidates.length];
+		double[] variance = new double[candidates.length];
+		for (int i=0; i<candidates.length; i++) {
+			
+			// what is the average of this column?
+			for (int iline=0; iline<countLines; iline++) {
+				averageOccurences[i] += counts[iline][i];
+			}
+			averageOccurences[i] = averageOccurences[i]/countLines;
+			
+			// and so, was is its variance ?
+			for (int iline=0; iline<countLines; iline++) {
+				variance[i] += Math.pow(counts[iline][i] - averageOccurences[i], 2);
+			}
+			variance[i] = variance[i]/countLines;
+			
+		}
+		
+		String msg = "";
+		for (int i=0; i<candidates.length; i++) {
+			msg += candidates[i]+": "+averageOccurences[i]+" ~ "+variance[i]+" \n";
+		}
+		System.out.println(msg);
+		
+		// now select the ones which might be relevant, that is the ones with more than one occurence per line
+		List<Integer> relevant = new LinkedList<>();
+		for (int i=0; i<candidates.length; i++) {
+			if (averageOccurences[i]>=1)
+				relevant.add(i);
+		}
+		
+		// and select the one with the lowest variance
+		Collections.sort(relevant, new Comparator<Integer>() {
+
+			@Override
+			public int compare(Integer o1, Integer o2) {
+				return Double.compare(variance[o1], variance[o2]);
+			}
+			
+		});
+		
+		System.out.println("order of merit: "+relevant);
+		return candidates[relevant.get(0)];
+		
+	}
+
 
 }

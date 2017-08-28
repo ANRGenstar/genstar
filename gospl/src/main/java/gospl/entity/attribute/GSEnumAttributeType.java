@@ -9,6 +9,9 @@ public enum GSEnumAttributeType {
 	record;
 	
 	public String getDefaultStringValue(GSEnumDataType dataType){
+		if (dataType == null)
+			return "";
+		
 		String def = "";
 		switch (this) {
 		case unique:

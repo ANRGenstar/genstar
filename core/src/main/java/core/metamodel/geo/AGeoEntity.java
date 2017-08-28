@@ -36,6 +36,11 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 		values.put(attribute, value);
 	}
 	
+
+	@Override
+	public boolean hasAttribute(AGeoAttribute a) {
+		return values.containsKey(a);
+	}
 	
 	/**
 	 * The value associated with this attribute. 

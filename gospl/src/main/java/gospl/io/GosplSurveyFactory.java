@@ -20,6 +20,7 @@ import java.text.DecimalFormatSymbols;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,6 +41,7 @@ import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;
 import core.util.GSPerformanceUtil;
+import core.util.data.GSEnumDataType;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.io.exception.InvalidSurveyFormatException;
@@ -55,25 +57,42 @@ public class GosplSurveyFactory {
 	@SuppressWarnings("unused")
 	private double precision = Math.pow(10, -2);
 
-	private DecimalFormatSymbols dfs;
-	private DecimalFormat decimalFormat;
+	private final DecimalFormatSymbols dfs;
+	private final DecimalFormat decimalFormat;
 
-	private char separator = GSSurveyWrapper.DEFAULT_SEPARATOR;
-	private int sheetNb = GSSurveyWrapper.DEFAULT_SHEET_NB;
-	private int firstRowDataIdx = GSSurveyWrapper.FIRST_ROW_DATA;
-	private int firstColumnDataIdx = GSSurveyWrapper.FIRST_COLUMN_DATA;
+	private final char separator;
+	private final int sheetNb;
+	private final int firstRowDataIdx;
+	private final int firstColumnDataIdx;
 
-	private static final String CSV_EXT = ".csv";
-	private static final String XLS_EXT = ".xls";
-	private static final String XLSX_EXT = ".xlsx";
+	public static final String CSV_EXT 	= ".csv";
+	public static final String XLS_EXT 	= ".xls";
+	public static final String XLSX_EXT = ".xlsx";
+	public static final String DBF_EXT 	= ".dbf";
 
-	private final List<String> supportedFileFormat;
+
+	/**
+	 * The list of supported file formats (provided as extensions)
+	 */
+	public static final List<String> supportedFileFormat = Collections.unmodifiableList(Arrays.asList(
+			CSV_EXT, 
+			XLS_EXT, 
+			XLSX_EXT,
+			DBF_EXT
+			));
 
 	public GosplSurveyFactory() {
-		this.dfs = new DecimalFormatSymbols(Locale.FRANCE);
+		
+		this(
+				GSSurveyWrapper.DEFAULT_SHEET_NB, 
+				GSSurveyWrapper.DEFAULT_SEPARATOR, 
+				GSSurveyWrapper.FIRST_ROW_DATA,
+				GSSurveyWrapper.FIRST_COLUMN_DATA,
+				new DecimalFormatSymbols(Locale.FRANCE),
+				new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.FRANCE))
+				);
+		
 		this.dfs.setDecimalSeparator('.');
-		this.decimalFormat = new DecimalFormat("#.##", dfs);
-		supportedFileFormat = Arrays.asList(CSV_EXT, XLS_EXT, XLSX_EXT);
 	}
 
 	/**
@@ -86,7 +105,61 @@ public class GosplSurveyFactory {
 	 */
 	public GosplSurveyFactory(final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex) {
-		this();
+		
+		this(
+				sheetNn, 
+				csvSeparator, 
+				firstRowDataIndex,
+				firstColumnDataIndex,
+				new DecimalFormatSymbols(Locale.FRANCE),
+				new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.FRANCE))
+				);
+	}
+	
+
+	/**
+	 * Replace default factory value by explicit ones
+	 * 
+	 * @param sheetNn
+	 * @param csvSeparator
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param locale
+	 */
+	public GosplSurveyFactory(final int sheetNn, final char csvSeparator,
+			int firstRowDataIndex, int firstColumnDataIndex, Locale locale) {
+		
+		this(
+				sheetNn, 
+				csvSeparator, 
+				firstRowDataIndex,
+				firstColumnDataIndex,
+				new DecimalFormatSymbols(locale),
+				new DecimalFormat("#.##", new DecimalFormatSymbols(locale))
+				);
+	}
+	
+	/**
+	 * Replace default factory value by explicit ones
+	 * 
+	 *
+	 * @param sheetNn
+	 * @param csvSeparator
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param decimalFormatSymbols
+	 * @param decimalFormat
+	 */
+	public GosplSurveyFactory(
+			final int sheetNn, 
+			final char csvSeparator,
+			int firstRowDataIndex, 
+			int firstColumnDataIndex, 
+			DecimalFormatSymbols decimalFormatSymbols, 
+			DecimalFormat decimalFormat) {
+		
+		this.dfs = decimalFormatSymbols;
+		this.decimalFormat = decimalFormat;
 		this.sheetNb = sheetNn;
 		this.separator = csvSeparator;
 		this.firstRowDataIdx = firstRowDataIndex;
@@ -153,6 +226,7 @@ public class GosplSurveyFactory {
 	public IGSSurvey getSurvey(final String filepath, final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException {
+		
 		if (filepath.endsWith(XLSX_EXT))
 			return new XlsxInputHandler(filepath, sheetNn, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
@@ -162,6 +236,44 @@ public class GosplSurveyFactory {
 		if (filepath.endsWith(CSV_EXT))
 			return new CsvInputHandler(filepath, csvSeparator, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
+		if (filepath.endsWith(DBF_EXT))
+			return new DBaseInputHandler(dataFileType, filepath);
+		
+		final String[] pathArray = filepath.split(File.separator);
+		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
+	}
+	
+	/**
+	 * 
+	 * @param filepath
+	 * @param sheetNn
+	 * @param csvSeparator
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param dataFileType
+	 * @param processAsFormat one of the formats supportedFileFormat 
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
+	 * @throws InvalidFormatException
+	 */
+	public IGSSurvey getSurvey(final String filepath, final int sheetNn, final char csvSeparator,
+			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType, 
+			String processAsFormat) 
+					throws IOException, InvalidSurveyFormatException, InvalidFormatException {
+		
+		if (processAsFormat.equals(XLSX_EXT))
+			return new XlsxInputHandler(filepath, sheetNn, firstRowDataIndex, 
+					firstColumnDataIndex, dataFileType);
+		if (processAsFormat.equals(XLS_EXT))
+			return new XlsInputHandler(filepath, sheetNn, firstRowDataIndex, 
+					firstColumnDataIndex, dataFileType);
+		if (processAsFormat.equals(CSV_EXT))
+			return new CsvInputHandler(filepath, csvSeparator, firstRowDataIndex, 
+					firstColumnDataIndex, dataFileType);
+		if (processAsFormat.equals(DBF_EXT))
+			return new DBaseInputHandler(dataFileType, filepath);
+		
 		final String[] pathArray = filepath.split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}
@@ -207,6 +319,8 @@ public class GosplSurveyFactory {
 		if (file.getName().endsWith(CSV_EXT))
 			return new CsvInputHandler(file, csvSeparator, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
+		if (file.getName().endsWith(DBF_EXT))
+			return new DBaseInputHandler(dataFileType, file);
 		final String[] pathArray = file.getPath().split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}
@@ -254,9 +368,11 @@ public class GosplSurveyFactory {
 		if (fileName.endsWith(CSV_EXT))
 			return new CsvInputHandler(fileName, surveyIS, csvSeparator,
 					firstRowDataIndex, firstColumnDataIndex, dataFileType);
+		if (fileName.endsWith(DBF_EXT))
+			throw new IllegalArgumentException("Cannot read format "+DBF_EXT+" from a, input stream, sorry");
 		throw new InvalidSurveyFormatException(fileName, supportedFileFormat);
 	}
-
+	
 	/**
 	 * TODO: javadoc
 	 * 
@@ -270,8 +386,7 @@ public class GosplSurveyFactory {
 	 */
 	public IGSSurvey getSurvey(final String fileName, final InputStream surveyIS, GSSurveyType dataFileType) 
 			throws IOException, InvalidFormatException, InvalidSurveyFormatException {
-		return this.getSurvey(fileName, surveyIS, sheetNb, separator, 
-				firstRowDataIdx, firstColumnDataIdx, dataFileType);
+		return this.getSurvey(fileName, surveyIS, sheetNb, separator, firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
 
 	// ----------------------------------------------------------------------- //
@@ -402,24 +517,30 @@ public class GosplSurveyFactory {
 
 	private IGSSurvey createTableSummary(File surveyFile, GSSurveyType surveyType,
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) throws IOException, InvalidFormatException, InvalidSurveyFormatException {
+		
 		Set<APopulationAttribute> attributes = population.getPopulationAttributes();
+		
 		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
 				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
 		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValues().size()+1).max().getAsInt())
 				.mapToObj(i -> "").collect(Collectors.toList());
 
-		Map<APopulationValue, Integer> mapReport = attributes.stream().flatMap(att -> 
-		Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue()))
-		.collect(Collectors.toSet()).stream())
-				.collect(Collectors.toMap(Function.identity(), value -> 0)); 
+		Map<APopulationValue, Integer> mapReport = attributes.stream()
+				.flatMap(att -> Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue()))
+				.collect(Collectors.toSet()).stream())
+				.collect(Collectors.toMap(Function.identity(), value -> 0));
+		
 		population.stream().forEach(entity -> entity.getValues()
 				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));
 
 		for(APopulationAttribute attribute : attributes){
+			
 			int lineNumber = 0;
+			
 			Set<APopulationValue> attValues = Stream.concat(attribute.getValues().stream(), 
 					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
-			for(APopulationValue value : attValues){
+			
+			for(APopulationValue value : attValues) {
 				String val = "";
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
 					val = String.valueOf(mapReport.get(value));
@@ -429,9 +550,12 @@ public class GosplSurveyFactory {
 						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
 						value.getStringValue() + separator + val);
 			}
+			
 			for(int i = lineNumber; i < lines.size(); i++)
-				lines.set(i, lines.get(i)
-						.concat(lines.get(i).isEmpty() ? "" : separator + "") + separator + "");
+				lines.set(
+						i, 
+						lines.get(i).concat(lines.get(i).isEmpty() ? "" : separator + "") + separator + ""
+						);
 		}
 
 		report += String.join("\n", lines);
@@ -453,6 +577,7 @@ public class GosplSurveyFactory {
 	private IGSSurvey createSample(File surveyFile, 
 			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
+		
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
@@ -465,14 +590,26 @@ public class GosplSurveyFactory {
 			for (final APopulationAttribute attribute : attributes) {
 				bw.write(separator);
 				try {
-					bw.write(e.getValueForAttribute(attribute).getStringValue());
+		
+					APopulationValue val = e.getValueForAttribute(attribute); 
+					String v = val.getStringValue();
+					
+					
+					if (attribute.getDataType() == GSEnumDataType.String) {
+						bw.write("\"");
+						bw.write(v);
+						bw.write("\"");
+					} else {
+						bw.write(v);
+					}
+					
 				} catch (NullPointerException e2) {
-					bw.write("???");
+					bw.write("\"?\"");
 				}
 			}
 			bw.write("\n");
 		}
-		bw.flush();
+		bw.close();
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}
 

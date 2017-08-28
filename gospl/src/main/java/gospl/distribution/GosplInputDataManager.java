@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -34,7 +33,6 @@ import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarXmlSerializer;
 import core.metamodel.IEntity;
 import core.metamodel.IPopulation;
-import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.APopulationEntity;
 import core.metamodel.pop.APopulationValue;
@@ -70,7 +68,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
  */
 public class GosplInputDataManager {
 
-	private Logger logger = LogManager.getLogger();
+	private static Logger logger = LogManager.getLogger();
 	
 	private final double EPSILON = Math.pow(10d, -3);
 
@@ -220,26 +218,30 @@ public class GosplInputDataManager {
 	 */
 	private Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
 			final Set<APopulationAttribute> attributes) throws IOException, InvalidSurveyFormatException {
+		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		
 		// Read headers and store possible variables by line index
-		final Map<Integer, Set<APopulationValue>> rowHeaders = getRowHeaders(survey, attributes);
+		final Map<Integer, Set<APopulationValue>> rowHeaders = survey.getRowHeaders(attributes);
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<APopulationValue>> columnHeaders = getColumnHeaders(survey, attributes);
+		final Map<Integer, Set<APopulationValue>> columnHeaders = survey.getColumnHeaders(attributes);
 
 		// Store column related attributes while keeping unrelated attributes separated
 		final Set<Set<APopulationAttribute>> columnSchemas = columnHeaders.values().stream()
 				.map(head -> head.stream().map(v -> v.getAttribute()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
+		
 		// Remove lower generality schema: e.g. if we have scheam [A,B] then [A] or [B] will be skiped
 		columnSchemas.removeAll(columnSchemas.stream().filter(schema -> 
 			columnSchemas.stream().anyMatch(higherSchema -> schema.stream()
 					.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
 				.collect(Collectors.toSet()));
+		
 		// Store line related attributes while keeping unrelated attributes separated
 		final Set<Set<APopulationAttribute>> rowSchemas = rowHeaders.values().stream()
 				.map(line -> line.stream().map(v -> v.getAttribute()).collect(Collectors.toSet()))
 				.collect(Collectors.toSet());
+		
 		rowSchemas.removeAll(rowSchemas.stream().filter(schema -> 
 			rowSchemas.stream().anyMatch(higherSchema -> schema.stream()
 				.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
@@ -296,6 +298,7 @@ public class GosplInputDataManager {
 	 */
 	private AFullNDimensionalMatrix<Double> getFrequency(final AFullNDimensionalMatrix<? extends Number> matrix)
 			throws IllegalControlTotalException {
+		
 		// returned matrix
 		AFullNDimensionalMatrix<Double> freqMatrix = null;
 		
@@ -323,6 +326,7 @@ public class GosplInputDataManager {
 									- (int) jd1.getDimensions().stream().filter(d -> matrix.getDimensions().contains(d))
 											.count())
 					.findFirst();
+			
 			if (optionalRef.isPresent()) {
 				freqMatrix = new GosplJointDistribution(
 						matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValues())),
@@ -373,43 +377,75 @@ public class GosplInputDataManager {
 		return freqMatrix;
 	}
 
-	/*
-	 * TODO: describre
+	/**
+	 * Based on a survey wrapping data, and for a given set of expected attributes, 
+	 * creates a GoSPl population.
 	 */
-	private GosplPopulation getSample(final IGSSurvey survey, 
+	public static GosplPopulation getSample(final IGSSurvey survey, 
 			final Set<APopulationAttribute> attributes)
 			throws IOException, InvalidSurveyFormatException {
+		return getSample(survey, attributes, null, Collections.emptyMap());
+	}
+	
+	/**
+	 * Based on a survey wrapping data, and for a given set of expected attributes, 
+	 * creates a GoSPl population.
+	 */
+	public static GosplPopulation getSample(final IGSSurvey survey, 
+			final Set<APopulationAttribute> attributes, 
+			Integer maxIndividuals,
+			Map<String,String> keepOnlyEqual
+			)
+			throws IOException, InvalidSurveyFormatException {
+		
 		final GosplPopulation sampleSet = new GosplPopulation();
 		
 		// Read headers and store possible variables by column index
-		final Map<Integer, APopulationAttribute> columnHeaders = getColumnSample(survey, attributes);
+		final Map<Integer, APopulationAttribute> columnHeaders = survey.getColumnSample(attributes);
 
 		if (columnHeaders.isEmpty()) 
-			throw new RuntimeException("no column header was found in survey "+survey);
+			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
 		
 		int unmatchSize = 0;
 		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
 		
-		for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+			
+			// too much ?
+			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
+				break;
+			
 			final Map<APopulationAttribute, APopulationValue> entityAttributes = new HashMap<>();
 			final List<String> indiVals = survey.readLine(i);
+			//System.err.println(i+" "+indiVals);
+
 			if(indiVals.size() <= maxIndivSize){
-				logger.trace("One individual does not fit required number of attributes: \n"
+				logger.warn("One individual does not fit required number of attributes: \n"
 						+ Arrays.toString(indiVals.toArray()));
 						
 				unmatchSize++;
 				continue;
 			}
 			for (final Integer idx : columnHeaders.keySet()){
-				Optional<APopulationValue> opVal = columnHeaders.get(idx).getValues()
-						.stream().filter(val -> val.getInputStringValue().equals(indiVals.get(idx))).findAny();
-				if(opVal.isPresent())
-					entityAttributes.put(columnHeaders.get(idx), opVal.get());
-				else if(columnHeaders.get(idx).getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
-					entityAttributes.put(columnHeaders.get(idx), columnHeaders.get(idx).getEmptyValue());
-				else{
-					logger.trace("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
-							+columnHeaders.get(idx).getAttributeName());
+				
+				APopulationAttribute att = columnHeaders.get(idx);
+				APopulationValue val = att.getValue(indiVals.get(idx));
+				
+				// filter
+				if (val != null) {
+					String expected = keepOnlyEqual.get(att.getAttributeName());
+					if (expected != null && !val.getStringValue().equals(expected))
+						// skip
+						continue loopLines;
+				}
+				
+				if (val!=null)
+					entityAttributes.put(att, val);
+				else if (att.getEmptyValue().getInputStringValue().equals(indiVals.get(idx)))
+					entityAttributes.put(att, att.getEmptyValue());
+				else {
+					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+							+att.getAttributeName());
 					unmatchSize++;
 				}
 			}
@@ -458,121 +494,5 @@ public class GosplInputDataManager {
 		return freqMatrix;
 	}
 
-	///////////////////////////////////////////////////////////////////////
-	// -------------------------- back office -------------------------- //
-	///////////////////////////////////////////////////////////////////////
-
-	private Map<Integer, Set<APopulationValue>> getRowHeaders(
-			final IGSSurvey survey, final Set<APopulationAttribute> attributes) {
-		final List<Integer> attributeIdx = new ArrayList<>();
-		for (int line = 0; line < survey.getFirstRowIndex(); line++) {
-			final List<String> sLine = survey.readLine(line);
-			for (int idx = 0; idx < survey.getFirstColumnIndex(); idx++) {
-				final String headAtt = sLine.get(idx);
-				if (attributes.stream().map(att -> att.getAttributeName())
-						.anyMatch(attName -> attName.equals(headAtt)))
-					attributeIdx.add(idx);
-				if (headAtt.isEmpty()) {
-					final List<String> valList = survey.readColumn(idx);
-					if (attributes.stream().anyMatch(att -> att.getValues().stream()
-							.allMatch(val -> valList.contains(val.getInputStringValue()))))
-						attributeIdx.add(idx);
-				}
-			}
-		}
-
-		final Map<Integer, Set<APopulationValue>> rowHeaders = new HashMap<>();
-		for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
-			final List<String> rawLine = survey.readColumns(0, survey.getFirstColumnIndex(), i);
-			final List<String> line = attributeIdx.stream().map(idx -> rawLine.get(idx)).collect(Collectors.toList());
-			for (int j = 0; j < line.size(); j++) {
-				final String lineVal = line.get(j);
-				final Set<APopulationValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
-						.filter(asp -> asp.getInputStringValue().equals(lineVal)).collect(Collectors.toSet());
-				if (vals.isEmpty())
-					continue;
-				if (vals.size() > 1) {
-					final Set<APopulationAttribute> inferedHeads = new HashSet<>();
-					final List<String> headList = survey.readLines(0, survey.getFirstRowIndex(), j);
-					if (headList.stream().allMatch(s -> s.isEmpty())) {
-						for (final List<String> column : survey.readColumns(0, survey.getFirstColumnIndex()))
-							inferedHeads.addAll(attributes.stream()
-									.filter(a -> a.getValues().stream()
-											.allMatch(av -> column.contains(av.getInputStringValue())))
-									.collect(Collectors.toSet()));
-					} else {
-						inferedHeads.addAll(headList.stream()
-								.flatMap(s -> attributes.stream().filter(a -> a.getAttributeName().equals(s)))
-								.collect(Collectors.toSet()));
-					}
-					final Set<APopulationValue> vals2 = new HashSet<>(vals);
-					for (final IValue val : vals2)
-						if (!inferedHeads.contains(val.getAttribute()))
-							vals.remove(val);
-				}
-				if (rowHeaders.containsKey(i))
-					rowHeaders.get(i).addAll(vals);
-				else
-					rowHeaders.put(i, new HashSet<>(vals));
-			}
-		}
-		return rowHeaders;
-	}
-
-	private Map<Integer, Set<APopulationValue>> getColumnHeaders(
-			final IGSSurvey survey, final Set<APopulationAttribute> attributes) {
-		final Map<Integer, Set<APopulationValue>> columnHeaders = new HashMap<>();
-		for (int i = survey.getFirstColumnIndex(); i <= survey.getLastColumnIndex(); i++) {
-			final List<String> column = survey.readLines(0, survey.getFirstRowIndex(), i);
-			for (String columnVal : column) {
-				Set<APopulationValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
-						.filter(asp -> asp.getInputStringValue().equals(columnVal)).collect(Collectors.toSet());
-				if (vals.isEmpty())
-					continue;
-				if (vals.size() > 1) {
-					final Set<APopulationValue> vals2 = new HashSet<>(vals);
-					vals = column.stream()
-							.flatMap(s -> attributes.stream().filter(att -> att.getAttributeName().equals(s)))
-							.flatMap(att -> vals2.stream().filter(v -> v.getAttribute().equals(att)))
-							.collect(Collectors.toSet());
-				}
-				if (columnHeaders.containsKey(i))
-					columnHeaders.get(i).addAll(vals);
-				else
-					columnHeaders.put(i, new HashSet<>(vals));
-			}
-		}
-		return columnHeaders;
-	}
-	
-	/*
-	 * Retrieves column headers from sample data file
-	 */
-	private Map<Integer, APopulationAttribute> getColumnSample(
-			final IGSSurvey survey, final Set<APopulationAttribute> attributes){
-		Map<Integer, APopulationAttribute> columnHeaders = new HashMap<>();
-		for(int i = survey.getFirstColumnIndex(); i <= survey.getLastColumnIndex(); i++){
-			List<String> columnAtt = survey.readLines(0, survey.getFirstRowIndex(), i);
-			Set<APopulationAttribute> attSet = attributes.stream()
-					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
-					.collect(Collectors.toSet());
-			if(attSet.isEmpty())
-				continue;
-			if(attSet.size() > 1){
-				int row = survey.getFirstRowIndex();
-				Optional<APopulationAttribute> opAtt = null;
-				do {
-					String value = survey.read(row++, i);
-					opAtt = attSet.stream().filter(att -> att.getValues()
-							.stream().anyMatch(val -> val.getInputStringValue().equals(value)))
-							.findAny();
-				} while (opAtt.isPresent());
-				columnHeaders.put(i, opAtt.get());
-			} else {
-				columnHeaders.put(i, attSet.iterator().next());
-			}
-		}
-		return columnHeaders;
-	}
 
 }

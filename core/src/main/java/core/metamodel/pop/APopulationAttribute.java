@@ -2,6 +2,7 @@ package core.metamodel.pop;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,11 +35,18 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 
 	private APopulationAttribute referentAttribute;
 	private String name;
-	private GSEnumDataType dataType;
+	protected GSEnumDataType dataType;
 
-	private Set<APopulationValue> values = new HashSet<>();
-	private APopulationValue emptyValue;
-
+	protected Set<APopulationValue> values = new HashSet<>();
+	protected APopulationValue emptyValue;
+	private String description = null;
+	
+	/**
+	 * Maps each input string with its population value. 
+	 * Can be null if this cache is not built yet. 
+	 */
+	protected Map<String,APopulationValue> inputString2value = null;
+	
 	public APopulationAttribute(String name, GSEnumDataType dataType, APopulationAttribute referentAttribute) {
 		this.name = name;
 		this.dataType = dataType;
@@ -51,16 +59,39 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 		this.dataType = dataType;
 		this.referentAttribute = this;
 	}
+	
+	/**
+	 * to be called by anyone knowing the content of this attribute changed. 
+	 */
+	public void resetCache() {
+		inputString2value = null;
+	}
+
+	protected Map<String,APopulationValue> getInputString2value() {
+		if (inputString2value == null) {
+			inputString2value = values.stream().collect(Collectors.toMap(v->v.getInputStringValue().trim(), v->v));
+		}
+		return inputString2value;
+	}
+	
+	
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
 
 	@Override
-	public String getAttributeName() {
+	public final String getAttributeName() {
 		return name;
 	}
 
-	public GSEnumDataType getDataType() {
+	public final GSEnumDataType getDataType() {
 		return dataType;
 	}
-
+	
 	/**
 	 * The {@link IAttribute} this attribute target: should be itself, but could indicate disaggregated linked {@link IAttribute} or record linked one
 	 * 
@@ -177,7 +208,7 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 		int result = 1;
 		result = prime * result + ((dataType == null) ? 0 : dataType.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
-		result = prime * result + ((values == null) ? 0 : values.size());
+		//result = prime * result + ((values == null) ? 0 : values.size());
 		return result;
 	}
 
@@ -200,42 +231,38 @@ public abstract class APopulationAttribute implements IAttribute<APopulationValu
 				return false;
 		} else if (!name.equals(other.name))
 			return false;
-		if (values == null) {
+		
+		/*if (values == null) {
 			if (other.values != null)
 				return false;
 		} else if (values.size() != other.values.size())
 			return false;
+			*/
 		return true;
 	}
 	
 	@Override
 	public APopulationValue getValue(String name) {
 		
-		// manual and slow lookup. 
-		// we assume querying by name is for manual usage only, that is a rare case. 
+		APopulationValue res = getInputString2value().get(name);
 		
-		for (APopulationValue v: values) {
-			if (v.getStringValue().equals(name))
-				return v;
-		}
-		
-		throw new IllegalArgumentException(
-				"unknown value "+name+
+		if (res == null)
+			throw new IllegalArgumentException(
+				"unknown value "+name+" for attribute "+this.name+
 				"; possible values are "+
-				values
+				getInputString2value()
 			);
+		
+		return res;
 	}
 	
 
 	@Override
 	public boolean hasValue(String name) {
 		
-		for (APopulationValue v: values) {
-			if (v.getStringValue().equals(name))
-				return true;
-		}
+		return getInputString2value().containsKey(name);
 		
-		return false;
 	}
+
 
 }
