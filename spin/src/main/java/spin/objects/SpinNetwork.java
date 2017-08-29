@@ -172,7 +172,7 @@ public class SpinNetwork implements INetProperties{
 		// Adding the right number of nodes to the sample graph
 		while(nbNodes>0) {
 			// Check if the program is stuck and change the starting point if necessary
-			if(nbSteps>5*nodes.size()) {
+			if(nbSteps>10*nodes.size()) {
 				//System.out.println("Reset");
 				// Clear sampleGraph, sampleNodes and the maps
 				sampleGraph.clear();
@@ -200,7 +200,11 @@ public class SpinNetwork implements INetProperties{
 				sampleNodeId++;
 				nbNodes = sampleSize-1;
 				currentNode = start;
-				weights.replace(currentNode, weights.get(currentNode)/2);
+				if(currentNode.getDegree()==1) {
+					weights.replace(currentNode, 0.0);
+				} else {
+					weights.replace(currentNode, weights.get(currentNode)/2);
+				}
 				nbSteps = 0;
 			}
 			
@@ -238,10 +242,12 @@ public class SpinNetwork implements INetProperties{
 		int sampleLinkId = network.getEdgeCount();
 		for(Node n1 : sampleGraph.getEachNode()) {
 			Node N1 = network.getNode(sampleToOriginalMap.get(n1.getId()));
-			for(Node n2 : sampleGraph.getEachNode()) {
-				if(!n2.equals(n1)) {
-					Node N2 = network.getNode(sampleToOriginalMap.get(n2.getId()));
-					if(N1.hasEdgeBetween(N2) && !n1.hasEdgeBetween(n2)) {
+			int d = N1.getDegree();
+			for(int i=0 ; i<d ; i++) {
+				Node N2 = N1.getEdge(i).getOpposite(N1);
+				if(originalToSampleMap.containsKey(N2.getId())) {
+					Node n2 = sampleGraph.getNode(originalToSampleMap.get(N2.getId()));
+					if(!n2.hasEdgeBetween(n1)) {
 						sampleGraph.addEdge(String.valueOf(sampleLinkId), n1, n2);
 						sampleLinkId++;
 					}
