@@ -11,11 +11,11 @@ import spin.objects.SpinNetwork;
 public class RandomNetworkGenerator 
 {
 
-	/** GÃ©nÃ©ration d'un spinNetwork. 
+	/** Génération d'un réseau aléatoire. 
 	 * 
-	 * @param population
-	 * @param proba
-	 * @return
+	 * @param myNetwork réseau de base
+	 * @param proba proportion du nombre maximum de lien générée
+	 * @return myNetwork réseau final
 	 */
 	public SpinNetwork generateNetwork(SpinNetwork myNetwork, double proba){
 		// TODO: check random generator 

@@ -10,11 +10,11 @@ import spin.objects.SpinNetwork;
 
 public class RegularNetworkGenerator {
 
-	/**
+	/** Génération d'un réseau régulier. 
 	 * 
-	 * @param population
-	 * @param k
-	 * @return
+	 * @param myNetwork réseau de base
+	 * @param k connectivité du réseau
+	 * @return myNetwork réseau final
 	 */
 	public SpinNetwork generateNetwork(SpinNetwork myNetwork, int k) {
 		

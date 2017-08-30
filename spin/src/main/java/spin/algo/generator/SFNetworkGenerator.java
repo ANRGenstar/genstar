@@ -11,6 +11,11 @@ import spin.objects.SpinNetwork;
 
 public class SFNetworkGenerator {
 
+	/** Génération d'un réseau ScaleFree. 
+	 * 
+	 * @param myNetwork réseau de base
+	 * @return myNetwork réseau final
+	 */
 	public SpinNetwork generateNetwork(SpinNetwork myNetwork){
 		
 		// Listing the nodes

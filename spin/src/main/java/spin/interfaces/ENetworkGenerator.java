@@ -8,5 +8,6 @@ public enum ENetworkGenerator {
 	SmallWorld,
 	ScaleFree,
 	Random,
-	Regular;
+	Regular,
+	Spatial;
 }

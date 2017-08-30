@@ -9,6 +9,7 @@ import spin.algo.generator.RandomNetworkGenerator;
 import spin.algo.generator.RegularNetworkGenerator;
 import spin.algo.generator.SFNetworkGenerator;
 import spin.algo.generator.SWNetworkGenerator;
+import spin.algo.generator.SpatialNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
 import spin.objects.SpinNetwork;
 
@@ -70,6 +71,8 @@ public class SpinNetworkFactory {
 			network = new RegularNetworkGenerator().generateNetwork(baseNetwork, 5);
 		if(typeGenerator.equals(ENetworkGenerator.ScaleFree))	
 			network = new SFNetworkGenerator().generateNetwork(baseNetwork);
+		if(typeGenerator.equals(ENetworkGenerator.Spatial))	
+			network = new SpatialNetworkGenerator().generateNetwork(baseNetwork,800,600,3);
 		
 		// Create the SpinPopulation
 		SpinPopulation spinPop = new SpinPopulation(population, network);

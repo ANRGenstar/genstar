@@ -16,12 +16,12 @@ import spin.objects.SpinNetwork;
  */
 public class SWNetworkGenerator
 {
-	/**
+	/** Génération d'un réseau SmallWorld. 
 	 * 
-	 * @param population
-	 * @param k
-	 * @param beta
-	 * @return
+	 * @param myNetwork réseau de base
+	 * @param k connectivité du réseau
+	 * @param beta probabilité qu'un lien soit reranché
+	 * @return myNetwork réseau final
 	 */
 	public SpinNetwork generateNetwork(SpinNetwork network, int k, double beta){
 		//int k connectivity of the network
