@@ -24,12 +24,16 @@ public class SpatialNetworkGenerator {
 		
 		Random rand = new Random();
 		
+		// List the nodes
 		List<Node> nodes = new ArrayList<>(myNetwork.getNodes());
 		int nbNodes = nodes.size();
 		
+		// Social reaches for the different types of nodes
 		int reach1 = 50;
 		int reach2 = 60;
 		int reach3 = 70;
+		
+		// Number of nodes for the different types of nodes
 		int nbNodes1 = 0;
 		int nbNodes2 = 0;
 		int nbNodes3 = 0;
@@ -48,6 +52,8 @@ public class SpatialNetworkGenerator {
 			System.exit(1);
 		}
 		
+		// Give each node random coordinates and a reach based on their types
+		// Uncomment the lines to display the type number of each node
 		int i=0;
 		int j=0;
 		while(i<nbNodes) {
@@ -56,7 +62,7 @@ public class SpatialNetworkGenerator {
 				n.setAttribute("x", rand.nextInt(xMax));
 				n.setAttribute("y", rand.nextInt(yMax));
 				n.addAttribute("reach", reach1);
-				n.addAttribute("ui.label", 1);
+				//n.addAttribute("ui.label", 1);
 				i++;
 				j++;
 			}
@@ -66,7 +72,7 @@ public class SpatialNetworkGenerator {
 				n.setAttribute("x", rand.nextInt(xMax));
 				n.setAttribute("y", rand.nextInt(yMax));
 				n.addAttribute("reach", reach2);
-				n.addAttribute("ui.label", 2);
+				//n.addAttribute("ui.label", 2);
 				i++;
 				j++;
 			}
@@ -76,7 +82,7 @@ public class SpatialNetworkGenerator {
 				n.setAttribute("x", rand.nextInt(xMax));
 				n.setAttribute("y", rand.nextInt(yMax));
 				n.addAttribute("reach", reach3);
-				n.addAttribute("ui.label", 3);
+				//n.addAttribute("ui.label", 3);
 				i++;
 				j++;
 			}
@@ -84,6 +90,7 @@ public class SpatialNetworkGenerator {
 		
 		ArrayList<Node> computedNodes = new ArrayList<Node>();
 		
+		// If two nodes are within each other's reach, they are linked
 		int link_id = 0;
 		for(Node n1 : nodes) {
 			int x1 = n1.getAttribute("x");
