@@ -29,7 +29,7 @@ public class TestOnGenerator {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
 		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
 		generator.generate(1000);
-/*		
+		
 		System.out.println("Debut de la generation de reseau regulier");
 		SpinPopulation populationWithNetworkRegular = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		SpinNetwork networkRegular = populationWithNetworkRegular.getNetwork();
@@ -49,9 +49,11 @@ public class TestOnGenerator {
 		SpinPopulation populationWithNetworkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.SmallWorld, population);
 		SpinNetwork networkSW = populationWithNetworkSW.getNetwork();
 		System.out.println("Fin de generation de reseau SmallWorld");
-*/		
-		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Spatial, population);
-		SpinNetwork networkTest = populationWithNetwork.getNetwork();
-		networkTest.network.display(false);
+		
+		System.out.println("Debut de la generation de reseau Spatial");
+		SpinPopulation populationWithNetworkSpatial = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Spatial, population);
+		SpinNetwork networkSpatial = populationWithNetworkSpatial.getNetwork();
+		System.out.println("Fin de generation de reseau Spatial");
+		
 	}
 }
