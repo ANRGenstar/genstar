@@ -11,14 +11,16 @@ public abstract class APopulationValue implements IValue {
 	private String inputStringValue;
 	private String mappedStringValue;
 	
-	public APopulationValue(String inputStringValue, String mappedStringValue, GSEnumDataType dataType, APopulationAttribute attribute){
+	public APopulationValue(String inputStringValue, String mappedStringValue, 
+			GSEnumDataType dataType, APopulationAttribute attribute){
 		this.inputStringValue = inputStringValue;
 		this.mappedStringValue = mappedStringValue;
 		this.dataType = dataType;
 		this.attribute = attribute;
 	}
 	
-	public APopulationValue(String inputStringValue, GSEnumDataType dataType, APopulationAttribute attribute) {
+	public APopulationValue(String inputStringValue, GSEnumDataType dataType, 
+			APopulationAttribute attribute) {
 		this(inputStringValue, inputStringValue, dataType, attribute);
 	}
 	
