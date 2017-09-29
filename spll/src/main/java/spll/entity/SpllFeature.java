@@ -6,7 +6,6 @@ import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.AGeoValue;
 

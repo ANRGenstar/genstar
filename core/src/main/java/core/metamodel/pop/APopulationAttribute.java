@@ -18,7 +18,7 @@ import core.util.data.GSEnumDataType;
  * <ul>
  * <li> <b>Name</b> = a unique and characterized name, beware it will drive data case sensitive
  * automatic reading, hence it should have exactly the same form as in data file 
- * <li> <b>Values</b> = the set of all possible values, concrete entities can get for this attribute.
+ * <li> <b>Values</b> = the set of all possible values, concrete entities can have for this attribute.
  * Apart from possible values, most attribute can have an empty value, refereed as {@code emptyValue}
  * <li> <b>Data type</b> = a {@link GSEnumDataType} that gives information on value's content type
  * <li> <b>Referent attribute</b> = an attribute this one referees to. That means values of the first are
