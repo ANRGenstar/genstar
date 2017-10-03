@@ -8,22 +8,22 @@ import com.vividsolutions.jts.geom.Point;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.pop.APopulationEntity;
 
-public class SpllPopulationEntity extends APopulationEntity {
+public class SpllEntity extends APopulationEntity {
 
 	private APopulationEntity entity;
 	
 	private Point location = null;
 	private AGeoEntity nest = null;
 
-	public SpllPopulationEntity(APopulationEntity entity) {
+	public SpllEntity(APopulationEntity entity) {
 		super(entity.getValues().stream().collect(Collectors
 				.toMap(val -> val.getAttribute(), Function.identity())));
 		this.entity = entity;
 	}
 	
 	@Override
-	public SpllPopulationEntity clone() {
-		SpllPopulationEntity spe = new SpllPopulationEntity(entity);
+	public SpllEntity clone() {
+		SpllEntity spe = new SpllEntity(entity);
 		spe.setLocation(this.location);
 		spe.setNest(this.nest);
 		return spe;

@@ -1,4 +1,6 @@
-package core.metamodel;
+package core.metamodel.value;
+
+import core.util.data.GSEnumDataType;
 
 /**
  * The values that characterise Genstar's attribute of entity
@@ -9,6 +11,13 @@ package core.metamodel;
 public interface IValue {
 	
 	/**
+	 * The type of data this value encapsulate
+	 * 
+	 * @return
+	 */
+	public GSEnumDataType getType();
+	
+	/**
 	 * The value represented as a String
 	 * 
 	 * @return
@@ -16,18 +25,11 @@ public interface IValue {
 	public String getStringValue();
 	
 	/**
-	 * The value as it has been input from the data into this object
-	 * 
-	 * @return
-	 */
-	public String getInputStringValue();
-	
-	/**
 	 * The attribute this value refers to
 	 * 
 	 * @return
 	 */
-	public IAttribute<? extends IValue> getAttribute();
+	public IValueSpace<? extends IValue> getValueSpace();
 	
 	/**
 	 * Force to overload hashcode method to ensure equals consistency

@@ -1,6 +1,6 @@
 package core.metamodel.pop;
 
-import core.metamodel.IValue;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
 public abstract class APopulationValue implements IValue {

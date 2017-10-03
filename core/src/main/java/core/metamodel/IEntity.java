@@ -2,13 +2,15 @@ package core.metamodel;
 
 import java.util.Collection;
 
+import core.metamodel.value.IValue;
+
 /**
  * An entity might represent an household, an individual, or even a geographical entity etc.
  * 
  * @author gospl-team
  *
  */
-public interface IEntity<A extends IAttribute<V>, V extends IValue> {
+public interface IEntity<A extends IAttribute, V extends IValue> {
 
 	/**
 	 * returns the list of the attributes for which the entity might have values

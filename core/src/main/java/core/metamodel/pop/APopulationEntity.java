@@ -134,35 +134,6 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 		throw new NullPointerException("Attribute "+property+" does not exist in "+this.getClass().getSimpleName());
 	}
 
-	/**
-	 * Retrieve the localtion of the agent as a point
-	 * 
-	 * @return a point of type {@link Point}
-	 */
-	public abstract Point getLocation();
-
-	/**
-	 * Retrieve the most significant enclosing geographical entity this
-	 * entity is situated. It represents 'home's entity 
-	 * 
-	 * @return
-	 */
-	public abstract AGeoEntity getNest();
-
-	/**
-	 * Change the location of the entity
-	 * 
-	 * @param location
-	 */
-	public abstract void setLocation(Point location);
-
-	/**
-	 * Change the nest of the entity
-	 * 
-	 * @param entity
-	 */
-	public abstract void setNest(AGeoEntity entity);
-
 	
 	public String toString() {
 		return attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()+":"+e.getValue().getStringValue()).collect(Collectors.joining(",\t"));

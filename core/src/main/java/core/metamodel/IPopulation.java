@@ -1,7 +1,8 @@
 package core.metamodel;
 
 import java.util.Collection;
-import java.util.Set;
+
+import core.metamodel.value.IValue;
 
 /**
  * A population is a collection of entity characterize by a set of attribute.
@@ -16,9 +17,6 @@ import java.util.Set;
  * @author gospl-team
  *
  */
-public interface IPopulation<E extends IEntity<A, V>, A extends IAttribute<V>, V extends IValue> 
-								extends Collection<E> {
-
-	public Set<A> getPopulationAttributes();
+public interface IPopulation<E extends IEntity<IAttribute, IValue>> extends Collection<E> {
 	
 }

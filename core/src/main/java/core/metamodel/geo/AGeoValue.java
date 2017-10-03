@@ -1,6 +1,6 @@
 package core.metamodel.geo;
 
-import core.metamodel.IValue;
+import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 
 /**

@@ -18,14 +18,14 @@ import spll.util.SpllUtil;
 
 public class SpllPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
 
-	private Collection<SpllPopulationEntity> population;
+	private Collection<SpllEntity> population;
 	private IGSGeofile<? extends AGeoEntity> geoFile; 
 
 	private Set<APopulationAttribute> attributes;
 	
 	public SpllPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
 			IGSGeofile<? extends AGeoEntity> geoFile) {
-		this.population = population.stream().map(entity -> new SpllPopulationEntity(entity))
+		this.population = population.stream().map(entity -> new SpllEntity(entity))
 				.collect(Collectors.toSet());
 		this.attributes = population.getPopulationAttributes();
 		this.geoFile = geoFile;
@@ -55,7 +55,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	 * 
 	 * @return
 	 */
-	public Collection<SpllPopulationEntity> getSpllPopulation(){
+	public Collection<SpllEntity> getSpllPopulation(){
 		return population;
 	}
 	
@@ -101,7 +101,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 
 	@Override
 	public boolean add(APopulationEntity e) {
-		return population.add(new SpllPopulationEntity(e));
+		return population.add(new SpllEntity(e));
 	}
 
 	@Override
@@ -116,7 +116,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 
 	@Override
 	public boolean addAll(Collection<? extends APopulationEntity> c) {
-		return population.addAll(c.stream().map(e -> new SpllPopulationEntity(e))
+		return population.addAll(c.stream().map(e -> new SpllEntity(e))
 				.collect(Collectors.toList()));
 	}
 

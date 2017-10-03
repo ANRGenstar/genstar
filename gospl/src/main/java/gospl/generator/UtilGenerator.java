@@ -16,8 +16,8 @@ import core.metamodel.pop.APopulationValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
+import gospl.GosplEntity;
 import gospl.GosplPopulation;
-import gospl.entity.GosplEntity;
 import gospl.entity.attribute.GSEnumAttributeType;
 import gospl.entity.attribute.GosplAttributeFactory;
 

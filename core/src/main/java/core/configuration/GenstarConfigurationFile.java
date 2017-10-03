@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import core.metamodel.IAttribute;
-import core.metamodel.IValue;
 import core.metamodel.pop.APopulationAttribute;
 import core.metamodel.pop.io.GSSurveyWrapper;
+import core.metamodel.value.IValue;
 
 /**
  * TODO: describe the main contract for input data in genstar !!!

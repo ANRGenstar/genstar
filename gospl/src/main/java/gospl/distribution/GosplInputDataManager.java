@@ -42,6 +42,7 @@ import core.metamodel.pop.io.IGSSurvey;
 import core.util.GSPerformanceUtil;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
+import gospl.GosplEntity;
 import gospl.GosplPopulation;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -51,7 +52,6 @@ import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
-import gospl.entity.GosplEntity;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 

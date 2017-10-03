@@ -1,5 +1,12 @@
 package core.util.data;
 
+/**
+ * 
+ * 
+ * @author kevinchapuis
+ * @author Vo Duc An
+ *
+ */
 public enum GSEnumDataType {
 
 	Double (Double.class, "0d"),
@@ -8,7 +15,7 @@ public enum GSEnumDataType {
 	String (String.class, "null");
 
 	private Class<?> wrapperClass;
-	private java.lang.String defaultValue;
+	private String defaultValue;
 
 	private GSEnumDataType(Class<?> wrapperClass, String defaultValue){
 		this.wrapperClass = wrapperClass;

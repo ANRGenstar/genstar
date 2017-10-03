@@ -11,6 +11,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.poi.util.Beta;
+import org.junit.Test;
+
 import core.util.excpetion.GSIllegalRangedData;
 
 /**
@@ -48,19 +51,37 @@ public class GSDataParser {
 			return GSEnumDataType.Boolean;
 		return GSEnumDataType.String;
 	}
+	
+	/**
+	 * Can extract the template of the range data in given string representation
+	 * 
+	 * @see RangeTemplate
+	 * 
+	 * @param range
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	@Test 
+	public RangeTemplate getRangeTemplate(String range, String match, boolean negValue) throws GSIllegalRangedData {
+		//List<Integer> rangeInt = this.getRangedIntegerData(range.stream().collect(Collectors.joining()), negValue); 
+		String[] template = range.split("[^\\d+\\.\\d+][E\\-\\d+]?");
+		if(template.length != 3)
+			throw new GSIllegalRangedData("The string ranged data "+range+" does not seems to be legal");
+		return new RangeTemplate(template[0], template[1], template[2], match);
+	}
 
 	/**
 	 * Parses double range values from string representation. There is no need for specifying <br/>
 	 * any delimiter, although the method rely on proper {@link Double} values string encoding. <br/>
-	 * If null value is true delimiter can't be the null "-" symbol
+	 * If negative value is true delimiter can't be the null "-" symbol
 	 * 
 	 * @param range
 	 * @return {@link List} of min and max double values based on {@code range} string representation 
 	 * @throws GSIllegalRangedData
 	 */
-	public List<Double> getRangedDoubleData(String range, boolean nullValue) throws GSIllegalRangedData{
+	public List<Double> getRangedDoubleData(String range, boolean negativeValue) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
-		if(nullValue)
+		if(negativeValue)
 			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
 		else 
 			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
@@ -70,7 +91,7 @@ public class GSDataParser {
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
-			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (lower / upper) values");
 	    for(String i : stringRange)
 	    	list.add(Double.valueOf(i));
 		return list;
@@ -140,7 +161,7 @@ public class GSDataParser {
 		if(stringRange.isEmpty())
 			throw new GSIllegalRangedData("The string ranged data " +range+ " does not represent any value");
 		if(stringRange.size() > 2)
-			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (min / max) values");
+			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (lower / upper) values");
 	    for(String i : stringRange)
 	    	list.add(Integer.valueOf(i));
 		return list;
