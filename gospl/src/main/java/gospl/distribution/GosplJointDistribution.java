@@ -2,14 +2,11 @@ package gospl.distribution;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
-import core.util.data.GSEnumDataType;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.control.ControlFrequency;
@@ -23,20 +20,12 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
-	protected GosplJointDistribution(Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> matrix){
+	protected GosplJointDistribution(Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> matrix){
 		super(matrix);
 	}
 
-	public GosplJointDistribution(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, 
-			GSSurveyType metaDataType) {
-		super(dimensionAspectMap, metaDataType);
-	}
-	
-	public GosplJointDistribution(Set<APopulationAttribute> attributes, GSSurveyType metaDataType) {
-		this(
-			attributes.stream().collect(Collectors.toMap(Function.identity(), APopulationAttribute::getValues)),
-			metaDataType
-			);
+	public GosplJointDistribution(Set<DemographicAttribute<? extends IValue>> dimensions, GSSurveyType metaDataType) {
+		super(dimensions, metaDataType);
 	}
 
 		
@@ -44,19 +33,19 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
 	
 	@Override
-	public boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
 	}
 	
 	@Override
-	public final boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, Double value) {
+	public final boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, Double value) {
 		return addValue(coordinates, new ControlFrequency(value));
 	}
 
 	@Override
-	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size());
 			matrix.put(coordinate, new ControlFrequency(value.getValue().doubleValue()));
@@ -67,7 +56,7 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
 
 	@Override
-	public final boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, Double value) {
+	public final boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, Double value) {
 		return setValue(coordinate, new ControlFrequency(value));
 	}
 	
@@ -86,7 +75,7 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 
 	@Override
 	public AControl<Double> parseVal(GSDataParser parser, String val) {
-		if(parser.getValueType(val).equals(GSEnumDataType.String) || parser.getValueType(val).equals(GSEnumDataType.Boolean))
+		if(!parser.getValueType(val).isNumericValue())
 			return getNulVal();
 		return new ControlFrequency(parser.getDouble(val));
 	}

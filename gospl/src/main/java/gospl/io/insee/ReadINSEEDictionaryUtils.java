@@ -27,11 +27,11 @@ import org.htmlcleaner.XPather;
 import org.htmlcleaner.XPatherException;
 
 import au.com.bytecode.opencsv.CSVReader;
-import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.io.CsvInputHandler;
 import gospl.io.ReadDictionaryUtils;
 
@@ -45,11 +45,11 @@ public class ReadINSEEDictionaryUtils {
 
 	private static Logger logger = LogManager.getLogger();
 	
-	public static Collection<APopulationAttribute> readFromWebsite(String url) {
+	public static Collection<DemographicAttribute<IValue>> readFromWebsite(String url) {
 		return readFromWebsite(url, null);
 	}
 	
-	public static Collection<APopulationAttribute> readFromWebsite(String url, String splitCode) {
+	public static Collection<DemographicAttribute<IValue>> readFromWebsite(String url, String splitCode) {
 		try {
 			return readFromWebsite(new URL(url), splitCode);
 		} catch (MalformedURLException e) {
@@ -101,7 +101,7 @@ public class ReadINSEEDictionaryUtils {
 	}
 	
 	// TODO use splitCode
-	public static Collection<APopulationAttribute> readFromWebsite(URL url, String splitCode) {
+	public static Collection<DemographicAttribute<IValue>> readFromWebsite(URL url, String splitCode) {
 		
 		logger.debug("reading a dictionnary of data from URL {}", url);
 		
@@ -204,8 +204,7 @@ public class ReadINSEEDictionaryUtils {
 		String separatorName = detectSeparator(variable2modalities.keySet());
 		
 		// now we have everything to construct variables !
-		GosplAttributeFactory attf = new GosplAttributeFactory();
-		List<APopulationAttribute> attributes = new ArrayList<>(variable2modality2text.size());
+		List<DemographicAttribute<IValue>> attributes = new ArrayList<>(variable2modality2text.size());
 
 		for (Map.Entry<String,Map<String,String>> e: variable2modality2text.entrySet()) {
 			String variableName;
@@ -222,11 +221,9 @@ public class ReadINSEEDictionaryUtils {
 			final boolean isRange = ReadDictionaryUtils.detectIsRange(modalities.values());
 			final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalities.values());
 			
-			GSEnumDataType dataType = GSEnumDataType.String;
-			GSEnumAttributeType attType = GSEnumAttributeType.unique;
+			GSEnumDataType dataType = GSEnumDataType.Nominal;
 			if (isRange) {
-				dataType = GSEnumDataType.Integer;
-				attType = GSEnumAttributeType.range;
+				dataType = GSEnumDataType.Range;
 			} else if (isInteger) {
 				dataType = GSEnumDataType.Integer;
 			}
@@ -234,12 +231,11 @@ public class ReadINSEEDictionaryUtils {
 			// TODO add coding as a mapped attribute ???
 			
 			try {
-				APopulationAttribute att = attf.createAttribute(
+				DemographicAttribute<IValue> att = GosplAttributeFactory.getFactory().createAttribute(
 						variableName, 
 						dataType, 
 						new ArrayList<String>(modalities.keySet()), 
 						new ArrayList<String>(modalities.values()),
-						attType, 
 						null, 
 						null
 						);
@@ -255,7 +251,7 @@ public class ReadINSEEDictionaryUtils {
 	}
 
 	
-	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(String filename, String encoding) {
+	public static Collection<DemographicAttribute<IValue>> readDictionnaryFromMODFile(String filename, String encoding) {
 		
 		if (encoding == null) {
 			// TODO automatic detection
@@ -265,7 +261,7 @@ public class ReadINSEEDictionaryUtils {
 		return readDictionnaryFromMODFile(new File(filename), encoding);
 	}
 	
-	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(String filename) {
+	public static Collection<DemographicAttribute<IValue>> readDictionnaryFromMODFile(String filename) {
 		return readDictionnaryFromMODFile(filename, Charset.defaultCharset().name());
 	}
 	
@@ -282,7 +278,7 @@ public class ReadINSEEDictionaryUtils {
 	 * @param f
 	 * @return
 	 */
-	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(File f, String encoding) {
+	public static Collection<DemographicAttribute<IValue>> readDictionnaryFromMODFile(File f, String encoding) {
 		
 		logger.info("reading a dictionnary of data from file {}", f);
 		CSVReader reader = null;
@@ -295,7 +291,7 @@ public class ReadINSEEDictionaryUtils {
 			throw new RuntimeException(e);
 		}
 		
-		Collection<APopulationAttribute> attributes = new LinkedList<>();
+		Collection<DemographicAttribute<IValue>> attributes = new LinkedList<>();
 		
 		final GosplAttributeFactory attf = GosplAttributeFactory.getFactory();
 		
@@ -318,7 +314,7 @@ public class ReadINSEEDictionaryUtils {
 					continue;
 				
 				
-				APopulationAttribute att = null;
+				DemographicAttribute<IValue> att = null;
 
 				final String varCode = s[0];
 				final String varLib = s[1];
@@ -331,18 +327,14 @@ public class ReadINSEEDictionaryUtils {
 						final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
 						final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
 						
-						GSEnumDataType dataType = GSEnumDataType.String;
-						GSEnumAttributeType attType = GSEnumAttributeType.unique;
+						GSEnumDataType dataType = GSEnumDataType.Nominal;
 						if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
-							// that's a record, I think !
-							attType = GSEnumAttributeType.record;
 							// TODO
 							if (modalitiesCode2Lib.isEmpty())
 								modalitiesCode2Lib.put(previousCode, previousCode);
 							dataType = null; // unfortunatly we don't know exactly what it is
 						} else if (isRange) {
-							dataType = GSEnumDataType.Integer;
-							attType = GSEnumAttributeType.range;
+							dataType = GSEnumDataType.Range;
 						} else if (isInteger) {
 							dataType = GSEnumDataType.Integer;
 						}
@@ -354,7 +346,6 @@ public class ReadINSEEDictionaryUtils {
 								dataType, 
 								new ArrayList<String>(modalitiesCode2Lib.keySet()),
 								new ArrayList<String>(modalitiesCode2Lib.values()),
-								attType,
 								null,
 								null
 								);

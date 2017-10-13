@@ -11,10 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import gospl.algo.ipf.margin.AMargin;
 import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
@@ -61,11 +61,11 @@ public abstract class AGosplIPF<T extends Number> {
 
 	private Logger logger = LogManager.getLogger();
 
-	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed;
-	protected INDimensionalMatrix<APopulationAttribute, APopulationValue, T> marginals;
+	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed;
+	protected INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> marginals;
 	protected IMarginalsIPFBuilder<T> marginalProcessor;
 
-	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
+	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
 			IMarginalsIPFBuilder<T> marginalProcessor, int step, double delta){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
@@ -73,18 +73,18 @@ public abstract class AGosplIPF<T extends Number> {
 		this.delta = delta;
 	}
 
-	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
+	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
 			int step, double delta){
 		this(sampleSeed, new MarginalsIPFBuilder<T>(), step, delta);
 	}
 
-	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed,
+	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
 			IMarginalsIPFBuilder<T> marginalProcessor){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
 	}
 
-	protected AGosplIPF(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sampleSeed){
+	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed){
 		this(sampleSeed, new MarginalsIPFBuilder<T>());
 	}
 
@@ -95,7 +95,7 @@ public abstract class AGosplIPF<T extends Number> {
 	 * @see INDimensionalMatrix#getVal(Collection)
 	 * @param marginals
 	 */
-	protected void setMarginalMatrix(INDimensionalMatrix<APopulationAttribute, APopulationValue, T> marginals){
+	protected void setMarginalMatrix(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> marginals){
 		this.marginals = marginals;
 	}
 
@@ -170,7 +170,7 @@ public abstract class AGosplIPF<T extends Number> {
 					+ "Distribution: "+Arrays.toString(marginals.getDimensions().toArray()) +"\n"
 					+ "Sample seed: :"+Arrays.toString(seed.getDimensions().toArray()));
 
-		List<APopulationAttribute> unmatchSeedAttribute = seed.getDimensions().stream()
+		List<DemographicAttribute<? extends IValue>> unmatchSeedAttribute = seed.getDimensions().stream()
 				.filter(dim -> marginals.getDimensions().contains(dim) 
 						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
 				.collect(Collectors.toList());
@@ -181,7 +181,7 @@ public abstract class AGosplIPF<T extends Number> {
 				+"% of samples dimensions will be estimate with output controls");
 		
 		logger.debug("Sample seed controls' dimension: "+seed.getDimensions()
-			.stream().map(d -> d.getAttributeName()+" = "+d.getValues().size())
+			.stream().map(d -> d.getAttributeName()+" = "+d.getValueSpace().size())
 			.collect(Collectors.joining(";")));
 
 		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
@@ -202,13 +202,13 @@ public abstract class AGosplIPF<T extends Number> {
 			if(stepIter % (int) (step * 0.1) == 0d)
 				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+ae);
 			for(AMargin<T> margin : marginals){
-				for(Set<APopulationValue> seedMarginalDescriptor : margin.getSeedMarginalDescriptors()){
+				for(Set<IValue> seedMarginalDescriptor : margin.getSeedMarginalDescriptors()){
 					double marginValue = margin.getControl(seedMarginalDescriptor).getValue().doubleValue();
 					double actualValue = seed.getVal(seedMarginalDescriptor).getValue().doubleValue();
 					AControl<Double> factor = new ControlFrequency(marginValue/actualValue);
-					Collection<ACoordinate<APopulationAttribute, APopulationValue>> relatedCoordinates = 
+					Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> relatedCoordinates = 
 							seed.getCoordinates(seedMarginalDescriptor); 
-					for(ACoordinate<APopulationAttribute, APopulationValue> coord : relatedCoordinates)
+					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates)
 						seed.getVal(coord).multiply(factor);
 					logger.trace("Work on value set {} and related {} coordinates; EV = {} and AV = {}",
 							Arrays.toString(seedMarginalDescriptor.toArray()), 

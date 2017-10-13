@@ -1,6 +1,7 @@
 package core.metamodel;
 
 import java.util.Collection;
+import java.util.Set;
 
 import core.metamodel.value.IValue;
 
@@ -17,6 +18,8 @@ import core.metamodel.value.IValue;
  * @author gospl-team
  *
  */
-public interface IPopulation<E extends IEntity<IAttribute, IValue>> extends Collection<E> {
+public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> extends Collection<E> {
+
+	Set<A> getPopulationAttributes();
 	
 }

@@ -7,19 +7,20 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 
 public class CachedSegmentedNDimensionalMatrix<T extends Number> 
-		extends CachedNDimensionalMatrix<APopulationAttribute, APopulationValue, T>
+		extends CachedNDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T>
 		implements ISegmentedNDimensionalMatrix<T> {
 
 	@SuppressWarnings("unused")
 	private final ISegmentedNDimensionalMatrix<T> mSeg;
 	
-	private final Collection<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> cachedSubMatrices;
+	private final Collection<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>> cachedSubMatrices;
 	
-	private final Map<APopulationAttribute,Set<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>>> attribute2involvedmatrices = new HashMap<>();
+	private final Map<DemographicAttribute<? extends IValue>, 
+		Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>>> attribute2involvedmatrices = new HashMap<>();
 	
 	public CachedSegmentedNDimensionalMatrix(ISegmentedNDimensionalMatrix<T> originalMatrix) {
 		super(originalMatrix);
@@ -28,21 +29,21 @@ public class CachedSegmentedNDimensionalMatrix<T extends Number>
 		
 		// create list of cached sub matrices
 		cachedSubMatrices = new ArrayList<>(originalMatrix.getMatrices().size());
-		for (INDimensionalMatrix<APopulationAttribute, APopulationValue,T> m: originalMatrix.getMatrices()) {
-			cachedSubMatrices.add(new CachedNDimensionalMatrix<APopulationAttribute, APopulationValue, T>(m));
+		for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T> m: originalMatrix.getMatrices()) {
+			cachedSubMatrices.add(new CachedNDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T>(m));
 		}
 		
 	}
 
 	@Override
-	public final Collection<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> getMatrices() {
+	public final Collection<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>> getMatrices() {
 		return cachedSubMatrices;
 	}
 
 	@Override
-	public final Set<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> getMatricesInvolving(APopulationAttribute att) {
+	public final Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>> getMatricesInvolving(DemographicAttribute<? extends IValue> att) {
 
-		Set<INDimensionalMatrix<APopulationAttribute, APopulationValue,T>> res = attribute2involvedmatrices.get(att);
+		Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>> res = attribute2involvedmatrices.get(att);
 		
 		if (res == null) {
 			res = this.cachedSubMatrices.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
@@ -59,8 +60,8 @@ public class CachedSegmentedNDimensionalMatrix<T extends Number>
 		
 		long total = super.getHits();
 		
-		for (INDimensionalMatrix<APopulationAttribute, APopulationValue,T> subM: cachedSubMatrices) {
-			total += ((CachedNDimensionalMatrix<APopulationAttribute, APopulationValue, Double>)subM).getHits();
+		for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T> subM: cachedSubMatrices) {
+			total += ((CachedNDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double>)subM).getHits();
 		}
 		
 		return total;
@@ -71,8 +72,8 @@ public class CachedSegmentedNDimensionalMatrix<T extends Number>
 		
 		long total = super.getMissed();
 
-		for (INDimensionalMatrix<APopulationAttribute, APopulationValue,T> subM: cachedSubMatrices) {
-			total += ((CachedNDimensionalMatrix<APopulationAttribute, APopulationValue, Double>)subM).getMissed();
+		for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T> subM: cachedSubMatrices) {
+			total += ((CachedNDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double>)subM).getMissed();
 		}
 		return total;
 	}

@@ -7,14 +7,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 
-public class GosplPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
+public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 	
-	private final Collection<APopulationEntity> population;
-	private Collection<APopulationAttribute> attributes = null;
+	private final Collection<ADemoEntity> population;
+	private Collection<DemographicAttribute<IValue>> attributes = null;
 	
 	/**
 	 * Default inner type collection is {@link Set}
@@ -31,7 +31,7 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	 * 
 	 * @param population
 	 */
-	public GosplPopulation(Collection<APopulationEntity> population){
+	public GosplPopulation(Collection<ADemoEntity> population){
 		if(population.isEmpty())
 			this.population = new HashSet<>();
 		else
@@ -42,7 +42,7 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	 * throws an exception if this entity does not has the reference attributes
 	 * @param e
 	 */
-	protected final void _checkEntityAttributes(APopulationEntity e) throws IllegalArgumentException {
+	protected final void _checkEntityAttributes(ADemoEntity e) throws IllegalArgumentException {
 		if ((this.attributes != null) && (!e.getAttributes().equals(this.attributes)))
 			throw new IllegalArgumentException(
 					"the entity should contain attributes "+
@@ -58,11 +58,11 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	 * 
 	 * @param attributes
 	 */
-	public void setExpectedAttributes(Collection<APopulationAttribute> attributes) {
+	public void setExpectedAttributes(Collection<DemographicAttribute<IValue>> attributes) {
 		this.attributes = attributes;
 		
 		// check past entities
-		for (APopulationEntity e: population) {
+		for (ADemoEntity e: population) {
 			_checkEntityAttributes(e);
 		}
 	}
@@ -83,7 +83,7 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	}
 
 	@Override
-	public Iterator<APopulationEntity> iterator() {
+	public Iterator<ADemoEntity> iterator() {
 		return population.iterator();
 	}
 
@@ -98,7 +98,7 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	}
 
 	@Override
-	public boolean add(APopulationEntity e) {
+	public boolean add(ADemoEntity e) {
 		if (attributes != null)
 			_checkEntityAttributes(e);
 		return population.add(e);
@@ -115,7 +115,7 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends APopulationEntity> c) {
+	public boolean addAll(Collection<? extends ADemoEntity> c) {
 		return population.addAll(c);
 	}
 
@@ -136,10 +136,10 @@ public class GosplPopulation implements IPopulation<APopulationEntity, APopulati
 	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
-	public Set<APopulationAttribute> getPopulationAttributes(){
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes(){
 		if (attributes == null)
 			// rebuild the list of attributes
-			return population.parallelStream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
+			return population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 		else 
 			return new HashSet<>(attributes);
 	}

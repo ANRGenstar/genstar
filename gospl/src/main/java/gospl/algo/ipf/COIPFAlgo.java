@@ -1,9 +1,9 @@
 package gospl.algo.ipf;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.value.IValue;
 import gospl.algo.co.ICombinatorialOptimizationAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -13,22 +13,22 @@ import gospl.sampler.ISampler;
 
 public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
 
-	public COIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix) {
+	public COIPFAlgo(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed,
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Integer> matrix) {
 		super(seed);
 		super.setMarginalMatrix(matrix);
 	}
 	
-	public COIPFAlgo(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> seed,
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Integer> matrix,
+	public COIPFAlgo(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed,
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Integer> matrix,
 			int step, double delta) {
 		super(seed, step, delta);
 		super.setMarginalMatrix(matrix);
 	}
 	
 	@Override
-	public ISampler<APopulationEntity> setupCOSampler(
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample,
+	public ISampler<ADemoEntity> setupCOSampler(
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sample,
 			IEntitySampler sampler) {
 		
 		sampler.setSample(sample);

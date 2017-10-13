@@ -5,14 +5,12 @@ import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-
-import org.apache.poi.util.Beta;
-import org.junit.Test;
 
 import core.util.excpetion.GSIllegalRangedData;
 
@@ -30,9 +28,33 @@ import core.util.excpetion.GSIllegalRangedData;
  */
 public class GSDataParser {
 	
-	private String splitOperator = " ";
+	public static final String DEFAULT_NUM_MATCH = "#";
+
+	private static String SPLIT_OPERATOR = " ";
 	
-	public GSDataParser(){}
+	public enum NumMatcher{
+		DOUBLE_MATCH_ENG("(\\-)?(\\d+\\.\\d+)(E(\\-)?\\d+)?"),
+		DOUBLE_POSITIF_MATCH_ENG("[^\\d+\\.\\d+][E\\-\\d+]?"),
+		DOUBLE_MATCH_FR("(\\-)?(\\d+\\,\\d+)(E(\\-)?\\d+)?"),
+		DOUBLE_POSITIF_MATCH_FR("[^\\d+\\,\\d+][E\\-\\d+]?"),
+		INT_POSITIF_MATCH("[^\\d+]"),
+		INT_MATCH("[^-?\\d+]");
+		
+		private String match;
+		private NumMatcher(String match){this.match = match;}
+		
+		/**
+		 * Gives the string matcher
+		 * @return
+		 */
+		public String getMatch(){return match;}
+
+		/**
+		 * Default numeric value String matcher which look for positive integer range values
+		 * @return
+		 */
+		public static NumMatcher getDefault() {return NumMatcher.INT_POSITIF_MATCH;}
+	}
 	
 	/**
 	 * Methods that retrieve value type ({@link GSEnumDataType}) through string parsing <br/>
@@ -43,31 +65,62 @@ public class GSDataParser {
 	 */
 	public GSEnumDataType getValueType(String value){
 		value = value.trim();
-		if(value.matches("(\\-)?(\\d+\\.\\d+)(E(\\-)?\\d+)?") || value.matches("(\\-)?(\\d+\\,\\d+)(E(\\-)?\\d+)?"))
-			return GSEnumDataType.Double;
-		if(value.matches("(\\-)?\\d+"))
+		if(value.matches(NumMatcher.DOUBLE_MATCH_ENG.getMatch()) || value.matches(NumMatcher.DOUBLE_MATCH_FR.getMatch()))
+			return GSEnumDataType.Continue;
+		if(value.matches(NumMatcher.INT_MATCH.getMatch()))
 			return GSEnumDataType.Integer;
 		if(Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value))
 			return GSEnumDataType.Boolean;
-		return GSEnumDataType.String;
+		try {
+			this.getRangedDoubleData(value, NumMatcher.DOUBLE_MATCH_ENG);
+			return GSEnumDataType.Range;
+		} catch (Exception e) {
+			return GSEnumDataType.Nominal;
+		}
 	}
 	
 	/**
 	 * Can extract the template of the range data in given string representation
 	 * 
-	 * @see RangeTemplate
+	 * @see GSRangeTemplate
+	 * 
+	 * WARNING: untested
 	 * 
 	 * @param range
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	@Test 
-	public RangeTemplate getRangeTemplate(String range, String match, boolean negValue) throws GSIllegalRangedData {
-		//List<Integer> rangeInt = this.getRangedIntegerData(range.stream().collect(Collectors.joining()), negValue); 
-		String[] template = range.split("[^\\d+\\.\\d+][E\\-\\d+]?");
-		if(template.length != 3)
-			throw new GSIllegalRangedData("The string ranged data "+range+" does not seems to be legal");
-		return new RangeTemplate(template[0], template[1], template[2], match);
+	public GSRangeTemplate getRangeTemplate(List<String> ranges, String match, NumMatcher numMatcher) throws GSIllegalRangedData {
+		List<Integer> rangeInt = this.getRangedIntegerData(ranges.stream().collect(Collectors.joining()), numMatcher);
+		Collections.sort(rangeInt);
+		String lowerBound = "", upperBound = "", middle = "";
+		for(String range : ranges){
+			if(this.getRangedIntegerData(range, numMatcher).get(0).equals(rangeInt.get(0).toString()))
+				lowerBound = range.replaceAll(rangeInt.get(0).toString(), match);
+			else if(this.getRangedIntegerData(range, numMatcher).get(0).equals(rangeInt.get(rangeInt.size()-1).toString()))
+				upperBound = range.replaceAll(rangeInt.get(rangeInt.size()-1).toString(), match);
+			else if(middle.isEmpty()){
+				middle = range.replaceAll(numMatcher.getMatch(), match);
+			} else if(middle != null){
+				String newMiddle = range.replaceAll(numMatcher.getMatch(), match);
+				if(!newMiddle.equalsIgnoreCase(middle))
+					throw new GSIllegalRangedData("Range template has more than 3 range format");
+			}
+		}
+		return new GSRangeTemplate(lowerBound, upperBound, middle, match, numMatcher);
+	}
+	
+	/**
+	 * default replacement of match {@link NumMatcher}
+	 * 
+	 * @see #getRangeTemplate(List, String, NumMatcher)
+	 * 
+	 * @param ranges
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public GSRangeTemplate getRangeTemplate(List<String> ranges) throws GSIllegalRangedData {
+		return getRangeTemplate(ranges, SPLIT_OPERATOR, NumMatcher.getDefault());
 	}
 
 	/**
@@ -79,13 +132,10 @@ public class GSDataParser {
 	 * @return {@link List} of min and max double values based on {@code range} string representation 
 	 * @throws GSIllegalRangedData
 	 */
-	public List<Double> getRangedDoubleData(String range, boolean negativeValue) throws GSIllegalRangedData{
+	public List<Double> getRangedDoubleData(String range, NumMatcher numMatcher) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
-		if(negativeValue)
-			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
-		else 
-			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
-		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		range = range.replaceAll(numMatcher.getMatch(), SPLIT_OPERATOR);
+		List<String> stringRange = Arrays.asList(range.trim().split(SPLIT_OPERATOR));
 		stringRange.stream().forEach(s -> s.trim());
 		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
@@ -109,13 +159,10 @@ public class GSDataParser {
 	 * @throws GSIllegalRangedData
 	 */
 	@Deprecated
-	public List<Double> getRangedData(String range, boolean nullValue, Double minVal, Double maxVal) throws GSIllegalRangedData{
+	public List<Double> getRangedData(String range, NumMatcher numMatcher, Double minVal, Double maxVal) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
-		if(nullValue)
-			range = range.replaceAll("^-?[\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
-		else 
-			range = range.replaceAll("[^\\d+\\.\\d+][E\\-\\d+]?", splitOperator);
-		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		range = range.replaceAll(numMatcher.getMatch(), SPLIT_OPERATOR);
+		List<String> stringRange = Arrays.asList(range.trim().split(SPLIT_OPERATOR));
 		stringRange.stream().forEach(s -> s.trim());
 		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
@@ -148,14 +195,11 @@ public class GSDataParser {
 	 * @return {@link List} of min and max integer values based on {@code range} string representation
 	 * @throws GSIllegalRangedData
 	 */
-	public List<Integer> getRangedIntegerData(String range, boolean nullValue) throws GSIllegalRangedData{
+	public List<Integer> getRangedIntegerData(String range, NumMatcher numMatcher) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
 		range = range.replaceAll(Pattern.quote("+"), "");
-		if(nullValue)
-			range = range.replaceAll("[^-?\\d+]", splitOperator);
-		else
-			range = range.replaceAll("[^\\d+]", splitOperator);
-		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		range = range.replaceAll(numMatcher.getMatch(), SPLIT_OPERATOR);
+		List<String> stringRange = Arrays.asList(range.trim().split(SPLIT_OPERATOR));
 		stringRange.stream().forEach(s -> s.trim());
 		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
@@ -179,13 +223,10 @@ public class GSDataParser {
 	 * @throws GSIllegalRangedData
 	 */
 	@Deprecated
-	public List<Integer> getRangedData(String range, boolean nullValue, Integer minVal, Integer maxVal) throws GSIllegalRangedData{
+	public List<Integer> getRangedData(String range, NumMatcher numMatcher, Integer minVal, Integer maxVal) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
-		if(nullValue)
-			range = range.replaceAll("[^-?\\d+]", splitOperator);
-		else
-			range = range.replaceAll("[^\\d]+", splitOperator);
-		List<String> stringRange = Arrays.asList(range.trim().split(splitOperator));
+		range = range.replaceAll(numMatcher.getMatch(), SPLIT_OPERATOR);
+		List<String> stringRange = Arrays.asList(range.trim().split(SPLIT_OPERATOR));
 		stringRange.stream().forEach(s -> s.trim());
 		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
@@ -242,7 +283,7 @@ public class GSDataParser {
 	 */
 	public List<String> getNumber(String string) {
 		List<String> numbers = new ArrayList<>();
-		Pattern p = Pattern.compile("^-?[\\d+][\\.\\d+]?[E\\-\\d+]?");
+		Pattern p = Pattern.compile(NumMatcher.DOUBLE_MATCH_ENG.getMatch());
 		Matcher m = p.matcher(string);
 		while (m.find()) {
 		  numbers.add(m.group());
@@ -260,7 +301,7 @@ public class GSDataParser {
 	 */
 	public Number parseNumber(String stringVal) {
 		switch (this.getValueType(stringVal)) {
-		case Double:
+		case Continue:
 			return Double.valueOf(getNumber(stringVal).get(0));
 		case Integer:
 			return Integer.valueOf(getNumber(stringVal).get(0));

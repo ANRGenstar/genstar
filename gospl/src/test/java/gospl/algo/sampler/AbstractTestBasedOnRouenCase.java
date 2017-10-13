@@ -10,8 +10,8 @@ import org.junit.rules.TemporaryFolder;
 
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarXmlSerializer;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.IValue;
 import core.metamodel.pop.io.GSSurveyType;
 import gospl.GosplPopulation;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
@@ -28,7 +28,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
 import gospl.sampler.IHierarchicalSampler;
 import gospl.sampler.ISampler;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, IValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -141,7 +141,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		final long timestampStart = System.currentTimeMillis();
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
+		INDimensionalMatrix<DemographicAttribute, IValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDataTablesIntoDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -152,7 +152,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final ISyntheticReconstructionAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<APopulationAttribute,APopulationValue>> sampler = null;
+		ISampler<ACoordinate<DemographicAttribute,IValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferSRSampler(
 					distribution, 

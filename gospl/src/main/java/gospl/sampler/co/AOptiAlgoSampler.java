@@ -2,7 +2,7 @@ package gospl.sampler.co;
 
 import java.util.Collection;
 
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.ADemoEntity;
 import core.util.random.GenstarRandom;
 import gospl.algo.co.metamodel.IGSOptimizationAlgorithm;
 import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
@@ -11,22 +11,22 @@ import gospl.sampler.IEntitySampler;
 
 public abstract class AOptiAlgoSampler<A extends IGSOptimizationAlgorithm> implements IEntitySampler {
 
-	protected Collection<APopulationEntity> sample;
+	protected Collection<ADemoEntity> sample;
 	protected RandomSampler basicSampler;
 	protected A algorithm;
 	
 	private IGSSampleBasedCOSolution solution;
 
 	@Override
-	public APopulationEntity draw() {
+	public ADemoEntity draw() {
 		if(solution == null)
 			throw new RuntimeException("You cannot draw a unique entity before "
 					+ "drawing an entire collection of entities, i.e. a solution to tabu search");
-		return (APopulationEntity) this.solution.getSolution().toArray()[GenstarRandom.getInstance().nextInt(sample.size())];
+		return (ADemoEntity) this.solution.getSolution().toArray()[GenstarRandom.getInstance().nextInt(sample.size())];
 	}
 	
 	@Override
-	public void setSample(Collection<APopulationEntity> sample) {
+	public void setSample(Collection<ADemoEntity> sample) {
 		this.sample = sample;
 		this.basicSampler = new RandomSampler();
 		basicSampler.setSample(sample);

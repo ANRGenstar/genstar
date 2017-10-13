@@ -9,17 +9,17 @@ package core.util.data;
  */
 public enum GSEnumDataType {
 
-	Double (Double.class, "0d"),
-	Integer (Integer.class, "0"),
-	Boolean (Boolean.class, "true"),
-	String (String.class, "null");
+	Continue (Double.class),
+	Integer (Integer.class),
+	Range (String.class),
+	Boolean (Boolean.class),
+	Order (String.class),
+	Nominal (String.class);
 
 	private Class<?> wrapperClass;
-	private String defaultValue;
 
-	private GSEnumDataType(Class<?> wrapperClass, String defaultValue){
+	private GSEnumDataType(Class<?> wrapperClass){
 		this.wrapperClass = wrapperClass;
-		this.defaultValue = defaultValue;
 	}
 	
 	/**
@@ -29,15 +29,6 @@ public enum GSEnumDataType {
 	 */
 	public boolean isNumericValue() {
 		return wrapperClass.getSuperclass().equals(Number.class);
-	}
-
-	/**
-	 * Default string value associated with this {@link GSEnumDataType} 
-	 * 
-	 * @return
-	 */
-	public String getDefaultValue() {
-		return defaultValue;
 	}
 	
 }

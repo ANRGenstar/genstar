@@ -11,7 +11,7 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.value.IValue;
 
 public interface IGSGeofile<Entity extends AGeoEntity> {
 
@@ -39,14 +39,14 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * 
 	 * @return 
 	 */
-	public Collection<AGeoValue> getGeoValues() ;
+	public Collection<IValue> getGeoValues() ;
 	
 	/**
 	 * Retrieve all possible attribute that geo entity can embody
 	 * 
 	 * @return
 	 */
-	public Collection<AGeoAttribute> getGeoAttributes();
+	public Collection<AGeoAttribute<? extends IValue>> getGeoAttributes();
 
 
 	/**

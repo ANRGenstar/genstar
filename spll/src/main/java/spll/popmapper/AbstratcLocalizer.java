@@ -28,13 +28,13 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
-import spll.SpllPopulation;
 import spll.SpllEntity;
+import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
@@ -174,7 +174,7 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 
 	@Override
 	public void setMapper(List<IGSGeofile<? extends AGeoEntity>> ancillaryFileList, 
-			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, 
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException {
 		String extension = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
@@ -190,7 +190,7 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	@Override
 	public void setMapper(IGSGeofile<? extends AGeoEntity> mainMapper, String mainAttribute,
 			List<IGSGeofile<? extends AGeoEntity>> ancillaryFileList, 
-			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, 
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException {
 		this.setMapper(new SPLAreaMapperBuilder(mainMapper, mainAttribute, 
@@ -485,8 +485,8 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 		} else {
 			features = new HashSet<>();
 			for(Entry<AGeoEntity, Number> entry : eMatches.entrySet()){
-				AGeoValue contingency = new RawGeoData(contAtt, entry.getValue());
-				AGeoValue iris = entry.getKey().getValueForAttribute(keyAtt);
+				IValue contingency = new RawGeoData(contAtt, entry.getValue());
+				IValue iris = entry.getKey().getValueForAttribute(keyAtt);
 				SpllFeature spllFeat = ef.createGeoEntity(entry.getKey().getGeometry(), 
 						Stream.of(contingency, iris)
 						.collect(Collectors.toSet()));

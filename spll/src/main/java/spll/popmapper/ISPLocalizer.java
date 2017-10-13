@@ -11,11 +11,10 @@ import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.value.IValue;
 import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
@@ -34,8 +33,8 @@ import spll.popmapper.normalizer.SPLUniformNormalizer;
  * </ul>
  * </p>
  * These three options outline what Spll localization process cover: <br> 
- * (1) localize entity into nest {@link APopulationEntity#getNest()} <br>
- * (2) match entity with the geography {@link APopulationEntity#getLocation()} (if no match, it is equal to the nest) <br> 
+ * (1) localize entity into nest {@link ADemoEntity#getNest()} <br>
+ * (2) match entity with the geography {@link ADemoEntity#getLocation()} (if no match, it is equal to the nest) <br> 
  * (3) ancillary information on density (even estimated one using regression techniques) <br>
  * <p>
  * 
@@ -54,7 +53,7 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> localisePopulation();
+	public IPopulation<ADemoEntity, DemographicAttribute<IValue>> localisePopulation();
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //
@@ -122,7 +121,7 @@ public interface ISPLocalizer {
 	 * @throws SchemaException 
 	 */
 	public void setMapper(List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
-			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, 
 			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
 	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
 	
@@ -147,7 +146,7 @@ public interface ISPLocalizer {
 	 */
 	public void setMapper(IGSGeofile<? extends AGeoEntity> mainMapper , String mainAttribute, 
 			List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
-			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, 
 			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
 	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
 	

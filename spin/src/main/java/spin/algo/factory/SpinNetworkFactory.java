@@ -1,8 +1,8 @@
 package spin.algo.factory;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
 import core.metamodel.pop.APopulationValue;
 import spin.SpinPopulation;
 import spin.algo.generator.RandomNetworkGenerator;
@@ -37,14 +37,14 @@ public class SpinNetworkFactory {
 	 * @param population
 	 * @return SpinNetwork. 
 	 */
-	public SpinNetwork loadPopulation(IPopulation<? extends APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public SpinNetwork loadPopulation(IPopulation<? extends ADemoEntity, DemographicAttribute, APopulationValue> population){
 		// Create a SpinNetwork with nodes linked to population entities
 		// The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
 		int i = 0;		
 		
 		// create all the nodes 
-		for (APopulationEntity entity : population) {
+		for (ADemoEntity entity : population) {
 			myNetwork.putNode(String.valueOf(i), entity);
 			i++;
 		}
@@ -60,7 +60,7 @@ public class SpinNetworkFactory {
 	 * @return SpinPopulation
 	 */
 	public SpinPopulation generateNetwork(ENetworkGenerator typeGenerator, 
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+			IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> population){
 		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
 			network = new SWNetworkGenerator().generateNetwork(baseNetwork,4, .1); 

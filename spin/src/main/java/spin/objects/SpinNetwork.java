@@ -17,7 +17,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.DefaultGraph;
 
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.ADemoEntity;
 import spin.interfaces.INetProperties;
 
 
@@ -30,16 +30,16 @@ public class SpinNetwork implements INetProperties{
 	public Graph network;
 	
 	// Map d'acces rapide;
-	public Map<Node, APopulationEntity> kvNodeEntityFastList;
-	public Map<APopulationEntity, Node> kvEntityNodeFastList;
+	public Map<Node, ADemoEntity> kvNodeEntityFastList;
+	public Map<ADemoEntity, Node> kvEntityNodeFastList;
 	
 	/** Constructeur sans param. 
 	 * 
 	 */
 	public SpinNetwork(){
 		network = new DefaultGraph("network");
-		kvNodeEntityFastList = new HashMap<Node, APopulationEntity>();
-		kvEntityNodeFastList = new HashMap<APopulationEntity, Node>();
+		kvNodeEntityFastList = new HashMap<Node, ADemoEntity>();
+		kvEntityNodeFastList = new HashMap<ADemoEntity, Node>();
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class SpinNetwork implements INetProperties{
 	 * @param nodeId the id of the Node to add
 	 * @param entite the population entity to which the Node is associated 
 	 */
-	public void putNode(String nodeId, APopulationEntity entite) {
+	public void putNode(String nodeId, ADemoEntity entite) {
 		network.addNode(nodeId);
 		
 		Node node = network.getNode(nodeId);
@@ -110,7 +110,7 @@ public class SpinNetwork implements INetProperties{
 	
 	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
 	
-	// TODO [stage] Random Walk ne fonctionne pas sur les graphes SF. Chercher une solution au probl�me
+	// TODO [stage] Random Walk ne fonctionne pas sur les graphes SF. Chercher une solution au probl�me
 	/** Creates a sample graph from an existing graph using the Random Walk Sampling Method
 	 * 
 	 * @param sampleSize the number of nodes we want in our sample graph
@@ -205,9 +205,9 @@ public class SpinNetwork implements INetProperties{
 			}
 			
 			// List the neighbors of the current node
-			List<APopulationEntity> neighborsEntity = new ArrayList<>(getNeighboor(currentNode.getAttribute("entity")));
+			List<ADemoEntity> neighborsEntity = new ArrayList<>(getNeighboor(currentNode.getAttribute("entity")));
 			List<Node> neighborsNode = new ArrayList<Node>();
-			for(APopulationEntity e : neighborsEntity) {
+			for(ADemoEntity e : neighborsEntity) {
 				neighborsNode.add(kvEntityNodeFastList.get(e));
 			}
 			
@@ -324,18 +324,18 @@ public class SpinNetwork implements INetProperties{
 	}
 
 	@Override
-	public double getClustering(APopulationEntity entite) {
+	public double getClustering(ADemoEntity entite) {
 		Node node = kvEntityNodeFastList.get(entite);
 		return clusteringCoefficient(node);
 	}
 
 	@Override
-	public Set<APopulationEntity> getNeighboor(APopulationEntity entite) {
+	public Set<ADemoEntity> getNeighboor(ADemoEntity entite) {
 		Node node = kvEntityNodeFastList.get(entite);
-		Set<APopulationEntity> neighbors = new HashSet<APopulationEntity>();
+		Set<ADemoEntity> neighbors = new HashSet<ADemoEntity>();
 		for(Node n : network.getEachNode()) {
 			if(!n.equals(node) && n.hasEdgeBetween(node)) {
-				APopulationEntity e = n.getAttribute("entity");
+				ADemoEntity e = n.getAttribute("entity");
 				neighbors.add(e);
 			}
 		}

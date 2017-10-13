@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.algo.ipf.AGosplIPF;
 import gospl.distribution.matrix.control.AControl;
 
@@ -23,17 +23,17 @@ import gospl.distribution.matrix.control.AControl;
  * @author kevinchapuis
  *
  */
-public abstract class AMargin<T extends Number> implements IMargin<APopulationAttribute, APopulationValue, T> {
+public abstract class AMargin<T extends Number> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
 
-	private APopulationAttribute controlAttribute;
-	private APopulationAttribute seedAttribute;
+	private DemographicAttribute<? extends IValue> controlAttribute;
+	private DemographicAttribute<? extends IValue> seedAttribute;
 	
-	protected Map<Set<APopulationValue>, AControl<T>> marginalControl;
+	protected Map<Set<IValue>, AControl<T>> marginalControl;
 	
 	/*
 	 * protected constructor to unsure safe initialization
 	 */
-	protected AMargin(APopulationAttribute controlAttribute, APopulationAttribute seedAttribute){
+	protected AMargin(DemographicAttribute<? extends IValue> controlAttribute, DemographicAttribute<? extends IValue> seedAttribute){
 		this.controlAttribute = controlAttribute;
 		this.seedAttribute = seedAttribute;
 		this.marginalControl = new HashMap<>();
@@ -45,17 +45,17 @@ public abstract class AMargin<T extends Number> implements IMargin<APopulationAt
 	}
 	
 	@Override
-	public AControl<T> getControl(Set<APopulationValue> seedMargin) {
+	public AControl<T> getControl(Set<IValue> seedMargin) {
 		return marginalControl.get(seedMargin);
 	}
 	
 	@Override
-	public APopulationAttribute getControlDimension() {
+	public DemographicAttribute<? extends IValue> getControlDimension() {
 		return controlAttribute;
 	}
 	
 	@Override
-	public APopulationAttribute getSeedDimension() {
+	public DemographicAttribute<? extends IValue> getSeedDimension() {
 		return seedAttribute;
 	}
 

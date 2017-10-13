@@ -12,9 +12,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
@@ -33,17 +33,17 @@ public class GosplAlgoUtilTest {
 	
 	private GosplAttributeFactory gaf = new GosplAttributeFactory();
 	private ISyntheticGosplPopGenerator generator;
-	private Set<APopulationAttribute> attributes;
+	private Set<DemographicAttribute> attributes;
 	
-	private IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population = null;
+	private IPopulation<ADemoEntity, DemographicAttribute, IValue> population = null;
 
-	public GosplAlgoUtilTest(Set<APopulationAttribute> attributes, 
+	public GosplAlgoUtilTest(Set<DemographicAttribute> attributes, 
 			ISyntheticGosplPopGenerator generator){
 		this.attributes = attributes;
 		this.generator = generator;
 	}
 	
-	public GosplAlgoUtilTest(Set<APopulationAttribute> attributes){
+	public GosplAlgoUtilTest(Set<DemographicAttribute> attributes){
 		this(attributes, new UtilGenerator(attributes));
 	}
 	
@@ -69,7 +69,7 @@ public class GosplAlgoUtilTest {
 	 * @return 
 	 * @return
 	 */
-	public IPopulation<APopulationEntity,APopulationAttribute,APopulationValue> buildPopulation(int size){
+	public IPopulation<ADemoEntity,DemographicAttribute,IValue> buildPopulation(int size){
 		this.population = generator.generate(size);
 		return this.population;
 	}
@@ -113,14 +113,14 @@ public class GosplAlgoUtilTest {
 		if(this.population == null)
 			this.buildPopulation(segmentSize);
 		log.debug("Try to build segmented matrix with {} dimensions", this.attributes.size());
-		Map<APopulationAttribute, Double> attributesProb = this.attributes.stream().collect(
+		Map<DemographicAttribute, Double> attributesProb = this.attributes.stream().collect(
 				Collectors.toMap(Function.identity(), att -> new Double(0.5)));
 
-		Collection<Set<APopulationAttribute>> segmentedAttribute = new HashSet<>();
+		Collection<Set<DemographicAttribute>> segmentedAttribute = new HashSet<>();
 		while(!segmentedAttribute.stream().flatMap(set -> set.stream())
 				.collect(Collectors.toSet()).containsAll(this.attributes)){
-			Set<APopulationAttribute> atts = new HashSet<>();
-			for(APopulationAttribute attribute : attributesProb.keySet()){
+			Set<DemographicAttribute> atts = new HashSet<>();
+			for(DemographicAttribute attribute : attributesProb.keySet()){
 				if(GenstarRandom.getInstance().nextDouble() < attributesProb.get(attribute)){
 					atts.add(attribute);
 					attributesProb.put(attribute, attributesProb.get(attribute) * 0.5); 

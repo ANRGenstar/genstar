@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
@@ -40,7 +40,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 
 	protected Logger logger = LogManager.getLogger();
 	
-	private List<ACoordinate<APopulationAttribute, APopulationValue>> indexedKey;
+	private List<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> indexedKey;
 	private List<Double> initProba;
 	
 
@@ -57,7 +57,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 		if(distribution.getMatrix().isEmpty())
 			throw new IllegalArgumentException("Probability vector must be nonempty.");
 		
-		Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> orderedDistribution = 
+		Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> orderedDistribution = 
 				distribution.getOrderedMatrix();
 		
 		this.indexedKey = new ArrayList<>(orderedDistribution.keySet());
@@ -143,7 +143,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<APopulationAttribute, APopulationValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	
@@ -154,7 +154,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 	 * @return A random value sampled from the underlying distribution.
 	 */
 	@Override
-	public ACoordinate<APopulationAttribute, APopulationValue> draw() {
+	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> draw() {
 		/* Generate a fair die roll to determine which column to inspect. */
 		int column =  GenstarRandom.getInstance().nextInt(probability.length);
 
@@ -167,14 +167,14 @@ public class GosplAliasSampler implements IDistributionSampler {
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<APopulationAttribute> attributs = new ArrayList<>(indexedKey
+		List<DemographicAttribute<? extends IValue>> attributs = new ArrayList<>(indexedKey
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
 		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
-		for(ACoordinate<APopulationAttribute, APopulationValue> coord : indexedKey){
+		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : indexedKey){
 			String line = "";
-			for(APopulationAttribute att : attributs){
+			for(DemographicAttribute<? extends IValue> att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
 						s += csvSeparator+coord.getMap().get(att);

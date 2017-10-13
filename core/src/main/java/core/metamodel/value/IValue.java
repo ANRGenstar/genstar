@@ -25,11 +25,13 @@ public interface IValue {
 	public String getStringValue();
 	
 	/**
-	 * The attribute this value refers to
+	 * The value space this value is part of
 	 * 
 	 * @return
 	 */
 	public IValueSpace<? extends IValue> getValueSpace();
+	
+	// --------------------------------------------------------------- //
 	
 	/**
 	 * Force to overload hashcode method to ensure equals consistency

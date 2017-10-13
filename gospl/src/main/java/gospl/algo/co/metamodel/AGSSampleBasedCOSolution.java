@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -30,22 +30,22 @@ import gospl.validation.GosplIndicatorFactory;
  */
 public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSolution {
 
-	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population;
-	protected Set<APopulationValue> valueList;
+	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population;
+	protected Set<IValue> valueList;
 	
-	protected Collection<APopulationEntity> sample;
+	protected Collection<ADemoEntity> sample;
 	
 	private double fitness = -1;
 	
-	public AGSSampleBasedCOSolution(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			Collection<APopulationEntity> sample){
+	public AGSSampleBasedCOSolution(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			Collection<ADemoEntity> sample){
 		this.population = population;
 		this.sample = sample;
 		this.valueList = population.stream().flatMap(entity -> entity.getValues().stream())
 				.collect(Collectors.toSet());
 	}
 	
-	public AGSSampleBasedCOSolution(Collection<APopulationEntity> population, Collection<APopulationEntity> sample){
+	public AGSSampleBasedCOSolution(Collection<ADemoEntity> population, Collection<ADemoEntity> sample){
 		this(new GosplPopulation(population), sample);
 	}
 	
@@ -62,7 +62,7 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	}
 	
 	@Override
-	public IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> getSolution() {
+	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> getSolution() {
 		return population;
 	}
 	
@@ -103,20 +103,20 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	 * <p>
 	 * May returns an empty map if no pair is find
 	 */
-	protected Map<APopulationEntity, APopulationEntity> findAnyTargetRemoveAddPair(
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			APopulationValue value){
-		Map<APopulationEntity, Collection<APopulationValue>> expectedRemove = population.stream()
+	protected Map<ADemoEntity, ADemoEntity> findAnyTargetRemoveAddPair(
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			IValue value){
+		Map<ADemoEntity, Collection<IValue>> expectedRemove = population.stream()
 				.filter(entity -> entity.getValues().contains(value))
 				.collect(Collectors.toSet()).stream()
 				.collect(Collectors.toMap(Function.identity(), 
 						entity -> entity.getValues().stream().filter(val -> !val.equals(value))
 						.collect(Collectors.toList())));
-		Optional<APopulationEntity> newEntity = sample.stream().filter(entity -> expectedRemove.values()
+		Optional<ADemoEntity> newEntity = sample.stream().filter(entity -> expectedRemove.values()
 				.stream().anyMatch(values -> entity.getValues().containsAll(values)))
 				.findFirst();
 		if(newEntity.isPresent()){
-			APopulationEntity oldEntity = expectedRemove.keySet().stream().filter(entity -> newEntity.get().getValues()
+			ADemoEntity oldEntity = expectedRemove.keySet().stream().filter(entity -> newEntity.get().getValues()
 					.containsAll(expectedRemove.get(entity)))
 					.findFirst().get();
 			return Stream.of(oldEntity).collect(Collectors.toMap(Function.identity(), e -> newEntity.get()));
@@ -130,9 +130,9 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	 * the new entity cannot be add (population.add(newEntity) returns false)
 	 * the method throw an exception
 	 */
-	protected IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> deepSwitch(
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, 
-			APopulationEntity oldEntity, APopulationEntity newEntity){
+	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> deepSwitch(
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population, 
+			ADemoEntity oldEntity, ADemoEntity newEntity){
 		if(!population.remove(oldEntity) || !population.add(newEntity))
 				throw new RuntimeException("Encounter a problem while switching between two entities:\n"
 						+ "remove entity = "+oldEntity.toString()+"\n"

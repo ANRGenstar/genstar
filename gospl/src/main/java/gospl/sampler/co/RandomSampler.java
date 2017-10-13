@@ -8,41 +8,41 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.ADemoEntity;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
 public class RandomSampler implements IEntitySampler {
 
-	Collection<APopulationEntity> sample;
+	Collection<ADemoEntity> sample;
 	
 	@Override
-	public APopulationEntity draw() {
+	public ADemoEntity draw() {
 		return sample.stream().skip(GenstarRandom.getInstance()
 				.nextInt(sample.size())).findFirst().get();
 	}
 
 	@Override
-	public List<APopulationEntity> draw(int numberOfDraw) {
+	public List<ADemoEntity> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).mapToObj(i -> draw())
 				.collect(Collectors.toList());
 	}
 	
 	@Override
-	public Set<APopulationEntity> drawUnique(int numberOfDraw){
-		final List<APopulationEntity> tmpSample = new ArrayList<>(sample);
-		Set<APopulationEntity> draws = new HashSet<>();
+	public Set<ADemoEntity> drawUnique(int numberOfDraw){
+		final List<ADemoEntity> tmpSample = new ArrayList<>(sample);
+		Set<ADemoEntity> draws = new HashSet<>();
 		for(int i = 0; i < numberOfDraw; i++){
-			APopulationEntity newEntity = this.draw();
+			ADemoEntity newEntity = this.draw();
 			draws.add(tmpSample.remove(newEntity) ? 
-					newEntity : (APopulationEntity) newEntity.clone());
+					newEntity : (ADemoEntity) newEntity.clone());
 		}
 		return draws;
 	}
 
 	@Override
-	public void setSample(Collection<APopulationEntity> sample) {
+	public void setSample(Collection<ADemoEntity> sample) {
 		this.sample = sample;
 	}
 	

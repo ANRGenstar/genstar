@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.factory.GosplAttributeFactory;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.entity.attribute.GosplAttributeFactory;
 import nl.knaw.dans.common.dbflib.CorruptedTableException;
 import nl.knaw.dans.common.dbflib.Field;
 import nl.knaw.dans.common.dbflib.IfNonExistent;
@@ -290,12 +290,13 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<APopulationValue>> getColumnHeaders(Set<APopulationAttribute> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
 		
-		Map<Integer, Set<APopulationValue>> res = new HashMap<>(attributes.size());
+		Map<Integer, Set<IValue>> res = new HashMap<>(attributes.size());
 				
 		// prepare attributes information
-		Map<String,APopulationAttribute> name2attribute = attributes.stream().collect(Collectors.toMap(a->a.getAttributeName(), a->a));
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = attributes.stream()
+				.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		// prepare table information
 		final Table table = getDBFTable();
@@ -305,13 +306,13 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		
 			Field currentField = fields.get(iField);
 			
-			APopulationAttribute att = name2attribute.get(currentField.getName());
+			DemographicAttribute<? extends IValue> att = name2attribute.get(currentField.getName());
 			
 			if (att == null)
 				// ignore missing attributes
 				continue;
 			
-			res.put(iField, att.getValues());
+			res.put(iField, att.getValueSpace().stream().collect(Collectors.toSet()));
 		}
 		
 		return res;
@@ -335,10 +336,17 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<APopulationValue>> getRowHeaders(Set<APopulationAttribute> attributes) {
+	public Map<Integer, Set<IValue>> getRowHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
 		return Collections.emptyMap();
 	}
 	
+	/**
+	 * WARNING
+	 * 
+	 * @param f
+	 * @param t
+	 * @return
+	 */
 	protected GSEnumDataType getGosplDatatypeForDatabaseType(Field f, Table t) {
 		switch (f.getType()) {
 		case NUMBER:
@@ -358,21 +366,21 @@ public class DBaseInputHandler extends AbstractInputHandler {
 				}
 				try {
 					Double.parseDouble(strVal);
-					return GSEnumDataType.Double;
+					return GSEnumDataType.Continue;
 				} catch (NumberFormatException e) {
 					try {
 						Integer.parseInt(strVal);
 						return GSEnumDataType.Integer;
 					} catch (NumberFormatException e2) {
-						return GSEnumDataType.String;
+						return GSEnumDataType.Nominal;
 					}
 				}
 			}
 		case FLOAT:
-			return GSEnumDataType.Double;
+			return GSEnumDataType.Continue;
 		case CHARACTER:
 		case MEMO:
-			return GSEnumDataType.String;
+			return GSEnumDataType.Nominal;
 		case LOGICAL:
 			return GSEnumDataType.Boolean;
 		default:
@@ -381,12 +389,12 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, APopulationAttribute> getColumnSample(Set<APopulationAttribute> attributes) {
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Set<DemographicAttribute<? extends IValue>> attributes) {
 
-		Map<Integer, APopulationAttribute> res = new HashMap<>(attributes.size());
+		Map<Integer, DemographicAttribute<? extends IValue>> res = new HashMap<>(attributes.size());
 				
 		// prepare attributes information
-		Map<String,APopulationAttribute> name2attribute = attributes.stream().collect(Collectors.toMap(a->a.getAttributeName(), a->a));
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = attributes.stream().collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		// prepare table information
 		final Table table = getDBFTable();
@@ -397,7 +405,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		
 			Field currentField = fields.get(iField);
 			
-			APopulationAttribute att = name2attribute.get(currentField.getName());
+			DemographicAttribute<? extends IValue> att = name2attribute.get(currentField.getName());
 			
 			if (att == null)
 				// ignore missing attributes
@@ -406,22 +414,22 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			res.put(iField, att);
 			
 			// check if we should, in any way, complete the attribute information
-			if (att.getDataType() == null) {
+			if (att.getValueSpace().getType() == null) {
 				// data type is not defined. Let's define it. 
 				// what is the datatype in the field ?
 				GSEnumDataType dt = null;
 				try {
 					dt = getGosplDatatypeForDatabaseType(currentField, table);
 				} catch (IllegalArgumentException e) {
-					logger.warn("unable to automatically define the type for field "+currentField+"; will treat it as a String", e);
-					dt = GSEnumDataType.String;
+					logger.warn("unable to automatically define the type for field "+currentField+"; will treat it as a Nominal string value", e);
+					dt = GSEnumDataType.Nominal;
 				}
 				
 				// update this attribute !
 				logger.info("refining the properties of attribute {} based on database content: its type is now {}", att, dt);
 
 				try {
-					APopulationAttribute updatedAtt = GosplAttributeFactory.getFactory().createRefinedAttribute(att, dt);
+					DemographicAttribute<IValue> updatedAtt = GosplAttributeFactory.getFactory().createRefinedAttribute(att, dt);
 					attributes.remove(att);
 					attributes.add(updatedAtt);
 					name2attribute.put(currentField.getName(), updatedAtt);

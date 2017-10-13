@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.geo.IValue;
 import core.util.GSPerformanceUtil;
 import spll.datamapper.variable.SPLVariable;
 
@@ -22,9 +22,9 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 
 	private int matcherCount = 0;
 
-	private Collection<? extends AGeoValue> variables;
+	private Collection<? extends IValue> variables;
 
-	public SPLAreaMatcherFactory(Collection<? extends AGeoValue> variables) {
+	public SPLAreaMatcherFactory(Collection<? extends IValue> variables) {
 		this.variables = variables;
 	}
 
@@ -63,13 +63,13 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	 * TODO: could be optimise
 	 */
 	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity entity,
-			Iterator<? extends AGeoEntity> geoData, Collection<? extends AGeoValue> variables, 
+			Iterator<? extends AGeoEntity> geoData, Collection<? extends IValue> variables, 
 			GSPerformanceUtil gspu) {
 		List<ISPLMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
 		while(geoData.hasNext()){
 			AGeoEntity geoEntity = geoData.next();  
 			for(String prop : geoEntity.getPropertiesAttribute()){
-				AGeoValue value = geoEntity.getValueForAttribute(prop);
+				IValue value = geoEntity.getValueForAttribute(prop);
 				if(!variables.isEmpty() && !variables.contains(value))
 					continue;
 				Optional<ISPLMatcher<SPLVariable, Double>> potentialMatch = areaMatcherList

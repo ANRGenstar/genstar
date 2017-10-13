@@ -11,19 +11,19 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import core.metamodel.IPopulation;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
 import core.metamodel.pop.APopulationValue;
 import spll.util.SpllUtil;
 
-public class SpllPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
+public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> {
 
 	private Collection<SpllEntity> population;
 	private IGSGeofile<? extends AGeoEntity> geoFile; 
 
-	private Set<APopulationAttribute> attributes;
+	private Set<DemographicAttribute> attributes;
 	
-	public SpllPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
+	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> population,
 			IGSGeofile<? extends AGeoEntity> geoFile) {
 		this.population = population.stream().map(entity -> new SpllEntity(entity))
 				.collect(Collectors.toSet());
@@ -60,7 +60,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 	
 	@Override
-	public Set<APopulationAttribute> getPopulationAttributes() {
+	public Set<DemographicAttribute> getPopulationAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}
 	
@@ -85,8 +85,8 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public Iterator<APopulationEntity> iterator() {
-		return new ArrayList<APopulationEntity>(this).iterator();
+	public Iterator<ADemoEntity> iterator() {
+		return new ArrayList<ADemoEntity>(this).iterator();
 	}
 
 	@Override
@@ -100,7 +100,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public boolean add(APopulationEntity e) {
+	public boolean add(ADemoEntity e) {
 		return population.add(new SpllEntity(e));
 	}
 
@@ -115,7 +115,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends APopulationEntity> c) {
+	public boolean addAll(Collection<? extends ADemoEntity> c) {
 		return population.addAll(c.stream().map(e -> new SpllEntity(e))
 				.collect(Collectors.toList()));
 	}

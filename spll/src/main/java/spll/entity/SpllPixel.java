@@ -9,7 +9,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.value.geo.IValue;
 
 public class SpllPixel extends AGeoEntity {
 	
@@ -18,7 +18,7 @@ public class SpllPixel extends AGeoEntity {
 	private int gridX;
 	private int gridY;
 	
-	protected SpllPixel(Set<AGeoValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
+	protected SpllPixel(Set<IValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
 		super(bandsData, "px ["+pixel.getCenterX()+";"+pixel.getCenterY()+"]");
 		this.gridX = gridX;
 		this.gridY = gridY;

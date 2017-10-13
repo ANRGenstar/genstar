@@ -23,14 +23,14 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.value.geo.IValue;
 import spll.entity.attribute.RawGeoAttribute;
 import spll.entity.attribute.value.RawGeoData;
 
 /**
  * The factory to safely create Spll geographical entity
  * <p>
- *  TODO: revise what AGeoValue should be
+ *  TODO: revise what IValue should be
  * 
  * @author kevinchapuis
  *
@@ -94,7 +94,7 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllFeature createGeoEntity(Feature feature, List<String> attList) {
-		Set<AGeoValue> values = new HashSet<>();
+		Set<IValue> values = new HashSet<>();
 		NumberFormat defaultFormat = NumberFormat.getInstance();
 		for(Property property : feature.getProperties()){
 			String name = property.getName().getLocalPart();
@@ -104,7 +104,7 @@ public class GeoEntityFactory {
 				attribute = new RawGeoAttribute(name);
 				attributes.put(name,attribute);
 			}
-			AGeoValue value = attribute.getValue( property.getValue().toString());
+			IValue value = attribute.addValue( property.getValue().toString());
 			if (value == null) {
 				try {
 					Number val = defaultFormat.parse(property.getValue().toString());
@@ -126,7 +126,7 @@ public class GeoEntityFactory {
 	 * @param featureValues
 	 * @return
 	 */
-	public SpllFeature createGeoEntity(Geometry the_geom, Set<AGeoValue> featureValues){
+	public SpllFeature createGeoEntity(Geometry the_geom, Set<IValue> featureValues){
 		// Use factory defined feature constructor to build the inner feature
 		contingencyFeatureBuilder.add(the_geom);
 		featureValues.stream().forEach(values -> 
@@ -135,7 +135,7 @@ public class GeoEntityFactory {
 		Feature feat = contingencyFeatureBuilder.buildFeature(null);
 		// Add non previously encountered attribute to attributes set
 		
-		for (AGeoValue val: featureValues) {
+		for (IValue val: featureValues) {
 			if (!attributes.containsKey(val.getInputStringValue())) 
 				attributes.put(val.getInputStringValue(), val.getAttribute());
 		}
@@ -154,7 +154,7 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
-		Set<AGeoValue> values = new HashSet<>();
+		Set<IValue> values = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
 			AGeoAttribute attribute = attributes.get(bandsName);
@@ -164,10 +164,10 @@ public class GeoEntityFactory {
 			}
 				
 			int idx = i;
-			Optional<AGeoValue> opVal = values
+			Optional<IValue> opVal = values
 					.stream().filter(val -> val.getInputStringValue().equals(pixelBands[idx].toString()))
 					.findFirst();
-			AGeoValue value = opVal.isPresent() ? opVal.get() : new RawGeoData(attribute, pixelBands[i]);
+			IValue value = opVal.isPresent() ? opVal.get() : new RawGeoData(attribute, pixelBands[i]);
 			if(!opVal.isPresent())
 				attribute.addValue(value);
 			values.add(value);

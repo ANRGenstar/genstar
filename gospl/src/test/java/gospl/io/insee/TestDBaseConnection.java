@@ -15,8 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.IGSSurvey;
 import gospl.GosplPopulation;
@@ -87,7 +87,7 @@ public class TestDBaseConnection {
 		}
 		
 		
-		Collection<APopulationAttribute> attributes = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
+		Collection<DemographicAttribute> attributes = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
 																dictionaryFilename
 																);
 
@@ -109,7 +109,7 @@ public class TestDBaseConnection {
 			throw new RuntimeException(e);
 		}
 		
-		for (APopulationEntity e: pop) {
+		for (ADemoEntity e: pop) {
 		
 			System.err.println(e);
 		}

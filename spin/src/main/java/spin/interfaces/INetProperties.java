@@ -2,7 +2,7 @@ package spin.interfaces;
 
 import java.util.Set;
 
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.ADemoEntity;
 
 /** 
  * Interface pour obtenir des valeurs de propriete sur le graphe
@@ -22,14 +22,14 @@ public interface INetProperties {
 	 * @param entite
 	 * @return
 	 */
-	double getClustering(APopulationEntity entite);
+	double getClustering(ADemoEntity entite);
 	
 	/** Obtient les noeuds voisins a l'entite specifier
 	 * 
 	 * @param entite
 	 * @return
 	 */
-	Set<APopulationEntity> getNeighboor(APopulationEntity entite);
+	Set<ADemoEntity> getNeighboor(ADemoEntity entite);
 	
 	/** Obtient la densite du reseau
 	 * 

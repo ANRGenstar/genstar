@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -12,13 +11,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.IAttribute;
+import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
@@ -34,14 +35,14 @@ import gospl.distribution.matrix.coordinate.GosplCoordinate;
  *
  * @param <T>
  */
-public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<APopulationAttribute, APopulationValue, T> {
+public abstract class AFullNDimensionalMatrix<T extends Number> implements INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> {
 
 	private GSSurveyType dataType; 
 
-	private final Map<APopulationAttribute, Set<APopulationValue>> dimensions;
-	protected final Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix;
+	private final Set<DemographicAttribute<? extends IValue>> dimensions;
+	protected final Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> matrix;
 
-	private ACoordinate<APopulationAttribute, APopulationValue> emptyCoordinate = null;
+	private ACoordinate<DemographicAttribute<? extends IValue>, IValue> emptyCoordinate = null;
 
 	protected String label = null;
 	
@@ -55,22 +56,16 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	 * @param dimensionAspectMap
 	 * @param metaDataType
 	 */
-	public AFullNDimensionalMatrix(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap, GSSurveyType metaDataType) {
-		this.dimensions = new HashMap<>(dimensionAspectMap);
-		this.matrix = new ConcurrentHashMap<>(dimensions.entrySet().stream()
-				.mapToInt(d -> d.getValue().size())
+	public AFullNDimensionalMatrix(Set<DemographicAttribute<? extends IValue>> dimensions, GSSurveyType metaDataType) {
+		this.dimensions = new HashSet<>(dimensions);
+		this.matrix = new ConcurrentHashMap<>(dimensions.stream()
+				.mapToInt(d -> d.getValueSpace().size())
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
-		this.emptyCoordinate = new GosplCoordinate(Collections.<APopulationValue>emptySet());
-		this.label = dimensionAspectMap.keySet().stream().map(dim -> dim.getAttributeName().length()>3?dim.getAttributeName().substring(0, 3):dim.getAttributeName())
+		this.emptyCoordinate = new GosplCoordinate(Collections.emptyMap());
+		this.label = dimensions.stream().map(dim -> dim.getAttributeName().length()>3 ? 
+				dim.getAttributeName().substring(0, 3) : dim.getAttributeName())
 				.collect(Collectors.joining(" x "));
-	}
-	
-	public AFullNDimensionalMatrix(Set<APopulationAttribute> attributes, GSSurveyType metaDataType) {
-		this(
-				attributes.stream().collect(Collectors.toMap(Function.identity(),APopulationAttribute::getValues)),
-				metaDataType
-				);
 	}
 	
 	/**
@@ -81,11 +76,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	 * 
 	 * @param matrix
 	 */
-	protected AFullNDimensionalMatrix(Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> matrix){
+	protected AFullNDimensionalMatrix(Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> matrix){
 		this.dimensions = matrix.keySet().stream()
 				.flatMap(coord -> coord.getDimensions().stream())
-				.collect(Collectors.toSet()).stream()
-				.collect(Collectors.toMap(Function.identity(), dim -> dim.getValues()));
+				.collect(Collectors.toSet());
 		this.matrix = matrix;
 	}
 	
@@ -168,12 +162,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public final boolean addValue(T value, String... coordinates) {
-		return this.addValue(GosplCoordinate.createCoordinate(dimensions.keySet(), coordinates), value);
+		return this.addValue(GosplCoordinate.createCoordinate(dimensions, coordinates), value);
 	}
 
 	@Override
 	public final boolean setValue(T value, String... coordinates) {
-		return this.setValue(GosplCoordinate.createCoordinate(dimensions.keySet(), coordinates), value);
+		return this.setValue(GosplCoordinate.createCoordinate(dimensions, coordinates), value);
 	}
 
 	
@@ -183,45 +177,44 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Set<APopulationAttribute> getDimensions(){
-		return Collections.unmodifiableSet(dimensions.keySet());
+	public Set<DemographicAttribute<? extends IValue>> getDimensions(){
+		return Collections.unmodifiableSet(dimensions);
 	}
 	
 	@Override
-	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues() {
-		return Collections.unmodifiableMap(dimensions);
+	public Map<DemographicAttribute<? extends IValue>, Set<? extends IValue>> getDimensionsAsAttributesAndValues() {
+		return dimensions.stream().collect(Collectors.toMap(Function.identity(), DemographicAttribute::getValueSpace));
 	}
 
 	@Override
-	public APopulationAttribute getDimension(APopulationValue aspect) {
-		if(!dimensions.values().stream().flatMap(values -> values.stream()).collect(Collectors.toSet()).contains(aspect))
+	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
+		if(!dimensions.stream().flatMap(dim -> dim.getValueSpace().stream()).anyMatch(asp -> asp.equals(aspect)))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
-		return dimensions.entrySet()
-				.stream().filter(e -> e.getValue().contains(aspect))
-				.findFirst().get().getKey();
+		return dimensions.stream().filter(e -> e.getValueSpace().contains(aspect))
+				.findFirst().get();
 	}
 
 	@Override
-	public Set<APopulationValue> getAspects(){
-		return Collections.unmodifiableSet(dimensions.values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
+	public Set<IValue> getAspects(){
+		return dimensions.stream().flatMap(dim -> dim.getValueSpace().stream()).collect(Collectors.toSet());
 	}
 
 	@Override
-	public Set<APopulationValue> getAspects(APopulationAttribute dimension) {
-		if(!dimensions.containsKey(dimension))
+	public Set<IValue> getAspects(DemographicAttribute<? extends IValue> dimension) {
+		if(!dimensions.contains(dimension))
 			throw new NullPointerException("dimension "+dimension+" is not present in the joint distribution");
-		return Collections.unmodifiableSet(dimensions.get(dimension));
+		return Collections.unmodifiableSet(dimension.getValueSpace());
 	}
 	
 
 	@Override
-	public Set<APopulationValue> getValues(String... keyAndVal) throws IllegalArgumentException {
+	public Set<IValue> getValues(String... keyAndVal) throws IllegalArgumentException {
 
-		Set<APopulationValue> coordinateValues = new HashSet<>();
+		Set<IValue> coordinateValues = new HashSet<>();
 		
 		// collect all the attributes and index their names
-		Map<String,APopulationAttribute> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
-															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
+															.collect(Collectors.toMap(DemographicAttribute::getAttributeName,Function.identity()));
 
 		if (keyAndVal.length/2 != name2attribute.size()) {
 			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
@@ -232,10 +225,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			final String attributeName = keyAndVal[i];
 			final String attributeValueStr = keyAndVal[i+1];
 			
-			APopulationAttribute attribute = name2attribute.get(attributeName);
+			DemographicAttribute<? extends IValue> attribute = name2attribute.get(attributeName);
 			if (attribute == null)
 				throw new IllegalArgumentException("unknown attribute "+attributeName);
-			coordinateValues.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
+			coordinateValues.add(attribute.getValueSpace().addValue(attributeValueStr)); // will raise exception if the value is not ok
 
 		}
 		
@@ -243,18 +236,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<T>> getMatrix(){
+	public Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> getMatrix(){
 		return Collections.unmodifiableMap(matrix);
 	}
 	
 	@Override
-	public LinkedHashMap<ACoordinate<APopulationAttribute,APopulationValue>, AControl<T>> getOrderedMatrix() {
+	public LinkedHashMap<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> getOrderedMatrix() {
 		return matrix.entrySet().stream().sorted(Map.Entry.comparingByValue())
 				.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue(), (e1, e2) -> e1, LinkedHashMap::new));
 	}
 	
 	@Override
-	public ACoordinate<APopulationAttribute, APopulationValue> getEmptyCoordinate(){
+	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> getEmptyCoordinate(){
 		return emptyCoordinate;
 	}
 
@@ -271,7 +264,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 	
 	@Override
-	public AControl<T> getVal(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
+	public AControl<T> getVal(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate) {
 		
 		AControl<T> res = this.matrix.get(coordinate);
 		
@@ -289,12 +282,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public AControl<T> getVal(APopulationValue aspect) {
+	public AControl<T> getVal(IValue aspect) {
 		return this.getVal(aspect, false);
 	}
 	
 	@Override
-	public AControl<T> getVal(APopulationValue aspect, boolean defaultToNul){
+	public AControl<T> getVal(IValue aspect, boolean defaultToNul){
 		if(!matrix.keySet().stream().anyMatch(coord -> coord.contains(aspect)))
 			if(defaultToNul)
 				return getNulVal();
@@ -306,12 +299,12 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public AControl<T> getVal(Collection<APopulationValue> aspects) {
+	public AControl<T> getVal(Collection<IValue> aspects) {
 		return getVal(aspects, false);
 	}
 	
 	@Override
-	public AControl<T> getVal(Collection<APopulationValue> aspects, boolean defaultToNul) {
+	public AControl<T> getVal(Collection<IValue> aspects, boolean defaultToNul) {
 		if(!aspects.stream().allMatch(a -> matrix.keySet()
 				.stream().anyMatch(coord -> coord.contains(a))))
 			if (defaultToNul)
@@ -321,21 +314,9 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 					+ aspects.size()+" is absent from this matrix"
 					+ " (size = "+this.size()+" - attribute = "+Arrays.toString(this.getDimensions().toArray())+")");
 		
-		Map<APopulationAttribute, Set<APopulationValue>> attAsp = aspects.stream()
-				.collect(Collectors.groupingBy(aspect -> aspect.getAttribute(),
+		Map<IAttribute<? extends IValue>, Set<IValue>> attAsp = aspects.stream()
+				.collect(Collectors.groupingBy(aspect -> aspect.getValueSpace().getAttribute(),
 				Collectors.mapping(Function.identity(), Collectors.toSet())));
-		
-		/*
-		 * TODO: seems not to be as worse as expected in term of efficiency
-		 * Rather strange because it collect and then reduce
-		AControl<T> result = getNulVal();
-		for(AControl<T> val : this.matrix.entrySet().stream().filter(e -> attAsp.values()
-				.stream().allMatch(set -> e.getKey().values().stream()
-						.anyMatch(a -> set.contains(a))))
-				.map(Entry::getValue).collect(Collectors.toList()))
-			getSummedControl(result, val);
-		return result;
-		*/
 		
 		return this.matrix.entrySet().stream().filter(e -> attAsp.values()
 						.stream().allMatch(set -> e.getKey().values().stream()
@@ -345,11 +326,11 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	public final AControl<T> getVal(String ... coordinates) {
 		
-		Collection<APopulationValue> l = new LinkedList<>();
+		Set<IValue> l = new TreeSet<>();
 		
 		// collect all the attributes and index their names
-		Map<String,APopulationAttribute> name2attribute = dimensions.keySet().stream()
-															.collect(Collectors.toMap(APopulationAttribute::getAttributeName,Function.identity()));
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = dimensions.stream()
+															.collect(Collectors.toMap(DemographicAttribute::getAttributeName,Function.identity()));
 
 		if (coordinates.length % 2 != 0) {
 			throw new IllegalArgumentException("values should be passed in even count, "
@@ -362,18 +343,18 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			final String attributeName = coordinates[i];
 			final String attributeValueStr = coordinates[i+1];
 			
-			APopulationAttribute attribute = name2attribute.get(attributeName);
+			DemographicAttribute<? extends IValue> attribute = name2attribute.get(attributeName);
 			if (attribute == null)
 				throw new IllegalArgumentException("unknown attribute "+attributeName);
-			l.add(attribute.getValue(attributeValueStr)); // will raise exception if the value is not ok
+			l.add(attribute.getValueSpace().addValue(attributeValueStr)); // will raise exception if the value is not ok
 			
 		}
 		
 		return getVal(l);
 	}
 	
-	public final AControl<T> getVal(APopulationValue ... aspects) {
-		return getVal(Arrays.asList(aspects));
+	public final AControl<T> getVal(IValue ... aspects) {
+		return getVal(new HashSet<>(Arrays.asList(aspects)));
 	}
 	
 	
@@ -382,28 +363,29 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	///////////////////////////////////////////////////////////////////////////
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<APopulationAttribute, APopulationValue> coordinate) {
-		List<APopulationAttribute> dimensionsAspects = new ArrayList<>();
-		for(APopulationValue aspect : coordinate.values()){
-			for(APopulationAttribute dim : dimensions.keySet()){
-				if(dimensions.containsKey(dim)) {
-					if(dimensions.get(dim).contains(aspect))
+	public boolean isCoordinateCompliant(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate) {
+		List<DemographicAttribute<? extends IValue>> dimensionsAspects = new ArrayList<>();
+		for(IValue aspect : coordinate.values()){
+			for(DemographicAttribute<? extends IValue> dim : dimensions){
+				if(dimensions.contains(dim)) {
+					if(dim.getValueSpace().contains(aspect))
 						dimensionsAspects.add(dim);
-				} else if(dim.getEmptyValue() != null && dim.getEmptyValue().equals(aspect))
+				} else if(dim.getEmptyValue() != null 
+						&& dim.getEmptyValue().equals(aspect))
 					dimensionsAspects.add(dim);
 			}
 		}
-		Set<APopulationAttribute> dimSet = new HashSet<>(dimensionsAspects);
+		Set<DemographicAttribute<? extends IValue>> dimSet = new HashSet<>(dimensionsAspects);
 		if(dimensionsAspects.size() == dimSet.size())
 			return true;
 		return false;
 	}
 	
 	@Override
-	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(Set<APopulationValue> values){
-		Map<APopulationAttribute, Set<APopulationValue>> attValues = values.stream()
-				.filter(val -> this.getDimensions().contains(val.getAttribute()))
-				.collect(Collectors.groupingBy(value -> value.getAttribute(),
+	public Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> getCoordinates(Set<IValue> values){
+		Map<IAttribute<? extends IValue>, Set<IValue>> attValues = values.stream()
+				.filter(val -> this.getDimensions().contains(val.getValueSpace().getAttribute()))
+				.collect(Collectors.groupingBy(value -> value.getValueSpace().getAttribute(),
 				Collectors.mapping(Function.identity(), Collectors.toSet())));
 		return this.matrix.keySet().stream().filter(coord -> attValues.values()
 				.stream().allMatch(attVals -> attVals.stream().anyMatch(val -> coord.contains(val))))
@@ -411,21 +393,21 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	}
 
 	@Override
-	public APopulationAttribute getDimension(String name) throws IllegalArgumentException {
+	public DemographicAttribute<? extends IValue> getDimension(String name) throws IllegalArgumentException {
 		
-		for (APopulationAttribute a: dimensions.keySet())
+		for (DemographicAttribute<? extends IValue> a: dimensions)
 			if (a.getAttributeName().equals(name))
 				return a;
 
 		throw new IllegalArgumentException(
 				"unknown dimension "+name+"; available dimensions are "+
-				dimensions.keySet().stream().map(d -> d.getAttributeName()).reduce("", (u,t)->u+","+t)
+				dimensions.stream().map(d -> d.getAttributeName()).reduce("", (u,t)->u+","+t)
 				);
 	}
 
 
 	@Override
-	public Collection<ACoordinate<APopulationAttribute, APopulationValue>> getCoordinates(String... keyAndVal)
+	public Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> getCoordinates(String... keyAndVal)
 			throws IllegalArgumentException {
 
 		return getCoordinates(getValues(keyAndVal));
@@ -433,10 +415,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 
 	@Override
-	public ACoordinate<APopulationAttribute, APopulationValue> getCoordinate(String... keyAndVal)
+	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> getCoordinate(String... keyAndVal)
 			throws IllegalArgumentException {
 		
-		Collection<ACoordinate<APopulationAttribute, APopulationValue>> s = getCoordinates(keyAndVal);
+		Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> s = getCoordinates(keyAndVal);
 				
 		if (s.size() > 1) 
 			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
@@ -455,10 +437,9 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	 * TODO: turn values to coordinate to unsure one value per dimension
 	 */
 	@Override
-	public Set<APopulationValue> getEmptyReferentCorrelate(
-			ACoordinate<APopulationAttribute, APopulationValue> coordinate){
+	public Set<IValue> getEmptyReferentCorrelate(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate){
 		// Only focus on values of mapped attribute
-		Map<APopulationAttribute, APopulationValue> dimRef = this.getDimensions()
+		Map<DemographicAttribute<? extends IValue>, IValue> dimRef = this.getDimensions()
 				.stream().filter(dim -> !dim.getReferentAttribute().equals(dim) 
 						&& coordinate.getDimensions().contains(dim.getReferentAttribute()))
 				.collect(Collectors.toMap(Function.identity(), 
@@ -466,14 +447,14 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		
 		if(dimRef.isEmpty())
 			return Collections.emptySet();
-		Set<APopulationValue> emptyReferentValue = dimRef.entrySet().stream()
+		Set<IValue> emptyReferentValue = dimRef.entrySet().stream()
 				.flatMap(e -> e.getKey().findMappedAttributeValues(e.getValue()).stream())
-				.filter(val -> val.getAttribute().getEmptyValue().equals(val))
+				.filter(val -> val.getValueSpace().getEmptyValue().equals(val))
 				.collect(Collectors.toSet());
 		if(emptyReferentValue.isEmpty())
 			return Collections.emptySet();
 		return this.getDimensions().stream().filter(dim -> emptyReferentValue
-				.stream().noneMatch(val -> val.getAttribute().equals(dim)))
+				.stream().noneMatch(val -> val.getValueSpace().getAttribute().equals(dim)))
 				.map(dim -> dim.getEmptyValue()).collect(Collectors.toSet());
 	}
 
@@ -481,15 +462,16 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	@Override
 	public String toString(){
-		int theoreticalSpaceSize = this.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
+		int theoreticalSpaceSize = this.getDimensions().stream().mapToInt(d -> d.getValueSpace().size()).reduce(1, (i1, i2) -> i1 * i2);
 		StringBuffer sb = new StringBuffer();
-		sb.append("-- Matrix: ").append(dimensions.size()).append(" dimensions and ").append(dimensions.values().stream().mapToInt(Collection::size).sum())
+		sb.append("-- Matrix: ").append(dimensions.size()).append(" dimensions and ").append(dimensions.stream()
+				.mapToInt(dim -> dim.getValueSpace().size()).sum())
 					.append(" aspects (theoretical size:").append(theoreticalSpaceSize).append(")--\n");
 		AControl<T> empty = getNulVal();
-		for(APopulationAttribute dimension : dimensions.keySet()){
+		for(DemographicAttribute<? extends IValue> dimension : dimensions){
 			sb.append(" -- dimension: ").append(dimension.getAttributeName());
-			sb.append(" with ").append(dimensions.get(dimension).size()).append(" aspects -- \n");
-			for(APopulationValue aspect : dimensions.get(dimension)) {
+			sb.append(" with ").append(dimension.getValueSpace().size()).append(" aspects -- \n");
+			for(IValue aspect : dimension.getValueSpace()) {
 				AControl<T> value = null;
 				try {
 					value = getVal(aspect);
@@ -506,26 +488,26 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public String toCsv(char csvSeparator) {
-		List<APopulationAttribute> atts = new ArrayList<>(getDimensions());
+		List<DemographicAttribute<? extends IValue>> atts = new ArrayList<>(getDimensions());
 		AControl<T> emptyVal = getNulVal();
 		String csv = "";
-		for(APopulationAttribute att :atts){
+		for(DemographicAttribute<? extends IValue> att :atts){
 			if(!csv.isEmpty())
 				csv += csvSeparator;
 			csv+=att.getAttributeName();
 		}
 		csv += csvSeparator+"value\n";
-		for(ACoordinate<APopulationAttribute, APopulationValue> coordVal : matrix.keySet()){
+		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordVal : matrix.keySet()){
 			String csvLine = "";
-			for(APopulationAttribute att :atts){
+			for(DemographicAttribute<? extends IValue> att :atts){
 				if(!csvLine.isEmpty())
 					csvLine += csvSeparator;
 				if(!coordVal.values()
-						.stream().anyMatch(asp -> asp.getAttribute().equals(att)))
+						.stream().anyMatch(asp -> asp.getValueSpace().getAttribute().equals(att)))
 					csvLine += " ";
 				else {
 					String val = coordVal.values()
-							.stream().filter(asp -> asp.getAttribute().equals(att))
+							.stream().filter(asp -> asp.getValueSpace().getAttribute().equals(att))
 							.findFirst().get().getStringValue();
 					if(val.isEmpty())
 						val = "empty value";
@@ -545,11 +527,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public boolean checkAllCoordinatesHaveValues() {
 		
-		return matrix.size() == dimensions.values().stream().mapToInt(Set::size).reduce(1, (a, b) -> a * b);
+		return matrix.size() == dimensions.stream().mapToInt(dim -> dim.getValueSpace().size()).reduce(1, (a, b) -> a * b);
 
 	}
 	
-
 	@Override
 	public boolean checkGlobalSum() {
 		

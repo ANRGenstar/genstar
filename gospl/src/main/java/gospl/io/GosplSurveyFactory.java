@@ -34,14 +34,13 @@ import org.apache.logging.log4j.Level;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
-import core.util.data.GSEnumDataType;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.io.exception.InvalidSurveyFormatException;
@@ -409,7 +408,7 @@ public class GosplSurveyFactory {
 	 * @throws InvalidSurveyFormatException
 	 */
 	public IGSSurvey createSummary(File surveyFile, GSSurveyType surveyType,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
 					throws InvalidFormatException, IOException, InvalidSurveyFormatException{
 		switch (surveyType) {
 		case Sample:
@@ -435,8 +434,8 @@ public class GosplSurveyFactory {
 	 * @throws InvalidSurveyFormatException 
 	 * @throws InvalidFormatException 
 	 */
-	public IGSSurvey createContingencyTable(File surveyFile, Set<APopulationAttribute> format,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
+	public IGSSurvey createContingencyTable(File surveyFile, Set<DemographicAttribute<? extends IValue>> format,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
 					throws IOException, InvalidFormatException, InvalidSurveyFormatException{
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("TEST OUTPUT TABLES", Level.TRACE);
@@ -449,9 +448,9 @@ public class GosplSurveyFactory {
 					+ "Format: "+Arrays.toString(format.toArray())+"\n"
 					+ "Population: "+Arrays.toString(popMatrix.getDimensions().toArray()));
 
-		List<APopulationAttribute> columnHeaders = format.stream().skip(format.size()/2)
+		List<DemographicAttribute<? extends IValue>> columnHeaders = format.stream().skip(format.size()/2)
 				.collect(Collectors.toList());
-		List<APopulationAttribute> rowHeaders = format.stream()
+		List<DemographicAttribute<? extends IValue>> rowHeaders = format.stream()
 				.filter(att -> !columnHeaders.contains(att)).collect(Collectors.toList());
 
 		gspu.sysoStempMessage("Columns: "+columnHeaders.stream().map(att -> att.getAttributeName())
@@ -462,7 +461,7 @@ public class GosplSurveyFactory {
 		String report = "";
 
 		if(rowHeaders.isEmpty()){
-			List<APopulationValue> vals = columnHeaders.stream().flatMap(att -> att.getValues().stream())
+			List<IValue> vals = columnHeaders.stream().flatMap(att -> att.getValueSpace().stream())
 					.collect(Collectors.toList());
 			report += vals.stream().map(val -> val.getStringValue())
 					.collect(Collectors.joining(String.valueOf(separator)))
@@ -471,8 +470,8 @@ public class GosplSurveyFactory {
 					.collect(Collectors.joining(String.valueOf(separator)))+String.valueOf(separator)
 					+vals.stream().mapToInt(val -> popMatrix.getVal(val, true).getValue()).sum();
 		} else {
-			Map<Integer, List<APopulationValue>> columnHead = getTableHeader(columnHeaders);
-			Map<Integer, List<APopulationValue>> rowHead = getTableHeader(rowHeaders);
+			Map<Integer, List<IValue>> columnHead = getTableHeader(columnHeaders);
+			Map<Integer, List<IValue>> rowHead = getTableHeader(rowHeaders);
 
 			String blankHeadLine = rowHeaders.stream().map(rAtt -> " "+String.valueOf(separator))
 					.collect(Collectors.joining());
@@ -516,31 +515,31 @@ public class GosplSurveyFactory {
 	// ---------------------- inner methods ---------------------- // 
 
 	private IGSSurvey createTableSummary(File surveyFile, GSSurveyType surveyType,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) throws IOException, InvalidFormatException, InvalidSurveyFormatException {
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) throws IOException, InvalidFormatException, InvalidSurveyFormatException {
 		
-		Set<APopulationAttribute> attributes = population.getPopulationAttributes();
+		Collection<DemographicAttribute<? extends IValue>> attributes = population.getPopulationAttributes();
 		
 		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
 				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
-		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValues().size()+1).max().getAsInt())
+		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValueSpace().size()+1).max().getAsInt())
 				.mapToObj(i -> "").collect(Collectors.toList());
 
-		Map<APopulationValue, Integer> mapReport = attributes.stream()
-				.flatMap(att -> Stream.concat(att.getValues().stream(), Stream.of(att.getEmptyValue()))
+		Map<IValue, Integer> mapReport = attributes.stream()
+				.flatMap(att -> Stream.concat(att.getValueSpace().stream(), Stream.of(att.getEmptyValue()))
 				.collect(Collectors.toSet()).stream())
 				.collect(Collectors.toMap(Function.identity(), value -> 0));
 		
 		population.stream().forEach(entity -> entity.getValues()
 				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));
 
-		for(APopulationAttribute attribute : attributes){
+		for(DemographicAttribute<? extends IValue> attribute : attributes){
 			
 			int lineNumber = 0;
 			
-			Set<APopulationValue> attValues = Stream.concat(attribute.getValues().stream(), 
+			Set<IValue> attValues = Stream.concat(attribute.getValueSpace().stream(), 
 					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
 			
-			for(APopulationValue value : attValues) {
+			for(IValue value : attValues) {
 				String val = "";
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
 					val = String.valueOf(mapReport.get(value));
@@ -575,27 +574,27 @@ public class GosplSurveyFactory {
 	 * @throws InvalidFileTypeException
 	 */
 	private IGSSurvey createSample(File surveyFile, 
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) 
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
 		
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
-		final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
+		final Collection<DemographicAttribute<? extends IValue>> attributes = population.getPopulationAttributes();
 		bw.write("Individual");
 		bw.write(separator);
 		bw.write(attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator))));
 		bw.write("\n");
-		for (final APopulationEntity e : population) {
+		for (final ADemoEntity e : population) {
 			bw.write(String.valueOf(individual++));
-			for (final APopulationAttribute attribute : attributes) {
+			for (final DemographicAttribute<? extends IValue> attribute : attributes) {
 				bw.write(separator);
 				try {
 		
-					APopulationValue val = e.getValueForAttribute(attribute); 
+					IValue val = e.getValueForAttribute(attribute); 
 					String v = val.getStringValue();
 					
 					
-					if (attribute.getDataType() == GSEnumDataType.String) {
+					if (!attribute.getValueSpace().getType().isNumericValue()) {
 						bw.write("\"");
 						bw.write(v);
 						bw.write("\"");
@@ -613,22 +612,21 @@ public class GosplSurveyFactory {
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}
 
-	private Map<Integer, List<APopulationValue>> getTableHeader(Collection<APopulationAttribute> headerAttributes){
-		List<APopulationAttribute> hAtt = new ArrayList<>(headerAttributes);
-		APopulationAttribute anchor = hAtt.get(0);
-		List<List<APopulationValue>> head = anchor.getValues()
-				.stream().map(val -> Stream.of(val).collect(Collectors.toList()))
-				.collect(Collectors.toList());
-		hAtt.remove(anchor);
-		for(APopulationAttribute headAtt : hAtt){
-			List<List<APopulationValue>> tmpHead = new ArrayList<>();
-			for(List<APopulationValue> currentHead : head)
-				tmpHead.addAll(headAtt.getValues().stream()
+	private Map<Integer, List<IValue>> getTableHeader(Collection<DemographicAttribute<? extends IValue>> headerAttributes){
+		DemographicAttribute<? extends IValue> anchor = headerAttributes.iterator().next();
+		List<List<IValue>> head = new ArrayList<>();
+		for(IValue value : anchor.getValueSpace())
+			head.add(new ArrayList<>(Arrays.asList(value)));
+		headerAttributes.remove(anchor);
+		for(DemographicAttribute<? extends IValue> headAtt : headerAttributes){
+			List<List<IValue>> tmpHead = new ArrayList<>();
+			for(List<IValue> currentHead : head)
+				tmpHead.addAll(headAtt.getValueSpace().stream()
 						.map(val -> Stream.concat(currentHead.stream(), Stream.of(val))
 								.collect(Collectors.toList())).collect(Collectors.toList()));
 			head = tmpHead;
 		}
-		final List<List<APopulationValue>> headFinal = head;
+		final List<List<IValue>> headFinal = head;
 		return head.stream().collect(Collectors.toMap(h -> headFinal.indexOf(h), Function.identity()));
 	}
 

@@ -1,13 +1,10 @@
 package gospl.distribution;
 
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -17,31 +14,25 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 
 
 /**
+ * Complete n dimensional matrix with contingency cell, which means internal storage data are integers.
  * 
- * TODO: javadoc 
+ * @see AFullNDimensionalMatrix
  * 
  * @author kevinchapuis
  *
  */
 public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
-	protected GosplContingencyTable(Map<APopulationAttribute, Set<APopulationValue>> dimensionAspectMap) {
-		super(dimensionAspectMap, GSSurveyType.ContingencyTable);
+	protected GosplContingencyTable(Set<DemographicAttribute<? extends IValue>> attributes) {
+		super(attributes, GSSurveyType.ContingencyTable);
 	}
-	
-	protected GosplContingencyTable(Set<APopulationAttribute> attributes) {
-		this(
-				attributes.stream().collect(Collectors.toMap(Function.identity(),APopulationAttribute::getValues))
-				);
-	}
-
-	
+		
 	
 	// ----------------------- SETTER CONTRACT ----------------------- //
 
 	
 	@Override
-	public boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
@@ -49,12 +40,12 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 
 
 	@Override
-	public final boolean addValue(ACoordinate<APopulationAttribute, APopulationValue> coordinates, Integer value) {
+	public final boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, Integer value) {
 		return addValue(coordinates, new ControlContingency(value));
 	}
 	
 	@Override
-	public boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size());
 			matrix.put(coordinate, new ControlContingency(value.getValue().intValue()));
@@ -64,7 +55,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	}
 
 	@Override
-	public final boolean setValue(ACoordinate<APopulationAttribute, APopulationValue> coordinate, Integer value) {
+	public final boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, Integer value) {
 		return setValue(coordinate, new ControlContingency(value));
 	}
 	

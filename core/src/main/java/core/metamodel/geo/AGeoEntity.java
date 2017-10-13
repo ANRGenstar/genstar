@@ -1,65 +1,24 @@
 package core.metamodel.geo;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.IEntity;
+import core.metamodel.value.IValue;
 
-public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
-
-	private Map<AGeoAttribute, AGeoValue> values; 
+public abstract class AGeoEntity implements IEntity<AGeoAttribute<IValue>> {
+ 
 	private String gsName;
 	
-	public AGeoEntity(Set<AGeoValue> values, String gsName) {
-		this.values = values.stream().collect(Collectors.toMap(AGeoValue::getAttribute, val -> val));
-		this.gsName = gsName;
-	}
+	private Map<AGeoAttribute<IValue>, IValue> attributes;
 	
 	@Override
-	public Collection<AGeoAttribute> getAttributes(){
-		return values.keySet();
-	}
-
-	@Override
-	public AGeoValue getValueForAttribute(AGeoAttribute attribute){
-		return values.get(attribute);
-	}
-	
-	public void addAttribute(AGeoAttribute attribute, AGeoValue value) {
-		values.put(attribute, value);
-	}
-	
-
-	@Override
-	public boolean hasAttribute(AGeoAttribute a) {
-		return values.containsKey(a);
-	}
-	
-	/**
-	 * The value associated with this attribute. 
-	 * Return value is of type {@link IGeoValue} that can encapsulate either numerical or nominal value
-	 * 
-	 * @param property
-	 * @return {@link IGeoValue}
-	 */
-	public AGeoValue getValueForAttribute(String property){
-		Optional<AGeoAttribute> opAtt = values.keySet()
-				.stream().filter(att -> att.getAttributeName().equals(property)).findFirst();
-		if(opAtt.isPresent())
-			return values.get(opAtt.get());
-		throw new NullPointerException("Attribute \""+property+"\" does not exist in "+this.getClass().getSimpleName());
-	}
-
-	@Override
-	public Set<AGeoValue> getValues(){
-		return new HashSet<>(values.values());
+	public Collection<AGeoAttribute<IValue>> getAttributes(){
+		return attributes.keySet();
 	}
 	
 	/**
@@ -79,22 +38,6 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 	public Collection<String> getPropertiesAttribute(){
 		return this.getAttributes().stream()
 				.map(AGeoAttribute::getAttributeName).collect(Collectors.toList());
-	}
-	
-	/**
-	 * The attribute that match the given property name if any. In case, no
-	 * attribute matches the name passed as argument return null
-	 * 
-	 * @param prop
-	 * @return
-	 */
-	public AGeoAttribute getPropertyAttribute(String propertyName) {
-		Optional<AGeoAttribute> opAtt = getAttributes().stream()
-				.filter(att -> att.getAttributeName().equals(propertyName))
-				.findFirst();
-		if(!opAtt.isPresent())
-			return null;
-		return opAtt.get();
 	}
 	
 	/**

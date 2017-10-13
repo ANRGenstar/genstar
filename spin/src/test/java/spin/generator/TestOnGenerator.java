@@ -4,8 +4,8 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
 import core.metamodel.pop.APopulationValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UtilGenerator;
@@ -25,7 +25,7 @@ public class TestOnGenerator {
 	 */
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
+		IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> population =
 		generator.generate(100);
 /*		
 		System.out.println("Debut de la generation de reseau regulier");

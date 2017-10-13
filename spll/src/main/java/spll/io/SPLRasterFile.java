@@ -36,9 +36,9 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.geo.IValue;
 import spll.entity.SpllPixel;
 import spll.entity.GeoEntityFactory;
 import spll.entity.iterator.GSPixelIterator;
@@ -67,7 +67,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	
 	private Collection<SpllPixel> cacheGeoEntity = null;
 
-	private Collection<AGeoValue> cacheGeoValues = null;
+	private Collection<IValue> cacheGeoValues = null;
 	
 	private Collection<AGeoAttribute> cacheGeoAttributes = null;
 
@@ -164,7 +164,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	}
 	
 	@Override
-	public Collection<AGeoValue> getGeoValues() {
+	public Collection<IValue> getGeoValues() {
 		if (cacheGeoValues == null) {
 			cacheGeoValues = new HashSet<>();
 			getGeoEntityIterator().forEachRemaining(pix -> cacheGeoValues.addAll(pix.getValues()));
@@ -228,7 +228,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 		return noData.doubleValue();
 	}
 	
-	public boolean isNoDataValue(AGeoValue var) {
+	public boolean isNoDataValue(IValue var) {
 		return var.getNumericalValue().equals(noData);
 	}
 	

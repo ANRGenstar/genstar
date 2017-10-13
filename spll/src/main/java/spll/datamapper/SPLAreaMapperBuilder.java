@@ -22,8 +22,8 @@ import com.vividsolutions.jts.operation.buffer.BufferParameters;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.geo.IValue;
 import core.util.GSPerformanceUtil;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
@@ -57,7 +57,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 */
 	public SPLAreaMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute,
 			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, 
-			Collection<? extends AGeoValue> variables) {
+			Collection<? extends IValue> variables) {
 		this(mainFile, mainAttribute, ancillaryFiles, variables, new LMRegressionOLS());
 	}
 	
@@ -71,7 +71,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 */
 	public SPLAreaMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute,
 			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, 
-			Collection<? extends AGeoValue> variables, 
+			Collection<? extends IValue> variables, 
 			ISPLRegressionAlgo<SPLVariable, Double> regAlgo) {
 		this(mainFile, mainAttribute, ancillaryFiles, variables, regAlgo, 
 				new SPLUniformNormalizer(0, SPLRasterFile.DEF_NODATA));
@@ -88,7 +88,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 	 */
 	public SPLAreaMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute,
 			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles, 
-			Collection<? extends AGeoValue> variables, 
+			Collection<? extends IValue> variables, 
 			ISPLRegressionAlgo<SPLVariable, Double> regAlgo,
 			ASPLNormalizer normalizer) {
 		super(mainFile, mainAttribute, ancillaryFiles);
@@ -233,8 +233,8 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 		// Retain info about pixel and his context
 		Geometry pixGeom = refPixel.getGeometry();
-		Collection<AGeoValue> pixData = refPixel.getValues();
-		Collection<AGeoValue> coefVal = regCoef.keySet()
+		Collection<IValue> pixData = refPixel.getValues();
+		Collection<IValue> coefVal = regCoef.keySet()
 				.stream().map(var -> var.getValue()).collect(Collectors.toSet());
 		if(pixData.stream().allMatch(val -> geotiff.isNoDataValue(val) || !coefVal.contains(val)) && ancillaries.isEmpty())
 			return SPLRasterFile.DEF_NODATA.floatValue();
@@ -275,7 +275,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 			return SPLRasterFile.DEF_NODATA.floatValue();
 
 		// Get the values contain in the pixel bands
-		Collection<AGeoValue> pixData = refPixel.getValues();
+		Collection<IValue> pixData = refPixel.getValues();
 		double pixArea = refPixel.getArea();
 
 		// Setup output value for the pixel based on pixels' band values

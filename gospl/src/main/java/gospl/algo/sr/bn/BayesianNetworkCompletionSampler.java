@@ -3,12 +3,12 @@ package gospl.algo.sr.bn;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.sampler.ICompletionSampler;
 
 /**
@@ -17,13 +17,12 @@ import gospl.sampler.ICompletionSampler;
  * 
  * @author Samuel Thiriot
  */
-public class BayesianNetworkCompletionSampler implements ICompletionSampler<APopulationEntity> {
+public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADemoEntity> {
 
 	private final CategoricalBayesianNetwork bn;
 	private final AbstractInferenceEngine engine;
-	private final Map<String,APopulationAttribute> bnVariable2popAttribute;
-	private final Map<APopulationAttribute,NodeCategorical> popAttribute2bnVariable;
-	private final GosplAttributeFactory attf = new GosplAttributeFactory();
+	private final Map<String,DemographicAttribute<? extends IValue>> bnVariable2popAttribute;
+	private final Map<DemographicAttribute<? extends IValue>,NodeCategorical> popAttribute2bnVariable;
 
 	public BayesianNetworkCompletionSampler(CategoricalBayesianNetwork bn) throws GSIllegalRangedData {
 		this(bn, new EliminationInferenceEngine(bn));
@@ -42,11 +41,10 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 		for (NodeCategorical n: bn.getNodes()) {
 			bnVariable2popAttribute.put(
 					n.name, 
-					attf.createAttribute(
+					GosplAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
-						GSEnumDataType.String,
-						n.getDomain(),
-						GSEnumAttributeType.unique
+						GSEnumDataType.Nominal,
+						n.getDomain()
 						)
 					);
 		}
@@ -55,7 +53,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 	}
 	
 
-	protected NodeCategorical getBNVariableForAttribute(APopulationAttribute a) {
+	protected NodeCategorical getBNVariableForAttribute(DemographicAttribute<? extends IValue> a) {
 		
 		NodeCategorical n = null;
 		
@@ -74,19 +72,18 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 		
 	}
 	
-	protected APopulationAttribute getPopulationAttributeForBNVariable(NodeCategorical n) {
+	protected DemographicAttribute<? extends IValue> getPopulationAttributeForBNVariable(NodeCategorical n) {
 		
-		APopulationAttribute a = bnVariable2popAttribute.get(n.name);
+		DemographicAttribute<? extends IValue> a = bnVariable2popAttribute.get(n.name);
 		
 		if (!bnVariable2popAttribute.containsKey(n.name)) {
 			// we don't have any counterpart for this population attribute now
 			// let's create it !
 			try {
-				a = attf.createAttribute(
+				a = GosplAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
-						GSEnumDataType.String,
-						n.getDomain(),
-						GSEnumAttributeType.unique
+						GSEnumDataType.Nominal,
+						n.getDomain()
 						);
 			} catch (GSIllegalRangedData e) {
 				throw new RuntimeException("unable to create attribute", e);
@@ -101,12 +98,12 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 	}
 	
 	@Override
-	public APopulationEntity complete(APopulationEntity originalEntity) {
+	public ADemoEntity complete(ADemoEntity originalEntity) {
 
 		// we already have the original entity
 		
 		// let's use it as evidence
-		for (APopulationAttribute aOriginal: originalEntity.getAttributes()) {
+		for (DemographicAttribute<? extends IValue> aOriginal: originalEntity.getAttributes()) {
 			
 			NodeCategorical n = getBNVariableForAttribute(aOriginal);
 			
@@ -125,11 +122,11 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 		
 		// let's take these values and use them inside our BN
 		// TODO should clone here !!!
-		APopulationEntity resultEntity = (APopulationEntity) originalEntity.clone(); 
+		ADemoEntity resultEntity = (ADemoEntity) originalEntity.clone(); 
 		
 		for (Map.Entry<NodeCategorical,String> eNew: variable2value.entrySet()) {
 			
-			APopulationAttribute a = getPopulationAttributeForBNVariable(eNew.getKey());
+			DemographicAttribute<? extends IValue> a = getPopulationAttributeForBNVariable(eNew.getKey());
 			
 			// skip the known attributes
 			if (resultEntity.hasAttribute(a)) {
@@ -137,7 +134,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<APop
 				continue;
 			}
 			
-			resultEntity.setAttributeValue(a, a.getValue(eNew.getValue()));
+			resultEntity.setAttributeValue(a, a.getValueSpace().addValue(eNew.getValue()));
 			
 		}
 		

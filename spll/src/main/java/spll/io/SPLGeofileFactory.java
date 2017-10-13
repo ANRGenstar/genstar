@@ -58,8 +58,8 @@ import com.vividsolutions.jts.geom.Polygon;
 
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
 import core.util.stats.GSBasicStats;
 import core.util.stats.GSEnumStats;
 import spll.SpllPopulation;
@@ -244,14 +244,14 @@ public class SPLGeofileFactory {
 		}
 		ShapefileDataStore newDataStore = new ShapefileDataStore(shapefile.toURI().toURL());
 
-		Map<APopulationEntity, Geometry> geoms = population.getSpllPopulation()
+		Map<ADemoEntity, Geometry> geoms = population.getSpllPopulation()
 				.stream().filter(e -> e.getLocation() != null)
 				.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
 		final StringBuilder specs = new StringBuilder(population.size() * 20);
 		String geomType = getGeometryType(geoms.values());
 		specs.append("geometry:" + geomType);
 		List<String> atts = new ArrayList<>();
-			for (final APopulationAttribute at : population.getPopulationAttributes()) {
+			for (final DemographicAttribute at : population.getPopulationAttributes()) {
 				atts.add(at.getAttributeName());
 				String name = at.getAttributeName().replaceAll("\"", "");
 				name = name.replaceAll("'", "");
@@ -269,7 +269,7 @@ public class SPLGeofileFactory {
 
 			final List<Object> values = new ArrayList<>();
 
-			for (final APopulationEntity entity : population) {
+			for (final ADemoEntity entity : population) {
 				values.clear();
 				final SimpleFeature ff = (SimpleFeature) fw.next();
 				values.add(geoms.get(entity));

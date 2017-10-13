@@ -1,9 +1,9 @@
 package spll.entity.attribute.value;
 
 import core.metamodel.geo.AGeoAttribute;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.value.geo.IValue;
 
-public class RawGeoData extends AGeoValue {
+public class RawGeoData extends IValue {
 
 	private Number numVal;
 

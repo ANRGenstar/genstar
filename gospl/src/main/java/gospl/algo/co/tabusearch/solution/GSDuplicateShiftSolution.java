@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
 import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AGSSampleBasedCOSolution;
@@ -28,8 +28,8 @@ public class GSDuplicateShiftSolution extends AGSSampleBasedCOSolution {
 	 * @param population
 	 * @param sample
 	 */
-	public GSDuplicateShiftSolution(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			Collection<APopulationEntity> sample){
+	public GSDuplicateShiftSolution(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
 
@@ -38,7 +38,7 @@ public class GSDuplicateShiftSolution extends AGSSampleBasedCOSolution {
 	 * @param population
 	 * @param sample
 	 */
-	public GSDuplicateShiftSolution(Collection<APopulationEntity> population, Collection<APopulationEntity> sample){
+	public GSDuplicateShiftSolution(Collection<ADemoEntity> population, Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
 
@@ -64,16 +64,16 @@ public class GSDuplicateShiftSolution extends AGSSampleBasedCOSolution {
 
 	@Override
 	public IGSSampleBasedCOSolution getRandomNeighbor(int dimensionalShiftNumber) {
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> newPopulation = new GosplPopulation(population);
-		for(APopulationValue value : valueList.stream().unordered().
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> newPopulation = new GosplPopulation(population);
+		for(IValue value : valueList.stream().unordered().
 				skip(dimensionalShiftNumber > valueList.size() ? 
 						0 : valueList.size() - dimensionalShiftNumber)
 				.collect(Collectors.toList())){
-			Map<APopulationEntity, APopulationEntity> removeAddPair = this.findAnyTargetRemoveAddPair(
+			Map<ADemoEntity, ADemoEntity> removeAddPair = this.findAnyTargetRemoveAddPair(
 					newPopulation, value);
 			if(removeAddPair.isEmpty())
 				continue;
-			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
+			ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
 			newPopulation = super.deepSwitch(newPopulation, oldEntity, removeAddPair.get(oldEntity));
 		}
 		return new GSDuplicateShiftSolution(newPopulation, sample);
@@ -81,14 +81,14 @@ public class GSDuplicateShiftSolution extends AGSSampleBasedCOSolution {
 	
 	// ---------------- inner utility method ---------------- //
 	
-	private GSDuplicateShiftSolution getNeighbor(APopulationValue value){
+	private GSDuplicateShiftSolution getNeighbor(IValue value){
 		if(!valueList.contains(value))
 			throw new RuntimeException();
-		Map<APopulationEntity, APopulationEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
+		Map<ADemoEntity, ADemoEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
 				this.population, value);
 		if(removeAddPair.isEmpty())
 			return null;
-		APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
+		ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
 		return new GSDuplicateShiftSolution(super.deepSwitch(new GosplPopulation(this.population), 
 				oldEntity, removeAddPair.get(oldEntity)), sample);
 	}

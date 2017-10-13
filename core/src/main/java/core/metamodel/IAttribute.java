@@ -9,7 +9,7 @@ import core.metamodel.value.IValueSpace;
  * @author gospl-team
  *
  */
-public interface IAttribute {
+public interface IAttribute<V extends IValue> {
 
 	/**
 	 * The name of the attribute
@@ -26,6 +26,6 @@ public interface IAttribute {
 	 * 
 	 * @return
 	 */
-	public IValueSpace<IValue> getAttributeValueSpace();
+	public IValueSpace<V> getValueSpace();
 	
 }

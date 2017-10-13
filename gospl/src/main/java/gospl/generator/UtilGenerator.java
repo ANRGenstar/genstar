@@ -11,15 +11,14 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
 import gospl.GosplEntity;
 import gospl.GosplPopulation;
-import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.entity.attribute.GosplAttributeFactory;
 
 /**
  * 
@@ -42,8 +41,8 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-	private Set<APopulationAttribute> attributes;
-	private Map<APopulationAttribute, SortedMap<Double, APopulationValue>> attributesProba;
+	private Set<DemographicAttribute<? extends IValue>> attributes;
+	private Map<DemographicAttribute<? extends IValue>, SortedMap<Double, IValue>> attributesProba;
 
 	Random random = GenstarRandom.getInstance();
 
@@ -63,7 +62,7 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 	 * 
 	 * @param attributes
 	 */
-	public UtilGenerator(Set<APopulationAttribute> attributes){
+	public UtilGenerator(Set<DemographicAttribute<? extends IValue>> attributes){
 		this.attributes = attributes;
 	}
 
@@ -75,9 +74,8 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 		
 		// Attribute Factory
 		if(attributes == null){
-			GosplAttributeFactory attF = new GosplAttributeFactory();
 			this.attributes = IntStream.range(0, random.nextInt(maxAtt)+1)
-					.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt(attF) : createIntegerAtt(attF))
+					.mapToObj(i -> random.nextDouble() > 0.5 ? createStringAtt() : createIntegerAtt())
 					.collect(Collectors.toSet());
 		}
 		
@@ -97,13 +95,12 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 	// ------------------------------------------------------ //
 
 
-	private APopulationAttribute createIntegerAtt(GosplAttributeFactory factory) {
-		APopulationAttribute asa = null;
+	private DemographicAttribute<? extends IValue> createIntegerAtt() {
+		DemographicAttribute<? extends IValue> asa = null;
 		try {
-			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
+			asa = GosplAttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Integer, 
-					IntStream.range(0, maxVal).mapToObj(i -> String.valueOf(i)).collect(Collectors.toList()), 
-					GSEnumAttributeType.unique);
+					IntStream.range(0, maxVal).mapToObj(i -> String.valueOf(i)).collect(Collectors.toList()));
 		} catch (GSIllegalRangedData e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -111,14 +108,13 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 		return asa;
 	}
 
-	private APopulationAttribute createStringAtt(GosplAttributeFactory factory){
-		APopulationAttribute asa = null;
+	private DemographicAttribute<? extends IValue> createStringAtt(){
+		DemographicAttribute<? extends IValue> asa = null;
 		try {
-			asa = factory.createAttribute(generateName(random.nextInt(6)+1), 
-					GSEnumDataType.String, 
+			asa = GosplAttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
+					GSEnumDataType.Nominal, 
 					IntStream.range(0, random.nextInt(maxVal)).mapToObj(j -> 
-					generateName(random.nextInt(j+1))).collect(Collectors.toList()), 
-					GSEnumAttributeType.unique);
+					generateName(random.nextInt(j+1))).collect(Collectors.toList()));
 		} catch (GSIllegalRangedData e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -137,10 +133,10 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 	
 	private void setupAttributeProbabilityTable(){
 		attributesProba = new HashMap<>();
-		for(APopulationAttribute att : attributes){
+		for(DemographicAttribute<? extends IValue> att : attributes){
 			double sop = 1d;
 			attributesProba.put(att, new TreeMap<>());
-			for(APopulationValue val : att.getValues()){
+			for(IValue val : att.getValueSpace()){
 				double rnd = random.nextDouble() * sop;
 				attributesProba.get(att).put(rnd, val);
 				sop -= rnd;
@@ -150,13 +146,13 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 
 	// ---------------------- utilities ---------------------- //
 
-	private APopulationValue randomVal(APopulationAttribute attribute){
+	private IValue randomVal(DemographicAttribute<? extends IValue> attribute){
 		List<Double> dop = new ArrayList<>(attributesProba.get(attribute).keySet());
 		double rnd = random.nextDouble();
 		for(Double proba : dop)
 			if(rnd <= proba)
 				return attributesProba.get(attribute).get(proba);
-		List<APopulationValue> values = new ArrayList<>(attributesProba.get(attribute).values());
+		List<IValue> values = new ArrayList<>(attributesProba.get(attribute).values());
 		return values.get(random.nextInt(values.size()));
 	}
 

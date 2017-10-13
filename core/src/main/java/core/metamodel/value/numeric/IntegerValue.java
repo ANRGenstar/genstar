@@ -5,9 +5,14 @@ import core.util.data.GSEnumDataType;
 
 public class IntegerValue implements IValue {
 
-	private int value;
+	private Integer value;
 	private IntegerSpace is;
-
+	
+	protected IntegerValue(IntegerSpace is){
+		this.is = is;
+		this.value = null;
+	}
+	
 	protected IntegerValue(IntegerSpace is, int value){
 		this.is = is;
 		this.value = value;
@@ -23,17 +28,17 @@ public class IntegerValue implements IValue {
 		return String.valueOf(value);
 	}
 
-	@Override
-	public IntegerSpace getValueSpace() {
-		return this.is;
-	}
-
 	/**
 	 * The actual encapsulated value
 	 * @return
 	 */
 	public int getActualValue(){
 		return value;
+	}
+
+	@Override
+	public IntegerSpace getValueSpace() {
+		return is;
 	}
 	
 }

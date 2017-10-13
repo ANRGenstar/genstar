@@ -23,8 +23,8 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.ISegmentedNDimensionalMatrix;
@@ -90,10 +90,10 @@ public class AttributesDependanciesGraph {
 		
 		AttributesDependanciesGraph dependancies = new AttributesDependanciesGraph();
 		
-		for (INDimensionalMatrix<APopulationAttribute, APopulationValue, ?> currentMatrix: segmentedMatrix.getMatrices()) {
+		for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ?> currentMatrix: segmentedMatrix.getMatrices()) {
 
 			// add all the nodes 
-			for (APopulationAttribute attribute: currentMatrix.getDimensions()) {
+			for (DemographicAttribute<? extends IValue> attribute: currentMatrix.getDimensions()) {
 				dependancies.addKnownAttribute(attribute);				
 			}
 			
@@ -111,7 +111,7 @@ public class AttributesDependanciesGraph {
 	 * Adds this attribute as a known attribute in the graph
 	 * @param attribute
 	 */
-	public void addKnownAttribute(APopulationAttribute attribute) {
+	public void addKnownAttribute(DemographicAttribute<? extends IValue> attribute) {
 		
 		logger.debug("should add node {}", attribute.getAttributeName());
 		
@@ -142,11 +142,11 @@ public class AttributesDependanciesGraph {
 	}
 	
 	
-	public void addKnownGlobalFrequency(INDimensionalMatrix<APopulationAttribute, APopulationValue, ?> currentMatrix) {
+	public void addKnownGlobalFrequency(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ?> currentMatrix) {
 		
 		logger.debug("adding information on matrix {}", currentMatrix.getLabel());
 
-		List<APopulationAttribute> attributes = new ArrayList<>();
+		List<DemographicAttribute<? extends IValue>> attributes = new ArrayList<>();
 		attributes.addAll(currentMatrix.getDimensions());
 		for (int i=0; i<attributes.size();i++) {
 			for (int j=i+1; j<attributes.size();j++) {
@@ -223,7 +223,8 @@ public class AttributesDependanciesGraph {
 	 * returns the sets of the survey attributes which belong to independnat components.
 	 * @return
 	 */
-	public Collection<Set<APopulationAttribute>> getConnectedComponents() {
+	@SuppressWarnings("unchecked")
+	public Collection<Set<DemographicAttribute<? extends IValue>>> getConnectedComponents() {
 		
 		ConnectedComponents cc = new ConnectedComponents(graph);
 		cc.setCountAttribute(NODE_ATTRIBUTE_SUBGRAPH_ID);
@@ -233,11 +234,11 @@ public class AttributesDependanciesGraph {
 		
 		if (count == 1) {
 			// quick exit
-			LinkedList<Set<APopulationAttribute>> res = new LinkedList<>();
+			LinkedList<Set<DemographicAttribute<? extends IValue>>> res = new LinkedList<>();
 			res.add(
 					graph.getNodeSet()
 						.stream()
-						.map(node -> (APopulationAttribute)node.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE))
+						.map(node -> (DemographicAttribute<? extends IValue>)node.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE))
 						.collect(Collectors.toSet()));
 			
 			return res;
@@ -245,7 +246,7 @@ public class AttributesDependanciesGraph {
 		
 		// the algo puts an id of component into every node. Just collect the nodes based on that. 
 		
-		Map<Integer, Set<APopulationAttribute>> componentId2attributes = new HashMap<>(count);
+		Map<Integer, Set<DemographicAttribute<? extends IValue>>> componentId2attributes = new HashMap<>(count);
 		for (Node n: graph.getNodeSet()) {
 			Integer componentId = n.getAttribute(NODE_ATTRIBUTE_SUBGRAPH_ID);
 			if (!componentId2attributes.containsKey(componentId)) {
@@ -265,17 +266,18 @@ public class AttributesDependanciesGraph {
 	 * will be degree 1; else, it will be the lowest possible). 
 	 * @return
 	 */
-	public Set<APopulationAttribute> getRoots(Collection<APopulationAttribute> component) {
+	@SuppressWarnings("unchecked")
+	public Set<DemographicAttribute<? extends IValue>> getRoots(Collection<DemographicAttribute<? extends IValue>> component) {
 		
 		// the max connectivity found so far
 		Integer minDegree = Integer.MAX_VALUE;
 		// the nodes found so far for the degrees
-		Map<Integer,Set<APopulationAttribute>> degree2nodes = new TreeMap<>();
+		Map<Integer,Set<DemographicAttribute<? extends IValue>>> degree2nodes = new TreeMap<>();
 		
 		for (Node n: graph.getNodeSet()) {
 			
 			// skip graph nodes which are not in this component
-			if (!component.contains((APopulationAttribute)n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE)))
+			if (!component.contains((DemographicAttribute<? extends IValue>)n.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE)))
 				continue;
 			
 			Integer degree = n.getDegree();
@@ -309,15 +311,16 @@ public class AttributesDependanciesGraph {
 	 * @param root
 	 * @return
 	 */
-	public List<APopulationAttribute> getOrderOfExploration(Collection<APopulationAttribute> component, APopulationAttribute root) {
+	public List<DemographicAttribute<? extends IValue>> getOrderOfExploration(Collection<DemographicAttribute<? extends IValue>> component, 
+			DemographicAttribute<? extends IValue> root) {
 		
-		Map<APopulationAttribute,Integer> attribute2rank = new HashMap<>(component.size());
+		Map<DemographicAttribute<? extends IValue>,Integer> attribute2rank = new HashMap<>(component.size());
 		
 		// these nodes were seen already !
-		Set<APopulationAttribute> taboo = new HashSet<>();
-		List<APopulationAttribute> list = new ArrayList<>(component.size());
+		Set<DemographicAttribute<? extends IValue>> taboo = new HashSet<>();
+		List<DemographicAttribute<? extends IValue>> list = new ArrayList<>(component.size());
 		
-		Set<APopulationAttribute> toExplore = new HashSet<>();
+		Set<DemographicAttribute<? extends IValue>> toExplore = new HashSet<>();
 		
 		// bootstrap
 		toExplore.add(root);
@@ -325,7 +328,7 @@ public class AttributesDependanciesGraph {
 		
 		while (!toExplore.isEmpty()) {
 			
-			APopulationAttribute current = toExplore.iterator().next();
+			DemographicAttribute<? extends IValue> current = toExplore.iterator().next();
 			toExplore.remove(current);
 			Integer currentRank = attribute2rank.get(current);
 			taboo.add(current);
@@ -336,7 +339,7 @@ public class AttributesDependanciesGraph {
 			Iterator<Node> itNeighboors = graph.getNode(current.getAttributeName()).getNeighborNodeIterator();
 			while (itNeighboors.hasNext()) {
 				Node neighboor = itNeighboors.next();
-				APopulationAttribute nei  = neighboor.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
+				DemographicAttribute<? extends IValue> nei  = neighboor.getAttribute(NODE_ATTRIBUTE_ATTRIBUTE);
 				
 				if (taboo.contains(nei)) 
 					continue;

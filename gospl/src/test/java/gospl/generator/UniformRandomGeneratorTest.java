@@ -6,9 +6,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.IValue;
 import gospl.generator.UtilGenerator;
 
 public class UniformRandomGeneratorTest {
@@ -26,7 +26,7 @@ public class UniformRandomGeneratorTest {
 
 	@Test
 	public void test() {
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> pop = urg.generate(popSize);
+		IPopulation<ADemoEntity, DemographicAttribute, IValue> pop = urg.generate(popSize);
 		assertEquals(popSize, pop.size());
 	}
 

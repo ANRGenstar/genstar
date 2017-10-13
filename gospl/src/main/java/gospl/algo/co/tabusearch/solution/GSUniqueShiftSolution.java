@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
 import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AGSSampleBasedCOSolution;
@@ -26,8 +26,8 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 	 * @param population
 	 * @param sample
 	 */
-	public GSUniqueShiftSolution(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			Collection<APopulationEntity> sample){
+	public GSUniqueShiftSolution(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
 	
@@ -36,7 +36,7 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 	 * @param population
 	 * @param sample
 	 */
-	public GSUniqueShiftSolution(Set<APopulationEntity> population, Collection<APopulationEntity> sample){
+	public GSUniqueShiftSolution(Set<ADemoEntity> population, Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
 	
@@ -62,18 +62,18 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 
 	@Override
 	public IGSSampleBasedCOSolution getRandomNeighbor(int dimensionalShiftNumber) {
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> newPopulation = new GosplPopulation(population);
-		for(APopulationValue value : valueList.stream().unordered().
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> newPopulation = new GosplPopulation(population);
+		for(IValue value : valueList.stream().unordered().
 				skip(dimensionalShiftNumber > valueList.size() ? 
 						0 : valueList.size() - dimensionalShiftNumber)
 				.collect(Collectors.toList())){
-			Map<APopulationEntity, APopulationEntity> removeAddPair = this.findAnyTargetRemoveAddPair(
+			Map<ADemoEntity, ADemoEntity> removeAddPair = this.findAnyTargetRemoveAddPair(
 					newPopulation, value);
 			if(removeAddPair.isEmpty())
 				continue;
-			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
-			APopulationEntity newEntity = newPopulation.contains(removeAddPair.get(oldEntity)) ?
-					(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+			ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
+			ADemoEntity newEntity = newPopulation.contains(removeAddPair.get(oldEntity)) ?
+					(ADemoEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 			newPopulation = super.deepSwitch(newPopulation, oldEntity, newEntity);
 		}
 		return new GSDuplicateShiftSolution(newPopulation, sample);
@@ -81,16 +81,16 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 
 	// ---------------- inner utility methods ---------------- //
 	
-	private GSUniqueShiftSolution getNeighbor(APopulationValue value){
+	private GSUniqueShiftSolution getNeighbor(IValue value){
 		if(!valueList.contains(value))
 			throw new RuntimeException();
-		Map<APopulationEntity, APopulationEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
+		Map<ADemoEntity, ADemoEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
 				this.population, value);
 		if(removeAddPair.isEmpty())
 			return null;
-		APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
-		APopulationEntity newEntity = this.population.contains(removeAddPair.get(oldEntity)) ? 
-						(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+		ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
+		ADemoEntity newEntity = this.population.contains(removeAddPair.get(oldEntity)) ? 
+						(ADemoEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 		return new GSUniqueShiftSolution(super.deepSwitch(new GosplPopulation(this.population), 
 				oldEntity, newEntity), sample);
 	}

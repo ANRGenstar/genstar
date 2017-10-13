@@ -10,9 +10,9 @@ import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.geo.IValue;
 import spll.io.SPLRasterFile;
 
 public class SpllUtil {
@@ -25,8 +25,8 @@ public class SpllUtil {
 	 * @param vals
 	 * @return
 	 */
-	public static Collection<? extends AGeoValue> getValuesFor(Collection<String> vals, List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile){
-		Collection<AGeoValue> values = new HashSet<>();
+	public static Collection<? extends IValue> getValuesFor(Collection<String> vals, List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile){
+		Collection<IValue> values = new HashSet<>();
 		if(vals.isEmpty()){
 			for(IGSGeofile<? extends AGeoEntity> file : endogeneousVarFile){
 				if(file.getGeoGSFileType().equals(GeoGSFileType.RASTER))

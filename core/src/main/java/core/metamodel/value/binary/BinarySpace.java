@@ -1,7 +1,7 @@
 package core.metamodel.value.binary;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -12,53 +12,40 @@ import core.util.data.GSEnumDataType;
 
 public class BinarySpace implements IValueSpace<BooleanValue> {
 	
-	private static Map<IAttribute, BinarySpace> multiton = new HashMap<>();
-	
 	private Set<BooleanValue> values;
-	private IAttribute attribute;
+	private IAttribute<BooleanValue> attribute;
 	
-	private BinarySpace(IAttribute attribute){
+	private BooleanValue emptyValue;
+	
+	public BinarySpace(IAttribute<BooleanValue> attribute){
 		this.attribute = attribute;
-		this.values = Stream.of(new BooleanValue(this, true), new BooleanValue(this, false))
+		this.values = Stream.of(new BooleanValue(this, true), new BooleanValue(this, true))
 				.collect(Collectors.toSet());
-	}
-	
-	/**
-	 * Instances getter as mandatory constructor that complies to multiton
-	 * design patterns
-	 * 
-	 * @param attribute
-	 * @return
-	 */
-	public static BinarySpace getInstance(IAttribute attribute){
-		if(multiton.containsKey(attribute))
-			return multiton.get(attribute);
-		multiton.put(attribute, new BinarySpace(attribute));
-		return multiton.get(attribute);
+		this.emptyValue = new BooleanValue(this, null);
 	}
 	
 	// ---------------------------------------------------------------------- //
 
 	@Override
-	public BooleanValue getValue(String value) throws IllegalArgumentException {
-		if(!value.equalsIgnoreCase(Boolean.TRUE.toString()) 
-				&& !value.equalsIgnoreCase(Boolean.FALSE.toString()))
-			throw new IllegalArgumentException("The string value "+value+" does not feet a binary value template");
-		return values.stream().filter(val -> val.getStringValue().equalsIgnoreCase(value)).findFirst().get();
-	}
-
-	@Override
-	public BooleanValue retrieveValue(String value) throws NullPointerException {
+	public BooleanValue addValue(String value) throws IllegalArgumentException {
 		try {
 			return getValue(value);
-		} catch (IllegalArgumentException e) {
-			throw new NullPointerException("The string value "+value
+		} catch (NullPointerException e) {
+			throw new IllegalArgumentException("The string value "+value
 					+" cannot be resolve to boolean as defined by "+this.getClass().getSimpleName());
 		}
 	}
 
 	@Override
-	public IAttribute getAttribute() {
+	public BooleanValue getValue(String value) throws NullPointerException {
+		if(!isValidCandidate(value))
+			throw new NullPointerException("The string value "+value
+					+" cannot be resolve to boolean as defined by "+this.getClass().getSimpleName());
+		return values.stream().filter(val -> val.getStringValue().equalsIgnoreCase(value)).findFirst().get();
+	}
+
+	@Override
+	public IAttribute<BooleanValue> getAttribute() {
 		return attribute;
 	}
 	
@@ -66,5 +53,91 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	public GSEnumDataType getType() {
 		return GSEnumDataType.Boolean;
 	}
+	
+	@Override
+	public BooleanValue getEmptyValue() {
+		return emptyValue;
+	}
+	
+	@Override
+	public void setEmptyValue(String value){
+		// JUST DONT DO THAT
+	}
+	
+	@Override
+	public boolean isValidCandidate(String value) {
+		if(!value.equalsIgnoreCase(Boolean.TRUE.toString()) 
+				&& !value.equalsIgnoreCase(Boolean.FALSE.toString())
+				|| emptyValue.getStringValue().equalsIgnoreCase(value))
+			return true;
+		return false;
+	}
+	
+	// ---------------------------------------------------------------------- //
 
+	@Override
+	public boolean isEmpty() {
+		return false;
+	}
+
+	@Override
+	public boolean contains(Object o) {
+		return values.contains(o);
+	}
+
+	@Override
+	public Iterator<BooleanValue> iterator() {
+		return values.iterator();
+	}
+
+	@Override
+	public Object[] toArray() {
+		return values.toArray();
+	}
+
+	@Override
+	public <T> T[] toArray(T[] a) {
+		return values.toArray(a);
+	}
+
+	@Override
+	public boolean add(BooleanValue e) {
+		return false;
+	}
+
+	@Override
+	public boolean remove(Object o) {
+		return false;
+	}
+
+	@Override
+	public boolean containsAll(Collection<?> c) {
+		return values.containsAll(c);
+	}
+
+	@Override
+	public boolean addAll(Collection<? extends BooleanValue> c) {
+		return false;
+	}
+
+	@Override
+	public boolean removeAll(Collection<?> c) {
+		return false;
+	}
+
+	@Override
+	public boolean retainAll(Collection<?> c) {
+		return values.retainAll(c);
+	}
+
+	@Override
+	public void clear() {
+		// JUST CANNOT BE
+	}
+
+	@Override
+	public int size() {
+		return values.size();
+	}
+	
 }

@@ -1,17 +1,21 @@
 package core.metamodel.value.categoric;
 
-import core.metamodel.IAttribute;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
 public class NominalValue implements IValue {
 	
 	private String value;
-	private IAttribute attribute;
+	private NominalSpace vs;
+	
+	protected NominalValue(NominalSpace vs, String value){
+		this.value = value;
+		this.vs = vs;
+	}
 
 	@Override
 	public GSEnumDataType getType() {
-		return GSEnumDataType.String;
+		return GSEnumDataType.Nominal;
 	}
 
 	@Override
@@ -20,8 +24,8 @@ public class NominalValue implements IValue {
 	}
 
 	@Override
-	public IAttribute getAttribute() {
-		return attribute;
+	public NominalSpace getValueSpace() {
+		return vs;
 	}
 
 }

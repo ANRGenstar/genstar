@@ -3,25 +3,25 @@ package gospl.algo.ipf.margin;
 import java.util.Collection;
 import java.util.Set;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.control.AControl;
 
-public class SimpleMargin<T extends Number> extends AMargin<T> implements IMargin<APopulationAttribute, APopulationValue, T> {
+public class SimpleMargin<T extends Number> extends AMargin<T> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
 
-	protected SimpleMargin(APopulationAttribute controlAttribute, APopulationAttribute seedAttribute) {
+	protected SimpleMargin(DemographicAttribute<? extends IValue> controlAttribute, DemographicAttribute<? extends IValue> seedAttribute) {
 		super(controlAttribute, seedAttribute);
 	}
 
 	@Override
-	public Collection<Set<APopulationValue>> getSeedMarginalDescriptors() {
+	public Collection<Set<IValue>> getSeedMarginalDescriptors() {
 		return super.marginalControl.keySet();
 	}
 	
 	/*
 	 * Protected setter to unsure safe construction
 	 */
-	protected void addMargin(Set<APopulationValue> marginalDescriptor, AControl<T> control){
+	protected void addMargin(Set<IValue> marginalDescriptor, AControl<T> control){
 		super.marginalControl.put(marginalDescriptor, control);
 	}
 

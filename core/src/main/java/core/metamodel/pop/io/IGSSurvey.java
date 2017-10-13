@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 
 /**
  * Main interface for access to survey as a table (List of list) 
@@ -32,7 +32,7 @@ public interface IGSSurvey {
 	 * @param attributes
 	 * @return
 	 */
-	public Map<Integer, Set<APopulationValue>> getColumnHeaders(Set<APopulationAttribute> attributes);
+	public Map<Integer, Set<IValue>> getColumnHeaders(Set<DemographicAttribute<? extends IValue>> attributes);
 	
 
 	/**
@@ -40,12 +40,12 @@ public interface IGSSurvey {
 	 * @param attributes
 	 * @return
 	 */
-	public Map<Integer, Set<APopulationValue>> getRowHeaders(Set<APopulationAttribute> attributes);
+	public Map<Integer, Set<IValue>> getRowHeaders(Set<DemographicAttribute<? extends IValue>> attributes);
 	
 	/**
 	 * Retrieves column headers from a sample data file
 	 */
-	public Map<Integer, APopulationAttribute> getColumnSample(Set<APopulationAttribute> attributes);
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Set<DemographicAttribute<? extends IValue>> attributes);
 	
 	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}

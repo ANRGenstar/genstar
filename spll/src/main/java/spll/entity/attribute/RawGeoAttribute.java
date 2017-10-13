@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import core.metamodel.geo.AGeoAttribute;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.value.geo.IValue;
 
 /**
  * Attribute of geo entity that are not specified with any content type:
@@ -18,11 +18,11 @@ import core.metamodel.geo.AGeoValue;
  */
 public class RawGeoAttribute extends AGeoAttribute {
 
-	public RawGeoAttribute(Set<AGeoValue> values, AGeoValue emptyValue, String name) {
+	public RawGeoAttribute(Set<IValue> values, IValue emptyValue, String name) {
 		super(values, emptyValue, name);
 	}
 	
-	public RawGeoAttribute(Set<AGeoValue> values, String name){
+	public RawGeoAttribute(Set<IValue> values, String name){
 		this(values, null, name);
 	}
 	

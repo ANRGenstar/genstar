@@ -1,14 +1,14 @@
 package gospl.sampler.evaluation;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
 public class SamplingEvaluationUtils {
 
 	public static double computeMeanSquarredError(
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> ref, 
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> computed
+			INDimensionalMatrix<DemographicAttribute<IValue>, IValue, Double> ref, 
+			INDimensionalMatrix<DemographicAttribute<IValue>, IValue, Double> computed
 			) {
 				
 		double sumSquaredErrors = ref.getMatrix().entrySet().stream()

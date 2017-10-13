@@ -46,9 +46,9 @@ import com.vividsolutions.jts.geom.Geometry;
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
 import core.metamodel.geo.io.GeoGSFileType;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.geo.IValue;
 import spll.entity.SpllFeature;
 import spll.entity.GeoEntityFactory;
 import spll.entity.attribute.RawGeoAttribute;
@@ -218,7 +218,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature> {
 	 * @return
 	 */
 	@Override
-	public Collection<AGeoValue> getGeoValues() {
+	public Collection<IValue> getGeoValues() {
 		return features.parallelStream().flatMap(f -> f.getValues().stream())
 				.collect(Collectors.toSet());
 	}

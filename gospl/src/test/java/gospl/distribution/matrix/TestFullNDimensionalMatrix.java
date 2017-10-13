@@ -15,8 +15,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import core.configuration.GenstarConfigurationFile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -50,7 +50,7 @@ public class TestFullNDimensionalMatrix {
 		try {
 			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
-			Set<APopulationAttribute> attributes = new HashSet<>();
+			Set<DemographicAttribute> attributes = new HashSet<>();
 			attributes.add(gaf.createAttribute("Genre", GSEnumDataType.String, 
 					Arrays.asList("Homme", "Femme"), GSEnumAttributeType.unique));
 			attributes.add(gaf.createAttribute("Age", GSEnumDataType.Integer, 
@@ -85,7 +85,7 @@ public class TestFullNDimensionalMatrix {
 		try {
 			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
-			Set<APopulationAttribute> attributes = new HashSet<>();
+			Set<DemographicAttribute> attributes = new HashSet<>();
 			attributes.add(gaf.createAttribute("Age", GSEnumDataType.Integer, 
 					Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus"), GSEnumAttributeType.range));
 			attributes.add(gaf.createAttribute("Activite", GSEnumDataType.String, 
@@ -147,7 +147,7 @@ public class TestFullNDimensionalMatrix {
 			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
 			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
-			Set<APopulationAttribute> attributes = new HashSet<>();
+			Set<DemographicAttribute> attributes = new HashSet<>();
 			if(mapped){
 				Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
 				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("moins de 15"),  Arrays.asList("0-5", "6-15"));
@@ -165,7 +165,7 @@ public class TestFullNDimensionalMatrix {
 
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-			for(APopulationValue value : ageCSP.getDimension("Activite").getValues()){
+			for(IValue value : ageCSP.getDimension("Activite").getValues()){
 				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "0-5").getValue() + 
 						ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "6-15").getValue(), 
 						"Activite", value.getInputStringValue(), "Age2", "moins de 15");
@@ -191,7 +191,7 @@ public class TestFullNDimensionalMatrix {
 			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
 			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
-			Set<APopulationAttribute> attributes = new HashSet<>();
+			Set<DemographicAttribute> attributes = new HashSet<>();
 				Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
 				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("16-25"), Arrays.asList("16-25"));
 				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
@@ -203,7 +203,7 @@ public class TestFullNDimensionalMatrix {
 
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-			for(APopulationValue value : ageCSP.getDimension("Activite").getValues()){
+			for(IValue value : ageCSP.getDimension("Activite").getValues()){
 				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "16-25").getValue(), 
 						"Activite", value.getInputStringValue(), "Age3", "16-25");
 				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "26-40").getValue() + 

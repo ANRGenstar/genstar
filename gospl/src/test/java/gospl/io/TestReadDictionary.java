@@ -9,7 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.DemographicAttribute;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
 
 public class TestReadDictionary {
@@ -27,7 +27,7 @@ public class TestReadDictionary {
 
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(new File("./src/test/resources/bayesiannetworks/gerland.xbif"));
 
-		Collection<APopulationAttribute> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
+		Collection<DemographicAttribute> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		System.err.println(attributes);
 		

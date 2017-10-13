@@ -6,16 +6,16 @@ import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.ADemoEntity;
 
-public class SpllEntity extends APopulationEntity {
+public class SpllEntity extends ADemoEntity {
 
-	private APopulationEntity entity;
+	private ADemoEntity entity;
 	
 	private Point location = null;
 	private AGeoEntity nest = null;
 
-	public SpllEntity(APopulationEntity entity) {
+	public SpllEntity(ADemoEntity entity) {
 		super(entity.getValues().stream().collect(Collectors
 				.toMap(val -> val.getAttribute(), Function.identity())));
 		this.entity = entity;

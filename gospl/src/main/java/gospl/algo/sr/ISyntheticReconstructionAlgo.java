@@ -1,14 +1,13 @@
 package gospl.algo.sr;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.entity.attribute.MappedAttribute;
 import gospl.sampler.ISampler;
 
-public interface ISyntheticReconstructionAlgo<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
+public interface ISyntheticReconstructionAlgo<SamplerType extends ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>>> {
 
 	/**
 	 * This method must provide a way to build a Synthetic Reconstructive (SR) sampler. SR is known in the literature
@@ -22,8 +21,8 @@ public interface ISyntheticReconstructionAlgo<SamplerType extends ISampler<ACoor
 	 * @throws IllegalDistributionCreation
 	 * @throws GosplSamplerException
 	 */
-	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSampler(
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix, 
+	public ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> inferSRSampler(
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix, 
 			SamplerType sampler) 
 			throws IllegalDistributionCreation;
 	

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.pop.ADemoEntity;
 import gospl.algo.co.simannealing.SimulatedAnnealing;
 import gospl.algo.co.simannealing.state.GSSAState;
 
@@ -16,13 +16,13 @@ public class SimAnnealingSampler extends AOptiAlgoSampler<SimulatedAnnealing> {
 	}
 	
 	@Override
-	public List<APopulationEntity> draw(int numberOfDraw) {
+	public List<ADemoEntity> draw(int numberOfDraw) {
 		return new ArrayList<>(this.algorithm.run(new GSSAState(
 				basicSampler.draw(numberOfDraw), sample)).getSolution());
 	}
 	
 	@Override
-	public Set<APopulationEntity> drawUnique(int numberOfDraw) {
+	public Set<ADemoEntity> drawUnique(int numberOfDraw) {
 		return new HashSet<>(this.algorithm.run(new GSSAState(
 				basicSampler.drawUnique(numberOfDraw), sample)).getSolution());
 	}

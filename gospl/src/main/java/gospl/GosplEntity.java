@@ -3,18 +3,18 @@ package gospl;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.value.IValue;
 
 /**
- * A GoSPL Entity is a population entity with a geolocation
+ * A GoSPL Entity is a population entity
  * 
  *
  */
-public class GosplEntity extends APopulationEntity {
+public class GosplEntity extends ADemoEntity {
 	
-	public GosplEntity(Map<APopulationAttribute, APopulationValue> attributes){
+	public GosplEntity(Map<DemographicAttribute<? extends IValue>, IValue> attributes){
 		super(attributes);
 	}
 
@@ -24,8 +24,7 @@ public class GosplEntity extends APopulationEntity {
 	
 	@Override
 	public GosplEntity clone(){
-		return new GosplEntity(new HashMap<>(this.getAttributesMap()));
+		return new GosplEntity(new HashMap<>(this.getAttributeMap()));
 	}
-
 
 }

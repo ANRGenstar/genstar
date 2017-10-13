@@ -11,8 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.IGSSurvey;
 import core.metamodel.value.IValue;
@@ -62,22 +61,22 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 * @return returns for each column id the list of attributes values
 	 */
 	@Override
-	public Map<Integer, Set<APopulationValue>> getColumnHeaders(Set<APopulationAttribute> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
 		
-		final Map<Integer, Set<APopulationValue>> columnHeaders = new HashMap<>();
+		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
 			final List<String> column = readLines(0, getFirstRowIndex(), i);
 			for (String columnVal : column) {
-				Set<APopulationValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
-						.filter(asp -> asp.getInputStringValue().equals(columnVal)).collect(Collectors.toSet());
+				Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().stream())
+						.filter(asp -> asp.getStringValue().equals(columnVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
-					final Set<APopulationValue> vals2 = new HashSet<>(vals);
+					final Set<IValue> vals2 = new HashSet<>(vals);
 					vals = column.stream()
 							.flatMap(s -> attributes.stream().filter(att -> att.getAttributeName().equals(s)))
-							.flatMap(att -> vals2.stream().filter(v -> v.getAttribute().equals(att)))
+							.flatMap(att -> vals2.stream().filter(v -> v.getValueSpace().getAttribute().equals(att)))
 							.collect(Collectors.toSet());
 				}
 				if (columnHeaders.containsKey(i))
@@ -93,7 +92,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	/**
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
-	public Map<Integer, Set<APopulationValue>> getRowHeaders(Set<APopulationAttribute> attributes) {
+	public Map<Integer, Set<IValue>> getRowHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
 		final List<Integer> attributeIdx = new ArrayList<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
 			final List<String> sLine = readLine(line);
@@ -104,40 +103,40 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					attributeIdx.add(idx);
 				if (headAtt.isEmpty()) {
 					final List<String> valList = readColumn(idx);
-					if (attributes.stream().anyMatch(att -> att.getValues().stream()
-							.allMatch(val -> valList.contains(val.getInputStringValue()))))
+					if (attributes.stream().anyMatch(att -> att.getValueSpace().stream()
+							.allMatch(val -> valList.contains(val.getStringValue()))))
 						attributeIdx.add(idx);
 				}
 			}
 		}
 
-		final Map<Integer, Set<APopulationValue>> rowHeaders = new HashMap<>();
+		final Map<Integer, Set<IValue>> rowHeaders = new HashMap<>();
 		for (int i = getFirstRowIndex(); i <= getLastRowIndex(); i++) {
 			final List<String> rawLine = readColumns(0, getFirstColumnIndex(), i);
 			final List<String> line = attributeIdx.stream().map(idx -> rawLine.get(idx)).collect(Collectors.toList());
 			for (int j = 0; j < line.size(); j++) {
 				final String lineVal = line.get(j);
-				final Set<APopulationValue> vals = attributes.stream().flatMap(att -> att.getValues().stream())
-						.filter(asp -> asp.getInputStringValue().equals(lineVal)).collect(Collectors.toSet());
+				final Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().stream())
+						.filter(asp -> asp.getStringValue().equals(lineVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
-					final Set<APopulationAttribute> inferedHeads = new HashSet<>();
+					final Set<DemographicAttribute<? extends IValue>> inferedHeads = new HashSet<>();
 					final List<String> headList = readLines(0, getFirstRowIndex(), j);
 					if (headList.stream().allMatch(s -> s.isEmpty())) {
 						for (final List<String> column : readColumns(0, getFirstColumnIndex()))
 							inferedHeads.addAll(attributes.stream()
-									.filter(a -> a.getValues().stream()
-											.allMatch(av -> column.contains(av.getInputStringValue())))
+									.filter(a -> a.getValueSpace().stream()
+											.allMatch(av -> column.contains(av.getStringValue())))
 									.collect(Collectors.toSet()));
 					} else {
 						inferedHeads.addAll(headList.stream()
 								.flatMap(s -> attributes.stream().filter(a -> a.getAttributeName().equals(s)))
 								.collect(Collectors.toSet()));
 					}
-					final Set<APopulationValue> vals2 = new HashSet<>(vals);
+					final Set<IValue> vals2 = new HashSet<>(vals);
 					for (final IValue val : vals2)
-						if (!inferedHeads.contains(val.getAttribute()))
+						if (!inferedHeads.contains(val.getValueSpace().getAttribute()))
 							vals.remove(val);
 				}
 				if (rowHeaders.containsKey(i))
@@ -150,24 +149,24 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	}
 	
 	@Override
-	public Map<Integer, APopulationAttribute> getColumnSample(Set<APopulationAttribute> attributes) {
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Set<DemographicAttribute<? extends IValue>> attributes) {
 		
-		Map<Integer, APopulationAttribute> columnHeaders = new HashMap<>();
+		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
 		
 		for(int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++){
 			List<String> columnAtt = readLines(0, getFirstRowIndex(), i);
-			Set<APopulationAttribute> attSet = attributes.stream()
+			Set<DemographicAttribute<? extends IValue>> attSet = attributes.stream()
 					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
 					.collect(Collectors.toSet());
 			if(attSet.isEmpty())
 				continue;
 			if(attSet.size() > 1){
 				int row = getFirstRowIndex();
-				Optional<APopulationAttribute> opAtt = null;
+				Optional<DemographicAttribute<? extends IValue>> opAtt = null;
 				do {
 					String value = read(row++, i);
-					opAtt = attSet.stream().filter(att -> att.getValues()
-							.stream().anyMatch(val -> val.getInputStringValue().equals(value)))
+					opAtt = attSet.stream().filter(att -> att.getValueSpace()
+							.stream().anyMatch(val -> val.getStringValue().equals(value)))
 							.findAny();
 				} while (opAtt.isPresent());
 				columnHeaders.put(i, opAtt.get());
