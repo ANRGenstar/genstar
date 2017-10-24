@@ -37,7 +37,7 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * 
 	 * @return
 	 */
-	public Collection<IValue> getValues();
+	public Collection<? extends IValue> getValues();
 	
 	/**
 	 * returns the value for an attribute if any; the value might be null if no

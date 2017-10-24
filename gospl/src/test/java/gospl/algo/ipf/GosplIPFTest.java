@@ -7,9 +7,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.IValue;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.algo.GosplAlgoUtilTest;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -29,8 +29,8 @@ public class GosplIPFTest {
 	public static int POPULATION_SIZE = (int) Math.pow(10, 5);
 	public static int GENERATION_SIZE = 1000;
 
-	public static IPopulation<ADemoEntity, DemographicAttribute, IValue> seed;	
-	public static INDimensionalMatrix<DemographicAttribute,IValue,Double> marginals;
+	public static IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed;	
+	public static INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals;
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -44,7 +44,7 @@ public class GosplIPFTest {
 	@Test
 	public void test() {
 		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new SRIPFAlgo(seed);
-		ISampler<ACoordinate<DemographicAttribute, IValue>> sampler = null;
+		ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> sampler = null;
 		try {
 			sampler = inferenceAlgo.inferSRSampler(marginals, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e) {
@@ -52,7 +52,7 @@ public class GosplIPFTest {
 			e.printStackTrace();
 		}
 		ISyntheticGosplPopGenerator gosplGenerator = new DistributionBasedGenerator(sampler);
-		IPopulation<ADemoEntity, DemographicAttribute, IValue> popOut = gosplGenerator.generate(GENERATION_SIZE);
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = gosplGenerator.generate(GENERATION_SIZE);
 		
 		// Basic test of population size generation
 		assertEquals(GENERATION_SIZE, popOut.size());

@@ -1,4 +1,4 @@
-package core.metamodel.pop;
+package core.metamodel.pop.attribute;
 
 import java.util.Map;
 import java.util.Set;

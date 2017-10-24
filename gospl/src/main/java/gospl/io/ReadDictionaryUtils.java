@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import core.metamodel.pop.DemographicAttribute;
-import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -48,7 +48,7 @@ public class ReadDictionaryUtils {
 				
 			DemographicAttribute<? extends IValue> att;
 			try {
-				att = GosplAttributeFactory.getFactory().createAttribute(
+				att = DemographicAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						dataType,
 						new ArrayList<String>(n.getDomain())

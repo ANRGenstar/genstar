@@ -3,7 +3,7 @@ package gospl.distribution.matrix;
 import java.util.Collection;
 import java.util.Set;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 
 public interface ISegmentedNDimensionalMatrix<T extends Number> extends INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> {

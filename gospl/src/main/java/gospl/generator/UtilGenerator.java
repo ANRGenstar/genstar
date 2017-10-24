@@ -11,8 +11,8 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.metamodel.pop.DemographicAttribute;
-import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -98,7 +98,7 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 	private DemographicAttribute<? extends IValue> createIntegerAtt() {
 		DemographicAttribute<? extends IValue> asa = null;
 		try {
-			asa = GosplAttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
+			asa = DemographicAttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Integer, 
 					IntStream.range(0, maxVal).mapToObj(i -> String.valueOf(i)).collect(Collectors.toList()));
 		} catch (GSIllegalRangedData e) {
@@ -111,7 +111,7 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 	private DemographicAttribute<? extends IValue> createStringAtt(){
 		DemographicAttribute<? extends IValue> asa = null;
 		try {
-			asa = GosplAttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
+			asa = DemographicAttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Nominal, 
 					IntStream.range(0, random.nextInt(maxVal)).mapToObj(j -> 
 					generateName(random.nextInt(j+1))).collect(Collectors.toList()));

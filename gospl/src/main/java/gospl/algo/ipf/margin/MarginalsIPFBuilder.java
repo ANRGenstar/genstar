@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;

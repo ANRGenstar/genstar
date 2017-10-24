@@ -6,8 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import core.metamodel.geo.AGeoEntity;
-import spll.SpllPopulation;
+import core.metamodel.value.IValue;
 import spll.SpllEntity;
+import spll.SpllPopulation;
 import spll.popmapper.constraint.ISpatialConstraint;
 
 public class SPUniformLocalizer extends AbstratcLocalizer {
@@ -24,7 +25,7 @@ public class SPUniformLocalizer extends AbstratcLocalizer {
 
 	@Override
 	protected List<SpllEntity> localizationInNestOp(Collection<SpllEntity> entities,
-			List<AGeoEntity> possibleNests, Long val) {
+			List<AGeoEntity<? extends IValue>> possibleNests, Long val) {
 		Collection<SpllEntity> chosenEntities = null;
 		if (val != null) {
 			List<SpllEntity> ens = new ArrayList<>(entities);
@@ -43,7 +44,7 @@ public class SPUniformLocalizer extends AbstratcLocalizer {
 				break;
 			}
 			int index = rand.nextInt(possibleNests.size());
-			AGeoEntity nest = possibleNests.get(index);
+			AGeoEntity<? extends IValue> nest = possibleNests.get(index);
 			boolean removeObject = false;
 			for (ISpatialConstraint constraint: constraints) {
 				removeObject = removeObject || constraint.updateConstraint(nest);

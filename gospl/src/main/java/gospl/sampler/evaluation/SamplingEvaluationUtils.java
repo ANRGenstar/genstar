@@ -1,6 +1,6 @@
 package gospl.sampler.evaluation;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.distribution.matrix.INDimensionalMatrix;
 

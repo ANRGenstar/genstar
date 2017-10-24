@@ -7,17 +7,18 @@ import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.pop.ADemoEntity;
+import core.metamodel.value.IValue;
 
 public class SpllEntity extends ADemoEntity {
 
 	private ADemoEntity entity;
 	
 	private Point location = null;
-	private AGeoEntity nest = null;
+	private AGeoEntity<? extends IValue> nest = null;
 
 	public SpllEntity(ADemoEntity entity) {
-		super(entity.getValues().stream().collect(Collectors
-				.toMap(val -> val.getAttribute(), Function.identity())));
+		super(entity.getAttributes().stream().collect(Collectors
+				.toMap(Function.identity(), att -> entity.getValueForAttribute(att))));
 		this.entity = entity;
 	}
 	
@@ -39,16 +40,6 @@ public class SpllEntity extends ADemoEntity {
 	}
 
 	/**
-	 * Retrieve the most significant enclosing geographical entity this
-	 * entity is situated. It represents 'home's entity 
-	 * 
-	 * @return
-	 */
-	public AGeoEntity getNest(){
-		return nest;
-	}
-
-	/**
 	 * Change the location of the entity
 	 * 
 	 * @param location
@@ -57,12 +48,23 @@ public class SpllEntity extends ADemoEntity {
 		this.location = location;
 	}
 
+
+	/**
+	 * Retrieve the most significant enclosing geographical entity this
+	 * entity is situated. It represents 'home's entity 
+	 * 
+	 * @return
+	 */
+	public AGeoEntity<? extends IValue> getNest(){
+		return nest;
+	}
+	
 	/**
 	 * Change the nest of the entity
 	 * 
 	 * @param entity
 	 */
-	public void setNest(AGeoEntity nest){
+	public void setNest(AGeoEntity<? extends IValue> nest){
 		this.nest = nest;
 	}
 	

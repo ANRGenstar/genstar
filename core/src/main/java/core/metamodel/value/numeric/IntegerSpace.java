@@ -61,7 +61,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 		if(values.contains(e) || 
 				e.getActualValue() < min || e.getActualValue() > max)
 			return false;
-		addValue(e.getStringValue());
+		this.addValue(e.getStringValue());
 		return true;
 	}
 	

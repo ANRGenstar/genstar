@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.DemographicAttribute;
-import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttributeFactory;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
@@ -429,7 +429,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 				logger.info("refining the properties of attribute {} based on database content: its type is now {}", att, dt);
 
 				try {
-					DemographicAttribute<IValue> updatedAtt = GosplAttributeFactory.getFactory().createRefinedAttribute(att, dt);
+					DemographicAttribute<? extends IValue> updatedAtt = DemographicAttributeFactory.getFactory()
+							.createRefinedAttribute(att, dt);
 					attributes.remove(att);
 					attributes.add(updatedAtt);
 					name2attribute.put(currentField.getName(), updatedAtt);

@@ -12,13 +12,14 @@ import org.opengis.referencing.operation.TransformException;
 import core.metamodel.IPopulation;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
+import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 
@@ -53,7 +54,7 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, DemographicAttribute<IValue>> localisePopulation();
+	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> localisePopulation();
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //
@@ -68,7 +69,8 @@ public interface ISPLocalizer {
 	 * @param keyAttPop
 	 * @param keyAttMatch
 	 */
-	public void setMatcher(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch);
+	public void setMatcher(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> match, 
+			String keyAttPop, String keyAttMatch);
 	
 	/**
 	 * This method must setup matcher variable (i.e. the number of entity) in
@@ -81,7 +83,7 @@ public interface ISPLocalizer {
 	 * @throws MismatchedDimensionException 
 	 * @throws SchemaException 
 	 */
-	public IGSGeofile<? extends AGeoEntity> estimateMatcher(File match) 
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> estimateMatcher(File match) 
 			throws MismatchedDimensionException, IllegalArgumentException, IOException, TransformException, SchemaException;
 	
 	
@@ -99,7 +101,8 @@ public interface ISPLocalizer {
 	 * @param entityNbAreas
 	 * @param numberProperty
 	 */
-	public void setMapper(IGSGeofile<? extends AGeoEntity> map, String numberProperty);
+	public void setMapper(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> map, 
+			String numberProperty);
 	
 	/**
 	 * Setup a density map - from the result of spatial interpolation: this interpolation
@@ -119,11 +122,14 @@ public interface ISPLocalizer {
 	 * @throws IndexOutOfBoundsException
 	 * @throws GSMapperException
 	 * @throws SchemaException 
+	 * @throws InvalidGeoFormatException 
+	 * @throws IllegalArgumentException 
+	 * @throws MismatchedDimensionException 
 	 */
-	public void setMapper(List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
-			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, 
-			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
-	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
+	public void setMapper(List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> endogeneousVarFile, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, SPLUniformNormalizer splUniformNormalizer) 
+					throws IOException, TransformException, InterruptedException, ExecutionException, IllegalRegressionException, 
+					IndexOutOfBoundsException, GSMapperException, SchemaException, MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException;
 	
 	/**
 	 * Setup a density map - from the result of spatial interpolation: this interpolation
@@ -143,12 +149,15 @@ public interface ISPLocalizer {
 	 * @throws IndexOutOfBoundsException
 	 * @throws GSMapperException
 	 * @throws SchemaException 
+	 * @throws InvalidGeoFormatException 
+	 * @throws IllegalArgumentException 
+	 * @throws MismatchedDimensionException 
 	 */
-	public void setMapper(IGSGeofile<? extends AGeoEntity> mainMapper , String mainAttribute, 
-			List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
-			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, 
-			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
-	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
+	public void setMapper(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> mainMapper, 
+			String mainAttribute, List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> endogeneousVarFile, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, SPLUniformNormalizer splUniformNormalizer) 
+					throws IOException, TransformException, InterruptedException, ExecutionException, IllegalRegressionException, 
+					IndexOutOfBoundsException, GSMapperException, SchemaException, MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException;
 	
 	///////////////////////////////////////////////////
 	// -------------- CONSTRAINT PART -------------- //

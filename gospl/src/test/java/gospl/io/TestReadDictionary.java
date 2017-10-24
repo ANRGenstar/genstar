@@ -1,6 +1,7 @@
 package gospl.io;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.Collection;
@@ -9,7 +10,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
 
 public class TestReadDictionary {
@@ -27,7 +29,7 @@ public class TestReadDictionary {
 
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(new File("./src/test/resources/bayesiannetworks/gerland.xbif"));
 
-		Collection<DemographicAttribute> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
+		Collection<DemographicAttribute<? extends IValue>> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		System.err.println(attributes);
 		

@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.IGSSurvey;
 import core.metamodel.value.IValue;

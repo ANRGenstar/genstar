@@ -10,9 +10,9 @@ import org.junit.rules.TemporaryFolder;
 
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarXmlSerializer;
-import core.metamodel.pop.DemographicAttribute;
-import core.metamodel.pop.IValue;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplInputDataManager;
@@ -20,7 +20,6 @@ import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.io.GosplSurveyFactory;
@@ -28,7 +27,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
 import gospl.sampler.IHierarchicalSampler;
 import gospl.sampler.ISampler;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, IValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -71,8 +70,6 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		 }
 		
 		 // Setup the factory that build attribute
-		 @SuppressWarnings("unused")
-		GosplAttributeFactory attf = new GosplAttributeFactory();
 		
 		 GenstarConfigurationFile gcf = null;
 		 try {
@@ -82,7 +79,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			 e.printStackTrace();
 		 }
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
-						 gcf.getAttributes().size()+" attributs\n"+
+						 gcf.getDemoDictionary().getAttributes().size()+" attributs\n"+
 						 gcf.getSurveyWrappers().size()+" data files");
 						
 		 return gcf;
@@ -141,7 +138,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		final long timestampStart = System.currentTimeMillis();
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<DemographicAttribute, IValue, Double> distribution = null;
+		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDataTablesIntoDistributions();
 		} catch (final IllegalDistributionCreation e1) {
@@ -152,7 +149,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final ISyntheticReconstructionAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<DemographicAttribute,IValue>> sampler = null;
+		ISampler<ACoordinate<DemographicAttribute<? extends IValue>,IValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferSRSampler(
 					distribution, 

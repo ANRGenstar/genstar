@@ -66,6 +66,13 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 		return addValue(values.size()-1, value);
 	}
 	
+	/**
+	 * 
+	 * @param order
+	 * @param value
+	 * @return
+	 * @throws IllegalArgumentException
+	 */
 	public OrderedValue addValue(int order, String value) throws IllegalArgumentException {
 		OrderedValue ov = null;
 		try {
@@ -92,10 +99,10 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 */
 	@Override
 	public boolean add(OrderedValue e) {
-		if(values.stream().anyMatch(v -> v.getOrder() == e.getOrder()))
-			values.stream().filter(v -> v.getOrder() > e.getOrder())
-				.forEach(v -> v.setOrder(v.getOrder()+1));
-		return values.add(e);
+		if(values.stream().anyMatch(val -> val.getStringValue().equals(e.getStringValue())))
+			return false;
+		this.addValue(e.getOrder(), e.getStringValue());
+		return true;
 	}
 	
 	/**

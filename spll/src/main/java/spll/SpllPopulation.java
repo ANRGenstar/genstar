@@ -1,4 +1,5 @@
 package spll;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,20 +12,20 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import core.metamodel.IPopulation;
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.value.IValue;
 import spll.util.SpllUtil;
 
-public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> {
+public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 
 	private Collection<SpllEntity> population;
-	private IGSGeofile<? extends AGeoEntity> geoFile; 
+	private IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile; 
 
-	private Set<DemographicAttribute> attributes;
+	private Set<DemographicAttribute<? extends IValue>> attributes;
 	
-	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> population,
-			IGSGeofile<? extends AGeoEntity> geoFile) {
+	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile) {
 		this.population = population.stream().map(entity -> new SpllEntity(entity))
 				.collect(Collectors.toSet());
 		this.attributes = population.getPopulationAttributes();
@@ -46,7 +47,7 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	 * 
 	 * @return
 	 */
-	public IGSGeofile<? extends AGeoEntity> getGeography() {
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> getGeography() {
 		return geoFile;
 	}
 	
@@ -60,7 +61,7 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 	
 	@Override
-	public Set<DemographicAttribute> getPopulationAttributes() {
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}
 	

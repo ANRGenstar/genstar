@@ -1,8 +1,10 @@
-package core.metamodel.pop.factory;
+package core.metamodel.pop.attribute;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.metamodel.value.binary.BinarySpace;
@@ -29,13 +31,13 @@ import core.util.excpetion.GSIllegalRangedData;
  * @author kevinchapuis
  *
  */
-public class GosplAttributeFactory {
+public class DemographicAttributeFactory {
 	
-	private static GosplAttributeFactory gaf = new GosplAttributeFactory();
+	private static DemographicAttributeFactory gaf = new DemographicAttributeFactory();
 	
-	private GosplAttributeFactory(){};
+	private DemographicAttributeFactory(){};
 	
-	public static GosplAttributeFactory getFactory() {
+	public static DemographicAttributeFactory getFactory() {
 		return gaf;
 	}
 
@@ -77,6 +79,52 @@ public class GosplAttributeFactory {
 		values.stream().forEach(val -> vs.addValue(val));
 		return attribute;
 	}
+	
+	/**
+	 * TODO javadoc  
+	 * 
+	 * @param string
+	 * @param type
+	 * @param values
+	 * @param referent
+	 * @param mapper
+	 * @return
+	 */
+	public DemographicAttribute<? extends IValue> createAttribute(String string, GSEnumDataType type,
+			List<String> values, DemographicAttribute<? extends IValue> referent,
+			Map<Set<String>, Set<String>> mapper) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	/**
+	 * In case we have better information about an attribute after its definition - for instance 
+	 * because the definition was imprecise but is better defined when reading the data - then 
+	 * we can create a novel attribute based on the past one by changing or or several of its properties
+	 * 
+	 * FIXME: fix based on new {@link DemographicAttribute} creation rules
+	 * 
+	 * @param orignalAtt
+	 * @param datatype
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public DemographicAttribute<? extends IValue> createRefinedAttribute(DemographicAttribute<? extends IValue> orignalAtt, 
+			GSEnumDataType datatype) throws GSIllegalRangedData {
+
+		//Map<Set<String>, Set<String>> mapper = null;
+		
+		DemographicAttribute<? extends IValue> novel = createAttribute(
+				orignalAtt.getAttributeName(),
+				datatype, 
+				orignalAtt.getValueSpace().stream().map(a->a.getStringValue()).collect(Collectors.toList()) /*,
+				orignalAtt.getReferentAttribute(), 
+				mapper */
+				);
+		return novel;
+	}
+	
+	// -------------------------------------------------------------- //
 	
 	/**
 	 * Create integer value attribute

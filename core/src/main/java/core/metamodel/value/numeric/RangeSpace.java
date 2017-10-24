@@ -97,7 +97,8 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 					.anyMatch(num -> num.doubleValue() < min || num.doubleValue() > max) 
 				|| !rt.isValideRangeCandidate(e.getStringValue()))
 			return false;
-		return values.add(e);
+		this.addValue(e.getStringValue());
+		return true;
 	}
 	
 	@Override

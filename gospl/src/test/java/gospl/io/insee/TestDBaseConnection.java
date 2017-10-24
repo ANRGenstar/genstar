@@ -1,6 +1,7 @@
 package gospl.io.insee;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,10 +16,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplInputDataManager;
 import gospl.io.GosplSurveyFactory;
@@ -87,7 +89,7 @@ public class TestDBaseConnection {
 		}
 		
 		
-		Collection<DemographicAttribute> attributes = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
+		Collection<DemographicAttribute<? extends IValue>> attributes = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
 																dictionaryFilename
 																);
 

@@ -7,16 +7,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.value.IValue;
 import spin.objects.SpinNetwork;
 
 /** Population Spin. 
  * 
  *
  */
-public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> {
+public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 
 	// Network associe a la population.
 	private SpinNetwork network;
@@ -36,7 +36,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	 * @param prop
 	 * @param network
 	 */
-	public SpinPopulation(IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> popRef, 
+	public SpinPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popRef, 
 						 SpinNetwork network){
 		population = popRef;
 		this.network = network; 
@@ -137,8 +137,8 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
-	public Set<DemographicAttribute> getPopulationAttributes(){
-		return population.parallelStream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes(){
+		return population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
 
 }

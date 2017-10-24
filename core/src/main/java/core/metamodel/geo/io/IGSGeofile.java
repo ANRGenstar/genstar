@@ -3,18 +3,21 @@ package core.metamodel.geo.io;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import javax.xml.crypto.dsig.TransformException;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
+import core.metamodel.geo.attribute.GeographicAttribute;
 import core.metamodel.value.IValue;
 
-public interface IGSGeofile<Entity extends AGeoEntity> {
+public interface IGSGeofile<E extends AGeoEntity<V>, V extends IValue> {
 
+	public enum GeoGSFileType {RASTER,VECTOR}
+	
 	/**
 	 * Gives the geographic type of data within the file: either to be
 	 * raster or vector
@@ -31,7 +34,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @return
 	 * @throws TransformException 
 	 */
-	public Collection<Entity> getGeoEntity() throws IOException;
+	public Collection<E> getGeoEntity() throws IOException;
 	
 	/**
 	 * Retrieve all possible variable within spatial component.
@@ -39,14 +42,14 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * 
 	 * @return 
 	 */
-	public Collection<IValue> getGeoValues() ;
+	public Collection<V> getGeoValues() ;
 	
 	/**
 	 * Retrieve all possible attribute that geo entity can embody
 	 * 
 	 * @return
 	 */
-	public Collection<AGeoAttribute<? extends IValue>> getGeoAttributes();
+	public Collection<GeographicAttribute<? extends V>> getGeoAttributes();
 
 
 	/**
@@ -58,7 +61,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @return
 	 * @throws FactoryException 
 	 */
-	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity> file);
+	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> file);
 	
 	/**
 	 * Access to file coordinate referent system through a WKT representation.
@@ -72,7 +75,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * 
 	 * @return
 	 */
-	public Iterator<Entity> getGeoEntityIterator() ;
+	public Iterator<E> getGeoEntityIterator() ;
 	
 	/**
 	 * Access to file data but limited to geo data within the given Geometry.
@@ -80,7 +83,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param feature
 	 * @return Iterator 
 	 */
-	public Iterator<Entity> getGeoEntityIteratorWithin(Geometry geom);
+	public Iterator<E> getGeoEntityIteratorWithin(Geometry geom);
 	
 	/**
 	 * Access to file data but limited to geo data within the given Geometry.
@@ -88,7 +91,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param geom
 	 * @return Collection 
 	 */
-	public Collection<Entity> getGeoEntityWithin(Geometry geom);
+	public Collection<E> getGeoEntityWithin(Geometry geom);
 	
 	/**
 	 * Access to file data but limited to geo data intersected with the given Geometry
@@ -96,7 +99,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param feature
 	 * @return Iterator 
 	 */
-	public Iterator<Entity> getGeoEntityIteratorIntersect(Geometry geom);
+	public Iterator<E> getGeoEntityIteratorIntersect(Geometry geom);
 
 	/**
 	 * Access to file data but limited to geo data intersected with the given Geometry
@@ -104,7 +107,7 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @param geom
 	 * @return Collection 
 	 */
-	public Collection<Entity> getGeoEntityIntersect(Geometry geom);
+	public Collection<E> getGeoEntityIntersect(Geometry geom);
 	
 	/**
 	 * Access to file envelope as define in JTS 
@@ -113,5 +116,22 @@ public interface IGSGeofile<Entity extends AGeoEntity> {
 	 * @throws IOException 
 	 */
 	public Envelope getEnvelope() throws IOException;
+	
+	/**
+	 * Use this GIS file as a template to fill with transfer mapping in argument
+	 * 
+	 * WARNING: the transfer map keys {@link AGeoEntity} must be part of this GIS file 
+	 * 
+	 * TODO: extends transfer to be a map of <entity, Map<attribute, value>> to transfer multiple attribute value pairs 
+	 * 
+	 * @param transfer
+	 * @return
+	 * @throws org.opengis.referencing.operation.TransformException 
+	 * @throws IOException 
+	 * @throws IllegalArgumentException 
+	 */
+	public IGSGeofile<E, V> transferTo(Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer, 
+			GeographicAttribute<? extends IValue> attribute) 
+					throws IllegalArgumentException, IOException;
 	
 }

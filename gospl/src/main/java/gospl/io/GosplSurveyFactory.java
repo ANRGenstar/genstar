@@ -35,7 +35,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.pop.io.IGSSurvey;

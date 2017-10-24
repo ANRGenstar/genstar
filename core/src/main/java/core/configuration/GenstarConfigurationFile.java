@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import core.configuration.dictionary.DemographicDictionary;
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 

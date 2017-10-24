@@ -54,7 +54,7 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 		if(values.contains(e) ||
 				!ct.getFormatedString(e.getStringValue()).equals(e.getStringValue()))
 			return false;
-		values.add(e);
+		this.addValue(e.getStringValue());
 		return true;
 	}
 	

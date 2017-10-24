@@ -15,10 +15,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.value.IValue;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplInputDataManager;
@@ -46,7 +47,7 @@ public class TestBayesianNetworkCompletionSampler {
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(fileBN);
 		
 		// to read the incomplete sample, we need a dict
-		Collection<DemographicAttribute> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
+		Collection<DemographicAttribute<? extends IValue>> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		// we need an incomplete sample
 		char sep;
@@ -79,7 +80,7 @@ public class TestBayesianNetworkCompletionSampler {
 		
 		GosplPopulation pop = null;
 		
-		Set<DemographicAttribute> updatedAttributes = new HashSet<>(attributes);
+		Set<DemographicAttribute<? extends IValue>> updatedAttributes = new HashSet<>(attributes);
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();

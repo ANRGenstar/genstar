@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 
 public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {

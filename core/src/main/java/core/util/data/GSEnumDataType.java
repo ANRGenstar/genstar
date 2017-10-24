@@ -11,7 +11,7 @@ public enum GSEnumDataType {
 
 	Continue (Double.class),
 	Integer (Integer.class),
-	Range (String.class),
+	Range (Number.class),
 	Boolean (Boolean.class),
 	Order (String.class),
 	Nominal (String.class);
@@ -29,6 +29,15 @@ public enum GSEnumDataType {
 	 */
 	public boolean isNumericValue() {
 		return wrapperClass.getSuperclass().equals(Number.class);
+	}
+	
+	/**
+	 * Return the inner type this data type encapsulate
+	 * 
+	 * @return
+	 */
+	public Class<?> getInnerType(){
+		return wrapperClass;
 	}
 	
 }

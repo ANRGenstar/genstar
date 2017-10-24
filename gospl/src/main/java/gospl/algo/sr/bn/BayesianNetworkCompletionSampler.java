@@ -3,9 +3,9 @@ package gospl.algo.sr.bn;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.pop.DemographicAttribute;
-import core.metamodel.pop.factory.GosplAttributeFactory;
 import core.metamodel.pop.ADemoEntity;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -41,7 +41,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 		for (NodeCategorical n: bn.getNodes()) {
 			bnVariable2popAttribute.put(
 					n.name, 
-					GosplAttributeFactory.getFactory().createAttribute(
+					DemographicAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						GSEnumDataType.Nominal,
 						n.getDomain()
@@ -80,7 +80,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 			// we don't have any counterpart for this population attribute now
 			// let's create it !
 			try {
-				a = GosplAttributeFactory.getFactory().createAttribute(
+				a = DemographicAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						GSEnumDataType.Nominal,
 						n.getDomain()

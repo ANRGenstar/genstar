@@ -7,23 +7,24 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.geo.AGeoEntity;
+import core.metamodel.value.IValue;
 
 public class SpatialConstraintMaxDistance extends ASpatialConstraint {
 
-	private Map<AGeoEntity, Double> distanceToEntities;
+	private Map<AGeoEntity<? extends IValue>, Double> distanceToEntities;
 
-	public SpatialConstraintMaxDistance(Collection<AGeoEntity> distanceToEntities,
+	public SpatialConstraintMaxDistance(Collection<AGeoEntity<? extends IValue>> distanceToEntities,
 			Double distance) {
 		this.distanceToEntities = distanceToEntities.stream().collect(Collectors
 				.toMap(Function.identity(), entity -> distance));
 	}
 	
-	public SpatialConstraintMaxDistance(Map<AGeoEntity, Double> distanceToEntities) {
+	public SpatialConstraintMaxDistance(Map<AGeoEntity<? extends IValue>, Double> distanceToEntities) {
 		this.distanceToEntities = distanceToEntities;
 	}
 	
 	@Override
-	public List<AGeoEntity> getSortedCandidates(List<AGeoEntity> nests) {
+	public List<AGeoEntity<? extends IValue>> getSortedCandidates(List<AGeoEntity<? extends IValue>> nests) {
 		return nests.stream().filter(nest -> distanceToEntities.keySet()
 				.stream().anyMatch(entity -> nest.getGeometry()
 						.getCentroid().buffer(distanceToEntities.get(entity))
@@ -37,12 +38,12 @@ public class SpatialConstraintMaxDistance extends ASpatialConstraint {
 	}
 
 	@Override
-	public boolean updateConstraint(AGeoEntity nest) {
+	public boolean updateConstraint(AGeoEntity<? extends IValue> nest) {
 		return false;
 	}
 
 	@Override
-	public void relaxConstraintOp(Collection<AGeoEntity> distanceToEntities) {
+	public void relaxConstraintOp(Collection<AGeoEntity<? extends IValue>> distanceToEntities) {
 		distanceToEntities.stream().forEach(entity -> 
 			this.distanceToEntities.put(entity, 
 					this.distanceToEntities.get(entity)+this.increaseStep));

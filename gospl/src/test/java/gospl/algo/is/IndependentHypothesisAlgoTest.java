@@ -1,14 +1,15 @@
 package gospl.algo.is;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.IValue;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.algo.GosplAlgoUtilTest;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.algo.sr.is.IndependantHypothesisAlgo;
@@ -48,7 +49,7 @@ public class IndependentHypothesisAlgoTest {
 			e.printStackTrace();
 		}
 		
-		IPopulation<ADemoEntity, DemographicAttribute, IValue> pop = generator.generate(SEGMENT_SIZE);
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop = generator.generate(SEGMENT_SIZE);
 
 		assertEquals(pop.size(), SEGMENT_SIZE, 0.01);
 		

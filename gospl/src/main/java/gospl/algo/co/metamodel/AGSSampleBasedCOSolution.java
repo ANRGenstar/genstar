@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplNDimensionalMatrixFactory;

@@ -1,49 +1,10 @@
 package spll.util;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.geotools.referencing.CRS;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.io.GeoGSFileType;
-import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.value.geo.IValue;
-import spll.io.SPLRasterFile;
-
 public class SpllUtil {
-
-	/**
-	 * Return values of meaningful geographical purpose (i.e. exclude raster noData) contains 
-	 * in given files collection and that complains to given {@code vals} argument collection
-	 * of attribute name
-	 * 
-	 * @param vals
-	 * @return
-	 */
-	public static Collection<? extends IValue> getValuesFor(Collection<String> vals, List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile){
-		Collection<IValue> values = new HashSet<>();
-		if(vals.isEmpty()){
-			for(IGSGeofile<? extends AGeoEntity> file : endogeneousVarFile){
-				if(file.getGeoGSFileType().equals(GeoGSFileType.RASTER))
-					values.addAll(file.getGeoValues()
-							.stream().filter(val -> !((SPLRasterFile)file).isNoDataValue(val))
-							.collect(Collectors.toSet()));
-				else
-					values.addAll(file.getGeoValues());
-			}
-		} else {
-			values.addAll(endogeneousVarFile.stream()
-					.flatMap(file -> file.getGeoValues().stream())
-					.filter(var -> vals.stream().anyMatch(vName -> var.valueEquals(vName)))
-					.collect(Collectors.toSet()));
-		}
-		return values;
-	}
 
 	/**
 	 * Return a string representation of a 2D matrix

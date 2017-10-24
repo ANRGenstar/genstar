@@ -5,10 +5,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.AgregatedDemographicAttribute;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.MappedDemographicAttribute;
+import core.metamodel.pop.attribute.AgregatedDemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.pop.attribute.MappedDemographicAttribute;
 import core.metamodel.value.IValue;
 
 /**

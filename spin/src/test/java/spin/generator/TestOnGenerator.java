@@ -1,12 +1,11 @@
 package spin.generator;
 
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.DemographicAttribute;
 import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UtilGenerator;
 import spin.SpinPopulation;
@@ -25,8 +24,7 @@ public class TestOnGenerator {
 	 */
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
-		IPopulation<ADemoEntity, DemographicAttribute, APopulationValue> population =
-		generator.generate(100);
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population = generator.generate(100);
 /*		
 		System.out.println("Debut de la generation de reseau regulier");
 		SpinPopulation populationWithNetworkRegular = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);

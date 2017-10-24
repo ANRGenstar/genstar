@@ -2,7 +2,7 @@ package gospl.distribution;
 
 import java.util.Set;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.pop.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;

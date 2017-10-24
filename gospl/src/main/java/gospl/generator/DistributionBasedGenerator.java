@@ -2,7 +2,7 @@ package gospl.generator;
 
 import java.util.stream.Collectors;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
 import gospl.GosplPopulation;

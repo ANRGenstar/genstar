@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttribute;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;

@@ -6,8 +6,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.metamodel.pop.DemographicAttribute;
-import core.metamodel.pop.factory.GosplAttributeFactory;
+import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.pop.attribute.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -31,7 +31,7 @@ public class BayesianNetworkFromScratchSampler implements ISampler<ACoordinate<D
 		for (NodeCategorical n: bn.getNodes()) {
 			bnVariable2popAttribute.put(
 					n.name, 
-					GosplAttributeFactory.getFactory().createAttribute(
+					DemographicAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						GSEnumDataType.Nominal,
 						n.getDomain()

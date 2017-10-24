@@ -1,6 +1,7 @@
 package spll.datamapper.matcher;
 
 import core.metamodel.geo.AGeoEntity;
+import core.metamodel.value.IValue;
 import spll.datamapper.variable.ISPLVariable;
 
 public interface ISPLMatcher<V extends ISPLVariable, T> {
@@ -13,7 +14,7 @@ public interface ISPLMatcher<V extends ISPLVariable, T> {
 	
 	public V getVariable();
 
-	public AGeoEntity getEntity();
+	public AGeoEntity<? extends IValue> getEntity();
 	
 	public String toString();
 

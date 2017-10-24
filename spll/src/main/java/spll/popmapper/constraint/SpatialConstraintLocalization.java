@@ -9,11 +9,12 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoEntity;
 import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.value.IValue;
 
 public class SpatialConstraintLocalization extends ASpatialConstraint {
 
 	Geometry bounds;
-	protected IGSGeofile<? extends AGeoEntity> referenceFile;
+	protected IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> referenceFile;
 	
 	public SpatialConstraintLocalization(Geometry bounds) {
 		super();
@@ -21,12 +22,12 @@ public class SpatialConstraintLocalization extends ASpatialConstraint {
 	}
 
 	@Override
-	public List<AGeoEntity> getSortedCandidates(List<AGeoEntity> nests) {
+	public List<AGeoEntity<? extends IValue>> getSortedCandidates(List<AGeoEntity<? extends IValue>> nests) {
 		if (bounds == null) return nests;
 		//System.out.println("nests: " + nests.size());
-		List<AGeoEntity> cands = null;
+		List<AGeoEntity<? extends IValue>> cands = null;
 		if (referenceFile != null) {
-			cands = new ArrayList<AGeoEntity>(referenceFile.getGeoEntityWithin(bounds));
+			cands = new ArrayList<>(referenceFile.getGeoEntityWithin(bounds));
 			if (nests != null)cands.removeIf(a -> !nests.stream().anyMatch(b -> b.getGenstarName().equals(b.getGenstarName())));
 		} else {
 			cands = nests.stream().filter(a -> a.getGeometry().intersects(bounds)).collect(Collectors.toList());
@@ -39,12 +40,12 @@ public class SpatialConstraintLocalization extends ASpatialConstraint {
 	}
 
 	@Override
-	public boolean updateConstraint(AGeoEntity nest) {
+	public boolean updateConstraint(AGeoEntity<? extends IValue> nest) {
 		return false;
 	}
 
 	@Override
-	public void relaxConstraintOp(Collection<AGeoEntity> nests) {
+	public void relaxConstraintOp(Collection<AGeoEntity<? extends IValue>> nests) {
 		if (bounds != null) 
 			bounds = bounds.buffer(increaseStep);
 		else 
@@ -64,11 +65,11 @@ public class SpatialConstraintLocalization extends ASpatialConstraint {
 	}
 
 
-	public IGSGeofile<? extends AGeoEntity> getReferenceFile() {
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> getReferenceFile() {
 		return referenceFile;
 	}
 
-	public void setReferenceFile(IGSGeofile<? extends AGeoEntity> referenceFile) {
+	public void setReferenceFile(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> referenceFile) {
 		this.referenceFile = referenceFile;
 	}
 

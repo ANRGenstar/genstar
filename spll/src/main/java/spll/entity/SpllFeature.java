@@ -1,20 +1,20 @@
 package spll.entity;
 
-import java.util.Set;
+import java.util.Map;
 
 import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoEntity;
-import core.metamodel.value.geo.IValue;
+import core.metamodel.geo.attribute.GeographicAttribute;
+import core.metamodel.value.IValue;
 
-public class SpllFeature extends AGeoEntity {
+public class SpllFeature extends AGeoEntity<IValue> {
  
 	private final Feature innerFeature;
 	
-	protected SpllFeature(Set<IValue> values, Feature innerFeature) {
+	protected SpllFeature(Map<GeographicAttribute<? extends IValue>, IValue> values, Feature innerFeature) {
 		super(values, innerFeature.getIdentifier().getID());
 		this.innerFeature = innerFeature;
 	}
@@ -42,6 +42,5 @@ public class SpllFeature extends AGeoEntity {
 	public String toString() {
 		return "Feature of type: "+innerFeature.getType()+" with default geometry being "+this.getGeometry().getGeometryType();
 	}
-
 
 }

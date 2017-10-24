@@ -1,6 +1,6 @@
 package spll.datamapper.variable;
 
-import core.metamodel.value.geo.IValue;
+import core.metamodel.value.IValue;
 
 public class SPLVariable implements ISPLVariable {
 
