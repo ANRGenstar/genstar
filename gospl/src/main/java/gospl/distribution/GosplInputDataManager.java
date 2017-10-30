@@ -175,7 +175,7 @@ public class GosplInputDataManager {
 	 * @throws MatrixCoordinateException
 	 *
 	 */
-	public INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> collapseDataTablesIntoDistributions()
+	public INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> collapseDataTablesIntoDistribution()
 			throws IllegalDistributionCreation, IllegalControlTotalException {
 		if (inputData.isEmpty())
 			throw new IllegalArgumentException(

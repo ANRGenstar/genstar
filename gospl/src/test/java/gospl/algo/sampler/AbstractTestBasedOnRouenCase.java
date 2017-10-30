@@ -140,7 +140,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		// so we collapse all distribution build from the data
 		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> distribution = null;
 		try {
-			distribution = df.collapseDataTablesIntoDistributions();
+			distribution = df.collapseDataTablesIntoDistribution();
 		} catch (final IllegalDistributionCreation e1) {
 			e1.printStackTrace();
 		} catch (final IllegalControlTotalException e1) {
