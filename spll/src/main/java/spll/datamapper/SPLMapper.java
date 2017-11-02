@@ -12,8 +12,8 @@ import java.util.stream.Collectors;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import org.opengis.referencing.operation.TransformException;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;

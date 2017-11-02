@@ -1,7 +1,7 @@
 package core.metamodel.value.binary;
 
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
-import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 public class BooleanValue implements IValue {

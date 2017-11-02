@@ -1,4 +1,4 @@
-package core.metamodel.geo.attribute;
+package core.metamodel.attribute.geographic;
 
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BinarySpace;

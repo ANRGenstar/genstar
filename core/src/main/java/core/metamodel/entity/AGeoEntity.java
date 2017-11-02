@@ -1,4 +1,4 @@
-package core.metamodel.geo;
+package core.metamodel.entity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,8 +8,7 @@ import java.util.stream.Collectors;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import core.metamodel.IEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 

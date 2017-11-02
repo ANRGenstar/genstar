@@ -20,8 +20,8 @@ import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.attribute.GeographicAttribute;
-import core.metamodel.geo.attribute.GeographicValueSpace;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicValueSpace;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuedSpace;
 import core.metamodel.value.numeric.ContinuedValue;

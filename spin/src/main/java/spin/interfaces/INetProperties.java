@@ -2,7 +2,7 @@ package spin.interfaces;
 
 import java.util.Set;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 
 /** 
  * Interface pour obtenir des valeurs de propriete sur le graphe

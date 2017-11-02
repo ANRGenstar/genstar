@@ -10,8 +10,8 @@ import org.geotools.coverage.grid.GridEnvelope2D;
 import org.geotools.geometry.Envelope2D;
 import org.opengis.referencing.operation.TransformException;
 
-import spll.entity.SpllPixel;
 import spll.entity.GeoEntityFactory;
+import spll.entity.SpllPixel;
 
 public class GSPixelIterator implements Iterator<SpllPixel> {
 

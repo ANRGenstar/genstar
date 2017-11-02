@@ -1,20 +1,29 @@
-package core.metamodel.pop.attribute;
+package core.metamodel.attribute.demographic;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
-import core.metamodel.value.IValueSpace;
 
-public class MappedDemographicAttribute<R extends IValue, V extends IValue> extends DemographicAttribute<V> {
+/**
+ * Complex attribute that links values with values of a referent attribute.
+ * <p>
+ * STS means: Several To Several
+ * 
+ * @author kevinchapuis
+ *
+ * @param <V>
+ */
+public class STSDemographicAttribute<V extends IValue> extends DemographicAttribute<V> {
 
-	private Map<Set<R>, Set<V>> map;
-	protected DemographicAttribute<R> referent;
+	private Map<Set<V>, Set<IValue>> map;
+	protected DemographicAttribute<? extends IValue> referent;
 
-	public MappedDemographicAttribute(String name, IValueSpace<V> valueSpace,
-			DemographicAttribute<R> referent, Map<Set<R>, Set<V>> map) {
+	public STSDemographicAttribute(String name, IValueSpace<V> valueSpace,
+			DemographicAttribute<? extends IValue> referent, Map<Set<V>, Set<IValue>> map) {
 		super(name, valueSpace);
 		this.referent = referent;
 		this.map = map;
@@ -26,7 +35,7 @@ public class MappedDemographicAttribute<R extends IValue, V extends IValue> exte
 	}
 	
 	@Override
-	public DemographicAttribute<R> getReferentAttribute(){
+	public DemographicAttribute<? extends IValue> getReferentAttribute(){
 		return referent;
 	}
 	

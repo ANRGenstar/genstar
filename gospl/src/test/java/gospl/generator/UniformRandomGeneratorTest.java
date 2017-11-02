@@ -6,8 +6,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
 public class UniformRandomGeneratorTest {

@@ -1,8 +1,8 @@
 package spin.networkProperties;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UtilGenerator;

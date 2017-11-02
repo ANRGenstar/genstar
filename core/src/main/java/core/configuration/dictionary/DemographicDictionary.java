@@ -7,10 +7,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.AgregatedDemographicAttribute;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.attribute.MappedDemographicAttribute;
+import core.metamodel.attribute.demographic.OTSDemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.STSDemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
 /**
@@ -25,10 +25,10 @@ public class DemographicDictionary {
 
 	private Set<DemographicAttribute<? extends IValue>> attSet;
 	
-	private Set<AgregatedDemographicAttribute<? extends IValue>> aggregAttSet;
-	private Set<MappedDemographicAttribute<? extends IValue, IValue>> mappedAttSet;
+	private Set<OTSDemographicAttribute<? extends IValue>> aggregAttSet;
+	private Set<STSDemographicAttribute<? extends IValue>> mappedAttSet;
 	
-	private Set<MappedDemographicAttribute<? extends IValue, IValue>> recordAttSet;
+	private Set<STSDemographicAttribute<? extends IValue>> recordAttSet;
 	
 	public DemographicDictionary() {
 		attSet = new HashSet<>();
@@ -40,7 +40,7 @@ public class DemographicDictionary {
 				.collect(Collectors.toSet());
 	}
 	
-	public Set<MappedDemographicAttribute<? extends IValue, IValue>> getRecordAttribute(){
+	public Set<STSDemographicAttribute<? extends IValue>> getRecordAttribute(){
 		return recordAttSet;
 	}
 	
@@ -53,19 +53,19 @@ public class DemographicDictionary {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public DemographicDictionary addAggregatedAttributes(AgregatedDemographicAttribute<? extends IValue>... attributes) {
+	public DemographicDictionary addAggregatedAttributes(OTSDemographicAttribute<? extends IValue>... attributes) {
 		this.aggregAttSet.addAll(Arrays.asList(attributes));
 		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public DemographicDictionary addMappedAttributes(MappedDemographicAttribute<? extends IValue, IValue>... attributes) {
+	public DemographicDictionary addMappedAttributes(STSDemographicAttribute<? extends IValue>... attributes) {
 		this.mappedAttSet.addAll(Arrays.asList(attributes));
 		return this;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public DemographicDictionary addRecordAttributes(MappedDemographicAttribute<? extends IValue, IValue>... attributes) {
+	public DemographicDictionary addRecordAttributes(STSDemographicAttribute<? extends IValue>... attributes) {
 		this.recordAttSet.addAll(Arrays.asList(attributes));
 		return this;
 	}

@@ -1,4 +1,4 @@
-package core.metamodel.geo.io;
+package core.metamodel.io;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -10,8 +10,8 @@ import javax.xml.crypto.dsig.TransformException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 public interface IGSGeofile<E extends AGeoEntity<V>, V extends IValue> {

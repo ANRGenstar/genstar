@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 import gospl.algo.co.tabusearch.TabuSearch;
 import gospl.algo.co.tabusearch.list.GSTabuList;
 import gospl.algo.co.tabusearch.solution.GSDuplicateShiftSolution;

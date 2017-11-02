@@ -1,9 +1,9 @@
-package core.metamodel.geo.attribute;
+package core.metamodel.attribute.geographic;
 
 import java.util.Arrays;
 import java.util.Collection;
 
-import core.metamodel.IAttribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
 
 

@@ -3,9 +3,9 @@ package gospl.algo.sr.bn;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.attribute.DemographicAttributeFactory;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;

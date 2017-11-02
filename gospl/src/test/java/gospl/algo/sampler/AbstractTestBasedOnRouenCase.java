@@ -10,8 +10,8 @@ import org.junit.rules.TemporaryFolder;
 
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarXmlSerializer;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;

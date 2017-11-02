@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import core.metamodel.value.numeric.template.GSRangeTemplate;
 import core.util.excpetion.GSIllegalRangedData;
 
 /**
@@ -90,6 +91,7 @@ public class GSDataParser {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
+	@SuppressWarnings("unlikely-arg-type")
 	public GSRangeTemplate getRangeTemplate(List<String> ranges, String match, NumMatcher numMatcher) throws GSIllegalRangedData {
 		List<Integer> rangeInt = this.getRangedIntegerData(ranges.stream().collect(Collectors.joining()), numMatcher);
 		Collections.sort(rangeInt);

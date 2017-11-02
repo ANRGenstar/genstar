@@ -13,9 +13,9 @@ import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.extended.NamedMapConverter;
 import com.thoughtworks.xstream.io.xml.StaxDriver;
 
-import core.metamodel.IAttribute;
-import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.io.IGSSurvey;
 
 /**
  * TODO: javadoc

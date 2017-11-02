@@ -3,6 +3,8 @@ package core.metamodel;
 import java.util.Collection;
 import java.util.Set;
 
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**

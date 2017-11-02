@@ -1,18 +1,33 @@
-package core.metamodel.pop.attribute;
+package core.metamodel.attribute.demographic;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
-import core.metamodel.value.IValueSpace;
 
-public class AgregatedDemographicAttribute<V extends IValue> extends DemographicAttribute<V> {
+/**
+ * Attribute links to a referent one: each value of this attribute is bound
+ * to at least one referent value. This means that this attribute has fewer
+ * values than its referent attribute.
+ * <p>
+ * OTS means: One To Several
+ * <p>
+ * Self aggregated value -> referent disaggregated values
+ * 
+ * @see DemographicAttribute
+ * 
+ * @author kevinchapuis
+ *
+ * @param <V>
+ */
+public class OTSDemographicAttribute<V extends IValue> extends DemographicAttribute<V> {
 
 	private Map<V, Set<V>> mapper;
 	protected DemographicAttribute<V> referent;
 	
-	public AgregatedDemographicAttribute(String name, IValueSpace<V> valueSpace,
+	public OTSDemographicAttribute(String name, IValueSpace<V> valueSpace,
 			DemographicAttribute<V> referent, Map<V, Set<V>> mapper) {
 		super(name, valueSpace);
 		this.referent = referent;

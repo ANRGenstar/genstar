@@ -1,6 +1,6 @@
 package gospl.generator;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 import gospl.GosplPopulation;
 import gospl.sampler.ISampler;
 import gospl.sampler.co.RandomSampler;

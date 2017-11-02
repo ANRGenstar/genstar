@@ -3,7 +3,7 @@ package spll.popmapper.constraint;
 import java.util.Collection;
 import java.util.List;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 public interface ISpatialConstraint {

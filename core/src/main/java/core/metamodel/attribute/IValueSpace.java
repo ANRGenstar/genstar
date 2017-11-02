@@ -1,8 +1,8 @@
-package core.metamodel.value;
+package core.metamodel.attribute;
 
 import java.util.Set;
 
-import core.metamodel.IAttribute;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
 /**

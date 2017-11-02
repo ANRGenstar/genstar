@@ -1,4 +1,4 @@
-package core.metamodel.pop.io;
+package core.metamodel.io;
 
 import java.io.FileNotFoundException;
 import java.io.ObjectStreamException;

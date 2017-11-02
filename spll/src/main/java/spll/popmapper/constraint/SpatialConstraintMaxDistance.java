@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 public class SpatialConstraintMaxDistance extends ASpatialConstraint {

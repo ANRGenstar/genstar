@@ -1,8 +1,8 @@
 package gospl.algo.ipf;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.algo.co.ICombinatorialOptimizationAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;

@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
-import core.metamodel.IEntity;
+import core.metamodel.entity.IEntity;
 
 /**
  * Intended to compute statistic on various list of number. To compute statistics on arrays {@see GSBasicStats#transpose(...)} static methods

@@ -16,9 +16,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.IAttribute;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.control.AControl;

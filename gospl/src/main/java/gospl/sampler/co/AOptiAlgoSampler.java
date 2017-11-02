@@ -2,7 +2,7 @@ package gospl.sampler.co;
 
 import java.util.Collection;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 import core.util.random.GenstarRandom;
 import gospl.algo.co.metamodel.IGSOptimizationAlgorithm;
 import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;

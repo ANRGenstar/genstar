@@ -25,12 +25,12 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
-import core.metamodel.geo.attribute.GeographicAttributeFactory;
-import core.metamodel.geo.attribute.GeographicValueSpace;
-import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.geo.io.IGSGeofile.GeoGSFileType;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.geographic.GeographicValueSpace;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuedSpace;
 import core.metamodel.value.numeric.ContinuedValue;

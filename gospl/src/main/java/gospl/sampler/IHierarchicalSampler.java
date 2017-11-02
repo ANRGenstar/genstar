@@ -3,7 +3,7 @@ package gospl.sampler;
 import java.util.Collection;
 import java.util.List;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;

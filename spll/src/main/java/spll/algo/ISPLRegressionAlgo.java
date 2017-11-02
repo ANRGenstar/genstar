@@ -3,7 +3,7 @@ package spll.algo;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import spll.datamapper.matcher.ISPLMatcher;
 import spll.datamapper.variable.ISPLVariable;

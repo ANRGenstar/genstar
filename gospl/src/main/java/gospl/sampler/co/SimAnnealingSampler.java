@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 import gospl.algo.co.simannealing.SimulatedAnnealing;
 import gospl.algo.co.simannealing.state.GSSAState;
 

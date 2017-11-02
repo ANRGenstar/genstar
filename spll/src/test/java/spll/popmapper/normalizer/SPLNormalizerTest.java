@@ -13,8 +13,6 @@ import org.junit.Test;
 
 import core.util.stats.GSBasicStats;
 import core.util.stats.GSEnumStats;
-import spll.popmapper.normalizer.ASPLNormalizer;
-import spll.popmapper.normalizer.SPLUniformNormalizer;
 
 public class SPLNormalizerTest {
 

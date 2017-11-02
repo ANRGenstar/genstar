@@ -1,7 +1,6 @@
-package core.metamodel;
+package core.metamodel.attribute;
 
 import core.metamodel.value.IValue;
-import core.metamodel.value.IValueSpace;
 
 /**
  * Attribute (of for instance an individual or household)

@@ -23,7 +23,7 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 import org.graphstream.graph.implementations.MultiGraph;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;

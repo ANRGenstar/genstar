@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.TreeSet;
 
-import core.metamodel.IAttribute;
-import core.metamodel.value.IValueSpace;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 

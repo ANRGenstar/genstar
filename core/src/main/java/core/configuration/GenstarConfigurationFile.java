@@ -5,7 +5,6 @@ import java.io.FileNotFoundException;
 import java.io.ObjectStreamException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,8 +13,8 @@ import java.util.stream.Collectors;
 import com.thoughtworks.xstream.annotations.XStreamOmitField;
 
 import core.configuration.dictionary.DemographicDictionary;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.io.GSSurveyWrapper;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 
 /**
@@ -116,27 +115,6 @@ public class GenstarConfigurationFile {
 			throw new IllegalArgumentException("You cannot setup circular references between attributes: "
 					+ opCircle.entrySet().stream().map(e -> e.getKey().getAttributeName()+" > "+e.getValue().getAttributeName())
 					.reduce((s1, s2) -> s1.concat(" >> "+s2)).get());
-	}
-
-	/**
-	 * facilitates the creation of lisible mappings.
-	 * 
-	 * Example: Map<Set<String>, Set<String>> mapper = new HashMap<>();
-	 * addMapper(mapper, Arrays.asList("moins de 15"),  Arrays.asList("0-5", "6-15"));
-	 * addMapper(mapper, Arrays.asList("16-25"), Arrays.asList("16-25"));
-	 * addMapper(mapper, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
-	 * addMapper(mapper, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
-	 *	
-	 * @param mapper
-	 * @param from
-	 * @param to
-	 */
-	public static void addMapper(
-			Map<Set<String>, Set<String>> mapper, 
-			List<String> from, List<String> to) {
-		
-		mapper.put(new HashSet<>(from), new HashSet<>(to));
-		
 	}
 	
 	public void setBaseDirectory(File f) {

@@ -5,8 +5,8 @@ import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Point;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 public class SpllEntity extends ADemoEntity {

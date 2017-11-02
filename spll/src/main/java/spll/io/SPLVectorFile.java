@@ -38,9 +38,10 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
-import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;

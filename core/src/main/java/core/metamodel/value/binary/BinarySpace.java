@@ -6,8 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import core.metamodel.IAttribute;
-import core.metamodel.value.IValueSpace;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 public class BinarySpace implements IValueSpace<BooleanValue> {

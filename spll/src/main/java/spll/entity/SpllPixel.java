@@ -8,8 +8,8 @@ import org.geotools.geometry.jts.GeometryBuilder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.numeric.ContinuedValue;
 
 public class SpllPixel extends AGeoEntity<ContinuedValue> {

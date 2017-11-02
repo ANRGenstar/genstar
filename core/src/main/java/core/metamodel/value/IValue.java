@@ -1,5 +1,6 @@
 package core.metamodel.value;
 
+import core.metamodel.attribute.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**

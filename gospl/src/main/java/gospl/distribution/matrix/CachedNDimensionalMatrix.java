@@ -6,7 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.io.GSSurveyType;
 import core.util.data.GSDataParser;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;

@@ -15,10 +15,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.GosplPopulation;

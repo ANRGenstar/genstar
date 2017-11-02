@@ -1,8 +1,9 @@
-package core.metamodel;
+package core.metamodel.entity;
 
 import java.util.Collection;
 import java.util.Map;
 
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
 
 /**

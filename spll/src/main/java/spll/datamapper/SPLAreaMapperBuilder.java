@@ -21,8 +21,8 @@ import com.vividsolutions.jts.geom.PrecisionModel;
 import com.vividsolutions.jts.operation.buffer.BufferParameters;
 import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuedValue;
 import core.util.GSPerformanceUtil;

@@ -7,8 +7,8 @@ import java.util.stream.Collectors;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 
 public class SpatialConstraintLocalization extends ASpatialConstraint {

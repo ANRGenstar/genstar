@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.attribute.DemographicAttributeFactory;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;

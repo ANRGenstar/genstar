@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
-import core.metamodel.IAttribute;
-import core.metamodel.value.IValueSpace;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.IValueSpace;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 

@@ -64,12 +64,12 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import au.com.bytecode.opencsv.CSVReader;
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
-import core.metamodel.geo.attribute.GeographicAttributeFactory;
-import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.stats.GSBasicStats;

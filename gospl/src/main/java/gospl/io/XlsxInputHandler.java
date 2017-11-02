@@ -19,7 +19,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.io.GSSurveyType;
 
 class XlsxInputHandler extends AbstractXlsXlsxInputHandler {
 

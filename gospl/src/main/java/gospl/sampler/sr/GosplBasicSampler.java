@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;

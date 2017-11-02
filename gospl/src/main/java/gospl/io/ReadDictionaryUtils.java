@@ -6,8 +6,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.attribute.DemographicAttributeFactory;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;

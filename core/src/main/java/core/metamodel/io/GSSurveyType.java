@@ -1,4 +1,4 @@
-package core.metamodel.pop.io;
+package core.metamodel.io;
 
 /**
  * This {@link Enum} represents the types of data a synthetic population generation could input. Each refer to 

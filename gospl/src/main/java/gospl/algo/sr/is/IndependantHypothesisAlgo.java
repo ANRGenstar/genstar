@@ -15,10 +15,10 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.IValueSpace;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
-import core.metamodel.value.IValueSpace;
 import core.util.GSPerformanceUtil;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;

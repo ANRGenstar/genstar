@@ -3,7 +3,7 @@ package gospl.sampler;
 import java.util.Collection;
 import java.util.Set;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 
 public interface IEntitySampler extends ISampler<ADemoEntity> {

@@ -1,6 +1,6 @@
 package spll.datamapper.matcher;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import spll.datamapper.variable.SPLVariable;
 

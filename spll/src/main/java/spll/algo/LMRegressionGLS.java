@@ -12,7 +12,7 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.stat.regression.GLSMultipleLinearRegression;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import spll.datamapper.matcher.ISPLMatcher;
 import spll.datamapper.variable.SPLVariable;

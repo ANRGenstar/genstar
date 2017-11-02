@@ -6,8 +6,8 @@ import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.attribute.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 public class SpllFeature extends AGeoEntity<IValue> {

@@ -1,11 +1,11 @@
 
-package core.metamodel.pop.io;
+package core.metamodel.io;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 
 /**

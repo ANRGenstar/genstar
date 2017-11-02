@@ -6,13 +6,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-import core.metamodel.IAttribute;
-import core.metamodel.value.IValueSpace;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.numeric.RangeValue.RangeBound;
+import core.metamodel.value.numeric.template.GSRangeTemplate;
 import core.util.data.GSDataParser;
 import core.util.data.GSDataParser.NumMatcher;
 import core.util.data.GSEnumDataType;
-import core.util.data.GSRangeTemplate;
 import core.util.excpetion.GSIllegalRangedData;
 
 public class RangeSpace implements IValueSpace<RangeValue> {

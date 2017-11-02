@@ -13,8 +13,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.ADemoEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;

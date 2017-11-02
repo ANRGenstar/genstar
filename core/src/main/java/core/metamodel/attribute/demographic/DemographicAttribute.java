@@ -1,13 +1,13 @@
-package core.metamodel.pop.attribute;
+package core.metamodel.attribute.demographic;
 
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import core.metamodel.IAttribute;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
-import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**

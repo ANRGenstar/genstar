@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.metamodel.pop.ADemoEntity;
+import core.metamodel.entity.ADemoEntity;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.sampler.IEntitySampler;

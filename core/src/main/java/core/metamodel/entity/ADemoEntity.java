@@ -1,4 +1,4 @@
-package core.metamodel.pop;
+package core.metamodel.entity;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -8,8 +8,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.IEntity;
-import core.metamodel.pop.attribute.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 
 public abstract class ADemoEntity implements IEntity<DemographicAttribute<? extends IValue>> {

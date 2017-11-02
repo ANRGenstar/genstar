@@ -8,8 +8,8 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;

@@ -18,7 +18,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 import au.com.bytecode.opencsv.CSVReader;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.io.GSSurveyType;
 
 public class CsvInputHandler extends AbstractInputHandler {
 

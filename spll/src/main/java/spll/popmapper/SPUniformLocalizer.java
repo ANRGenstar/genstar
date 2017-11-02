@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
 import spll.SpllPopulation;

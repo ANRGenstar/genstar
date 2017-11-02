@@ -10,8 +10,8 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import core.metamodel.geo.attribute.GeographicAttribute;
-import core.metamodel.geo.attribute.GeographicAttributeFactory;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 

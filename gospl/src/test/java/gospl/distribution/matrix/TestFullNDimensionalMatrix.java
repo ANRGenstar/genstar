@@ -14,10 +14,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.configuration.GenstarConfigurationFile;
-import core.metamodel.pop.attribute.DemographicAttribute;
-import core.metamodel.pop.attribute.DemographicAttributeFactory;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.RangeValue;
+import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -138,6 +139,7 @@ public class TestFullNDimensionalMatrix {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge2CSP(boolean mapped) {
 
 		try {
@@ -145,14 +147,14 @@ public class TestFullNDimensionalMatrix {
 			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
 			Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
 			if(mapped){
-				Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("moins de 15"),  Arrays.asList("0-5", "6-15"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("16-25"), Arrays.asList("16-25"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
-				attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age2", GSEnumDataType.Range, 
-						Arrays.asList("moins de 15", "16-25", "26-55", "55 et plus"), 
-						ageCSP.getDimension("Age"), mapperAge2toAge));
+				Map<String, Set<String>> mapperAge2toAge = new HashMap<>();
+				mapperAge2toAge.put("moins de 15",  Set.of("0-5", "6-15"));
+				mapperAge2toAge.put("16-25", Set.of("16-25"));
+				mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
+				mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
+				attributes.add(DemographicAttributeFactory.getFactory().createRangeAggregatedAttribute("Age2", 
+						new GSDataParser().getRangeTemplate(mapperAge2toAge.keySet().stream().collect(Collectors.toList())), 
+						(DemographicAttribute<RangeValue>) ageCSP.getDimension("Age"), mapperAge2toAge));
 			} else {
 				attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age2", GSEnumDataType.Range, 
 						Arrays.asList("moins de 15", "16-25", "26-55", "55 et plus")));
@@ -181,16 +183,18 @@ public class TestFullNDimensionalMatrix {
 		}
 	}
 	
-	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge3CSP() {
+	@SuppressWarnings("unchecked")
+	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge3CSP() throws IllegalArgumentException, GSIllegalRangedData {
 
 		AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
 		Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
-			Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
-			GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("16-25"), Arrays.asList("16-25"));
-			GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
-			GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
-			attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age3", GSEnumDataType.Range, 
-					Arrays.asList("16-25", "26-55", "55 et plus"), ageCSP.getDimension("Age"), mapperAge2toAge));
+			Map<String, Set<String>> mapperAge2toAge = new HashMap<>();
+			mapperAge2toAge.put("16-25", Set.of("16-25"));
+			mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
+			mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
+			attributes.add(DemographicAttributeFactory.getFactory().createRangeAggregatedAttribute("Age3", 
+					new GSDataParser().getRangeTemplate(mapperAge2toAge.keySet().stream().collect(Collectors.toList())), 
+					(DemographicAttribute<RangeValue>) ageCSP.getDimension("Age"), mapperAge2toAge));
 		attributes.add(ageCSP.getDimension("Activite"));
 
 		AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
@@ -252,7 +256,8 @@ public class TestFullNDimensionalMatrix {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private ASegmentedNDimensionalMatrix<Double> generateSegmentedWithPartialMappingAgePyramideAndCSP() {
+	private ASegmentedNDimensionalMatrix<Double> generateSegmentedWithPartialMappingAgePyramideAndCSP() 
+			throws IllegalArgumentException, GSIllegalRangedData {
 		try {
 
 			return GosplNDimensionalMatrixFactory.getFactory().createDistributionFromDistributions(
@@ -369,7 +374,7 @@ public class TestFullNDimensionalMatrix {
 	}
 	
 	@Test
-	public void testGetValSegementedWithPartialMapping(){
+	public void testGetValSegementedWithPartialMapping() throws IllegalArgumentException, GSIllegalRangedData{
 		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
 		ASegmentedNDimensionalMatrix<Double> segPartial = generateSegmentedWithPartialMappingAgePyramideAndCSP();
 		

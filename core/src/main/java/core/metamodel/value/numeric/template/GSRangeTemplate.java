@@ -1,4 +1,4 @@
-package core.util.data;
+package core.metamodel.value.numeric.template;
 
 import java.util.stream.Stream;
 
@@ -17,7 +17,7 @@ public class GSRangeTemplate {
 	
 	private NumMatcher numMatcher; 
 	
-	protected GSRangeTemplate(String lowerBound, String middle, String upperBound,
+	public GSRangeTemplate(String lowerBound, String middle, String upperBound,
 			String match, NumMatcher numMatcher){
 		this.match = match;
 		this.middle = middle;
