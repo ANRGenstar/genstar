@@ -47,7 +47,7 @@ public interface IValueSpace<V extends IValue> extends Set<V> {
 	public boolean isValidCandidate(String value);
 	
 	/**
-	 * 
+	 * Return the type of value this space contains
 	 */
 	public GSEnumDataType getType();
 	

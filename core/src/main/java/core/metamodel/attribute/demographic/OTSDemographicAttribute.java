@@ -1,5 +1,6 @@
 package core.metamodel.attribute.demographic;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,26 +23,14 @@ import core.metamodel.value.IValue;
  *
  * @param <V>
  */
-public class OTSDemographicAttribute<V extends IValue> extends DemographicAttribute<V> {
+public class OTSDemographicAttribute<V extends IValue> extends MappedDemographicAttribute<V, V> {
 
 	private Map<V, Set<V>> mapper;
-	protected DemographicAttribute<V> referent;
 	
 	public OTSDemographicAttribute(String name, IValueSpace<V> valueSpace,
-			DemographicAttribute<V> referent, Map<V, Set<V>> mapper) {
-		super(name, valueSpace);
-		this.referent = referent;
-		this.mapper = mapper;
-	}
-
-	@Override
-	public boolean isLinked(DemographicAttribute<? extends IValue> attribute){
-		return attribute.equals(referent);	
-	}
-	
-	@Override
-	public DemographicAttribute<V> getReferentAttribute(){
-		return referent;
+			DemographicAttribute<V> referentAttribute, Map<V, Set<V>> mapper) {
+		super(name, valueSpace, referentAttribute);
+		this.mapper = new HashMap<>(mapper);
 	}
 
 	@Override
@@ -52,7 +41,16 @@ public class OTSDemographicAttribute<V extends IValue> extends DemographicAttrib
 			return mapper.entrySet().stream().filter(e -> e.getValue().contains(value))
 					.map(e -> e.getKey()).collect(Collectors.toSet());
 		throw new NullPointerException("The value "+value+" is not part of any known link attribute ("
-				+ this + " < "+referent + ")");
+				+ this + " < "+this.getReferentAttribute()+ ")");
+	}
+
+	@Override
+	public boolean addMappedValue(V mapTo, V mapWith) {
+		if(mapper.containsKey(mapTo) ||
+				this.getValueSpace().contains(mapTo)
+				&& getReferentAttribute().getValueSpace().contains(mapWith))
+			return mapper.get(mapTo).add(mapWith);
+		return false;
 	}
 	
 	

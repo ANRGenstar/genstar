@@ -1,5 +1,6 @@
 package core.metamodel.attribute.demographic;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,35 +16,43 @@ import core.metamodel.value.IValue;
  *
  * @param <V>
  */
-public class OTODemographicAttribute<V extends IValue> extends DemographicAttribute<V> {
+public class OTODemographicAttribute<V extends IValue, M extends IValue> extends MappedDemographicAttribute<V, M> {
 
-	private DemographicAttribute<? extends IValue> referentAttribute;
-	private Map<V, ? extends IValue> mapper;
+	private Map<V, M> mapper;
 
 	public OTODemographicAttribute(String name, IValueSpace<V> valueSpace,
-			DemographicAttribute<? extends IValue> referentAttribute, Map<V, ? extends IValue> mapper) {
-		super(name, valueSpace);
-		this.referentAttribute = referentAttribute;
-		this.mapper = mapper;
+			DemographicAttribute<M> referentAttribute) {
+		super(name, valueSpace, referentAttribute);
+		this.mapper = new HashMap<>();
 	}
 	
-	@Override
-	public boolean isLinked(DemographicAttribute<? extends IValue> attribute){
-		return attribute.equals(referentAttribute);	
-	}
-	
-	@Override
-	public DemographicAttribute<? extends IValue> getReferentAttribute(){
-		return referentAttribute;
+	public OTODemographicAttribute(String name, IValueSpace<V> valueSpace,
+			DemographicAttribute<M> referentAttribute, Map<V, M> mapper) {
+		super(name, valueSpace, referentAttribute);
+		this.mapper = new HashMap<>(mapper);
 	}
 	
 	@Override
 	public Set<IValue> findMappedAttributeValues(IValue value){
 		if(!mapper.containsKey(value) || !mapper.containsValue(value))
 			throw new NullPointerException("The value "+value+" is not part of any known linked attribute ("
-				+ this + " || "+referentAttribute+ ")");
+				+ this + " || "+getReferentAttribute()+ ")");
 		return Set.of(mapper.containsKey(value) ? mapper.get(value) : mapper.keySet().stream()
 				.filter(key -> mapper.get(key).equals(value)).findAny().get());
+	}
+	
+	/**
+	 * Add a pair of self value to referent value
+	 * 
+	 * @param mapTo
+	 * @param mapWith
+	 */
+	public boolean addMappedValue(V mapTo, M mapWith) {
+		if(!this.getValueSpace().contains(mapTo) 
+				|| !this.getReferentAttribute().getValueSpace().contains(mapWith))
+			return false;
+		mapper.put(mapTo, mapWith);
+		return true;
 	}
 
 }

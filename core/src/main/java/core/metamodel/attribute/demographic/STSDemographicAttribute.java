@@ -1,6 +1,7 @@
 package core.metamodel.attribute.demographic;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,26 +18,14 @@ import core.metamodel.value.IValue;
  *
  * @param <V>
  */
-public class STSDemographicAttribute<V extends IValue> extends DemographicAttribute<V> {
+public class STSDemographicAttribute<V extends IValue, M extends IValue> extends MappedDemographicAttribute<V, M> {
 
-	private Map<Set<V>, Set<IValue>> map;
-	protected DemographicAttribute<? extends IValue> referent;
+	private Map<Set<V>, Set<M>> map;
 
 	public STSDemographicAttribute(String name, IValueSpace<V> valueSpace,
-			DemographicAttribute<? extends IValue> referent, Map<Set<V>, Set<IValue>> map) {
-		super(name, valueSpace);
-		this.referent = referent;
-		this.map = map;
-	}
-	
-	@Override
-	public boolean isLinked(DemographicAttribute<? extends IValue> attribute){
-		return attribute.equals(referent);	
-	}
-	
-	@Override
-	public DemographicAttribute<? extends IValue> getReferentAttribute(){
-		return referent;
+			DemographicAttribute<M> referentAttribute, Map<Set<V>, Set<M>> map) {
+		super(name, valueSpace, referentAttribute);
+		this.map = new HashMap<>(map);
 	}
 	
 	@Override
@@ -47,6 +36,22 @@ public class STSDemographicAttribute<V extends IValue> extends DemographicAttrib
 				Collections.unmodifiableSet(map.get(value))
 				: map.entrySet().stream().filter(e -> e.getValue().contains(value))
 					.flatMap(e -> e.getKey().stream()).collect(Collectors.toSet());
+	}
+
+	@Override
+	public boolean addMappedValue(V mapTo, M mapWith) {
+		if(map.keySet().stream().anyMatch(set -> set.contains(mapTo))) {
+			return map.get(map.keySet().stream().filter(key -> key.contains(mapTo))
+					.findFirst().get()).add(mapWith);
+		} else if(map.containsValue(mapWith)) {
+			return map.keySet().stream().filter(key -> map.get(key).contains(mapWith))
+					.findFirst().get().add(mapTo);
+		} else if(this.getValueSpace().contains(mapTo) 
+				&& this.getReferentAttribute().getValueSpace().contains(mapWith)) {
+			map.put(Set.of(mapTo), Set.of(mapWith));
+			return true;
+		}
+		return false;
 	}
 	
 }

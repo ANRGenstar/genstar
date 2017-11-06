@@ -1,5 +1,7 @@
 package core.metamodel.attribute.demographic;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -101,10 +103,10 @@ public class DemographicAttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData 
 	 */
-	public STSDemographicAttribute<? extends IValue> createMappedAttribute(String name, GSEnumDataType dataType,
-			DemographicAttribute<? extends IValue> referent, Map<Set<String>, Set<String>> mapper) 
+	public <V extends IValue> STSDemographicAttribute<? extends IValue, V> createMappedAttribute(String name, GSEnumDataType dataType,
+			DemographicAttribute<V> referent, Map<Set<String>, Set<String>> mapper) 
 					throws GSIllegalRangedData {
-		STSDemographicAttribute<? extends IValue> attribute = null;
+		STSDemographicAttribute<? extends IValue, V> attribute = null;
 		switch (dataType) {
 		case Integer:
 			attribute = createIntegerAttribute(name, referent, mapper);
@@ -160,12 +162,12 @@ public class DemographicAttributeFactory {
 		return novel;
 	}
 	
-	// -------------------------------------------------------------- //
+	// ------------------------------------------------------------- //
 	//                          BUILD METHOD							//
 	
-	/*
-	 * Integer attribute
-	 */
+	/* ----------------- *
+	 * Integer attribute *
+	 * ----------------- */
 	
 	/**
 	 * Create integer value attribute
@@ -179,28 +181,6 @@ public class DemographicAttributeFactory {
 	public DemographicAttribute<IntegerValue> createIntegerAttribute(String name){
 		DemographicAttribute<IntegerValue> attribute = null;
 		attribute = new DemographicAttribute<>(name, new IntegerSpace(attribute)); 
-		return attribute;
-	}
-	
-	/**
-	 * Create integer mapped value attribute
-	 * 
-	 * @see IntegerSpace
-	 * @see IntegerValue
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public STSDemographicAttribute<IntegerValue> createIntegerAttribute(String name, 
-			DemographicAttribute<? extends IValue> referentAttribute, Map<Set<String>, Set<String>> mapper){
-		STSDemographicAttribute<IntegerValue> attribute = null;
-		IntegerSpace is = new IntegerSpace(attribute);
-		attribute = new STSDemographicAttribute<IntegerValue>(name, is, referentAttribute, 
-				mapper.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> is.addValue(val))
-							.collect(Collectors.toSet()), 
-						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet())))); 
 		return attribute;
 	}
 	
@@ -224,11 +204,51 @@ public class DemographicAttributeFactory {
 							.collect(Collectors.toSet()))));
 		return attribute;
 	}
+	
+	/**
+	 * Create integer mapped value attribute
+	 * 
+	 * @see IntegerSpace
+	 * @see IntegerValue
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public <V extends IValue> STSDemographicAttribute<IntegerValue, V> createIntegerAttribute(String name, 
+			DemographicAttribute<V> referentAttribute, 
+			Map<Set<String>, Set<String>> mapper){
+		STSDemographicAttribute<IntegerValue, V> attribute = null;
+		IntegerSpace is = new IntegerSpace(attribute);
+		attribute = new STSDemographicAttribute<IntegerValue, V>(name, is, referentAttribute, 
+				mapper.keySet().stream().collect(Collectors.toMap(
+						key -> key.stream().map(val -> is.addValue(val))
+							.collect(Collectors.toSet()), 
+						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
+							.collect(Collectors.toSet())))); 
+		return attribute;
+	}
+	
+	/**
+	 * Create integer record value attribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> OTODemographicAttribute<IntegerValue, V> createIntegerRecordAttribute(String name,
+			DemographicAttribute<V> referentAttribute){
+		OTODemographicAttribute<IntegerValue, V> attribute = null;
+		IntegerSpace is = new IntegerSpace(attribute);
+		attribute = new OTODemographicAttribute<IntegerValue, V>(name, is, referentAttribute, 
+				Collections.emptyMap());
+		return attribute;
+	}
 
 	
-	/*
-	 * Continue attribute
-	 */
+	/* ------------------ *
+	 * Continue attribute *
+	 * ------------------ */
 	
 	/**
 	 * Create continued value attribute
@@ -257,11 +277,11 @@ public class DemographicAttributeFactory {
 	 * to several (disaggregated) relationship
 	 * @return
 	 */
-	public STSDemographicAttribute<ContinuedValue> createContinueAttribute(String name, 
-			DemographicAttribute<? extends IValue> referentAttribute, Map<Set<String>, Set<String>> mapper){
-		STSDemographicAttribute<ContinuedValue> attribute = null;
+	public <V extends IValue> STSDemographicAttribute<ContinuedValue, V> createContinueAttribute(String name, 
+			DemographicAttribute<V> referentAttribute, Map<Set<String>, Set<String>> mapper){
+		STSDemographicAttribute<ContinuedValue, V> attribute = null;
 		ContinuedSpace is = new ContinuedSpace(attribute);
-		attribute = new STSDemographicAttribute<ContinuedValue>(name, is, referentAttribute, 
+		attribute = new STSDemographicAttribute<ContinuedValue, V>(name, is, referentAttribute, 
 				mapper.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> is.addValue(val))
 							.collect(Collectors.toSet()),
@@ -291,9 +311,9 @@ public class DemographicAttributeFactory {
 		return attribute;
 	}
 	
-	/*
-	 * Boolean attribute
-	 */
+	/* ----------------- *
+	 * Boolean attribute *
+	 * ----------------- */
 	
 	/**
 	 * Create boolean attribute
@@ -318,11 +338,11 @@ public class DemographicAttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
-	public STSDemographicAttribute<BooleanValue> createBooleanAttribute(String name,
-			DemographicAttribute<? extends IValue> referentAttribute, Map<Set<String>, Set<String>> mapper){
-		STSDemographicAttribute<BooleanValue> attribute = null;
+	public <V extends IValue> STSDemographicAttribute<BooleanValue, V> createBooleanAttribute(String name,
+			DemographicAttribute<V> referentAttribute, Map<Set<String>, Set<String>> mapper){
+		STSDemographicAttribute<BooleanValue, V> attribute = null;
 		BinarySpace bs = new BinarySpace(attribute);
-		attribute = new STSDemographicAttribute<BooleanValue>(name, bs, referentAttribute, 
+		attribute = new STSDemographicAttribute<BooleanValue, V>(name, bs, referentAttribute, 
 				mapper.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> bs.addValue(val))
 							.collect(Collectors.toSet()), 
@@ -353,9 +373,9 @@ public class DemographicAttributeFactory {
 	}
 
 	
-	/*
-	 * Ordered nominal attribute
-	 */
+	/* ------------------------- *
+	 * Ordered nominal attribute *
+	 * ------------------------- */
 	
 	/**
 	 * Create ordered value attribute
@@ -371,29 +391,6 @@ public class DemographicAttributeFactory {
 		DemographicAttribute<OrderedValue> oa = null;
 		oa = new DemographicAttribute<>(name, new OrderedSpace(oa, ct));
 		return oa;
-	}
-	
-	/**
-	 * Create ordered mapped value attribute
-	 * 
-	 * @param name
-	 * @param gsCategoricTemplate
-	 * @param referentAttribute
-	 * @param mapper
-	 * @return
-	 */
-	public STSDemographicAttribute<? extends IValue> createOrderedAttribute(String name,
-			GSCategoricTemplate gsCategoricTemplate, DemographicAttribute<? extends IValue> referentAttribute,
-			Map<Set<String>, Set<String>> mapper) {
-		STSDemographicAttribute<OrderedValue> attribute = null;
-		OrderedSpace os = new OrderedSpace(attribute, gsCategoricTemplate);
-		attribute = new STSDemographicAttribute<OrderedValue>(name, os, referentAttribute, 
-				mapper.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> os.addValue(val))
-							.collect(Collectors.toSet()), 
-						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet()))));
-		return attribute;
 	}
 	
 	/**
@@ -432,9 +429,80 @@ public class DemographicAttributeFactory {
 		return this.createOrderedAgregatedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
 	}
 	
-	/*
-	 * Nominal attribute
+	/**
+	 * Create ordered mapped value attribute
+	 * 
+	 * @param name
+	 * @param gsCategoricTemplate
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
 	 */
+	public <V extends IValue> STSDemographicAttribute<OrderedValue, V> createOrderedAttribute(String name,
+			GSCategoricTemplate gsCategoricTemplate, DemographicAttribute<V> referentAttribute,
+			Map<Set<String>, Set<String>> mapper) {
+		STSDemographicAttribute<OrderedValue, V> attribute = null;
+		OrderedSpace os = new OrderedSpace(attribute, gsCategoricTemplate);
+		attribute = new STSDemographicAttribute<OrderedValue, V>(name, os, referentAttribute, 
+				mapper.keySet().stream().collect(Collectors.toMap(
+						key -> key.stream().map(val -> os.addValue(val))
+							.collect(Collectors.toSet()), 
+						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
+							.collect(Collectors.toSet()))));
+		return attribute;
+	}
+	
+	/**
+	 * Create ordered mapped value attribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> STSDemographicAttribute<OrderedValue, V> createOrderedAttribute(String name,
+			DemographicAttribute<V> referentAttribute, Map<Set<String>, Set<String>> mapper) {
+		return this.createOrderedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
+	}
+	
+	/**
+	 * Create ordered record value attribute
+	 * 
+	 * @param name
+	 * @param gsCategoricTemplate
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> OTODemographicAttribute<OrderedValue, V> createOrderedRecordAttribute(String name,
+			GSCategoricTemplate gsCategoricTemplate,  DemographicAttribute<V> referentAttribute, 
+			Map<String, String> mapper){
+		OTODemographicAttribute<OrderedValue, V > attribute = null;
+		OrderedSpace os = new OrderedSpace(attribute, gsCategoricTemplate);
+		attribute = new OTODemographicAttribute<>(name, os, referentAttribute,
+				mapper.keySet().stream().collect(Collectors.toMap(
+						key -> os.getValue(key), 
+						key -> referentAttribute.getValueSpace().getValue(mapper.get(key)))));
+		return attribute;
+	}
+	
+	/**
+	 * Create ordered record value attribute
+	 * 
+	 * @param name
+	 * @param gsCategoricTemplate
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> OTODemographicAttribute<OrderedValue, V> createOrderedRecordAttribute(String name,
+			DemographicAttribute<V> referentAttribute, Map<String, String> mapper){
+		return this.createOrderedRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
+	}
+	
+	/* ----------------- *
+	 * Nominal attribute *
+	 * ----------------- */
 	
 	/**
 	 * Create nominal value attribute
@@ -450,29 +518,6 @@ public class DemographicAttributeFactory {
 		DemographicAttribute<NominalValue> na = null;
 		na = new DemographicAttribute<>(name, new NominalSpace(na, ct));
 		return na;
-	}
-	
-	/**
-	 * Create nominal mapped value attribute
-	 * 
-	 * @param name
-	 * @param gsCategoricTemplate
-	 * @param referent
-	 * @param mapper
-	 * @return
-	 */
-	public STSDemographicAttribute<NominalValue> createNominalAttribute(String name,
-			GSCategoricTemplate gsCategoricTemplate, DemographicAttribute<? extends IValue> referentAttribute,
-			Map<Set<String>, Set<String>> mapper) {
-		STSDemographicAttribute<NominalValue> attribute = null;
-		NominalSpace ns = new NominalSpace(attribute, gsCategoricTemplate);
-		attribute = new STSDemographicAttribute<NominalValue>(name, ns, referentAttribute, 
-				mapper.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> ns.addValue(val))
-							.collect(Collectors.toSet()), 
-						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet()))));
-		return attribute;
 	}
 	
 	/**
@@ -497,9 +542,82 @@ public class DemographicAttributeFactory {
 		return attribute;
 	}
 	
-	/*
-	 * Range value
+	/**
+	 * Create nominal aggregated value attribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
 	 */
+	public OTSDemographicAttribute<NominalValue> createNominalAggregatedAttribute(String name,
+			DemographicAttribute<NominalValue> referentAttribute,
+			Map<String, Set<String>> mapper) {
+		return this.createNominalAggregatedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
+	}
+	
+	/**
+	 * Create nominal mapped value attribute
+	 * 
+	 * @param name
+	 * @param gsCategoricTemplate
+	 * @param referent
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> STSDemographicAttribute<NominalValue, V> createNominalAttribute(String name,
+			GSCategoricTemplate gsCategoricTemplate, DemographicAttribute<V> referentAttribute,
+			Map<Set<String>, Set<String>> mapper) {
+		STSDemographicAttribute<NominalValue, V> attribute = null;
+		NominalSpace ns = new NominalSpace(attribute, gsCategoricTemplate);
+		attribute = new STSDemographicAttribute<NominalValue, V>(name, ns, referentAttribute, 
+				mapper.keySet().stream().collect(Collectors.toMap(
+						key -> key.stream().map(val -> ns.addValue(val))
+							.collect(Collectors.toSet()), 
+						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
+							.collect(Collectors.toSet()))));
+		return attribute;
+	}
+	
+	/**
+	 * Create a nominal record value attribute
+	 * <p>
+	 * @see OTODemographicAttribute
+	 * 
+	 * @param string
+	 * @param attCouple
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> OTODemographicAttribute<NominalValue, V> createNominalRecordAttribute(String name, 
+			GSCategoricTemplate gsCategoricTemplate, DemographicAttribute<V> referentAttribute,
+			Map<String, String> mapper) {
+		OTODemographicAttribute<NominalValue, V> attribute = null;
+		NominalSpace ns = new NominalSpace(attribute, gsCategoricTemplate);
+		attribute = new OTODemographicAttribute<>(name, ns, referentAttribute, 
+				mapper.keySet().stream().collect(Collectors.toMap(
+						key -> ns.addValue(key), 
+						key -> referentAttribute.getValueSpace().getValue(mapper.get(key)))));
+		return attribute;
+	}
+	
+	/**
+	 * Create a nominal record value attribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> OTODemographicAttribute<NominalValue, V> createNominalRecordAttribute(String name, 
+			DemographicAttribute<V> referentAttribute,
+			Map<String, String> mapper) {
+		return this.createNominalRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
+	}
+	
+	/* ----------- *
+	 * Range value *
+	 * ----------- */
 	
 	/**
 	 * Create range value attribute
@@ -534,29 +652,6 @@ public class DemographicAttributeFactory {
 	}
 	
 	/**
-	 * Create mapped range value attribute 
-	 * 
-	 * @param name
-	 * @param rangeTemplate
-	 * @param referent
-	 * @param mapper
-	 * @return
-	 */
-	public STSDemographicAttribute<RangeValue> createRangeAttribute(String name,
-			GSRangeTemplate rangeTemplate, DemographicAttribute<? extends IValue> referentAttribute,
-			Map<Set<String>, Set<String>> mapper) {
-		STSDemographicAttribute<RangeValue> attribute = null;
-		RangeSpace rs = new RangeSpace(attribute, rangeTemplate);
-		attribute = new STSDemographicAttribute<>(name, rs, referentAttribute, 
-				mapper.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> rs.addValue(val))
-							.collect(Collectors.toSet()), 
-						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet()))));
-		return attribute;
-	}
-	
-	/**
 	 * Create range aggregated value attribute
 	 * 
 	 * @param name
@@ -573,6 +668,46 @@ public class DemographicAttributeFactory {
 		attribute = new OTSDemographicAttribute<RangeValue>(name, rs, referentAttribute, 
 				mapper.keySet().stream().collect(Collectors.toMap(
 						key -> rs.addValue(key), 
+						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
+							.collect(Collectors.toSet()))));
+		return attribute;
+	}
+	
+	/**
+	 * Create range aggregated value attribute
+	 * 
+	 * @param name
+	 * @param referent
+	 * @param mapper
+	 * @return
+	 * @throws GSIllegalRangedData 
+	 */
+	public OTSDemographicAttribute<RangeValue> createRangeAggregatedAttribute(String name,
+			DemographicAttribute<RangeValue> referentAttribute,
+			Map<String, Set<String>> mapper) throws GSIllegalRangedData {
+		return this.createRangeAggregatedAttribute(name, 
+				new GSDataParser().getRangeTemplate(new ArrayList<>(mapper.keySet())), 
+				referentAttribute, mapper);
+	}
+	
+	/**
+	 * Create mapped range value attribute 
+	 * 
+	 * @param name
+	 * @param rangeTemplate
+	 * @param referent
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> STSDemographicAttribute<RangeValue, V> createRangeAttribute(String name,
+			GSRangeTemplate rangeTemplate, DemographicAttribute<V> referentAttribute,
+			Map<Set<String>, Set<String>> mapper) {
+		STSDemographicAttribute<RangeValue, V> attribute = null;
+		RangeSpace rs = new RangeSpace(attribute, rangeTemplate);
+		attribute = new STSDemographicAttribute<>(name, rs, referentAttribute, 
+				mapper.keySet().stream().collect(Collectors.toMap(
+						key -> key.stream().map(val -> rs.addValue(val))
+							.collect(Collectors.toSet()), 
 						key -> mapper.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
 							.collect(Collectors.toSet()))));
 		return attribute;
