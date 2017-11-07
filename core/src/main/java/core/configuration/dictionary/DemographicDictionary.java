@@ -21,6 +21,7 @@ import core.metamodel.value.IValue;
  *
  * @param <A>
  */
+@XmlRootElement (name = "DemographiDictionary")
 public class DemographicDictionary {
 
 	private Set<DemographicAttribute<? extends IValue>> attSet;
