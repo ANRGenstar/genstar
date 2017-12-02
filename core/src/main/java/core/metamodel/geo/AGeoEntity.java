@@ -16,6 +16,7 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 
 	private Map<AGeoAttribute, AGeoValue> values; 
 	private String gsName;
+	private String entityType = null;
 	
 	public AGeoEntity(Set<AGeoValue> values, String gsName) {
 		this.values = values.stream().collect(Collectors.toMap(AGeoValue::getAttribute, val -> val));
@@ -123,4 +124,20 @@ public abstract class AGeoEntity implements IEntity<AGeoAttribute, AGeoValue> {
 		return getGeometry().getCentroid();
 	}
 	
+
+	@Override
+	public final boolean hasEntityType() {
+		return entityType != null;
+	}
+
+	@Override
+	public final String getEntityType() {
+		return entityType;
+	}
+
+	@Override
+	public final void setEntityType(String type) {
+		this.entityType = type;
+	}
+
 }

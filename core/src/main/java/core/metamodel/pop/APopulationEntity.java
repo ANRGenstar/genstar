@@ -17,6 +17,12 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 	private Map<APopulationAttribute, APopulationValue> attributes;
 	
 	/**
+	 * the type of this entity (such as "household" or "individual" or "building")
+	 * null if not declared.
+	 */
+	private String entityType = null;
+	
+	/**
 	 * Creates a population entity by defining directly the attribute values
 	 * @param attributes
 	 */
@@ -166,6 +172,22 @@ public abstract class APopulationEntity implements IEntity<APopulationAttribute,
 	
 	public String toString() {
 		return attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()+":"+e.getValue().getStringValue()).collect(Collectors.joining(",\t"));
+	}
+	
+
+	@Override
+	public final boolean hasEntityType() {
+		return entityType != null;
+	}
+
+	@Override
+	public final String getEntityType() {
+		return entityType;
+	}
+
+	@Override
+	public final void setEntityType(String type) {
+		this.entityType = type;
 	}
 	
 }

@@ -2,7 +2,10 @@ package spll.entity;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,8 +27,15 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.geo.AGeoAttribute;
 import core.metamodel.geo.AGeoValue;
+import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.pop.APopulationValue;
+import core.util.data.GSEnumDataType;
+import gospl.GosplPopulation;
+import gospl.entity.GosplEntity;
+import gospl.entity.attribute.value.UniqueValue;
 import spll.entity.attribute.RawGeoAttribute;
 import spll.entity.attribute.value.RawGeoData;
+import spll.io.SPLVectorFile;
 
 /**
  * The factory to safely create Spll geographical entity
@@ -175,4 +185,78 @@ public class GeoEntityFactory {
 		return new SpllPixel(values, pixel, gridX, gridY);
 	}
 
+	/**
+	 * Creates a GoSPL population from a shapefile. 
+	 * It browses the different Features from the shapefile (which correspond to entities),
+	 * parses their various attributes and keeps only the attributes declared in the 
+	 * dictionnary of data. 
+	 * Returns these entities as a GoSPL population, without the corresponding geometry.
+	 * 
+	 * @param sfAdmin a shapefile
+	 * @param dictionnary a list of the attributes to read 
+	 * @param maxentities the maximum size of entities to read
+	 * @return
+	 */
+	public static GosplPopulation createGosplPopulationFromShapefile(SPLVectorFile sfAdmin, Collection<APopulationAttribute> dictionnary, int maxentities) {
+		
+
+		// create an index of the dictionnary on names
+		Map<String,APopulationAttribute> dictionnaryName2attribute = new HashMap<>(dictionnary.size());
+		System.out.print("working on attributes: "+dictionnaryName2attribute);
+		for (APopulationAttribute a: dictionnary)
+			dictionnaryName2attribute.put(a.getAttributeName(), a);
+
+		// the resulting population
+		GosplPopulation pop = new GosplPopulation();
+		
+		// just for information
+		System.out.println("read the shapefile.");
+		System.out.println("\nhere are the attributes available in the shapefile:");
+		for (AGeoAttribute att: sfAdmin.getGeoAttributes()) {
+			System.out.println(att.getAttributeName()+": "+att.getValues().size()); // att.getValuesAsString()
+		}
+		
+		// will contain the list of all the attributes which were ignored 
+		Set<String> ignoredAttributes = new HashSet<>();
+		
+		// iterate all the geo entities
+		Iterator<SpllFeature> itGeoEntity = sfAdmin.getGeoEntityIterator();
+		int i=0;
+		while (itGeoEntity.hasNext()) {
+			SpllFeature feature = itGeoEntity.next();
+			System.out.println("\nfound SpellFeature: "+feature.getGenstarName());
+			Map<APopulationAttribute,APopulationValue> attribute2value = new HashMap<>(dictionnary.size());
+			
+			for (AGeoValue v : feature.getValues()) {
+				System.out.println(v.getAttribute().getAttributeName()+ "="+v.getInputStringValue());
+				APopulationAttribute gosplType = dictionnaryName2attribute.get(v.getAttribute().getAttributeName());
+				if (gosplType == null) {
+					System.err.println("attribute not defined in dict: "+v.getAttribute().getAttributeName());
+					ignoredAttributes.add(v.getAttribute().getAttributeName());
+					continue;
+				}
+				try {
+					APopulationValue value = gosplType.getValue(v.getInputStringValue());
+					if (value == null)
+						value = new UniqueValue(v.getInputStringValue(), GSEnumDataType.String, gosplType);
+					attribute2value.put(gosplType, value);
+
+				} catch (NullPointerException e) {
+					ignoredAttributes.add(v.getAttribute().getAttributeName());
+				}
+				
+			}
+			GosplEntity entity = new GosplEntity(attribute2value);
+			pop.add(entity);
+			if (i++ >= maxentities)
+				break;
+		}
+		
+		if (!ignoredAttributes.isEmpty()) {
+			System.err.println("ignored attributes not defined in the dictionnary: "+ignoredAttributes);
+		}
+		
+		return pop;
+		
+	}
 }

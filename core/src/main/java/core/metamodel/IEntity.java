@@ -10,6 +10,8 @@ import java.util.Collection;
  */
 public interface IEntity<A extends IAttribute<V>, V extends IValue> {
 
+
+	
 	/**
 	 * returns the list of the attributes for which the entity might have values
 	 * @return
@@ -48,5 +50,26 @@ public interface IEntity<A extends IAttribute<V>, V extends IValue> {
 	 * @return
 	 */
 	public V getValueForAttribute(String property);
+
+	/**
+	 * Returns true if this agent has an entity type, that is if getEntityType 
+	 * returns something else than null
+	 * @return
+	 */
+	public boolean hasEntityType();
+
+	/**
+	 * Returns the entity type of this agent, or null if none was defined 
+	 * (standard case if there is only one type of agent)
+	 * @return
+	 */
+	public String getEntityType();
+	
+	/**
+	 * Sets the type of this agent, without any control
+	 * @param type
+	 */
+	public void setEntityType(String type);
+	
 
 }
