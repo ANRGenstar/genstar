@@ -29,7 +29,7 @@ import spll.util.SpllUtil;
 
 /**
  * The mapper is the main concept of SPLL algorithm. It matches main geographical features
- * contain in a shape file to various geographical variables (e.g. other features, satellite image).
+ * contained in a shape file to various geographical variables (e.g. other features, satellite image).
  * It also setup regression algorithm to compute the relationship between an attribute of main features
  * (dependent variable) and ancillary geographical variable (explanatory variables). Last, it encapsulate
  * the method to fit regression output to a proper contract (e.g. integer values, adjusted output sum).

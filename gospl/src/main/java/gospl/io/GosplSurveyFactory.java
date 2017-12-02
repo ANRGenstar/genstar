@@ -581,9 +581,13 @@ public class GosplSurveyFactory {
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<APopulationAttribute> attributes = population.getPopulationAttributes();
-		bw.write("Individual");
+		bw.write("ID");
 		bw.write(separator);
 		bw.write(attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator))));
+		bw.write("\n");
+		bw.write("individual identifier");
+		bw.write(separator);
+		bw.write(attributes.stream().map(att -> att.getDescription()).collect(Collectors.joining(String.valueOf(separator))));
 		bw.write("\n");
 		for (final APopulationEntity e : population) {
 			bw.write(String.valueOf(individual++));

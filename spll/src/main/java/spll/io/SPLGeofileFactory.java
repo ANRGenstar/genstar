@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +78,16 @@ public class SPLGeofileFactory {
 			new Color(179, 0, 0)};
 	public static Color noDataColor = new Color(0, 0, 0, 0);
 	
+	public final Charset charset;
+	
+	public SPLGeofileFactory() {
+		this.charset = null;
+	}
+	
+	public SPLGeofileFactory(Charset charset) {
+		this.charset = charset;
+	}
+	
 	public static List<String> getSupportedFileFormat(){
 		return Arrays.asList(SHAPEFILE_EXT, GEOTIFF_EXT, ARC_EXT);
 	}
@@ -94,7 +105,7 @@ public class SPLGeofileFactory {
 	public IGSGeofile<? extends AGeoEntity> getGeofile(File geofile) 
 			throws IllegalArgumentException, TransformException, IOException, InvalidGeoFormatException{
 		if(FilenameUtils.getExtension(geofile.getName()).equals(SHAPEFILE_EXT))
-			return new SPLVectorFile(geofile);
+			return new SPLVectorFile(geofile, this.charset);
 		if(FilenameUtils.getExtension(geofile.getName()).equals(GEOTIFF_EXT) || 
 				FilenameUtils.getExtension(geofile.getName()).equals(ARC_EXT))
 			return new SPLRasterFile(geofile);
@@ -110,7 +121,7 @@ public class SPLGeofileFactory {
 	 */
 	public SPLVectorFile getShapeFile(File shapefile) throws IOException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SHAPEFILE_EXT))
-			return new SPLVectorFile(shapefile);
+			return new SPLVectorFile(shapefile, this.charset);
 		String[] pathArray = shapefile.getPath().split(File.separator);
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SHAPEFILE_EXT));
 	}
@@ -243,7 +254,9 @@ public class SPLGeofileFactory {
 			parent.mkdirs();
 		}
 		ShapefileDataStore newDataStore = new ShapefileDataStore(shapefile.toURI().toURL());
-
+		if (this.charset != null)
+			newDataStore.setCharset(this.charset);
+		
 		Map<APopulationEntity, Geometry> geoms = population.getSpllPopulation()
 				.stream().filter(e -> e.getLocation() != null)
 				.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
@@ -290,7 +303,6 @@ public class SPLGeofileFactory {
 
 		return new SPLVectorFile(newDataStore, Collections.emptyList());
 	}
-	
 
 	/**
 	 * Create a shapefile based on a collection of feature 
@@ -311,7 +323,9 @@ public class SPLGeofileFactory {
 		params.put("create spatial index", Boolean.TRUE);
 
 		ShapefileDataStore newDataStore = (ShapefileDataStore) dataStoreFactory.createNewDataStore(params);
-
+		if (charset != null) 
+			newDataStore.setCharset(this.charset);
+		
 		Set<FeatureType> featTypeSet = features
 				.parallelStream().map(feat -> feat.getInnerFeature().getType()).collect(Collectors.toSet());
 		if(featTypeSet.size() > 1)
@@ -337,6 +351,7 @@ public class SPLGeofileFactory {
 
 		return new SPLVectorFile(newDataStore, new HashSet<>(features));
 	}
+	
 	
 	// ------------------------------------------------------- //
 	// ------------------- INNER UTILITIES ------------------- //

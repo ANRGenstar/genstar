@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.AbstractMap;
@@ -25,6 +26,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
@@ -139,21 +141,39 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature> {
 	}
 
 	protected SPLVectorFile(File file, List<String> attributes) throws IOException{
-		this(DataStoreFinder.getDataStore(
-				Stream.of(
-						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), attributes
-				);
+		this(getDataStore(file, null), attributes);
 	}
 
 	protected SPLVectorFile(File file) throws IOException{
-		this(DataStoreFinder.getDataStore(
-				Stream.of(
-						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), Collections.emptyList()
-				);
+		this(getDataStore(file, null), Collections.emptyList());
 	}
 
+	protected SPLVectorFile(File file, Charset charset) throws IOException{
+		
+		this(getDataStore(file, charset), Collections.emptyList());
+	}
+
+	/**
+	 * returns a geotools Datastore loaded from File with the charset passed as parameter
+	 * (default charset if null)
+	 * @param file
+	 * @param charset
+	 * @return
+	 * @throws IOException
+	 */
+	private static DataStore getDataStore(File file, Charset charset) throws IOException {
+		DataStore datastore = DataStoreFinder.getDataStore(
+				Stream.of(
+						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
+		if (charset != null 
+				&& datastore instanceof ShapefileDataStore) {
+			((ShapefileDataStore)datastore).setCharset(charset);
+		}
+		return datastore;
+	}
+	
+	
 	// ------------------- GENERAL CONTRACT ------------------- //
 
 	@Override

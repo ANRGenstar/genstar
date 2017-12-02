@@ -18,6 +18,10 @@ public class SpllFeature extends AGeoEntity {
 		this.innerFeature = innerFeature;
 	}
 	
+	/**
+	 * Returns the internal geotool feature.
+	 * @return
+	 */
 	public Feature getInnerFeature(){
 		return innerFeature;
 	}

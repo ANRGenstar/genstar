@@ -258,15 +258,14 @@ public class ReadINSEEDictionaryUtils {
 	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(String filename, String encoding) {
 		
 		if (encoding == null) {
-			// TODO automatic detection
-			
+			encoding = Charset.defaultCharset().name();
 		}
 		
 		return readDictionnaryFromMODFile(new File(filename), encoding);
 	}
 	
 	public static Collection<APopulationAttribute> readDictionnaryFromMODFile(String filename) {
-		return readDictionnaryFromMODFile(filename, Charset.defaultCharset().name());
+		return readDictionnaryFromMODFile(filename, null);
 	}
 	
 	/**
@@ -288,7 +287,7 @@ public class ReadINSEEDictionaryUtils {
 		CSVReader reader = null;
 		try {
 			InputStreamReader isReader = new InputStreamReader(new FileInputStream(f), encoding);
-			reader = new CSVReader(isReader, CsvInputHandler.detectSeparator(f)); // , '\t'
+			reader = new CSVReader(isReader, ';'); // , '\t'
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("unable to find file "+f);
 		} catch (IOException e) {
@@ -322,6 +321,7 @@ public class ReadINSEEDictionaryUtils {
 
 				final String varCode = s[0];
 				final String varLib = s[1];
+				
 				
 				if (!varCode.equals(previousCode)) {
 					if (previousCode != null) {
@@ -377,6 +377,47 @@ public class ReadINSEEDictionaryUtils {
 				}
 		     }
 
+
+			if (previousCode != null) {
+				// we finished the previous attribute, let's create it
+				// TODO
+				
+				final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
+				final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
+				
+				GSEnumDataType dataType = GSEnumDataType.String;
+				GSEnumAttributeType attType = GSEnumAttributeType.unique;
+				if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
+					// that's a record, I think !
+					attType = GSEnumAttributeType.record;
+					// TODO
+					if (modalitiesCode2Lib.isEmpty())
+						modalitiesCode2Lib.put(previousCode, previousCode);
+					dataType = null; // unfortunatly we don't know exactly what it is
+				} else if (isRange) {
+					dataType = GSEnumDataType.Integer;
+					attType = GSEnumAttributeType.range;
+				} else if (isInteger) {
+					dataType = GSEnumDataType.Integer;
+				}
+				
+				logger.info("detected attribute {} - {}, {} with {} modalities", previousCode, previousLib, dataType, modalitiesCode2Lib.size());
+
+				APopulationAttribute att = attf.createAttribute(
+						previousCode, 
+						dataType, 
+						new ArrayList<String>(modalitiesCode2Lib.keySet()),
+						new ArrayList<String>(modalitiesCode2Lib.values()),
+						attType,
+						null,
+						null
+						);
+				att.setDescription(previousLib);
+				
+				attributes.add(att);
+				
+				modalitiesCode2Lib.clear();
+			}
 			
 		} catch (IOException e) {
 			throw new RuntimeException("error while reading file", e);
