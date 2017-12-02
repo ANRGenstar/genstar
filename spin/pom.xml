@@ -5,7 +5,7 @@
  <modelVersion>4.0.0</modelVersion>
   <groupId>org.genstar</groupId>
   <artifactId>genstar-spin</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.3</version>
   <packaging>bundle</packaging>
 
  <properties>
@@ -18,13 +18,13 @@
 	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-core</artifactId>
-	    <version>1.0.1</version>
+	    <version>1.0.3</version>
 	</dependency>
 
 	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-gospl</artifactId>
-	    <version>1.0.1</version>
+	    <version>1.0.3</version>
 	</dependency> 
 
 	<dependency>
