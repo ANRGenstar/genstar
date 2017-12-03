@@ -1,6 +1,7 @@
 package core.metamodel.attribute.demographic.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -42,7 +43,7 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 		} else if(this.getRelatedAttribute().getValueSpace().getValues().contains(mapTo) 
 				&& this.getRelatedAttribute().getReferentAttribute().getValueSpace()
 				.getValues().contains(mapWith)) {
-			map.put(new ArrayList<>(List.of(mapTo)), new ArrayList<>(List.of(mapWith)));
+			map.put(new ArrayList<>(Arrays.asList(mapTo)), new ArrayList<>(Arrays.asList(mapWith)));
 			return true;
 		}
 		return false;

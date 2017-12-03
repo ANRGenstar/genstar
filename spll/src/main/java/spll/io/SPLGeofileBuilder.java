@@ -8,6 +8,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -367,9 +368,11 @@ public class SPLGeofileBuilder {
 		if(population == null && features == null || features.isEmpty())
 			throw new IllegalStateException("To build shape file you must first setup a sources, either features or population");
 
-		DataStore newDataStore = new ShapefileDataStoreFactory().createNewDataStore(
-				new HashMap<>(Map.ofEntries(Map.entry("url", gisFile.toURI().toURL()),
-						Map.entry("create spatial index", Boolean.TRUE))));
+		Map<String,Serializable> key2m = new HashMap<>();
+		key2m.put("url", gisFile.toURI().toURL());
+		key2m.put("create spatial index", Boolean.TRUE);
+		
+		DataStore newDataStore = new ShapefileDataStoreFactory().createNewDataStore(key2m);
 		// Three cases:
 		// 1 - write down a population to a file
 		if(this.population != null){

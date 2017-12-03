@@ -2,6 +2,7 @@ package core.configuration;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -42,7 +43,7 @@ public class GenstarJsonUtil {
 	 * Default inner Jackson {@link ObjectMapper}
 	 */
 	public GenstarJsonUtil() {
-		this(List.of(SerializationFeature.INDENT_OUTPUT), Collections.emptyList());
+		this(Arrays.asList(SerializationFeature.INDENT_OUTPUT), Collections.emptyList());
 	}
 	
 	/**

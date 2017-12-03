@@ -57,6 +57,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 
 	private Logger logger = LogManager.getLogger();
 
+	@SuppressWarnings("serial")
 	@Override
 	public ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> inferSRSampler(
 			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix,
@@ -103,7 +104,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		Collection<Map<DemographicAttribute<? extends IValue>, IValue>> coordinates = new ArrayList<>();
 		for(DemographicAttribute<? extends IValue> attribute : targetedDimensions){
 			if(coordinates.isEmpty())
-				attribute.getValueSpace().getValues().forEach(val -> coordinates.add(new HashMap<>(Map.of(attribute, val))));
+				attribute.getValueSpace().getValues()
+					.forEach(val -> coordinates.add(new HashMap<DemographicAttribute<? extends IValue>, IValue>() {{ put(attribute, val); }} ));
 			else
 				coordinates.stream().forEach(map -> attribute.getValueSpace().getValues().forEach(val -> map.put(attribute, val)));
 		}

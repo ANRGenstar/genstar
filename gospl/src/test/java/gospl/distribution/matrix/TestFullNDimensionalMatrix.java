@@ -149,10 +149,10 @@ public class TestFullNDimensionalMatrix {
 			Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
 			if(mapped){
 				Map<String, Collection<String>> mapperAge2toAge = new HashMap<>();
-				mapperAge2toAge.put("moins de 15",  Set.of("0-5", "6-15"));
-				mapperAge2toAge.put("16-25", Set.of("16-25"));
-				mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
-				mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
+				mapperAge2toAge.put("moins de 15",  new HashSet<>(Arrays.asList("0-5", "6-15")));
+				mapperAge2toAge.put("16-25", new HashSet<>(Arrays.asList("16-25")));
+				mapperAge2toAge.put("26-55", new HashSet<>(Arrays.asList("26-40","40-55")));
+				mapperAge2toAge.put("55 et plus", new HashSet<>(Arrays.asList("55 et plus")));
 				attributes.add(DemographicAttributeFactory.getFactory().createRangeAggregatedAttribute("Age2", 
 						new GSDataParser().getRangeTemplate(mapperAge2toAge.keySet().stream().collect(Collectors.toList())), 
 						(DemographicAttribute<RangeValue>) ageCSP.getDimension("Age"), mapperAge2toAge));
@@ -190,9 +190,9 @@ public class TestFullNDimensionalMatrix {
 		AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
 		Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
 			Map<String, Collection<String>> mapperAge2toAge = new HashMap<>();
-			mapperAge2toAge.put("16-25", Set.of("16-25"));
-			mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
-			mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
+			mapperAge2toAge.put("16-25", new HashSet<>(Arrays.asList("16-25")));
+			mapperAge2toAge.put("26-55", new HashSet<>(Arrays.asList("26-40","40-55")));
+			mapperAge2toAge.put("55 et plus", new HashSet<>(Arrays.asList("55 et plus")));
 			attributes.add(DemographicAttributeFactory.getFactory().createRangeAggregatedAttribute("Age3", 
 					new GSDataParser().getRangeTemplate(mapperAge2toAge.keySet().stream().collect(Collectors.toList())), 
 					(DemographicAttribute<RangeValue>) ageCSP.getDimension("Age"), mapperAge2toAge));

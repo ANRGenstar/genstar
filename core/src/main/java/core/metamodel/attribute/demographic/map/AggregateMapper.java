@@ -1,10 +1,10 @@
 package core.metamodel.attribute.demographic.map;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -37,7 +37,7 @@ public class AggregateMapper<V extends IValue> implements IAttributeMapper<V, V>
 		if(this.getRelatedAttribute().getValueSpace().getValues().contains(mapTo)
 				&& this.getRelatedAttribute().getReferentAttribute().getValueSpace()
 				.getValues().contains(mapWith)) {
-			map.put(mapTo, new ArrayList<>(List.of(mapWith)));
+			map.put(mapTo, new ArrayList<>(Arrays.asList(mapWith)));
 			return true;
 			}
 		return false;

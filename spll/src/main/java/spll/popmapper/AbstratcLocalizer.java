@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -473,10 +474,15 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 			GeographicAttribute<IntegerValue> contAtt, GeographicAttribute<? extends IValue> keyAtt, SimpleFeatureType featType){
 		GeoEntityFactory ef = new GeoEntityFactory(Stream.of(contAtt, keyAtt).collect(Collectors.toSet()), 
 				featType);
-		Collection<SpllFeature> features = eMatches.keySet().stream().map(entity -> 
-				ef.createGeoEntity(entity.getGeometry(), Map.ofEntries(
-					Map.entry(contAtt, contAtt.getValueSpace().addValue(eMatches.get(entity).toString())),
-					Map.entry(keyAtt, entity.getValueForAttribute(keyAtt.getAttributeName())))))
+		@SuppressWarnings("unchecked")
+		Collection<SpllFeature> features = eMatches.keySet().stream()
+				.map(entity -> ef.createGeoEntity(
+						entity.getGeometry(), 
+						new HashMap() {{ 
+							put(contAtt, contAtt.getValueSpace().addValue(eMatches.get(entity).toString()));
+							put(keyAtt, entity.getValueForAttribute(keyAtt.getAttributeName()));
+						}} 
+						))
 				.collect(Collectors.toSet());
 		return features;
 	}

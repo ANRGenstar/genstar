@@ -59,10 +59,10 @@ public class GosplSurveyFactory {
 	private final DecimalFormatSymbols dfs;
 	private final DecimalFormat decimalFormat;
 
-	private final char separator;
-	private final int sheetNb;
-	private final int firstRowDataIdx;
-	private final int firstColumnDataIdx;
+	private char separator;
+	private int sheetNb;
+	private int firstRowDataIdx;
+	private int firstColumnDataIdx;
 
 	public static final String CSV_EXT 	= ".csv";
 	public static final String XLS_EXT 	= ".xls";

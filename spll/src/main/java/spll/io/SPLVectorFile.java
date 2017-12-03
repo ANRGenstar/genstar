@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -187,13 +188,23 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 			throw new IllegalArgumentException("There is a mismatch between provided set of geographical entity and "
 					+ "geographic entity of this SPLVector file "+this.toString());
 		
-		GeoEntityFactory gef = new GeoEntityFactory(Set.of(attribute), 
-				SpllGeotoolsAdapter.getInstance().getGeotoolsFeatureType(attribute.toString(), 
-						Set.of(attribute), this.crs, this.dataStore.getFeatureSource(dataStore.getTypeNames()[0])
-						.getSchema().getGeometryDescriptor()));
+		Set<GeographicAttribute<? extends IValue>> attrSet = new HashSet<GeographicAttribute<? extends IValue>>();
+		attrSet.add(attribute);
+		GeoEntityFactory gef = new GeoEntityFactory(
+				attrSet, 
+				SpllGeotoolsAdapter.getInstance().getGeotoolsFeatureType(
+						attribute.toString(), 
+						attrSet, 
+						this.crs, 
+						this.dataStore.getFeatureSource(dataStore.getTypeNames()[0]
+						).getSchema().getGeometryDescriptor()));
 		
 		Collection<SpllFeature> newFeatures = this.features.stream()
-				.map(feat -> gef.createGeoEntity(feat.getGeometry(), Map.of(attribute, transfer.get(feat))))
+				.map(feat -> gef.createGeoEntity(
+						feat.getGeometry(), 
+						new HashMap<GeographicAttribute<? extends IValue>, IValue>() {{ 
+							put(attribute, transfer.get(feat)); 
+						}}))
 				.collect(Collectors.toSet());
 		
 		IGSGeofile<SpllFeature, IValue> res = null;
