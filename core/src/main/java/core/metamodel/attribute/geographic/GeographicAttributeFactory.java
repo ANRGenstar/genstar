@@ -6,8 +6,8 @@ import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalSpace;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
-import core.metamodel.value.numeric.ContinuedSpace;
-import core.metamodel.value.numeric.ContinuedValue;
+import core.metamodel.value.numeric.ContinuousSpace;
+import core.metamodel.value.numeric.ContinuousValue;
 import core.metamodel.value.numeric.IntegerSpace;
 import core.metamodel.value.numeric.IntegerValue;
 import core.util.data.GSEnumDataType;
@@ -40,22 +40,38 @@ public class GeographicAttributeFactory {
 			attribute = createIntegerAttribute(name);
 			break;
 		case Continue:
-			GeographicAttribute<ContinuedValue> cAtt = null;
-			cAtt = new GeographicAttribute<ContinuedValue>(new GeographicValueSpace<>(new ContinuedSpace(cAtt)), name);
-			attribute = cAtt; 
+			attribute = createContinueAttribute(name);
 			break;
 		case Boolean:
-			GeographicAttribute<BooleanValue> bAtt = null;
-			bAtt = new GeographicAttribute<BooleanValue>(new GeographicValueSpace<>(new BinarySpace(bAtt)), name);
-			attribute = bAtt;
+			attribute = createBooleanAttribute(name);
 			break;
 		default:
-			GeographicAttribute<NominalValue> nAtt = null;
-			nAtt = new GeographicAttribute<NominalValue>(new GeographicValueSpace<>(new NominalSpace(nAtt, new GSCategoricTemplate())), name);
-			attribute = nAtt;
+			attribute = createNominalAttribute(name);
 			break;
 		}
 		return attribute;
+	}
+
+	/**
+	 * Create a non specified String value geographical attribute
+	 * @param name
+	 * @return
+	 */
+	public GeographicAttribute<NominalValue> createNominalAttribute(String name) {
+		GeographicAttribute<NominalValue> nAtt = new GeographicAttribute<NominalValue>(name);
+		nAtt.setValueSpace(new NominalSpace(nAtt, new GSCategoricTemplate()));
+		return nAtt;
+	}
+
+	/**
+	 * Create a boolean value geographical attribute
+	 * @param name
+	 * @return
+	 */
+	public GeographicAttribute<BooleanValue> createBooleanAttribute(String name) {
+		GeographicAttribute<BooleanValue> bAtt = new GeographicAttribute<BooleanValue>(name);
+		bAtt.setValueSpace(new BinarySpace(bAtt));
+		return bAtt;
 	}
 
 	/**
@@ -63,10 +79,21 @@ public class GeographicAttributeFactory {
 	 * @param name
 	 * @return
 	 */
-	public GeographicAttribute<? extends IValue> createIntegerAttribute(String name) {
-		GeographicAttribute<IntegerValue> iAtt = null;
-		iAtt = new GeographicAttribute<IntegerValue>(new GeographicValueSpace<>(new IntegerSpace(iAtt)), name);
+	public GeographicAttribute<IntegerValue> createIntegerAttribute(String name) {
+		GeographicAttribute<IntegerValue> iAtt = new GeographicAttribute<IntegerValue>(name);
+		iAtt.setValueSpace(new IntegerSpace(iAtt));
 		return iAtt;
+	}
+	
+	/**
+	 * Create a continued value geographical attribute
+	 * @param name
+	 * @return
+	 */
+	public GeographicAttribute<ContinuousValue> createContinueAttribute(String name) {
+		GeographicAttribute<ContinuousValue> cAtt = new GeographicAttribute<ContinuousValue>(name);
+		cAtt.setValueSpace(new ContinuousSpace(cAtt));
+		return cAtt;
 	}
 	
 }

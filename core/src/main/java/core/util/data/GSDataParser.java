@@ -35,11 +35,11 @@ public class GSDataParser {
 	
 	public enum NumMatcher{
 		DOUBLE_MATCH_ENG("(\\-)?(\\d+\\.\\d+)(E(\\-)?\\d+)?"),
-		DOUBLE_POSITIF_MATCH_ENG("[^\\d+\\.\\d+][E\\-\\d+]?"),
+		DOUBLE_POSITIF_MATCH_ENG("(^\\d+\\.\\d+)(E\\-\\d+)?"),
 		DOUBLE_MATCH_FR("(\\-)?(\\d+\\,\\d+)(E(\\-)?\\d+)?"),
-		DOUBLE_POSITIF_MATCH_FR("[^\\d+\\,\\d+][E\\-\\d+]?"),
-		INT_POSITIF_MATCH("[^\\d+]"),
-		INT_MATCH("[^-?\\d+]");
+		DOUBLE_POSITIF_MATCH_FR("(^\\d+\\,\\d+)(E\\-\\d+)?"),
+		INT_POSITIF_MATCH("\\d+"),
+		INT_MATCH("-?\\d+");
 		
 		private String match;
 		private NumMatcher(String match){this.match = match;}
@@ -66,10 +66,10 @@ public class GSDataParser {
 	 */
 	public GSEnumDataType getValueType(String value){
 		value = value.trim();
-		if(value.matches(NumMatcher.DOUBLE_MATCH_ENG.getMatch()) || value.matches(NumMatcher.DOUBLE_MATCH_FR.getMatch()))
-			return GSEnumDataType.Continue;
 		if(value.matches(NumMatcher.INT_MATCH.getMatch()))
 			return GSEnumDataType.Integer;
+		if(value.matches(NumMatcher.DOUBLE_MATCH_ENG.getMatch()) || value.matches(NumMatcher.DOUBLE_MATCH_FR.getMatch()))
+			return GSEnumDataType.Continue;
 		if(Boolean.TRUE.toString().equalsIgnoreCase(value) || Boolean.FALSE.toString().equalsIgnoreCase(value))
 			return GSEnumDataType.Boolean;
 		try {
@@ -86,6 +86,7 @@ public class GSDataParser {
 	 * @see GSRangeTemplate
 	 * 
 	 * WARNING: untested
+	 * FIXME: only get template with integer based range data
 	 * 
 	 * @param range
 	 * @return
@@ -93,23 +94,39 @@ public class GSDataParser {
 	 */
 	@SuppressWarnings("unlikely-arg-type")
 	public GSRangeTemplate getRangeTemplate(List<String> ranges, String match, NumMatcher numMatcher) throws GSIllegalRangedData {
-		List<Integer> rangeInt = this.getRangedIntegerData(ranges.stream().collect(Collectors.joining()), numMatcher);
+		List<Integer> rangeInt = new ArrayList<>();
+		for(String range : ranges)
+			rangeInt.addAll(this.getRangedIntegerData(range, numMatcher));
 		Collections.sort(rangeInt);
 		String lowerBound = "", upperBound = "", middle = "";
 		for(String range : ranges){
-			if(this.getRangedIntegerData(range, numMatcher).get(0).equals(rangeInt.get(0).toString()))
-				lowerBound = range.replaceAll(rangeInt.get(0).toString(), match);
-			else if(this.getRangedIntegerData(range, numMatcher).get(0).equals(rangeInt.get(rangeInt.size()-1).toString()))
-				upperBound = range.replaceAll(rangeInt.get(rangeInt.size()-1).toString(), match);
-			else if(middle.isEmpty()){
+			List<Integer> ints = this.getRangedIntegerData(range, numMatcher); 
+			if(ints.size() == 1) { 
+				if(ints.get(0).equals(rangeInt.get(0)))
+					lowerBound = range.replaceAll(rangeInt.get(0).toString(), match);
+				else if(ints.get(0).equals(rangeInt.get(rangeInt.size()-1)))
+					upperBound = range.replaceAll(rangeInt.get(rangeInt.size()-1).toString(), match);
+			} else if(middle.isEmpty())
 				middle = range.replaceAll(numMatcher.getMatch(), match);
-			} else if(middle != null){
+			else if(middle != null){
 				String newMiddle = range.replaceAll(numMatcher.getMatch(), match);
 				if(!newMiddle.equalsIgnoreCase(middle))
 					throw new GSIllegalRangedData("Range template has more than 3 range format");
 			}
 		}
-		return new GSRangeTemplate(lowerBound, upperBound, middle, match, numMatcher);
+		return new GSRangeTemplate(lowerBound, middle, upperBound, match, numMatcher);
+	}
+	
+	/**
+	 * Extract range template from a list of ranges and given number matcher
+	 * 
+	 * @param ranges
+	 * @param numMatcher
+	 * @return
+	 * @throws GSIllegalRangedData 
+	 */
+	public GSRangeTemplate getRangeTemplate(List<String> ranges, NumMatcher numMatcher) throws GSIllegalRangedData {
+		return getRangeTemplate(ranges, DEFAULT_NUM_MATCH, numMatcher);
 	}
 	
 	/**
@@ -122,7 +139,7 @@ public class GSDataParser {
 	 * @throws GSIllegalRangedData
 	 */
 	public GSRangeTemplate getRangeTemplate(List<String> ranges) throws GSIllegalRangedData {
-		return getRangeTemplate(ranges, SPLIT_OPERATOR, NumMatcher.getDefault());
+		return getRangeTemplate(ranges, DEFAULT_NUM_MATCH, NumMatcher.getDefault());
 	}
 
 	/**
@@ -136,8 +153,7 @@ public class GSDataParser {
 	 */
 	public List<Double> getRangedDoubleData(String range, NumMatcher numMatcher) throws GSIllegalRangedData{
 		List<Double> list = new ArrayList<>();
-		range = range.replaceAll(numMatcher.getMatch(), SPLIT_OPERATOR);
-		List<String> stringRange = Arrays.asList(range.trim().split(SPLIT_OPERATOR));
+		List<String> stringRange = this.getNumbers(range, numMatcher.getMatch());
 		stringRange.stream().forEach(s -> s.trim());
 		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
@@ -199,9 +215,7 @@ public class GSDataParser {
 	 */
 	public List<Integer> getRangedIntegerData(String range, NumMatcher numMatcher) throws GSIllegalRangedData{
 		List<Integer> list = new ArrayList<>();
-		range = range.replaceAll(Pattern.quote("+"), "");
-		range = range.replaceAll(numMatcher.getMatch(), SPLIT_OPERATOR);
-		List<String> stringRange = Arrays.asList(range.trim().split(SPLIT_OPERATOR));
+		List<String> stringRange = this.getNumbers(range, numMatcher.getMatch());
 		stringRange.stream().forEach(s -> s.trim());
 		stringRange = stringRange.stream().filter(s -> !s.isEmpty()).collect(Collectors.toList());
 		if(stringRange.isEmpty())
@@ -209,7 +223,7 @@ public class GSDataParser {
 		if(stringRange.size() > 2)
 			throw new GSIllegalRangedData("The string ranged data " +range+ " has more than 2 (lower / upper) values");
 	    for(String i : stringRange)
-	    	list.add(Integer.valueOf(i));
+	    		list.add(Integer.valueOf(i));
 		return list;
 	}
 	
@@ -265,34 +279,40 @@ public class GSDataParser {
 	    if (value == null || value.isEmpty())
 	    	throw new NumberFormatException(value);
 
-	    Locale theLocale = Locale.getDefault();
-	    NumberFormat numberFormat = DecimalFormat.getInstance(theLocale);
-	    Number theNumber;
 	    try {
-	        theNumber = numberFormat.parse(value);
-	        return theNumber.doubleValue();
-	    } catch (ParseException e) {
-	        String valueWithDot = value.replaceAll(",",".");
-	        return Double.valueOf(valueWithDot);
-	    }
+	    		return Double.valueOf(value);
+		} catch (NumberFormatException e) {
+			Locale theLocale = Locale.getDefault();
+		    NumberFormat numberFormat = DecimalFormat.getInstance(theLocale);
+		    try {
+				return numberFormat.parse(value).doubleValue();
+			} catch (ParseException e1) {
+				String valueWithDot = value.replaceAll(",",".");
+		        return Double.valueOf(valueWithDot);
+			}
+		}
 	}
 
 	/**
-	 * Parse a {@link String} and retrieves numerical values
+	 * Parse a {@link String} and retrieve any numerical match independently
 	 * 
 	 * @param trim
 	 * @return
 	 */
 	public List<String> getNumber(String string) {
-		List<String> numbers = new ArrayList<>();
-		Pattern p = Pattern.compile(NumMatcher.DOUBLE_MATCH_ENG.getMatch());
-		Matcher m = p.matcher(string);
-		while (m.find()) {
-		  numbers.add(m.group());
-		}
-		//String s = string.replaceAll("^-?[\\d+][\\.\\d+]?[E\\-\\d+]?", " ");
-		//return Arrays.asList(s.trim().split(" "));
-		return numbers;
+		return this.getNumbers(string, NumMatcher.getDefault().getMatch());
+	}
+	
+	/**
+	 * Parse a {@link String} and retrieves numerical values
+	 * 
+	 * @param string
+	 * @param matcher
+	 * @return
+	 */
+	public List<Number> getNumbers(String string, NumMatcher matcher){
+		return this.getNumbers(string, matcher.getMatch()).stream().map(num -> this.parseNumbers(num))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -301,15 +321,26 @@ public class GSDataParser {
 	 * @param stringVal
 	 * @return
 	 */
-	public Number parseNumber(String stringVal) {
+	public Number parseNumbers(String stringVal) {
 		switch (this.getValueType(stringVal)) {
 		case Continue:
-			return Double.valueOf(getNumber(stringVal).get(0));
+			return Double.valueOf(getNumbers(stringVal, 
+					NumMatcher.DOUBLE_MATCH_FR.getMatch()).get(0));
 		case Integer:
-			return Integer.valueOf(getNumber(stringVal).get(0));
+			return Integer.valueOf(getNumbers(stringVal,
+					NumMatcher.INT_MATCH.getMatch()).get(0));
 		default:
 			return Double.NaN;
 		}
+	}
+	
+	private List<String> getNumbers(String string, String match){
+		List<String> numbers = new ArrayList<>();
+		Pattern p = Pattern.compile(match);
+		Matcher m = p.matcher(string);
+		while (m.find())
+		  numbers.add(m.group());
+		return numbers;
 	}
 
 }

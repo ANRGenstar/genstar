@@ -1,7 +1,7 @@
 package core.metamodel.value.categoric;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,6 +10,12 @@ import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
+/**
+ * TODO: javadoc
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class NominalSpace implements IValueSpace<NominalValue> {
 
 	private IAttribute<NominalValue> attribute; 
@@ -19,9 +25,9 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	private GSCategoricTemplate ct;
 	
-	public NominalSpace(IAttribute<NominalValue> attribute,
-			GSCategoricTemplate ct){
+	public NominalSpace(IAttribute<NominalValue> attribute, GSCategoricTemplate ct){
 		this.attribute = attribute;
+		this.values = new HashSet<>();
 		this.emptyValue = new NominalValue(this, null);
 		this.ct = ct;
 	}
@@ -45,26 +51,14 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 			nv = this.getValue(value);
 		} catch (NullPointerException e) {
 			nv = new NominalValue(this, ct.getFormatedString(value));
+			this.values.add(nv);
 		}
 		return nv;
 	}
 	
 	@Override
-	public boolean add(NominalValue e) {
-		if(values.contains(e) ||
-				!ct.getFormatedString(e.getStringValue()).equals(e.getStringValue()))
-			return false;
-		this.addValue(e.getStringValue());
-		return true;
-	}
-	
-	@Override
-	public boolean addAll(Collection<? extends NominalValue> c) {
-		boolean res = false;
-		for(NominalValue nv : c)
-			if(this.add(nv) && !res)
-				res = true;
-		return res;
+	public Set<NominalValue> getValues(){
+		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
@@ -85,69 +79,40 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	@Override
 	public void setEmptyValue(String value){
-		this.emptyValue = new NominalValue(this, value);
+		try {
+			this.emptyValue = this.getValue(value);
+		} catch (NullPointerException e) {
+			this.emptyValue = new NominalValue(this, value); 
+		}
 	}
-	
-	// ---------------------------------------------------------------------- //
 
 	@Override
 	public IAttribute<NominalValue> getAttribute() {
 		return attribute;
 	}
-
-	@Override
-	public boolean isEmpty() {
-		return values.isEmpty();
+	
+	/**
+	 * Gives the template used to elaborate proper formated value for this value space
+	 * @return
+	 */
+	public GSCategoricTemplate getCategoricTemplate() {
+		return ct;
 	}
-
+	
+	// ---------------------------------------------- //
+	
 	@Override
-	public boolean contains(Object o) {
-		return values.contains(o);
+	public int hashCode() {
+		final int prime = 31;
+		int result = this.getHashCode();
+		result = prime * result + ct.hashCode();
+		return result;
+		
 	}
-
+	
 	@Override
-	public Iterator<NominalValue> iterator() {
-		return values.iterator();
+	public boolean equals(Object obj) {
+		return this.isEqual(obj) && this.ct.equals(((NominalSpace)obj).getCategoricTemplate());
 	}
-
-	@Override
-	public Object[] toArray() {
-		return values.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] a) {
-		return values.toArray(a);
-	}
-
-	@Override
-	public boolean remove(Object o) {
-		return values.remove(o);
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> c) {
-		return values.containsAll(c);
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		return values.removeAll(c);
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		return values.retainAll(c);
-	}
-
-	@Override
-	public void clear() {
-		values.clear();	
-	}
-
-	@Override
-	public int size() {
-		return values.size();
-	}
-
+	
 }

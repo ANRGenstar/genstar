@@ -2,7 +2,6 @@ package core.metamodel.attribute.geographic;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
@@ -48,7 +47,7 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	public Number getNumericValue(V val) {
 		if(!val.getType().isNumericValue())
 			return Double.NaN;
-		return new GSDataParser().parseNumber(val.getStringValue());
+		return new GSDataParser().parseNumbers(val.getStringValue());
 	}
 
 	// ---------------------- ADDER CONTRACT ---------------------- //
@@ -74,72 +73,9 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 		return innerValueSpace.getValue(value);
 	}
 	
-	@Override
-	public boolean add(V arg0) {
-		return innerValueSpace.add(arg0);
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends V> arg0) {
-		return innerValueSpace.addAll(arg0);
-	}
-	
-	// ------------------------------------------------------------ //
-
-	@Override
-	public boolean contains(Object arg0) {
-		return innerValueSpace.contains(arg0);
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> arg0) {
-		return innerValueSpace.containsAll(arg0);
-	}
-
-	@Override
-	public boolean isEmpty() {
-		return innerValueSpace.isEmpty();
-	}
-
-	@Override
-	public Iterator<V> iterator() {
-		return innerValueSpace.iterator();
-	}
-
-	@Override
-	public boolean remove(Object arg0) {
-		return innerValueSpace.remove(arg0);
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> arg0) {
-		return innerValueSpace.removeAll(arg0);
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> arg0) {
-		return innerValueSpace.retainAll(arg0);
-	}
-
-	@Override
-	public int size() {
-		return innerValueSpace.size();
-	}
-
-	@Override
-	public Object[] toArray() {
-		return innerValueSpace.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] arg0) {
-		return innerValueSpace.toArray(arg0);
-	}
-	
-	@Override
-	public void clear() {
-		innerValueSpace.clear();
-		noDataValues.clear();
+	@Override 
+	public Set<V> getValues(){
+		return innerValueSpace.getValues();
 	}
 	
 	// ---------------------------------------------------- //

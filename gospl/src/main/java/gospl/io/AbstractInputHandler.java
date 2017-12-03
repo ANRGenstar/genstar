@@ -3,6 +3,7 @@ package gospl.io;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -61,14 +62,14 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 * @return returns for each column id the list of attributes values
 	 */
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
 		
 		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
 			final List<String> column = readLines(0, getFirstRowIndex(), i);
 			for (String columnVal : column) {
-				Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().stream())
+				Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().getValues().stream())
 						.filter(asp -> asp.getStringValue().equals(columnVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
@@ -92,7 +93,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	/**
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
-	public Map<Integer, Set<IValue>> getRowHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
 		final List<Integer> attributeIdx = new ArrayList<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
 			final List<String> sLine = readLine(line);
@@ -103,7 +104,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					attributeIdx.add(idx);
 				if (headAtt.isEmpty()) {
 					final List<String> valList = readColumn(idx);
-					if (attributes.stream().anyMatch(att -> att.getValueSpace().stream()
+					if (attributes.stream().anyMatch(att -> att.getValueSpace().getValues().stream()
 							.allMatch(val -> valList.contains(val.getStringValue()))))
 						attributeIdx.add(idx);
 				}
@@ -116,7 +117,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 			final List<String> line = attributeIdx.stream().map(idx -> rawLine.get(idx)).collect(Collectors.toList());
 			for (int j = 0; j < line.size(); j++) {
 				final String lineVal = line.get(j);
-				final Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().stream())
+				final Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().getValues().stream())
 						.filter(asp -> asp.getStringValue().equals(lineVal)).collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
@@ -126,7 +127,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					if (headList.stream().allMatch(s -> s.isEmpty())) {
 						for (final List<String> column : readColumns(0, getFirstColumnIndex()))
 							inferedHeads.addAll(attributes.stream()
-									.filter(a -> a.getValueSpace().stream()
+									.filter(a -> a.getValueSpace().getValues().stream()
 											.allMatch(av -> column.contains(av.getStringValue())))
 									.collect(Collectors.toSet()));
 					} else {
@@ -149,7 +150,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	}
 	
 	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Collection<DemographicAttribute<? extends IValue>> attributes) {
 		
 		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
 		
@@ -165,7 +166,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 				Optional<DemographicAttribute<? extends IValue>> opAtt = null;
 				do {
 					String value = read(row++, i);
-					opAtt = attSet.stream().filter(att -> att.getValueSpace()
+					opAtt = attSet.stream().filter(att -> att.getValueSpace().getValues()
 							.stream().anyMatch(val -> val.getStringValue().equals(value)))
 							.findAny();
 				} while (opAtt.isPresent());

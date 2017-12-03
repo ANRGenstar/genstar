@@ -136,7 +136,7 @@ public class UtilGenerator implements ISyntheticGosplPopGenerator {
 		for(DemographicAttribute<? extends IValue> att : attributes){
 			double sop = 1d;
 			attributesProba.put(att, new TreeMap<>());
-			for(IValue val : att.getValueSpace()){
+			for(IValue val : att.getValueSpace().getValues()){
 				double rnd = random.nextDouble() * sop;
 				attributesProba.get(att).put(rnd, val);
 				sop -= rnd;

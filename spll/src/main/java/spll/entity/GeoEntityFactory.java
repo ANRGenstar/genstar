@@ -21,10 +21,9 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.attribute.geographic.GeographicAttribute;
-import core.metamodel.attribute.geographic.GeographicValueSpace;
+import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.ContinuedSpace;
-import core.metamodel.value.numeric.ContinuedValue;
+import core.metamodel.value.numeric.ContinuousValue;
 import core.util.data.GSDataParser;
 import spll.util.SpllGeotoolsAdapter;
 
@@ -42,7 +41,7 @@ public class GeoEntityFactory {
 	public static String ATTRIBUTE_FEATURE_POP = "Population";
 	
 	private final Map<String, GeographicAttribute<? extends IValue>> featureAttributes;
-	private Set<GeographicAttribute<ContinuedValue>> pixelAttributes;
+	private Set<GeographicAttribute<ContinuousValue>> pixelAttributes;
 	
 	private SimpleFeatureBuilder contingencyFeatureBuilder;
 	
@@ -86,7 +85,7 @@ public class GeoEntityFactory {
         		schema.getGeometryDescriptor().getType().getBinding().getSimpleName(), 
         		attributes.stream().map(a -> a.getAttributeName()).collect(Collectors.joining(", ")));
         for(GeographicAttribute<? extends IValue> attribute : attributes)
-            builder.add(attribute.getAttributeName(), attribute.getValueSpace().stream()
+            builder.add(attribute.getAttributeName(), attribute.getValueSpace().getValues().stream()
         			.allMatch(value -> value.getType().isNumericValue()) ? Number.class : String.class);
         
         this.contingencyFeatureBuilder = new SimpleFeatureBuilder(builder.buildFeatureType());
@@ -152,16 +151,16 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
-		Map<GeographicAttribute<? extends ContinuedValue>, ContinuedValue> values = new HashMap<>();
+		Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> values = new HashMap<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
-			GeographicAttribute<ContinuedValue> attribute = null;
-			Optional<GeographicAttribute<ContinuedValue>> opAtt = pixelAttributes.stream()
+			GeographicAttribute<ContinuousValue> attribute = null;
+			Optional<GeographicAttribute<ContinuousValue>> opAtt = pixelAttributes.stream()
 					.filter(att -> att.getAttributeName().equals(bandsName)).findAny();
 			if(opAtt.isPresent())
 				attribute = opAtt.get();
 			else {
-				attribute = new GeographicAttribute<>(new GeographicValueSpace<>(new ContinuedSpace(attribute)), bandsName);
+				attribute = GeographicAttributeFactory.getFactory().createContinueAttribute(bandsName);
 				pixelAttributes.add(attribute);
 			}
 			values.put(attribute, attribute.getValueSpace().addValue(pixelBands[i].toString()));

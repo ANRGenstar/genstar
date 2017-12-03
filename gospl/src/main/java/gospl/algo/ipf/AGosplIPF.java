@@ -181,7 +181,7 @@ public abstract class AGosplIPF<T extends Number> {
 				+"% of samples dimensions will be estimate with output controls");
 		
 		logger.debug("Sample seed controls' dimension: "+seed.getDimensions()
-			.stream().map(d -> d.getAttributeName()+" = "+d.getValueSpace().size())
+			.stream().map(d -> d.getAttributeName()+" = "+d.getValueSpace().getValues().size())
 			.collect(Collectors.joining(";")));
 
 		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);

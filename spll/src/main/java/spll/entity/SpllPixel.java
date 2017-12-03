@@ -10,16 +10,16 @@ import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.AGeoEntity;
-import core.metamodel.value.numeric.ContinuedValue;
+import core.metamodel.value.numeric.ContinuousValue;
 
-public class SpllPixel extends AGeoEntity<ContinuedValue> {
+public class SpllPixel extends AGeoEntity<ContinuousValue> {
 	
 	private Envelope2D pixel;
 	
 	private int gridX;
 	private int gridY;
 	
-	protected SpllPixel(Map<GeographicAttribute<? extends ContinuedValue>, ContinuedValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
+	protected SpllPixel(Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
 		super(bandsData, "px ["+pixel.getCenterX()+";"+pixel.getCenterY()+"]");
 		this.gridX = gridX;
 		this.gridY = gridY;

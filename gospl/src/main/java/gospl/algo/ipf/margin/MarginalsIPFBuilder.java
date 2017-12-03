@@ -241,14 +241,14 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 		Collection<Set<IValue>> marginalDescriptors = new ArrayList<>();
 		// Init. the output collection with any attribute
 		DemographicAttribute<? extends IValue> firstAtt = sideAttributes.iterator().next();
-		for(IValue value : firstAtt.getValueSpace())
+		for(IValue value : firstAtt.getValueSpace().getValues())
 			marginalDescriptors.add(Stream.of(value).collect(Collectors.toSet()));
 		sideAttributes.remove(firstAtt);
 		// Then iterate over all other attributes
 		for(DemographicAttribute<? extends IValue> att : sideAttributes){
 			List<Set<IValue>> tmpDescriptors = new ArrayList<>();
 			for(Set<IValue> descriptors : marginalDescriptors){
-				tmpDescriptors.addAll(att.getValueSpace().stream()
+				tmpDescriptors.addAll(att.getValueSpace().getValues().stream()
 						.map(val -> Stream.concat(descriptors.stream(), Stream.of(val)).collect(Collectors.toSet()))
 						.collect(Collectors.toList())); 
 			}
@@ -273,7 +273,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			.collect(Collectors.toSet());
 		return outputMarginalDescriptors.stream().filter(set -> mdArchitype
 				.stream().anyMatch(architype -> architype.stream().allMatch(att -> set.stream()
-						.anyMatch(val -> att.getValueSpace().contains(val)))))
+						.anyMatch(val -> att.getValueSpace().getValues().contains(val)))))
 			.collect(Collectors.toList());
 	}
 }

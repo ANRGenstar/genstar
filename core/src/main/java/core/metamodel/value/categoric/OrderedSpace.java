@@ -1,40 +1,48 @@
 package core.metamodel.value.categoric;
 
-import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
+/**
+ * TODO: javadoc
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	// Generic purpose comparator. Ordered value does not implement comparable because
 	// they only be compared within a given ordered space
+	@JsonIgnore
 	private static Comparator<OrderedValue> comp = new Comparator<OrderedValue>() {
 		@Override
 		public int compare(OrderedValue o1, OrderedValue o2) {return o1.compareTo(o2);}
 	}; 
-	
-	private OrderedValue emptyValue;
+
 	private TreeSet<OrderedValue> values;
+	private OrderedValue emptyValue;
+
 	private IAttribute<OrderedValue> attribute;
 
 	private GSCategoricTemplate template;
-	
-	public OrderedSpace(IAttribute<OrderedValue> attribute,
-			GSCategoricTemplate template){
+
+	public OrderedSpace(IAttribute<OrderedValue> attribute, GSCategoricTemplate template){
 		this.values = new TreeSet<>(comp);
 		this.attribute = attribute;
 		this.template = template;
 		this.emptyValue = new OrderedValue(this, null, 0);
 	}
-	
+
 	public int compare(OrderedValue referent, OrderedValue compareTo) {
 		return referent.compareTo(compareTo);
 	}
@@ -43,14 +51,14 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	public GSEnumDataType getType() {
 		return GSEnumDataType.Order;
 	}
-	
+
 	@Override
 	public boolean isValidCandidate(String value){
 		return true;
 	}
 
 	// ------------------------ SETTERS & ADDER CAPACITIES ------------------------ //
-	
+
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -65,7 +73,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	public OrderedValue addValue(String value) throws IllegalArgumentException {
 		return addValue(values.size()-1, value);
 	}
-	
+
 	/**
 	 * 
 	 * @param order
@@ -81,43 +89,14 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 				throw new IllegalArgumentException("Ordered value "+value+" already exists with order "+ov.getOrder());
 		} catch (NullPointerException e) {
 			ov = new OrderedValue(this, value, order);
-			values.add(ov);
+			this.values.add(ov);
 		}
 		return ov;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Whenever this method is called, ordered value is added according to its internal order.
-	 * In case where two value has same internal order then all previously added value with
-	 * equal or upper order value are incremented. Works the same way as {@link List#add(int, Object)}
-	 * methods shifting all elements to the right
-	 *
-	 * @param e
-	 * @return
-	 */
+
 	@Override
-	public boolean add(OrderedValue e) {
-		if(values.stream().anyMatch(val -> val.getStringValue().equals(e.getStringValue())))
-			return false;
-		this.addValue(e.getOrder(), e.getStringValue());
-		return true;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 * @see #addValue(String)
-	 * @param c
-	 * @return
-	 */
-	@Override
-	public boolean addAll(Collection<? extends OrderedValue> c) {
-		boolean res = false;
-		for(OrderedValue ov : c)
-			if(this.add(ov) && !res)
-				res = true;
-		return res;
+	public Set<OrderedValue> getValues(){
+		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
@@ -129,7 +108,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 		throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
 	}
-	
+
 	@Override
 	public OrderedValue getEmptyValue() {
 		return emptyValue;
@@ -137,69 +116,43 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	@Override
 	public void setEmptyValue(String value) {
-		this.emptyValue = new OrderedValue(this, value, 0);
+		try {
+			this.emptyValue = getValue(value);
+		} catch (NullPointerException e) {
+			this.emptyValue = new OrderedValue(this, value, 0);
+		}
 	}
-	
-	// ----------------------------------------------------------------------------- //
 
 	@Override
 	public IAttribute<OrderedValue> getAttribute() {
 		return attribute;
 	}
 
+	/**
+	 * Gives the template used to elaborate proper formated value for this value space
+	 * 
+	 * @return
+	 */
+	public GSCategoricTemplate getCategoricTemplate() {
+		return template;
+	}
+
+	// ---------------------------------------------- //
+
 	@Override
-	public boolean isEmpty() {
-		return values.isEmpty();
+	public int hashCode() {
+		final int prime = 31;
+		int result = this.getHashCode();
+		result = prime * result + template.hashCode();
+		return result;
+
 	}
 
 	@Override
-	public boolean contains(Object o) {
-		return values.contains(o);
+	public boolean equals(Object obj) {
+		return this.isEqual(obj) && 
+				obj == null || this == null ? false : 
+					this.template.equals(((OrderedSpace)obj).getCategoricTemplate());
 	}
 
-	@Override
-	public Iterator<OrderedValue> iterator() {
-		return values.iterator();
-	}
-
-	@Override
-	public Object[] toArray() {
-		return values.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] a) {
-		return values.toArray(a);
-	}
-
-	@Override
-	public boolean remove(Object o) {
-		return values.remove(o);
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> c) {
-		return values.containsAll(c);
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		return values.removeAll(c);
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		return values.retainAll(c);
-	}
-
-	@Override
-	public void clear() {
-		values.clear();	
-	}
-
-	@Override
-	public int size() {
-		return values.size();
-	}
-	
 }

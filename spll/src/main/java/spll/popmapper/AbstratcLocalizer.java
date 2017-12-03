@@ -27,13 +27,11 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
-import core.metamodel.attribute.geographic.GeographicValueSpace;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.ContinuedSpace;
-import core.metamodel.value.numeric.ContinuedValue;
+import core.metamodel.value.numeric.IntegerValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
 import spll.SpllEntity;
@@ -446,9 +444,8 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 			throw new IllegalArgumentException("Matches entity must contain attribute "+keyAttMatch);
 
 		GeographicAttribute<? extends IValue> key = keyAtt.get();
-		GeographicAttribute<ContinuedValue> contAtt = null;
-		contAtt = new GeographicAttribute<>(new GeographicValueSpace<>(new ContinuedSpace(contAtt)), 
-				GeoEntityFactory.ATTRIBUTE_FEATURE_POP);
+		GeographicAttribute<IntegerValue> contAtt = GeographicAttributeFactory.getFactory()
+				.createIntegerAttribute(GeoEntityFactory.ATTRIBUTE_FEATURE_POP);
 
 		// Transpose entity-contingency map into a collection of feature
 		Collection<SpllFeature> features = constructFeatureCollection(eMatches, contAtt, key, 
@@ -473,7 +470,7 @@ public abstract class AbstratcLocalizer implements ISPLocalizer {
 	 * Create a set of GSFeature
 	 */
 	protected Collection<SpllFeature> constructFeatureCollection(Map<AGeoEntity<? extends IValue>, Number> eMatches, 
-			GeographicAttribute<ContinuedValue> contAtt, GeographicAttribute<? extends IValue> keyAtt, SimpleFeatureType featType){
+			GeographicAttribute<IntegerValue> contAtt, GeographicAttribute<? extends IValue> keyAtt, SimpleFeatureType featType){
 		GeoEntityFactory ef = new GeoEntityFactory(Stream.of(contAtt, keyAtt).collect(Collectors.toSet()), 
 				featType);
 		Collection<SpllFeature> features = eMatches.keySet().stream().map(entity -> 

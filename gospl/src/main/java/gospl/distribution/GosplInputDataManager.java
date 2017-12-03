@@ -9,11 +9,11 @@
  **********************************************************************************************/
 package gospl.distribution;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.configuration.GenstarConfigurationFile;
-import core.configuration.GenstarXmlSerializer;
+import core.configuration.GenstarJsonUtil;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
@@ -79,9 +79,11 @@ public class GosplInputDataManager {
 	private Set<AFullNDimensionalMatrix<? extends Number>> inputData;
 	private Set<GosplPopulation> samples;
 
-	public GosplInputDataManager(final Path configurationFilePath) throws FileNotFoundException {
-		this.configuration = new GenstarXmlSerializer().deserializeGSConfig(configurationFilePath);
-		this.configuration.setBaseDirectory(configurationFilePath.toFile());
+	public GosplInputDataManager(final Path configurationFilePath) 
+			throws IllegalArgumentException, IOException {
+		this.configuration = new GenstarJsonUtil().unmarshalFromGenstarJson(configurationFilePath, 
+				GenstarConfigurationFile.class);
+		this.configuration.setBaseDirectory(configurationFilePath.getParent());
 		this.dataParser = new GSDataParser();
 	}
 	
@@ -110,7 +112,7 @@ public class GosplInputDataManager {
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (!wrapper.getSurveyType().equals(GSSurveyType.Sample))
 				this.inputData.addAll(getDataTables(sf.getSurvey(wrapper, this.configuration.getBaseDirectory() == null ? 
-						null : this.configuration.getBaseDirectory()), 
+						null : this.configuration.getBaseDirectory().toFile()), 
 						this.configuration.getDemoDictionary().getAttributes()
 						));
 	}
@@ -130,7 +132,7 @@ public class GosplInputDataManager {
 		samples = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
+				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory().toFile()), 
 						this.configuration.getDemoDictionary().getAttributes()));
 	}
 
@@ -191,8 +193,7 @@ public class GosplInputDataManager {
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> this.isRecordAttribute(d)))
 				.collect(Collectors.toSet())){
-			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getDemoDictionary()
-					.getRecordAttribute().contains(d))
+			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getRecords().getAttributes().contains(d))
 					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
 		}
@@ -220,7 +221,7 @@ public class GosplInputDataManager {
 	 * Get the distribution matrix from data files
 	 */
 	private Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
-			final Set<DemographicAttribute<? extends IValue>> attributes) throws IOException, InvalidSurveyFormatException {
+			final Collection<DemographicAttribute<? extends IValue>> attributes) throws IOException, InvalidSurveyFormatException {
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		
@@ -314,7 +315,7 @@ public class GosplInputDataManager {
 		if (matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
 			// Identify local referent dimension
 			final Map<DemographicAttribute<? extends IValue>, List<AControl<? extends Number>>> mappedControls =
-					matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValueSpace()
+					matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValueSpace().getValues()
 							.stream().map(a -> matrix.getVal(a)).collect(Collectors.toList())));
 			final DemographicAttribute<? extends IValue> localReferentDimension =
 					mappedControls.entrySet().stream()
@@ -340,10 +341,10 @@ public class GosplInputDataManager {
 				freqMatrix = new GosplJointDistribution(matrix.getDimensions(), GSSurveyType.GlobalFrequencyTable);
 				final AFullNDimensionalMatrix<? extends Number> matrixOfReference = optionalRef.get();
 				final double totalControl =
-						matrixOfReference.getVal(localReferentDimension.getValueSpace()
+						matrixOfReference.getVal(localReferentDimension.getValueSpace().getValues()
 								.stream().collect(Collectors.toSet())).getValue().doubleValue();
 				final Map<IValue, Double> freqControls =
-						localReferentDimension.getValueSpace().stream().collect(Collectors.toMap(lrv -> lrv,
+						localReferentDimension.getValueSpace().getValues().stream().collect(Collectors.toMap(lrv -> lrv,
 								lrv -> matrixOfReference.getVal(lrv).getValue().doubleValue() / totalControl));
 
 				for (final ACoordinate<DemographicAttribute<? extends IValue>, IValue> controlKey : matrix.getMatrix().keySet()) {
@@ -366,7 +367,7 @@ public class GosplInputDataManager {
 			} else {
 				final AControl<? extends Number> total = matrix.getVal();
 				for (final DemographicAttribute<? extends IValue> attribut : matrix.getDimensions()) {
-					final AControl<? extends Number> controlAtt = matrix.getVal(attribut.getValueSpace().stream()
+					final AControl<? extends Number> controlAtt = matrix.getVal(attribut.getValueSpace().getValues().stream()
 							.collect(Collectors.toSet()));
 					if (Math.abs(controlAtt.getValue().doubleValue() - total.getValue().doubleValue())
 							/ controlAtt.getValue().doubleValue() > this.EPSILON)
@@ -389,7 +390,7 @@ public class GosplInputDataManager {
 	 * creates a GoSPl population.
 	 */
 	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final Set<DemographicAttribute<? extends IValue>> attributes)
+			final Collection<DemographicAttribute<? extends IValue>> attributes)
 			throws IOException, InvalidSurveyFormatException {
 		return getSample(survey, attributes, null, Collections.emptyMap());
 	}
@@ -399,7 +400,7 @@ public class GosplInputDataManager {
 	 * creates a GoSPl population.
 	 */
 	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final Set<DemographicAttribute<? extends IValue>> attributes, 
+			final Collection<DemographicAttribute<? extends IValue>> attributes, 
 			Integer maxIndividuals,
 			Map<String,String> keepOnlyEqual
 			)
@@ -501,7 +502,7 @@ public class GosplInputDataManager {
 	}
 	
 	private boolean isRecordAttribute(DemographicAttribute<? extends IValue> attribute){
-		return configuration.getDemoDictionary().getRecordAttribute().contains(attribute);
+		return configuration.getRecords().getAttributes().contains(attribute);
 	}
 
 

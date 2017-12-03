@@ -1,9 +1,10 @@
 package core.metamodel.attribute.demographic;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
@@ -31,16 +32,21 @@ import core.util.data.GSEnumDataType;
  * @author kevinchapuis
  * @author Duc an vo
  */
+
+@JsonTypeName(DemographicAttribute.SELF)
 public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 
+	public static final String SELF = "DEMOGRAPHIC ATTRIBUTE";
+	
 	private IValueSpace<V> valuesSpace;
 	
 	private String name;
 
+	@JsonIgnore
 	private String description = null;
 	
-	public DemographicAttribute(String name, IValueSpace<V> valueSpace) {
-		this.valuesSpace = valueSpace;
+	protected DemographicAttribute(String name) {
+		this.name = name;
 	}
 	
 	// ----------------- IAttribute contract methods ----------------- //
@@ -55,12 +61,26 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 		return valuesSpace;
 	}
 	
+	@Override
+	public void setValueSpace(IValueSpace<V> valueSpace) {
+		this.valuesSpace = valueSpace;
+	}
+	
 	// --------------------------------------------------------------- //
 	
+	/**
+	 * Retrieve the natural language description of this attribute
+	 * @return
+	 */
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * To give natural description for this attribute
+	 * 
+	 * @param description
+	 */
 	public void setDescription(String description) {
 		this.description = description;
 	}
@@ -71,6 +91,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	 * 
 	 * @return
 	 */
+	@JsonIgnore
 	public DemographicAttribute<? extends IValue> getReferentAttribute(){
 		return this;
 	}
@@ -98,14 +119,25 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 		return false;
 	}
 	
+	/**
+	 * Return the empty value
+	 * @return
+	 */
+	@JsonIgnore
 	public IValue getEmptyValue(){
 		return valuesSpace.getEmptyValue();
 	}
 
-	public Set<? extends IValue> findMappedAttributeValues(IValue value){
-		if(this.getValueSpace().contains(value) ||
+	/**
+	 * Find any related value. Could be the value itself or any corresponding mapped values
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public Collection<? extends IValue> findMappedAttributeValues(IValue value){
+		if(this.getValueSpace().getValues().contains(value) ||
 				this.getValueSpace().isValidCandidate(value.getStringValue()))
-			return Stream.of(value).collect(Collectors.toSet());
+			return Collections.singleton(value);
 		return Collections.emptySet();
 	}
 
@@ -117,6 +149,20 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	@Override
 	public String toString(){
 		return name+" ("+this.getValueSpace().getType()+") - "+this.getValueSpace()+" values";
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((description == null) ? 0 : description.hashCode());
+		result = prime * result + this.getHashCode();
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.isEqual(obj);
 	}
 
 

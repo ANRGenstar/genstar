@@ -67,7 +67,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	 */
 	public Number getNumericValueForAttribute(GeographicAttribute<? extends V> attribute) {
 		if(attribute.getValueSpace().getType().isNumericValue())
-			return new GSDataParser().parseNumber(this.getValueForAttribute(attribute).getStringValue());
+			return new GSDataParser().parseNumbers(this.getValueForAttribute(attribute).getStringValue());
 		return Double.NaN;
 	}
 	

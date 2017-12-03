@@ -1,31 +1,54 @@
 package core.metamodel.value.numeric;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.template.GSRangeTemplate;
 import core.util.data.GSEnumDataType;
 
+/**
+ * Encapsulate two bounded number, i.e. low and higher bound
+ * <p>
+ * Referent {@link RangeSpace} provide a {@link GSRangeTemplate} to transpose input string into {@link RangeValue}
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class RangeValue implements IValue {
 
 	public enum RangeBound{LOWER,UPPER}
 	
-	private Number lowerbound, upperbound;
+	private Number bottomBound, topBound;
+
 	private RangeSpace rs; 
 	
-	protected RangeValue(RangeSpace rs, Number bound, RangeBound rb){
+	/**
+	 * a) When it's lower bound then max is used to setup other part of the range value
+	 * <p>
+	 * b) When it's upper bound then min is used to setup other part of the range value
+	 * @param rs
+	 * @param bound
+	 * @param defaultBound
+	 */
+	protected RangeValue(RangeSpace rs, Number bound, RangeBound defaultBound){
 		this.rs = rs;
-		switch (rb) {
-		case LOWER: this.lowerbound = bound; this.upperbound = null;
+		switch (defaultBound) {
+		case UPPER: this.bottomBound = bound; this.topBound = rs.getMax();
 			break;
-		case UPPER: this.upperbound = bound; this.lowerbound = null;
+		case LOWER: this.topBound = bound; this.bottomBound = rs.getMin();
+			break;
 		default:
 			throw new IllegalArgumentException();
 		}
 	}
 	
 	protected RangeValue(RangeSpace rs, Number lowerBound, Number upperbound){
-		this.lowerbound = lowerBound;
-		this.upperbound = upperbound;
+		this.bottomBound = lowerBound;
+		this.topBound = upperbound;
 		this.rs = rs;
 	}
+	
+	// ----------------------------------------- //
 	
 	@Override
 	public GSEnumDataType getType() {
@@ -34,11 +57,11 @@ public class RangeValue implements IValue {
 
 	@Override
 	public String getStringValue() {
-		if(lowerbound != null && upperbound != null)
-			return rs.getRangeTemplate().getMiddleTemplate(lowerbound, upperbound);
-		if(lowerbound == null)
-			return rs.getRangeTemplate().getUpperTemplate(upperbound);
-		return rs.getRangeTemplate().getLowerTemplate(lowerbound);
+		if(topBound.equals(this.rs.getMax()))
+			return rs.getRangeTemplate().getTopTemplate(bottomBound);
+		if(bottomBound.equals(this.rs.getMin()))
+			return rs.getRangeTemplate().getBottomTemplate(topBound);
+		return rs.getRangeTemplate().getMiddleTemplate(bottomBound, topBound);
 	}
 	
 	@Override
@@ -50,8 +73,26 @@ public class RangeValue implements IValue {
 	 * The actual encapsulated value
 	 * @return
 	 */
+	@JsonIgnore
 	public Number[] getActualValue(){
-		return new Number[]{lowerbound, upperbound};
+		return new Number[]{bottomBound, topBound};
+	}
+	
+	// ------------------------------------------------------ //
+
+	@Override
+	public int hashCode() {
+		return this.getHashCode();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return this.isEquals(obj);
+	}
+	
+	@Override
+	public String toString() {
+		return this.getStringValue();
 	}
 	
 }

@@ -102,7 +102,7 @@ public class GosplNDimensionalMatrixFactory {
 		sampleDistribution.entrySet().stream().forEach(entry -> distribution.addValue(
 				new GosplCoordinate(dimensions.stream().collect(Collectors
 						.toMap(Function.identity(), att -> entry.getKey()
-								.stream().filter(val -> att.getValueSpace().contains(val)).findFirst().get()))), 
+								.stream().filter(val -> att.getValueSpace().getValues().contains(val)).findFirst().get()))), 
 				new ControlFrequency(entry.getValue())));
 		return distribution;
 	}

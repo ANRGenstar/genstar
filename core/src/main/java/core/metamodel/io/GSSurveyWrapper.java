@@ -1,10 +1,8 @@
 package core.metamodel.io;
 
-import java.io.FileNotFoundException;
-import java.io.ObjectStreamException;
-import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Wrapper class that encapsulate needed information for {@link IGSSurvey}
@@ -12,52 +10,46 @@ import java.nio.file.Paths;
  * <p>
  * Also define default value for variable that initialize survey readers,
  * like the index of sheet to read, headers index or csv separator character
+ * <p>
+ * TODO: move first row and first column data attribute to a schema that describe
+ * how many attributes in row & column and how there are organized (in a row, meaning
+ * consecutive attribute value are to be concatenated, one per row, multiple in one line, etc.)
  * 
  * @author kevinchapuis
  *
  */
 public class GSSurveyWrapper {
-
-	public static char DEFAULT_SEPARATOR = ',';
-	public static int DEFAULT_SHEET_NB = 0;
-	public static int FIRST_ROW_DATA = 1;
-	public static int FIRST_COLUMN_DATA = 1;
+	
+	public static final String RELATIVE_PATH = "RELATIVE PATH";
+	private static final String SURVEY_TYPE = "SURVEY TYPE";
+	private static final String SHEET_NB = "SHEET NB";
+	private static final String CSV_SEPARATOR = "SEPARATOR";
+	private static final String FIRST_ROW_INDEX = "FRI";
+	private static final String FIRST_COLUMN_INDEX = "FCI";
 
 	// Cannot set a default value to these variables
-	private String relativePath;
-	private final GSSurveyType surveyType;
+	private Path relativePath;
+	private GSSurveyType surveyType;
 
 	// Possible default value for these variables
-	private final int sheetNb;
-	private final char csvSeparator;
-	private final int firstRowIndex;
-	private final int firstColumnIndex;
+	private int sheetNb = 0;
+	private char csvSeparator = ',';
+	private int firstRowIndex = 1;
+	private int firstColumnIndex = 1;
 
 	/**
-	 * Inner constructor for deserialization
-	 * 
-	 * @param absoluteFilePath
-	 * @param surveyType
+	 * Json required default constructor
 	 */
-	protected GSSurveyWrapper(String relativePath, 
-			GSSurveyType surveyType, int sheetNb, 
-			char csvSeparator, int firstRowIndex, int firstColumnIndex){
-		this.relativePath = relativePath;
-		this.surveyType = surveyType;
-		this.sheetNb = sheetNb;
-		this.csvSeparator = csvSeparator;
-		this.firstRowIndex = firstRowIndex;
-		this.firstColumnIndex = firstColumnIndex;
-	}
+	protected GSSurveyWrapper() {}
 
 	/**
 	 * Wrapper for default survey file attribute
 	 * 
 	 * @param absoluteFilePath
 	 */
-	public GSSurveyWrapper(String absoluteFilePath, GSSurveyType surveyType) {
-		this(absoluteFilePath, surveyType, DEFAULT_SHEET_NB,
-				DEFAULT_SEPARATOR, FIRST_ROW_DATA, FIRST_COLUMN_DATA);
+	public GSSurveyWrapper(Path relativePath, GSSurveyType surveyType) {
+		this.setRelativePath(relativePath);
+		this.setSurveyType(surveyType);
 	}
 
 	/**
@@ -68,10 +60,12 @@ public class GSSurveyWrapper {
 	 * @param firstRowIndex
 	 * @param firstColumnIndex
 	 */
-	public GSSurveyWrapper(String absoluteFilePath, GSSurveyType surveyType, 
+	public GSSurveyWrapper(Path relativePath, GSSurveyType surveyType, 
 			int sheetNb, int firstRowIndex, int firstColumnIndex) {
-		this(absoluteFilePath, surveyType, sheetNb, DEFAULT_SEPARATOR, 
-				firstRowIndex, firstColumnIndex);
+		this(relativePath, surveyType);
+		this.setSheetNumber(sheetNb);
+		this.setFirstRowIndex(firstRowIndex);
+		this.setFirstColumnIndex(firstColumnIndex);
 	}
 
 	/**
@@ -82,40 +76,28 @@ public class GSSurveyWrapper {
 	 * @param firstRowIndex
 	 * @param firstColumnIndex
 	 */
-	public GSSurveyWrapper(String absoluteFilePath, GSSurveyType surveyType, 
+	public GSSurveyWrapper(Path relativePath, GSSurveyType surveyType, 
 			char csvSeparator, int firstRowIndex, int firstColumnIndex) {
-		this(absoluteFilePath, surveyType, DEFAULT_SHEET_NB, csvSeparator, 
-				firstRowIndex, firstColumnIndex);
+		this(relativePath, surveyType);
+		this.setCsvSeparator(csvSeparator);
+		this.setFirstColumnIndex(firstColumnIndex);
+		this.setFirstRowIndex(firstRowIndex);
 	}
 
-	// ------------------- ACCESSOR ------------------- //
-
-	/**
-	 * Get the absolute {@link Path} to the file
-	 * 
-	 * @return
-	 */
-	public Path getAbsolutePath(){
-		return Paths.get(relativePath).toAbsolutePath();
-	}
+	// ------------------- GETTERS & SETTERS ------------------- //
 
 	/**
 	 * Get the relative {@link Path} to the file
 	 * 
 	 * @return
 	 */
+	@JsonProperty(GSSurveyWrapper.RELATIVE_PATH)
 	public Path getRelativePath(){
-		return Paths.get(relativePath);
+		return relativePath;
 	}
-
-	/**
-	 * Set the relative path to the file according to an external 
-	 * {@link Path}
-	 * 
-	 * @param parentPath
-	 */
-	public void setRelativePath(Path parentPath) throws IllegalArgumentException {
-		this.relativePath = parentPath.relativize(this.getAbsolutePath()).toString();
+	
+	public void setRelativePath(Path relativePath) {
+		this.relativePath = relativePath;
 	}
 
 	/**
@@ -124,8 +106,13 @@ public class GSSurveyWrapper {
 	 * @see GSSurveyType
 	 * @return
 	 */
+	@JsonProperty(GSSurveyWrapper.SURVEY_TYPE)
 	public GSSurveyType getSurveyType(){
 		return surveyType;
+	}
+	
+	public void setSurveyType(GSSurveyType surveyType) {
+		this.surveyType = surveyType;
 	}
 
 	/**
@@ -134,8 +121,13 @@ public class GSSurveyWrapper {
 	 * 
 	 * @return
 	 */
-	public int getSheetNumber(){
+	@JsonProperty(GSSurveyWrapper.SHEET_NB)
+	public int getSheetNumber() {
 		return sheetNb;
+	}
+	
+	public void setSheetNumber(int sheetNb) {
+		this.sheetNb = sheetNb;
 	}
 
 	/**
@@ -143,8 +135,13 @@ public class GSSurveyWrapper {
 	 * 
 	 * @return
 	 */
+	@JsonProperty(GSSurveyWrapper.CSV_SEPARATOR)
 	public char getCsvSeparator() {
 		return csvSeparator;
+	}
+	
+	public void setCsvSeparator(char csvSeparator) {
+		this.csvSeparator = csvSeparator;
 	}
 
 	/**
@@ -153,8 +150,13 @@ public class GSSurveyWrapper {
 	 * 
 	 * @return
 	 */
+	@JsonProperty(GSSurveyWrapper.FIRST_ROW_INDEX)
 	public int getFirstRowIndex(){
 		return firstRowIndex;
+	}
+	
+	public void setFirstRowIndex(int firstRowIndex) {
+		this.firstRowIndex = firstRowIndex;
 	}
 
 	/**
@@ -163,22 +165,16 @@ public class GSSurveyWrapper {
 	 * 
 	 * @return
 	 */
+	@JsonProperty(GSSurveyWrapper.FIRST_COLUMN_INDEX)
 	public int getFirstColumnIndex(){
 		return firstColumnIndex;
 	}
+	
+	public void setFirstColumnIndex(int firstColumnIndex) {
+		this.firstColumnIndex = firstColumnIndex;
+	}
 
 	// ------------------------------------------------------- //
-
-	/*
-	 * Method that enable a safe serialization / deserialization of this java class <br/>
-	 * The serialization process end up in xml file that represents a particular java <br/>
-	 * object of this class; and the way back from xml file to java object. 
-	 */
-	protected Object readResolve() throws ObjectStreamException, FileNotFoundException, UnsupportedEncodingException {
-		return new GSSurveyWrapper(getAbsolutePath().toString(), 
-				getSurveyType(), getSheetNumber(), getCsvSeparator(), getFirstRowIndex(), 
-				getFirstColumnIndex());
-	}
 
 	public String toString() {
 		return "wrapper to survey "+relativePath;

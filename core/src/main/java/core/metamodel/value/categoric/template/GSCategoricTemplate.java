@@ -42,19 +42,46 @@ public class GSCategoricTemplate extends Format {
 		String formatedString = caseSensitive ? string : string.toLowerCase();
 		Arrays.asList(regex).stream().forEach(r -> formatedString
 				.replaceAll(caseSensitive ? r : r.toLowerCase(), ""));
-		return this.format(string);
+		return this.format(formatedString);
 	}
+	
+	public void setRegex(String[] regex) { this.regex = regex; }
+	
+	public String[] getRegex() { return this.regex; }
 
 	@Override
 	public StringBuffer format(Object obj, StringBuffer toAppendTo, FieldPosition pos) {
-		// TODO Auto-generated method stub
-		return null;
+		return toAppendTo.append(obj.toString());
 	}
 
 	@Override
 	public Object parseObject(String source, ParsePosition pos) {
-		// TODO Auto-generated method stub
-		return null;
+		return source;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + (caseSensitive ? 1231 : 1237);
+		result = prime * result + Arrays.hashCode(regex);
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		GSCategoricTemplate other = (GSCategoricTemplate) obj;
+		if (caseSensitive != other.caseSensitive)
+			return false;
+		if (!Arrays.equals(regex, other.regex))
+			return false;
+		return true;
 	}
 	
 }

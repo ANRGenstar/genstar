@@ -24,7 +24,7 @@ import com.vividsolutions.jts.precision.GeometryPrecisionReducer;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.ContinuedValue;
+import core.metamodel.value.numeric.ContinuousValue;
 import core.util.GSPerformanceUtil;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.LMRegressionOLS;
@@ -238,7 +238,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 
 		// Retain info about pixel and his context
 		Geometry pixGeom = refPixel.getGeometry();
-		Collection<ContinuedValue> pixData = refPixel.getValues();
+		Collection<ContinuousValue> pixData = refPixel.getValues();
 		Collection<IValue> coefVal = regCoef.keySet()
 				.stream().map(var -> var.getValue()).collect(Collectors.toSet());
 		if(pixData.stream().allMatch(val -> val.getActualValue() == geotiff.getNoDataValue() || !coefVal.contains(val)) && ancillaries.isEmpty())
@@ -282,7 +282,7 @@ public class SPLAreaMapperBuilder extends ASPLMapperBuilder<SPLVariable, Double>
 			return SPLRasterFile.DEF_NODATA.floatValue();
 
 		// Get the values contain in the pixel bands
-		Collection<ContinuedValue> pixData = refPixel.getValues();
+		Collection<ContinuousValue> pixData = refPixel.getValues();
 		double pixArea = refPixel.getArea();
 
 		// Setup output value for the pixel based on pixels' band values

@@ -38,9 +38,8 @@ import com.vividsolutions.jts.geom.Geometry;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
-import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.ContinuedValue;
+import core.metamodel.value.numeric.ContinuousValue;
 import core.util.data.GSDataParser;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllPixel;
@@ -59,7 +58,7 @@ import spll.util.SpllUtil;
  * @author kevinchapuis
  *
  */
-public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuedValue> {
+public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 
 	private final GridCoverage2D coverage;
 	private final AbstractGridCoverage2DReader store;
@@ -70,8 +69,8 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuedValue> {
 	private Number noData;
 	
 	private Collection<SpllPixel> cacheGeoEntity = null;
-	private Collection<ContinuedValue> cacheGeoValues = null;
-	private Collection<GeographicAttribute<? extends ContinuedValue>> cacheGeoAttributes = null;
+	private Collection<ContinuousValue> cacheGeoValues = null;
+	private Collection<GeographicAttribute<? extends ContinuousValue>> cacheGeoAttributes = null;
 
 	/**
 	 * 
@@ -145,7 +144,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuedValue> {
 	}
 	
 	@Override
-	public IGSGeofile<SpllPixel, ContinuedValue> transferTo(
+	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(
 			Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer,
 			GeographicAttribute<? extends IValue> attribute) 
 					throws IllegalArgumentException, IOException {
@@ -164,7 +163,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuedValue> {
 			bands[pix.getGridX()][pix.getGridY()] = gsdp.getDouble(value.getStringValue()).floatValue(); 
 		}
 		
-		IGSGeofile<SpllPixel, ContinuedValue> res = null;
+		IGSGeofile<SpllPixel, ContinuousValue> res = null;
 		
 		try {
 			res = new SPLGeofileBuilder().setRasterBands(bands).setReferenceEnvelope(this.getEnvelope()).buildRasterfile();
@@ -197,7 +196,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuedValue> {
 	}
 	
 	@Override
-	public Collection<ContinuedValue> getGeoValues() {
+	public Collection<ContinuousValue> getGeoValues() {
 		if (cacheGeoValues == null) {
 			cacheGeoValues = new HashSet<>();
 			getGeoEntityIterator().forEachRemaining(pix -> cacheGeoValues.addAll(pix.getValues()));
@@ -206,7 +205,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuedValue> {
 	}
 	
 	@Override
-	public Collection<GeographicAttribute<? extends ContinuedValue>> getGeoAttributes(){
+	public Collection<GeographicAttribute<? extends ContinuousValue>> getGeoAttributes(){
 		if (cacheGeoAttributes == null) {
 			cacheGeoAttributes = getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
 				.collect(Collectors.toSet());

@@ -3,6 +3,7 @@ package gospl.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -290,7 +291,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
 		
 		Map<Integer, Set<IValue>> res = new HashMap<>(attributes.size());
 				
@@ -312,7 +313,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 				// ignore missing attributes
 				continue;
 			
-			res.put(iField, att.getValueSpace().stream().collect(Collectors.toSet()));
+			res.put(iField, att.getValueSpace().getValues().stream().collect(Collectors.toSet()));
 		}
 		
 		return res;
@@ -336,7 +337,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<IValue>> getRowHeaders(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
 		return Collections.emptyMap();
 	}
 	
@@ -389,7 +390,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Collection<DemographicAttribute<? extends IValue>> attributes) {
 
 		Map<Integer, DemographicAttribute<? extends IValue>> res = new HashMap<>(attributes.size());
 				

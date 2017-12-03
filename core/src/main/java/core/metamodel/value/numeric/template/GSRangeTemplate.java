@@ -12,7 +12,7 @@ import core.util.data.GSDataParser.NumMatcher;
  */
 public class GSRangeTemplate {
 	
-	private String lowerBound, middle, upperBound;
+	private String bottomBound, middle, topBound;
 	private String match;
 	
 	private NumMatcher numMatcher; 
@@ -21,8 +21,8 @@ public class GSRangeTemplate {
 			String match, NumMatcher numMatcher){
 		this.match = match;
 		this.middle = middle;
-		this.lowerBound = lowerBound;
-		this.upperBound = upperBound;
+		this.bottomBound = lowerBound;
+		this.topBound = upperBound;
 		this.numMatcher = numMatcher;
 	}
 	
@@ -39,23 +39,23 @@ public class GSRangeTemplate {
 	}
 	
 	/**
-	 * Process the lone lower bound to obtain a formated String representation
+	 * Process the lone bottom bound (smallest number) to obtain a formated String representation
 	 * 
 	 * @param up
 	 * @return
 	 */
-	public String getLowerTemplate(Number up){
-		return lowerBound.replaceFirst(match, up.toString());
+	public String getBottomTemplate(Number bottom){
+		return bottomBound.replaceFirst(match, bottom.toString());
 	}
 	
 	/**
-	 * Process the lone upper bound to obtain a formated String representation
+	 * Process the lone top bound (largest number) to obtain a formated String representation
 	 * 
 	 * @param low
 	 * @return
 	 */
-	public String getUpperTemplate(Number low){
-		return upperBound.replaceFirst(match, low.toString());
+	public String getTopTemplate(Number top){
+		return topBound.replaceFirst(match, top.toString());
 	}
 	
 	/**
@@ -68,7 +68,7 @@ public class GSRangeTemplate {
 	public boolean isValideRangeCandidate(String value) {
 		// TODO Auto-generated method stub
 		String valueTemplate = value.replaceAll(numMatcher.getMatch(), match);
-		return Stream.of(lowerBound, middle, upperBound).anyMatch(template -> template.equals(valueTemplate));
+		return Stream.of(bottomBound, middle, topBound).anyMatch(template -> template.equals(valueTemplate));
 	}
 
 	/**
@@ -82,7 +82,7 @@ public class GSRangeTemplate {
 	
 	@Override
 	public String toString(){
-		return "Template: "+lowerBound+" ... "+middle+" ... "+upperBound;
+		return "Template: {"+bottomBound+" ... "+middle+" ... "+topBound+"}";
 	}
 	
 }

@@ -1,15 +1,19 @@
 package core.configuration.dictionary;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import core.configuration.GenstarJsonUtil;
 import core.metamodel.IPopulation;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
-import core.metamodel.attribute.demographic.OTODemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
@@ -21,29 +25,26 @@ import core.metamodel.value.IValue;
  *
  * @param <A>
  */
-@XmlRootElement (name = "DemographiDictionary")
-public class DemographicDictionary {
+@JsonTypeName(GenstarJsonUtil.DEMO_DICO)
+public class DemographicDictionary<A extends DemographicAttribute<? extends IValue>>
+	implements IGenstarDictionary<A> {
 
-	private Set<DemographicAttribute<? extends IValue>> attSet;
+	public static final String ATTRIBUTES = "ATTRIBUTES";
 	
-	private Set<MappedDemographicAttribute<? extends IValue, ? extends IValue>> mappedAttSet;
-	private Set<OTODemographicAttribute<? extends IValue, ? extends IValue>> recordAttSet;
+	private Set<A> attributes;
 	
 	public DemographicDictionary() {
-		attSet = new HashSet<>();
+		this.attributes = new LinkedHashSet<>();
 	}
 	
-	public Set<DemographicAttribute<? extends IValue>> getAttributes() {
-		return Stream.concat(mappedAttSet.stream(), 
-				Stream.concat(attSet.stream(), mappedAttSet.stream()))
-				.collect(Collectors.toSet());
+	@JsonCreator
+	public DemographicDictionary(
+			@JsonProperty(DemographicDictionary.ATTRIBUTES) Collection<A> attributes) {
+		this();
+		this.attributes.addAll(attributes);
 	}
 	
-	public Set<OTODemographicAttribute<? extends IValue, ? extends IValue>> getRecordAttribute(){
-		return recordAttSet;
-	}
-	
-	// ---------------------------- SETTERS ---------------------------- //
+	// ---------------------------- ADDERS ---------------------------- //
 	
 	/**
 	 * Add attributes to this dictionary
@@ -51,31 +52,43 @@ public class DemographicDictionary {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public DemographicDictionary addAttributes(DemographicAttribute<? extends IValue>... attributes) {
-		this.attSet.addAll(Arrays.asList(attributes));
+	@Override
+	public DemographicDictionary<A> addAttributes(A... attributes) {
+		this.attributes.addAll(Arrays.asList(attributes));
 		return this;
 	}
 	
-	/**
-	 * Add record attributes
-	 * @param attributes
-	 * @return
-	 */
-	@SuppressWarnings("unchecked")
-	public DemographicDictionary addRecordAttributes(OTODemographicAttribute<? extends IValue, ? extends IValue>... attributes) {
-		this.recordAttSet.addAll(Arrays.asList(attributes));
-		return this;
+	@Override
+	@JsonProperty(DemographicDictionary.ATTRIBUTES)
+	public void setAttributes(Collection<A> attributes) {
+		this.attributes.clear();
+		this.attributes.addAll(attributes);
 	}
 
+	// ---------------------------- ACCESSORS ---------------------------- //
+	
 	/**
-	 * Add attributes linked to other attributes
-	 * @param attributes
+	 * Retrieves attributes describe by this dictionary
+	 * 
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
-	public DemographicDictionary addMappedAttributes(MappedDemographicAttribute<? extends IValue, ? extends IValue>... attributes) {
-		this.mappedAttSet.addAll(Arrays.asList(attributes));
-		return this;
+	@Override
+	@JsonProperty(DemographicDictionary.ATTRIBUTES)
+	public Collection<A> getAttributes() {
+		return Collections.unmodifiableSet(attributes);
+	}
+	
+	/**
+	 * Access to attribute using attribute name define as {@link IAttribute#getAttributeName()}
+	 * 
+	 * @param string
+	 * @return
+	 */
+	@Override
+	public A getAttribute(String string) {
+		if(attributes.stream().noneMatch(att -> att.getAttributeName().equals(string)))
+			throw new NullPointerException("This dictionary contains no reference to the attribute with name "+string);
+		return attributes.stream().filter(att -> att.getAttributeName().equals(string)).findFirst().get();
 	}
 	
 }

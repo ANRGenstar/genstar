@@ -1,7 +1,6 @@
 package core.metamodel.value.binary;
 
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -10,16 +9,28 @@ import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.util.data.GSEnumDataType;
 
+/**
+ * Value space of boolean value
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class BinarySpace implements IValueSpace<BooleanValue> {
 	
 	private Set<BooleanValue> values;
+	private BooleanValue emptyValue;
+
 	private IAttribute<BooleanValue> attribute;
 	
-	private BooleanValue emptyValue;
-	
+	/**
+	 * Constraint bianry space constructor define with values: {@link Boolean#TRUE}, {@link Boolean#FALSE}
+	 * and a null {@link Boolean} as empty value
+	 * 
+	 * @param attribute
+	 */
 	public BinarySpace(IAttribute<BooleanValue> attribute){
 		this.attribute = attribute;
-		this.values = Stream.of(new BooleanValue(this, true), new BooleanValue(this, true))
+		this.values = Stream.of(new BooleanValue(this, true), new BooleanValue(this, false))
 				.collect(Collectors.toSet());
 		this.emptyValue = new BooleanValue(this, null);
 	}
@@ -42,6 +53,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 			throw new NullPointerException("The string value "+value
 					+" cannot be resolve to boolean as defined by "+this.getClass().getSimpleName());
 		return values.stream().filter(val -> val.getStringValue().equalsIgnoreCase(value)).findFirst().get();
+	}
+	
+	@Override
+	public Set<BooleanValue> getValues(){
+		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
@@ -67,77 +83,22 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	@Override
 	public boolean isValidCandidate(String value) {
 		if(!value.equalsIgnoreCase(Boolean.TRUE.toString()) 
-				&& !value.equalsIgnoreCase(Boolean.FALSE.toString())
+				|| !value.equalsIgnoreCase(Boolean.FALSE.toString())
 				|| emptyValue.getStringValue().equalsIgnoreCase(value))
 			return true;
 		return false;
 	}
 	
-	// ---------------------------------------------------------------------- //
-
+	// ---------------------------------------------- //
+	
 	@Override
-	public boolean isEmpty() {
-		return false;
+	public int hashCode() {
+		return this.getHashCode();
 	}
-
+	
 	@Override
-	public boolean contains(Object o) {
-		return values.contains(o);
-	}
-
-	@Override
-	public Iterator<BooleanValue> iterator() {
-		return values.iterator();
-	}
-
-	@Override
-	public Object[] toArray() {
-		return values.toArray();
-	}
-
-	@Override
-	public <T> T[] toArray(T[] a) {
-		return values.toArray(a);
-	}
-
-	@Override
-	public boolean add(BooleanValue e) {
-		return false;
-	}
-
-	@Override
-	public boolean remove(Object o) {
-		return false;
-	}
-
-	@Override
-	public boolean containsAll(Collection<?> c) {
-		return values.containsAll(c);
-	}
-
-	@Override
-	public boolean addAll(Collection<? extends BooleanValue> c) {
-		return false;
-	}
-
-	@Override
-	public boolean removeAll(Collection<?> c) {
-		return false;
-	}
-
-	@Override
-	public boolean retainAll(Collection<?> c) {
-		return values.retainAll(c);
-	}
-
-	@Override
-	public void clear() {
-		// JUST CANNOT BE
-	}
-
-	@Override
-	public int size() {
-		return values.size();
+	public boolean equals(Object obj) {
+		return this.isEqual(obj);
 	}
 	
 }

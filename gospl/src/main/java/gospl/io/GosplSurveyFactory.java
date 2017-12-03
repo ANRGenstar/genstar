@@ -59,10 +59,10 @@ public class GosplSurveyFactory {
 	private final DecimalFormatSymbols dfs;
 	private final DecimalFormat decimalFormat;
 
-	private final char separator;
-	private final int sheetNb;
-	private final int firstRowDataIdx;
-	private final int firstColumnDataIdx;
+	private char separator = ',';
+	private int sheetNb = 0;
+	private int firstRowDataIdx = 1;
+	private int firstColumnDataIdx = 1;
 
 	public static final String CSV_EXT 	= ".csv";
 	public static final String XLS_EXT 	= ".xls";
@@ -82,15 +82,8 @@ public class GosplSurveyFactory {
 
 	public GosplSurveyFactory() {
 		
-		this(
-				GSSurveyWrapper.DEFAULT_SHEET_NB, 
-				GSSurveyWrapper.DEFAULT_SEPARATOR, 
-				GSSurveyWrapper.FIRST_ROW_DATA,
-				GSSurveyWrapper.FIRST_COLUMN_DATA,
-				new DecimalFormatSymbols(Locale.FRANCE),
-				new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.FRANCE))
-				);
-		
+		this.dfs = new DecimalFormatSymbols(Locale.FRANCE);
+		this.decimalFormat =	new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.FRANCE));
 		this.dfs.setDecimalSeparator('.');
 	}
 
@@ -461,7 +454,7 @@ public class GosplSurveyFactory {
 		String report = "";
 
 		if(rowHeaders.isEmpty()){
-			List<IValue> vals = columnHeaders.stream().flatMap(att -> att.getValueSpace().stream())
+			List<IValue> vals = columnHeaders.stream().flatMap(att -> att.getValueSpace().getValues().stream())
 					.collect(Collectors.toList());
 			report += vals.stream().map(val -> val.getStringValue())
 					.collect(Collectors.joining(String.valueOf(separator)))
@@ -521,11 +514,11 @@ public class GosplSurveyFactory {
 		
 		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
 				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
-		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValueSpace().size()+1).max().getAsInt())
+		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValueSpace().getValues().size()+1).max().getAsInt())
 				.mapToObj(i -> "").collect(Collectors.toList());
 
 		Map<IValue, Integer> mapReport = attributes.stream()
-				.flatMap(att -> Stream.concat(att.getValueSpace().stream(), Stream.of(att.getEmptyValue()))
+				.flatMap(att -> Stream.concat(att.getValueSpace().getValues().stream(), Stream.of(att.getEmptyValue()))
 				.collect(Collectors.toSet()).stream())
 				.collect(Collectors.toMap(Function.identity(), value -> 0));
 		
@@ -536,7 +529,7 @@ public class GosplSurveyFactory {
 			
 			int lineNumber = 0;
 			
-			Set<IValue> attValues = Stream.concat(attribute.getValueSpace().stream(), 
+			Set<IValue> attValues = Stream.concat(attribute.getValueSpace().getValues().stream(), 
 					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
 			
 			for(IValue value : attValues) {
@@ -615,13 +608,13 @@ public class GosplSurveyFactory {
 	private Map<Integer, List<IValue>> getTableHeader(Collection<DemographicAttribute<? extends IValue>> headerAttributes){
 		DemographicAttribute<? extends IValue> anchor = headerAttributes.iterator().next();
 		List<List<IValue>> head = new ArrayList<>();
-		for(IValue value : anchor.getValueSpace())
+		for(IValue value : anchor.getValueSpace().getValues())
 			head.add(new ArrayList<>(Arrays.asList(value)));
 		headerAttributes.remove(anchor);
 		for(DemographicAttribute<? extends IValue> headAtt : headerAttributes){
 			List<List<IValue>> tmpHead = new ArrayList<>();
 			for(List<IValue> currentHead : head)
-				tmpHead.addAll(headAtt.getValueSpace().stream()
+				tmpHead.addAll(headAtt.getValueSpace().getValues().stream()
 						.map(val -> Stream.concat(currentHead.stream(), Stream.of(val))
 								.collect(Collectors.toList())).collect(Collectors.toList()));
 			head = tmpHead;

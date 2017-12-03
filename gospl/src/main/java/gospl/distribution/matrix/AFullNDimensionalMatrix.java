@@ -59,7 +59,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	public AFullNDimensionalMatrix(Set<DemographicAttribute<? extends IValue>> dimensions, GSSurveyType metaDataType) {
 		this.dimensions = new HashSet<>(dimensions);
 		this.matrix = new ConcurrentHashMap<>(dimensions.stream()
-				.mapToInt(d -> d.getValueSpace().size())
+				.mapToInt(d -> d.getValueSpace().getValues().size())
 				.reduce(1, (ir, dimSize) -> ir * dimSize) / 4);
 		this.dataType = metaDataType;
 		this.emptyCoordinate = new GosplCoordinate(Collections.emptyMap());
@@ -183,27 +183,27 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	@Override
 	public Map<DemographicAttribute<? extends IValue>, Set<? extends IValue>> getDimensionsAsAttributesAndValues() {
-		return dimensions.stream().collect(Collectors.toMap(Function.identity(), DemographicAttribute::getValueSpace));
+		return dimensions.stream().collect(Collectors.toMap(Function.identity(), dim -> dim.getValueSpace().getValues()));
 	}
 
 	@Override
 	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
-		if(!dimensions.stream().flatMap(dim -> dim.getValueSpace().stream()).anyMatch(asp -> asp.equals(aspect)))
+		if(!dimensions.stream().flatMap(dim -> dim.getValueSpace().getValues().stream()).anyMatch(asp -> asp.equals(aspect)))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
-		return dimensions.stream().filter(e -> e.getValueSpace().contains(aspect))
+		return dimensions.stream().filter(e -> e.getValueSpace().getValues().contains(aspect))
 				.findFirst().get();
 	}
 
 	@Override
 	public Set<IValue> getAspects(){
-		return dimensions.stream().flatMap(dim -> dim.getValueSpace().stream()).collect(Collectors.toSet());
+		return dimensions.stream().flatMap(dim -> dim.getValueSpace().getValues().stream()).collect(Collectors.toSet());
 	}
 
 	@Override
 	public Set<IValue> getAspects(DemographicAttribute<? extends IValue> dimension) {
 		if(!dimensions.contains(dimension))
 			throw new NullPointerException("dimension "+dimension+" is not present in the joint distribution");
-		return Collections.unmodifiableSet(dimension.getValueSpace());
+		return Collections.unmodifiableSet(dimension.getValueSpace().getValues());
 	}
 	
 
@@ -368,7 +368,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		for(IValue aspect : coordinate.values()){
 			for(DemographicAttribute<? extends IValue> dim : dimensions){
 				if(dimensions.contains(dim)) {
-					if(dim.getValueSpace().contains(aspect))
+					if(dim.getValueSpace().getValues().contains(aspect))
 						dimensionsAspects.add(dim);
 				} else if(dim.getEmptyValue() != null 
 						&& dim.getEmptyValue().equals(aspect))
@@ -462,16 +462,16 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	@Override
 	public String toString(){
-		int theoreticalSpaceSize = this.getDimensions().stream().mapToInt(d -> d.getValueSpace().size()).reduce(1, (i1, i2) -> i1 * i2);
+		int theoreticalSpaceSize = this.getDimensions().stream().mapToInt(d -> d.getValueSpace().getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
 		StringBuffer sb = new StringBuffer();
 		sb.append("-- Matrix: ").append(dimensions.size()).append(" dimensions and ").append(dimensions.stream()
-				.mapToInt(dim -> dim.getValueSpace().size()).sum())
+				.mapToInt(dim -> dim.getValueSpace().getValues().size()).sum())
 					.append(" aspects (theoretical size:").append(theoreticalSpaceSize).append(")--\n");
 		AControl<T> empty = getNulVal();
 		for(DemographicAttribute<? extends IValue> dimension : dimensions){
 			sb.append(" -- dimension: ").append(dimension.getAttributeName());
-			sb.append(" with ").append(dimension.getValueSpace().size()).append(" aspects -- \n");
-			for(IValue aspect : dimension.getValueSpace()) {
+			sb.append(" with ").append(dimension.getValueSpace().getValues().size()).append(" aspects -- \n");
+			for(IValue aspect : dimension.getValueSpace().getValues()) {
 				AControl<T> value = null;
 				try {
 					value = getVal(aspect);
@@ -527,7 +527,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public boolean checkAllCoordinatesHaveValues() {
 		
-		return matrix.size() == dimensions.stream().mapToInt(dim -> dim.getValueSpace().size()).reduce(1, (a, b) -> a * b);
+		return matrix.size() == dimensions.stream().mapToInt(dim -> dim.getValueSpace().getValues().size()).reduce(1, (a, b) -> a * b);
 
 	}
 	

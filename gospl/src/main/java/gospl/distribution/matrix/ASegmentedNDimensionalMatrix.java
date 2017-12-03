@@ -118,7 +118,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
-		return getDimensions().stream().filter(d -> d.getValueSpace().contains(aspect))
+		return getDimensions().stream().filter(d -> d.getValueSpace().getValues().contains(aspect))
 				.findFirst().get();
 	}
 
@@ -127,7 +127,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public Set<IValue> getAspects() {
-		return getDimensions().stream().flatMap(d -> d.getValueSpace().stream()).collect(Collectors.toSet());
+		return getDimensions().stream().flatMap(d -> d.getValueSpace().getValues().stream()).collect(Collectors.toSet());
 	}
 
 	/* (non-Javadoc)
@@ -135,7 +135,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public Set<IValue> getAspects(DemographicAttribute<? extends IValue> dimension) {
-		return Collections.unmodifiableSet(dimension.getValueSpace());
+		return Collections.unmodifiableSet(dimension.getValueSpace().getValues());
 	}
 
 	/* (non-Javadoc)
@@ -321,7 +321,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		String s = "";
 		for(AFullNDimensionalMatrix<T> matrix : jointDistributionSet){
 			String matrixHeader = "-- Matrix: "+matrix.getDimensions().size()+" dimensions and "
-					+matrix.getDimensions().stream().map(dim -> dim.getValueSpace()).mapToInt(Collection::size).sum()
+					+matrix.getDimensions().stream().mapToInt(dim -> dim.getValueSpace().getValues().size()).sum()
 					+" aspects (theoretical size:"+this.size()+")--\n"; 
 			if(s.isEmpty())
 				s += matrixHeader+matrix.toCsv(csvSeparator);

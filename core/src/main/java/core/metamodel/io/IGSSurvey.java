@@ -1,6 +1,7 @@
 
 package core.metamodel.io;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +33,7 @@ public interface IGSSurvey {
 	 * @param attributes
 	 * @return
 	 */
-	public Map<Integer, Set<IValue>> getColumnHeaders(Set<DemographicAttribute<? extends IValue>> attributes);
+	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes);
 	
 
 	/**
@@ -40,12 +41,12 @@ public interface IGSSurvey {
 	 * @param attributes
 	 * @return
 	 */
-	public Map<Integer, Set<IValue>> getRowHeaders(Set<DemographicAttribute<? extends IValue>> attributes);
+	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes);
 	
 	/**
 	 * Retrieves column headers from a sample data file
 	 */
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Set<DemographicAttribute<? extends IValue>> attributes);
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Collection<DemographicAttribute<? extends IValue>> attributes);
 	
 	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}

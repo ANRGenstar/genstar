@@ -41,7 +41,6 @@ import com.vividsolutions.jts.geom.Geometry;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
-import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;

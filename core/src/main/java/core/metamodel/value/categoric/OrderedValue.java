@@ -1,13 +1,27 @@
 package core.metamodel.value.categoric;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
+/**
+ * Encapsulate a {@link String} value that is inherently ordered
+ * <p>
+ * Two {@link OrderedValue} can be ordered if, and only if, they pertain to the same {@link IValueSpace}. In fact,
+ * two ordered value cannot be compared outside of a specific {@link OrderedSpace} using {@link OrderedSpace#compare(OrderedValue, OrderedValue)}
+ * method
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class OrderedValue implements IValue {
 
 	private String value;
 	private int order;
-	
+
+	@JsonManagedReference
 	private OrderedSpace sv;
 	
 	protected OrderedValue(OrderedSpace sv, String value, int order){
@@ -41,6 +55,28 @@ public class OrderedValue implements IValue {
 	
 	protected int getOrder() {
 		return order;
+	}
+	
+	// ------------------------------------------------------ //
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: Does not take into account order
+	 */
+	@Override
+	public int hashCode() {
+		return this.getHashCode();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: Does not take into account order
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		return this.isEquals(obj);
 	}
 	
 }

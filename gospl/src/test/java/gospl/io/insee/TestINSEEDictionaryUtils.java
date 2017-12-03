@@ -76,10 +76,10 @@ public class TestINSEEDictionaryUtils {
 		Map<String,DemographicAttribute<? extends IValue>> name2att = attributes.stream().collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		assertNotNull("expecting variable TYPMD", name2att.get("TYPMD"));
-		assertEquals("TYPMD should contain 35 modalities", 35, name2att.get("TYPMD").getValueSpace().size());
+		assertEquals("TYPMD should contain 35 modalities", 35, name2att.get("TYPMD").getValueSpace().getValues().size());
 
 		assertNotNull("expecting variable UR", name2att.get("UR"));
-		assertEquals("UR should contain 2 modalities", 2, name2att.get("UR").getValueSpace().size());
+		assertEquals("UR should contain 2 modalities", 2, name2att.get("UR").getValueSpace().getValues().size());
 
 		System.out.println(name2att.get("TYPMD").getValueSpace());
 		

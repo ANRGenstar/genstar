@@ -87,7 +87,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 							att.getReferentAttribute().getAttributeName(), att2value.get(att.getReferentAttribute()));
 					
 					IValue referentValue = att2value.get(att.getReferentAttribute()); 
-					Set<? extends IValue> mappedValues = att.findMappedAttributeValues(referentValue);
+					Collection<? extends IValue> mappedValues = att.findMappedAttributeValues(referentValue);
 
 					logger.trace("\t\t{} maps to {}", referentValue, mappedValues);
 					if (mappedValues.size() > 1) {
@@ -103,12 +103,12 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 					logger.debug("\tshould pick one of the values {}", att.getValueSpace());
 	
 					// what we want is the distribution of probabilities for each of these possible values of the current attribute...
-					List<IValue> keys = new ArrayList<>(att.getValueSpace());
+					List<IValue> keys = new ArrayList<>(att.getValueSpace().getValues());
 					// TODO knowing the previous ones ! 
 					keys.addAll(att2value.values());
 					
 					// for each of the aspects of this attribute we're working on...
-					List<Double> distribution = new ArrayList<>(att.getValueSpace().size()+1);
+					List<Double> distribution = new ArrayList<>(att.getValueSpace().getValues().size()+1);
 					List<IValue> a = new ArrayList<>();
 					// ... we want to add the values already defined that can condition the attribute of interest
 					for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> m : this.segmentedMatrix
@@ -123,7 +123,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 									);
 					}
 					double total = 0.;
-					for (IValue val : att.getValueSpace()) {
+					for (IValue val : att.getValueSpace().getValues()) {
 						// construct the list of the attributes on which we want conditional probabilities
 						Set<IValue> aa =  new HashSet<>(a);
 						// att2value.values()
@@ -156,7 +156,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 					// well, we defined a value... maybe its defining the value of another thing ?
 					if (att.getReferentAttribute() != att) {
 						// yes, it has a reference attribute !
-						Set<? extends IValue> mappedValues = att.findMappedAttributeValues(theOne);
+						Collection<? extends IValue> mappedValues = att.findMappedAttributeValues(theOne);
 						logger.debug("\twe have a reference attribute {}, which maps to {}", att.getReferentAttribute(), mappedValues);
 						if (mappedValues.size() > 1) {
 							logger.warn("\t\thypothesis of uniformity for {} => {}", theOne, mappedValues);	

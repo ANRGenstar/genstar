@@ -67,7 +67,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			throw new IllegalDistributionCreation("can't create a sampler using only one matrix of GosplMetaDataType#LocalFrequencyTable");
 
 		// Begin the algorithm (and performance utility)
-		int theoreticalSize = matrix.getDimensions().stream().mapToInt(d -> d.getValueSpace().size()).reduce(1, (i1, i2) -> i1 * i2);
+		int theoreticalSize = matrix.getDimensions().stream().mapToInt(d -> d.getValueSpace().getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
 				theoreticalSize, logger);
 		gspu.setObjectif(theoreticalSize);
@@ -103,9 +103,9 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		Collection<Map<DemographicAttribute<? extends IValue>, IValue>> coordinates = new ArrayList<>();
 		for(DemographicAttribute<? extends IValue> attribute : targetedDimensions){
 			if(coordinates.isEmpty())
-				attribute.getValueSpace().forEach(val -> coordinates.add(Map.of(attribute, val)));
+				attribute.getValueSpace().getValues().forEach(val -> coordinates.add(new HashMap<>(Map.of(attribute, val))));
 			else
-				coordinates.stream().forEach(map -> attribute.getValueSpace().forEach(val -> map.put(attribute, val)));
+				coordinates.stream().forEach(map -> attribute.getValueSpace().getValues().forEach(val -> map.put(attribute, val)));
 		}
 
 		gspu.sysoStempPerformance(1, this);
@@ -161,7 +161,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 
 		// Begin the algorithm (and performance utility)
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
-				matrix.getDimensions().stream().mapToInt(d -> d.getValueSpace().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
+				matrix.getDimensions().stream().mapToInt(d -> d.getValueSpace().getValues().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
 		gspu.getStempPerformance(0);
 
 		// Stop the algorithm and exit the unique matrix if there is only one
@@ -205,15 +205,15 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 								&& !aggDim.equals(refDim)).collect(Collectors.toSet())));
 
 		// And disintegrated value -> to aggregated values relationships:
-		Map<IValue, Set<? extends IValue>> aggToRefValues = new HashMap<>();
+		Map<IValue, Collection<? extends IValue>> aggToRefValues = new HashMap<>();
 		for(DemographicAttribute<? extends IValue> asa : aggAtts){
-			Map<IValue, Set<? extends IValue>> tmpMap = new HashMap<>();
+			Map<IValue, Collection<? extends IValue>> tmpMap = new HashMap<>();
 			IValueSpace<? extends IValue> values = asa.getValueSpace();
-			for(IValue val : values)
+			for(IValue val : values.getValues())
 				tmpMap.put(val, segmentedMatrix.getDimension(val).findMappedAttributeValues(val));
 			Set<IValue> matchedValue = tmpMap.values().stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
 			IValueSpace<? extends IValue> refValue = asa.getReferentAttribute().getValueSpace();
-			Set<IValue> unmatchedValue = refValue.stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
+			Set<IValue> unmatchedValue = refValue.getValues().stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
 			tmpMap.put(asa.getEmptyValue(), unmatchedValue);
 			aggToRefValues.putAll(tmpMap);
 		}
@@ -246,7 +246,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			// Corresponding disintegrated control total of aggregated values
 			double oControl = sampleDistribution.entrySet()
 					.parallelStream().filter(indiv -> mat.getDimensions()
-							.stream().filter(ad -> aggAtts.contains(ad)).map(ad -> ad.getValueSpace()).allMatch(aVals -> aVals
+							.stream().filter(ad -> aggAtts.contains(ad)).map(ad -> ad.getValueSpace()).allMatch(aVals -> aVals.getValues()
 									.stream().anyMatch(av -> aggToRefValues.get(av)
 											.stream().anyMatch(dv -> indiv.getKey().contains(dv)))))
 					.mapToDouble(indiv -> indiv.getValue()).sum();

@@ -3,6 +3,7 @@ package gospl.distribution.matrix;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -147,7 +148,7 @@ public class TestFullNDimensionalMatrix {
 			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
 			Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
 			if(mapped){
-				Map<String, Set<String>> mapperAge2toAge = new HashMap<>();
+				Map<String, Collection<String>> mapperAge2toAge = new HashMap<>();
 				mapperAge2toAge.put("moins de 15",  Set.of("0-5", "6-15"));
 				mapperAge2toAge.put("16-25", Set.of("16-25"));
 				mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
@@ -163,7 +164,7 @@ public class TestFullNDimensionalMatrix {
 
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-			for(IValue value : ageCSP.getDimension("Activite").getValueSpace()){
+			for(IValue value : ageCSP.getDimension("Activite").getValueSpace().getValues()){
 				m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "0-5").getValue() + 
 						ageCSP.getVal("Activite", value.getStringValue(), "Age", "6-15").getValue(), 
 						"Activite", value.getStringValue(), "Age2", "moins de 15");
@@ -188,7 +189,7 @@ public class TestFullNDimensionalMatrix {
 
 		AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
 		Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
-			Map<String, Set<String>> mapperAge2toAge = new HashMap<>();
+			Map<String, Collection<String>> mapperAge2toAge = new HashMap<>();
 			mapperAge2toAge.put("16-25", Set.of("16-25"));
 			mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
 			mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
@@ -199,7 +200,7 @@ public class TestFullNDimensionalMatrix {
 
 		AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-		for(IValue value : ageCSP.getDimension("Activite").getValueSpace()){
+		for(IValue value : ageCSP.getDimension("Activite").getValueSpace().getValues()){
 			m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "16-25").getValue(), 
 					"Activite", value.getStringValue(), "Age3", "16-25");
 			m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "26-40").getValue() + 
