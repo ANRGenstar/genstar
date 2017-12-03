@@ -62,6 +62,24 @@
 	    <version>1.4.9</version>
 		</dependency> -->
 		
+		<!-- for serialization of config files in JSON -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>2.9.2</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-annotations</artifactId>
+		    <version>2.9.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.2</version>
+		</dependency>
+				
+	
 		<!--  MINIMAL SPATIAL IMPORT -->
 		<dependency>
     	<groupId>com.vividsolutions</groupId>
