@@ -79,4 +79,9 @@ public class OrderedValue implements IValue {
 		return this.isEquals(obj);
 	}
 	
+	@Override
+	public String toString() {
+		return this.getStringValue();
+	}
+	
 }

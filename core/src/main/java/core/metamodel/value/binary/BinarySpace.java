@@ -101,4 +101,9 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 		return this.isEqual(obj);
 	}
 	
+	@Override
+	public String toString() {
+		return this.toPrettyString();
+	}
+	
 }

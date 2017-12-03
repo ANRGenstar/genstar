@@ -51,7 +51,8 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 
 	@Override
 	public Collection<? extends IValue> getMappedValues(IValue value) {
-		if(!map.values().contains(value) || map.keySet().contains(value))
+		if(!map.values().stream().flatMap(Collection::stream).anyMatch(val -> val.equals(value)) 
+				|| map.keySet().stream().flatMap(Collection::stream).anyMatch(val -> val.equals(value)))
 			throw new NullPointerException("Value "+value+" is not linked to this mapped attribute ("
 					+this.getRelatedAttribute()+")");
 		return map.keySet().contains(value) ? 

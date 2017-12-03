@@ -154,5 +154,10 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 				obj == null || this == null ? false : 
 					this.template.equals(((OrderedSpace)obj).getCategoricTemplate());
 	}
+	
+	@Override
+	public String toString() {
+		return this.toPrettyString();
+	}
 
 }

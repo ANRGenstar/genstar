@@ -174,4 +174,9 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	public boolean equals(Object obj) {
 		return isEqual(obj);
 	}
+	
+	@Override
+	public String toString() {
+		return this.toPrettyString();
+	}
 }
