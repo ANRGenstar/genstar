@@ -1,18 +1,20 @@
 package gospl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -172,10 +174,48 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 
 	@Override
 	public Iterator<E> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		return new IteratorMultipleSets<E>(this.type2agents.values());
 	}
 
+	/**
+	 * Iterator that explores successively the various Sets passed as 
+	 * a parameter
+	 * @author samuel Thiriot
+	 *
+	 * @param <E>
+	 */
+	private class IteratorMultipleSets<E> implements Iterator<E> {
+		private final List<Set<E>> sets;
+		private Iterator<Set<E>> itList;
+		private Iterator<E> itCurrentSet;
+		
+		protected IteratorMultipleSets(Collection<Set<E>> sets) {
+			this.sets = new LinkedList<Set<E>>(sets);
+			this.itList = this.sets.iterator();
+			try {
+				this.itCurrentSet = this.itList.next().iterator();
+			} catch (NullPointerException e) {
+				this.itCurrentSet = null;
+			}
+		}
+
+		@Override
+		public boolean hasNext() {
+			return itCurrentSet != null && ( itCurrentSet.hasNext() || itList.hasNext());
+		}
+
+		@Override
+		public E next() {
+			if (!itCurrentSet.hasNext()) {
+				// we exhausted the current set
+				if (!itList.hasNext())
+					throw new NoSuchElementException();
+				itCurrentSet = itList.next().iterator();
+			}
+			return itCurrentSet.next();
+		}
+	}
+	
 	@Override
 	public boolean remove(Object o) {
 		for (Set<E> s: type2agents.values()) {
@@ -217,14 +257,29 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 
 	@Override
 	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return null;
+		Object[] res = new Object[size];
+		
+		int i=0;
+		for (Set<E> s : type2agents.values()) {
+			for (E e: s) {
+				res[i++] = e;
+			}
+		}
+		
+		return res;
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
-		// TODO Auto-generated method stub
-		return null;
+	public <T> T[] toArray(T[] res) {
+		
+		int i=0;
+		for (Set<E> s : type2agents.values()) {
+			for (E e: s) {
+				res[i++] = (T) e;
+			}
+		}
+		
+		return res;
 	}
 
 	@Override
