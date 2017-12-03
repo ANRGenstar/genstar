@@ -14,6 +14,12 @@ import core.metamodel.value.IValue;
 public abstract class ADemoEntity implements IEntity<DemographicAttribute<? extends IValue>> {
 
 	private Map<DemographicAttribute<? extends IValue>, IValue> attributes;
+
+	/**
+	 * The type of the agent (like "household" or "building"), 
+	 * or null if undefined
+	 */
+	private String type;
 	
 	/**
 	 * Creates a population entity by defining directly the attribute values
@@ -115,5 +121,23 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 		return attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()
 				+":"+e.getValue().getStringValue()).collect(Collectors.joining(",\t"));
 	}
+	
+
+	@Override
+	public final boolean hasEntityType() {
+		return type != null;
+	}
+
+	@Override
+	public final String getEntityType() {
+		return type;
+	}
+
+	@Override
+	public void setEntityType(String type) {
+		this.type = type;
+	}
+	
+	
 	
 }

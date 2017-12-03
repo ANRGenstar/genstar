@@ -67,7 +67,6 @@ public class SpllEntity extends ADemoEntity {
 	public void setNest(AGeoEntity<? extends IValue> nest){
 		this.nest = nest;
 	}
-	
-	
+
 	
 }

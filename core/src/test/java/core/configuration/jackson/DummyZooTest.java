@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 
 import org.hamcrest.Matchers;
@@ -13,10 +14,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.sun.tools.javac.util.List;
 
 import core.configuration.jackson.utilclass.dummy.Cage;
 import core.configuration.jackson.utilclass.dummy.IAnimal;
@@ -34,7 +32,7 @@ public class DummyZooTest {
 		om = new ObjectMapper();
 		
 		Lion lion = new Lion("michel");
-		Collection<IAnimal> animals = List.of(lion, lion);
+		Collection<IAnimal> animals = Arrays.asList(lion, lion);
 		cage.setAnimals(animals);
 		
 		theFile = Files.createTempFile(Paths.get(System.getProperty("user.dir")), "_", ".tmp").toFile();

@@ -6,12 +6,12 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,19 +55,27 @@ public class GenstarJsonUtilTest {
 		// NOMINAL
 		dd.addAttributes(DemographicAttributeFactory.getFactory()
 				.createAttribute("Nominal attribute", GSEnumDataType.Nominal, 
-						List.of("Célibataire", "En couple")));
+						Arrays.asList("Célibataire", "En couple")));
 		
 		// ORDERED
 		dd.addAttributes(DemographicAttributeFactory.getFactory()
 				.createAttribute("Ordered attribute", GSEnumDataType.Order, 
-						List.of("Brevet", "Bac", "Licence", "Master et plus")));
+						Arrays.asList("Brevet", "Bac", "Licence", "Master et plus")));
 		
 		// COOL FIBONACCI LIST
-		List<String> fiboList = Stream.iterate(new int[] {0,1}, 
-				pair -> pair[0] < 20, 
-				pair -> new int[] {pair[1], pair[0] + pair[1]})
-			.map(pair -> String.valueOf(pair[0])).collect(Collectors.toList());
-		
+		List<String> fiboList = new LinkedList<>();
+		int a = 1;
+		int b = 0;
+		int n = 1;
+		while (n++ <= 20) {  // input being from the user
+		    a += b;
+		    b = a - b;
+		    char[] fib = Integer.toString(b).toCharArray();
+		    for (int i = 0; i < fib.length; i++) {
+		    	fiboList.add(Integer.toString(fib[i] - '0'));
+		    }
+		}
+
 		// INTEGER
 		dd.addAttributes(DemographicAttributeFactory.getFactory()
 				.createAttribute("Int attribute", GSEnumDataType.Integer, fiboList));
@@ -75,47 +83,49 @@ public class GenstarJsonUtilTest {
 		// CONTINUE
 		dd.addAttributes(DemographicAttributeFactory.getFactory()
 				.createAttribute("Double attribute", GSEnumDataType.Continue, 
-						List.of("0,1", "0.3", "0,5", "0.7", "0.9")));
+						Arrays.asList("0,1", "0.3", "0,5", "0.7", "0.9")));
 		
 		// RANGE
 		DemographicAttribute<RangeValue> rangeAttribute = DemographicAttributeFactory.getFactory()
 				.createRangeAttribute("Range attribute", 
-						List.of("moins de 14", "15 à 24", "25 à 34", "35 à 54", "55 et plus"),
+						Arrays.asList("moins de 14", "15 à 24", "25 à 34", "35 à 54", "55 et plus"),
 						0, 120);
 		dd.addAttributes(rangeAttribute);
 
 		// AGGREGATED
+		Map<String,Collection<String>> value2values = new HashMap<>();
+		value2values.put("moins de 24 ans", Arrays.asList("moins de 14", "15 à 24"));
+		value2values.put("25 à 54", Arrays.asList("25 à 34", "35 à 54"));
+		value2values.put("55 et plus", Arrays.asList("55 et plus"));
+		
 		MappedDemographicAttribute<RangeValue, RangeValue> rangeAggAttribute = 
 				DemographicAttributeFactory.getFactory()
 					.createRangeAggregatedAttribute("Range aggregated attribute", rangeAttribute, 
-						Map.of(
-								"moins de 24 ans", Set.of("moins de 14", "15 à 24"),
-								"25 à 54", Set.of("25 à 34", "35 à 54"),
-								"55 et plus", Set.of("55 et plus")
-								));
+						value2values);
 		dd.addAttributes(rangeAggAttribute);
 		
 		// MAPPED
+		Map<Collection<String>,Collection<String>> value2value = new HashMap<>();
+		value2value.put(Arrays.asList("Bébé", "Enfant"), Arrays.asList("15 à 24"));
+		value2value.put(Arrays.asList("Adulte"), Arrays.asList("25 à 34", "35 à 54"));
+		value2value.put(Arrays.asList("Vieux"), Arrays.asList("55 et plus"));
+		
 		MappedDemographicAttribute<? extends IValue, RangeValue> nominalToRangeAttribute = 
 				DemographicAttributeFactory.getFactory()
-					.createMappedAttribute("Mapped attribute", GSEnumDataType.Order, rangeAttribute, 
-							List.of(Map.entry(List.of("Bébé", "Enfant"), Set.of("moins de 14")),
-									Map.entry(List.of("Adolescent", "Jeune"), Set.of("15 à 24")),
-									Map.entry(List.of("Adulte"), Set.of("25 à 34", "35 à 54")),
-									Map.entry(List.of("Vieux"), Set.of("55 et plus")))
-							.stream().collect(Collectors.toMap(
-									entry -> entry.getKey(), 
-									entry -> entry.getValue(), 
-									(e1, e2) -> e1,
-									LinkedHashMap::new))
+					.createMappedAttribute("Mapped attribute", GSEnumDataType.Order, 
+							rangeAttribute, 
+							value2value
 						);
 		dd.addAttributes(nominalToRangeAttribute);
 		
 		// RECORD
+		Map<String,String> value2value2 = new HashMap<>();
+		value2value2.put("1", "true");
+		value2value2.put("2", "false");
 		MappedDemographicAttribute<IntegerValue, ? extends IValue> intToBoolAttribute =
 				DemographicAttributeFactory.getFactory()
 					.createIntegerRecordAttribute("Record attribute", dd.getAttribute("Boolean attribute"),
-							Map.of("1", "true", "2", "false"));
+							value2value2);
 		dd.addAttributes(intToBoolAttribute);
 
 		sju = new GenstarJsonUtil();

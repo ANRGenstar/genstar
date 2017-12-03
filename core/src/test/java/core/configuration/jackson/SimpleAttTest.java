@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -41,7 +42,7 @@ public class SimpleAttTest {
 		collectionFile = Files.createTempFile(Paths.get(System.getProperty("user.dir")), "", ".gns").toFile();
 		om = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
 		
-		ranges = List.of("0-14", "15-24", "25-39", "40-64", "64-120");
+		ranges = Arrays.asList("0-14", "15-24", "25-39", "40-64", "64-120");
 		
 		ra = new RangeAtt("-");
 		ranges.forEach(range -> ra.addValue(range));

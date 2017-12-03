@@ -18,6 +18,14 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	
 	private Map<GeographicAttribute<? extends V>, V> attributes;
 	
+
+	/**
+	 * The type of the agent (like "household" or "building"), 
+	 * or null if undefined
+	 */
+	private String type;
+	
+	
 	public AGeoEntity(Map<GeographicAttribute<? extends V>, V> attributes, String id) {
 		this.attributes = attributes;
 		this.gsName = id;
@@ -126,6 +134,21 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	 */
 	public Point getLocation() {
 		return getGeometry().getCentroid();
+	}
+	
+	@Override
+	public final boolean hasEntityType() {
+		return type != null;
+	}
+
+	@Override
+	public final String getEntityType() {
+		return type;
+	}
+
+	@Override
+	public void setEntityType(String type) {
+		this.type = type;
 	}
 	
 }
