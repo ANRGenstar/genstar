@@ -228,7 +228,7 @@ public class ReadINSEEDictionaryUtils {
 				dataType = GSEnumDataType.Range;
 			} else if (isInteger) {
 				dataType = GSEnumDataType.Integer;
-			}
+			} 
 				
 			// TODO add coding as a mapped attribute ???
 			
@@ -330,10 +330,10 @@ public class ReadINSEEDictionaryUtils {
 						
 						GSEnumDataType dataType = GSEnumDataType.Nominal;
 						if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
-							// TODO
+							// TODO define how this should be... defined !
 							if (modalitiesCode2Lib.isEmpty())
 								modalitiesCode2Lib.put(previousCode, previousCode);
-							dataType = null; // unfortunatly we don't know exactly what it is
+							dataType = GSEnumDataType.Nominal; // unfortunatly we don't know exactly what it is
 						} else if (isRange) {
 							dataType = GSEnumDataType.Range;
 						} else if (isInteger) {
@@ -368,6 +368,42 @@ public class ReadINSEEDictionaryUtils {
 					
 				}
 		     }
+			
+			if (previousCode != null) {
+				// we finished the previous attribute, let's create it
+				// TODO
+				
+				final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
+				final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
+				
+				GSEnumDataType dataType = GSEnumDataType.Nominal;
+				if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
+					// TODO define how this should be... defined !
+					if (modalitiesCode2Lib.isEmpty())
+						modalitiesCode2Lib.put(previousCode, previousCode);
+					dataType = GSEnumDataType.Nominal; // unfortunatly we don't know exactly what it is
+				} else if (isRange) {
+					dataType = GSEnumDataType.Range;
+				} else if (isInteger) {
+					dataType = GSEnumDataType.Integer;
+				}
+				
+				logger.info("detected attribute {} - {}, {} with {} modalities", previousCode, previousLib, dataType, modalitiesCode2Lib.size());
+
+				DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute(
+						previousCode, 
+						dataType, 
+						new ArrayList<String>(modalitiesCode2Lib.keySet()) /*,
+						new ArrayList<String>(modalitiesCode2Lib.values()),
+						null,
+						null */
+						);
+				att.setDescription(previousLib);
+				
+				attributes.add(att);
+				
+				modalitiesCode2Lib.clear();
+			}
 
 			
 		} catch (IOException e) {

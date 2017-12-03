@@ -35,7 +35,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	}
 
 	@Override
-	public Collection<GeographicAttribute<? extends V>> getAttributes(){
+	public Collection<GeographicAttribute<? extends V>> getAttributes() {
 		return attributes.keySet();
 	}
 	

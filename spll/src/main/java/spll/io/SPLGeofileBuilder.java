@@ -9,6 +9,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +81,12 @@ import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
 import spll.io.exception.InvalidGeoFormatException;
 
+/**
+ * Constructs shapefiles
+ * 
+ * @author Kevin Chapuis
+ *
+ */
 public class SPLGeofileBuilder {
 
 	// FILE EXTENSION
@@ -97,6 +104,7 @@ public class SPLGeofileBuilder {
 	// SHAPE FILE BUILD ATTRIBUTE 
 	private SpllPopulation population;
 	private Collection<SpllFeature> features;
+	private Charset charset = null;
 	
 	// UNSPECIFIC BUILD
 	private File gisFile;
@@ -299,7 +307,7 @@ public class SPLGeofileBuilder {
 	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> buildGeofile() 
 			throws IOException, IllegalArgumentException, TransformException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(this.gisFile.getName()).equals(SPLGisFileExtension.shp.toString()))
-			return new SPLVectorFile(this.gisFile);
+			return new SPLVectorFile(this.gisFile, this.charset);
 		if(FilenameUtils.getExtension(this.gisFile.getName()).equals(SPLGisFileExtension.asc.toString())
 				|| FilenameUtils.getExtension(this.gisFile.getName()).equals(SPLGisFileExtension.tif.toString()))
 			return new SPLRasterFile(this.gisFile);
@@ -450,12 +458,14 @@ public class SPLGeofileBuilder {
 	/**
 	 * Create a shapefile from a file
 	 * 
+	 * @param shapefile the file to parse
+	 * @param charset the charset to use for parsing the shapefile (null for default)
 	 * @return
 	 * @throws IOException, InvalidFileTypeException 
 	 */
-	public static SPLVectorFile getShapeFile(File shapefile) throws IOException, InvalidGeoFormatException {
+	public static SPLVectorFile getShapeFile(File shapefile, Charset charset) throws IOException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SPLGisFileExtension.shp.toString()))
-			return new SPLVectorFile(shapefile);
+			return new SPLVectorFile(shapefile, charset);
 		String[] pathArray = shapefile.getPath().split(File.separator);
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SPLGisFileExtension.shp));
 	}
@@ -465,13 +475,15 @@ public class SPLGeofileBuilder {
 	 * 
 	 * @param shapefile
 	 * @param attributes
+	 * @param charset charset to use to decode the file (null for default)
 	 * @return
 	 * @throws IOException
 	 * @throws InvalidGeoFormatException
 	 */
-	public static SPLVectorFile getShapeFile(File shapefile, List<String> attributes) throws IOException, InvalidGeoFormatException {
+	public static SPLVectorFile getShapeFile(File shapefile, List<String> attributes, Charset charset) 
+						throws IOException, InvalidGeoFormatException {
 		if(FilenameUtils.getExtension(shapefile.getName()).equals(SPLGisFileExtension.shp.toString()))
-			return new SPLVectorFile(shapefile, attributes);
+			return new SPLVectorFile(shapefile, charset, attributes);
 		String[] pathArray = shapefile.getPath().split(File.separator);
 		throw new InvalidGeoFormatException(pathArray[pathArray.length-1], Arrays.asList(SPLGisFileExtension.shp));
 	}

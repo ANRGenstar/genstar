@@ -1,6 +1,7 @@
 package spll.entity;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -100,19 +101,55 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllFeature createGeoEntity(Feature feature, List<String> attList) {
+		
 		Map<GeographicAttribute<? extends IValue>, IValue> values = new HashMap<>();
+		
+		Set<String> indexedAttList = new HashSet<>(attList);
 		for(Property property : feature.getProperties()){
+			
 			String name = property.getName().getLocalPart();
-			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) || (!attList.isEmpty() && !attList.contains(name))) continue;
+			
+			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) 
+					|| (!indexedAttList.isEmpty() && !indexedAttList.contains(name))) { 
+				// we ignore the geometry attribute
+				// we also ignore the attributes not provided by the user (at least if he provided any) 
+				continue;
+			}
+			
 			GeographicAttribute<? extends IValue> attribute = null;
 			try {
 				attribute = featureAttributes.get(name);
 			} catch (NullPointerException e) {
-				attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
-				featureAttributes.put(name, attribute);
+			} finally {
+				if (attribute == null) {
+					// if the corresponding attribute does not yet exist, we create it on the fly
+					attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
+					System.out.println("discovered attribute: "+attribute.getAttributeName());
+					featureAttributes.put(name, attribute);
+				}
 			}
-			values.put(attribute, attribute.getValueSpace().addValue(property.getValue().toString()));
+			if (attribute == null)
+				throw new NullPointerException("the attribute for "+property.getName()+" is null");
+
+			if (attribute.getValueSpace() == null)
+				throw new NullPointerException("the value space of attribute "+attribute+" is null");
+			
+			Object v = property.getValue().toString();
+			if (v == null)
+				values.put(attribute, attribute.getValueSpace().getEmptyValue());
+			else {
+				if (attribute.getValueSpace().isValidCandidate(v.toString())) {
+					try {
+						values.put(attribute, attribute.getValueSpace().getValue(v.toString()));
+					} catch (NullPointerException e) {
+						values.put(attribute, attribute.getValueSpace().addValue(v.toString()));	
+					}
+				} else {
+					values.put(attribute, attribute.getValueSpace().addValue(v.toString()));
+				}
+			}
 		}
+		
 		return new SpllFeature(values, feature);
 	}
 	

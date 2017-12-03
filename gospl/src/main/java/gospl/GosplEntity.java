@@ -27,5 +27,4 @@ public class GosplEntity extends ADemoEntity {
 		return new GosplEntity(new HashMap<>(this.getAttributeMap()));
 	}
 
-
 }

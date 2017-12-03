@@ -347,6 +347,4 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 		recomputeSize();
 	}
 
-	
-
 }

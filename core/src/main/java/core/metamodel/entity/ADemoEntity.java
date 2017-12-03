@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.vividsolutions.jts.geom.Geometry;
+
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 
