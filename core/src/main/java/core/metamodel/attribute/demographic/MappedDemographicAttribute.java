@@ -1,5 +1,6 @@
 package core.metamodel.attribute.demographic;
 
+import java.util.Arrays;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -55,7 +56,15 @@ public class MappedDemographicAttribute<K extends IValue, V extends IValue> exte
 	
 	@Override
 	public Collection<? extends IValue> findMappedAttributeValues(IValue value){
-		return attributeMapper.getMappedValues(value);
+		try {
+			return attributeMapper.getMappedValues(value);
+		} catch (NullPointerException e) {
+			if(getReferentAttribute().getValueSpace().getValues().contains(value))
+				return Arrays.asList(this.getEmptyValue());
+			if(this.getValueSpace().getValues().contains(value))
+				return Arrays.asList(this.getReferentAttribute().getEmptyValue());
+			throw e;
+		}
 	}
 	
 	// ------------------------------------------------------------------- //

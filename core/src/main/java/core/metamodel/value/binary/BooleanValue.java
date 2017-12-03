@@ -59,5 +59,10 @@ public class BooleanValue implements IValue {
 	public boolean equals(Object obj) {
 		return this.isEquals(obj);
 	}
+	
+	@Override
+	public String toString() {
+		return this.getStringValue();
+	}
 
 }
