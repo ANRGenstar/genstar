@@ -199,7 +199,6 @@ public class GeoEntityFactory {
 	 */
 	public static GosplPopulation createGosplPopulationFromShapefile(SPLVectorFile sfAdmin, Collection<APopulationAttribute> dictionnary, int maxentities) {
 		
-
 		// create an index of the dictionnary on names
 		Map<String,APopulationAttribute> dictionnaryName2attribute = new HashMap<>(dictionnary.size());
 		System.out.print("working on attributes: "+dictionnaryName2attribute);
