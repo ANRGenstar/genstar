@@ -37,37 +37,37 @@ import core.util.data.GSEnumDataType;
 public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 
 	public static final String SELF = "DEMOGRAPHIC ATTRIBUTE";
-	
+
 	private IValueSpace<V> valuesSpace;
-	
+
 	private String name;
 
 	@JsonIgnore
 	private String description = null;
-	
+
 	protected DemographicAttribute(String name) {
 		this.name = name;
 	}
-	
+
 	// ----------------- IAttribute contract methods ----------------- //
-	
+
 	@Override
 	public final String getAttributeName() {
 		return name;
 	}
-	
+
 	@Override
 	public IValueSpace<V> getValueSpace(){
 		return valuesSpace;
 	}
-	
+
 	@Override
 	public void setValueSpace(IValueSpace<V> valueSpace) {
 		this.valuesSpace = valueSpace;
 	}
-	
+
 	// --------------------------------------------------------------- //
-	
+
 	/**
 	 * Retrieve the natural language description of this attribute
 	 * @return
@@ -84,7 +84,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	
+
 	/**
 	 * The {@link IAttribute} this attribute target: should be itself, 
 	 * but could indicate disaggregated linked {@link IAttribute} or record linked one
@@ -95,7 +95,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	public DemographicAttribute<? extends IValue> getReferentAttribute(){
 		return this;
 	}
-	
+
 	/**
 	 * Tests if this attribute is linked to the one passed as argument.
 	 * It returns true if one of these are true:
@@ -118,7 +118,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 			return true;
 		return false;
 	}
-	
+
 	/**
 	 * Return the empty value
 	 * @return
@@ -129,7 +129,12 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	}
 
 	/**
-	 * Find any related value. Could be the value itself or any corresponding mapped values
+	 * Find any related value. Could be the value itself or any corresponding mapped values. When
+	 * no mapping have been define there is 2 options (e.g. A and B are the two mapped attribute): 
+	 * <p><ul>
+	 * <li> the value exist for attribute A (B): then attribute B (A) empty value is return
+	 * <li> the value does not exist in A nor B: a {@link NullPointerException} is raised
+	 * </ul><p>
 	 * 
 	 * @param value
 	 * @return

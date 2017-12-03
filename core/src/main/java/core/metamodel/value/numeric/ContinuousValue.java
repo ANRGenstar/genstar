@@ -65,4 +65,9 @@ public class ContinuousValue implements IValue, Comparable<ContinuousValue> {
 		return this.isEquals(obj);
 	}
 	
+	@Override
+	public String toString() {
+		return this.getStringValue();
+	}
+	
 }

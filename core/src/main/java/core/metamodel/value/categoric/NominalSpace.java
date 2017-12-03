@@ -115,4 +115,9 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 		return this.isEqual(obj) && this.ct.equals(((NominalSpace)obj).getCategoricTemplate());
 	}
 	
+	@Override
+	public String toString() {
+		return this.toPrettyString();
+	}
+	
 }

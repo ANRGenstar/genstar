@@ -47,7 +47,7 @@ public class AggregateMapper<V extends IValue> implements IAttributeMapper<V, V>
 	public Collection<V> getMappedValues(IValue value) {
 		if(map.containsKey(value))
 			return map.get(value);
-		if(map.values().contains(value))
+		if(map.values().stream().flatMap(Collection::stream).anyMatch(val -> val.equals(value)))
 			return map.entrySet().stream().filter(e -> e.getValue().contains(value))
 					.map(e -> e.getKey()).collect(Collectors.toSet());
 		throw new NullPointerException("The value "+value+" is not part of any known link attribute ("

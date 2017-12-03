@@ -119,11 +119,6 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 		return attribute;
 	}
 
-	@Override
-	public String toString(){
-		return this.getAttribute().getAttributeName()+"_"+getType();
-	}
-
 	// ----------------------------------------------------- //
 
 	@JsonProperty("max")
@@ -154,6 +149,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	@Override
 	public boolean equals(Object obj) {
 		return isEqual(obj);
+	}
+	
+	@Override
+	public String toString() {
+		return this.toPrettyString();
 	}
 
 }

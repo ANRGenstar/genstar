@@ -113,7 +113,7 @@ public interface IValueSpace<V extends IValue> {
 	// -------------------------------------------------------- //
 	
 	default String toPrettyString() {
-		return this.getAttribute().getAttributeName()+"["+this.getType().toString()+"]";
+		return "["+this.getType().toString()+"]";
 	}
 	
 	/**

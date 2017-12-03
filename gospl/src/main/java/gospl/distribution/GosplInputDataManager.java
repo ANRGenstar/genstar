@@ -83,7 +83,6 @@ public class GosplInputDataManager {
 			throws IllegalArgumentException, IOException {
 		this.configuration = new GenstarJsonUtil().unmarshalFromGenstarJson(configurationFilePath, 
 				GenstarConfigurationFile.class);
-		this.configuration.setBaseDirectory(configurationFilePath.getParent());
 		this.dataParser = new GSDataParser();
 	}
 	
@@ -112,7 +111,7 @@ public class GosplInputDataManager {
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (!wrapper.getSurveyType().equals(GSSurveyType.Sample))
 				this.inputData.addAll(getDataTables(sf.getSurvey(wrapper, this.configuration.getBaseDirectory() == null ? 
-						null : this.configuration.getBaseDirectory().toFile()), 
+						null : this.configuration.getBaseDirectory()), 
 						this.configuration.getDemoDictionary().getAttributes()
 						));
 	}
@@ -132,7 +131,7 @@ public class GosplInputDataManager {
 		samples = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory().toFile()), 
+				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
 						this.configuration.getDemoDictionary().getAttributes()));
 	}
 
