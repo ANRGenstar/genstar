@@ -1,14 +1,12 @@
-package core.metamodel.pop.io;
+package core.metamodel.io;
 
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.value.IValue;
 
 /**
  * Main interface for access to survey as a table (List of list) 
