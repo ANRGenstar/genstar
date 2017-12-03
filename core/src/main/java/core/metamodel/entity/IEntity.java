@@ -2,6 +2,7 @@ package core.metamodel.entity;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
@@ -14,8 +15,6 @@ import core.metamodel.value.IValue;
  */
 public interface IEntity<A extends IAttribute<? extends IValue>> {
 
-
-	
 	/**
 	 * returns the mapped view of attribute / value pairs
 	 * @return
@@ -80,6 +79,59 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * @param type
 	 */
 	public void setEntityType(String type);
+	
+	/**
+	 * Returns true if this agent has a parent, 
+	 * that is if getParent does not return null;
+	 * @return
+	 */
+	public boolean hasParent();
+	
+	/**
+	 * Returns the "parent" entity 
+	 * @return
+	 */
+	public IEntity<?> getParent();
+	
+	/**
+	 * defines the parent. Raises an exception if you 
+	 * try to define an entity as its own parent. 
+	 * Does not detects loops, which you should still 
+	 * avoid.
+	 * @param e
+	 */
+	public void setParent(IEntity<?> e);
+
+	/**
+	 * returns true if this entity has any children, 
+	 * that is if getCountChildren returns more than 1
+	 * @return
+	 */
+	public boolean hasChildren();
+	
+	/**
+	 * returns the count of children
+	 * @return
+	 */
+	public int getCountChildren();
+	
+	/**
+	 * returns the set of children
+	 * @return
+	 */
+	public Set<IEntity<?>> getChildren();
+	
+	/**
+	 * Adds a child to the list of children
+	 * @param e
+	 */
+	public void addChild(IEntity<?> e);
+	
+	/**
+	 * Adds several children to the list of children
+	 * @param e
+	 */
+	public void addChildren(Collection<IEntity<?>> e);
 	
 
 }

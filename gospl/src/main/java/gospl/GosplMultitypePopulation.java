@@ -1,6 +1,5 @@
 package gospl;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,23 +14,40 @@ import java.util.stream.Collectors;
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
-
+/**
+ * The GoSPL implementation of a multitype population, that is a population able to deal with several 
+ * different types of agents and browse them.
+ * 
+ * @author Samuel Thiriot
+ *
+ * @param <E>
+ * @param <A>
+ */
 public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>>
 		implements IMultitypePopulation<E, A> {
 
+	/**
+	 * Associates to each type the corresponding agents.
+	 * We assume an agent is only stored for one given type.
+	 */
 	protected final Map<String,Set<E>> type2agents = new HashMap<>();
 	
+	/**
+	 * Associates to each type the attributes known for this subpopulation.
+	 */
 	protected final Map<String,Set<A>> type2attributes = new HashMap<>();
 	
 	private int size = 0;
 	
-	public GosplMultitypePopulation() {
-		
+	public GosplMultitypePopulation(String type, GosplPopulation pop) {
+		addAll(type, pop);
 	}
 	
+
 	public GosplMultitypePopulation(String... entityTypes) {
 		for (String type: entityTypes) {
 			type2agents.put(type, new HashSet<>());
@@ -137,8 +153,33 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 		
 		return anyChange;
 	}
-
-
+	
+	/**
+	 * Adds the GosplPopulation and forces all of these agents 
+	 * to be of the given type. Beware this is not copying the agents, 
+	 * so if you later change the original agents, the content of this collection 
+	 * will be affected !
+	 * @param type
+	 * @param pop
+	 * @return true if any change
+	 */
+	@SuppressWarnings("unchecked")
+	public boolean addAll(String type, GosplPopulation pop) {
+		
+		Set<E> subpop = getSetForType(type);
+		
+		for (ADemoEntity e: pop) {
+			e.setEntityType(type);
+		}
+		
+		boolean anyChange = subpop.addAll((Collection<? extends E>) pop);
+		
+		if (anyChange)
+			recomputeSize();
+		
+		return anyChange;
+	}
+	
 	@Override
 	public void clear() {
 		for (Set<E> s: type2agents.values())
