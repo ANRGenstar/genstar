@@ -1,11 +1,11 @@
 package gospl.sampler;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 
-public interface IDistributionSampler extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>> {
+public interface IDistributionSampler extends ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> {
 
 	// ---------------- setup methods ---------------- //
 	

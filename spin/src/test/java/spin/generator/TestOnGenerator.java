@@ -1,14 +1,11 @@
 package spin.generator;
 
-import static org.graphstream.algorithm.Toolkit.*;
-
 import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.UtilGenerator;
 import spin.SpinPopulation;
@@ -27,9 +24,8 @@ public class TestOnGenerator {
 	 */
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population =
-		generator.generate(1000);
-		
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population = generator.generate(100);
+/*		
 		System.out.println("Debut de la generation de reseau regulier");
 		SpinPopulation populationWithNetworkRegular = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		SpinNetwork networkRegular = populationWithNetworkRegular.getNetwork();
@@ -49,11 +45,12 @@ public class TestOnGenerator {
 		SpinPopulation populationWithNetworkSW = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.SmallWorld, population);
 		SpinNetwork networkSW = populationWithNetworkSW.getNetwork();
 		System.out.println("Fin de generation de reseau SmallWorld");
+*/		
+		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
+		SpinNetwork networkTest = populationWithNetwork.getNetwork();
+		networkTest.network.display();
 		
-		System.out.println("Debut de la generation de reseau Spatial");
-		SpinPopulation populationWithNetworkSpatial = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Spatial, population);
-		SpinNetwork networkSpatial = populationWithNetworkSpatial.getNetwork();
-		System.out.println("Fin de generation de reseau Spatial");
-		
+		Graph sampleGraph = networkTest.randomWalkSample(50);
+		sampleGraph.display();
 	}
 }

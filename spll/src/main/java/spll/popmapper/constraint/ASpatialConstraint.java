@@ -2,7 +2,8 @@ package spll.popmapper.constraint;
 
 import java.util.Collection;
 
-import core.metamodel.geo.AGeoEntity;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.value.IValue;
 
 public abstract class ASpatialConstraint implements ISpatialConstraint{
 
@@ -48,7 +49,7 @@ public abstract class ASpatialConstraint implements ISpatialConstraint{
 	}
 	
 	@Override
-	public void relaxConstraint(Collection<AGeoEntity> nests) {
+	public void relaxConstraint(Collection<AGeoEntity<? extends IValue>> nests) {
 		if (currentValue < maxIncrease) {
 			currentValue = Math.min(currentValue + increaseStep, maxIncrease);
 			constraintLimitReach = false;
@@ -60,7 +61,7 @@ public abstract class ASpatialConstraint implements ISpatialConstraint{
 	}
 
 
-	public abstract void relaxConstraintOp(Collection<AGeoEntity> nests);
+	public abstract void relaxConstraintOp(Collection<AGeoEntity<? extends IValue>> nests);
 	
 	public boolean isConstraintLimitReach() {
 		return constraintLimitReach;

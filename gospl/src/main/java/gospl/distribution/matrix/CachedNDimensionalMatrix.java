@@ -6,9 +6,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.io.GSSurveyType;
 import core.util.data.GSDataParser;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
@@ -233,7 +231,7 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	}
 
 	@Override
-	public final Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues() {
+	public final Map<D, Set<? extends A>> getDimensionsAsAttributesAndValues() {
 		return m.getDimensionsAsAttributesAndValues();
 	}
 

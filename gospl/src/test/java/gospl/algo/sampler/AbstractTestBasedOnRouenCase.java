@@ -3,16 +3,17 @@ package gospl.algo.sampler;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Paths;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import core.configuration.GenstarConfigurationFile;
-import core.configuration.GenstarXmlSerializer;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
-import core.metamodel.pop.io.GSSurveyType;
+import core.configuration.GenstarJsonUtil;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplInputDataManager;
@@ -20,7 +21,6 @@ import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.entity.attribute.GosplAttributeFactory;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.io.GosplSurveyFactory;
@@ -28,7 +28,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
 import gospl.sampler.IHierarchicalSampler;
 import gospl.sampler.ISampler;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<APopulationAttribute, APopulationValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -60,29 +60,26 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 	 * @return
 	 */
 	protected GenstarConfigurationFile getConfigurationFile() {
-
-		 // Setup the serializer that save configuration file
-		 GenstarXmlSerializer gxs = null;
-		 try {
-			 gxs = new GenstarXmlSerializer();
-		 } catch (FileNotFoundException e) {
-			 // TODO Auto-generated catch block
-			 e.printStackTrace();
-		 }
 		
 		 // Setup the factory that build attribute
-		 @SuppressWarnings("unused")
-		GosplAttributeFactory attf = new GosplAttributeFactory();
 		
 		 GenstarConfigurationFile gcf = null;
 		 try {
-			 gcf = gxs.deserializeGSConfig(new File("../../template/target/classes/rouen/gospl/data/GSC_Rouen_IS.xml"));
+			 gcf = new GenstarJsonUtil().unmarshalFromGenstarJson(
+					 Paths.get("../../template/target/classes/rouen/gospl/data/GSC_Rouen_IS.xml"),
+					 GenstarConfigurationFile.class);
 		 } catch (FileNotFoundException e) {
 			 // TODO Auto-generated catch block
 			 e.printStackTrace();
-		 }
+		 } catch (IllegalArgumentException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
-						 gcf.getAttributes().size()+" attributs\n"+
+						 gcf.getDemoDictionary().getAttributes().size()+" attributs\n"+
 						 gcf.getSurveyWrappers().size()+" data files");
 						
 		 return gcf;
@@ -141,9 +138,9 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		final long timestampStart = System.currentTimeMillis();
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution = null;
+		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> distribution = null;
 		try {
-			distribution = df.collapseDataTablesIntoDistributions();
+			distribution = df.collapseDataTablesIntoDistribution();
 		} catch (final IllegalDistributionCreation e1) {
 			e1.printStackTrace();
 		} catch (final IllegalControlTotalException e1) {
@@ -152,7 +149,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final ISyntheticReconstructionAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<APopulationAttribute,APopulationValue>> sampler = null;
+		ISampler<ACoordinate<DemographicAttribute<? extends IValue>,IValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferSRSampler(
 					distribution, 

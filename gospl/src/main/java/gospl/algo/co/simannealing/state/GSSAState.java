@@ -7,9 +7,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
 import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AGSSampleBasedCOSolution;
@@ -17,12 +17,12 @@ import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
 
 public class GSSAState extends AGSSampleBasedCOSolution {
 
-	public GSSAState(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			Collection<APopulationEntity> sample){
+	public GSSAState(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
 
-	public GSSAState(Collection<APopulationEntity> population, Collection<APopulationEntity> sample) {
+	public GSSAState(Collection<ADemoEntity> population, Collection<ADemoEntity> sample) {
 		super(population, sample);
 	}
 
@@ -35,16 +35,16 @@ public class GSSAState extends AGSSampleBasedCOSolution {
 
 	@Override
 	public IGSSampleBasedCOSolution getRandomNeighbor(int dimensionalShiftNumber) {
-		List<APopulationValue> popShift = valueList.stream().skip(GenstarRandom.getInstance().nextInt(
+		List<IValue> popShift = valueList.stream().skip(GenstarRandom.getInstance().nextInt(
 				valueList.size() < dimensionalShiftNumber ? valueList.size() : dimensionalShiftNumber))
 				.collect(Collectors.toList());
-		IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> newPop = new GosplPopulation(population);
-		for(APopulationValue value : popShift){
-			Map<APopulationEntity, APopulationEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
+		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> newPop = new GosplPopulation(population);
+		for(IValue value : popShift){
+			Map<ADemoEntity, ADemoEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
 					newPop, value);
-			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
-			APopulationEntity newEntity = newPop.contains(removeAddPair.get(oldEntity)) ?
-					(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+			ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
+			ADemoEntity newEntity = newPop.contains(removeAddPair.get(oldEntity)) ?
+					(ADemoEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 			newPop = super.deepSwitch(newPop, oldEntity, newEntity);
 		}
 		return new GSSAState(newPop, super.sample);
@@ -53,12 +53,12 @@ public class GSSAState extends AGSSampleBasedCOSolution {
 	@Override
 	public Collection<IGSSampleBasedCOSolution> getNeighbors() {
 		Collection<IGSSampleBasedCOSolution> neighbors = new ArrayList<>();
-		for(APopulationValue value : valueList){
-			Map<APopulationEntity, APopulationEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
+		for(IValue value : valueList){
+			Map<ADemoEntity, ADemoEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
 					super.population, value);
-			APopulationEntity oldEntity = removeAddPair.keySet().iterator().next();
-			APopulationEntity newEntity = super.population.contains(removeAddPair.get(oldEntity)) ?
-					(APopulationEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
+			ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
+			ADemoEntity newEntity = super.population.contains(removeAddPair.get(oldEntity)) ?
+					(ADemoEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
 					neighbors.add(new GSSAState(super.deepSwitch(new GosplPopulation(super.population), oldEntity, newEntity),
 							super.sample));
 		}

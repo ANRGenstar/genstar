@@ -1,4 +1,5 @@
 package spll;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,23 +10,23 @@ import java.util.stream.Collectors;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import core.metamodel.IPopulation;
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.value.IValue;
 import spll.util.SpllUtil;
 
-public class SpllPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
+public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 
-	private Collection<SpllPopulationEntity> population;
-	private IGSGeofile<? extends AGeoEntity> geoFile; 
+	private Collection<SpllEntity> population;
+	private IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile; 
 
-	private Set<APopulationAttribute> attributes;
+	private Set<DemographicAttribute<? extends IValue>> attributes;
 	
-	public SpllPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population,
-			IGSGeofile<? extends AGeoEntity> geoFile) {
-		this.population = population.stream().map(entity -> new SpllPopulationEntity(entity))
+	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile) {
+		this.population = population.stream().map(entity -> new SpllEntity(entity))
 				.collect(Collectors.toSet());
 		this.attributes = population.getPopulationAttributes();
 		this.geoFile = geoFile;
@@ -46,7 +47,7 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	 * 
 	 * @return
 	 */
-	public IGSGeofile<? extends AGeoEntity> getGeography() {
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> getGeography() {
 		return geoFile;
 	}
 	
@@ -55,12 +56,12 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	 * 
 	 * @return
 	 */
-	public Collection<SpllPopulationEntity> getSpllPopulation(){
+	public Collection<SpllEntity> getSpllPopulation(){
 		return population;
 	}
 	
 	@Override
-	public Set<APopulationAttribute> getPopulationAttributes() {
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}
 	
@@ -85,8 +86,8 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public Iterator<APopulationEntity> iterator() {
-		return new ArrayList<APopulationEntity>(this).iterator();
+	public Iterator<ADemoEntity> iterator() {
+		return new ArrayList<ADemoEntity>(this).iterator();
 	}
 
 	@Override
@@ -100,8 +101,8 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public boolean add(APopulationEntity e) {
-		return population.add(new SpllPopulationEntity(e));
+	public boolean add(ADemoEntity e) {
+		return population.add(new SpllEntity(e));
 	}
 
 	@Override
@@ -115,8 +116,8 @@ public class SpllPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends APopulationEntity> c) {
-		return population.addAll(c.stream().map(e -> new SpllPopulationEntity(e))
+	public boolean addAll(Collection<? extends ADemoEntity> c) {
+		return population.addAll(c.stream().map(e -> new SpllEntity(e))
 				.collect(Collectors.toList()));
 	}
 

@@ -8,15 +8,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.IValueSpace;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -56,8 +58,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 	private Logger logger = LogManager.getLogger();
 
 	@Override
-	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSampler(
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,
+	public ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> inferSRSampler(
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix,
 			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
@@ -65,7 +67,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			throw new IllegalDistributionCreation("can't create a sampler using only one matrix of GosplMetaDataType#LocalFrequencyTable");
 
 		// Begin the algorithm (and performance utility)
-		int theoreticalSize = matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
+		int theoreticalSize = matrix.getDimensions().stream().mapToInt(d -> d.getValueSpace().getValues().size()).reduce(1, (i1, i2) -> i1 * i2);
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
 				theoreticalSize, logger);
 		gspu.setObjectif(theoreticalSize);
@@ -87,7 +89,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		*/
 
 		// Reject attribute with referent, to only account for referent attribute
-		Set<APopulationAttribute> targetedDimensions = matrix.getDimensions()
+		Set<DemographicAttribute<? extends IValue>> targetedDimensions = matrix.getDimensions()
 				.stream().filter(att -> att.getReferentAttribute().equals(att))
 				.collect(Collectors.toSet());
 
@@ -98,47 +100,37 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
 
 		// Extrapolate the whole set of coordinates
-		Collection<Set<APopulationValue>> coordinates = new ArrayList<>();
-		for(APopulationAttribute attribute : targetedDimensions){
+		Collection<Map<DemographicAttribute<? extends IValue>, IValue>> coordinates = new ArrayList<>();
+		for(DemographicAttribute<? extends IValue> attribute : targetedDimensions){
 			if(coordinates.isEmpty())
-				coordinates.addAll(attribute.getValues()
-						.stream().map(value -> Stream.of(value).collect(Collectors.toSet()))
-						.collect(Collectors.toSet()));
-			else {
-				Set<Set<APopulationValue>> newVals = attribute.getValues().stream()
-						.flatMap(value -> coordinates.stream().map(set -> 
-						Stream.concat(set.stream(), Stream.of(value)).collect(Collectors.toSet())))
-						.collect(Collectors.toSet());
-				coordinates.clear();
-				coordinates.addAll(newVals);
-			}
+				attribute.getValueSpace().getValues().forEach(val -> coordinates.add(new HashMap<>(Map.of(attribute, val))));
+			else
+				coordinates.stream().forEach(map -> attribute.getValueSpace().getValues().forEach(val -> map.put(attribute, val)));
 		}
 
 		gspu.sysoStempPerformance(1, this);
 		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
 
-		for(Set<APopulationValue> coordinate : coordinates){
+		for(Map<DemographicAttribute<? extends IValue>, IValue> coordinate : coordinates){
 			AControl<Double> nulVal = freqMatrix.getNulVal();
-			ACoordinate<APopulationAttribute, APopulationValue> coord = new GosplCoordinate(coordinate);
+			ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
 			AControl<Double> freq = matrix.getVal(coord);
 			if(nulVal.getValue() != freq.getValue())
 				freqMatrix.addValue(coord, freq);
 			else {
 				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
 				gspu.sysoStempMessage("Goes into a referent empty correlate: "
-						+Arrays.toString(coordinate.toArray()));
-				Set<APopulationValue> emptyCorrelate = matrix.getEmptyReferentCorrelate(coord);
-				ACoordinate<APopulationAttribute, APopulationValue> newCoord = 
-						new GosplCoordinate(coord.values().stream()
-								.map(val -> emptyCorrelate.stream()
-											.anyMatch(emptyVal -> emptyVal.getAttribute().equals(val.getAttribute())) ? 
-										val.getAttribute().getEmptyValue() : val)
-								.collect(Collectors.toSet()));
+						+Arrays.toString(coordinate.values().toArray()));
+				ACoordinate<DemographicAttribute<? extends IValue>, IValue	> newCoord = new GosplCoordinate(
+						coord.getDimensions().stream().collect(Collectors.toMap(Function.identity(), 
+						att -> matrix.getEmptyReferentCorrelate(coord).stream()
+									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att)) ?
+								att.getValueSpace().getEmptyValue() : coord.getMap().get(att))));
 				if(newCoord.equals(coord))
 					freqMatrix.addValue(coord, freq);
 				else
 					freqMatrix.addValue(newCoord, matrix.getVal(newCoord.values()
-							.stream().filter(value -> !value.getAttribute().getEmptyValue().equals(value))
+							.stream().filter(value -> !matrix.getDimension(value).getEmptyValue().equals(value))
 							.collect(Collectors.toSet())));
 			}
 		}
@@ -159,8 +151,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 	}
 
 
-	public ISampler<ACoordinate<APopulationAttribute, APopulationValue>> inferSRSamplerWithReferentProcess(
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix,
+	public ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> inferSRSamplerWithReferentProcess(
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix,
 			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
@@ -169,7 +161,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 
 		// Begin the algorithm (and performance utility)
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute independant-hypothesis-joint-distribution from conditional distribution\nTheoretical size = "+
-				matrix.getDimensions().stream().mapToInt(d -> d.getValues().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
+				matrix.getDimensions().stream().mapToInt(d -> d.getValueSpace().getValues().size()).reduce(1, (i1, i2) -> i1 * i2), logger);
 		gspu.getStempPerformance(0);
 
 		// Stop the algorithm and exit the unique matrix if there is only one
@@ -187,11 +179,11 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		ASegmentedNDimensionalMatrix<Double> segmentedMatrix = (ASegmentedNDimensionalMatrix<Double>) matrix;
 
 		// Init sample distribution simple expression
-		Map<Set<APopulationValue>, Double> sampleDistribution = new HashMap<>();
+		Map<Set<IValue>, Double> sampleDistribution = new HashMap<>();
 
 		// Init collection to store processed attributes & matrix
-		Set<APopulationAttribute> allocatedAttributes = new HashSet<>();
-		Set<INDimensionalMatrix<APopulationAttribute, APopulationValue, Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
+		Set<DemographicAttribute<? extends IValue>> allocatedAttributes = new HashSet<>();
+		Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double>> unallocatedMatrices = new HashSet<>(segmentedMatrix.getMatrices());
 
 		/////////////////////////////////////
 		// 2nd STEP: disaggregate attributes & start processing associated matrices
@@ -201,69 +193,69 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		// More elegant and generic
 
 		// First identify referent & aggregated attributes
-		Set<APopulationAttribute> aggAtts = segmentedMatrix.getDimensions()
-				.stream().filter(d -> !d.isRecordAttribute() && !d.getReferentAttribute().equals(d))
+		Set<DemographicAttribute<? extends IValue>> aggAtts = segmentedMatrix.getDimensions()
+				.stream().filter(d -> !d.getReferentAttribute().equals(d))
 				.collect(Collectors.toSet());
-		Set<APopulationAttribute> refAtts = aggAtts.stream().map(att -> att.getReferentAttribute())
+		Set<DemographicAttribute<? extends IValue>> refAtts = aggAtts.stream().map(att -> att.getReferentAttribute())
 				.collect(Collectors.toSet());
 		// Then disintegrated attribute -> to aggregated attributes relationships
-		Map<APopulationAttribute, Set<APopulationAttribute>> aggAttributeMap = refAtts
+		Map<DemographicAttribute<? extends IValue>, Set<DemographicAttribute<? extends IValue>>> aggAttributeMap = refAtts
 				.stream().collect(Collectors.toMap(refDim -> refDim, refDim -> segmentedMatrix.getDimensions()
 						.stream().filter(aggDim -> aggDim.getReferentAttribute().equals(refDim) 
 								&& !aggDim.equals(refDim)).collect(Collectors.toSet())));
 
 		// And disintegrated value -> to aggregated values relationships:
-		Map<APopulationValue, Set<APopulationValue>> aggToRefValues = new HashMap<>();
-		for(APopulationAttribute asa : aggAtts){
-			Map<APopulationValue, Set<APopulationValue>> tmpMap = new HashMap<>();
-			Set<APopulationValue> values = asa.getValues();
-			for(APopulationValue val : values)
-				tmpMap.put(val, val.getAttribute().findMappedAttributeValues(val));
-			Set<APopulationValue> matchedValue = tmpMap.values().stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
-			Set<APopulationValue> refValue = asa.getReferentAttribute().getValues();
-			Set<APopulationValue> unmatchedValue = refValue.stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
+		Map<IValue, Collection<? extends IValue>> aggToRefValues = new HashMap<>();
+		for(DemographicAttribute<? extends IValue> asa : aggAtts){
+			Map<IValue, Collection<? extends IValue>> tmpMap = new HashMap<>();
+			IValueSpace<? extends IValue> values = asa.getValueSpace();
+			for(IValue val : values.getValues())
+				tmpMap.put(val, segmentedMatrix.getDimension(val).findMappedAttributeValues(val));
+			Set<IValue> matchedValue = tmpMap.values().stream().flatMap(set -> set.stream()).collect(Collectors.toSet());
+			IValueSpace<? extends IValue> refValue = asa.getReferentAttribute().getValueSpace();
+			Set<IValue> unmatchedValue = refValue.getValues().stream().filter(val -> !matchedValue.contains(val)).collect(Collectors.toSet());
 			tmpMap.put(asa.getEmptyValue(), unmatchedValue);
 			aggToRefValues.putAll(tmpMap);
 		}
 
 		// Iterate over matrices that have referent attributes and no aggregated attributes
-		List<INDimensionalMatrix<APopulationAttribute, APopulationValue, Double>> refMatrices = segmentedMatrix.getMatrices().stream()
+		List<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double>> refMatrices = segmentedMatrix.getMatrices().stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(dim -> aggAttributeMap.keySet().contains(dim) 
 						&& !aggAttributeMap.values().stream().flatMap(set -> set.stream()).anyMatch(aggDim -> dim.equals(aggDim))))
 				.sorted((mat1, mat2) -> (int) mat2.getDimensions().stream().filter(dim2 -> aggAttributeMap.keySet().contains(dim2)).count()
 						- (int) mat1.getDimensions().stream().filter(dim1 -> aggAttributeMap.keySet().contains(dim1)).count())
 				.collect(Collectors.toList());
-		for(INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> mat : refMatrices){
+		for(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> mat : refMatrices){
 			sampleDistribution = updateGosplProbaMap(sampleDistribution, mat, gspu);
 			unallocatedMatrices.remove(mat);
 			allocatedAttributes.addAll(mat.getDimensions());
 		}
 
 		// Iterate over matrices that have aggregated attributes
-		List<INDimensionalMatrix<APopulationAttribute, APopulationValue, Double>> aggMatrices = unallocatedMatrices.stream()
+		List<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double>> aggMatrices = unallocatedMatrices.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(dim -> aggAttributeMap.values()
 						.stream().flatMap(set -> set.stream()).anyMatch(aggDim -> dim.equals(aggDim))))
 				.sorted((mat1, mat2) -> (int) mat2.getDimensions().stream().filter(dim2 -> aggAttributeMap.keySet().contains(dim2)).count()
 						- (int) mat1.getDimensions().stream().filter(dim1 -> aggAttributeMap.keySet().contains(dim1)).count())
 				.collect(Collectors.toList());
 
-		for(INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> mat : aggMatrices){
-			Map<Set<APopulationValue>, Double> updatedSampleDistribution = new HashMap<>();
-			Map<Set<APopulationValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
+		for(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> mat : aggMatrices){
+			Map<Set<IValue>, Double> updatedSampleDistribution = new HashMap<>();
+			Map<Set<IValue>, Double> untargetedIndiv = new HashMap<>(sampleDistribution);
 
 			// Corresponding disintegrated control total of aggregated values
 			double oControl = sampleDistribution.entrySet()
 					.parallelStream().filter(indiv -> mat.getDimensions()
-							.stream().filter(ad -> aggAtts.contains(ad)).map(ad -> ad.getValues()).allMatch(aVals -> aVals
+							.stream().filter(ad -> aggAtts.contains(ad)).map(ad -> ad.getValueSpace()).allMatch(aVals -> aVals.getValues()
 									.stream().anyMatch(av -> aggToRefValues.get(av)
 											.stream().anyMatch(dv -> indiv.getKey().contains(dv)))))
 					.mapToDouble(indiv -> indiv.getValue()).sum();
 
 			// Iterate over the old sampleDistribution to had new disaggregate values
-			for(ACoordinate<APopulationAttribute, APopulationValue> aggCoord : mat.getMatrix().keySet()){
+			for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> aggCoord : mat.getMatrix().keySet()){
 
 				// Identify all individual in the distribution that have disintegrated information about aggregated data
-				Map<Set<APopulationValue>, Double> targetedIndiv = sampleDistribution.entrySet()
+				Map<Set<IValue>, Double> targetedIndiv = sampleDistribution.entrySet()
 						.stream().filter(indiv -> aggCoord.getDimensions()
 								.stream().filter(d -> allocatedAttributes.contains(d)).map(d -> aggCoord.getMap().get(d))
 								.allMatch(v -> indiv.getKey().contains(v))
@@ -273,7 +265,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 
 				// Retain new values from aggregated coordinate
-				Set<APopulationValue> newVals = aggCoord.getMap().entrySet()
+				Set<IValue> newVals = aggCoord.getMap().entrySet()
 						.stream().filter(e -> !aggAtts.contains(e.getKey()) 
 								&& !allocatedAttributes.contains(e.getKey()))
 						.map(e -> e.getValue()).collect(Collectors.toSet());
@@ -281,7 +273,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 				// Identify targeted probability: sum of proba for tageted disintegrated values and proba for aggregated values
 				double mControl = targetedIndiv.values().stream().reduce(0d, (d1, d2) -> d1 + d2);
 				double aControl = mat.getMatrix().get(aggCoord).getValue();
-				for(Set<APopulationValue> indiv : targetedIndiv.keySet()){
+				for(Set<IValue> indiv : targetedIndiv.keySet()){
 					updatedSampleDistribution.put(Stream.concat(indiv.stream(), newVals.stream()).collect(Collectors.toSet()), 
 							targetedIndiv.get(indiv) / mControl * aControl * oControl);
 
@@ -290,10 +282,10 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			}
 
 			// Iterate over non updated individual to add new attribute empty value (no info in aggregated data)
-			Set<APopulationValue> newVals = mat.getDimensions()
+			Set<IValue> newVals = mat.getDimensions()
 					.stream().filter(d -> !allocatedAttributes.contains(d) && !aggAtts.contains(d))
 					.map(d -> d.getEmptyValue()).collect(Collectors.toSet());
-			for(Set<APopulationValue> indiv : untargetedIndiv.keySet())
+			for(Set<IValue> indiv : untargetedIndiv.keySet())
 				updatedSampleDistribution.put(Stream.concat(indiv.stream(), newVals.stream()).collect(Collectors.toSet()), 
 						sampleDistribution.get(indiv));
 
@@ -308,7 +300,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		// 3rd STEP: proceed the remaining matrices
 		////////////////////////////////////
 
-		for(INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> mat : unallocatedMatrices){
+		for(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> mat : unallocatedMatrices){
 			gspu.sysoStempPerformance(0d, this);
 
 			// If "hookAtt" is empty fill the proxy distribution with conditional probability of this joint distribution
@@ -326,28 +318,28 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 	// ------------------------------ inner utility methods ------------------------------ //
 
 
-	private Map<Set<APopulationValue>, Double> updateGosplProbaMap(Map<Set<APopulationValue>, Double> sampleDistribution, 
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> matrix, GSPerformanceUtil gspu){
-		Map<Set<APopulationValue>, Double> updatedSampleDistribution = new HashMap<>();
+	private Map<Set<IValue>, Double> updateGosplProbaMap(Map<Set<IValue>, Double> sampleDistribution, 
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix, GSPerformanceUtil gspu){
+		Map<Set<IValue>, Double> updatedSampleDistribution = new HashMap<>();
 		if(sampleDistribution.isEmpty()){
 			updatedSampleDistribution.putAll(matrix.getMatrix().entrySet()
 					.parallelStream().collect(Collectors.toMap(e -> new HashSet<>(e.getKey().values()), e -> e.getValue().getValue())));
 		} else {
 			int j = 1;
-			Set<APopulationAttribute> allocatedAttributes = sampleDistribution.keySet()
-					.parallelStream().flatMap(set -> set.stream()).map(a -> a.getAttribute()).collect(Collectors.toSet());
-			Set<APopulationAttribute> hookAtt = matrix.getDimensions()
+			Set<DemographicAttribute<? extends IValue>> allocatedAttributes = sampleDistribution.keySet()
+					.parallelStream().flatMap(set -> set.stream()).map(a -> matrix.getDimension(a)).collect(Collectors.toSet());
+			Set<DemographicAttribute<? extends IValue>> hookAtt = matrix.getDimensions()
 					.stream().filter(att -> allocatedAttributes.contains(att)).collect(Collectors.toSet());
-			for(Set<APopulationValue> indiv : sampleDistribution.keySet()){
-				Set<APopulationValue> hookVal = indiv.stream().filter(val -> hookAtt.contains(val.getAttribute()))
+			for(Set<IValue> indiv : sampleDistribution.keySet()){
+				Set<IValue> hookVal = indiv.stream().filter(val -> hookAtt.contains(val.getValueSpace().getAttribute()))
 						.collect(Collectors.toSet());
-				Map<ACoordinate<APopulationAttribute, APopulationValue>, AControl<Double>> coordsHooked = matrix.getMatrix().entrySet()
+				Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> coordsHooked = matrix.getMatrix().entrySet()
 						.parallelStream().filter(e -> e.getKey().containsAll(hookVal))
 						.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
 				double summedProba = coordsHooked.values()
 						.stream().reduce(matrix.getNulVal(), (v1, v2) -> v1.add(v2)).getValue();
-				for(ACoordinate<APopulationAttribute, APopulationValue> newIndivVal : coordsHooked.keySet()){
-					Set<APopulationValue> newIndiv = Stream.concat(indiv.stream(), newIndivVal.values().stream()).collect(Collectors.toSet());
+				for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> newIndivVal : coordsHooked.keySet()){
+					Set<IValue> newIndiv = Stream.concat(indiv.stream(), newIndivVal.values().stream()).collect(Collectors.toSet());
 					double newProba = sampleDistribution.get(indiv) * coordsHooked.get(newIndivVal).getValue() / summedProba;
 					if(newProba > 0d)
 						updatedSampleDistribution.put(newIndiv, newProba);

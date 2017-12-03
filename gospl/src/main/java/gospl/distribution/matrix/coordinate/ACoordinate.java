@@ -1,6 +1,7 @@
 package gospl.distribution.matrix.coordinate;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -20,10 +21,10 @@ import java.util.Set;
  */
 public abstract class ACoordinate<D, A> {
 
-	private Set<A> coordinate;
+	private Map<D, A> coordinate;
 	private int hashIndex = -1;
 	
-	protected ACoordinate(Set<A> coordinate) {
+	protected ACoordinate(Map<D, A> coordinate) {
 		if(!isCoordinateSetComplient(coordinate))
 			throw new IllegalArgumentException("Coordinate must complies to the moto: One attribute, one value");
 		this.coordinate = coordinate;
@@ -37,18 +38,15 @@ public abstract class ACoordinate<D, A> {
 	 * @param coordinateSet
 	 * @return <code>true</code> if coordinate complies to the "one attribute, one value" moto, <code>false</code> otherwise
 	 */
-	protected abstract boolean isCoordinateSetComplient(Set<A> coordinateSet);
+	protected abstract boolean isCoordinateSetComplient(Map<D, A> coordinateSet);
 	
 	/**
-	 * Gives the set of aspect (of parametric type {@code A}) this {@link ACoordinate} contains. 
-	 * <p>
-	 * WARNING: The set is backed by the coordinate, so changes to the coordinate are reflected in the set, 
-	 * and vice-versa.
+	 * Gives the collection of aspect (of parametric type {@code A}) this {@link ACoordinate} contains. 
 	 * 
 	 * @return {@link Set}
 	 */
-	public Set<A> values() {
-		return coordinate;
+	public Collection<A> values() {
+		return Collections.unmodifiableCollection(coordinate.values());
 	}
 
 	/**
@@ -69,7 +67,7 @@ public abstract class ACoordinate<D, A> {
 	 * @return <code>true</code> if this {@link ACoordinate} contains {@code coordAspect} and <code>false</code> otherwise
 	 */
 	public boolean contains(A coordAspect){
-		return this.coordinate.contains(coordAspect);
+		return coordinate.containsValue(coordAspect);
 	}
 
 	/**
@@ -82,7 +80,7 @@ public abstract class ACoordinate<D, A> {
 	 * @see ACoordinate#contains(Object)
 	 */
 	public boolean containsAll(Collection<A> aspects) {
-		return this.coordinate.containsAll(aspects);
+		return coordinate.values().containsAll(aspects);
 	}
 
 	/**
@@ -97,11 +95,13 @@ public abstract class ACoordinate<D, A> {
 	}
 	
 	/**
-	 * Return the set of dimension this coordinate is bind with
+	 * Return the set of dimension this coordinate is bind with 
 	 * 
 	 * @return {@link Set} of dimension {@code <D>}
 	 */
-	public abstract Set<D> getDimensions();
+	public Set<D> getDimensions(){
+		return Collections.unmodifiableSet(coordinate.keySet());
+	}
 	
 	/**
 	 * Return the underlying coordinate: each dimension is
@@ -109,14 +109,16 @@ public abstract class ACoordinate<D, A> {
 	 * 
 	 * @return {@link Map} that bind dimension to aspect
 	 */
-	public abstract Map<D, A> getMap();
+	public Map<D, A> getMap(){
+		return Collections.unmodifiableMap(coordinate);
+	}
 
 // -------------------------------------------------------------------
 	
 	@Override
 	public String toString(){
 		String s = "";
-		for(A aspect : coordinate)
+		for(A aspect : coordinate.values())
 			if(s.isEmpty())
 				s+= "[["+aspect.toString()+"]";
 			else

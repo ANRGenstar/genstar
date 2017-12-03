@@ -1,6 +1,6 @@
 package gospl.generator;
 
-import core.metamodel.pop.APopulationEntity;
+import core.metamodel.entity.ADemoEntity;
 import gospl.GosplPopulation;
 import gospl.sampler.ISampler;
 import gospl.sampler.co.RandomSampler;
@@ -20,9 +20,9 @@ import gospl.sampler.co.TabuSampler;
  */
 public class SampleBasedGenerator implements ISyntheticGosplPopGenerator {
 
-	private ISampler<APopulationEntity> sampler;
+	private ISampler<ADemoEntity> sampler;
 	
-	public SampleBasedGenerator(ISampler<APopulationEntity> sampler) {
+	public SampleBasedGenerator(ISampler<ADemoEntity> sampler) {
 		this.sampler = sampler;
 	}
 	

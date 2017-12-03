@@ -2,21 +2,17 @@ package gospl.io;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 
-import org.bouncycastle.crypto.RuntimeCryptoException;
-
-import core.metamodel.pop.APopulationAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
 import gospl.algo.sr.bn.NodeCategorical;
-import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.entity.attribute.GosplAttributeFactory;
 
 /**
  * Provides tools to read dictionaries from various file formats 
@@ -34,35 +30,28 @@ public class ReadDictionaryUtils {
 	 * @param bn
 	 * @return
 	 */
-	public static Collection<APopulationAttribute> readBayesianNetworkAsDictionary(CategoricalBayesianNetwork bn) {
+	public static Collection<DemographicAttribute<? extends IValue>> readBayesianNetworkAsDictionary(CategoricalBayesianNetwork bn) {
 		
-		Collection<APopulationAttribute> attributes = new LinkedList<>();
-		
-		GosplAttributeFactory attf = new GosplAttributeFactory();
+		Collection<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>();
 
 		for (NodeCategorical n: bn.getNodes()) {
 			
 			final boolean isRange = detectIsRange(n.getDomain());
 			final boolean isInteger = !isRange && detectIsInteger(n.getDomain());
 			
-			GSEnumDataType dataType = GSEnumDataType.String;
-			GSEnumAttributeType attType = GSEnumAttributeType.unique;
+			GSEnumDataType dataType = GSEnumDataType.Nominal;
 			if (isRange) {
-				dataType = GSEnumDataType.Integer;
-				attType = GSEnumAttributeType.range;
+				dataType = GSEnumDataType.Range;
 			} else if (isInteger) {
 				dataType = GSEnumDataType.Integer;
 			}
 				
-			APopulationAttribute att;
+			DemographicAttribute<? extends IValue> att;
 			try {
-				att = attf.createAttribute(
+				att = DemographicAttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						dataType,
-						new ArrayList<String>(n.getDomain()), 
-						attType, 
-						null, 
-						null
+						new ArrayList<String>(n.getDomain())
 						);
 				attributes.add(att);
 			} catch (GSIllegalRangedData e) {

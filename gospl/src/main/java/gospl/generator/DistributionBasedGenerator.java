@@ -2,11 +2,11 @@ package gospl.generator;
 
 import java.util.stream.Collectors;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.value.IValue;
+import gospl.GosplEntity;
 import gospl.GosplPopulation;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.entity.GosplEntity;
 import gospl.sampler.ISampler;
 
 /**
@@ -19,9 +19,9 @@ import gospl.sampler.ISampler;
  */
 public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	
-	private ISampler<ACoordinate<APopulationAttribute, APopulationValue>> sampler;
+	private ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> sampler;
 	
-	public DistributionBasedGenerator(ISampler< ACoordinate<APopulationAttribute, APopulationValue>> sampler) {
+	public DistributionBasedGenerator(ISampler< ACoordinate<DemographicAttribute<? extends IValue>, IValue>> sampler) {
 		this.sampler = sampler;
 	}
 	

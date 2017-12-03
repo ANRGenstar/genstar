@@ -1,6 +1,6 @@
 package spll.entity;
 
-import java.util.Set;
+import java.util.Map;
 
 import org.geotools.geometry.Envelope2D;
 import org.geotools.geometry.jts.GeometryBuilder;
@@ -8,17 +8,18 @@ import org.geotools.geometry.jts.GeometryBuilder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.value.numeric.ContinuousValue;
 
-public class SpllPixel extends AGeoEntity {
+public class SpllPixel extends AGeoEntity<ContinuousValue> {
 	
 	private Envelope2D pixel;
 	
 	private int gridX;
 	private int gridY;
 	
-	protected SpllPixel(Set<AGeoValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
+	protected SpllPixel(Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
 		super(bandsData, "px ["+pixel.getCenterX()+";"+pixel.getCenterY()+"]");
 		this.gridX = gridX;
 		this.gridY = gridY;

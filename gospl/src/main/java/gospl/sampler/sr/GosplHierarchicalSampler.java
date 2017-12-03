@@ -14,8 +14,8 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -35,7 +35,7 @@ import gospl.sampler.IHierarchicalSampler;
 public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
-	private Collection<List<APopulationAttribute>> explorationOrder = null;
+	private Collection<List<DemographicAttribute<? extends IValue>>> explorationOrder = null;
 	private ISegmentedNDimensionalMatrix<Double> segmentedMatrix;
 	
 	public GosplHierarchicalSampler() {
@@ -50,7 +50,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	@Override
 	public void setDistribution(
-			Collection<List<APopulationAttribute>> explorationOrder,
+			Collection<List<DemographicAttribute<? extends IValue>>> explorationOrder,
 			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
 			) {
 		this.explorationOrder = explorationOrder;
@@ -64,14 +64,14 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	// -------------------- main contract -------------------- //
 
 	@Override
-	public ACoordinate<APopulationAttribute, APopulationValue> draw() {
+	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> draw() {
 
-		Map<APopulationAttribute,APopulationValue> att2value = new HashMap<>();
+		Map<DemographicAttribute<? extends IValue>, IValue> att2value = new HashMap<>();
 		
 		logger.debug("starting hierarchical sampling...");
-		for (List<APopulationAttribute> subgraph : explorationOrder) {
+		for (List<DemographicAttribute<? extends IValue>> subgraph : explorationOrder) {
 			logger.debug("starting hierarchical sampling for the first subgraph {}", subgraph);
-			for (APopulationAttribute att: subgraph) {
+			for (DemographicAttribute<? extends IValue> att: subgraph) {
 			
 				// maybe we processed it already ? (because of control attributes / mapped aspects)
 				if (att2value.containsKey(att))
@@ -86,32 +86,34 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 					logger.debug("\t\t{} was already defined to {}; let's reuse the mapping...", 
 							att.getReferentAttribute().getAttributeName(), att2value.get(att.getReferentAttribute()));
 					
-					APopulationValue referentValue = att2value.get(att.getReferentAttribute()); 
-					Set<APopulationValue> mappedValues = att.findMappedAttributeValues(referentValue);
+					IValue referentValue = att2value.get(att.getReferentAttribute()); 
+					Collection<? extends IValue> mappedValues = att.findMappedAttributeValues(referentValue);
 
 					logger.trace("\t\t{} maps to {}", referentValue, mappedValues);
 					if (mappedValues.size() > 1) {
 						logger.warn("\t\thypothesis of uniformity for {} => {}", referentValue, mappedValues);	
 					}
-					APopulationValue theOneMapped = GenstarRandomUtils.oneOf(mappedValues);
+					IValue theOneMapped = GenstarRandomUtils.oneOf(mappedValues);
 					att2value.put(att, theOneMapped);
 					logger.debug("\t\tpicked {} = {} (through referent attribute)", att, theOneMapped);
 
 					
 				} else {
 					
-					logger.debug("\tshould pick one of the values {}", att.getValues());
+					logger.debug("\tshould pick one of the values {}", att.getValueSpace());
 	
 					// what we want is the distribution of probabilities for each of these possible values of the current attribute...
-					List<APopulationValue> keys = new ArrayList<>(att.getValues());
+					List<IValue> keys = new ArrayList<>(att.getValueSpace().getValues());
 					// TODO knowing the previous ones ! 
 					keys.addAll(att2value.values());
 					
 					// for each of the aspects of this attribute we're working on...
-					List<Double> distribution = new ArrayList<>(att.getValues().size()+1);
-					List<APopulationValue> a = new ArrayList<>();
+					List<Double> distribution = new ArrayList<>(att.getValueSpace().getValues().size()+1);
+					List<IValue> a = new ArrayList<>();
 					// ... we want to add the values already defined that can condition the attribute of interest
-					for (INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> m : this.segmentedMatrix.getMatricesInvolving(att.getReferentAttribute())) {
+					for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> m : this.segmentedMatrix
+							.getMatricesInvolving(this.segmentedMatrix.getDimensions().stream()
+									.filter(dim -> dim.equals(att.getReferentAttribute())).findAny().get())) {
 						a.addAll(
 								m.getDimensions()
 									.stream()
@@ -121,9 +123,9 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 									);
 					}
 					double total = 0.;
-					for (APopulationValue val : att.getValues()) {
+					for (IValue val : att.getValueSpace().getValues()) {
 						// construct the list of the attributes on which we want conditional probabilities
-						List<APopulationValue> aa =  new ArrayList<>(a);
+						Set<IValue> aa =  new HashSet<>(a);
 						// att2value.values()
 						
 						//this.segmentedMatrix.getMatricesInvolving(val).stream().filter(matrix -> att2value.containsKey(key));
@@ -139,7 +141,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 							logger.warn("\t\tpotential value {} will be excluded from the distribution as it has no probability", val);
 						}
 					}
-					APopulationValue theOne = null;
+					IValue theOne = null;
 					if (distribution.isEmpty() || total==0.) {
 						// okay, the mix of variables probably includes some "empty"; let's assume the value is then empty as well...
 						// TODO what to do here ?
@@ -154,15 +156,17 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 					// well, we defined a value... maybe its defining the value of another thing ?
 					if (att.getReferentAttribute() != att) {
 						// yes, it has a reference attribute !
-						Set<APopulationValue> mappedValues = att.findMappedAttributeValues(theOne);
+						Collection<? extends IValue> mappedValues = att.findMappedAttributeValues(theOne);
 						logger.debug("\twe have a reference attribute {}, which maps to {}", att.getReferentAttribute(), mappedValues);
 						if (mappedValues.size() > 1) {
 							logger.warn("\t\thypothesis of uniformity for {} => {}", theOne, mappedValues);	
 						}
 						// let's randomly draw something there 
 						// another random
-						APopulationValue theOneMapped = GenstarRandomUtils.oneOf(mappedValues);
-						att2value.put(att.getReferentAttribute(), theOneMapped);
+						IValue theOneMapped = GenstarRandomUtils.oneOf(mappedValues);
+						// Little trick to get referent attribute without <? extends IValue> wildcard
+						att2value.put(this.segmentedMatrix.getDimensions().stream()
+								.filter(dim -> dim.equals(att.getReferentAttribute())).findAny().get(), theOneMapped);
 						logger.debug("\t\tpicked {} = {} (through referent attribute)", att.getReferentAttribute(), theOneMapped);
 
 					}
@@ -178,7 +182,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 				);
 		*/
 		
-		return new GosplCoordinate(new HashSet<>(att2value.values()));
+		return new GosplCoordinate(att2value);
 		
 	}
 	
@@ -188,7 +192,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<APopulationAttribute, APopulationValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	

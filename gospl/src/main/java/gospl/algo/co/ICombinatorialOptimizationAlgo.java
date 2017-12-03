@@ -1,12 +1,12 @@
 package gospl.algo.co;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import gospl.sampler.ISampler;
 
-public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<APopulationEntity>> {
+public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADemoEntity>> {
 
 	/**
 	 * This method must provide a way to build a Combinatorial Optimization (CO) sampler. CO is known in the literature
@@ -16,8 +16,8 @@ public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<APo
 	 * @param sampler
 	 * @return
 	 */
-	public ISampler<APopulationEntity> setupCOSampler(
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> sample,
+	public ISampler<ADemoEntity> setupCOSampler(
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sample,
 			SamplerType sampler);
 	
 }

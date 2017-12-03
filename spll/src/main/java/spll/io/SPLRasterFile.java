@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -34,14 +35,16 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoAttribute;
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
-import core.metamodel.geo.io.GeoGSFileType;
-import core.metamodel.geo.io.IGSGeofile;
-import spll.entity.SpllPixel;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.ContinuousValue;
+import core.util.data.GSDataParser;
 import spll.entity.GeoEntityFactory;
+import spll.entity.SpllPixel;
 import spll.entity.iterator.GSPixelIterator;
+import spll.io.SPLGeofileBuilder.SPLGisFileExtension;
 import spll.util.SpllUtil;
 
 /**
@@ -50,12 +53,12 @@ import spll.util.SpllUtil;
  * 
  * <p>
  * Available input format can be found at
- * {@link SPLGeofileFactory#getSupportedFileFormat()} 
+ * {@link SPLGeofileBuilder#getSupportedFileFormat()} 
  * 
  * @author kevinchapuis
  *
  */
-public class SPLRasterFile implements IGSGeofile<SpllPixel> {
+public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 
 	private final GridCoverage2D coverage;
 	private final AbstractGridCoverage2DReader store;
@@ -66,10 +69,8 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	private Number noData;
 	
 	private Collection<SpllPixel> cacheGeoEntity = null;
-
-	private Collection<AGeoValue> cacheGeoValues = null;
-	
-	private Collection<AGeoAttribute> cacheGeoAttributes = null;
+	private Collection<ContinuousValue> cacheGeoValues = null;
+	private Collection<GeographicAttribute<? extends ContinuousValue>> cacheGeoAttributes = null;
 
 	/**
 	 * 
@@ -81,7 +82,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	 * @throws TransformException
 	 * @throws IllegalArgumentException 
 	 */
-	public SPLRasterFile(File file) throws TransformException, IllegalArgumentException, IOException {
+	protected SPLRasterFile(File file) throws TransformException, IllegalArgumentException, IOException {
 		ParameterValue<OverviewPolicy> policy = AbstractGridFormat.OVERVIEW_POLICY.createValue();
 		policy.setValue(OverviewPolicy.IGNORE);
 
@@ -95,14 +96,14 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 		// TODO: fill in the factory with all possible attribute for this file
 		this.gef = new GeoEntityFactory(new HashSet<>());
 
-		if(FilenameUtils.getExtension(file.getName()).equals(SPLGeofileFactory.ARC_EXT)){
+		if(FilenameUtils.getExtension(file.getName()).equals(SPLGisFileExtension.asc.toString())){
 			this.store = GridFormatFinder.findFormat(file).getReader(file);
-		} else if(FilenameUtils.getExtension(file.getName()).equals(SPLGeofileFactory.GEOTIFF_EXT)){
+		} else if(FilenameUtils.getExtension(file.getName()).equals(SPLGisFileExtension.tif.toString())){
 			this.store = new GeoTiffReader(file, new Hints(Hints.USE_JAI_IMAGEREAD, true));
 			this.noData = ((GeoTiffReader) store).getMetadata().getNoData();
 		} else
 			throw new IOException("File format "+FilenameUtils.getExtension(file.getName())+" is not supported "
-					+ "\nSupported file type are: "+Arrays.toString(SPLGeofileFactory.getSupportedFileFormat().toArray()));
+					+ "\nSupported file type are: "+Arrays.toString(SPLGisFileExtension.values()));
 		 
 		this.coverage = this.store.read(new GeneralParameterValue[]{policy, gridsize, useJaiRead});	
 	}
@@ -120,7 +121,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	}
 	
 	@Override
-	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity> file) {
+	public boolean isCoordinateCompliant(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> file) {
 		CoordinateReferenceSystem thisCRS = null, fileCRS = null;
 		thisCRS = SpllUtil.getCRSfromWKT(this.getWKTCoordinateReferentSystem());
 		fileCRS = SpllUtil.getCRSfromWKT(file.getWKTCoordinateReferentSystem());
@@ -140,6 +141,37 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	@Override
 	public String getWKTCoordinateReferentSystem() {
 		return coverage.getCoordinateReferenceSystem().toWKT();
+	}
+	
+	@Override
+	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(
+			Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer,
+			GeographicAttribute<? extends IValue> attribute) 
+					throws IllegalArgumentException, IOException {
+		if(!attribute.getValueSpace().getType().isNumericValue())
+			throw new IllegalArgumentException("Raster file cannot be template for non numeric data tranfer\n"
+					+ "Trying to force attribute "+attribute.getAttributeName()+" of type "+attribute.getValueSpace().getType()
+					+ " to fit a numerical type");
+		
+		float[][] bands = new float[this.getRowNumber()][this.getColumnNumber()]; 
+		
+		Iterator<SpllPixel> it = this.getGeoEntityIterator();
+		GSDataParser gsdp = new GSDataParser();
+		while(it.hasNext()) {
+			SpllPixel pix = it.next();
+			IValue value = transfer.get(pix);
+			bands[pix.getGridX()][pix.getGridY()] = gsdp.getDouble(value.getStringValue()).floatValue(); 
+		}
+		
+		IGSGeofile<SpllPixel, ContinuousValue> res = null;
+		
+		try {
+			res = new SPLGeofileBuilder().setRasterBands(bands).setReferenceEnvelope(this.getEnvelope()).buildRasterfile();
+		} catch (TransformException e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		return res;
 	}
 	
 	
@@ -164,7 +196,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	}
 	
 	@Override
-	public Collection<AGeoValue> getGeoValues() {
+	public Collection<ContinuousValue> getGeoValues() {
 		if (cacheGeoValues == null) {
 			cacheGeoValues = new HashSet<>();
 			getGeoEntityIterator().forEachRemaining(pix -> cacheGeoValues.addAll(pix.getValues()));
@@ -173,8 +205,8 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	}
 	
 	@Override
-	public Collection<AGeoAttribute> getGeoAttributes(){
-		if (cacheGeoAttributes ==null) {
+	public Collection<GeographicAttribute<? extends ContinuousValue>> getGeoAttributes(){
+		if (cacheGeoAttributes == null) {
 			cacheGeoAttributes = getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
 				.collect(Collectors.toSet());
 		}
@@ -228,10 +260,6 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 		return noData.doubleValue();
 	}
 	
-	public boolean isNoDataValue(AGeoValue var) {
-		return var.getNumericalValue().equals(noData);
-	}
-	
 	public String[] getBandId(){
 		return store.getGridCoverageNames();
 	}
@@ -273,12 +301,19 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 	 * @throws TransformException
 	 */
 	public float[][] getMatrix(int i) throws TransformException {
+		if(coverage.getNumSampleDimensions() < i)
+			throw new IllegalArgumentException("This raster data file does not have more than "
+					+ coverage.getNumSampleDimensions() + " data bands while ask for band n° "+i);
 		String bandName = GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+i;
 		float[][] matrix = new float[getColumnNumber()][getRowNumber()];
-		for (int row = 0; row < getRowNumber(); row++)
-			for (int col = 0; col < getColumnNumber(); col++)
-				matrix[col][row] = this.getPixel(col, row).getValueForAttribute(bandName)
-						.getNumericalValue().floatValue();
+		Iterator<SpllPixel> pixIt = this.getGeoEntityIterator(); 
+		while(pixIt.hasNext()) {
+			SpllPixel pix = pixIt.next();
+			matrix[pix.getGridX()][pix.getGridY()] = pix.getAttributes().stream()
+					.filter(attribute -> attribute.getAttributeName().equals(bandName))
+					.map(attribute -> pix.getNumericValueForAttribute(attribute))
+					.findFirst().get().floatValue();
+		}
 		return matrix;
 	}
 
@@ -336,5 +371,5 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel> {
 		}
 		return s;
 	}
-
+	
 }

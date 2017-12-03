@@ -3,6 +3,7 @@ package gospl.distribution.matrix;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,16 +15,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.configuration.GenstarConfigurationFile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.RangeValue;
+import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.control.AControl;
-import gospl.entity.attribute.GSEnumAttributeType;
-import gospl.entity.attribute.GosplAttributeFactory;
 
 public class TestFullNDimensionalMatrix {
 
@@ -45,16 +46,15 @@ public class TestFullNDimensionalMatrix {
 	 * generates a global frequency table 
 	 * @return
 	 */
-	public static AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeGender() {
+	public AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeGender() {
 
 		try {
-			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
-			Set<APopulationAttribute> attributes = new HashSet<>();
-			attributes.add(gaf.createAttribute("Genre", GSEnumDataType.String, 
-					Arrays.asList("Homme", "Femme"), GSEnumAttributeType.unique));
-			attributes.add(gaf.createAttribute("Age", GSEnumDataType.Integer, 
-					Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus"), GSEnumAttributeType.range));
+			Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
+			attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
+					"Genre", GSEnumDataType.Nominal, Arrays.asList("Homme", "Femme")));
+			attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age", GSEnumDataType.Range, 
+					Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus")));
 
 
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
@@ -83,13 +83,12 @@ public class TestFullNDimensionalMatrix {
 	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAgeCSP() {
 
 		try {
-			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
-			Set<APopulationAttribute> attributes = new HashSet<>();
-			attributes.add(gaf.createAttribute("Age", GSEnumDataType.Integer, 
-					Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus"), GSEnumAttributeType.range));
-			attributes.add(gaf.createAttribute("Activite", GSEnumDataType.String, 
-					Arrays.asList("Sans emploi", "Précaire", "Employé"), GSEnumAttributeType.unique));
+			Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
+			attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age", GSEnumDataType.Range, 
+					Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus")));
+			attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
+					"Activite", GSEnumDataType.Nominal, Arrays.asList("Sans emploi", "Précaire", "Employé")));
 
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory()
 					.createEmptyDistribution(attributes);
@@ -141,41 +140,41 @@ public class TestFullNDimensionalMatrix {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge2CSP(boolean mapped) {
 
 		try {
-			final GosplAttributeFactory gaf = new GosplAttributeFactory();
 
 			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
-			Set<APopulationAttribute> attributes = new HashSet<>();
+			Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
 			if(mapped){
-				Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("moins de 15"),  Arrays.asList("0-5", "6-15"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("16-25"), Arrays.asList("16-25"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
-				attributes.add(gaf.createAttribute("Age2", GSEnumDataType.Integer, 
-						Arrays.asList("moins de 15", "16-25", "26-55", "55 et plus"), GSEnumAttributeType.range, 
-						ageCSP.getDimension("Age"), mapperAge2toAge));
+				Map<String, Collection<String>> mapperAge2toAge = new HashMap<>();
+				mapperAge2toAge.put("moins de 15",  Set.of("0-5", "6-15"));
+				mapperAge2toAge.put("16-25", Set.of("16-25"));
+				mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
+				mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
+				attributes.add(DemographicAttributeFactory.getFactory().createRangeAggregatedAttribute("Age2", 
+						new GSDataParser().getRangeTemplate(mapperAge2toAge.keySet().stream().collect(Collectors.toList())), 
+						(DemographicAttribute<RangeValue>) ageCSP.getDimension("Age"), mapperAge2toAge));
 			} else {
-				attributes.add(gaf.createAttribute("Age2", GSEnumDataType.Integer, 
-						Arrays.asList("moins de 15", "16-25", "26-55", "55 et plus"), GSEnumAttributeType.range));
+				attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age2", GSEnumDataType.Range, 
+						Arrays.asList("moins de 15", "16-25", "26-55", "55 et plus")));
 			}
 			attributes.add(ageCSP.getDimension("Activite"));
 
 			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-			for(APopulationValue value : ageCSP.getDimension("Activite").getValues()){
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "0-5").getValue() + 
-						ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "6-15").getValue(), 
-						"Activite", value.getInputStringValue(), "Age2", "moins de 15");
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "16-25").getValue(), 
-						"Activite", value.getInputStringValue(), "Age2", "16-25");
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "26-40").getValue() + 
-						ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "40-55").getValue(), 
-						"Activite", value.getInputStringValue(), "Age2", "26-55");
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "55 et plus").getValue(), 
-						"Activite", value.getInputStringValue(), "Age2", "55 et plus");
+			for(IValue value : ageCSP.getDimension("Activite").getValueSpace().getValues()){
+				m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "0-5").getValue() + 
+						ageCSP.getVal("Activite", value.getStringValue(), "Age", "6-15").getValue(), 
+						"Activite", value.getStringValue(), "Age2", "moins de 15");
+				m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "16-25").getValue(), 
+						"Activite", value.getStringValue(), "Age2", "16-25");
+				m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "26-40").getValue() + 
+						ageCSP.getVal("Activite", value.getStringValue(), "Age", "40-55").getValue(), 
+						"Activite", value.getStringValue(), "Age2", "26-55");
+				m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "55 et plus").getValue(), 
+						"Activite", value.getStringValue(), "Age2", "55 et plus");
 			}
 
 			return m;
@@ -185,41 +184,35 @@ public class TestFullNDimensionalMatrix {
 		}
 	}
 	
-	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge3CSP() {
+	@SuppressWarnings("unchecked")
+	protected AFullNDimensionalMatrix<Double> generateGlobalFrequencyAge3CSP() throws IllegalArgumentException, GSIllegalRangedData {
 
-		try {
-			final GosplAttributeFactory gaf = new GosplAttributeFactory();
+		AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
+		Set<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
+			Map<String, Collection<String>> mapperAge2toAge = new HashMap<>();
+			mapperAge2toAge.put("16-25", Set.of("16-25"));
+			mapperAge2toAge.put("26-55", Set.of("26-40","40-55"));
+			mapperAge2toAge.put("55 et plus", Set.of("55 et plus"));
+			attributes.add(DemographicAttributeFactory.getFactory().createRangeAggregatedAttribute("Age3", 
+					new GSDataParser().getRangeTemplate(mapperAge2toAge.keySet().stream().collect(Collectors.toList())), 
+					(DemographicAttribute<RangeValue>) ageCSP.getDimension("Age"), mapperAge2toAge));
+		attributes.add(ageCSP.getDimension("Activite"));
 
-			AFullNDimensionalMatrix<Double> ageCSP = this.generateGlobalFrequencyAgeCSP();
-			Set<APopulationAttribute> attributes = new HashSet<>();
-				Map<Set<String>, Set<String>> mapperAge2toAge = new HashMap<>();
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("16-25"), Arrays.asList("16-25"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
-				GenstarConfigurationFile.addMapper(mapperAge2toAge, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
-				attributes.add(gaf.createAttribute("Age3", GSEnumDataType.Integer, 
-						Arrays.asList("16-25", "26-55", "55 et plus"), GSEnumAttributeType.range, 
-						ageCSP.getDimension("Age"), mapperAge2toAge));
-			attributes.add(ageCSP.getDimension("Activite"));
+		AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
 
-			AFullNDimensionalMatrix<Double> m = GosplNDimensionalMatrixFactory.getFactory().createEmptyDistribution(attributes);
-
-			for(APopulationValue value : ageCSP.getDimension("Activite").getValues()){
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "16-25").getValue(), 
-						"Activite", value.getInputStringValue(), "Age3", "16-25");
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "26-40").getValue() + 
-						ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "40-55").getValue(), 
-						"Activite", value.getInputStringValue(), "Age3", "26-55");
-				m.setValue(ageCSP.getVal("Activite", value.getInputStringValue(), "Age", "55 et plus").getValue(), 
-						"Activite", value.getInputStringValue(), "Age3", "55 et plus");
-			}
-
-			m.normalize();
-			
-			return m;
-
-		} catch (GSIllegalRangedData e) {
-			throw new RuntimeException("the developer screwed up when writing unit tests. Just kill him, get rid of the body, and hire someone better.", e);
+		for(IValue value : ageCSP.getDimension("Activite").getValueSpace().getValues()){
+			m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "16-25").getValue(), 
+					"Activite", value.getStringValue(), "Age3", "16-25");
+			m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "26-40").getValue() + 
+					ageCSP.getVal("Activite", value.getStringValue(), "Age", "40-55").getValue(), 
+					"Activite", value.getStringValue(), "Age3", "26-55");
+			m.setValue(ageCSP.getVal("Activite", value.getStringValue(), "Age", "55 et plus").getValue(), 
+					"Activite", value.getStringValue(), "Age3", "55 et plus");
 		}
+
+		m.normalize();
+		
+		return m;
 	}
 
 	/**
@@ -264,7 +257,8 @@ public class TestFullNDimensionalMatrix {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private ASegmentedNDimensionalMatrix<Double> generateSegmentedWithPartialMappingAgePyramideAndCSP() {
+	private ASegmentedNDimensionalMatrix<Double> generateSegmentedWithPartialMappingAgePyramideAndCSP() 
+			throws IllegalArgumentException, GSIllegalRangedData {
 		try {
 
 			return GosplNDimensionalMatrixFactory.getFactory().createDistributionFromDistributions(
@@ -283,9 +277,9 @@ public class TestFullNDimensionalMatrix {
 	@Test
 	public void testGetValOneAtoms() {
 		AFullNDimensionalMatrix<Double> agePyramid = generateGlobalFrequencyAgeGender();
-		assertEquals("wrong storage", new Double(0.05*probaHomme), agePyramid.getVal("Genre", "Homme", "Age", "0-5").getValue());
-		assertEquals("wrong storage", new Double(0.2*probaFemme), agePyramid.getVal("Genre", "Femme", "Age", "6-15").getValue());
-		assertEquals("wrong storage", new Double(0.05*probaHomme), agePyramid.getVal("Genre", "Homme", "Age", "55 et plus").getValue());
+		assertEquals("wrong storage", (0.05*probaHomme), agePyramid.getVal("Genre", "Homme", "Age", "0-5").getValue().doubleValue(), 0);
+		assertEquals("wrong storage", (0.2*probaFemme), agePyramid.getVal("Genre", "Femme", "Age", "6-15").getValue().doubleValue(), 0);
+		assertEquals("wrong storage", (0.05*probaHomme), agePyramid.getVal("Genre", "Homme", "Age", "55 et plus").getValue().doubleValue(), 0);
 
 	}
 
@@ -294,14 +288,14 @@ public class TestFullNDimensionalMatrix {
 
 		AFullNDimensionalMatrix<Double> agePyramid = generateGlobalFrequencyAgeGender();
 
-		assertEquals("wrong computation of the column", new Double(1.0), 
+		assertEquals("wrong computation of the column", 1.0, 
 				agePyramid.getVal().getValue(), delta);
-		assertEquals("wrong computation of the column", new Double(probaHomme), 
+		assertEquals("wrong computation of the column", probaHomme, 
 				agePyramid.getVal("Genre","Homme").getValue(), delta);
-		assertEquals("wrong computation of the column", new Double(probaFemme), 
+		assertEquals("wrong computation of the column", probaFemme, 
 				agePyramid.getVal("Genre","Femme").getValue(), delta);
 
-		assertEquals("wrong computation of the column", new Double(0.05*probaHomme+0.05*probaFemme), 
+		assertEquals("wrong computation of the column", (0.05*probaHomme+0.05*probaFemme), 
 				agePyramid.getVal("Age","0-5").getValue(), delta);
 
 	}
@@ -311,7 +305,7 @@ public class TestFullNDimensionalMatrix {
 
 		AFullNDimensionalMatrix<Double> ageCSP = generateGlobalFrequencyAgeCSP();
 
-		assertEquals("wrong computation of the total", new Double(1.0), ageCSP.getVal().getValue(), delta);
+		assertEquals("wrong computation of the total", 1.0, ageCSP.getVal().getValue(), delta);
 
 	}
 
@@ -320,7 +314,7 @@ public class TestFullNDimensionalMatrix {
 
 		AFullNDimensionalMatrix<Double> agePyramid = generateGlobalFrequencyAgeGender();
 
-		assertEquals("wrong computation of the probas", new Double(0.05*probaHomme+0.20*probaHomme), 
+		assertEquals("wrong computation of the probas", (0.05*probaHomme+0.20*probaHomme), 
 				agePyramid.getVal("Genre","Homme","Age","0-5", "Age", "6-15").getValue(), delta);
 
 		assertEquals("wrong computation of the probas", agePyramid.getVal("Genre","Homme","Genre","Femme","Age","0-5", "Age", "6-15").getValue(), 
@@ -381,7 +375,7 @@ public class TestFullNDimensionalMatrix {
 	}
 	
 	@Test
-	public void testGetValSegementedWithPartialMapping(){
+	public void testGetValSegementedWithPartialMapping() throws IllegalArgumentException, GSIllegalRangedData{
 		ASegmentedNDimensionalMatrix<Double> seg = generateSegmentedNoMappingAgePyramidAndCSP();
 		ASegmentedNDimensionalMatrix<Double> segPartial = generateSegmentedWithPartialMappingAgePyramideAndCSP();
 		

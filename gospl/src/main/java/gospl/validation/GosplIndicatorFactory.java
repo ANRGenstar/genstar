@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -60,8 +60,8 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public int getTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public int getTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		double chiFiveCritical = new ChiSquaredDistribution(1)
 				.inverseCumulativeProbability(criticalPValue);
 		switch (inputMatrix.getMetaDataType()) {
@@ -92,8 +92,8 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public int getTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population, double delta){
+	public int getTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population, double delta){
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable: 
 			return getIntegerTACE(inputMatrix, GosplNDimensionalMatrixFactory
@@ -120,7 +120,7 @@ public class GosplIndicatorFactory {
 	 * @param delta
 	 * @return
 	 */
-	public int getIntegerTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+	public int getIntegerTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix, double delta){
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
@@ -139,7 +139,7 @@ public class GosplIndicatorFactory {
 	 * @param delta
 	 * @return
 	 */
-	public int getDoubleTACE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+	public int getDoubleTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Double> populationMatrix, double delta){
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
@@ -164,8 +164,8 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public double getTAE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public double getTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable: 
 			return getIntegerTAE(inputMatrix, GosplNDimensionalMatrixFactory
@@ -191,7 +191,7 @@ public class GosplIndicatorFactory {
 	 * @param populationMatrix
 	 * @return
 	 */
-	public double getIntegerTAE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+	public double getIntegerTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix){
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
@@ -208,7 +208,7 @@ public class GosplIndicatorFactory {
 	 * @param populationMatrix
 	 * @return
 	 */
-	public double getDoubleTAE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+	public double getDoubleTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Double> populationMatrix){
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToDouble(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
@@ -234,8 +234,8 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public double getAAPD(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public double getAAPD(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		return this.getTAE(inputMatrix, population) / inputMatrix.size();
 	}
 
@@ -259,8 +259,8 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public double getSRMSE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public double getSRMSE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable:
 			return getIntegerSRMSE(inputMatrix, GosplNDimensionalMatrixFactory
@@ -286,11 +286,11 @@ public class GosplIndicatorFactory {
 	 * @param populationMatrix
 	 * @return
 	 */
-	public double getIntegerSRMSE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+	public double getIntegerSRMSE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix){
 		int nbCells = inputMatrix.size();
 		double expectedValue, actualValue, rmse = 0d;
-		for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
+		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
 			actualValue = populationMatrix.getVal(coord.values(), true).getValue();
 			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
@@ -309,11 +309,11 @@ public class GosplIndicatorFactory {
 	 * @param popSize
 	 * @return
 	 */
-	public double getDoubleSRMSE(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
+	public double getDoubleSRMSE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix, int popSize){
 		int nbCells = inputMatrix.size();
 		double expectedValue, actualValue, s = 0d, rmse = 0d;
-		for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
+		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * popSize;
 			actualValue = populationMatrix.getVal(coord.values(), true).getValue();
 			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
@@ -340,8 +340,8 @@ public class GosplIndicatorFactory {
 	 * Optimisation Approaches to the Creation of Small-area Microdata" Working paper online
 	 * @return RSSZstaar indicator as a double
 	 */
-	public double getRSSZstar(INDimensionalMatrix<APopulationAttribute, APopulationValue, ? extends Number> inputMatrix,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+	public double getRSSZstar(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		double expectedValue = 0d;
 		double actualValue = 0d;
 		double ssz = 0d;
@@ -351,14 +351,14 @@ public class GosplIndicatorFactory {
 				.getFactory().createContingency(population);
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable:
-			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
+			for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
 				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;
 		case GlobalFrequencyTable:
-			for(ACoordinate<APopulationAttribute, APopulationValue> coord : inputMatrix.getMatrix().keySet()){			 
+			for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
 				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
@@ -388,8 +388,8 @@ public class GosplIndicatorFactory {
 	 * @throws IOException 
 	 */
 	public Map<GosplIndicator, Number> getReport(Collection<GosplIndicator> indicators,
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population) throws IOException {		
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> distribution,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) throws IOException {		
 		return indicators.stream().collect(Collectors.toMap(Function.identity(), 
 				indicator -> this.getStats(indicator, distribution, population)));
 	}
@@ -422,8 +422,8 @@ public class GosplIndicatorFactory {
 	// -------------------- Private inner methods -------------------- //
 	
 	private Number getStats(GosplIndicator indicator,
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, Double> distribution,
-			IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> population){
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> distribution,
+			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		switch (indicator) {
 		case TAE:
 			return this.getTAE(distribution, population);

@@ -4,9 +4,9 @@ import java.util.Collection;
 import java.util.Set;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 
 public interface IGSSampleBasedCOSolution {
@@ -19,6 +19,6 @@ public interface IGSSampleBasedCOSolution {
 
 	public Double getFitness(Set<AFullNDimensionalMatrix<Integer>> objectives);
 	
-	public IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> getSolution();
+	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> getSolution();
 	
 }

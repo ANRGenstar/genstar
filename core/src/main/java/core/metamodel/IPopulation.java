@@ -3,6 +3,10 @@ package core.metamodel;
 import java.util.Collection;
 import java.util.Set;
 
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.IEntity;
+import core.metamodel.value.IValue;
+
 /**
  * A population is a collection of entity characterize by a set of attribute.
  * Each attribute is made of one or more value, and a particular entity should have
@@ -16,9 +20,8 @@ import java.util.Set;
  * @author gospl-team
  *
  */
-public interface IPopulation<E extends IEntity<A, V>, A extends IAttribute<V>, V extends IValue> 
-								extends Collection<E> {
+public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> extends Collection<E> {
 
-	public Set<A> getPopulationAttributes();
+	Set<A> getPopulationAttributes();
 	
 }

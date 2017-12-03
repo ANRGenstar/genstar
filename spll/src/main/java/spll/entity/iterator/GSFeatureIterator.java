@@ -2,7 +2,6 @@ package spll.entity.iterator;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import org.geotools.data.DataStore;
@@ -21,9 +20,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoAttribute;
-import spll.entity.SpllFeature;
 import spll.entity.GeoEntityFactory;
+import spll.entity.SpllFeature;
 
 public class GSFeatureIterator implements Iterator<SpllFeature> {
 
@@ -43,7 +41,7 @@ public class GSFeatureIterator implements Iterator<SpllFeature> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.factory = new GeoEntityFactory(new HashSet<AGeoAttribute>());
+		this.factory = new GeoEntityFactory();
 	}
 	
 	public GSFeatureIterator(DataStore dataStore) {

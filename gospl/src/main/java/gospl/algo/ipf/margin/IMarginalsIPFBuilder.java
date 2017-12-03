@@ -2,8 +2,8 @@ package gospl.algo.ipf.margin;
 
 import java.util.Collection;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
@@ -18,7 +18,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 public interface IMarginalsIPFBuilder<T extends Number> {
 
 	public Collection<AMargin<T>> buildCompliantMarginals(
-			INDimensionalMatrix<APopulationAttribute, APopulationValue, T> matrix,
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> matrix,
 			AFullNDimensionalMatrix<T> seed, boolean parallel);
 	
 }

@@ -15,10 +15,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.io.GSSurveyType;
-import core.metamodel.pop.io.IGSSurvey;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.io.IGSSurvey;
+import core.metamodel.value.IValue;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplInputDataManager;
@@ -46,7 +47,7 @@ public class TestBayesianNetworkCompletionSampler {
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(fileBN);
 		
 		// to read the incomplete sample, we need a dict
-		Collection<APopulationAttribute> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
+		Collection<DemographicAttribute<? extends IValue>> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		// we need an incomplete sample
 		char sep;
@@ -79,7 +80,7 @@ public class TestBayesianNetworkCompletionSampler {
 		
 		GosplPopulation pop = null;
 		
-		Set<APopulationAttribute> updatedAttributes = new HashSet<>(attributes);
+		Set<DemographicAttribute<? extends IValue>> updatedAttributes = new HashSet<>(attributes);
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();
@@ -121,10 +122,10 @@ public class TestBayesianNetworkCompletionSampler {
 			throw new RuntimeException(e);
 		}
 		
-		for (APopulationEntity e: pop) {
+		for (ADemoEntity e: pop) {
 			
 			System.err.println("before:\t"+e);
-			APopulationEntity novelEntity = sampler.complete(e);
+			ADemoEntity novelEntity = sampler.complete(e);
 			
 			// we don't want the entities to be replaced in place 
 			// TODO assertNotEquals(e, novelEntity);

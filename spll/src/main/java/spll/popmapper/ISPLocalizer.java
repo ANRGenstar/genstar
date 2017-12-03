@@ -10,16 +10,16 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.IPopulation;
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
-import core.metamodel.geo.io.IGSGeofile;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.value.IValue;
 import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
+import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 
@@ -34,8 +34,8 @@ import spll.popmapper.normalizer.SPLUniformNormalizer;
  * </ul>
  * </p>
  * These three options outline what Spll localization process cover: <br> 
- * (1) localize entity into nest {@link APopulationEntity#getNest()} <br>
- * (2) match entity with the geography {@link APopulationEntity#getLocation()} (if no match, it is equal to the nest) <br> 
+ * (1) localize entity into nest {@link ADemoEntity#getNest()} <br>
+ * (2) match entity with the geography {@link ADemoEntity#getLocation()} (if no match, it is equal to the nest) <br> 
  * (3) ancillary information on density (even estimated one using regression techniques) <br>
  * <p>
  * 
@@ -54,7 +54,7 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> localisePopulation();
+	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> localisePopulation();
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //
@@ -69,7 +69,8 @@ public interface ISPLocalizer {
 	 * @param keyAttPop
 	 * @param keyAttMatch
 	 */
-	public void setMatcher(IGSGeofile<? extends AGeoEntity> match, String keyAttPop, String keyAttMatch);
+	public void setMatcher(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> match, 
+			String keyAttPop, String keyAttMatch);
 	
 	/**
 	 * This method must setup matcher variable (i.e. the number of entity) in
@@ -82,7 +83,7 @@ public interface ISPLocalizer {
 	 * @throws MismatchedDimensionException 
 	 * @throws SchemaException 
 	 */
-	public IGSGeofile<? extends AGeoEntity> estimateMatcher(File match) 
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> estimateMatcher(File match) 
 			throws MismatchedDimensionException, IllegalArgumentException, IOException, TransformException, SchemaException;
 	
 	
@@ -100,7 +101,8 @@ public interface ISPLocalizer {
 	 * @param entityNbAreas
 	 * @param numberProperty
 	 */
-	public void setMapper(IGSGeofile<? extends AGeoEntity> map, String numberProperty);
+	public void setMapper(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> map, 
+			String numberProperty);
 	
 	/**
 	 * Setup a density map - from the result of spatial interpolation: this interpolation
@@ -120,11 +122,14 @@ public interface ISPLocalizer {
 	 * @throws IndexOutOfBoundsException
 	 * @throws GSMapperException
 	 * @throws SchemaException 
+	 * @throws InvalidGeoFormatException 
+	 * @throws IllegalArgumentException 
+	 * @throws MismatchedDimensionException 
 	 */
-	public void setMapper(List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
-			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
-			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
-	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
+	public void setMapper(List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> endogeneousVarFile, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, SPLUniformNormalizer splUniformNormalizer) 
+					throws IOException, TransformException, InterruptedException, ExecutionException, IllegalRegressionException, 
+					IndexOutOfBoundsException, GSMapperException, SchemaException, MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException;
 	
 	/**
 	 * Setup a density map - from the result of spatial interpolation: this interpolation
@@ -144,12 +149,15 @@ public interface ISPLocalizer {
 	 * @throws IndexOutOfBoundsException
 	 * @throws GSMapperException
 	 * @throws SchemaException 
+	 * @throws InvalidGeoFormatException 
+	 * @throws IllegalArgumentException 
+	 * @throws MismatchedDimensionException 
 	 */
-	public void setMapper(IGSGeofile<? extends AGeoEntity> mainMapper , String mainAttribute, 
-			List<IGSGeofile<? extends AGeoEntity>> endogeneousVarFile, 
-			List<? extends AGeoValue> varList, LMRegressionOLS lmRegressionOLS, 
-			SPLUniformNormalizer splUniformNormalizer) throws IOException, TransformException, 
-	InterruptedException, ExecutionException, IllegalRegressionException, IndexOutOfBoundsException, GSMapperException, SchemaException;
+	public void setMapper(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> mainMapper, 
+			String mainAttribute, List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> endogeneousVarFile, 
+			List<? extends IValue> varList, LMRegressionOLS lmRegressionOLS, SPLUniformNormalizer splUniformNormalizer) 
+					throws IOException, TransformException, InterruptedException, ExecutionException, IllegalRegressionException, 
+					IndexOutOfBoundsException, GSMapperException, SchemaException, MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException;
 	
 	///////////////////////////////////////////////////
 	// -------------- CONSTRAINT PART -------------- //

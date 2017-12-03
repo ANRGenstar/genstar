@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.value.IValue;
 import gospl.distribution.matrix.control.AControl;
 
 /**
@@ -16,16 +16,16 @@ import gospl.distribution.matrix.control.AControl;
  *
  * @param <T>
  */
-public class ComplexMargin<T extends Number> extends AMargin<T> implements IMargin<APopulationAttribute, APopulationValue, T> {
+public class ComplexMargin<T extends Number> extends AMargin<T> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
 
 	/**
 	 * WARNING: there is a issue here, linked to multiple marginal references, i.e. when a referent set of values
 	 * are linked to multiple possible combination of values.
 	 * 
 	 */
-	private Map<Set<APopulationValue>, Set<APopulationValue>> marginalDescriptors;
+	private Map<Set<IValue>, Set<IValue>> marginalDescriptors;
 	
-	protected ComplexMargin(APopulationAttribute controlAttribute, APopulationAttribute seedAttribute) {
+	protected ComplexMargin(DemographicAttribute<? extends IValue> controlAttribute, DemographicAttribute<? extends IValue> seedAttribute) {
 		super(controlAttribute, seedAttribute);
 		this.marginalDescriptors = new HashMap<>();
 	}
@@ -43,18 +43,18 @@ public class ComplexMargin<T extends Number> extends AMargin<T> implements IMarg
 	 * @param control
 	 * @param seedDescriptor
 	 */
-	public void addMarginal(Set<APopulationValue> controlDescriptor, AControl<T> control,
-			Set<APopulationValue> seedDescriptor){
+	public void addMarginal(Set<IValue> controlDescriptor, AControl<T> control,
+			Set<IValue> seedDescriptor){
 		marginalDescriptors.put(controlDescriptor, seedDescriptor);
 		super.marginalControl.put(seedDescriptor, control);
 	}
 	
 	@Override
-	public Collection<Set<APopulationValue>> getSeedMarginalDescriptors() {
+	public Collection<Set<IValue>> getSeedMarginalDescriptors() {
 		return marginalDescriptors.values();
 	}
 	
-	public Set<APopulationValue> getSeedMarginalDescriptor(Set<APopulationValue> controlDescriptor){
+	public Set<IValue> getSeedMarginalDescriptor(Set<IValue> controlDescriptor){
 		return marginalDescriptors.get(controlDescriptor);
 	}
 	

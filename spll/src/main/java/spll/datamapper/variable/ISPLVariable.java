@@ -1,10 +1,10 @@
 package spll.datamapper.variable;
 
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.value.IValue;
 
 public interface ISPLVariable {
 
-	public AGeoValue getValue();
+	public IValue getValue();
 	
 	public String getStringValue();
 	

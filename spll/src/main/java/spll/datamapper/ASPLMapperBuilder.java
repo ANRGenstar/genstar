@@ -11,19 +11,22 @@ import java.util.concurrent.ExecutionException;
 
 import org.geotools.feature.SchemaException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
+import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.value.IValue;
 import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
 import spll.datamapper.variable.ISPLVariable;
 import spll.entity.SpllFeature;
-import spll.io.SPLGeofileFactory;
+import spll.io.SPLGeofileBuilder;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
+import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.normalizer.ASPLNormalizer;
 import spll.util.SpllUtil;
 
@@ -41,18 +44,18 @@ import spll.util.SpllUtil;
  */
 public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	
-	protected final IGSGeofile<? extends AGeoEntity> mainFile;
+	protected final IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> mainFile;
 	private final String mainAttribute;
 	
-	protected List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles;
+	protected List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> ancillaryFiles;
 	protected ISPLMatcherFactory<V, T> matcherFactory;
 	
 	protected ISPLRegressionAlgo<V, T> regressionAlgorithm;
 	
 	protected ASPLNormalizer normalizer;
 	
-	public ASPLMapperBuilder(IGSGeofile<? extends AGeoEntity> mainFile, String mainAttribute, 
-			List<IGSGeofile<? extends AGeoEntity>> ancillaryFiles) {
+	public ASPLMapperBuilder(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> mainFile, String mainAttribute, 
+			List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> ancillaryFiles) {
 		this.mainFile = mainFile;
 		this.mainAttribute = mainAttribute;
 		this.ancillaryFiles = ancillaryFiles;
@@ -95,7 +98,7 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * 
 	 * @param outputFormat
 	 */
-	public void setOutputFormat(IGSGeofile<? extends AGeoEntity> outputFormat){
+	public void setOutputFormat(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> outputFormat){
 		if(!ancillaryFiles.contains(outputFormat))
 			throw new IllegalArgumentException("output format must be one of ancillary files");
 		ancillaryFiles.add(0, ancillaryFiles.remove(ancillaryFiles.indexOf(outputFormat)));
@@ -105,11 +108,11 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	// ------------------------ GETTERS ------------------------ //
 	///////////////////////////////////////////////////////////////
 	
-	public List<IGSGeofile<? extends AGeoEntity>> getAncillaryFiles(){
+	public List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> getAncillaryFiles(){
 		return Collections.unmodifiableList(ancillaryFiles);
 	}
 	
-	public IGSGeofile<? extends AGeoEntity> getMainFile(){
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> getMainFile(){
 		return mainFile;
 	}
 	
@@ -153,15 +156,21 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * @throws IndexOutOfBoundsException
 	 * @throws IOException
 	 * @throws GSMapperException 
+	 * @throws InvalidGeoFormatException 
+	 * @throws IllegalArgumentException 
+	 * @throws MismatchedDimensionException 
 	 */
 	public SPLRasterFile buildOutput(File output, SPLRasterFile formatFile, 
 			boolean intersect, boolean integer, Number targetPopulation) 
-			throws IllegalRegressionException, TransformException, 
-			IndexOutOfBoundsException, IOException, GSMapperException {
+			throws IllegalRegressionException, TransformException, IndexOutOfBoundsException, IOException, 
+			GSMapperException, MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException {
 		float[][] pixels = this.buildOutput(formatFile, intersect, integer, targetPopulation);
-		return new SPLGeofileFactory().createRasterfile(output, pixels, 
-				SPLRasterFile.DEF_NODATA.floatValue(), new ReferencedEnvelope(formatFile.getEnvelope(),
-						SpllUtil.getCRSfromWKT(formatFile.getWKTCoordinateReferentSystem())));
+		return new SPLGeofileBuilder()
+				.setFile(output)
+				.setRasterBands(pixels)
+				.setNoData(SPLRasterFile.DEF_NODATA.doubleValue())
+				.setReferenceEnvelope(new ReferencedEnvelope(formatFile.getEnvelope(), SpllUtil.getCRSfromWKT(formatFile.getWKTCoordinateReferentSystem())))
+				.buildRasterfile();
 	}
 	
 	/*
@@ -173,22 +182,28 @@ public abstract class ASPLMapperBuilder<V extends ISPLVariable, T> {
 	 * build the output of Spll regression based localization as vector based format output.
 	 * Format file argument {@code formatFile} must be an ancillaryFiles, see {@link #getAncillaryFiles()}
 	 * 
+	 * FIXME: create an empty shapefile
+	 * 
 	 * @param outputFile
 	 * @param formatFile
 	 * @return
 	 * @throws SchemaException 
 	 * @throws IOException 
+	 * @throws InvalidGeoFormatException 
 	 */
 	public SPLVectorFile buildOutput(File output, SPLVectorFile formatFile, 
 			boolean intersect, boolean integer, Number tagetPopulation) 
-			throws IOException, SchemaException{
+			throws IOException, SchemaException, InvalidGeoFormatException{
 		@SuppressWarnings("unused")
 		Map<SpllFeature, Number> map = this.buildOutput(formatFile, intersect, integer, tagetPopulation);
 		Collection<SpllFeature> features = new ArrayList<>();
 		
 		// TODO compute feature from map
 		
-		return new SPLGeofileFactory().createShapeFile(output, features);
+		return new SPLGeofileBuilder()
+				.setFile(output)
+				.setFeatures(features)
+				.buildShapeFile();
 	}
 	
 }

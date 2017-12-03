@@ -1,27 +1,24 @@
 package spll.entity;
 
-import java.util.Set;
+import java.util.Map;
 
 import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
+import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.value.IValue;
 
-public class SpllFeature extends AGeoEntity {
+public class SpllFeature extends AGeoEntity<IValue> {
  
 	private final Feature innerFeature;
 	
-	protected SpllFeature(Set<AGeoValue> values, Feature innerFeature) {
+	protected SpllFeature(Map<GeographicAttribute<? extends IValue>, IValue> values, Feature innerFeature) {
 		super(values, innerFeature.getIdentifier().getID());
 		this.innerFeature = innerFeature;
 	}
 	
-	/**
-	 * Returns the internal geotool feature.
-	 * @return
-	 */
 	public Feature getInnerFeature(){
 		return innerFeature;
 	}

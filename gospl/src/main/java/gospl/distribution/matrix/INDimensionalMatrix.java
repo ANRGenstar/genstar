@@ -5,10 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.IAttribute;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationValue;
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.io.GSSurveyType;
 import core.util.data.GSDataParser;
 import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.control.AControl;
@@ -36,7 +34,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public interface INDimensionalMatrix<D, A, T extends Number> {
 
-// ----------------------- Main contract ----------------------- //
+	// ---------------------------- GETTERS ---------------------------- //
 	
 	/**
 	 * Retrieve the matrix value according to the coordinate passed in method parameter. 
@@ -113,6 +111,8 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public AControl<T> getVal();
+	
+	// ---------------------------------- SETTERS ---------------------------------- //
 
 	
 	/**
@@ -219,7 +219,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * A complete view of the dimensions of the matrix
 	 * @return
 	 */
-	public Map<APopulationAttribute, Set<APopulationValue>> getDimensionsAsAttributesAndValues();
+	public Map<D, Set<? extends A>> getDimensionsAsAttributesAndValues();
 
 	/**
 	 * The dimensions associated with a spectific aspect

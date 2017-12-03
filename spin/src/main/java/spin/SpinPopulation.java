@@ -7,16 +7,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.APopulationEntity;
-import core.metamodel.pop.APopulationValue;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import spin.objects.SpinNetwork;
 
 /** Population Spin. 
  * 
  *
  */
-public class SpinPopulation implements IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> {
+public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 
 	// Network associe a la population.
 	private SpinNetwork network;
@@ -28,7 +28,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 //	private INetProperties properties;
 	
 	// TODO IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>
-	private final Collection<APopulationEntity> population;
+	private final Collection<ADemoEntity> population;
 
 	/**
 	 * 
@@ -36,7 +36,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	 * @param prop
 	 * @param network
 	 */
-	public SpinPopulation(IPopulation<APopulationEntity, APopulationAttribute, APopulationValue> popRef, 
+	public SpinPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popRef, 
 						 SpinNetwork network){
 		population = popRef;
 		this.network = network; 
@@ -58,7 +58,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	 * 
 	 * @param population
 	 */
-	public SpinPopulation(Collection<APopulationEntity> population){
+	public SpinPopulation(Collection<ADemoEntity> population){
 		if(!population.isEmpty())
 			this.population = new HashSet<>();
 		else
@@ -86,7 +86,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public Iterator<APopulationEntity> iterator() {
+	public Iterator<ADemoEntity> iterator() {
 		return population.iterator();
 	}
 
@@ -101,7 +101,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public boolean add(APopulationEntity e) {
+	public boolean add(ADemoEntity e) {
 		return population.add(e);
 	}
 
@@ -116,7 +116,7 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends APopulationEntity> c) {
+	public boolean addAll(Collection<? extends ADemoEntity> c) {
 		return population.addAll(c);
 	}
 
@@ -137,8 +137,8 @@ public class SpinPopulation implements IPopulation<APopulationEntity, APopulatio
 	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
-	public Set<APopulationAttribute> getPopulationAttributes(){
-		return population.parallelStream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes(){
+		return population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
 
 }

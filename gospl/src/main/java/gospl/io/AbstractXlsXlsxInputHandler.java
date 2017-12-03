@@ -10,7 +10,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
-import core.metamodel.pop.io.GSSurveyType;
+import core.metamodel.io.GSSurveyType;
 
 /**
  * Abstract class that define the general contract for

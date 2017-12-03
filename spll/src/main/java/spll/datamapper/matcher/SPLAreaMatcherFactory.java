@@ -12,9 +12,9 @@ import java.util.stream.Collectors;
 
 import org.opengis.referencing.operation.TransformException;
 
-import core.metamodel.geo.AGeoEntity;
-import core.metamodel.geo.AGeoValue;
-import core.metamodel.geo.io.IGSGeofile;
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
+import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import spll.datamapper.variable.SPLVariable;
 
@@ -22,15 +22,16 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 
 	private int matcherCount = 0;
 
-	private Collection<? extends AGeoValue> variables;
+	private Collection<? extends IValue> variables;
 
-	public SPLAreaMatcherFactory(Collection<? extends AGeoValue> variables) {
+	public SPLAreaMatcherFactory(Collection<? extends IValue> variables) {
 		this.variables = variables;
 	}
 
 	@Override
-	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity entity, 
-			IGSGeofile<? extends AGeoEntity> regressorsFile) throws IOException, TransformException, InterruptedException, ExecutionException { 
+	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity<? extends IValue> entity, 
+			IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> regressorsFile) 
+					throws IOException, TransformException, InterruptedException, ExecutionException { 
 		return getMatchers(Arrays.asList(entity), regressorsFile);
 	}
 
@@ -42,8 +43,8 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	 * 
 	 */
 	@Override
-	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<? extends AGeoEntity> entities,
-			IGSGeofile<? extends AGeoEntity> regressorsFile) 
+	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<? extends AGeoEntity<? extends IValue>> entities,
+			IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> regressorsFile) 
 					throws IOException, TransformException, InterruptedException, ExecutionException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start processing regressors' data");
 		gspu.setObjectif(entities.size());
@@ -62,14 +63,14 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 	/*
 	 * TODO: could be optimise
 	 */
-	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity entity,
-			Iterator<? extends AGeoEntity> geoData, Collection<? extends AGeoValue> variables, 
-			GSPerformanceUtil gspu) {
+	private List<ISPLMatcher<SPLVariable, Double>> getMatchers(AGeoEntity<? extends IValue> entity,
+			Iterator<? extends AGeoEntity<? extends IValue>> geoData, 
+					Collection<? extends IValue> variables, GSPerformanceUtil gspu) {
 		List<ISPLMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
 		while(geoData.hasNext()){
-			AGeoEntity geoEntity = geoData.next();  
+			AGeoEntity<? extends IValue> geoEntity = geoData.next();  
 			for(String prop : geoEntity.getPropertiesAttribute()){
-				AGeoValue value = geoEntity.getValueForAttribute(prop);
+				IValue value = geoEntity.getValueForAttribute(prop);
 				if(!variables.isEmpty() && !variables.contains(value))
 					continue;
 				Optional<ISPLMatcher<SPLVariable, Double>> potentialMatch = areaMatcherList

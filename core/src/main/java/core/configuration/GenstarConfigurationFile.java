@@ -1,79 +1,59 @@
 package core.configuration;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.ObjectStreamException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.thoughtworks.xstream.annotations.XStreamOmitField;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.metamodel.IAttribute;
-import core.metamodel.IValue;
-import core.metamodel.pop.APopulationAttribute;
-import core.metamodel.pop.io.GSSurveyWrapper;
+import core.configuration.dictionary.DemographicDictionary;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.io.GSSurveyWrapper;
+import core.metamodel.value.IValue;
 
 /**
- * TODO: describe the main contract for input data in genstar !!!
- * <br>
- * TODO: add configuration for localization process 
+ * Data configuration consist in a base directory where to find ressources, plus
+ * a list of wrapped file that encapsulate data file plus information to read it, and
+ * finally dictionary to understand data in file
  * <p><ul>
  * <li> list of survey files
  * <li> list of survey attribute
  * <li> list of key attribute (link between survey and spatial attribute)
  * </ul><p>
+ * Configuration file can be saved using Json based file with {@link GenstarJsonUtil}
+ * <p>
+ * TODO: add configuration for localization process
  * 
  * @author kevinchapuis
  *
  */
+@JsonTypeName(value = GenstarConfigurationFile.SELF)
 public class GenstarConfigurationFile {
 
+	public final static String SELF = "CONFIGURATION FILE";
+	
 	private final List<GSSurveyWrapper> dataFileList = new ArrayList<>();
 
-	private final Set<APopulationAttribute> attributeSet = new HashSet<>();
-
-	private final Map<String, IAttribute<? extends IValue>> keyAttribute = new HashMap<>();
+	// Demographic attributes
+	private DemographicDictionary<DemographicAttribute<? extends IValue>> demoDictionary;
+	private DemographicDictionary<MappedDemographicAttribute<? extends IValue, ? extends IValue>> records;
 
 	/**
 	 * The path in which the files included in this configuration is stored, if known.
 	 */
-	@XStreamOmitField
-	protected File baseDirectory = null; 
+	protected Path baseDirectory = null; 
 	
-	public GenstarConfigurationFile(List<GSSurveyWrapper> dataFiles, 
-			Set<APopulationAttribute> attributes, 
-			Map<String, IAttribute<? extends IValue>> keyAttribute) {
-		// TEST DATA FILE COMPATIBILITY
-		for(GSSurveyWrapper wrapper : dataFiles)
-			if(!wrapper.getAbsolutePath().toFile().exists()){
-				try {
-					wrapper.setRelativePath(Paths.get(System.getProperty("user.dir")));
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				}
-			}
-		this.dataFileList.addAll(dataFiles);
-		
-		// TEST ATTRIBUTE SET CIRCLE REFERENCES
-		try {
-			this.isCircleReferencedAttribute(attributes);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		this.attributeSet.addAll(attributes);
-		
-		// TEST KEY MAP
-		this.keyAttribute.putAll(keyAttribute == null ? Collections.emptyMap(): keyAttribute);
-	}
+	/**
+	 * Default constructor
+	 */
+	public GenstarConfigurationFile() {}
 
 	// ------------------------------------------- //
 	
@@ -81,51 +61,85 @@ public class GenstarConfigurationFile {
 	 * Gives the survey wrappers
 	 * @return
 	 */
+	@JsonProperty(GenstarJsonUtil.INPUT_FILES)
 	public List<GSSurveyWrapper> getSurveyWrappers(){
 		return dataFileList;
 	}
-
-	/**
-	 * Gives the population attribute set
-	 * @return
-	 */
-	public Set<APopulationAttribute> getAttributes(){
-		return attributeSet;
+	
+	@JsonProperty(GenstarJsonUtil.INPUT_FILES)
+	public void setSurveyWrappers(List<GSSurveyWrapper> surveys) {
+		for(GSSurveyWrapper wrapper : surveys)
+			if(!wrapper.getRelativePath().toAbsolutePath().toFile().exists()){
+				try {
+					wrapper.setRelativePath(Paths.get(System.getProperty("user.dir")));
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+					throw new RuntimeException(e);
+				}
+			}
+		this.dataFileList.addAll(surveys);
 	}
 
 	/**
-	 * TODO: yet to be specified
+	 * Gives the dictionary of attribute
 	 * @return
 	 */
-	private Map<String, IAttribute<? extends IValue>> getKeyAttributes() {
-		return keyAttribute;
+	@JsonProperty(GenstarJsonUtil.DEMO_DICO)
+	public DemographicDictionary<DemographicAttribute<? extends IValue>> getDemoDictionary(){
+		return demoDictionary;
+	}
+	
+	@JsonProperty(GenstarJsonUtil.DEMO_DICO)
+	public void setDemoDictionary(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+		this.demoDictionary = dictionary;
+		this.isCircleReferencedAttribute();
+	}
+	
+	/**
+	 * Give dictionary of record attributes
+	 * @return
+	 */
+	@JsonProperty(GenstarJsonUtil.DEMO_RECORDS)
+	public DemographicDictionary<MappedDemographicAttribute<? extends IValue, ? extends IValue>> getRecords(){
+		return records;
+	}
+	
+	@JsonProperty(GenstarJsonUtil.DEMO_RECORDS)
+	public void setRecords(DemographicDictionary<MappedDemographicAttribute<? extends IValue, ? extends IValue>> records) {
+		this.records = records;
+		this.isCircleReferencedAttribute();
+	}
+	
+	/**
+	 * The root directory from when to resolve relative path
+	 * @return
+	 */
+	@JsonProperty(GenstarJsonUtil.BASE_DIR)
+	public Path getBaseDirectory() {
+		return this.baseDirectory;
+	}
+	
+	@JsonProperty(GenstarJsonUtil.BASE_DIR)
+	public void setBaseDirectory(Path f) {
+		this.baseDirectory = f;
 	}
 	
 	// --------------- UTILITIES --------------- //
 
 	/*
-	 * Method that enable a safe serialization / deserialization of this java class <br/>
-	 * The serialization process end up in xml file that represents a particular java <br/>
-	 * object of this class; and the way back from xml file to java object. 
-	 */
-	protected Object readResolve() throws ObjectStreamException, FileNotFoundException {
-		List<GSSurveyWrapper> dataFiles = getSurveyWrappers();
-		Set<APopulationAttribute> attributes = getAttributes();
-		Map<String, IAttribute<? extends IValue>> keyAttribute = getKeyAttributes();
-		return new GenstarConfigurationFile(dataFiles, attributes, keyAttribute);
-	}
-	
-	/*
 	 * Throws an exception if attributes have feedback loop references, e.g. : A referees to B that referees to C
 	 * that referees to A; in this case, no any attribute can be taken as a referent one 
 	 */
-	private void isCircleReferencedAttribute(Set<APopulationAttribute> attSet) throws IllegalArgumentException {
+	private void isCircleReferencedAttribute() throws IllegalArgumentException {
+		Collection<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
+		if(demoDictionary != null) attributes.addAll(demoDictionary.getAttributes());
+		if(records != null) attributes.addAll(records.getAttributes());
 		// store attributes that have referent attribute
-		Map<APopulationAttribute, APopulationAttribute> attToRefAtt = attSet.stream()
-				.filter(att -> !att.getReferentAttribute().equals(att) && !att.isRecordAttribute())
+		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> attToRefAtt = 
+				attributes.stream().filter(att -> !att.getReferentAttribute().equals(att))
 				.collect(Collectors.toMap(att -> att, att -> att.getReferentAttribute()));
 		// store attributes that are referent and which also have a referent attribute
-		Map<APopulationAttribute, APopulationAttribute> opCircle = attToRefAtt.keySet()
+		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> opCircle = attToRefAtt.keySet()
 				.stream().filter(key -> attToRefAtt.values().contains(key))
 			.collect(Collectors.toMap(key -> key, key -> attToRefAtt.get(key)));
 		// check if all referent attributes are also ones to refer to another attributes (circle)
@@ -133,35 +147,6 @@ public class GenstarConfigurationFile {
 			throw new IllegalArgumentException("You cannot setup circular references between attributes: "
 					+ opCircle.entrySet().stream().map(e -> e.getKey().getAttributeName()+" > "+e.getValue().getAttributeName())
 					.reduce((s1, s2) -> s1.concat(" >> "+s2)).get());
-	}
-
-	/**
-	 * facilitates the creation of lisible mappings.
-	 * 
-	 * Example: Map<Set<String>, Set<String>> mapper = new HashMap<>();
-	 * addMapper(mapper, Arrays.asList("moins de 15"),  Arrays.asList("0-5", "6-15"));
-	 * addMapper(mapper, Arrays.asList("16-25"), Arrays.asList("16-25"));
-	 * addMapper(mapper, Arrays.asList("26-55"), Arrays.asList("26-40","40-55"));
-	 * addMapper(mapper, Arrays.asList("55 et plus"), Arrays.asList("55 et plus"));
-	 *	
-	 * @param mapper
-	 * @param from
-	 * @param to
-	 */
-	public static void addMapper(
-			Map<Set<String>, Set<String>> mapper, 
-			List<String> from, List<String> to) {
-		
-		mapper.put(new HashSet<>(from), new HashSet<>(to));
-		
-	}
-	
-	public void setBaseDirectory(File f) {
-		this.baseDirectory = f.getParentFile();
-	}
-	
-	public File getBaseDirectory() {
-		return this.baseDirectory;
 	}
 
 }
