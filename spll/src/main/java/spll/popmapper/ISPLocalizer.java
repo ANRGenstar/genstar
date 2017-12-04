@@ -15,6 +15,7 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
+import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
@@ -54,7 +55,7 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> localisePopulation();
+	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> localisePopulation();
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //

@@ -3,7 +3,6 @@ package spll;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,7 +35,7 @@ import spll.util.SpllUtil;
  * @author Kevin Chapuis
  * @author Samuel Thiriot
  */
-public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
+public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> {
 
 	private Set<SpllEntity> population;
 	private IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile; 
@@ -198,6 +197,7 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 								"they are not defined in the dictionnary: "+ignoredAttributes);
 		
 	}
+	
 	/**
 	 * Gives the specific coordinate system this population
 	 * have been localized with
@@ -215,15 +215,6 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	 */
 	public IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> getGeography() {
 		return geoFile;
-	}
-	
-	/**
-	 * Return spll entities
-	 * 
-	 * @return
-	 */
-	public Collection<SpllEntity> getSpllPopulation(){
-		return population;
 	}
 	
 	@Override
@@ -252,8 +243,8 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 
 	@Override
-	public Iterator<ADemoEntity> iterator() {
-		return new ArrayList<ADemoEntity>(this).iterator();
+	public Iterator<SpllEntity> iterator() {
+		return this.iterator();
 	}
 
 	@Override
@@ -267,12 +258,8 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 
 	@Override
-	public boolean add(ADemoEntity e) {
-		if (population.add(new SpllEntity(e))) {
-			this.attributes.addAll(e.getAttributes());
-			return true;
-		}
-		return false;
+	public boolean add(SpllEntity e) {
+		return population.add(e);
 	}
 
 	@Override
@@ -286,16 +273,8 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends ADemoEntity> c) {
-		if (population.addAll(c.stream().map(e -> new SpllEntity(e))
-				.collect(Collectors.toList()))) {
-			
-			for (ADemoEntity e: c) {
-				attributes.addAll(e.getAttributes());
-			}
-			return true;
-		}
-		return false;
+	public boolean addAll(Collection<? extends SpllEntity> c) {
+		return population.addAll(c);
 	}
 
 	@Override
