@@ -48,7 +48,7 @@ public interface IValueSpace<V extends IValue> {
 	 * Get the value from the theoretical value space if complied with. If the
 	 * proposed value does not feet theoretical requirement (e.g. characters chain
 	 * within a continuous "double" value space) then an exception is raised
-	 * 
+	 * TODO: refaire
 	 * @param value
 	 * @return
 	 */

@@ -48,9 +48,9 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	public NominalValue addValue(String value) throws IllegalArgumentException {
 		String val = ct.getFormatedString(value);
 		NominalValue nv = values.get(val);
-		if(val == null) {
+		if(nv == null) {
 			nv = new NominalValue(this, val);
-			this.values.put(nv.getStringValue(), nv);
+			this.values.put(val, nv);
 		}
 		return nv;
 	}
@@ -63,7 +63,7 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	@Override
 	public NominalValue getValue(String value) throws NullPointerException {
 		NominalValue val = values.get(ct.getFormatedString(value));
-		if(value == null)
+		if(val == null)
 			throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
 		return val;
