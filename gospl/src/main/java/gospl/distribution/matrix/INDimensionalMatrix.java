@@ -49,6 +49,9 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	
 	/**
 	 * Compute the matrix aggregated value according to one dimension's aspect
+	 * <br> The method call is equivalent to {@code getVal(aspect, false)}
+	 * 
+	 * @see #getVal(Object, boolean)
 	 * 
 	 * @param aspect
 	 * @return
@@ -70,6 +73,9 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	
 	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension
+	 * <br> The method call is equivalent to {@code getVal(aspect, false)}
+	 * 
+	 * @see #getVal(Collection, boolean)
 	 * 
 	 * @param aspects
 	 * @return
@@ -79,6 +85,7 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	/**
 	 * Compute the matrix aggregated value according to a set of aspect of one or several dimension.
 	 * if defaultToNul is true, then a missing value will return a null {@link AControl} value.
+	 * <p>
 	 * 
 	 * @param aspects
 	 * @param defaultToNul

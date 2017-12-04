@@ -11,10 +11,10 @@ import gospl.distribution.matrix.control.AControl;
  * which can be a segmented matrix in the sens of {@link ASegmentedNDimensionalMatrix}.
  * <\p>
  * A marginal is constructed as follow: we have a referent dimension of type A, and a
- * set of other related dimension; for each other dimension we can have a description
- * in the form of a {@link AControl}.
+ * set of n other related dimension. Marginal of A is the set of all margin composed of
+ * set of values from the other n dimension: a margin is a combination of values, one for
+ * each dimensions, and margins being all possible conjonction of values for the n dimensions
  * <\p>
- * TODO: better description
  * 
  * @author kevinchapuis
  *

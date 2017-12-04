@@ -10,6 +10,9 @@ import core.metamodel.value.IValue;
 import gospl.distribution.matrix.control.AControl;
 
 /**
+ * Complex margin describe a marginal for which seed and control descriptor (the set of value) are equivalent but not equals
+ * <br> Equivalence is guaranteed by relationship between attributes of seed matrix and control matrix
+ * 
  * @see IMargin
  * 
  * @author kevinchapuis

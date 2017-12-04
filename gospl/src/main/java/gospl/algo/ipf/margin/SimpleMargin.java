@@ -7,6 +7,12 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.distribution.matrix.control.AControl;
 
+/**
+ * Simple margin describe marginal that are equivalent for seed and control matrices
+ * @author kevinchapuis
+ *
+ * @param <T>
+ */
 public class SimpleMargin<T extends Number> extends AMargin<T> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
 
 	protected SimpleMargin(DemographicAttribute<? extends IValue> controlAttribute, DemographicAttribute<? extends IValue> seedAttribute) {

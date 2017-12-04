@@ -305,16 +305,23 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	@Override
 	public AControl<T> getVal(Collection<IValue> aspects, boolean defaultToNul) {
+		Collection<IValue> correctedAspects = new HashSet<>(aspects);
 		if(!aspects.stream().allMatch(a -> matrix.keySet()
 				.stream().anyMatch(coord -> coord.contains(a))))
 			if (defaultToNul)
 				return getNulVal();
-			else
+			else if(aspects.stream().filter(a -> a.getValueSpace().getEmptyValue().equals(a)
+						&& this.getDimensions().contains(a.getValueSpace().getAttribute()))
+					.allMatch(a -> matrix.keySet().stream().anyMatch(coord -> coord.contains(a)))) {
+				correctedAspects.removeAll(aspects.stream()
+						.filter(a -> a.getValueSpace().getEmptyValue().equals(a))
+						.collect(Collectors.toSet()));
+			} else
 				throw new NullPointerException("Aspect collection "+Arrays.toString(aspects.toArray())+" of size "
 					+ aspects.size()+" is absent from this matrix"
 					+ " (size = "+this.size()+" - attribute = "+Arrays.toString(this.getDimensions().toArray())+")");
 		
-		Map<IAttribute<? extends IValue>, Set<IValue>> attAsp = aspects.stream()
+		Map<IAttribute<? extends IValue>, Set<IValue>> attAsp = correctedAspects.stream()
 				.collect(Collectors.groupingBy(aspect -> aspect.getValueSpace().getAttribute(),
 				Collectors.mapping(Function.identity(), Collectors.toSet())));
 		
@@ -324,6 +331,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				.map(Entry::getValue).reduce(getNulVal(), (c1, c2) -> getSummedControl(c1, c2));
 	}
 	
+	@Override
 	public final AControl<T> getVal(String ... coordinates) {
 		
 		Set<IValue> l = new TreeSet<>();
@@ -353,6 +361,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return getVal(l);
 	}
 	
+	@Override
 	public final AControl<T> getVal(IValue ... aspects) {
 		return getVal(new HashSet<>(Arrays.asList(aspects)));
 	}
