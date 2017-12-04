@@ -35,12 +35,15 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	private IAttribute<OrderedValue> attribute;
 
 	private GSCategoricTemplate template;
+	
+	private int instanceIndex;
 
 	public OrderedSpace(IAttribute<OrderedValue> attribute, GSCategoricTemplate template){
 		this.values = new TreeSet<>(comp);
 		this.attribute = attribute;
 		this.template = template;
 		this.emptyValue = new OrderedValue(this, null, 0);
+		this.instanceIndex = 0;
 	}
 
 	public int compare(OrderedValue referent, OrderedValue compareTo) {
@@ -55,6 +58,16 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	@Override
 	public boolean isValidCandidate(String value){
 		return true;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Beware the order consistency could be break using instance value
+	 */
+	@Override
+	public OrderedValue getInstanceValue(String value) {
+		return new OrderedValue(this, value, instanceIndex++);
 	}
 
 	// ------------------------ SETTERS & ADDER CAPACITIES ------------------------ //

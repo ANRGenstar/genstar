@@ -106,7 +106,7 @@ public class GeoEntityFactory {
 		
 		Collection<Property> propertyList = feature.getProperties().stream()
 				.filter(property -> !BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(property.getName().getLocalPart()) 
-						|| (!attList.isEmpty() && attList.contains(property.getName().getLocalPart())))
+						&& (attList.isEmpty() || attList.contains(property.getName().getLocalPart())))
 				.collect(Collectors.toSet());
 		for(Property property : propertyList){
 			String name = property.getName().getLocalPart();
