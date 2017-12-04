@@ -2,7 +2,6 @@ package spll.entity;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -105,10 +104,9 @@ public class GeoEntityFactory {
 		
 		Map<GeographicAttribute<? extends IValue>, IValue> values = new HashMap<>();
 		
-		Set<String> indexedAttList = new HashSet<>(attList);
 		Collection<Property> propertyList = feature.getProperties().stream()
-				.filter(property -> BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(property.getName().getLocalPart()) 
-						|| (!indexedAttList.isEmpty() && !indexedAttList.contains(property.getName().getLocalPart())))
+				.filter(property -> !BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(property.getName().getLocalPart()) 
+						|| (!attList.isEmpty() && attList.contains(property.getName().getLocalPart())))
 				.collect(Collectors.toSet());
 		for(Property property : propertyList){
 			String name = property.getName().getLocalPart();

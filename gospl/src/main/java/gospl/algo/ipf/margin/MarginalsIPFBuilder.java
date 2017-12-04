@@ -23,6 +23,16 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 
+/**
+ * Make it possible to determine the signature of margin (how many dimensions, attributes, and theoretical margins)
+ * as well as the control T value associated
+ * 
+ * @see AMargin
+ * 
+ * @author kevinchapuis
+ *
+ * @param <T>
+ */
 public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 
 	private Logger logger = LogManager.getLogger();

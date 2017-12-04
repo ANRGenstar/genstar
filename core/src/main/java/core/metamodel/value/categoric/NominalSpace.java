@@ -1,8 +1,8 @@
 package core.metamodel.value.categoric;
 
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Optional;
+import java.util.Map;
 import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
@@ -11,7 +11,7 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
 /**
- * TODO: javadoc
+ * A set of value of nominal type
  * 
  * @author kevinchapuis
  *
@@ -20,14 +20,14 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 
 	private IAttribute<NominalValue> attribute; 
 	
-	private Set<NominalValue> values;
+	private Map<String, NominalValue> values;
 	private NominalValue emptyValue;
 	
 	private GSCategoricTemplate ct;
 	
 	public NominalSpace(IAttribute<NominalValue> attribute, GSCategoricTemplate ct){
 		this.attribute = attribute;
-		this.values = new HashSet<>();
+		this.values = new HashMap<>();
 		this.emptyValue = new NominalValue(this, null);
 		this.ct = ct;
 	}
@@ -46,30 +46,27 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	@Override
 	public NominalValue addValue(String value) throws IllegalArgumentException {
-		NominalValue nv = null;
-		try {
-			nv = this.getValue(value);
-		} catch (NullPointerException e) {
-			nv = new NominalValue(this, ct.getFormatedString(value));
-			this.values.add(nv);
+		String val = ct.getFormatedString(value);
+		NominalValue nv = values.get(val);
+		if(val == null) {
+			nv = new NominalValue(this, val);
+			this.values.put(nv.getStringValue(), nv);
 		}
 		return nv;
 	}
 	
 	@Override
 	public Set<NominalValue> getValues(){
-		return Collections.unmodifiableSet(values);
+		return new HashSet<>(values.values());
 	}
 
 	@Override
 	public NominalValue getValue(String value) throws NullPointerException {
-		String formatedValue = ct.getFormatedString(value);
-		Optional<NominalValue> opValue = values.stream()
-				.filter(v -> v.getStringValue().equals(formatedValue)).findAny();
-		if(opValue.isPresent())
-			return opValue.get();
-		throw new NullPointerException("The string value "+value+" is not comprise "
+		NominalValue val = values.get(ct.getFormatedString(value));
+		if(value == null)
+			throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
+		return val;
 	}
 	
 	@Override
