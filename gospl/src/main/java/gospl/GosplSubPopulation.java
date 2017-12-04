@@ -7,9 +7,8 @@ import java.util.Set;
 import org.bouncycastle.crypto.RuntimeCryptoException;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.entity.IEntity;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
 /**
@@ -19,21 +18,21 @@ import core.metamodel.value.IValue;
  * 
  * @author Samuel Thiriot
  */
-public final class GosplSubPopulation<E extends IEntity<A>, A extends DemographicAttribute<? extends IValue>> 
-				implements IPopulation<E, A> {
+public final class GosplSubPopulation<E extends ADemoEntity> 
+				implements IPopulation<E, DemographicAttribute<? extends IValue>> {
 
-	protected final GosplMultitypePopulation<E,A> multiPop;
+	protected final GosplMultitypePopulation<E> multiPop;
 	protected final String type;
 	protected final Set<E> set;
 	
-	protected GosplSubPopulation(GosplMultitypePopulation<E,A> p, String type) {
+	protected GosplSubPopulation(GosplMultitypePopulation<E> p, String type) {
 		this.multiPop = p;
 		this.type = type;
 		this.set = multiPop.getSetForType(type);
 	}
 
 	@Override
-	public Set<A> getPopulationAttributes() {
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
 		return this.multiPop.getAttributesForType(this.type);
 	}
 	
@@ -114,9 +113,6 @@ public final class GosplSubPopulation<E extends IEntity<A>, A extends Demographi
 		return set.toArray(a);
 	}
 
-	@Override
-	public boolean isAllPopulationOfType(String type) {
-		return type.equals(this.type);
-	}
+	
 	
 }

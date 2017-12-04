@@ -2,9 +2,7 @@ package spll.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,10 +10,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
@@ -137,7 +133,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	}
 
 	protected SPLVectorFile(File file, Charset charset) throws IOException{
-		this(readDataStoreFromFile(file, charset), Collections.EMPTY_LIST);
+		this(readDataStoreFromFile(file, charset), Collections.emptyList());
 	}
 
 	private static DataStore readDataStoreFromFile(File file, Charset charset) throws IOException {
@@ -210,13 +206,12 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 						this.dataStore.getFeatureSource(dataStore.getTypeNames()[0]
 						).getSchema().getGeometryDescriptor()));
 		
-		Collection<SpllFeature> newFeatures = this.features.stream()
-				.map(feat -> gef.createGeoEntity(
-						feat.getGeometry(), 
-						new HashMap<GeographicAttribute<? extends IValue>, IValue>() {{ 
-							put(attribute, transfer.get(feat)); 
-						}}))
-				.collect(Collectors.toSet());
+		Collection<SpllFeature> newFeatures = new HashSet<>();
+		for(AGeoEntity<? extends IValue> entity : this.features) {
+			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
+			theMap.put(attribute, transfer.get(entity));
+			newFeatures.add(gef.createGeoEntity(entity.getGeometry(), theMap));
+		}
 		
 		IGSGeofile<SpllFeature, IValue> res = null;
 		try {

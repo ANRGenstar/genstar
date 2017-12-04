@@ -27,7 +27,7 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 	protected Integer countEmptyParents = null;
 	protected Integer countOrphanChildren = null;
 	
-	protected GosplMultitypePopulation<E, DemographicAttribute<? extends IValue>> resultPopulation = null;
+	protected GosplMultitypePopulation<E> resultPopulation = null;
 	
 	public SpatialComposer() {
 		
@@ -75,7 +75,7 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 		this.populationOfChildrenCandidates = populationOfChildrenCandidates;
 		
 		// TODO cast o_O
-		this.resultPopulation.addAll(childrenType, (Collection<? extends E>) populationOfChildrenCandidates);
+		this.resultPopulation.addAll(childrenType, populationOfChildrenCandidates);
 
 		updateCountOfOrphanChildrenCandidates();
 	}
