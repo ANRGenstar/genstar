@@ -1,6 +1,5 @@
 package spll.popcomposing;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -14,7 +13,7 @@ import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.popmapper.constraint.ISpatialConstraint;
 
-public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E> {
+public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 
 	protected List<ISpatialConstraint> constraints = new LinkedList<ISpatialConstraint>();
 	
@@ -27,7 +26,7 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 	protected Integer countEmptyParents = null;
 	protected Integer countOrphanChildren = null;
 	
-	protected GosplMultitypePopulation<E> resultPopulation = null;
+	protected GosplMultitypePopulation<SpllEntity> resultPopulation = null;
 	
 	public SpatialComposer() {
 		
@@ -106,7 +105,7 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 	}
 
 	@Override
-	public IMultitypePopulation<E, DemographicAttribute<? extends IValue>> getMatchedPopulation() {
+	public IMultitypePopulation<SpllEntity, DemographicAttribute<? extends IValue>> getMatchedPopulation() {
 		return resultPopulation;
 	}
 	
@@ -128,9 +127,9 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 			this.countEmptyParents = null;
 		} else {
 			int c = 0;
-			Iterator<E> it = resultPopulation.iterateSubPopulation(this.parentType);
+			Iterator<SpllEntity> it = resultPopulation.iterateSubPopulation(this.parentType);
 			while (it.hasNext()) {
-				E e = it.next();
+				SpllEntity e = it.next();
 				if (!e.hasChildren())
 					c++;
 			}
@@ -146,9 +145,9 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 			this.countOrphanChildren = null;
 		} else {
 			int c = 0;
-			Iterator<E> it = resultPopulation.iterateSubPopulation(this.childrenType);
+			Iterator<SpllEntity> it = resultPopulation.iterateSubPopulation(this.childrenType);
 			while (it.hasNext()) {
-				E e = it.next();
+				SpllEntity e = it.next();
 				if (!e.hasParent())
 					c++;
 			}

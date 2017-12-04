@@ -387,7 +387,7 @@ public class SPLGeofileBuilder {
 			// 1.1 - with no more feature to add to the file
 			if(this.features == null || this.features.isEmpty()) {
 				this.features = Collections.emptyList();
-				Map<ADemoEntity, Geometry> geoms = population.getSpllPopulation()
+				Map<ADemoEntity, Geometry> geoms = population
 						.stream().filter(e -> e.getLocation() != null)
 						.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
 				final StringBuilder specs = new StringBuilder(population.size() * 20);

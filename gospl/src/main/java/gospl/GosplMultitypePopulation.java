@@ -43,7 +43,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	
 	private int size = 0;
 	
-	public GosplMultitypePopulation(String type, GosplPopulation pop) {
+	public GosplMultitypePopulation(String type, IPopulation<E, DemographicAttribute<? extends IValue>> pop) {
 		addAll(type, pop);
 	}
 	
@@ -154,6 +154,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		return anyChange;
 	}
 	
+	
 	/**
 	 * Adds the GosplPopulation and forces all of these agents 
 	 * to be of the given type. Beware this is not copying the agents, 
@@ -163,6 +164,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	 * @param pop
 	 * @return true if any change
 	 */
+	/*
 	@SuppressWarnings("unchecked")
 	public boolean addAll(String type, GosplPopulation pop) {
 		
@@ -179,6 +181,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		
 		return anyChange;
 	}
+	*/
 	
 	@Override
 	public void clear() {
@@ -345,6 +348,19 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	public void clear(String type) {
 		getSetForType(type).clear();
 		recomputeSize();
+	}
+
+
+	/**
+	 * TODO
+	 * FIXME
+	 * WARNING
+	 * @param parentType
+	 * @return
+	 */
+	public Iterator<E> iterateSubPopulation(String parentType) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

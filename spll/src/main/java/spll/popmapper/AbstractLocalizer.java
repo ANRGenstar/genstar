@@ -260,7 +260,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		try {
 			//case where the referenced file is not defined
 			if (match == null) {
-				List<SpllEntity> entities = new ArrayList<>(population.getSpllPopulation());
+				List<SpllEntity> entities = new ArrayList<>(population);
 
 				//case where there is no information about the number of entities in specific spatial areas
 				if (keyAttMap == null || map == null) {
@@ -275,7 +275,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			else {
 				for (AGeoEntity<? extends IValue> globalfeature : match.getGeoEntity()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
-					List<SpllEntity> entities = population.getSpllPopulation().stream()
+					List<SpllEntity> entities = population.stream()
 							.filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt))
 							.collect(Collectors.toList());
 					if (keyAttMap == null || map == null) {
@@ -286,7 +286,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 					}
 				}
 			}
-			population.getSpllPopulation().removeIf(a -> a.getLocation() == null); 
+			population.removeIf(a -> a.getLocation() == null); 
 		} catch (IOException | TransformException e) {
 			e.printStackTrace();
 		} 
