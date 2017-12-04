@@ -76,11 +76,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	@Override
 	public void setEmptyValue(String value){
-		try {
-			this.emptyValue = this.getValue(value);
-		} catch (NullPointerException e) {
-			this.emptyValue = new NominalValue(this, value); 
-		}
+		String val = ct.getFormatedString(value);
+		NominalValue nv = values.get(val);
+		if(nv == null)
+			nv = new NominalValue(this, val);
+		this.emptyValue = nv;
 	}
 
 	@Override
