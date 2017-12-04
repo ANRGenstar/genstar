@@ -171,7 +171,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	
 	@Override
 	public final boolean hasChildren() {
-		return children != null & !children.isEmpty();
+		return children != null && !children.isEmpty();
 	}
 
 	@Override

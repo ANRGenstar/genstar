@@ -143,5 +143,14 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 		else 
 			return new HashSet<>(attributes);
 	}
+
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		for (ADemoEntity e: population) {
+			if (type != e.getEntityType() || !type.equals(e.getEntityType()))
+				return false;
+		}
+		return true;
+	}
 	
 }

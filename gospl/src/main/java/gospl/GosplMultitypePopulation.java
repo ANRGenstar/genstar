@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -27,7 +28,7 @@ import core.metamodel.value.IValue;
  * @param <E>
  * @param <A>
  */
-public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>>
+public class GosplMultitypePopulation<E extends ADemoEntity, A extends DemographicAttribute<? extends IValue>>
 		implements IMultitypePopulation<E, A> {
 
 	/**
@@ -345,6 +346,18 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	public void clear(String type) {
 		getSetForType(type).clear();
 		recomputeSize();
+	}
+
+
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		return type2attributes.size()==1 && type2attributes.containsKey(type);
+	}
+
+
+	@Override
+	public Iterator<E> iterateSubPopulation(String entityType) {
+		return type2agents.get(entityType).iterator();
 	}
 
 }

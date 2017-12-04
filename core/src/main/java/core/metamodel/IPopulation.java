@@ -24,4 +24,11 @@ public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extend
 
 	public Set<A> getPopulationAttributes();
 	
+	/**
+	 * returns true if all the entities are of type type.
+	 * @param type
+	 * @return
+	 */
+	public boolean isAllPopulationOfType(String type);
+	
 }

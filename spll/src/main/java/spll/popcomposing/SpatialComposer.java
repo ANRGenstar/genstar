@@ -59,7 +59,7 @@ public class SpatialComposer<E extends SpllEntity> implements ISpatialComposer<E
 		this.populationOfParentCandidates = populationOfParentCandidates;
 		
 		// TODO cast o_O
-		this.resultPopulation.addAll(parentType, (Collection<? extends E>) populationOfParentCandidates);
+		this.resultPopulation.addAll(parentType, populationOfParentCandidates);
 		
 		updateCountOfEmptyParentCandidates();
 	}

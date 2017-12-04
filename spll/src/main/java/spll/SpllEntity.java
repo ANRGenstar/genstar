@@ -11,21 +11,23 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 /**
- * Represents a spatialized entity which can have attributes and a geometry. 
+ * Represents a spatialized entity which can have attributes, be localated at a point (represents
+ * where it is) and a Nest (representing where it "lives"). 
  * Such an entity might be generated.
  * 
  * @author Kevin Chapuis
  */
 public class SpllEntity extends ADemoEntity {
 
-	private ADemoEntity entity;
+	protected ADemoEntity entity;
 	
-	private Point location = null;
-	private AGeoEntity<? extends IValue> nest = null;
+	protected Point location = null;
+	protected AGeoEntity<? extends IValue> nest = null;
 	
 	private Geometry geometry = null;
 
 	public SpllEntity(ADemoEntity entity) {
+		// copy attributes
 		super(entity.getAttributes().stream().collect(Collectors
 				.toMap(Function.identity(), att -> entity.getValueForAttribute(att))));
 		this.entity = entity;

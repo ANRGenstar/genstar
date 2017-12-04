@@ -313,4 +313,13 @@ public class SpllPopulation implements IPopulation<ADemoEntity, DemographicAttri
 		population.clear();
 	}
 
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		for (ADemoEntity e: population) {
+			if (type != e.getEntityType() || !type.equals(e.getEntityType()))
+				return false;
+		}
+		return true;
+	}
+
 }

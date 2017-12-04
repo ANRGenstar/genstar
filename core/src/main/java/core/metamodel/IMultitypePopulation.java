@@ -1,9 +1,12 @@
 package core.metamodel;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -42,6 +45,13 @@ public interface IMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	 * @return
 	 */
 	public IPopulation<E,A> getSubPopulation(String entityType);
+	
+	/**
+	 * Returns an Iterator on the given subpopulation 
+	 * @param entityType
+	 * @return
+	 */
+	public Iterator<E> iterateSubPopulation(String entityType);
 	
 	/** 
 	 * Adds an agent of a given type, and sets this type for this agent

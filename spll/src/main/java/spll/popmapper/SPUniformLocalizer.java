@@ -11,7 +11,7 @@ import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.popmapper.constraint.ISpatialConstraint;
 
-public class SPUniformLocalizer extends AbstratcLocalizer {
+public class SPUniformLocalizer extends AbstractLocalizer {
 
 	
 	/**

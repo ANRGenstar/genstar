@@ -8,6 +8,7 @@ import org.bouncycastle.crypto.RuntimeCryptoException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -18,7 +19,7 @@ import core.metamodel.value.IValue;
  * 
  * @author Samuel Thiriot
  */
-public final class GosplSubPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> 
+public final class GosplSubPopulation<E extends IEntity<A>, A extends DemographicAttribute<? extends IValue>> 
 				implements IPopulation<E, A> {
 
 	protected final GosplMultitypePopulation<E,A> multiPop;
@@ -113,6 +114,9 @@ public final class GosplSubPopulation<E extends IEntity<A>, A extends IAttribute
 		return set.toArray(a);
 	}
 
-	
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		return type.equals(this.type);
+	}
 	
 }

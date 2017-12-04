@@ -140,5 +140,15 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes(){
 		return population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
+	
+
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		for (ADemoEntity e: population) {
+			if (type != e.getEntityType() || !type.equals(e.getEntityType()))
+				return false;
+		}
+		return true;
+	}
 
 }
