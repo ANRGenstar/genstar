@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -474,16 +475,13 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			GeographicAttribute<IntegerValue> contAtt, GeographicAttribute<? extends IValue> keyAtt, SimpleFeatureType featType){
 		GeoEntityFactory ef = new GeoEntityFactory(Stream.of(contAtt, keyAtt).collect(Collectors.toSet()), 
 				featType);
-		@SuppressWarnings("unchecked")
-		Collection<SpllFeature> features = eMatches.keySet().stream()
-				.map(entity -> ef.createGeoEntity(
-						entity.getGeometry(), 
-						new HashMap() {{ 
-							put(contAtt, contAtt.getValueSpace().addValue(eMatches.get(entity).toString()));
-							put(keyAtt, entity.getValueForAttribute(keyAtt.getAttributeName()));
-						}} 
-						))
-				.collect(Collectors.toSet());
+		Collection<SpllFeature> features = new HashSet<>();
+		for(AGeoEntity<? extends IValue> entity : eMatches.keySet()) {
+			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
+			theMap.put(contAtt, contAtt.getValueSpace().addValue(eMatches.get(entity).toString()));
+			theMap.put(keyAtt, entity.getValueForAttribute(keyAtt.getAttributeName()));
+			features.add(ef.createGeoEntity(entity.getGeometry(), theMap));
+		}
 		return features;
 	}
 

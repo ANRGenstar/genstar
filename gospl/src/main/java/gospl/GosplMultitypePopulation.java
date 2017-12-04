@@ -13,9 +13,8 @@ import java.util.stream.Collectors;
 
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
-import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
@@ -27,8 +26,8 @@ import core.metamodel.value.IValue;
  * @param <E>
  * @param <A>
  */
-public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>>
-		implements IMultitypePopulation<E, A> {
+public class GosplMultitypePopulation<E extends ADemoEntity>
+		implements IMultitypePopulation<E, DemographicAttribute<? extends IValue>> {
 
 	/**
 	 * Associates to each type the corresponding agents.
@@ -39,7 +38,7 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	/**
 	 * Associates to each type the attributes known for this subpopulation.
 	 */
-	protected final Map<String,Set<A>> type2attributes = new HashMap<>();
+	protected final Map<String,Set<DemographicAttribute<? extends IValue>>> type2attributes = new HashMap<>();
 	
 	private int size = 0;
 	
@@ -84,8 +83,8 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	 * @param type
 	 * @return
 	 */
-	protected Set<A> getAttributesForType(String type) {
-		Set<A> setForType = type2attributes.get(type);
+	protected Set<DemographicAttribute<? extends IValue>> getAttributesForType(String type) {
+		Set<DemographicAttribute<? extends IValue>> setForType = type2attributes.get(type);
 		if (setForType == null) {
 			setForType = new HashSet<>();
 			type2attributes.put(type, setForType);
@@ -94,7 +93,7 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	}
 	
 	@Override
-	public Set<A> getPopulationAttributes() {
+	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
 		return type2attributes.values().stream()
 					.flatMap(coll -> coll.stream())
 					.collect(Collectors.toSet());
@@ -335,10 +334,10 @@ public class GosplMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	}
 
 	@Override
-	public IPopulation<E, A> getSubPopulation(String entityType) {
+	public IPopulation<E, DemographicAttribute<? extends IValue>> getSubPopulation(String entityType) {
 		if (!type2agents.containsKey(entityType))
 			throw new RuntimeException("unknown type "+entityType);
-		return new GosplSubPopulation<E,A>(this, entityType);
+		return new GosplSubPopulation<E>(this, entityType);
 	}
 
 	@Override
