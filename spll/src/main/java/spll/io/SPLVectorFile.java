@@ -22,6 +22,7 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.SchemaException;
+import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
@@ -29,6 +30,7 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
+import org.opengis.feature.type.AttributeType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.FactoryException;
@@ -36,6 +38,7 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.AGeoEntity;
@@ -44,6 +47,7 @@ import core.metamodel.value.IValue;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
 import spll.entity.iterator.GSFeatureIterator;
+import spll.io.exception.InvalidGeoFormatException;
 import spll.util.SpllGeotoolsAdapter;
 import spll.util.SpllUtil;
 
@@ -296,6 +300,55 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 
 	public DataStore getStore() {
 		return dataStore;
+	}
+	
+	public SPLVectorFile applyBuffer(Double minDist, Double maxDist, Boolean avoidOverlapping, String destination) throws IOException, SchemaException, InvalidGeoFormatException {
+		Set<SpllFeature> fts = new HashSet<>();
+		SimpleFeatureType schemaOld = this.getStore().getSchema(this.getStore().getNames().get(0));
+		
+		final StringBuilder specs = new StringBuilder();
+		specs.append("geometry:MultiPolygon"); 
+		for (final AttributeType at : schemaOld.getTypes()) {
+			if (Geometry.class.isAssignableFrom(at.getBinding())) continue;
+			String name = at.getName().toString().replaceAll("\"", "");
+			name = name.replaceAll("'", "");
+			specs.append(',').append(name).append(":String");
+		}
+		SimpleFeatureType schemNew = DataUtilities.createType("buffer",specs.toString());
+		schemNew = DataUtilities.createSubType( schemNew, null, schemaOld.getCoordinateReferenceSystem() );
+		
+		
+		GeoEntityFactory gef = new GeoEntityFactory((Set<GeographicAttribute<? extends IValue>>) getGeoAttributes(),schemNew );
+		
+		Quadtree quadTreeMin = null;
+		if (minDist != null && minDist >= 0) {
+			quadTreeMin = new Quadtree();
+			for (SpllFeature ft : features) {
+				Geometry g = ft.getGeometry().buffer(minDist);
+				quadTreeMin.insert(g.getEnvelopeInternal(), g);
+			}
+		}
+		for (SpllFeature ft : features) {
+			 SimpleFeatureBuilder builder = new SimpleFeatureBuilder((SimpleFeatureType) ft.getInnerFeature().getType());
+			 Geometry newGeom = ft.getGeometry().buffer(maxDist);
+			 if (quadTreeMin != null && ! quadTreeMin.isEmpty()) {
+				 List<Geometry> intersection = quadTreeMin.query(newGeom.getEnvelopeInternal());
+				 for (Geometry g : intersection) {
+					 newGeom =  newGeom.difference(g);
+				 }
+				 newGeom.buffer(0.0);
+			 }
+			fts.add(gef.createGeoEntity(newGeom, ft.getAttributeMap()));
+			System.out.println("" + fts.size() + "/" + features.size()); 
+		}
+		
+		if (avoidOverlapping) {
+			
+		}
+		SPLGeofileBuilder builder = new SPLGeofileBuilder();
+		builder.setFeatures(fts);
+		builder.setFile(new File(destination));
+		return builder.buildShapeFile();
 	}
 
 	public String toString() {
