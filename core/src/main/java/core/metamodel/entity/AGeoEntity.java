@@ -3,7 +3,10 @@ package core.metamodel.entity;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
@@ -32,7 +35,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	}
 
 	@Override
-	public Collection<GeographicAttribute<? extends V>> getAttributes(){
+	public Collection<GeographicAttribute<? extends V>> getAttributes() {
 		return attributes.keySet();
 	}
 	
@@ -150,5 +153,46 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	public void setEntityType(String type) {
 		this.type = type;
 	}
+	
+
+	@Override
+	public boolean hasParent() {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
+	@Override
+	public IEntity<?> getParent() {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
+	@Override
+	public void setParent(IEntity<?> e) {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
+	@Override
+	public boolean hasChildren() {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
+	@Override
+	public int getCountChildren() {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
+	@Override
+	public Set<IEntity<?>> getChildren() {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
+	@Override
+	public void addChild(IEntity<?> e) {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");	}
+
+	@Override
+	public void addChildren(Collection<IEntity<?>> e) {
+		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+
 	
 }

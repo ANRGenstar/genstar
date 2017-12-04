@@ -112,6 +112,7 @@ public class DemographicAttributeFactory {
 		}
 		final IValueSpace<? extends IValue> vs = attribute.getValueSpace(); 
 		values.stream().forEach(val -> vs.addValue(val));
+		System.err.println("created attribute "+name+" "+dataType);
 		return attribute;
 	}
 	

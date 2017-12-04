@@ -1,6 +1,8 @@
 package core.util.data;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import core.metamodel.value.IValue;
@@ -29,7 +31,7 @@ public enum GSEnumDataType {
 
 	private Class<? extends IValue> wrapperClass;
 	private Class<?> concretClass;
-
+	
 	private GSEnumDataType(Class<?> concretClass,
 			Class<? extends IValue> wrapperClass){
 		this.wrapperClass = wrapperClass;
@@ -64,14 +66,54 @@ public enum GSEnumDataType {
 	public Class<? extends IValue> getGenstarType(){
 		return wrapperClass;
 	}
+	
+	private static Map<Class,GSEnumDataType> wrapperClass2enum;
 
+	/**
+	 * Returns a datatype for a IValue type
+	 * @param clazz
+	 * @return
+	 */
 	public static GSEnumDataType getType(Class<? extends IValue> clazz) {
-		Optional<GSEnumDataType> opt = Arrays.asList(GSEnumDataType.values()).stream()
-				.filter(type -> type.getGenstarType().equals(clazz)).findAny();
-		if(opt.isPresent())
-			return opt.get();
+		
+		if (wrapperClass2enum == null) {
+			wrapperClass2enum = new HashMap<>();
+			for (GSEnumDataType dt: GSEnumDataType.values()) {
+				wrapperClass2enum.put(dt.getGenstarType(), dt);
+			}
+		}
+		
+		GSEnumDataType res = wrapperClass2enum.get(clazz);
+		if (res != null)
+			return res;
 		throw new IllegalArgumentException(clazz.getCanonicalName()+" is not linked to any "
-			+GSEnumDataType.class.getCanonicalName());
+				+GSEnumDataType.class.getCanonicalName());
+		
 	}
+	
+	private static Map<Class<?>,GSEnumDataType> concretClass2enum;
+
+	public static GSEnumDataType getTypeForJavaType(Class<?> clazz) {
+		
+		if (concretClass2enum == null) {
+			concretClass2enum = new HashMap<>();
+			for (GSEnumDataType dt: GSEnumDataType.values()) {
+				concretClass2enum.put(dt.getInnerType(), dt);
+			}
+		}
+		
+		// hardcoded :-(
+		// Long can be decoded as Int !
+		if (clazz.equals(Long.class))
+			return GSEnumDataType.Integer;
+		
+		GSEnumDataType res = concretClass2enum.get(clazz);
+		if (res != null)
+			return res;
+		throw new IllegalArgumentException(clazz.getCanonicalName()+" is not linked to any "
+				+GSEnumDataType.class.getCanonicalName());
+		
+	}
+	
 	
 }

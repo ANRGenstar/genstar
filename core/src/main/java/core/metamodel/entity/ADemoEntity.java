@@ -3,10 +3,14 @@ package core.metamodel.entity;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
@@ -15,6 +19,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 
 	private Map<DemographicAttribute<? extends IValue>, IValue> attributes;
 
+	
 	/**
 	 * The type of the agent (like "household" or "building"), 
 	 * or null if undefined
@@ -138,6 +143,64 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 		this.type = type;
 	}
 	
+	/**
+	 * The parent entity, if any
+	 */
+	private IEntity<?> parent = null;
 	
+	/**
+	 * The set of children, if any. 
+	 * Else remains null (lazy creation)
+	 */
+	private Set<IEntity<?>> children = null;
+	
+	@Override
+	public final boolean hasParent() {
+		return parent != null;
+	}
+
+	@Override
+	public final IEntity<?> getParent() {
+		return parent;
+	}
+
+	@Override
+	public final void setParent(IEntity<?> e) {
+		this.parent = e;		
+	}
+	
+	@Override
+	public final boolean hasChildren() {
+		return children != null & !children.isEmpty();
+	}
+
+	@Override
+	public final int getCountChildren() {
+		if (children == null)
+			return 0;
+		return children.size();
+	}
+
+	@Override
+	public final Set<IEntity<?>> getChildren() {
+		if (children == null)
+			return Collections.emptySet();
+		return Collections.unmodifiableSet(children);
+	}
+
+	@Override
+	public final void addChild(IEntity<?> e) {
+		if (children == null)
+			children = new HashSet<>();
+		children.add(e);
+	}
+
+	@Override
+	public final void addChildren(Collection<IEntity<?>> e) {
+		if (children == null)
+			children = new HashSet<>();
+		children.addAll(e);
+	}
+
 	
 }

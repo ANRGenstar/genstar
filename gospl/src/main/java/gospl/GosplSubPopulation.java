@@ -18,7 +18,7 @@ import core.metamodel.value.IValue;
  * 
  * @author Samuel Thiriot
  */
-public class GosplSubPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> 
+public final class GosplSubPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> 
 				implements IPopulation<E, A> {
 
 	protected final GosplMultitypePopulation<E,A> multiPop;
@@ -33,8 +33,7 @@ public class GosplSubPopulation<E extends IEntity<A>, A extends IAttribute<? ext
 
 	@Override
 	public Set<A> getPopulationAttributes() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.multiPop.getAttributesForType(this.type);
 	}
 	
 	@Override

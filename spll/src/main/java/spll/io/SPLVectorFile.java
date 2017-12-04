@@ -3,6 +3,7 @@ package spll.io;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.util.AbstractMap;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DataUtilities;
 import org.geotools.data.FeatureSource;
+import org.geotools.data.shapefile.ShapefileDataStore;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
@@ -125,26 +127,35 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		features = new HashSet<>();
 		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(Filter.INCLUDE)).features();
 		GeoEntityFactory gef = new GeoEntityFactory();
+		System.out.println("loading from SPLVectorFile with attributes "+attributes);
 		while (fItt.hasNext())
 			features.add(gef.createGeoEntity(fItt.next(), attributes));
 	}
 
-	protected SPLVectorFile(File file, List<String> attributes) throws IOException{
-		this(DataStoreFinder.getDataStore(
-				Stream.of(
-						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), attributes
-				);
+	protected SPLVectorFile(File file, Charset charset, List<String> attributes) throws IOException{
+		this(readDataStoreFromFile(file, charset), attributes);
 	}
 
-	protected SPLVectorFile(File file) throws IOException{
-		this(DataStoreFinder.getDataStore(
-				Stream.of(
-						new AbstractMap.SimpleEntry<String, URL>("url", file.toURI().toURL()))
-				.collect(Collectors.toMap(Entry::getKey, Entry::getValue))), Collections.emptyList()
-				);
+	protected SPLVectorFile(File file, Charset charset) throws IOException{
+		this(readDataStoreFromFile(file, charset), Collections.EMPTY_LIST);
 	}
 
+	private static DataStore readDataStoreFromFile(File file, Charset charset) throws IOException {
+		
+		Map<String,Object> parameters = new HashMap<>();
+		parameters.put("url", file.toURI().toURL());
+		
+		DataStore datastore = DataStoreFinder.getDataStore(parameters);
+		
+		// set the charset (if possible)
+		if (charset != null 
+			&& datastore instanceof ShapefileDataStore) {
+			((ShapefileDataStore)datastore).setCharset(charset);
+		}
+		
+		return datastore;
+	}
+	
 	// ------------------- GENERAL CONTRACT ------------------- //
 
 	@Override

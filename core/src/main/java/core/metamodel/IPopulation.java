@@ -8,8 +8,8 @@ import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
- * A population is a collection of entity characterize by a set of attribute.
- * Each attribute is made of one or more value, and a particular entity should have
+ * A population is a collection of entity characterized by a set of attribute.
+ * Each attribute is made of one or more values, and a particular entity should have
  * a precise value for each.
  * <p>
  * More formally, an {@link IPopulation} is a {@link Collection} of {@link IEntity}
@@ -22,6 +22,6 @@ import core.metamodel.value.IValue;
  */
 public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> extends Collection<E> {
 
-	Set<A> getPopulationAttributes();
+	public Set<A> getPopulationAttributes();
 	
 }

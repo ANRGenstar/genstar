@@ -60,9 +60,16 @@ public class SpllGeotoolsAdapter {
 	 * @return
 	 */
 	public GeographicAttribute<? extends IValue> getGeographicAttribute(Property property) {
-		return GeographicAttributeFactory.getFactory().createAttribute(property.getName().getLocalPart(), 
+		
+		return GeographicAttributeFactory.getFactory().createAttribute(
+					property.getName().getLocalPart(), 
+					GSEnumDataType.getTypeForJavaType(property.getType().getBinding())
+					);
+		/*
+		return 
 				Stream.of(GSEnumDataType.Boolean, GSEnumDataType.Continue, GSEnumDataType.Integer, GSEnumDataType.Nominal)
 				.filter(gsType -> gsType.getInnerType().equals(property.getType().getBinding())).findAny().get());
+				*/
 	}
 	
 }
