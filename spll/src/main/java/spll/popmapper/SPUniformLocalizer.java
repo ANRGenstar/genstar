@@ -51,7 +51,7 @@ public class SPUniformLocalizer extends AbstractLocalizer {
 			}
 			if (removeObject) possibleNests.remove(index);
 			entity.setNest(nest);
-			entity.setLocation(pointInLocalizer.pointIn(nest.getGeometry()));
+			entity.setLocation(pointInLocalizer.pointIn(nest.getProxyGeometry()));
 			
 		}
 		return entities.stream().filter(a -> a.getLocation() == null)

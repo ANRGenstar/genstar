@@ -128,7 +128,6 @@ public class GeoEntityFactory {
 			if (attribute == null) {
 				// if the corresponding attribute does not yet exist, we create it on the fly
 				attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
-				System.out.println("discovered attribute: "+attribute.getAttributeName());
 				featureAttributes.put(name, attribute);
 			}
 			if (attribute == null)

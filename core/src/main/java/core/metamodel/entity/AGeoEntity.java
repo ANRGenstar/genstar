@@ -28,6 +28,12 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	
 
 	/**
+	 * The proxy use for the localization of agents and area computation: 
+	 * by default, the geometry of the entity
+	 */
+	protected Geometry proxyGeometry;
+	
+	/**
 	 * The type of the agent (like "household" or "building"), 
 	 * or null if undefined
 	 */
@@ -129,7 +135,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	 * @return
 	 */
 	public double getArea(){
-		return getGeometry().getArea();
+		return getProxyGeometry().getArea();
 	}
 	
 	@Override
@@ -216,6 +222,15 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	public void addChildren(Collection<IEntity<?>> e) {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
 	}
+	
+	public Geometry getProxyGeometry() {
+		return proxyGeometry == null ? getGeometry() : proxyGeometry;
+	}
+
+	public void setProxyGeometry(Geometry proxyGeometry) {
+		this.proxyGeometry = proxyGeometry;
+	}
+
 
 	
 }

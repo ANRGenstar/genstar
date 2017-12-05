@@ -215,7 +215,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 	}
 
 	// ----------------------------------------------------- //
-	// -------------------- CONSTRIANTS -------------------- //
+	// -------------------- CONSTRAINTS -------------------- //
 	// ----------------------------------------------------- //
 
 	@Override
@@ -276,10 +276,10 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 							.filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt))
 							.collect(Collectors.toList());
 					if (keyAttMap == null || map == null) {
-						localizationInNest(entities, globalfeature.getGeometry());
+						localizationInNest(entities, globalfeature.getProxyGeometry());
 					}
 					else {
-						localizationInNestWithNumbers(entities, globalfeature.getGeometry());
+						localizationInNestWithNumbers(entities, globalfeature.getProxyGeometry());
 					}
 				}
 			}
@@ -356,7 +356,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			if (map.getGeoGSFileType().equals(GeoGSFileType.RASTER))  {
 				if (!vals.containsKey(feature.getGenstarName())) continue;
 			}
-			localizationConstraint.setBounds(feature.getGeometry());
+			localizationConstraint.setBounds(feature.getProxyGeometry());
 			long val = Math.round(population.size() *vals.get(feature.getGenstarName()) / tot);
 			if (entities.isEmpty()) break;
 			for (ISpatialConstraint cr : constraints) {
@@ -476,7 +476,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
 			theMap.put(contAtt, contAtt.getValueSpace().addValue(eMatches.get(entity).toString()));
 			theMap.put(keyAtt, entity.getValueForAttribute(keyAtt.getAttributeName()));
-			features.add(ef.createGeoEntity(entity.getGeometry(), theMap));
+			features.add(ef.createGeoEntity(entity.getProxyGeometry(), theMap));
 		}
 		return features;
 	}

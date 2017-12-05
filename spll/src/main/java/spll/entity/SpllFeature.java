@@ -33,7 +33,7 @@ public class SpllFeature extends AGeoEntity<IValue> {
 	
 	@Override
 	public double getArea() {
-		return this.getGeometry().getArea();
+		return this.getProxyGeometry().getArea();
 	}
 	
 	@Override
