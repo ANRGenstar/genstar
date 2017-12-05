@@ -35,6 +35,7 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -77,6 +78,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	 */
 	protected SPLVectorFile(DataStore dataStore, Set<SpllFeature> features) throws IOException {
 		this.dataStore = dataStore;
+		this.features = features;
 		SimpleFeatureType schema = dataStore.getSchema(dataStore.getTypeNames()[0]);
 		this.crs = schema.getCoordinateReferenceSystem();
 		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(dataStore
@@ -86,19 +88,22 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		// Tests whether the dataStore contains all SimpleFeature that are within the GSFeature set
 		// WARNING: for weird reasons, when a Feature is stored in a DataStore every numerical value
 		// are transposed to a double value; hence fail to recognize equality with set integer value
-		while(fItt.hasNext()){
+		/*while(fItt.hasNext()){
 			SimpleFeature feat = fItt.next();
 			for(Property prop : feat.getProperties()){
 				boolean match = false;
 				for(SpllFeature feature : features){
-					IValue val = feature.getValueForAttribute(prop.getName().toString());
 					if(prop.getName().toString().equals(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME)){
 						if(prop.getValue().toString().equals(feature.getGeometry().toString()))
 							match = true;
-					} else if(val.getValueSpace().getType().isNumericValue()
+					} else {
+						IValue val = feature.getValueForAttribute(prop.getName().toString());
+						if(val.getValueSpace().getType().isNumericValue()
+					
 							&& prop.getValue().toString().equals(feature.getInnerFeature()
 									.getProperty(prop.getName()).getValue().toString())){
-						match = true;
+							match = true;
+						}
 					}
 				}
 				if(!match)
@@ -108,8 +113,8 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 							+ features.stream().map(gsf -> gsf.getInnerFeature().getProperty(prop.getName()).toString())
 							.collect(Collectors.joining("; ")));
 			}	
-		}
-		this.features = features;
+		}*/
+		
 	}
 
 	/**
@@ -127,7 +132,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		features = new HashSet<>();
 		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(Filter.INCLUDE)).features();
 		GeoEntityFactory gef = new GeoEntityFactory();
-		System.out.println("loading from SPLVectorFile with attributes "+attributes);
 		while (fItt.hasNext())
 			features.add(gef.createGeoEntity(fItt.next(), attributes));
 	}
@@ -192,8 +196,8 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	}
 	
 	@Override
-	public IGSGeofile<SpllFeature, IValue> transferTo(
-			Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer,
+	public IGSGeofile<SpllFeature, IValue> transferTo(File destination,
+			Map<? extends AGeoEntity<? extends IValue>,Number> transfer,
 			GeographicAttribute<? extends IValue> attribute) throws IllegalArgumentException, IOException {
 		if(features.stream().anyMatch(feat -> !transfer.containsKey(feat)))
 			throw new IllegalArgumentException("There is a mismatch between provided set of geographical entity and "
@@ -207,23 +211,25 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 						attribute.toString(), 
 						attrSet, 
 						this.crs, 
-						this.dataStore.getFeatureSource(dataStore.getTypeNames()[0]
-						).getSchema().getGeometryDescriptor()));
+						this.dataStore.getFeatureSource(dataStore.getTypeNames()[0]).getSchema().getGeometryDescriptor()));
 		
 		Collection<SpllFeature> newFeatures = new HashSet<>();
 		for(AGeoEntity<? extends IValue> entity : this.features) {
 			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
-			theMap.put(attribute, transfer.get(entity));
+			
+			theMap.put(attribute, attribute.getValueSpace().getInstanceValue(transfer.get(entity).toString()));
 			newFeatures.add(gef.createGeoEntity(entity.getGeometry(), theMap));
 		}
 		
 		IGSGeofile<SpllFeature, IValue> res = null;
 		try {
-			res = new SPLGeofileBuilder().setFeatures(newFeatures).buildShapeFile();
+			res =  new SPLGeofileBuilder().setFeatures(newFeatures).setFile(destination).buildShapeFile();
 		} catch (SchemaException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			System.exit(1);
+		} catch (InvalidGeoFormatException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return res;
 	}
@@ -339,7 +345,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 				 newGeom.buffer(0.0);
 			 }
 			fts.add(gef.createGeoEntity(newGeom, ft.getAttributeMap()));
-			System.out.println("" + fts.size() + "/" + features.size()); 
 		}
 		
 		if (avoidOverlapping) {

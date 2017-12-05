@@ -120,8 +120,8 @@ public class SPLGeofileBuilder {
 	 */
 	public SPLGeofileBuilder setFile(File gisFile) 
 			throws InvalidGeoFormatException, FileNotFoundException {
-		chekFile();
 		this.gisFile = gisFile;
+		chekFile(SPLGisFileExtension.values());
 		return this;
 	}
 
@@ -372,12 +372,14 @@ public class SPLGeofileBuilder {
 	 */
 	public SPLVectorFile buildShapeFile() throws IOException, SchemaException {
 		if(!chekAndRenameFile(SPLGisFileExtension.shp))
-			throw new RuntimeException("Not able to build requested "+this.gisFile+" shape file");
-		if(population == null && features == null || features.isEmpty())
+				throw new RuntimeException("Not able to build requested "+this.gisFile+" shape file");
+		
+		if(population == null && (features == null || features.isEmpty()))
 			throw new IllegalStateException("To build shape file you must first setup a sources, either features or population");
-
+		
 		Map<String,Serializable> key2m = new HashMap<>();
-		key2m.put("url", gisFile.toURI().toURL());
+		if (gisFile != null) key2m.put("url", gisFile.toURI().toURL());
+		else key2m.put("url", File.createTempFile("tmp_file", ".shp").toURI().toURL());
 		key2m.put("create spatial index", Boolean.TRUE);
 		
 		DataStore newDataStore = new ShapefileDataStoreFactory().createNewDataStore(key2m);
@@ -390,7 +392,7 @@ public class SPLGeofileBuilder {
 				Map<ADemoEntity, Geometry> geoms = population
 						.stream().filter(e -> e.getLocation() != null)
 						.collect(Collectors.toMap(e -> e, e ->  e.getLocation()));
-				final StringBuilder specs = new StringBuilder(population.size() * 20);
+				final StringBuilder specs = new StringBuilder();
 				specs.append("geometry:" + getGeometryType(geoms.values()));
 				List<String> atts = new ArrayList<>();
 				for (final DemographicAttribute<? extends IValue> at : population.getPopulationAttributes()) {
@@ -398,25 +400,33 @@ public class SPLGeofileBuilder {
 					String name = at.getAttributeName().replaceAll("\"", "").replaceAll("'", "");
 					specs.append(',').append(name).append(':').append("String");
 				}
-				
 				newDataStore.createSchema(DataUtilities.createType("Pop", specs.toString()));
 				FeatureWriter<SimpleFeatureType, SimpleFeature> fw = newDataStore
 						.getFeatureWriter(newDataStore.getTypeNames()[0], Transaction.AUTO_COMMIT);
 				
 				for (final ADemoEntity entity : population) {
-					((SimpleFeature) fw.next()).setAttributes(
-							Stream.concat(Stream.of(geoms.get(entity)),
-							entity.getValues().stream()).collect(Collectors.toList()));
-					fw.write();
+					
+						SimpleFeature f = ((SimpleFeature) fw.next());
+						
+						f.setAttributes(
+								Stream.concat(Stream.of(geoms.get(entity)),
+								entity.getValues().stream()).collect(Collectors.toList()));
+						fw.write();
+						fw.hasNext();
+						
 				}
 				
 				try {
-					FileWriter fwz = new FileWriter(this.gisFile.getAbsolutePath().replace(".shp", ".prj"));
-					fwz.write(population.getCrs().toString());
-					fwz.close();
+					if (gisFile != null) {
+						FileWriter fwz = new FileWriter(this.gisFile.getAbsolutePath().replace(".shp", ".prj"));
+						fwz.write(population.getCrs().toString());
+						
+						fwz.close();
+					}
 				} catch (final IOException e) {
 					e.printStackTrace();
 				}
+				fw.close();
 				// 1.2 - with extended feature to add to spatial entities
 			} else { 
 				// TODO
@@ -559,13 +569,13 @@ public class SPLGeofileBuilder {
 	 */
 	private boolean chekAndRenameFile(SPLGisFileExtension expectedExtension) throws IOException {
 		try {
-			chekFile(SPLGisFileExtension.shp);
+			chekFile(expectedExtension);
+			return true;
 		} catch (FileNotFoundException e) {
 			return this.gisFile.createNewFile();
 		} catch (InvalidGeoFormatException e) {
 			return gisFile.renameTo(new File(FilenameUtils
-					.removeExtension(gisFile.getAbsolutePath())+"."+SPLGisFileExtension.shp));
+					.removeExtension(gisFile.getAbsolutePath())+"."+expectedExtension));
 		}
-		return false;
 	}
 }

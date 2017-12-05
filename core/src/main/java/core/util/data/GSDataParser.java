@@ -277,7 +277,7 @@ public class GSDataParser {
 	 */
 	public Double getDouble(String value) {
 	    if (value == null || value.isEmpty())
-	    	throw new NumberFormatException(value);
+	    		throw new NumberFormatException(value);
 
 	    try {
 	    		return Double.valueOf(value);

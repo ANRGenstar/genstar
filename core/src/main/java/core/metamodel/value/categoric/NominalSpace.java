@@ -45,6 +45,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 	
 	@Override
+	public NominalValue getInstanceValue(String value) {
+		return new NominalValue(this, ct.getFormatedString(value));
+	}
+	
+	@Override
 	public NominalValue addValue(String value) throws IllegalArgumentException {
 		String val = ct.getFormatedString(value);
 		NominalValue nv = values.get(val);

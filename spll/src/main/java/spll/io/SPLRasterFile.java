@@ -144,8 +144,8 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	}
 	
 	@Override
-	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(
-			Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer,
+	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(File destination,
+			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
 			GeographicAttribute<? extends IValue> attribute) 
 					throws IllegalArgumentException, IOException {
 		if(!attribute.getValueSpace().getType().isNumericValue())
@@ -156,11 +156,9 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 		float[][] bands = new float[this.getRowNumber()][this.getColumnNumber()]; 
 		
 		Iterator<SpllPixel> it = this.getGeoEntityIterator();
-		GSDataParser gsdp = new GSDataParser();
 		while(it.hasNext()) {
 			SpllPixel pix = it.next();
-			IValue value = transfer.get(pix);
-			bands[pix.getGridX()][pix.getGridY()] = gsdp.getDouble(value.getStringValue()).floatValue(); 
+			bands[pix.getGridX()][pix.getGridY()] = transfer.get(pix).floatValue(); 
 		}
 		
 		IGSGeofile<SpllPixel, ContinuousValue> res = null;

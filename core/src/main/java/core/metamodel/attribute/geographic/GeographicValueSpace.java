@@ -22,8 +22,8 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	
 	public GeographicValueSpace(IValueSpace<V> innerValueSpace,
 			Collection<V> noDataValues){
-		this.innerValueSpace = innerValueSpace;
-		this.noDataValues = new HashSet<>(noDataValues);
+		this(innerValueSpace);
+		this.noDataValues.addAll(noDataValues);
 	}
 	
 	// ------------------- GEO RELATED CONTRACT ------------------- //
@@ -51,6 +51,11 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	}
 
 	// ---------------------- ADDER CONTRACT ---------------------- //
+	
+	@Override
+	public V getInstanceValue(String value) {
+		return this.innerValueSpace.getInstanceValue(value);
+	}
 	
 	@Override
 	public V addValue(String value) throws IllegalArgumentException {

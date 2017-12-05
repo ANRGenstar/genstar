@@ -44,11 +44,13 @@ public interface IValueSpace<V extends IValue> {
 	public static final String TYPE = "TYPE";
 	public static final String VALUES = "VALUES";
 	
+	
+	public V getInstanceValue(String value);
+	
 	/**
-	 * Get the value from the theoretical value space if complied with. If the
-	 * proposed value does not feet theoretical requirement (e.g. characters chain
-	 * within a continuous "double" value space) then an exception is raised
-	 * TODO: refaire
+	 * Create, add and return requested value according to value space specification. Must be compliant
+	 * with concrete value type (or throw an exception) - contract should be define by {@link #getInstanceValue(String)}.
+	 * 
 	 * @param value
 	 * @return
 	 */

@@ -27,6 +27,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.entity.AGeoEntity;
@@ -130,22 +131,18 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 	}
 
 	@Override
-	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> estimateMatcher(File match) 
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> estimateMatcher(File destination) 
 			throws MismatchedDimensionException, IllegalArgumentException, IOException, 
-			TransformException, SchemaException {
+			TransformException, SchemaException { 
 		if(this.match == null)
 			throw new NullPointerException("To call for a matcher, you need first to set one while match variable is null");
 
 		// Logger to track process
 		gspu = new GSPerformanceUtil("Create a file to store entity-space match (called 'matcher')", LogManager.getLogger());
-		
-		Map<? extends AGeoEntity<? extends IValue>, Number> transfer = this.estimateMatches(this.match, this.keyAttMatch, this.keyAttMap);
+		Map<? extends AGeoEntity<? extends IValue>, Number> transfer = this.estimateMatches(this.match, this.keyAttMatch, this.keyAttPop);
 		final GeographicAttribute<? extends IValue> transferAttribute = GeographicAttributeFactory.getFactory()
-				.createIntegerAttribute("contingency");
-		Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transferMap = transfer.keySet().stream()
-				.collect(Collectors.toMap(Function.identity(), 
-						entity -> transferAttribute.getValueSpace().addValue(transfer.get(entity).toString())));
-		return this.match.transferTo(transferMap, transferAttribute);
+				.createIntegerAttribute("count");
+		return this.match.transferTo(destination, transfer, transferAttribute);
 	}
 
 	// ----------------------------------------------------- //
@@ -154,7 +151,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 
 	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> getMapperOutput(){
 		return map;
-	}
+	} 
 	
 	@Override
 	public void setMapper(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> map, String mapAttribute) {
@@ -168,13 +165,12 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException, 
 	MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException {
-		String extension = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
-				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString();
+		File tmpFile = File.createTempFile("tempMapper", ".shp");
+		tmpFile.deleteOnExit();
 		String keyAttribute = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
 				GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
-		File tmp = File.createTempFile("match", "."+extension);
-		tmp.deleteOnExit();
-		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
+		
+		this.setMapper(this.estimateMatcher(tmpFile), keyAttribute, ancillaryFileList, 
 				varList, lmRegressionOLS, splUniformNormalizer);
 	}
 
@@ -275,6 +271,8 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			else {
 				for (AGeoEntity<? extends IValue> globalfeature : match.getGeoEntity()) {
 					String valKeyAtt = globalfeature.getValueForAttribute(keyAttMatch).getStringValue();
+					
+					
 					List<SpllEntity> entities = population.stream()
 							.filter(s -> s.getValueForAttribute(keyAttPop).getStringValue().equals(valKeyAtt))
 							.collect(Collectors.toList());
@@ -390,22 +388,22 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 					throws IOException {
 		// Collection of entity to match
 		Collection<? extends AGeoEntity<? extends IValue>> entities = matchFile.getGeoEntity();
-
 		// Setup key attribute of entity mapped to the number of match
 		Map<String, Integer> attMatches = entities.stream()
 				.collect(Collectors.toMap(e -> e.getValueForAttribute(keyAttributeSpace).getStringValue(), e -> 0));
-
+		
 		// Test if each entity has it's own key attribute, and if not through an exception
 		if(attMatches.size() != entities.size())
 			throw new IllegalArgumentException("Define matcher does not fit key attribute contract: some entity has the same key value");
 
+		
 		// DOES THE MATCH
-		population.stream().map(e -> e.getValueForAttribute(keyAttributePopulation).getStringValue())
-		.forEach(value -> attMatches.put(value, attMatches.get(value)+1));
-
+		population.stream().map(e -> e.getValueForAttribute(keyAttributePopulation)).filter(e -> attMatches.containsKey(e)).forEach(value -> attMatches.put(value.getStringValue(), attMatches.get(value.getStringValue())+1));
+		
 		this.gspu.sysoStempPerformance("Matches ("+ attMatches.size() +") have been counted (Total = "
 				+attMatches.values().stream().reduce(0, (i1, i2) -> i1 + i2).intValue()+") !", this);
 
+		
 		// Bind each key attribute with its entity to fasten further processes
 		return entities.stream().collect(Collectors.toMap(e -> e, 
 				e -> attMatches.get(e.getValueForAttribute(keyAttributeSpace).getStringValue())));

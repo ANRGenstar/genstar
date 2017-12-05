@@ -84,7 +84,7 @@ public interface ISPLocalizer {
 	 * @throws MismatchedDimensionException 
 	 * @throws SchemaException 
 	 */
-	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> estimateMatcher(File match) 
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> estimateMatcher(File destination) 
 			throws MismatchedDimensionException, IllegalArgumentException, IOException, TransformException, SchemaException;
 	
 	
