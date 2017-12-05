@@ -89,7 +89,18 @@
 		</dependency>
 		 -->	
 		 
-		 <!-- https://mvnrepository.com/artifact/net.sourceforge.htmlcleaner/htmlcleaner -->
+	<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
+	<!--  for the storage of populations in a database for quick querying -->
+	<dependency>
+	    <groupId>org.hsqldb</groupId>
+	    <artifactId>hsqldb</artifactId>
+	    <version>2.4.0</version>
+	    <scope>test</scope>
+	</dependency>
+			 
+			 
+	<!-- https://mvnrepository.com/artifact/net.sourceforge.htmlcleaner/htmlcleaner -->
+	<!-- for the parsing of data dictionnaries from webpages --> 
 	<dependency>
     	<groupId>net.sourceforge.htmlcleaner</groupId>
     	<artifactId>htmlcleaner</artifactId>

@@ -23,6 +23,8 @@ import core.metamodel.io.IGSGeofile;
 import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
 import gospl.GosplMultitypePopulation;
+import gospl.GosplPopulation;
+import gospl.GosplPopulationInDatabase;
 import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.popmapper.constraint.ISpatialConstraint;
@@ -61,23 +63,6 @@ public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 		resultPopulation = new GosplMultitypePopulation<>();
 	}
 
-	/*
-	@Override
-	public boolean addConstraint(ISpatialConstraint constraint) {
-		return constraints.add(constraint);
-	}
-
-	@Override
-	public void setConstraints(List<ISpatialConstraint> constraints) {
-		this.constraints = constraints;
-	}
-
-	@Override
-	public List<ISpatialConstraint> getConstraints() {
-		return Collections.unmodifiableList(constraints);
-	}
-	*/
-
 	@Override
 	public void setPopulationOfParentCandidates(SpllPopulation populationOfParentCandidates, String parentType) {
 		
@@ -85,7 +70,7 @@ public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 		
 		this.parentType = parentType;
 		this.populationOfParentCandidates = populationOfParentCandidates;
-		
+				
 		// gives the mapping between the SPLentities before and after clone.
 		Map<SpllEntity,SpllEntity> mappingBetweenEntities = new HashMap<>();
 		

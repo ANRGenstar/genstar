@@ -1,0 +1,5 @@
+VAR_CODE;VAR_LIB;MOD_CODE;MOD_LIB
+gender;"genre"
+age3;"age 3"
+salarie;"status"
+"actif";"actif"

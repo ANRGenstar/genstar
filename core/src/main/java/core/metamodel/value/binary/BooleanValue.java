@@ -42,7 +42,7 @@ public class BooleanValue implements IValue {
 	public boolean getActualValue(){
 		return value;
 	}
-
+	
 	@Override
 	public IValueSpace<BooleanValue> getValueSpace() {
 		return bs;
