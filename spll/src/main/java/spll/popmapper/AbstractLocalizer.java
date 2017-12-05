@@ -14,7 +14,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -27,7 +26,6 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.entity.AGeoEntity;
@@ -165,9 +163,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException, 
 	MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException {
-		String keyAttribute = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
-				GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
-		
+		String keyAttribute = "count" ;
 		File tmp = File.createTempFile("match", "."+ (match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
 				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString()));
 		tmp.deleteOnExit();
@@ -175,20 +171,6 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
 				varList, lmRegressionOLS, splUniformNormalizer);
 		
-		/*
-		 * 	File tmpFile = File.createTempFile("tempMapper", ".shp");
-		tmpFile.deleteOnExit();
-		String keyAttribute = "count";//GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0;
-			//	GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
-		
-		File tmp = File.createTempFile("match", "."+ (match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
-				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString()));
-		tmp.deleteOnExit();
-		
-		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
-				varList, lmRegressionOLS, splUniformNormalizer);
-	
-		 */
 	}
 
 	@Override

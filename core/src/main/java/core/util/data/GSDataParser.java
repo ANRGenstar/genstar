@@ -325,7 +325,7 @@ public class GSDataParser {
 		switch (this.getValueType(stringVal)) {
 		case Continue:
 			return Double.valueOf(getNumbers(stringVal, 
-					NumMatcher.DOUBLE_MATCH_FR.getMatch()).get(0));
+					NumMatcher.DOUBLE_MATCH_ENG.getMatch()).get(0));
 		case Integer:
 			return Integer.valueOf(getNumbers(stringVal,
 					NumMatcher.INT_MATCH.getMatch()).get(0));

@@ -1,6 +1,5 @@
 package spll.entity;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -176,7 +175,7 @@ public class GeoEntityFactory {
 				attribute = opAtt.get();
 			else {
 				attribute = GeographicAttributeFactory.getFactory().createContinueAttribute(bandsName);
-				//attribute.getValueSpace().addExcludedValues(Arrays.asList(SPLRasterFile.DEF_NODATA));
+				attribute.getValueSpace().addExceludedValue(SPLRasterFile.DEF_NODATA.toString());
 				pixelAttributes.add(attribute);
 			}
 			
