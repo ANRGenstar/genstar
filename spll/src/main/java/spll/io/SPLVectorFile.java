@@ -27,7 +27,6 @@ import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.Feature;
-import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeType;
@@ -35,7 +34,6 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -196,15 +194,9 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	}
 	
 	@Override
-<<<<<<< HEAD
-	public IGSGeofile<SpllFeature, IValue> transferTo(
-			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
-			GeographicAttribute<? extends IValue> attribute, File toFile) throws IllegalArgumentException, IOException {
-=======
 	public IGSGeofile<SpllFeature, IValue> transferTo(File destination,
 			Map<? extends AGeoEntity<? extends IValue>,Number> transfer,
 			GeographicAttribute<? extends IValue> attribute) throws IllegalArgumentException, IOException {
->>>>>>> ed70d76acd5f71459c8ce9d718f1eaa926d7372e
 		if(features.stream().anyMatch(feat -> !transfer.containsKey(feat)))
 			throw new IllegalArgumentException("There is a mismatch between provided set of geographical entity and "
 					+ "geographic entity of this SPLVector file "+this.toString());
@@ -222,24 +214,15 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		Collection<SpllFeature> newFeatures = new HashSet<>();
 		for(AGeoEntity<? extends IValue> entity : this.features) {
 			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
-<<<<<<< HEAD
-=======
-			
->>>>>>> ed70d76acd5f71459c8ce9d718f1eaa926d7372e
 			theMap.put(attribute, attribute.getValueSpace().getInstanceValue(transfer.get(entity).toString()));
 			newFeatures.add(gef.createGeoEntity(entity.getGeometry(), theMap));
 		}
 		
 		IGSGeofile<SpllFeature, IValue> res = null;
 		try {
-<<<<<<< HEAD
-			res = new SPLGeofileBuilder().setFeatures(newFeatures).setFile(toFile).buildShapeFile();
-		} catch (SchemaException | InvalidGeoFormatException e) {
-=======
 			res =  new SPLGeofileBuilder().setFeatures(newFeatures).setFile(destination).buildShapeFile();
 		} catch (SchemaException e) {
 			// TODO Auto-generated catch block
->>>>>>> ed70d76acd5f71459c8ce9d718f1eaa926d7372e
 			e.printStackTrace();
 		} catch (InvalidGeoFormatException e) {
 			// TODO Auto-generated catch block

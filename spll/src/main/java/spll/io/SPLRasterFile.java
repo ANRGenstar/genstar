@@ -144,16 +144,10 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 		return coverage.getCoordinateReferenceSystem().toWKT();
 	}
 	
-	@Override
-<<<<<<< HEAD
-	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(
-			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
-			GeographicAttribute<? extends IValue> attribute, File file) 
-=======
+	@Override 
 	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(File destination,
 			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
 			GeographicAttribute<? extends IValue> attribute) 
->>>>>>> ed70d76acd5f71459c8ce9d718f1eaa926d7372e
 					throws IllegalArgumentException, IOException {
 		if(!attribute.getValueSpace().getType().isNumericValue())
 			throw new IllegalArgumentException("Raster file cannot be template for non numeric data tranfer\n"
@@ -171,7 +165,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 		IGSGeofile<SpllPixel, ContinuousValue> res = null;
 		
 		try {
-			res = new SPLGeofileBuilder().setRasterBands(bands).setFile(file)
+			res = new SPLGeofileBuilder().setRasterBands(bands).setFile(destination)
 					.setReferenceEnvelope(this.getEnvelope()).buildRasterfile();
 		} catch (TransformException | InvalidGeoFormatException e) {
 			e.printStackTrace();
