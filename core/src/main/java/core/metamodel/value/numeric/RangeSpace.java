@@ -93,6 +93,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			iv = getValue(value);
 		} catch (NullPointerException e) {	
 			iv = this.getInstanceValue(value);
+			this.values.add(iv);
 		}
 		return iv;
 	}

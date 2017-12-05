@@ -27,7 +27,6 @@ import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.Feature;
-import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.AttributeType;
@@ -35,7 +34,6 @@ import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.FactoryException;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
@@ -216,7 +214,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		Collection<SpllFeature> newFeatures = new HashSet<>();
 		for(AGeoEntity<? extends IValue> entity : this.features) {
 			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
-			
 			theMap.put(attribute, attribute.getValueSpace().getInstanceValue(transfer.get(entity).toString()));
 			newFeatures.add(gef.createGeoEntity(entity.getGeometry(), theMap));
 		}

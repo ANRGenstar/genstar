@@ -16,7 +16,7 @@ import spin.objects.SpinNetwork;
  * 
  *
  */
-public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
+public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, DemographicAttribute<? extends IValue>> {
 
 	// Network associe a la population.
 	private SpinNetwork network;
@@ -28,7 +28,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 //	private INetProperties properties;
 	
 	// TODO IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>
-	private final Collection<ADemoEntity> population;
+	private final Collection<E> population;
 
 	/**
 	 * 
@@ -36,7 +36,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	 * @param prop
 	 * @param network
 	 */
-	public SpinPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popRef, 
+	public SpinPopulation(IPopulation<E, DemographicAttribute<? extends IValue>> popRef, 
 						 SpinNetwork network){
 		population = popRef;
 		this.network = network; 
@@ -58,7 +58,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	 * 
 	 * @param population
 	 */
-	public SpinPopulation(Collection<ADemoEntity> population){
+	public SpinPopulation(Collection<E> population){
 		if(!population.isEmpty())
 			this.population = new HashSet<>();
 		else
@@ -86,7 +86,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 
 	@Override
-	public Iterator<ADemoEntity> iterator() {
+	public Iterator<E> iterator() {
 		return population.iterator();
 	}
 
@@ -101,7 +101,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 
 	@Override
-	public boolean add(ADemoEntity e) {
+	public boolean add(E e) {
 		return population.add(e);
 	}
 
@@ -116,7 +116,7 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 	}
 
 	@Override
-	public boolean addAll(Collection<? extends ADemoEntity> c) {
+	public boolean addAll(Collection<? extends E> c) {
 		return population.addAll(c);
 	}
 
