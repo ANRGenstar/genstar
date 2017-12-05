@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.configuration.jackson.utilclass.IVal;
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.AGeoEntity;

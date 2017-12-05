@@ -1,9 +1,8 @@
 package core.metamodel.value.numeric;
 
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,7 +22,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	private static GSDataParser gsdp = new GSDataParser();
 
 	private IntegerValue emptyValue;
-	private Set<IntegerValue> values;
+	private TreeMap<Integer, IntegerValue> values;
 
 	private int min, max;
 
@@ -34,51 +33,48 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	}
 
 	public IntegerSpace(IAttribute<IntegerValue> attribute, Integer min, Integer max) {
-		this.values = new HashSet<>();
+		this.values = new TreeMap<>();
 		this.emptyValue = new IntegerValue(this);
 		this.attribute = attribute;
 		this.min = min;
 		this.max = max;
+	}
+	
+	@Override
+	public IntegerValue getInstanceValue(String value) {
+		int currentVal = gsdp.parseNumbers(value).intValue();
+		if(currentVal < min || currentVal > max)
+			throw new IllegalArgumentException("Proposed value "+value+" is "
+					+ (currentVal < min ? "below" : "beyond") + " given bound ("
+					+ (currentVal < min ? min : max) + ")");
+		return new IntegerValue(this, currentVal);
+	}
+	
+	@Override
+	public IntegerValue proposeValue(String value) {
+		return new IntegerValue(this, gsdp.parseNumbers(value).intValue());
 	}
 
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 
 	@Override
 	public IntegerValue addValue(String value) {
-		if(!gsdp.getValueType(value).isNumericValue())
-			throw new IllegalArgumentException("The string value "+value+" does not feet a discrete "
-					+ "integer value template");
-
-		int currentVal = gsdp.parseNumbers(value).intValue();
-		if(currentVal < min || currentVal > max)
-			throw new IllegalArgumentException("Proposed value "+value+" is "
-					+ (currentVal < min ? "below" : "beyond") + " given bound ("
-					+ (currentVal < min ? min : max) + ")");
-
-		IntegerValue iv = null;
-		try {
-			iv = getValue(value);
-		} catch (NullPointerException e) {
-			iv = new IntegerValue(this, currentVal);
-			values.add(iv);
+		IntegerValue iv = getValue(value);
+		if(iv == null) {
+			iv = this.getInstanceValue(value);
+			values.put(iv.getActualValue(), iv);
 		}
 		return iv;
 	}
 
 	@Override
 	public IntegerValue getValue(String value) throws NullPointerException {
-		Optional<IntegerValue> opValue = values.stream()
-				.filter(val -> val.getActualValue() == gsdp.parseNumbers(value).intValue())
-				.findAny();
-		if(opValue.isPresent())
-			return opValue.get();
-		throw new NullPointerException("The string value "+value+" is not comprise "
-				+ "in the value space "+this.toString());
+		return values.get(gsdp.parseNumbers(value).intValue());
 	}
 
 	@Override
 	public Set<IntegerValue> getValues(){
-		return Collections.unmodifiableSet(values);
+		return new HashSet<>(values.values());
 	}
 
 	@Override

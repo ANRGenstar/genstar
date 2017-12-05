@@ -56,9 +56,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 
 	@Override
 	public Collection<V> getValues() {
-		Collection<V> res = Collections.emptySet();
-		attributes.values().stream().forEach(value -> res.add(value));
-		return res;
+		return attributes.values();
 	}
 
 	@Override

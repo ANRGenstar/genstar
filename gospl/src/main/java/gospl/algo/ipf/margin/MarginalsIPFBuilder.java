@@ -23,6 +23,16 @@ import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
 
+/**
+ * Make it possible to determine the signature of margin (how many dimensions, attributes, and theoretical margins)
+ * as well as the control T value associated
+ * 
+ * @see AMargin
+ * 
+ * @author kevinchapuis
+ *
+ * @param <T>
+ */
 public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
 
 	private Logger logger = LogManager.getLogger();
@@ -78,6 +88,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 						.substring(0, att.getAttributeName().length() < 5 ? att.getAttributeName().length() : 5))
 				.collect(Collectors.joining(" x ")));
 		
+		// control to seed attribute - relationship can be from referent-to-referent, referent-to-referee, referee-to-referent
 		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> controlToSeedAttribute = new HashMap<>();
 		for(DemographicAttribute<? extends IValue> sAttribute : seed.getDimensions()){
 			List<DemographicAttribute<? extends IValue>> cAttList = control.getDimensions().stream()
@@ -98,20 +109,18 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 
 		// let's create the marginals based on this information
 		Collection<AMargin<T>> marginals = new ArrayList<>();
-
-		List<DemographicAttribute<? extends IValue>> targetedAttributes = controlToSeedAttribute.keySet().stream()
-				.filter(att -> att.getReferentAttribute().equals(att)).collect(Collectors.toList());
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Trying to build marginals for attribute set "
-				+Arrays.toString(targetedAttributes.toArray()), logger, Level.TRACE);
+				+Arrays.toString(controlToSeedAttribute.keySet().toArray()), logger, Level.TRACE);
 		gspu.sysoStempPerformance(0, this);
 		
-		for(DemographicAttribute<? extends IValue> cAttribute : targetedAttributes){
+		// For each dimension of the control matrix connected to seed matrix
+		// we will setup a margin with control attributes
+		for(DemographicAttribute<? extends IValue> cAttribute : controlToSeedAttribute.keySet()){
 			// The set of marginal descriptor, i.e. all combination of values, one per related attribute
 			Collection<Set<IValue>> cMarginalDescriptors = this.getMarginalDescriptors(cAttribute, 
 					controlToSeedAttribute.keySet().stream()
-						.filter(att -> !att.equals(cAttribute)).collect(Collectors.toSet())
-					, control);
+						.filter(att -> !att.equals(cAttribute)).collect(Collectors.toSet()), control);
 			
 			logger.debug("Attribute \'"+cAttribute.getAttributeName()+"\' marginal descriptors: "
 					+cMarginalDescriptors.size()+" margin(s), "
@@ -130,12 +139,8 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			} else {
 				DemographicAttribute<? extends IValue> sAttribute = controlToSeedAttribute.get(cAttribute);
 				ComplexMargin<T> margin = new ComplexMargin<>(cAttribute, sAttribute);
-				double total = 0d;
-				for(Set<IValue> marge : cMarginalDescriptors) {
-					AControl<T> ctrl = control.getVal(marge);
-					total += ctrl.getValue().doubleValue();
-					margin.addMarginal(marge, ctrl, this.tranposeMarginalDescriptor(marge, control, seed));
-				}
+				for(Set<IValue> marge : cMarginalDescriptors)
+					margin.addMarginal(marge, control.getVal(marge), this.tranposeMarginalDescriptor(marge, control, seed));
 				mrg = margin;
 				marginals.add(margin);
 			}

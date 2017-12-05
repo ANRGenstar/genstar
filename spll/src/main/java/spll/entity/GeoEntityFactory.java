@@ -1,5 +1,6 @@
 package spll.entity;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuousValue;
 import core.util.data.GSDataParser;
+import spll.io.SPLRasterFile;
 import spll.util.SpllGeotoolsAdapter;
 
 /**
@@ -43,7 +45,6 @@ public class GeoEntityFactory {
 	public static String ATTRIBUTE_FEATURE_POP = "Population";
 	
 	private final Map<String, GeographicAttribute<? extends IValue>> featureAttributes;
-	private Set<GeographicAttribute<ContinuousValue>> pixelAttributes;
 	
 	private SimpleFeatureBuilder contingencyFeatureBuilder;
 	
@@ -116,28 +117,19 @@ public class GeoEntityFactory {
 		
 		Map<GeographicAttribute<? extends IValue>, IValue> values = new HashMap<>();
 		
-		Set<String> indexedAttList = new HashSet<>(attList);
-		for(Property property : feature.getProperties()){
-			
+		Collection<Property> propertyList = feature.getProperties().stream()
+				.filter(property -> !BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(property.getName().getLocalPart()) 
+						&& (attList.isEmpty() || attList.contains(property.getName().getLocalPart())))
+				.collect(Collectors.toSet());
+		for(Property property : propertyList){
 			String name = property.getName().getLocalPart();
-			
-			if ( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(name) 
-					|| (!indexedAttList.isEmpty() && !indexedAttList.contains(name))) { 
-				// we ignore the geometry attribute
-				// we also ignore the attributes not provided by the user (at least if he provided any) 
-				continue;
-			}
-			
 			GeographicAttribute<? extends IValue> attribute = null;
-			try {
-				attribute = featureAttributes.get(name);
-			} catch (NullPointerException e) {
-			} finally {
-				if (attribute == null) {
-					// if the corresponding attribute does not yet exist, we create it on the fly
-					attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
-					featureAttributes.put(name, attribute);
-				}
+			attribute = featureAttributes.get(name);
+			if (attribute == null) {
+				// if the corresponding attribute does not yet exist, we create it on the fly
+				attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
+				System.out.println("discovered attribute: "+attribute.getAttributeName());
+				featureAttributes.put(name, attribute);
 			}
 			if (attribute == null)
 				throw new NullPointerException("the attribute for "+property.getName()+" is null");
@@ -201,20 +193,23 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
-		
 		Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> values = new HashMap<>();
+		Set<GeographicAttribute<ContinuousValue>> pixelAttributes = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
 			GeographicAttribute<ContinuousValue> attribute = null;
 			Optional<GeographicAttribute<ContinuousValue>> opAtt = pixelAttributes.stream()
 					.filter(att -> att.getAttributeName().equals(bandsName)).findAny();
+			
 			if(opAtt.isPresent())
 				attribute = opAtt.get();
 			else {
 				attribute = GeographicAttributeFactory.getFactory().createContinueAttribute(bandsName);
+				attribute.getValueSpace().addExceludedValue(SPLRasterFile.DEF_NODATA.toString());
 				pixelAttributes.add(attribute);
 			}
-			values.put(attribute, attribute.getValueSpace().addValue(pixelBands[i].toString()));
+			
+			values.put(attribute, attribute.getValueSpace().getInstanceValue(pixelBands[i].toString()));
 		}
 		return new SpllPixel(values, pixel, gridX, gridY);
 	}

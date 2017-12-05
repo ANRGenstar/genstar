@@ -64,10 +64,8 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		return rt;
 	}
 	
-	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
-
 	@Override
-	public RangeValue addValue(String value) throws IllegalArgumentException {
+	public RangeValue getInstanceValue(String value) {
 		if(!rt.isValideRangeCandidate(value))
 			throw new IllegalArgumentException("The string value "+value+" does not feet defined "
 					+ "range "+rt);
@@ -79,17 +77,28 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			throw new IllegalArgumentException("Proposed values "+value+" are "
 					+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? "below" : "beyond") + " given bound ("
 							+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? min : max) + ")");
-		
+		return currentVal.size() == 1 ? 
+				(rt.getBottomTemplate(currentVal.get(0)).equals(value) ? 
+						new RangeValue(this, currentVal.get(0), RangeBound.LOWER) :
+							new RangeValue(this, currentVal.get(0), RangeBound.UPPER)) :
+			new RangeValue(this, currentVal.get(0), currentVal.get(1));
+	}
+	
+	@Override
+	public RangeValue proposeValue(String value) {
+		return getInstanceValue(value);
+	}
+	
+	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
+
+	@Override
+	public RangeValue addValue(String value) throws IllegalArgumentException {
 		RangeValue iv = null;
 		try {
 			iv = getValue(value);
 		} catch (NullPointerException e) {	
-			iv = currentVal.size() == 1 ? 
-					(rt.getBottomTemplate(currentVal.get(0)).equals(value) ? 
-							new RangeValue(this, currentVal.get(0), RangeBound.LOWER) :
-								new RangeValue(this, currentVal.get(0), RangeBound.UPPER)) :
-				new RangeValue(this, currentVal.get(0), currentVal.get(1));
-			values.add(iv);
+			iv = this.getInstanceValue(value);
+			this.values.add(iv);
 		}
 		return iv;
 	}
@@ -179,4 +188,5 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	public String toString() {
 		return this.toPrettyString();
 	}
+	
 }

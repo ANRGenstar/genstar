@@ -1,9 +1,8 @@
 package core.metamodel.value.numeric;
 
-import java.util.Collections;
-import java.util.Optional;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.TreeMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,7 +22,7 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	private static GSDataParser gsdp = new GSDataParser();
 
 	private ContinuousValue emptyValue;
-	private TreeSet<ContinuousValue> values;
+	private TreeMap<Double, ContinuousValue> values;
 
 	private double min, max;
 
@@ -39,51 +38,49 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 		this.min = min;
 		this.max = max;
 		this.emptyValue = new ContinuousValue(this, Double.NaN);
-		this.values = new TreeSet<>();
+		this.values = new TreeMap<>();
 	}
 
 	@Override
 	public GSEnumDataType getType() {
 		return GSEnumDataType.Continue;
 	}
-
-	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
-
+	
 	@Override
-	public ContinuousValue addValue(String value) {
-		if(!gsdp.getValueType(value).isNumericValue())
-			throw new IllegalArgumentException("The string value "+value+" does not feet a "
-					+ "continued value template");
-
+	public ContinuousValue getInstanceValue(String value) {
 		double currentVal = gsdp.getDouble(value);
 		if(currentVal < min || currentVal > max)
 			throw new IllegalArgumentException("Proposed value "+currentVal+" is "
 					+ (currentVal < min ? "below" : "beyond") + " given bound ("
 					+ (currentVal < min ? min : max) + ")");
+		return new ContinuousValue(this, currentVal);
+	}
 
-		ContinuousValue iv = null;
-		try {
-			iv = getValue(value);
-		} catch (NullPointerException e) {
-			iv = new ContinuousValue(this, currentVal);
-			values.add(iv);
+	@Override
+	public ContinuousValue proposeValue(String value) {
+		return new ContinuousValue(this, gsdp.getDouble(value));
+	}
+	
+	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
+
+	@Override
+	public ContinuousValue addValue(String value) {
+		ContinuousValue iv = getValue(value);
+		if(value == null) {
+			iv = this.getInstanceValue(value);
+			values.put(iv.getActualValue(), iv);
 		}
 		return iv;
 	}
 
 	@Override
 	public ContinuousValue getValue(String value) throws NullPointerException {
-		Optional<ContinuousValue> opValue = values.stream()
-				.filter(val -> val.getActualValue() == gsdp.getDouble(value)).findAny();
-		if(opValue.isPresent())
-			return opValue.get();
-		throw new NullPointerException("The string value "+value+" is not comprise "
-				+ "in the value space "+this.toString());
+		return values.get(gsdp.getDouble(value));
 	}
 
 	@Override
 	public Set<ContinuousValue> getValues(){
-		return Collections.unmodifiableSet(values);
+		return new HashSet<>(values.values());
 	}
 
 	@Override

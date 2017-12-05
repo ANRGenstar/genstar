@@ -159,7 +159,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 				return this.getNulVal();
 			
 			// Adjust probability space definition: e.g. age from 15 to more than 65 & age from 0 to more than 100
-			// WARNING: impossible in probability theory / make assumption on the transition (uniformity)ccv
+			// WARNING: impossible in probability theory / make assumption on the transition (uniformity)
 			AControl<Double> adjustSpaceDefinition = this.getIdentityProductVal()
 					.multiply(Stream.concat(bottomup.entrySet().stream(), topdown.entrySet().stream())
 					.map(e -> e.getValue().multiply(1/mat.getVal(e.getKey()).getValue()))

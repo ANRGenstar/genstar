@@ -38,13 +38,18 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	// ---------------------------------------------------------------------- //
 
 	@Override
+	public BooleanValue getInstanceValue(String value) {
+		return this.getValue(value);
+	}
+	
+	@Override
+	public BooleanValue proposeValue(String value) {
+		return this.getValue(value);
+	}
+	
+	@Override
 	public BooleanValue addValue(String value) throws IllegalArgumentException {
-		try {
-			return getValue(value);
-		} catch (NullPointerException e) {
-			throw new IllegalArgumentException("The string value "+value
-					+" cannot be resolve to boolean as defined by "+this.getClass().getSimpleName());
-		}
+		return this.getValue(value);
 	}
 
 	@Override

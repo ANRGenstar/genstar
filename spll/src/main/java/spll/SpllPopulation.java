@@ -162,6 +162,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 
 		// will contain the list of all the attributes which were ignored 
 		Set<String> ignoredAttributes = new HashSet<>();
+		//Map<String,Set<String>> attributeName2ignoredValues = new HashMap<>();
 		
 		// iterate entities
 		Iterator<SpllFeature> itGeoEntity = sf.getGeoEntityIterator();
@@ -193,8 +194,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 				
 				/*System.out.println(	attribute.getAttributeName()
 									+"="+
-									value.getStringValue());
-				*/
+									value.getStringValue());*/
 				
 				// find the value according to the dictionnary
 				if (value.getStringValue().trim().isEmpty()) {
@@ -202,13 +202,16 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 					attribute2value.put(gosplType, gosplType.getEmptyValue());
 				}
 				try {
+					IValue valueEncoded = null;
 					try {
-						IValue valueEncoded = gosplType.getValueSpace().getValue(value.getStringValue());
+						valueEncoded = gosplType.getValueSpace().getValue(value.getStringValue());
 						attribute2value.put(gosplType, valueEncoded);
 					} catch (NullPointerException e) {
-						IValue valueEncoded = gosplType.getValueSpace().addValue(value.getStringValue());
+						valueEncoded = gosplType.getValueSpace().addValue(value.getStringValue());
 						attribute2value.put(gosplType, valueEncoded);
 					}
+					attribute2value.put(gosplType, valueEncoded);
+
 				} catch (RuntimeException e) {
 					System.err.println("error while decoding values: "+e.getMessage());
 					e.printStackTrace();
@@ -225,8 +228,6 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 			
 			if (maxEntities > 0 && ++i >= maxEntities)
 				break;
-			
-			
 		}
 		
 		if (!ignoredAttributes.isEmpty())

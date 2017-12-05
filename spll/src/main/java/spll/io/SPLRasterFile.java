@@ -40,11 +40,11 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuousValue;
-import core.util.data.GSDataParser;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllPixel;
 import spll.entity.iterator.GSPixelIterator;
 import spll.io.SPLGeofileBuilder.SPLGisFileExtension;
+import spll.io.exception.InvalidGeoFormatException;
 import spll.util.SpllUtil;
 
 /**
@@ -143,9 +143,9 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 		return coverage.getCoordinateReferenceSystem().toWKT();
 	}
 	
-	@Override
-	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(
-			Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer,
+	@Override 
+	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(File destination,
+			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
 			GeographicAttribute<? extends IValue> attribute) 
 					throws IllegalArgumentException, IOException {
 		if(!attribute.getValueSpace().getType().isNumericValue())
@@ -156,18 +156,17 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 		float[][] bands = new float[this.getRowNumber()][this.getColumnNumber()]; 
 		
 		Iterator<SpllPixel> it = this.getGeoEntityIterator();
-		GSDataParser gsdp = new GSDataParser();
 		while(it.hasNext()) {
 			SpllPixel pix = it.next();
-			IValue value = transfer.get(pix);
-			bands[pix.getGridX()][pix.getGridY()] = gsdp.getDouble(value.getStringValue()).floatValue(); 
+			bands[pix.getGridX()][pix.getGridY()] = transfer.get(pix).floatValue(); 
 		}
 		
 		IGSGeofile<SpllPixel, ContinuousValue> res = null;
 		
 		try {
-			res = new SPLGeofileBuilder().setRasterBands(bands).setReferenceEnvelope(this.getEnvelope()).buildRasterfile();
-		} catch (TransformException e) {
+			res = new SPLGeofileBuilder().setRasterBands(bands).setFile(destination)
+					.setReferenceEnvelope(this.getEnvelope()).buildRasterfile();
+		} catch (TransformException | InvalidGeoFormatException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}

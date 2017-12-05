@@ -1,8 +1,11 @@
 package core.metamodel.attribute.geographic;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
@@ -22,8 +25,8 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	
 	public GeographicValueSpace(IValueSpace<V> innerValueSpace,
 			Collection<V> noDataValues){
-		this.innerValueSpace = innerValueSpace;
-		this.noDataValues = new HashSet<>(noDataValues);
+		this(innerValueSpace);
+		this.noDataValues.addAll(noDataValues);
 	}
 	
 	// ------------------- GEO RELATED CONTRACT ------------------- //
@@ -39,6 +42,17 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	}
 	
 	/**
+	 * Add a list of excluded string based value
+	 * 
+	 * @param values
+	 * @return
+	 */
+	public boolean addExceludedValue(String... values) {
+		return this.addExcludedValues(Arrays.asList(values).stream()
+				.map(value -> this.proposeValue(value)).collect(Collectors.toSet()));
+	}
+	
+	/**
 	 * Get a numerical representation of a given value
 	 * 
 	 * @param val
@@ -51,6 +65,19 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	}
 
 	// ---------------------- ADDER CONTRACT ---------------------- //
+	
+	@Override
+	public V proposeValue(String value) {
+		return this.innerValueSpace.proposeValue(value);
+	}
+	
+	@Override
+	public V getInstanceValue(String value) {
+		Optional<V> val = noDataValues.stream().filter(v -> v.getStringValue().equals(value)).findFirst();
+		if (val.isPresent())
+			return val.get();
+		return this.innerValueSpace.getInstanceValue(value); 
+	}
 	
 	@Override
 	public V addValue(String value) throws IllegalArgumentException {

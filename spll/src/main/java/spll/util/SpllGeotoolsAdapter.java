@@ -1,7 +1,6 @@
 package spll.util;
 
 import java.util.Set;
-import java.util.stream.Stream;
 
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
 import org.geotools.feature.type.BasicFeatureTypes;
