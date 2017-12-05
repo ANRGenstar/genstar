@@ -3,6 +3,7 @@ package core.metamodel.attribute.geographic;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -72,7 +73,10 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	
 	@Override
 	public V getInstanceValue(String value) {
-		return this.innerValueSpace.getInstanceValue(value);
+		Optional<V> val = noDataValues.stream().filter(v -> v.getStringValue().equals(value)).findFirst();
+		if (val.isPresent())
+			return val.get();
+		return this.innerValueSpace.getInstanceValue(value); 
 	}
 	
 	@Override

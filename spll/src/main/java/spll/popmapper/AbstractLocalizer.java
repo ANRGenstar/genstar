@@ -174,6 +174,21 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		
 		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
 				varList, lmRegressionOLS, splUniformNormalizer);
+		
+		/*
+		 * 	File tmpFile = File.createTempFile("tempMapper", ".shp");
+		tmpFile.deleteOnExit();
+		String keyAttribute = "count";//GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0;
+			//	GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
+		
+		File tmp = File.createTempFile("match", "."+ (match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
+				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString()));
+		tmp.deleteOnExit();
+		
+		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
+				varList, lmRegressionOLS, splUniformNormalizer);
+	
+		 */
 	}
 
 	@Override
@@ -209,7 +224,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			File tmpVector = Files.createTempFile("regression_vector_output", ".shp").toFile();
 			tmpVector.deleteOnExit();
 			this.setMapper(splMapperBuilder.buildOutput(tmpVector, 
-					(SPLVectorFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
+					(SPLRasterFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
 					(double) population.size()), splMapperBuilder.getMainAttribute());
 			break;
 		default:

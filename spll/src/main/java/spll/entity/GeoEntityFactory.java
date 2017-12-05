@@ -1,5 +1,6 @@
 package spll.entity;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,6 +28,7 @@ import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuousValue;
 import core.util.data.GSDataParser;
+import spll.io.SPLRasterFile;
 import spll.util.SpllGeotoolsAdapter;
 
 /**
@@ -114,7 +116,6 @@ public class GeoEntityFactory {
 			if (attribute == null) {
 				// if the corresponding attribute does not yet exist, we create it on the fly
 					attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
-					System.out.println("discovered attribute: "+attribute.getAttributeName());
 					featureAttributes.put(name, attribute);
 			}	
 			Object v = property.getValue();
@@ -170,13 +171,16 @@ public class GeoEntityFactory {
 			GeographicAttribute<ContinuousValue> attribute = null;
 			Optional<GeographicAttribute<ContinuousValue>> opAtt = pixelAttributes.stream()
 					.filter(att -> att.getAttributeName().equals(bandsName)).findAny();
+			
 			if(opAtt.isPresent())
 				attribute = opAtt.get();
 			else {
 				attribute = GeographicAttributeFactory.getFactory().createContinueAttribute(bandsName);
+				//attribute.getValueSpace().addExcludedValues(Arrays.asList(SPLRasterFile.DEF_NODATA));
 				pixelAttributes.add(attribute);
 			}
-			values.put(attribute, attribute.getValueSpace().addValue(pixelBands[i].toString()));
+			
+			values.put(attribute, attribute.getValueSpace().getInstanceValue(pixelBands[i].toString()));
 		}
 		return new SpllPixel(values, pixel, gridX, gridY);
 	}
