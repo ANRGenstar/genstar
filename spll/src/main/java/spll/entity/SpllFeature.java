@@ -21,6 +21,7 @@ import core.metamodel.value.IValue;
 public class SpllFeature extends AGeoEntity<IValue> {
  
 	private final Feature innerFeature;
+	protected Geometry proxyGeometry;
 	
 	protected SpllFeature(Map<GeographicAttribute<? extends IValue>, IValue> values, Feature innerFeature) {
 		super(values, innerFeature.getIdentifier().getID());
@@ -41,6 +42,14 @@ public class SpllFeature extends AGeoEntity<IValue> {
 		return (Geometry) innerFeature.getDefaultGeometryProperty().getValue();
 	}
 	
+	public Geometry getProxyGeometry() {
+		return proxyGeometry == null ? getGeometry() : proxyGeometry;
+	}
+
+	public void setProxyGeometry(Geometry proxyGeometry) {
+		this.proxyGeometry = proxyGeometry;
+	}
+
 	@Override
 	public String getGenstarName(){
 		return innerFeature.getIdentifier().getID();

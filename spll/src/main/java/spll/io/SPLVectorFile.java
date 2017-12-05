@@ -3,6 +3,7 @@ package spll.io;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -24,14 +25,12 @@ import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.factory.GeoTools;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.SchemaException;
-import org.geotools.feature.simple.SimpleFeatureBuilder;
 import org.geotools.feature.type.BasicFeatureTypes;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.referencing.CRS;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.feature.type.AttributeType;
 import org.opengis.filter.Filter;
 import org.opengis.filter.FilterFactory2;
 import org.opengis.referencing.FactoryException;
@@ -39,12 +38,15 @@ import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.geom.GeometryCollection;
+import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
+import core.util.random.GenstarRandom;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
 import spll.entity.iterator.GSFeatureIterator;
@@ -92,41 +94,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		this.features = features;
 		SimpleFeatureType schema = dataStore.getSchema(dataStore.getTypeNames()[0]);
 		this.crs = schema.getCoordinateReferenceSystem();
-		
-		/*
-		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(dataStore
-				.getFeatureSource(dataStore.getTypeNames()[0]).getFeatures(Filter.INCLUDE))
-				.features();
-
-		// Tests whether the dataStore contains all SimpleFeature that are within the GSFeature set
-		// WARNING: for weird reasons, when a Feature is stored in a DataStore every numerical value
-		// are transposed to a double value; hence fail to recognize equality with set integer value
-		while(fItt.hasNext()){
-			SimpleFeature feat = fItt.next();
-			for(Property prop : feat.getProperties()){
-				boolean match = false;
-				for(SpllFeature feature : features){
-					if(prop.getName().toString().equals(BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME)){
-						if(prop.getValue().toString().equals(feature.getGeometry().toString()))
-							match = true;
-					} else {
-						IValue val = feature.getValueForAttribute(prop.getName().toString());
-						if(val.getValueSpace().getType().isNumericValue()
-					
-							&& prop.getValue().toString().equals(feature.getInnerFeature()
-									.getProperty(prop.getName()).getValue().toString())){
-							match = true;
-						}
-					}
-				}
-				if(!match)
-					throw new IllegalArgumentException("Property "+prop.getName().toString()+" has not been match at all:\n"
-							+ "Geotools feature value is "+feat.getProperty(prop.getName()).getValue().toString()+ "\n"
-							+ "but available value are: "
-							+ features.stream().map(gsf -> gsf.getInnerFeature().getProperty(prop.getName()).toString())
-							.collect(Collectors.joining("; ")));
-			}	
-		}*/
 		
 	}
 
@@ -326,23 +293,8 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		return dataStore;
 	}
 	
-	public SPLVectorFile minMaxDistance(Double minDist, Double maxDist, Boolean avoidOverlapping) throws IOException, SchemaException, InvalidGeoFormatException {
-		Set<SpllFeature> fts = new HashSet<>();
-		SimpleFeatureType schemaOld = this.getStore().getSchema(this.getStore().getNames().get(0));
-		final StringBuilder specs = new StringBuilder();
-		specs.append("geometry:MultiPolygon"); 
-		for (final AttributeType at : schemaOld.getTypes()) {
-			if (Geometry.class.isAssignableFrom(at.getBinding())) continue;
-			String name = at.getName().toString().replaceAll("\"", "");
-			name = name.replaceAll("'", "");
-			specs.append(',').append(name).append(":String");
-		}
-		SimpleFeatureType schemNew = DataUtilities.createType("buffer",specs.toString());
-		schemNew = DataUtilities.createSubType( schemNew, null, schemaOld.getCoordinateReferenceSystem() );
-		
-		
-		GeoEntityFactory gef = new GeoEntityFactory((Set<GeographicAttribute<? extends IValue>>) getGeoAttributes(),schemNew );
-		
+
+	public void minMaxDistance(Double minDist, Double maxDist, Boolean avoidOverlapping)  {
 		Quadtree quadTreeMin = null;
 		if (minDist != null && minDist >= 0) {
 			quadTreeMin = new Quadtree();
@@ -351,26 +303,64 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 				quadTreeMin.insert(g.getEnvelopeInternal(), g);
 			}
 		}
+		Quadtree quadTreeOverlap = null;
+		if (avoidOverlapping) quadTreeOverlap = new Quadtree();
 		for (SpllFeature ft : features) {
 			 Geometry newGeom = ft.getGeometry().buffer(maxDist);
 			 if (quadTreeMin != null && ! quadTreeMin.isEmpty()) {
 				 List<Geometry> intersection = quadTreeMin.query(newGeom.getEnvelopeInternal());
 				 for (Geometry g : intersection) {
-					 newGeom =  newGeom.difference(g);
+					 if (g.isEmpty()) continue;
+					 newGeom =  SpllUtil.difference(newGeom, g);
+					 if (newGeom == null) break;
+					 newGeom = manageGeometryCollection(newGeom);
+					 
 				 }
-				 newGeom.buffer(0.0);
+				 if (avoidOverlapping) {
+					 quadTreeOverlap.insert( newGeom.getEnvelopeInternal(), newGeom);
+				 }
 			 }
-			fts.add(gef.createGeoEntity(newGeom, ft.getAttributeMap()));
-			logger.debug("created features {}/{}", fts.size(), features.size());
+			ft.setProxyGeometry(newGeom);
 		}
 		
 		if (avoidOverlapping) {
-			// TODO ???
+			List<SpllFeature> fts_overlap = new ArrayList<>(features);
+			Collections.shuffle(fts_overlap, GenstarRandom.getInstance());
+			
+			for (SpllFeature ft : fts_overlap) {
+				Geometry newGeom = ft.getProxyGeometry();
+				List<Geometry> intersection =  quadTreeOverlap.query(newGeom.getEnvelopeInternal());
+				 for (Geometry g : intersection) {
+					if (g.isEmpty() ||  (g == ft.getGeometry())) continue;
+					 newGeom =  SpllUtil.difference(newGeom, g);
+					 if (newGeom == null) break;
+					 newGeom = manageGeometryCollection(newGeom);
+					
+				 }
+				 ft.setProxyGeometry(newGeom);
+			}
 		}
-		SPLGeofileBuilder builder = new SPLGeofileBuilder();
-		builder.setFeatures(fts);
-		builder.setFile(File.createTempFile("buffer", ".shp"));
-		return builder.buildShapeFile();
+	}
+	
+	private Geometry manageGeometryCollection(Geometry geom) {
+		geom.buffer(0.0);
+		if (geom instanceof GeometryCollection) {
+			 List<Geometry> toKeep = new ArrayList<Geometry>();
+			 for (int i = 0; i < geom.getNumGeometries(); i++) {
+				 Geometry newGeom = geom.getGeometryN(i);
+				 if (newGeom instanceof Polygon) {
+					 toKeep.add(newGeom);
+				 }
+			 }
+			 if (toKeep.size() == 1)
+				 geom = toKeep.get(0);
+			 else if (toKeep.size() > 1) {
+				 Polygon[] polys = new Polygon[toKeep.size()];
+				 for (int i = 0; i < toKeep.size(); i++) polys[i] = (Polygon) toKeep.get(i);
+				 geom = geom.getFactory().createMultiPolygon(polys);
+			 }
+		 }
+		return geom;
 	}
 
 	public String toString() {
