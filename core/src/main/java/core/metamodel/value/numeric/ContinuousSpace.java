@@ -56,6 +56,11 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 		return new ContinuousValue(this, currentVal);
 	}
 
+	@Override
+	public ContinuousValue proposeValue(String value) {
+		return new ContinuousValue(this, gsdp.getDouble(value));
+	}
+	
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 
 	@Override

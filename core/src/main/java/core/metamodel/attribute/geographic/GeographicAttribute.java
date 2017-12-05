@@ -33,7 +33,7 @@ public class GeographicAttribute<V extends IValue> implements IAttribute<V> {
 	}
 	
 	@Override
-	public IValueSpace<V> getValueSpace(){
+	public GeographicValueSpace<V> getValueSpace(){
 		return vs;
 	}
 	

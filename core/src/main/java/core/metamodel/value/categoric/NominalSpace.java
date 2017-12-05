@@ -45,6 +45,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 	
 	@Override
+	public NominalValue proposeValue(String value) {
+		return new NominalValue(this, value);
+	}
+	
+	@Override
 	public NominalValue getInstanceValue(String value) {
 		return new NominalValue(this, ct.getFormatedString(value));
 	}

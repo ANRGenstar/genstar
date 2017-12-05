@@ -40,7 +40,6 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuousValue;
-import core.util.data.GSDataParser;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllPixel;
 import spll.entity.iterator.GSPixelIterator;

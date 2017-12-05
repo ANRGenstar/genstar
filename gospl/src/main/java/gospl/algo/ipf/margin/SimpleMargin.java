@@ -8,7 +8,8 @@ import core.metamodel.value.IValue;
 import gospl.distribution.matrix.control.AControl;
 
 /**
- * Simple margin describe marginal that are equivalent for seed and control matrices
+ * Simple margin describe marginal that are equivalent for seed and control matrices. That means they either are
+ * the exact same attribute or record linked attribute (a map of value among two attribute as a one-to-one relationship)
  * @author kevinchapuis
  *
  * @param <T>

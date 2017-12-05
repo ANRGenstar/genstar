@@ -43,6 +43,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	}
 	
 	@Override
+	public BooleanValue proposeValue(String value) {
+		return this.getValue(value);
+	}
+	
+	@Override
 	public BooleanValue addValue(String value) throws IllegalArgumentException {
 		return this.getValue(value);
 	}

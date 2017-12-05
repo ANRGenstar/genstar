@@ -49,6 +49,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 					+ (currentVal < min ? min : max) + ")");
 		return new IntegerValue(this, currentVal);
 	}
+	
+	@Override
+	public IntegerValue proposeValue(String value) {
+		return new IntegerValue(this, gsdp.parseNumbers(value).intValue());
+	}
 
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 

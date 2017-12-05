@@ -44,7 +44,20 @@ public interface IValueSpace<V extends IValue> {
 	public static final String TYPE = "TYPE";
 	public static final String VALUES = "VALUES";
 	
+
+	/**
+	 * Create and return requested value without any constraint
+	 * @param value
+	 * @return
+	 */
+	public V proposeValue(String value);
 	
+	/**
+	 * Create and return requested value according to value space specification
+	 * 
+	 * @param value
+	 * @return
+	 */
 	public V getInstanceValue(String value);
 	
 	/**

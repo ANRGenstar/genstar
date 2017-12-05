@@ -79,6 +79,8 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		this.features = features;
 		SimpleFeatureType schema = dataStore.getSchema(dataStore.getTypeNames()[0]);
 		this.crs = schema.getCoordinateReferenceSystem();
+		
+		/*
 		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(dataStore
 				.getFeatureSource(dataStore.getTypeNames()[0]).getFeatures(Filter.INCLUDE))
 				.features();
@@ -86,7 +88,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		// Tests whether the dataStore contains all SimpleFeature that are within the GSFeature set
 		// WARNING: for weird reasons, when a Feature is stored in a DataStore every numerical value
 		// are transposed to a double value; hence fail to recognize equality with set integer value
-		/*while(fItt.hasNext()){
+		while(fItt.hasNext()){
 			SimpleFeature feat = fItt.next();
 			for(Property prop : feat.getProperties()){
 				boolean match = false;

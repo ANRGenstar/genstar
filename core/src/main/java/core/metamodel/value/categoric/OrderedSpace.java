@@ -63,12 +63,22 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Beware the order consistency could be break using instance value
+	 * WARNING: order consistency is not guarantee using this method
 	 */
 	@Override
 	public OrderedValue getInstanceValue(String value) {
 		return new OrderedValue(this, value, instanceIndex++);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 * WARNING: completly break indexation rules
+	 */
+	@Override
+	public OrderedValue proposeValue(String value) {
+		return new OrderedValue(this, value, 0);
+	}
+
 
 	// ------------------------ SETTERS & ADDER CAPACITIES ------------------------ //
 

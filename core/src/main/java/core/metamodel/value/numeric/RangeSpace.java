@@ -84,6 +84,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			new RangeValue(this, currentVal.get(0), currentVal.get(1));
 	}
 	
+	@Override
+	public RangeValue proposeValue(String value) {
+		return getInstanceValue(value);
+	}
+	
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 
 	@Override
