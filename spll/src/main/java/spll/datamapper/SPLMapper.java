@@ -146,9 +146,6 @@ public class SPLMapper<Variable extends ISPLVariable, T> {
 	// ------------------- Inner utilities ------------------- //
 	
 	private void setupRegression() throws IllegalRegressionException, IOException{
-		for (ISPLMatcher var : mapper) {
-			System.out.println(var.getEntity().getPropertiesAttribute());
-		}
 		if(mapper.stream().anyMatch(var -> !var.getEntity().getPropertiesAttribute().contains(this.targetProp)))
 			throw new IllegalRegressionException("Property "+this.targetProp+" is not present in each Feature of the main SPLMapper");
 		if(mapper.stream().anyMatch(var -> !var.getEntity().getValueForAttribute(this.targetProp).getType().isNumericValue()))
