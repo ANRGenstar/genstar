@@ -142,10 +142,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		Map<? extends AGeoEntity<? extends IValue>, Number> transfer = this.estimateMatches(this.match, this.keyAttMatch, this.keyAttMap);
 		final GeographicAttribute<? extends IValue> transferAttribute = GeographicAttributeFactory.getFactory()
 				.createIntegerAttribute("contingency");
-		Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transferMap = transfer.keySet().stream()
-				.collect(Collectors.toMap(Function.identity(), 
-						entity -> transferAttribute.getValueSpace().addValue(transfer.get(entity).toString())));
-		return this.match.transferTo(transferMap, transferAttribute);
+		return this.match.transferTo(transfer, transferAttribute, match);
 	}
 
 	// ----------------------------------------------------- //
@@ -168,12 +165,13 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException, 
 	MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException {
-		String extension = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
-				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString();
 		String keyAttribute = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
 				GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
-		File tmp = File.createTempFile("match", "."+extension);
+		
+		File tmp = File.createTempFile("match", "."+ (match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
+				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString()));
 		tmp.deleteOnExit();
+		
 		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
 				varList, lmRegressionOLS, splUniformNormalizer);
 	}

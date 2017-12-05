@@ -1,8 +1,10 @@
 package core.metamodel.attribute.geographic;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
@@ -36,6 +38,17 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	 */
 	public boolean addExcludedValues(Collection<V> asList) {
 		return this.noDataValues.addAll(asList);
+	}
+	
+	/**
+	 * Add a list of excluded string based value
+	 * 
+	 * @param values
+	 * @return
+	 */
+	public boolean addExceludedValue(String... values) {
+		return this.addExcludedValues(Arrays.asList(values).stream()
+				.map(value -> this.getInstanceValue(value)).collect(Collectors.toSet()));
 	}
 	
 	/**

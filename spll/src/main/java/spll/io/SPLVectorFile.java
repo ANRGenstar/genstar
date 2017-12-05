@@ -193,8 +193,8 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	
 	@Override
 	public IGSGeofile<SpllFeature, IValue> transferTo(
-			Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer,
-			GeographicAttribute<? extends IValue> attribute) throws IllegalArgumentException, IOException {
+			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
+			GeographicAttribute<? extends IValue> attribute, File toFile) throws IllegalArgumentException, IOException {
 		if(features.stream().anyMatch(feat -> !transfer.containsKey(feat)))
 			throw new IllegalArgumentException("There is a mismatch between provided set of geographical entity and "
 					+ "geographic entity of this SPLVector file "+this.toString());
@@ -213,15 +213,14 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		Collection<SpllFeature> newFeatures = new HashSet<>();
 		for(AGeoEntity<? extends IValue> entity : this.features) {
 			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
-			theMap.put(attribute, transfer.get(entity));
+			theMap.put(attribute, attribute.getValueSpace().getInstanceValue(transfer.get(entity).toString()));
 			newFeatures.add(gef.createGeoEntity(entity.getGeometry(), theMap));
 		}
 		
 		IGSGeofile<SpllFeature, IValue> res = null;
 		try {
-			res = new SPLGeofileBuilder().setFeatures(newFeatures).buildShapeFile();
-		} catch (SchemaException e) {
-			// TODO Auto-generated catch block
+			res = new SPLGeofileBuilder().setFeatures(newFeatures).setFile(toFile).buildShapeFile();
+		} catch (SchemaException | InvalidGeoFormatException e) {
 			e.printStackTrace();
 			System.exit(1);
 		}

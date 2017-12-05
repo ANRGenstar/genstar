@@ -60,8 +60,8 @@ public class SpinNetworkFactory {
 	 * @param population Population en parametre. 
 	 * @return SpinPopulation
 	 */
-	public SpinPopulation generateNetwork(ENetworkGenerator typeGenerator, 
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+	public <E extends ADemoEntity> SpinPopulation<E> generateNetwork(ENetworkGenerator typeGenerator, 
+			IPopulation<E, DemographicAttribute<? extends IValue>> population){
 		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
 			network = new SWNetworkGenerator().generateNetwork(baseNetwork, 5, .1); 
@@ -75,8 +75,7 @@ public class SpinNetworkFactory {
 			network = new SpatialNetworkGenerator().generateNetwork(baseNetwork,800,600,3);
 		
 		// Create the SpinPopulation
-		SpinPopulation spinPop = new SpinPopulation(population, network);
-		return spinPop;
+		return new SpinPopulation<>(population, network);
 	}
 	
 	public SpinNetwork getSpinNetwork(){

@@ -1,7 +1,6 @@
 package core.metamodel.attribute.geographic;
 
 import java.util.Arrays;
-import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -46,8 +45,7 @@ public class GeographicAttribute<V extends IValue> implements IAttribute<V> {
 	
 	@SuppressWarnings("unchecked")
 	public void setNoData(V... values) {
-		Collection<V> noDataValues = Arrays.asList(values);
-		vs.addExcludedValues(noDataValues);
+		vs.addExcludedValues(Arrays.asList(values));
 	}
 
 }

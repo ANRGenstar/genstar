@@ -244,7 +244,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 
 	@Override
 	public Iterator<SpllEntity> iterator() {
-		return this.iterator();
+		return population.iterator();
 	}
 
 	@Override

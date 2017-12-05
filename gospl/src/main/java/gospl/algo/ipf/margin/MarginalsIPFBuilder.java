@@ -109,6 +109,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 		// let's create the marginals based on this information
 		Collection<AMargin<T>> marginals = new ArrayList<>();
 
+		// Only referent attribute should be used to setup the marginals
 		List<DemographicAttribute<? extends IValue>> targetedAttributes = controlToSeedAttribute.keySet().stream()
 				.filter(att -> att.getReferentAttribute().equals(att)).collect(Collectors.toList());
 		

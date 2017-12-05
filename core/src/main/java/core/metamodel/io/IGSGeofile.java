@@ -1,5 +1,6 @@
 package core.metamodel.io;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -130,8 +131,8 @@ public interface IGSGeofile<E extends AGeoEntity<V>, V extends IValue> {
 	 * @throws IOException 
 	 * @throws IllegalArgumentException 
 	 */
-	public IGSGeofile<E, V> transferTo(Map<? extends AGeoEntity<? extends IValue>, ? extends IValue> transfer, 
-			GeographicAttribute<? extends IValue> attribute) 
+	public IGSGeofile<E, V> transferTo(Map<? extends AGeoEntity<? extends IValue>, Number> transfer, 
+			GeographicAttribute<? extends IValue> attribute, File toFile) 
 					throws IllegalArgumentException, IOException;
 	
 }
