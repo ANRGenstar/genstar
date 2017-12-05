@@ -28,21 +28,21 @@ public interface ISpatialComposer<E extends SpllEntity> {
 	 * 
 	 * @param constraint
 	 */
-	public boolean addConstraint(ISpatialConstraint constraint);
+	//public boolean addConstraint(ISpatialConstraint constraint);
 	
 	/**
 	 * Set the constraint all in a row
 	 * 
 	 * @param constraints
 	 */
-	public void setConstraints(List<ISpatialConstraint> constraints);
+	//public void setConstraints(List<ISpatialConstraint> constraints);
 	
 	/**
 	 * Returns all set constraints
 	 * 
 	 * @return
 	 */
-	public List<ISpatialConstraint> getConstraints();
+	//public List<ISpatialConstraint> getConstraints();
 	
 	public void setPopulationOfParentCandidates(SpllPopulation populationOfParentCandidates, String parentType);
 	public SpllPopulation getPopulationOfParentCandidates();

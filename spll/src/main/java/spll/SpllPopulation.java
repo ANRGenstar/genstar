@@ -20,6 +20,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
@@ -30,7 +31,9 @@ import spll.io.exception.InvalidGeoFormatException;
 import spll.util.SpllUtil;
 
 /**
- * A population of spatialized entities.
+ * A population of spatialized entities {@link SpllEntity} 
+ * which contain attributes as all the {@link AGeoEntity} do, and is 
+ * also linked to a geometry.
  * 
  * @author Kevin Chapuis
  * @author Samuel Thiriot
@@ -38,9 +41,20 @@ import spll.util.SpllUtil;
 public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> {
 
 	private Set<SpllEntity> population;
+
+	/**
+	 * The geo file from which the population was generated from (might be null)
+	 */
 	private IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile; 
 
 	private Set<DemographicAttribute<? extends IValue>> attributes;
+	
+	/**
+	 * A map which associates each geoentity with its corresponding SpllEntity.
+	 * Enables to find back which Entity was created thanks to each Geographic feature
+	 * read from a shapefile.
+	 */
+	protected Map<AGeoEntity<IValue>,SpllEntity> feature2entity = new HashMap<>();
 	
 	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
 			IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile) {
@@ -66,7 +80,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 							int maxEntities) throws IOException, InvalidGeoFormatException {
 
 		this.population=new HashSet<>();
-		this.attributes=new HashSet<>();
+		this.attributes=new HashSet<>(dictionnary);
 		
 		System.err.println("dict at spll :"+dictionnary);
 		System.err.println("max entities:"+maxEntities);
@@ -75,7 +89,8 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 													.map(DemographicAttribute::getAttributeName)
 													.collect(Collectors.toList());
 		SPLVectorFile sf = SPLGeofileBuilder.getShapeFile(sfFile,  attributesNamesToKeep, charset);
-		
+		this.geoFile = sf;
+
 		addDataFromVector(sf, dictionnary, maxEntities);
 	}
 	
@@ -91,12 +106,43 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 							int maxEntities) {
 		
 		this.population=new HashSet<>();
-		this.attributes=new HashSet<>();
-		
-		System.err.println("max entities:"+maxEntities);
+		this.attributes=new HashSet<>(dictionnary);
+		this.geoFile = sf;
 
 		addDataFromVector(sf, dictionnary, maxEntities);	
 	}
+
+
+	/**
+	 * "Clone" constructor. 
+	 * @param population
+	 * @param geoFile
+	 */
+	public SpllPopulation(SpllPopulation pop) {
+		this(pop, null);
+	}
+	
+	/**
+	 * "Clone" operator which also returns in the map passed as parameter (if not null)
+	 * the mapping between each entity before and its clone.
+	 * @param populationOfParentCandidates
+	 * @param mappingBetweenEntities
+	 */
+	public SpllPopulation(SpllPopulation pop,
+			Map<SpllEntity, SpllEntity> mappingBetweenEntities) {
+		
+		this.population = new HashSet<>();
+		for (SpllEntity original : pop.population) {
+			SpllEntity clone = new SpllEntity(original);
+			this.population.add(clone);
+			if (mappingBetweenEntities != null)
+				mappingBetweenEntities.put(original, clone);
+		}
+
+		this.attributes = new HashSet<>(pop.getPopulationAttributes());
+		this.geoFile = pop.geoFile;
+	}
+	
 	
 	/**
 	 * Adds 
@@ -112,11 +158,10 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 		Map<String,DemographicAttribute<? extends IValue>> dictionnaryName2attribute = new HashMap<>(dictionnary.size());
 		for (DemographicAttribute<? extends IValue> a: dictionnary)
 			dictionnaryName2attribute.put(a.getAttributeName(), a);
-		System.out.println("working on attributes: "+dictionnaryName2attribute);
+		//System.out.println("working on attributes: "+dictionnaryName2attribute);
 
 		// will contain the list of all the attributes which were ignored 
 		Set<String> ignoredAttributes = new HashSet<>();
-		//Map<String,Set<String>> attributeName2ignoredValues = new HashMap<>();
 		
 		// iterate entities
 		Iterator<SpllFeature> itGeoEntity = sf.getGeoEntityIterator();
@@ -125,7 +170,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 			
 			// retrieve the geospatial entity considered
 			SpllFeature feature = itGeoEntity.next();
-			System.out.println("working on feature: "+feature.getGenstarName());
+			//System.out.println("working on feature: "+feature.getGenstarName());
 
 			Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>(dictionnary.size());
 			
@@ -146,9 +191,10 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 					continue;
 				}
 				
-				System.out.println(	attribute.getAttributeName()
+				/*System.out.println(	attribute.getAttributeName()
 									+"="+
 									value.getStringValue());
+				*/
 				
 				// find the value according to the dictionnary
 				if (value.getStringValue().trim().isEmpty()) {
@@ -156,27 +202,13 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 					attribute2value.put(gosplType, gosplType.getEmptyValue());
 				}
 				try {
-					IValue valueEncoded;
-					// if the value is valid...
-					if (gosplType.getValueSpace().isValidCandidate(value.getStringValue())) {
-						// ... then we use the encoded value as defined in the attribute
-						try {
-							valueEncoded = gosplType.getValueSpace().getValue(value.getStringValue());
-						} catch (NullPointerException e) {
-							valueEncoded = gosplType.getValueSpace().addValue(value.getStringValue());	
-						}
-					} else {
-						valueEncoded = gosplType.getValueSpace().addValue(value.getStringValue());
-						/*
-						Set<String> ignoredValuesSet = attributeName2ignoredValues.get(gosplType.getAttributeName());
-						if (ignoredAttributes == null) {
-							ignoredValuesSet = new HashSet<>();
-							attributeName2ignoredValues.put(gosplType.getAttributeName(), ignoredValuesSet);
-						}
-						ignoredValuesSet.add(value.getStringValue());*/
+					try {
+						IValue valueEncoded = gosplType.getValueSpace().getValue(value.getStringValue());
+						attribute2value.put(gosplType, valueEncoded);
+					} catch (NullPointerException e) {
+						IValue valueEncoded = gosplType.getValueSpace().addValue(value.getStringValue());
+						attribute2value.put(gosplType, valueEncoded);
 					}
-					attribute2value.put(gosplType, valueEncoded);
-
 				} catch (RuntimeException e) {
 					System.err.println("error while decoding values: "+e.getMessage());
 					e.printStackTrace();
@@ -186,10 +218,15 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 			
 			// add the resulting entity to this population
 			GosplEntity entity = new GosplEntity(attribute2value);
-			add(new SpllEntity(entity, feature.getGeometry()));
+			SpllEntity spllEntity = new SpllEntity(entity);
+			add(spllEntity);
+			feature2entity.put(feature, spllEntity);
 			this.attributes.addAll(entity.getAttributes());
+			
 			if (maxEntities > 0 && ++i >= maxEntities)
 				break;
+			
+			
 		}
 		
 		if (!ignoredAttributes.isEmpty())
@@ -244,7 +281,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 
 	@Override
 	public Iterator<SpllEntity> iterator() {
-		return this.iterator();
+		return this.population.iterator();
 	}
 
 	@Override
@@ -259,7 +296,12 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 
 	@Override
 	public boolean add(SpllEntity e) {
-		return population.add(e);
+		if (population.add(e)) {
+			e._setEntityId(EntityUniqueId.createNextId(this, e.getEntityType()));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -274,7 +316,11 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 
 	@Override
 	public boolean addAll(Collection<? extends SpllEntity> c) {
-		return population.addAll(c);
+		boolean anyChange = false;
+		for (SpllEntity e: c) {
+			anyChange = add(e) || anyChange;
+		}
+		return anyChange;
 	}
 
 	@Override
@@ -301,4 +347,16 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 		return true;
 	}
 
+	public SpllEntity getEntityForFeature(AGeoEntity<? extends IValue> feature) {
+		return this.feature2entity.get(feature);
+	}
+	
+	/**
+	 * Returns the internal mapping between the spatial entity and the corresponding SPLEntity.
+	 * @return
+	 */
+	public Map<AGeoEntity<IValue>,SpllEntity> getFeatureToEntityMapping() {
+		return Collections.unmodifiableMap(this.feature2entity);
+	}
+	
 }

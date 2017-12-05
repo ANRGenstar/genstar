@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
 
 public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
@@ -101,7 +102,13 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 	public boolean add(ADemoEntity e) {
 		if (attributes != null)
 			_checkEntityAttributes(e);
-		return population.add(e);
+		if (population.add(e)) {
+			// the agent was just added into the population
+			e._setEntityId(EntityUniqueId.createNextId(this, e.getEntityType()));
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	@Override
@@ -116,7 +123,11 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 
 	@Override
 	public boolean addAll(Collection<? extends ADemoEntity> c) {
-		return population.addAll(c);
+		boolean anyChange = false;
+		for (ADemoEntity e: c) {
+			anyChange = this.add(e) || anyChange;
+		}
+		return anyChange;
 	}
 
 	@Override

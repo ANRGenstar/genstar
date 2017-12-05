@@ -1,5 +1,6 @@
 package spll.entity;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,8 +49,15 @@ public class GeoEntityFactory {
 	
 	private Logger log = LogManager.getLogger();
 
-	public GeoEntityFactory() {
+	private Map<Feature, SpllFeature> feature2splFeature;
+	
+	public GeoEntityFactory(Map<Feature, SpllFeature> feature2splFeature) {
 		this.featureAttributes = new HashMap<>();
+		
+		if (feature2splFeature == null)
+			this.feature2splFeature = Collections.emptyMap();
+		else 
+			this.feature2splFeature = feature2splFeature;
 	}
 	
 	/**
@@ -102,6 +110,10 @@ public class GeoEntityFactory {
 	 */
 	public SpllFeature createGeoEntity(Feature feature, List<String> attList) {
 		
+		SpllFeature cached = feature2splFeature.get(feature);
+		if (cached != null)
+			return cached;
+		
 		Map<GeographicAttribute<? extends IValue>, IValue> values = new HashMap<>();
 		
 		Set<String> indexedAttList = new HashSet<>(attList);
@@ -124,7 +136,6 @@ public class GeoEntityFactory {
 				if (attribute == null) {
 					// if the corresponding attribute does not yet exist, we create it on the fly
 					attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
-					System.out.println("discovered attribute: "+attribute.getAttributeName());
 					featureAttributes.put(name, attribute);
 				}
 			}
@@ -150,7 +161,9 @@ public class GeoEntityFactory {
 			}
 		}
 		
-		return new SpllFeature(values, feature);
+		cached = new SpllFeature(values, feature);
+		feature2splFeature.put(feature, cached);
+		return cached;
 	}
 	
 	/**
@@ -188,6 +201,7 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
+		
 		Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> values = new HashMap<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;

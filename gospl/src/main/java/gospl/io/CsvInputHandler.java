@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jfree.util.Log;
 
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.io.GSSurveyType;
@@ -305,7 +306,7 @@ public class CsvInputHandler extends AbstractInputHandler {
 		for (int i=0; i<candidates.length; i++) {
 			msg += candidates[i]+": "+averageOccurences[i]+" ~ "+variance[i]+" \n";
 		}
-		System.out.println(msg);
+		Log.debug("candidates for separators: "+msg);
 		
 		// now select the ones which might be relevant, that is the ones with more than one occurence per line
 		List<Integer> relevant = new LinkedList<>();
@@ -324,7 +325,7 @@ public class CsvInputHandler extends AbstractInputHandler {
 			
 		});
 		
-		System.out.println("order of merit: "+relevant);
+		Log.debug("order of merit for separators: "+relevant);
 		return candidates[relevant.get(0)];
 		
 	}

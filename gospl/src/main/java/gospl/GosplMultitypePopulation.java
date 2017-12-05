@@ -15,12 +15,13 @@ import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
-import core.metamodel.entity.IEntity;
+import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
 
 /**
  * The GoSPL implementation of a multitype population, that is a population able to deal with several 
  * different types of agents and browse them.
+ * 
  * 
  * @author Samuel Thiriot
  *
@@ -103,6 +104,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	@Override
 	public boolean add(E e) {
 		
+		System.err.println("addedinf it multitype pop entity with no forced type "+e.getEntityType());
 		if (!e.hasEntityType())
 			throw new RuntimeException("the population entity should be given an entity type");
 				 
@@ -118,9 +120,12 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	@Override
 	public boolean add(String type, E e) {
 		
+		System.err.println("addedinf it multitype pop entity with forced type "+type);
+
 		e.setEntityType(type);
-		if (getSetForType(e.getEntityType()).add(e)) {
+		if (getSetForType(type).add(e)) {
 			this.size++;
+			e._setEntityId(EntityUniqueId.createNextId(this, type));
 			return true;
 		} else {
 			return false;
@@ -141,47 +146,49 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		return anychange;
 	}
 	
-	@Override
-	public boolean addAll(String type, Collection<? extends E> c) {
-		for (E e: c) {
-			e.setEntityType(type);
-		}
-		boolean anyChange = getSetForType(type).addAll(c);
-		
-		if (anyChange)
-			recomputeSize();
-		
-		return anyChange;
-	}
-	
-	
 	/**
 	 * Adds the GosplPopulation and forces all of these agents 
 	 * to be of the given type. Beware this is not copying the agents, 
 	 * so if you later change the original agents, the content of this collection 
 	 * will be affected !
+	 * 
+	 * <b>note that you have to clone the agents yourself before inserting them!</b>
 	 * @param type
 	 * @param pop
 	 * @return true if any change
 	 */
-	/*
-	@SuppressWarnings("unchecked")
-	public boolean addAll(String type, GosplPopulation pop) {
+	@Override
+	public boolean addAll(String type, Collection<? extends E> c) {
 		
-		Set<E> subpop = getSetForType(type);
-		
-		for (ADemoEntity e: pop) {
+		// ensure the type of these agents is the right one
+		for (E e: c) {
 			e.setEntityType(type);
 		}
 		
-		boolean anyChange = subpop.addAll((Collection<? extends E>) pop);
+		// add the agents in the corresponding subset devoded to this type.
+		boolean anyChange = false;
+		final Set<E> setForType = getSetForType(type);
+		for (E e: c) {
+			if (setForType.add(e)) {
+				// the entity was not there already
+				anyChange = true;
+				e._setEntityId(EntityUniqueId.createNextId(this, type));
+				this.size++;
+			}
+		}
 		
-		if (anyChange)
-			recomputeSize();
+		// adds the corresponding attributes
+		if (c instanceof IPopulation) {
+			Set<DemographicAttribute<? extends IValue>> s = type2attributes.get(type);
+			if (s == null) {
+				s = new HashSet<>();
+				type2attributes.put(type, s);
+			}
+			s.addAll(((IPopulation) c).getPopulationAttributes());
+		}
 		
 		return anyChange;
 	}
-	*/
 	
 	@Override
 	public void clear() {
@@ -226,15 +233,15 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	 * a parameter
 	 * @author samuel Thiriot
 	 *
-	 * @param <E>
+	 * @param <ET>
 	 */
-	private class IteratorMultipleSets<E> implements Iterator<E> {
-		private final List<Set<E>> sets;
-		private Iterator<Set<E>> itList;
-		private Iterator<E> itCurrentSet;
+	private class IteratorMultipleSets<ET> implements Iterator<ET> {
+		private final List<Set<ET>> sets;
+		private Iterator<Set<ET>> itList;
+		private Iterator<ET> itCurrentSet;
 		
-		protected IteratorMultipleSets(Collection<Set<E>> sets) {
-			this.sets = new LinkedList<Set<E>>(sets);
+		protected IteratorMultipleSets(Collection<Set<ET>> sets) {
+			this.sets = new LinkedList<Set<ET>>(sets);
 			this.itList = this.sets.iterator();
 			try {
 				this.itCurrentSet = this.itList.next().iterator();
@@ -249,7 +256,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		}
 
 		@Override
-		public E next() {
+		public ET next() {
 			if (!itCurrentSet.hasNext()) {
 				// we exhausted the current set
 				if (!itList.hasNext())
@@ -350,17 +357,19 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		recomputeSize();
 	}
 
-
-	/**
-	 * TODO
-	 * FIXME
-	 * WARNING
-	 * @param parentType
-	 * @return
-	 */
+	@Override
 	public Iterator<E> iterateSubPopulation(String parentType) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			return type2agents.get(parentType).iterator();
+		} catch (NullPointerException e) {
+			throw new NullPointerException("no entity of type "+parentType
+					+" in this "+this.getClass().getSimpleName());
+		}
+	}
+
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		return type2agents.size() == 1 && type2agents.get(type) != null;
 	}
 
 }

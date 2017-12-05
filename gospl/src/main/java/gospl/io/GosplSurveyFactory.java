@@ -37,6 +37,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.io.IGSSurvey;
@@ -574,19 +575,41 @@ public class GosplSurveyFactory {
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<DemographicAttribute<? extends IValue>> attributes = population.getPopulationAttributes();
-		bw.write("Individual");
+		bw.write("ID");
+		bw.write(separator);
+		bw.write("__type");
 		bw.write(separator);
 		bw.write(attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator))));
+		bw.write(separator);
+		bw.write("parentId");
+		bw.write(separator);
+		bw.write("count_children");
 		bw.write("\n");
+		
+		bw.write("Individual");
+		bw.write(separator);
+		bw.write("Type of the entity");
+		bw.write(separator);
+		bw.write(attributes.stream().map(att -> att.getDescription()).collect(Collectors.joining(String.valueOf(separator))));
+		bw.write(separator);
+		bw.write("ID of the parent entity");
+		bw.write(separator);
+		bw.write("count of children of this entity");
+		bw.write("\n");
+		
 		for (final ADemoEntity e : population) {
-			bw.write(String.valueOf(individual++));
+			bw.write(e.getEntityId()); // String.valueOf(individual++)
+			bw.write(separator);
+			if (e.getEntityType() != null)
+				bw.write(e.getEntityType());
+			else 
+				bw.write(" ");
 			for (final DemographicAttribute<? extends IValue> attribute : attributes) {
 				bw.write(separator);
 				try {
 		
 					IValue val = e.getValueForAttribute(attribute); 
 					String v = val.getStringValue();
-					
 					
 					if (!attribute.getValueSpace().getType().isNumericValue()) {
 						bw.write("\"");
@@ -600,6 +623,14 @@ public class GosplSurveyFactory {
 					bw.write("\"?\"");
 				}
 			}
+			bw.write(separator);
+			IEntity<?> parent = e.getParent();
+			if (parent != null)
+				bw.write(e.getParent().getEntityId());
+			else 
+				bw.write(" ");
+			bw.write(separator);
+			bw.write(Integer.toString(e.getCountChildren()));
 			bw.write("\n");
 		}
 		bw.close();

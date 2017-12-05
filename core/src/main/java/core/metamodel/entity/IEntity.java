@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
+import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
 
@@ -15,6 +16,31 @@ import core.metamodel.value.IValue;
  */
 public interface IEntity<A extends IAttribute<? extends IValue>> {
 
+	/**
+	 * returns the entity id for the entity. It is unique at the scale of 
+	 * the entity population only.
+	 * See {@link EntityUniqueId}.
+	 * throws an {@link IllegalStateException} if the id was not defined yet by the population
+	 * @return
+	 */
+	public String getEntityId() throws IllegalStateException;
+	
+	/**
+	 * <b>Internal use only.</b> 
+	 * Called by an {@link IPopulation} when the agent is added into it. 
+	 * See {@link EntityUniqueId}.
+	 * Throws an {@link IllegalStateException} if an id was defined already.
+	 */
+	public void _setEntityId(String novelid) throws IllegalStateException;
+	
+	/**
+	 * <b>internal use only</b>.
+	 * Returns true if this entity already has a id defined.
+	 * Used by {@link IPopulation}. See {@link EntityUniqueId} for details.
+	 * @return
+	 */
+	public boolean _hasEntityId();
+	
 	/**
 	 * returns the mapped view of attribute / value pairs
 	 * @return

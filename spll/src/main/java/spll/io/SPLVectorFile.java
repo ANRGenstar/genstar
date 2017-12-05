@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DataUtilities;
@@ -62,8 +64,11 @@ import spll.util.SpllUtil;
  */
 public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 
-	private Set<SpllFeature> features = null;
+	private Logger logger = LogManager.getLogger();
 
+	private Set<SpllFeature> features = null;
+	private Map<Feature,SpllFeature> feature2SPLFeature = new HashMap<>();
+	
 	private final DataStore dataStore;
 	private final CoordinateReferenceSystem crs;
 
@@ -126,10 +131,14 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 				.getFeatureSource(dataStore.getTypeNames()[0]);
 		features = new HashSet<>();
 		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(Filter.INCLUDE)).features();
-		GeoEntityFactory gef = new GeoEntityFactory();
+		GeoEntityFactory gef = new GeoEntityFactory(feature2SPLFeature);
 		System.out.println("loading from SPLVectorFile with attributes "+attributes);
-		while (fItt.hasNext())
-			features.add(gef.createGeoEntity(fItt.next(), attributes));
+		while (fItt.hasNext()) {
+			SimpleFeature f = fItt.next();
+			SpllFeature sf = gef.createGeoEntity(f, attributes);
+			features.add(sf);
+			feature2SPLFeature.put(f, sf);
+		}
 	}
 
 	protected SPLVectorFile(File file, Charset charset, List<String> attributes) throws IOException{
@@ -266,14 +275,14 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 
 	@Override
 	public Iterator<SpllFeature> getGeoEntityIterator() {
-		return new GSFeatureIterator(dataStore);
+		return new GSFeatureIterator(dataStore, feature2SPLFeature);
 	}
 
 	@Override
 	public Iterator<SpllFeature> getGeoEntityIteratorWithin(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.within(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
-		return new GSFeatureIterator(dataStore, filter);
+		return new GSFeatureIterator(dataStore, filter, feature2SPLFeature);
 	}
 
 
@@ -288,7 +297,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	public Iterator<SpllFeature> getGeoEntityIteratorIntersect(Geometry geom) {
 		FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2( GeoTools.getDefaultHints() );
 		Filter filter = ff.intersects(ff.property( BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME), ff.literal( geom ));
-		return new GSFeatureIterator(dataStore, filter);
+		return new GSFeatureIterator(dataStore, filter, feature2SPLFeature);
 	}
 
 	@Override
@@ -339,11 +348,11 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 				 newGeom.buffer(0.0);
 			 }
 			fts.add(gef.createGeoEntity(newGeom, ft.getAttributeMap()));
-			System.out.println("" + fts.size() + "/" + features.size()); 
+			logger.debug("created features {}/{}", fts.size(), features.size());
 		}
 		
 		if (avoidOverlapping) {
-			
+			// TODO ???
 		}
 		SPLGeofileBuilder builder = new SPLGeofileBuilder();
 		builder.setFeatures(fts);

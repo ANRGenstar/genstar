@@ -113,6 +113,11 @@ public final class GosplSubPopulation<E extends ADemoEntity>
 		return set.toArray(a);
 	}
 
+	@Override
+	public boolean isAllPopulationOfType(String type) {
+		return type.equals(type);
+	}
+
 	
 	
 }

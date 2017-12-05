@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
 import spin.objects.SpinNetwork;
 
@@ -102,7 +103,11 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 
 	@Override
 	public boolean add(ADemoEntity e) {
-		return population.add(e);
+		if (population.add(e)) {
+			e._setEntityId(EntityUniqueId.createNextId(this, e.getEntityType()));
+			return true;
+		}
+		return false;
 	}
 
 	@Override
@@ -117,7 +122,11 @@ public class SpinPopulation implements IPopulation<ADemoEntity, DemographicAttri
 
 	@Override
 	public boolean addAll(Collection<? extends ADemoEntity> c) {
-		return population.addAll(c);
+		boolean anyChange = false;
+		for (ADemoEntity e: c) {
+			anyChange = add(e) || anyChange;
+		}
+		return anyChange;
 	}
 
 	@Override

@@ -163,7 +163,7 @@ public class ReadINSEEDictionaryUtils {
 											.collect(Collectors.toList())
 											);
 		
-		System.out.println("separator: "+separator);
+		logger.info("detected separator: "+separator);
 		if (separator.length() > 0) {
 			// there is a common substring; let's use it
 			
@@ -200,7 +200,7 @@ public class ReadINSEEDictionaryUtils {
 
 		}
 		
-		System.out.println(variable2modality2text);
+		logger.info("read modalities {}", variable2modality2text);
 		
 		// now detect a separator for variable names
 		String separatorName = detectSeparator(variable2modalities.keySet());

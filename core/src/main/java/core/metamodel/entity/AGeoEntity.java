@@ -17,6 +17,11 @@ import core.util.data.GSDataParser;
 
 public abstract class AGeoEntity<V extends IValue> implements IEntity<GeographicAttribute<? extends V>> {
  
+	/**
+	 * The unique identifier of the entity. See {@link EntityUniqueId}
+	 */
+	private String id = null;
+		
 	private String gsName;
 	
 	private Map<GeographicAttribute<? extends V>, V> attributes;
@@ -129,7 +134,27 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 		return getGeometry().getArea();
 	}
 	
+	@Override
+	public final void _setEntityId(String novelid) throws IllegalStateException {
+		if (this.id != null)
+			throw new IllegalArgumentException("cannot change the identifier of an agent; "+
+						"this agent already had id "+this.id+" but we were asked "+
+					"to change it for "+novelid);
+		this.id = novelid;
+	}
+
+	@Override
+	public final String getEntityId() throws IllegalStateException {
+		if (this.id == null)
+			throw new IllegalStateException("no id is defined yet for agent "+this.toString());
+		return this.id;
+	}
 	
+	@Override
+	public final boolean _hasEntityId() {
+		return this.id != null;
+	}
+
 	/**
 	 * The point characterizes the attribute location
 	 * 
