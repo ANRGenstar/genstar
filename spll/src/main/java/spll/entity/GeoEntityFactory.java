@@ -2,6 +2,7 @@ package spll.entity;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -42,7 +43,6 @@ public class GeoEntityFactory {
 	public static String ATTRIBUTE_FEATURE_POP = "Population";
 	
 	private final Map<String, GeographicAttribute<? extends IValue>> featureAttributes;
-	private Set<GeographicAttribute<ContinuousValue>> pixelAttributes;
 	
 	private SimpleFeatureBuilder contingencyFeatureBuilder;
 	
@@ -101,7 +101,6 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllFeature createGeoEntity(Feature feature, List<String> attList) {
-		
 		Map<GeographicAttribute<? extends IValue>, IValue> values = new HashMap<>();
 		
 		Collection<Property> propertyList = feature.getProperties().stream()
@@ -111,22 +110,21 @@ public class GeoEntityFactory {
 		for(Property property : propertyList){
 			String name = property.getName().getLocalPart();
 			GeographicAttribute<? extends IValue> attribute = null;
-			try {
-				attribute = featureAttributes.get(name);
-			} catch (NullPointerException e) {
-					// if the corresponding attribute does not yet exist, we create it on the fly
+			attribute = featureAttributes.get(name);
+			if (attribute == null) {
+				// if the corresponding attribute does not yet exist, we create it on the fly
 					attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
 					System.out.println("discovered attribute: "+attribute.getAttributeName());
 					featureAttributes.put(name, attribute);
-			}
-			
+			}	
 			Object v = property.getValue();
-			if (v == null)
+			if (v == null) {
 				values.put(attribute, attribute.getValueSpace().getEmptyValue());
-			else
+				
+			} else {
 				values.put(attribute, attribute.getValueSpace().addValue(v.toString()));
+			}
 		}
-		
 		return new SpllFeature(values, feature);
 	}
 	
@@ -166,6 +164,7 @@ public class GeoEntityFactory {
 	 */
 	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
 		Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> values = new HashMap<>();
+		Set<GeographicAttribute<ContinuousValue>> pixelAttributes = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
 			GeographicAttribute<ContinuousValue> attribute = null;

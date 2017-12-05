@@ -112,7 +112,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 		Map<String,DemographicAttribute<? extends IValue>> dictionnaryName2attribute = new HashMap<>(dictionnary.size());
 		for (DemographicAttribute<? extends IValue> a: dictionnary)
 			dictionnaryName2attribute.put(a.getAttributeName(), a);
-		System.out.println("working on attributes: "+dictionnaryName2attribute);
+		//System.out.println("working on attributes: "+dictionnaryName2attribute);
 
 		// will contain the list of all the attributes which were ignored 
 		Set<String> ignoredAttributes = new HashSet<>();
@@ -125,7 +125,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 			
 			// retrieve the geospatial entity considered
 			SpllFeature feature = itGeoEntity.next();
-			System.out.println("working on feature: "+feature.getGenstarName());
+			//System.out.println("working on feature: "+feature.getGenstarName());
 
 			Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>(dictionnary.size());
 			
@@ -146,9 +146,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 					continue;
 				}
 				
-				System.out.println(	attribute.getAttributeName()
-									+"="+
-									value.getStringValue());
+				//System.out.println(	attribute.getAttributeName()+"="+value.getStringValue());
 				
 				// find the value according to the dictionnary
 				if (value.getStringValue().trim().isEmpty()) {
@@ -291,5 +289,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	public void clear() {
 		population.clear();
 	}
+	
+	
 
 }

@@ -68,9 +68,10 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 					Collection<? extends IValue> variables, GSPerformanceUtil gspu) {
 		List<ISPLMatcher<SPLVariable, Double>> areaMatcherList = new ArrayList<>();
 		while(geoData.hasNext()){
-			AGeoEntity<? extends IValue> geoEntity = geoData.next();  
+			AGeoEntity<? extends IValue> geoEntity = geoData.next(); 
 			for(String prop : geoEntity.getPropertiesAttribute()){
 				IValue value = geoEntity.getValueForAttribute(prop);
+				
 				if(!variables.isEmpty() && !variables.contains(value))
 					continue;
 				Optional<ISPLMatcher<SPLVariable, Double>> potentialMatch = areaMatcherList

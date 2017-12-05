@@ -145,9 +145,15 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	}
 	
 	@Override
+<<<<<<< HEAD
 	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(
 			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
 			GeographicAttribute<? extends IValue> attribute, File file) 
+=======
+	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(File destination,
+			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
+			GeographicAttribute<? extends IValue> attribute) 
+>>>>>>> ed70d76acd5f71459c8ce9d718f1eaa926d7372e
 					throws IllegalArgumentException, IOException {
 		if(!attribute.getValueSpace().getType().isNumericValue())
 			throw new IllegalArgumentException("Raster file cannot be template for non numeric data tranfer\n"

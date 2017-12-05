@@ -103,7 +103,10 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 
 	@Override
 	public IValue getValueForAttribute(String property) {
-		return attributes.get(this.getValueForAttribute(property));
+		for (DemographicAttribute att :this.attributes.keySet()) {
+			if (att.getAttributeName().equals(property)) return attributes.get(att);
+		}
+		return null;
 	}
 	
 	@Override

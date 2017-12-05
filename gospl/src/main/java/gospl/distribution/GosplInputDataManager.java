@@ -448,7 +448,7 @@ public class GosplInputDataManager {
 				
 				if (val!=null)
 					entityAttributes.put(att, val);
-				else if (att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
+				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
 				else {
 					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "

@@ -131,8 +131,8 @@ public interface IGSGeofile<E extends AGeoEntity<V>, V extends IValue> {
 	 * @throws IOException 
 	 * @throws IllegalArgumentException 
 	 */
-	public IGSGeofile<E, V> transferTo(Map<? extends AGeoEntity<? extends IValue>, Number> transfer, 
-			GeographicAttribute<? extends IValue> attribute, File toFile) 
+	public IGSGeofile<E, V> transferTo(File destinationTmp, Map<? extends AGeoEntity<? extends IValue>,Number> transfer, 
+			GeographicAttribute<? extends IValue> attribute) 
 					throws IllegalArgumentException, IOException;
 	
 }
