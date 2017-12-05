@@ -169,9 +169,13 @@ public class GeoEntityFactory {
 		GSDataParser gsdp = new GSDataParser();
 		// Use factory defined feature constructor to build the inner feature
 		contingencyFeatureBuilder.add(the_geom);
-		featureValues.keySet().stream().forEach(att -> 
-			contingencyFeatureBuilder.set(att.getAttributeName(), att.getValueSpace().getType().isNumericValue() ? 
-					gsdp.getNumber(featureValues.get(att).getStringValue()) : featureValues.get(att).getStringValue()));
+		for (GeographicAttribute<? extends IValue> att : featureValues.keySet()) {
+			String name = att.getAttributeName() ;
+			IValue val = featureValues.get(att) ;
+			if (val == null) continue;
+			Object valObj =  att.getValueSpace().getType().isNumericValue() ? gsdp.getNumber(val.toString()) : val.toString();
+			contingencyFeatureBuilder.set(name,valObj);
+		}
 		Feature feat = contingencyFeatureBuilder.buildFeature(null);
 		
 		// Add non previously encountered attribute to attributes set
@@ -182,6 +186,8 @@ public class GeoEntityFactory {
 		// Return created GSFeature
 		return new SpllFeature(featureValues, feat);
 	}
+	
+	
 
 	/**
 	 * Create a raster style entity
