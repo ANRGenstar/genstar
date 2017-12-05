@@ -165,13 +165,30 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			SPLUniformNormalizer splUniformNormalizer) throws IndexOutOfBoundsException, IOException, 
 	TransformException, InterruptedException, ExecutionException, IllegalRegressionException, GSMapperException, SchemaException, 
 	MismatchedDimensionException, IllegalArgumentException, InvalidGeoFormatException {
-		File tmpFile = File.createTempFile("tempMapper", ".shp");
-		tmpFile.deleteOnExit();
 		String keyAttribute = match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
 				GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
 		
-		this.setMapper(this.estimateMatcher(tmpFile), keyAttribute, ancillaryFileList, 
+		File tmp = File.createTempFile("match", "."+ (match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
+				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString()));
+		tmp.deleteOnExit();
+		
+		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
 				varList, lmRegressionOLS, splUniformNormalizer);
+		
+		/*
+		 * 	File tmpFile = File.createTempFile("tempMapper", ".shp");
+		tmpFile.deleteOnExit();
+		String keyAttribute = "count";//GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0;
+			//	GeoEntityFactory.ATTRIBUTE_FEATURE_POP : GeoEntityFactory.ATTRIBUTE_PIXEL_BAND+0; 
+		
+		File tmp = File.createTempFile("match", "."+ (match.getGeoGSFileType().equals(GeoGSFileType.VECTOR) ? 
+				SPLGisFileExtension.shp.toString() : SPLGisFileExtension.tif.toString()));
+		tmp.deleteOnExit();
+		
+		this.setMapper(this.estimateMatcher(tmp), keyAttribute, ancillaryFileList, 
+				varList, lmRegressionOLS, splUniformNormalizer);
+	
+		 */
 	}
 
 	@Override
@@ -207,7 +224,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			File tmpVector = Files.createTempFile("regression_vector_output", ".shp").toFile();
 			tmpVector.deleteOnExit();
 			this.setMapper(splMapperBuilder.buildOutput(tmpVector, 
-					(SPLVectorFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
+					(SPLRasterFile) splMapperBuilder.getAncillaryFiles().get(0), false, true, 
 					(double) population.size()), splMapperBuilder.getMainAttribute());
 			break;
 		default:
@@ -388,22 +405,21 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 					throws IOException {
 		// Collection of entity to match
 		Collection<? extends AGeoEntity<? extends IValue>> entities = matchFile.getGeoEntity();
+
 		// Setup key attribute of entity mapped to the number of match
 		Map<String, Integer> attMatches = entities.stream()
 				.collect(Collectors.toMap(e -> e.getValueForAttribute(keyAttributeSpace).getStringValue(), e -> 0));
-		
+
 		// Test if each entity has it's own key attribute, and if not through an exception
 		if(attMatches.size() != entities.size())
 			throw new IllegalArgumentException("Define matcher does not fit key attribute contract: some entity has the same key value");
 
-		
 		// DOES THE MATCH
 		population.stream().map(e -> e.getValueForAttribute(keyAttributePopulation)).filter(e -> attMatches.containsKey(e)).forEach(value -> attMatches.put(value.getStringValue(), attMatches.get(value.getStringValue())+1));
 		
 		this.gspu.sysoStempPerformance("Matches ("+ attMatches.size() +") have been counted (Total = "
 				+attMatches.values().stream().reduce(0, (i1, i2) -> i1 + i2).intValue()+") !", this);
 
-		
 		// Bind each key attribute with its entity to fasten further processes
 		return entities.stream().collect(Collectors.toMap(e -> e, 
 				e -> attMatches.get(e.getValueForAttribute(keyAttributeSpace).getStringValue())));
