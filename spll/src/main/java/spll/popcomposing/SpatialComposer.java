@@ -376,7 +376,7 @@ public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 		logger.info("count of empty parents is now: {}/{} ~ {}%", 
 						countEmptyParents, 
 						populationOfParentCandidates.size(), 
-						(double)countEmptyParents/populationOfParentCandidates.size());		
+						(double)100*countEmptyParents/populationOfParentCandidates.size());		
 		
 	}
 	
