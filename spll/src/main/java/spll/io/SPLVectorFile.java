@@ -307,10 +307,9 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		return dataStore;
 	}
 	
-	public SPLVectorFile applyBuffer(Double minDist, Double maxDist, Boolean avoidOverlapping, String destination) throws IOException, SchemaException, InvalidGeoFormatException {
+	public SPLVectorFile minMaxDistance(Double minDist, Double maxDist, Boolean avoidOverlapping) throws IOException, SchemaException, InvalidGeoFormatException {
 		Set<SpllFeature> fts = new HashSet<>();
 		SimpleFeatureType schemaOld = this.getStore().getSchema(this.getStore().getNames().get(0));
-		
 		final StringBuilder specs = new StringBuilder();
 		specs.append("geometry:MultiPolygon"); 
 		for (final AttributeType at : schemaOld.getTypes()) {
@@ -334,7 +333,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 			}
 		}
 		for (SpllFeature ft : features) {
-			 SimpleFeatureBuilder builder = new SimpleFeatureBuilder((SimpleFeatureType) ft.getInnerFeature().getType());
 			 Geometry newGeom = ft.getGeometry().buffer(maxDist);
 			 if (quadTreeMin != null && ! quadTreeMin.isEmpty()) {
 				 List<Geometry> intersection = quadTreeMin.query(newGeom.getEnvelopeInternal());
@@ -351,7 +349,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		}
 		SPLGeofileBuilder builder = new SPLGeofileBuilder();
 		builder.setFeatures(fts);
-		builder.setFile(new File(destination));
+		builder.setFile(File.createTempFile("buffer", ".shp"));
 		return builder.buildShapeFile();
 	}
 

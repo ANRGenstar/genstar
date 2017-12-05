@@ -121,7 +121,7 @@ public class SPLGeofileBuilder {
 	public SPLGeofileBuilder setFile(File gisFile) 
 			throws InvalidGeoFormatException, FileNotFoundException {
 		this.gisFile = gisFile;
-		chekFile(SPLGisFileExtension.values());
+		//chekFile(SPLGisFileExtension.values());
 		return this;
 	}
 
