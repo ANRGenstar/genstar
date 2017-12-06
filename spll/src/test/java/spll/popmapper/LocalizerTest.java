@@ -1,7 +1,5 @@
 package spll.popmapper;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,25 +9,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.geotools.feature.SchemaException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opengis.referencing.operation.TransformException;
 
+import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
-import core.metamodel.entity.IEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.generator.UtilGenerator;
+import gospl.generator.util.GSUtilGenerator;
 import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
@@ -119,16 +115,17 @@ public class LocalizerTest {
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	private static void setupRandom(){
-		Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
+		DemographicDictionary<DemographicAttribute<? extends IValue>> atts = new DemographicDictionary<>();
 		try {
-			DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101"));
-			atts.add(att);
+			atts.addAttributes(DemographicAttributeFactory.getFactory()
+					.createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101")));
 		} catch (GSIllegalRangedData e1) {
 			e1.printStackTrace();
 		}
 		
-		UtilGenerator ug = new UtilGenerator(atts);
+		GSUtilGenerator ug = new GSUtilGenerator(atts);
 				
 		pop = ug.generate(100);
 		
