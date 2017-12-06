@@ -62,7 +62,7 @@ public class TestInferenceEnginesOnData {
 			// we can activate those but not on build machines in which they would slow don't the process
 			
 			// // { SimpleConditionningInferenceEngine.class, 	new DataAlarm() },
-			{ EliminationInferenceEngine.class, 			new DataAlarm() },
+			//{ EliminationInferenceEngine.class, 			new DataAlarm() },
 			//{ RecursiveConditionningEngine.class, 			new DataAlarm() },
 			// { BestInferenceEngine.class, 					new DataAlarm() },
 

@@ -160,4 +160,16 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 		return true;
 	}
 
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		for (E e: population) {
+			for (DemographicAttribute<? extends IValue> a: e.getAttributes()) {
+				if (a.getAttributeName().equals(name))
+					return a;
+			}
+		}
+		return null;
+	}
+	
+
 }

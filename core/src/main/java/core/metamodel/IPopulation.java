@@ -22,7 +22,28 @@ import core.metamodel.value.IValue;
  */
 public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extends IValue>> extends Collection<E> {
 
+	/**
+	 * Returns the set of the attributs which exist in this population
+	 * @return
+	 */
 	public Set<A> getPopulationAttributes();
+	
+	/**
+	 * returns the population attribute for the given name of attribute,
+	 * or null if it does not exists
+	 * @param attribute
+	 * @return
+	 */
+	public A getPopulationAttributeNamed(String name);
+	
+	/**
+	 * Returns true if the population contains the given attribute.
+	 * @param name
+	 * @return
+	 */
+	public default boolean hasPopulationAttributeNamed(String name) {
+		return getPopulationAttributeNamed(name) != null;
+	}
 	
 	/**
 	 * returns true if all the entities are of type type.

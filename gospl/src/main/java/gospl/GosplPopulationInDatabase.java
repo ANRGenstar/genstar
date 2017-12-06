@@ -4,9 +4,11 @@ import java.io.File;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,18 +16,20 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bouncycastle.crypto.RuntimeCryptoException;
+import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
+import core.metamodel.value.binary.BinarySpace;
 import core.metamodel.value.binary.BooleanValue;
 
 /**
@@ -51,12 +55,27 @@ public class GosplPopulationInDatabase
 
 	private Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes = new HashMap<>();
 	
+	private static int currentInstanceCount = 0;
+	
+	private String mySqlDBname = "GosplPopulation_"+(++currentInstanceCount);
 	
 	public GosplPopulationInDatabase(Connection connection, GosplPopulation population) {
 		this.connection = connection;
 		loadPopulationIntoDatabase(population);
 	} 
 
+	/**
+	 * Creates an empty population in memory
+	 */
+	public GosplPopulationInDatabase() {
+		try {
+			this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("error while trying to initialize the HDSQL database engine in memory: "+e.getMessage(), e);
+		}
+	} 
+	
 	/**
 	 * Creates a population stored in memory. 
 	 * Suitable as long as the population is not too big. 
@@ -65,7 +84,7 @@ public class GosplPopulationInDatabase
 	 */
 	public GosplPopulationInDatabase(GosplPopulation population) {
 		try {
-			this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:mymemdb;shutdown=true", "SA", "");
+			this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("error while trying to initialize the HDSQL database engine in memory: "+e.getMessage(), e);
@@ -81,7 +100,8 @@ public class GosplPopulationInDatabase
 	public GosplPopulationInDatabase(File databaseFile, GosplPopulation population) {
 		
 		 try {
-			this.connection = DriverManager.getConnection("jdbc:hsqldb:file:"+databaseFile.getPath()+";shutdown=true;ifexists=true", "SA", "");
+			 //;ifexists=true
+			this.connection = DriverManager.getConnection("jdbc:hsqldb:file:"+databaseFile.getPath()+";create=true;shutdown=true;", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("error while trying to initialize the HDSQL database engine in file "
@@ -164,7 +184,7 @@ public class GosplPopulationInDatabase
 		
 		// prepare the SQL query
 		StringBuffer sb = new StringBuffer();
-		sb.append("DECLARE LOCAL TEMPORARY TABLE ")
+		sb.append("CREATE TABLE ") // LOCAL TEMPORARY 
 			.append(getTableNameForEntityType(type))
 			.append(" (");
 		
@@ -215,7 +235,7 @@ public class GosplPopulationInDatabase
 	 */
 	protected void loadPopulationIntoDatabase(GosplPopulation pop) {
 		assert this.connection != null;
-		
+		assert pop != null;
 		
 		// create the attributes 
 		// we don't know the entity type for this population
@@ -265,6 +285,41 @@ public class GosplPopulationInDatabase
 	
 	}
 	
+	/**
+	 * For a given attribute of an entity of a given type, decodes the value from a SQL resultset 
+	 * and returns the corresponding genstar value.
+	 * @param type
+	 * @param a
+	 * @param r
+	 * @return
+	 * @throws SQLException 
+	 */
+	protected IValue readValueForAttribute(String type, DemographicAttribute<? extends IValue> a, ResultSet r) throws SQLException {
+		final String colName = getAttributeColNameForType(type, a);
+		switch (a.getValueSpace().getType()) {
+		case Integer:
+			int valueInd = r.getInt(colName);
+			return a.getValueSpace().getValue(Integer.toString(valueInd));
+		case Continue:
+			double valueDouble = r.getDouble(colName);
+			return a.getValueSpace().getValue(Double.toString(valueDouble));
+		case Nominal:
+		case Range:
+		case Order:
+			String valueStr = r.getString(colName);
+			return a.getValueSpace().getValue(valueStr);
+		case Boolean:
+			if (r.getBoolean(colName)) {
+				return ((BinarySpace)a.getValueSpace()).valueTrue;
+			} else {
+				return ((BinarySpace)a.getValueSpace()).valueFalse;
+			}
+		default :
+			throw new RuntimeException("unknown entity type "+a.getValueSpace().getType());
+		}
+	}
+	
+	
 	protected void storeEntities(String type, Collection<? extends ADemoEntity> entities) throws SQLException {
 
 		// name columns 
@@ -291,6 +346,7 @@ public class GosplPopulationInDatabase
 				logger.info("adding entities with query {}", qry);
 				Statement st = connection.createStatement();
 				st.executeQuery(qry);
+				st.close();
 				// restart from scratch 
 				first = true;
 				sb = new StringBuffer(qryHead);
@@ -319,6 +375,7 @@ public class GosplPopulationInDatabase
 			logger.info("adding last entities with query {}", qry);
 			Statement st = connection.createStatement();
 			st.executeQuery(qry);
+			st.close();
 		}
 	}
 
@@ -410,34 +467,352 @@ public class GosplPopulationInDatabase
 
 	@Override
 	public boolean isEmpty() {
+		
+		// easy solution: no entity type means nothing was ever inserted
 		if (entityType2tableName.isEmpty())
 			return true;
-		// TODO
+		
+		// the hard way 
+		try {
+			Statement st = connection.createStatement(
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+		            ResultSet.CONCUR_READ_ONLY);
+			
+			for (String tableName: entityType2tableName.values()) {
+				//ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
+				
+				ResultSet set = st.executeQuery("SELECT * FROM "+tableName+" LIMIT 1");
+				
+				if (!set.next())
+					return true;
+				
+			}
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException("Error while checking if the table is empty",e1);
+		}
+		
 		return false;
 	}
 
+	/**
+	 * Iterates the entities of a given type
+	 * 
+	 * @author Samuel Thiriot
+	 */
+	public class DatabaseEntitiesIterator implements Iterator<ADemoEntity> {
+
+	    private ResultSet rs;
+	    private PreparedStatement ps;
+	    private Connection connection;
+	    private String sql;
+	    private String type;
+	    private Set<DemographicAttribute<? extends IValue>> attributes;
+	    
+	    public DatabaseEntitiesIterator(Connection connection, Set<DemographicAttribute<? extends IValue>> attributes, String type, String sql) {
+	        assert connection != null;
+	        assert sql != null;
+	        assert type != null;
+	        assert attributes != null;
+	        this.connection = connection;
+	        this.sql = sql;
+	        this.attributes = attributes;
+	        this.type = type;
+	    }
+
+	    /**
+	     * Creates an iterator browsing all the entities of this type
+	     * @param connection
+	     * @param type
+	     */
+	    public DatabaseEntitiesIterator(Connection connection, Set<DemographicAttribute<? extends IValue>> attributes, String type) {
+	    	this(connection, attributes, type, "SELECT * FROM "+entityType2tableName.get(type));
+	    }
+	    
+	    public void init() {
+	        try {
+	            ps = connection.prepareStatement(sql);
+	            rs = ps.executeQuery();
+	            rs.next();
+	        } catch (SQLException e) {
+	            close();
+	            throw new RuntimeException();
+	        }
+	    }
+
+	    @Override
+	    public boolean hasNext() {
+	        if (ps == null) {
+	            init();
+	        }
+	        try {
+	            boolean hasMore = !rs.isAfterLast();
+	            // TODO avoid this ugly workaround ?!
+	            if (hasMore) {
+	            	try {
+		            	rs.getString("id");
+		            } catch (SQLException e) {
+		            	hasMore = false;
+		            }
+	            }
+	            if (!hasMore) {
+	                close();
+	            }
+	            return hasMore;
+	        } catch (SQLException e) {
+	            close();
+	            throw new RuntimeException(e);
+	        }
+
+	    }
+
+	    private void close() {
+	        try {
+	            rs.close();
+	            try {
+	                ps.close();
+	            } catch (SQLException e) {
+	                //nothing we can do here
+	            }
+	        } catch (SQLException e) {
+	            //nothing we can do here
+	        }
+	    }
+
+	    @Override
+	    public ADemoEntity next() {
+	        
+	    	Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>();
+	    	
+	    	// read the attributes of the current element 
+	    	String id;
+	    	try {
+	    		id = rs.getString("id");
+	    	} catch (SQLException e) {
+				e.printStackTrace();
+				throw new RuntimeException("error while reading the id from database: "+e.getMessage(), e);
+			}
+	    	for (DemographicAttribute<? extends IValue> a: attributes) {
+	    		try {
+					attribute2value.put(a, readValueForAttribute(type, a, rs));
+				} catch (SQLException e) {
+					e.printStackTrace();
+					throw new RuntimeException("error while reading the value "+a+" from database: "+e.getMessage(), e);
+				}
+	        } 
+	    	
+    		try {
+    			rs.next();
+    		} catch (SQLException e) {
+    			throw new RuntimeException("error while going to the next record: "+e.getMessage(), e);
+			}
+
+	    	// create the return result
+	    	GosplEntity res = new GosplEntity(attribute2value);
+	    	res._setEntityId(id);
+	    	res.setEntityType(type);
+	    	
+	    	return res;
+	    }
+	}
+	
+
+	/**
+	 * Iterates the entities of a all types
+	 * 
+	 * @author Samuel Thiriot
+	 */
+	public class AllTypesIterator implements Iterator<ADemoEntity> {
+
+	    private Connection connection;
+		private Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes;
+		
+		private Iterator<String> itTypes = null;
+		private DatabaseEntitiesIterator itEntities = null;
+		
+		private String currentType = null;
+		
+		//TODO add SQL selector
+
+	    public AllTypesIterator(
+	    		Connection connection, 
+	    		Map<String,String> entityType2tableName,
+	    		Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes
+	    		) {
+	        assert connection != null;
+	        
+	        this.connection = connection;
+	        this.entityType2attributes = entityType2attributes;
+	        
+	        itTypes = entityType2tableName.keySet().iterator();
+	        itTypes.hasNext();
+	    }
+
+	    protected void initEntitiesIterator() {
+    		String currentType = itTypes.next();
+    		itEntities = new DatabaseEntitiesIterator(
+    				connection, 
+    				entityType2attributes.get(currentType), 
+    				currentType
+    				);
+	    }
+	    @Override
+	    public boolean hasNext() {
+	    	
+	        if (itEntities == null)
+	        	initEntitiesIterator();
+	        	
+	        if (!itEntities.hasNext()) {
+	        	System.out.println("end of the entities iterator");
+	        	return itTypes.hasNext();
+	        } else {
+	        	return true;
+	        }
+	    }
+
+	    @Override
+	    public ADemoEntity next() {
+	        
+	    	/*if (itEntities == null || !itEntities.hasNext()) {
+	    		currentType = itTypes.next();
+	    		
+	    	}*/
+	    	//itTypes.hasNext()
+	    	if (itEntities == null || !itEntities.hasNext()) 
+	    		initEntitiesIterator();
+	    	
+	    	return itEntities.next();
+	    }
+	}
+	
+	
 	@Override
 	public Iterator<ADemoEntity> iterator() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return new AllTypesIterator(connection, entityType2tableName, entityType2attributes);
+	}
+	
+	public Iterator<ADemoEntity> iterator(String type) {
+		return new DatabaseEntitiesIterator(connection, entityType2attributes.get(type), type);
 	}
 
 	@Override
 	public boolean remove(Object o) {
-		// TODO Auto-generated method stub
-		return false;
+		try {
+			ADemoEntity e = (ADemoEntity)o;
+			
+			if (!entityType2tableName.containsKey(e.getEntityType()))
+				// if we hold no agent of this type, we did not delete it 
+				return false;
+			
+			if (!e._hasEntityId())
+				// we never stored an agent without id 
+				return false;
+			
+			try {
+				Statement st = connection.createStatement();
+				st.executeQuery("DELETE FROM "+
+						getTableNameForEntityType(e.getEntityType())+
+						" WHERE id='"+e.getEntityId()+"'"
+						);
+				
+				// check if we deleted anything
+				ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
+				rs.next();
+				return rs.getInt(1) > 0;
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+				throw new RuntimeException("SQL error while deleting the entity "+e, ex);
+			}
+			
+		} catch (ClassCastException e1) {
+			// if this is not an entity, we did not removed it
+			return false;
+		}
 	}
 
+	protected void createIdsClause(StringBuffer sb, Collection<String> ids) {
+		sb.append("IN (");
+		boolean first = true;
+		for (String id : ids) {
+			if (first)
+				first = false;
+			else 
+				sb.append(",");
+			sb.append("'").append(id).append("'");
+		}
+		sb.append(")");
+		
+	}
+	
+	protected int deleteIds(String type, Collection<String> ids) {
+		StringBuffer sb = new StringBuffer();
+		sb.append("DELETE FROM ").append(getTableNameForEntityType(type)).append(" WHERE id ");
+		createIdsClause(sb, ids);
+		
+		try {
+			Statement st = connection.createStatement();
+			st.executeQuery(sb.toString());
+			// check if we deleted anything
+			ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
+			rs.next();
+			return rs.getInt(1);
+		} catch (SQLException ex) {
+			ex.printStackTrace();
+			throw new RuntimeException("SQL error while deleting the entities "+ex, ex);
+		}
+	}
+	
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+
+		int REMOVE_ENTITIES_BATCH = 100;
+		
+		boolean anyChange = false;
+		
+		Map<String,List<String>> type2ids = new HashMap<>();
+		for (Object o: c) {
+			ADemoEntity e = null;
+			try {
+				e = (ADemoEntity)o;
+			} catch (ClassCastException e1) {
+				// skip was is not an entity
+				continue;
+			}
+			if (!e._hasEntityId())
+				continue;
+			
+			String type = e.getEntityType();
+			if (type == null)
+				type = DEFAULT_ENTITY_TYPE;
+			
+			if (!entityType2tableName.containsKey(type))
+				// we never saved it, so we will not remove it
+				continue;
+			
+			List<String> l = type2ids.get(type);
+			if (l == null) { 
+				l = new ArrayList<>(REMOVE_ENTITIES_BATCH);
+				type2ids.put(type, l);
+			}
+			l.add(e.getEntityId());
+			
+			if (l.size() >= REMOVE_ENTITIES_BATCH) {
+				anyChange = deleteIds(type, l)>0 || anyChange;
+				l.clear();
+			}
+		}
+		
+		for (String type: type2ids.keySet()) {
+			anyChange = deleteIds(type, type2ids.get(type)) > 0 || anyChange;
+		}
+		return anyChange;
 	}
 
 	@Override
 	public boolean retainAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+	
+		throw new NotImplementedException("cannot retain all for all the types");
 	}
 
 	@Override
@@ -445,13 +820,21 @@ public class GosplPopulationInDatabase
 		try {
 			int accumulated = 0;
 			System.out.println("in size");
-			Statement st = connection.createStatement();
+			Statement st = connection.createStatement(
+					ResultSet.TYPE_SCROLL_INSENSITIVE,
+		            ResultSet.CONCUR_READ_ONLY);
+			
 			for (String tableName: entityType2tableName.values()) {
-				ResultSet set = st.executeQuery("SELECT COUNT(*) AS total FROM "+tableName+";");
-				System.err.println("SELECT COUNT(*) AS count FROM "+tableName+";");
-				set.next();
-				System.out.println(set.getString("total"));
-				accumulated += set.getInt(1);	
+				//ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
+				
+				ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
+				
+				if (set.next()) {
+					 set.last();
+					 return set.getRow();
+				} else {
+					return 0;
+				}
 			}
 			return accumulated;
 		} catch (SQLException e1) {
@@ -462,14 +845,12 @@ public class GosplPopulationInDatabase
 
 	@Override
 	public Object[] toArray() {
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException("no array feature for this");
 	}
 
 	@Override
 	public <T> T[] toArray(T[] a) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new NotImplementedException("no array feature for this");
 	}
 
 	@Override
@@ -484,12 +865,28 @@ public class GosplPopulationInDatabase
 		return entityType2tableName.size() == 1 && entityType2tableName.containsKey(type);
 	}
 
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		// TODO index
+		Set<DemographicAttribute<? extends IValue>> attributes = getPopulationAttributes();
+		if (attributes == null)
+			return null;
+		for (DemographicAttribute<? extends IValue> a: attributes) {
+			if (a.getAttributeName().equals(name))
+				return a;
+		}
+		return null;
+	}
+	
 	/**
 	 * At finalization time, we shutdown the database
 	 */
 	@Override
 	protected void finalize() throws Throwable {
-		// TODO SHUTDOWN
+		
+		if (this.connection != null) {
+			this.connection.close();		
+		}
 		super.finalize();
 	}
 

@@ -372,4 +372,16 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		return type2agents.size() == 1 && type2agents.get(type) != null;
 	}
 
+
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		for (Set<DemographicAttribute<? extends IValue>> attributes: type2attributes.values()) {
+			for (DemographicAttribute<? extends IValue> a: attributes) {
+				if (a.getAttributeName().equals(name))
+					return a;
+			}
+		}
+		return null;
+	}
+	
 }

@@ -1,6 +1,7 @@
 package gospl;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,7 +16,7 @@ import core.metamodel.value.IValue;
 public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 	
 	private final Collection<ADemoEntity> population;
-	private Collection<DemographicAttribute<IValue>> attributes = null;
+	private Set<DemographicAttribute<? extends IValue>> attributes = null;
 	
 	/**
 	 * Default inner type collection is {@link Set}
@@ -60,7 +61,7 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 	 * @param attributes
 	 */
 	public void setExpectedAttributes(Collection<DemographicAttribute<IValue>> attributes) {
-		this.attributes = attributes;
+		this.attributes = new HashSet<>(attributes);
 		
 		// check past entities
 		for (ADemoEntity e: population) {
@@ -148,11 +149,13 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
 	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes(){
-		if (attributes == null)
+		if (attributes == null) {
 			// rebuild the list of attributes
-			return population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
-		else 
-			return new HashSet<>(attributes);
+			attributes = population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
+			return Collections.unmodifiableSet(attributes);
+		} else {
+			return Collections.unmodifiableSet(attributes);
+		}
 	}
 
 	@Override
@@ -162,6 +165,16 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 				return false;
 		}
 		return true;
+	}
+
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		attributes = getPopulationAttributes();
+		for (DemographicAttribute<? extends IValue> a: attributes) {
+			if (a.getAttributeName().equals(name))
+				return a;
+		}
+		return null;
 	}
 	
 }
