@@ -1,35 +1,29 @@
 package spll.popmapper;
 
-import static org.junit.Assert.assertEquals;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ThreadLocalRandom;
 
-import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.geotools.feature.SchemaException;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opengis.referencing.operation.TransformException;
 
+import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
-import core.metamodel.entity.IEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.generator.UtilGenerator;
+import gospl.generator.util.GSUtilGenerator;
 import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
@@ -46,6 +40,7 @@ public class LocalizerTest {
 	public static IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop;
 	public static SPLVectorFile sfAdmin;
 	public static SPLVectorFile sfBuildings;
+	public static SPLVectorFile sfRoads;
 	public static List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> endogeneousVarFile;
 	
 	@BeforeClass
@@ -55,8 +50,39 @@ public class LocalizerTest {
 
 	
 	@Test
+	public void testSimpleLocalisation() {
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	@Test
+	public void testCloseRoadsMaxDistance() {
+		((SPLVectorFile) sfRoads).minMaxDistance(0.0,5.0, false);
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	@Test
+	public void testCloseRoadsBetween() {
+		((SPLVectorFile) sfRoads).minMaxDistance(2.0, 5.0, false);
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	@Test
+	public void testCloseRoadsBetweenNonOverlapping() {
+		((SPLVectorFile) sfRoads).minMaxDistance(1.0, 5.0, true);
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	
+	@Test
 	public void testMatcher() {
-
 		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
 		
 		localizer.setMatcher(sfAdmin, "iris", "CODE_IRIS");
@@ -119,22 +145,24 @@ public class LocalizerTest {
 	
 	
 	
+	@SuppressWarnings("unchecked")
 	private static void setupRandom(){
-		Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
+		DemographicDictionary<DemographicAttribute<? extends IValue>> atts = new DemographicDictionary<>();
 		try {
-			DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101"));
-			atts.add(att);
+			atts.addAttributes(DemographicAttributeFactory.getFactory()
+					.createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101")));
 		} catch (GSIllegalRangedData e1) {
 			e1.printStackTrace();
 		}
 		
-		UtilGenerator ug = new UtilGenerator(atts);
+		GSUtilGenerator ug = new GSUtilGenerator(atts);
 				
-		pop = ug.generate(100);
+		pop = ug.generate(50);
 		
 		try {
 			sfBuildings = SPLGeofileBuilder.getShapeFile(new File("src/test/resources/buildings.shp"), Arrays.asList("name", "type"), null);
 			sfAdmin = SPLGeofileBuilder.getShapeFile(new File("src/test/resources/irisR.shp"), null);
+			sfRoads = SPLGeofileBuilder.getShapeFile(new File("src/test/resources/roads.shp"), null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidGeoFormatException e) {

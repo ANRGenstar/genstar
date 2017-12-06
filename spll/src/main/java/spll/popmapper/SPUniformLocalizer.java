@@ -46,9 +46,11 @@ public class SPUniformLocalizer extends AbstractLocalizer {
 			int index = rand.nextInt(possibleNests.size());
 			AGeoEntity<? extends IValue> nest = possibleNests.get(index);
 			boolean removeObject = false;
+			
 			for (ISpatialConstraint constraint: constraints) {
 				removeObject = removeObject || constraint.updateConstraint(nest);
 			}
+			
 			if (removeObject) possibleNests.remove(index);
 			entity.setNest(nest);
 			entity.setLocation(pointInLocalizer.pointIn(nest.getProxyGeometry()));
