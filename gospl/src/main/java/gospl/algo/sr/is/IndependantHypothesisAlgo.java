@@ -80,14 +80,6 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 					.createDistribution(matrix.getMatrix()));
 			return sampler;
 		}
-		
-		/*
-		if(!matrix.checkGlobalSum()){
-			double diffFromFloor = Math.abs(Math.floor(matrix.getVal().getValue()) - matrix.getVal().getValue());
-				throw new IllegalArgumentException("Input data does not satisfy the checkGlobalSum method requirement:"
-					+ "\nDifference from floor = "+diffFromFloor);
-		}
-		*/
 
 		// Reject attribute with referent, to only account for referent attribute
 		Set<DemographicAttribute<? extends IValue>> targetedDimensions = matrix.getDimensions()
@@ -102,13 +94,37 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 
 		// Extrapolate the whole set of coordinates
 		Collection<Map<DemographicAttribute<? extends IValue>, IValue>> coordinates = new ArrayList<>();
+		Set<Set<IValue>> tmpCoord = new HashSet<>();
+		for(DemographicAttribute<? extends IValue> attribute : targetedDimensions){
+			if(tmpCoord.isEmpty()) {
+				for(IValue val : attribute.getValueSpace().getValues()) {
+					tmpCoord.add(new HashSet<>(Arrays.asList(val)));
+				}
+			} else {
+				Set<Set<IValue>> newTmpCoord = new HashSet<>();
+				for(Set<IValue> prevSet : tmpCoord) {
+					attribute.getValueSpace().getValues().stream().forEach(val -> newTmpCoord.add(
+							Stream.concat(prevSet.stream(), Stream.of(val)).collect(Collectors.toSet())));
+				}
+				tmpCoord = newTmpCoord;
+			}
+		}
+		for(Set<IValue> coord : tmpCoord) {
+			Map<DemographicAttribute<? extends IValue>, IValue> newCoord = new HashMap<>();
+			coord.forEach(val -> newCoord.put(matrix.getDimension(val), val));
+			coordinates.add(newCoord);
+		}
+		/*
 		for(DemographicAttribute<? extends IValue> attribute : targetedDimensions){
 			if(coordinates.isEmpty())
 				attribute.getValueSpace().getValues()
-					.forEach(val -> coordinates.add(new HashMap<DemographicAttribute<? extends IValue>, IValue>() {{ put(attribute, val); }} ));
+					.forEach(val -> coordinates.add(new HashMap<DemographicAttribute<? extends IValue>, IValue>() 
+						{{ put(attribute, val); }} ));
 			else
-				coordinates.stream().forEach(map -> attribute.getValueSpace().getValues().forEach(val -> map.put(attribute, val)));
+				coordinates.stream().forEach(map -> attribute.getValueSpace().getValues()
+						.forEach(val -> map.put(attribute, val)));
 		}
+		*/
 
 		gspu.sysoStempPerformance(1, this);
 		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
@@ -117,7 +133,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 			AControl<Double> nulVal = freqMatrix.getNulVal();
 			ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
 			AControl<Double> freq = matrix.getVal(coord);
-			if(nulVal.getValue() != freq.getValue())
+			if(!nulVal.getValue().equals(freq.getValue()))
 				freqMatrix.addValue(coord, freq);
 			else {
 				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
@@ -141,7 +157,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		gspu.sysoStempPerformance(2, this);
 		
 		// WARNING: cannot justify this normalization, hence find another way to fit 1 sum of probability
-		freqMatrix.normalize();
+		//freqMatrix.normalize();
 		/*
 		gspu.sysoStempMessage("Collapse matrix have been normalize:\n"
 				+ freqMatrix.getDimensions().stream()
