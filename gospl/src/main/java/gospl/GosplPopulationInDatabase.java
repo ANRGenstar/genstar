@@ -484,6 +484,19 @@ public class GosplPopulationInDatabase
 		return entityType2tableName.size() == 1 && entityType2tableName.containsKey(type);
 	}
 
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		// TODO index
+		Set<DemographicAttribute<? extends IValue>> attributes = getPopulationAttributes();
+		if (attributes == null)
+			return null;
+		for (DemographicAttribute<? extends IValue> a: attributes) {
+			if (a.getAttributeName().equals(name))
+				return a;
+		}
+		return null;
+	}
+	
 	/**
 	 * At finalization time, we shutdown the database
 	 */

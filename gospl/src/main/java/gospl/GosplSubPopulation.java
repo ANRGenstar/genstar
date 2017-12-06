@@ -118,6 +118,16 @@ public final class GosplSubPopulation<E extends ADemoEntity>
 		return type.equals(type);
 	}
 
-	
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		Set<DemographicAttribute<? extends IValue>> attributes = getPopulationAttributes();
+		if (attributes == null)
+			return null;
+		for (DemographicAttribute<? extends IValue> a: attributes) {
+			if (a.getAttributeName().equals(name))
+				return a;
+		}
+		return null;
+	}
 	
 }

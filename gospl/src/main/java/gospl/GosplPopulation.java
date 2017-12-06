@@ -163,5 +163,16 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 		}
 		return true;
 	}
+
+	@Override
+	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		if (attributes == null)
+			return null;
+		for (DemographicAttribute<? extends IValue> a: attributes) {
+			if (a.getAttributeName().equals(name))
+				return a;
+		}
+		return null;
+	}
 	
 }
