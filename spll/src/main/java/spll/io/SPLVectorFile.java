@@ -324,7 +324,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 						 quadTreeOverlap.insert( newGeom.getEnvelopeInternal(), newGeom);
 						} catch (Exception e){ quadTreeOverlap = null;}
 					}
-			 } else {
+			 } else if (minDist > 0) {
 				 for (SpllFeature ft2 : features) {
 					if (ft == ft2) continue;
 					Geometry newGeom2 = ft2.getProxyGeometry();
