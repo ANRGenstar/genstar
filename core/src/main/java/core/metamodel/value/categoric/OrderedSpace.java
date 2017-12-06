@@ -1,7 +1,7 @@
 package core.metamodel.value.categoric;
 
-import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -119,7 +119,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	@Override
 	public Set<OrderedValue> getValues(){
-		return Collections.unmodifiableSet(values);
+		return new HashSet<>(values);
 	}
 
 	@Override

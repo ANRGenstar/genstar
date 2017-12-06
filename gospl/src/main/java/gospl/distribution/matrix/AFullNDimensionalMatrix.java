@@ -187,9 +187,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
-		if(!dimensions.stream().flatMap(dim -> dim.getValueSpace().getValues().stream()).anyMatch(asp -> asp.equals(aspect)))
+		if(!getDimensions().contains(aspect.getValueSpace().getAttribute()))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
-		return dimensions.stream().filter(e -> e.getValueSpace().getValues().contains(aspect))
+		return dimensions.stream().filter(d -> d.getValueSpace().getValues().contains(aspect)
+					|| d.getEmptyValue().equals(aspect))
 				.findFirst().get();
 	}
 
@@ -372,13 +373,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 
 	@Override
 	public boolean isCoordinateCompliant(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate) {
-		List<DemographicAttribute<? extends IValue>> dimensionsAspects = new ArrayList<>();
-		int matchDimension = (int) coordinate.values().stream().filter(a -> dimensions.stream()
-				.anyMatch(d -> d.getValueSpace().getValues().contains(a)
-						|| d.getEmptyValue().equals(a))).count();
-		if(dimensionsAspects.size() == matchDimension)
-			return true;
-		return false;
+		return dimensions.containsAll(coordinate.getDimensions()) && dimensions.size() == coordinate.getDimensions().size();
 	}
 	
 	@Override

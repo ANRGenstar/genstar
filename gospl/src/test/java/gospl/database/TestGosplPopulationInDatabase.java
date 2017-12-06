@@ -60,7 +60,7 @@ public class TestGosplPopulationInDatabase {
 	@Test
 	public void testFromGoSPLPopulationInMemory() {
 
-	//	new GosplPopulationInDatabase(getGoSPLPopulation());
+		new GosplPopulationInDatabase(getGoSPLPopulation());
 		
 	}
 	
@@ -68,8 +68,8 @@ public class TestGosplPopulationInDatabase {
 	public void testSize() {
 
 		GosplPopulation o = getGoSPLPopulation();
-	//	GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
-	//	assertEquals("wrong size", o.size(), p.size());
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+		assertEquals("wrong size", o.size(), p.size());
 		
 	}
 

@@ -2,7 +2,9 @@ package gospl.algo.ipf;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
-import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import gospl.algo.ipf.margin.AMargin;
@@ -187,20 +188,30 @@ public abstract class AGosplIPF<T extends Number> {
 		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
 
 		int stepIter = step;
+		int totalNumberOfMargins = marginals.stream().mapToInt(AMargin::size).sum();
 		gspu.sysoStempMessage("Convergence criterias are: step = "+step+" | delta = "+delta);
-		double tae = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+		
+		Map<Set<IValue>, Double> marginError = new HashMap<>();
+		Map<Set<IValue>, Double> marginAverageError = new HashMap<>();
+		
+		for(AMargin<T> margin : marginals) {
+			for(Set<IValue> marginDescriptor : margin.getSeedMarginalDescriptors()) {
+				double absolutError = Math.abs(seed.getVal(marginDescriptor)
+						.getDiff(margin.getControl(marginDescriptor)).doubleValue());
+				marginError.put(marginDescriptor, absolutError);
+				marginAverageError.put(marginDescriptor, absolutError / 
+						margin.getControl(marginDescriptor).getValue().doubleValue());
+			}
+		}
+				
+		double aapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
 				.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
-						.doubleValue())).sum()).sum();
-		double maxError = seed.getMetaDataType().equals(GSSurveyType.ContingencyTable) ? 
-				marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
-						.stream().mapToDouble(sd -> m.getControl(sd).getValue().doubleValue()).sum()).sum() : 
-				marginals.stream().mapToInt(m -> m.getSeedMarginalDescriptors().size()).sum();
-		double ae = tae / maxError;
-		gspu.sysoStempMessage("Start fitting iterations with TAE = "+tae+" | RAE (relative average error) = "+ae);
+						.doubleValue()) / m.getControl(sd).getValue().doubleValue()).sum()).sum() / totalNumberOfMargins;
+		gspu.sysoStempMessage("Start fitting iterations with AAPD = "+aapd);
 
-		while(stepIter-- > 0 ? ae > delta : false){
+		while(stepIter-- > 0 ? aapd > delta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
-				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+ae);
+				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+aapd);
 			for(AMargin<T> margin : marginals){
 				for(Set<IValue> seedMarginalDescriptor : margin.getSeedMarginalDescriptors()){
 					double marginValue = margin.getControl(seedMarginalDescriptor).getValue().doubleValue();
@@ -208,17 +219,17 @@ public abstract class AGosplIPF<T extends Number> {
 					AControl<Double> factor = new ControlFrequency(marginValue/actualValue);
 					Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> relatedCoordinates = 
 							seed.getCoordinates(seedMarginalDescriptor); 
-					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates)
-						seed.getVal(coord).multiply(factor);
-					logger.trace("Work on value set {} and related {} coordinates; EV = {} and AV = {}",
-							Arrays.toString(seedMarginalDescriptor.toArray()), 
-							relatedCoordinates.size(), marginValue, actualValue);
+					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates) {
+						AControl<T> av = seed.getVal(coord);
+						logger.trace("Coord {}: AV = {} and UpdatedV = {}",
+							coord, av.getValue().doubleValue(), av.multiply(factor).getValue().doubleValue());
+					}
 				}
 			}
 
-			ae = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+			aapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
 					.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
-							.doubleValue())).sum()).sum() / maxError;
+							.doubleValue()) / m.getControl(sd).getValue().doubleValue()).sum()).sum() / totalNumberOfMargins;
 
 			// TODO: better log and get back to debug
 			logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
