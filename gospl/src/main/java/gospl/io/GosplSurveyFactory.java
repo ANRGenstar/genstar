@@ -598,7 +598,12 @@ public class GosplSurveyFactory {
 		bw.write("\n");
 		
 		for (final ADemoEntity e : population) {
-			bw.write(e.getEntityId()); // String.valueOf(individual++)
+			if(e._hasEntityId()){
+				bw.write(e.getEntityId()); // String.valueOf(individual++)				
+			} else {
+				bw.write(" ");
+			}
+			
 			bw.write(separator);
 			if (e.getEntityType() != null)
 				bw.write(e.getEntityType());

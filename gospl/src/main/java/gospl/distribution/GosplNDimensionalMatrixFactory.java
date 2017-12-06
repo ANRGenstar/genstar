@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -178,7 +179,9 @@ public class GosplNDimensionalMatrixFactory {
 		
 		// iterate the whole population
 		for (ADemoEntity entity : population) {
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
+			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(
+					entity.getAttributeMap().entrySet().stream().filter(entry -> attributesToMeasure.contains(entry.getKey()))
+					.collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 			if(!matrix.addValue(entityCoord, new ControlFrequency(unitFreq)))
 				matrix.getVal(entityCoord).add(unitFreq);
 		}

@@ -7,7 +7,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.generator.UtilGenerator;
+import gospl.generator.util.GSUtilGenerator;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 import spin.interfaces.ENetworkGenerator;
@@ -23,7 +23,7 @@ public class TestOnGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		ISyntheticGosplPopGenerator generator = new UtilGenerator(2, 4);
+		ISyntheticGosplPopGenerator generator = new GSUtilGenerator(2, 4);
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population = generator.generate(100);
 /*		
 		System.out.println("Debut de la generation de reseau regulier");

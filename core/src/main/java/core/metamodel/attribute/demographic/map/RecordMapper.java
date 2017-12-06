@@ -44,7 +44,7 @@ public class RecordMapper<K extends IValue, V extends IValue> implements IAttrib
 
 	@Override
 	public Set<? extends IValue> getMappedValues(IValue value) {
-		if(!record.containsKey(value) || !record.containsValue(value))
+		if(!record.containsKey(value) && !record.containsValue(value))
 			throw new NullPointerException("The value "+value+" is not part of any known linked attribute ("
 				+ this + " || "+relatedAttribute.getReferentAttribute()+ ")");
 		return Collections.singleton(record.containsKey(value) ? 

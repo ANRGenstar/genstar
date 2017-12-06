@@ -2,10 +2,9 @@ package core.configuration;
 
 import static org.junit.Assert.assertEquals;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,10 +40,7 @@ public class GenstarJsonUtilTest {
 	@Before
 	public void setupBefore() throws GSIllegalRangedData {
 		
-		path = Paths.get(System.getProperty("user.dir")
-				+"src"+File.separator+"test"+File.separator+"java"+File.separator
-				+"core"+File.separator+"configuration"+File.separator
-				+File.separator+"GS_json_config_test.gns");
+		path = FileSystems.getDefault().getPath("src","test","java","core","configuration","GS_json_config_test.gns");
 
 		dd = new DemographicDictionary<>();
 
@@ -135,10 +131,7 @@ public class GenstarJsonUtilTest {
 	public void test() throws JsonGenerationException, JsonMappingException, IOException {
 		for(DemographicAttribute<? extends IValue> att : dd.getAttributes()) {
 			
-			sju.marshalToGenstarJson(path, att);
-			
-			// DEBUG
-			//System.out.println(sju.genstarJsonToString(att));
+			sju.marshalToGenstarJson(path, att, false);
 			
 			@SuppressWarnings("unchecked")
 			DemographicAttribute<? extends IValue> unmarshalAtt = sju.unmarshalFromGenstarJson(path, att.getClass());
@@ -149,7 +142,7 @@ public class GenstarJsonUtilTest {
 
 	@Test
 	public void testDemographicDictionary() throws JsonGenerationException, JsonMappingException, IOException {
-			sju.marshalToGenstarJson(path, dd);
+			sju.marshalToGenstarJson(path, dd, false);
 			
 			// DEBUG
 			System.out.println(sju.genstarJsonToString(dd));

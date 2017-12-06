@@ -1,0 +1,188 @@
+{
+  "DEMOGRAPHIC DICTIONARY" : {
+    "ATTRIBUTES" : [ {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Couple",
+        "VALUE SPACE" : {
+          "TYPE" : "Boolean",
+          "VALUES" : [ {
+            "INPUT VALUE" : "false"
+          }, {
+            "INPUT VALUE" : "true"
+          } ],
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "null"
+          }
+        }
+      }
+    }, {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Genre",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Homme"
+          }, {
+            "INPUT VALUE" : "Femme"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        }
+      }
+    }, {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Education",
+        "VALUE SPACE" : {
+          "TYPE" : "Order",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Brevet"
+          }, {
+            "INPUT VALUE" : "Bac"
+          }, {
+            "INPUT VALUE" : "Licence"
+          }, {
+            "INPUT VALUE" : "Master et plus"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        }
+      }
+    }, {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Age",
+        "VALUE SPACE" : {
+          "TYPE" : "Range",
+          "VALUES" : [ {
+            "INPUT VALUE" : "moins de 14"
+          }, {
+            "INPUT VALUE" : "15 à 24"
+          }, {
+            "INPUT VALUE" : "25 à 34"
+          }, {
+            "INPUT VALUE" : "35 à 54"
+          }, {
+            "INPUT VALUE" : "55 et plus"
+          } ],
+          "min" : 0,
+          "max" : 120,
+          "rangeTemplate" : {
+            "numerciMatcher" : "INT_POSITIF_MATCH"
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "NaN à NaN"
+          }
+        }
+      }
+    }, {
+      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Age_agr",
+        "VALUE SPACE" : {
+          "TYPE" : "Range",
+          "VALUES" : [ {
+            "INPUT VALUE" : "25 à 54"
+          }, {
+            "INPUT VALUE" : "55 et plus"
+          }, {
+            "INPUT VALUE" : "moins de 24 ans"
+          } ],
+          "min" : 0,
+          "max" : 120,
+          "rangeTemplate" : {
+            "numerciMatcher" : "INT_POSITIF_MATCH"
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "NaN à NaN"
+          }
+        },
+        "REFERENT ATTRIBUTE" : "Age",
+        "MAPPER" : {
+          "TYPE" : "AGG",
+          "THE MAP" : [ "25 à 54 : 25 à 34; 35 à 54", "55 et plus : 55 et plus", "moins de 24 ans : moins de 14; 15 à 24" ]
+        }
+      }
+    }, {
+      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Generation",
+        "VALUE SPACE" : {
+          "TYPE" : "Order",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Adulte"
+          }, {
+            "INPUT VALUE" : "Bébé"
+          }, {
+            "INPUT VALUE" : "Vieux"
+          }, {
+            "INPUT VALUE" : "Enfant"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "REFERENT ATTRIBUTE" : "Age",
+        "MAPPER" : {
+          "TYPE" : "UND",
+          "THE MAP" : [ "Bébé; Enfant : moins de 14; 15 à 24", "Adulte : 25 à 34; 35 à 54", "Vieux : 55 et plus" ]
+        }
+      }
+    }, {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Acitivté",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "inactif"
+          }, {
+            "INPUT VALUE" : "chomage"
+          }, {
+            "INPUT VALUE" : "employé"
+          }, {
+            "INPUT VALUE" : "fonctionnaire"
+          }, {
+            "INPUT VALUE" : "indépendant"
+          }, {
+            "INPUT VALUE" : "retraité"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        }
+      }
+    }, {
+      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "CoupleNum",
+        "VALUE SPACE" : {
+          "TYPE" : "Integer",
+          "VALUES" : [ {
+            "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "2"
+          } ],
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "null"
+          },
+          "min" : -2147483648,
+          "max" : 2147483647
+        },
+        "REFERENT ATTRIBUTE" : "Couple",
+        "MAPPER" : {
+          "TYPE" : "REC",
+          "THE MAP" : [ "1 : true", "2 : false" ]
+        }
+      }
+    } ]
+  }
+}

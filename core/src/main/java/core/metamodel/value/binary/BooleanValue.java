@@ -39,7 +39,7 @@ public class BooleanValue implements IValue {
 	 * @return
 	 */
 	@JsonIgnore
-	public boolean getActualValue(){
+	public Boolean getActualValue(){
 		return value;
 	}
 	
