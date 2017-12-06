@@ -37,6 +37,15 @@ public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extend
 	public A getPopulationAttributeNamed(String name);
 	
 	/**
+	 * Returns true if the population contains the given attribute.
+	 * @param name
+	 * @return
+	 */
+	public default boolean hasPopulationAttributeNamed(String name) {
+		return getPopulationAttributeNamed(name) != null;
+	}
+	
+	/**
 	 * returns true if all the entities are of type type.
 	 * @param type
 	 * @return
