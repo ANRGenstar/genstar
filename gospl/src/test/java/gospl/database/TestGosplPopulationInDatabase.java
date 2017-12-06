@@ -19,9 +19,11 @@ import org.junit.rules.TemporaryFolder;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
+import gospl.GosplEntity;
 import gospl.GosplPopulation;
 import gospl.GosplPopulationInDatabase;
 import gospl.distribution.GosplInputDataManager;
@@ -215,6 +217,59 @@ public class TestGosplPopulationInDatabase {
 		assertFalse("the entity should not accept to be removed", p.remove(fewEntities.get(0)));
 		assertEquals("the count should be the same after the removal failure",  o.size()-fewEntities.size(), p.size());
 
+	}
+	
+
+	@Test
+	public void testAddAgent() {
+
+		GosplPopulation o = getGoSPLPopulation();
+		
+		// create an empty population
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase();
+
+		Iterator<ADemoEntity> itEntities = o.iterator();
+		
+		// one entity
+		assertTrue("the entity should accept to be added", p.add(itEntities.next()));
+		assertEquals("the count should be 1 after adding", 1, p.size());
+
+		// add another entity
+		assertTrue("the entity should accept to be added", p.add(itEntities.next()));
+		assertEquals("the count should be lower after the removal", 2, p.size());
+
+		
+	}
+	
+
+	@Test
+	public void testAddAgents() {
+
+		GosplPopulation o = getGoSPLPopulation();
+		
+		// create an empty population
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase();
+
+		Iterator<ADemoEntity> itEntities = o.iterator();
+		List<ADemoEntity> fewEntities = new LinkedList<>();
+		for (int i=0;i<10;i++) {
+			ADemoEntity e = itEntities.next();
+			fewEntities.add(e);
+		}
+		
+		// one entity
+		assertTrue("the entities should accept to be added", p.addAll(fewEntities));
+		assertEquals("the count should be 10 after adding", 10, p.size());
+
+		// add another entity
+		fewEntities.add(itEntities.next());
+		assertTrue("the entities should accept to be added", p.addAll(fewEntities));
+		assertEquals("the count should 11 after adding", 11, p.size());
+
+		// add the same 
+		assertFalse("the entities should not accept to be added", p.addAll(fewEntities));
+		assertEquals("the count should be the same after adding existing objects", 11, p.size());
+		
 	}
 
 }

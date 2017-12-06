@@ -7,6 +7,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +17,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +45,9 @@ public class GosplPopulationInDatabase
 	public static final int VARCHAR_SIZE = 255;
 	public static final int MAX_BUFFER_QRY = 10000;
 	public static final String DEFAULT_ENTITY_TYPE = "unknown";
-
+	public static int REMOVE_ENTITIES_BATCH = 100;
+	public static int ADD_ENTITIES_BATCH = 500; // TODO more !
+	
 	private Logger logger = LogManager.getLogger();
 	
 	private final Connection connection;
@@ -188,7 +190,7 @@ public class GosplPopulationInDatabase
 			.append(getTableNameForEntityType(type))
 			.append(" (");
 		
-		sb.append("id VARCHAR(30) PRIMARY KEY"); // TODO maybe 30 is not enough?
+		sb.append("id VARCHAR(50) PRIMARY KEY"); // TODO maybe 30 is not enough?
 		
 		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
 			sb.append(", ");
@@ -209,7 +211,7 @@ public class GosplPopulationInDatabase
 		logger.info("creating table for type {} with SQL query: {}", type, qry);
 		Statement s = connection.createStatement();				
 		s.execute(qry);
-		
+		s.close();
 	}
 	
 	/**
@@ -227,6 +229,7 @@ public class GosplPopulationInDatabase
 		// TODO indexes !
 		
 	}
+	
 	
 	/**
 	 * Loads the given collection: keeps in memory the attributes,
@@ -258,7 +261,7 @@ public class GosplPopulationInDatabase
 			
 		}
 	}
-	
+
 	/**
 	 * Returns the SQL value for the attribute of an entity
 	 * @param e
@@ -320,14 +323,19 @@ public class GosplPopulationInDatabase
 	}
 	
 	
-	protected void storeEntities(String type, Collection<? extends ADemoEntity> entities) throws SQLException {
+	protected int storeEntities(String type, Collection<? extends ADemoEntity> entities) throws SQLException {
 
+		if (!entityType2tableName.containsKey(type))
+			createTableForEntityType(type);
+		
+		int added = 0;
+		
 		// name columns 
 		List<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>(entityType2attributes.get(type));
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ").append(getTableNameForEntityType(type));
-		sb.append(" (id");
+		sb.append(" m (id");
 		for (DemographicAttribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getAttributeColNameForType(type, a));
@@ -346,6 +354,10 @@ public class GosplPopulationInDatabase
 				logger.info("adding entities with query {}", qry);
 				Statement st = connection.createStatement();
 				st.executeQuery(qry);
+				ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
+				rs.next();
+				added += rs.getInt(1);
+				rs.close();
 				st.close();
 				// restart from scratch 
 				first = true;
@@ -358,7 +370,7 @@ public class GosplPopulationInDatabase
 				sb.append(",");
 			}
 			sb.append("('");
-			sb.append(EntityUniqueId.createNextId(this, type));
+			sb.append(e.getEntityId());
 			sb.append("'");
 			for (DemographicAttribute<? extends IValue> a: attributes) {
 				sb.append(",");
@@ -375,8 +387,13 @@ public class GosplPopulationInDatabase
 			logger.info("adding last entities with query {}", qry);
 			Statement st = connection.createStatement();
 			st.executeQuery(qry);
+			ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
+			rs.next();
+			added += rs.getInt(1);
+			rs.close();
 			st.close();
 		}
+		return added;
 	}
 
 	@Override
@@ -386,8 +403,20 @@ public class GosplPopulationInDatabase
 		if (type == null)
 			type = DEFAULT_ENTITY_TYPE;
 			
+		if (!entityType2attributes.containsKey(type))
+			entityType2attributes.put(type, new HashSet<>(e.getAttributes()));
+		
+		if (!entityType2tableName.containsKey(type)) {
+			try {
+				createTableForEntityType(type);
+			} catch (SQLException ex) {
+				throw new RuntimeException("error while creating table for type "+type);
+			}
+		}
+		
 		// name columns 
-		List<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>(entityType2attributes.get(type));
+		List<DemographicAttribute<? extends IValue>> attributes = 
+				new LinkedList<>(entityType2attributes.get(type));
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ").append(getTableNameForEntityType(type));
@@ -396,29 +425,115 @@ public class GosplPopulationInDatabase
 			sb.append(",");
 			sb.append(getAttributeColNameForType(type, a));
 		}
-		sb.append(") VALUES (");
+		sb.append(") VALUES");
 		
 		sb.append("('");
-		sb.append(EntityUniqueId.createNextId(this, type));
+		sb.append(e.getEntityId());
 		sb.append("'");
 		for (DemographicAttribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getSQLValueFor(e,a));
 		}
-		sb.append(");");
+		sb.append(")");
 		
-		return true;
+		boolean anyChange = false;
+		try {
+			Statement st = connection.createStatement();
+			st.executeQuery(sb.toString());
+			st.close();
+			return true;
+		} catch(SQLIntegrityConstraintViolationException e1) {
+			return false;
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException("error while adding entity "+e, e1);
+		}
+		
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends ADemoEntity> c) {
+		
+		int added = 0;
+		
+		Map<String,List<ADemoEntity>> type2entities = new HashMap<>();
+		
 		try {
-			storeEntities("unknown",c);
+				
+			for (Object o: c) {
+				ADemoEntity e = null;
+				try {
+					e = (ADemoEntity)o;
+				} catch (ClassCastException e1) {
+					// skip was is not an entity
+					continue;
+				}
+				
+				String type = e.getEntityType();
+				if (type == null)
+					type = DEFAULT_ENTITY_TYPE;
+				
+				if (!e._hasEntityId())
+					e._setEntityId(EntityUniqueId.createNextId(this, type));
+				
+				System.out.println("should add entity id: "+e.getEntityId());
+
+				if (!entityType2attributes.containsKey(type))
+					entityType2attributes.put(type, new HashSet<>(e.getAttributes()));
+				
+				if (!entityType2tableName.containsKey(type)) {
+					try {
+						createTableForEntityType(type);
+					} catch (SQLException ex) {
+						throw new RuntimeException("error while creating table for type "+type);
+					}
+				}
+				
+				List<ADemoEntity> l = type2entities.get(type);
+				if (l == null) { 
+					l = new ArrayList<>(ADD_ENTITIES_BATCH);
+					type2entities.put(type, l);
+				}
+				l.add(e);
+				
+				if (l.size() >= ADD_ENTITIES_BATCH) {
+					try {
+						added += storeEntities(type, l);
+					} catch (SQLIntegrityConstraintViolationException e2) {
+						// one of the entities already exist; 
+						// there is no easy and efficient synthax for sqldb to exclude the known ones
+						// the best is to just add them one by one
+						System.err.println("some of these agents already existed; switching to add 1 by 1");
+						for (ADemoEntity en: l) {
+							if (add(en))
+								added++;
+						}
+					}
+					l.clear();
+				}
+			}
+			
+			for (String type: type2entities.keySet()) {
+			
+				try {
+					added += storeEntities(type, type2entities.get(type));
+				} catch (SQLIntegrityConstraintViolationException e2) {
+					// one of the entities already exist; 
+					// there is no easy and efficient synthax for sqldb to exclude the known ones
+					// the best is to just add them one by one
+					System.err.println("some of these agents already existed; switching to add 1 by 1");
+					for (ADemoEntity en: type2entities.get(type)) {
+						if (add(en))
+							added++;
+					}
+				}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException("error while inserting the population in database: "+e.getMessage(), e);
+			throw new RuntimeException("error while adding entities",e);
 		}
-		return true;
+		return added > 0;
+	
 	}
 
 	@Override
@@ -461,8 +576,9 @@ public class GosplPopulationInDatabase
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		
+		// TODO implement that, we can do it (but its tedious and no one ever uses it !)
+		throw new NotImplementedException("Not yet implemented"); 
 	}
 
 	@Override
@@ -766,7 +882,6 @@ public class GosplPopulationInDatabase
 	@Override
 	public boolean removeAll(Collection<?> c) {
 
-		int REMOVE_ENTITIES_BATCH = 100;
 		
 		boolean anyChange = false;
 		
@@ -820,21 +935,13 @@ public class GosplPopulationInDatabase
 		try {
 			int accumulated = 0;
 			System.out.println("in size");
-			Statement st = connection.createStatement(
-					ResultSet.TYPE_SCROLL_INSENSITIVE,
-		            ResultSet.CONCUR_READ_ONLY);
+			Statement st = connection.createStatement();
 			
 			for (String tableName: entityType2tableName.values()) {
-				//ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
 				
-				ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
-				
-				if (set.next()) {
-					 set.last();
-					 return set.getRow();
-				} else {
-					return 0;
-				}
+				ResultSet set = st.executeQuery("SELECT COUNT(*) as TOTAL FROM "+tableName+";");
+				set.next();
+				accumulated += set.getInt("TOTAL");
 			}
 			return accumulated;
 		} catch (SQLException e1) {
