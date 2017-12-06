@@ -2,9 +2,7 @@ package gospl.algo.ipf;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,8 +39,8 @@ import gospl.sampler.IEntitySampler;
  * Two concerns must be cleared up for {@link AGosplIPF} to be fully and explicitly setup: 
  * <p>
  * <ul>
- * <li> Convergence criteria: could be a number of maximum iteration {@link AGosplIPF#step} or
- * a maximal error for any objectif {@link AGosplIPF#delta}
+ * <li> Convergence criteria: could be a number of maximum iteration {@link AGosplIPF#step},
+ * a maximal error for any objective {@link AGosplIPF#delta} or an increase in error fitting lower that delta itself
  * <li> zero-cell problem: As it is impossible to distinguish between structural 0 cell - i.e. impossible
  * set of value, like being age under 5 and retired - and conjonctural 0 cell - i.e. a set of value for
  * which we do not have any record  
@@ -51,6 +49,9 @@ import gospl.sampler.IEntitySampler;
  * </ul>
  * <p>
  * Usefull information could be found at {@link http://u.demog.berkeley.edu/~eddieh/datafitting.html}
+ * <p>
+ * 
+ * TODO: make it possible to choose the function to establish criteria - here is AAPD but could have been SRMSE
  * 
  * @author kevinchapuis
  *
@@ -58,7 +59,8 @@ import gospl.sampler.IEntitySampler;
 public abstract class AGosplIPF<T extends Number> {
 
 	private int step = 100;
-	private double delta = Math.pow(10, -5);
+	private double delta = Math.pow(10, -4);
+	private double aapd = Double.MAX_VALUE;
 
 	private Logger logger = LogManager.getLogger();
 
@@ -170,7 +172,7 @@ public abstract class AGosplIPF<T extends Number> {
 			throw new IllegalArgumentException("Output distribution and sample seed does not have any matching dimensions\n"
 					+ "Distribution: "+Arrays.toString(marginals.getDimensions().toArray()) +"\n"
 					+ "Sample seed: :"+Arrays.toString(seed.getDimensions().toArray()));
-
+		
 		List<DemographicAttribute<? extends IValue>> unmatchSeedAttribute = seed.getDimensions().stream()
 				.filter(dim -> marginals.getDimensions().contains(dim) 
 						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
@@ -190,26 +192,16 @@ public abstract class AGosplIPF<T extends Number> {
 		int stepIter = step;
 		int totalNumberOfMargins = marginals.stream().mapToInt(AMargin::size).sum();
 		gspu.sysoStempMessage("Convergence criterias are: step = "+step+" | delta = "+delta);
-		
-		Map<Set<IValue>, Double> marginError = new HashMap<>();
-		Map<Set<IValue>, Double> marginAverageError = new HashMap<>();
-		
-		for(AMargin<T> margin : marginals) {
-			for(Set<IValue> marginDescriptor : margin.getSeedMarginalDescriptors()) {
-				double absolutError = Math.abs(seed.getVal(marginDescriptor)
-						.getDiff(margin.getControl(marginDescriptor)).doubleValue());
-				marginError.put(marginDescriptor, absolutError);
-				marginAverageError.put(marginDescriptor, absolutError / 
-						margin.getControl(marginDescriptor).getValue().doubleValue());
-			}
-		}
 				
-		double aapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+		double total = this.marginals.getVal().getValue().doubleValue();
+		aapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
 				.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
-						.doubleValue()) / m.getControl(sd).getValue().doubleValue()).sum()).sum() / totalNumberOfMargins;
+						.doubleValue()) / total).sum()).sum() / totalNumberOfMargins;
 		gspu.sysoStempMessage("Start fitting iterations with AAPD = "+aapd);
 
-		while(stepIter-- > 0 ? aapd > delta : false){
+		double relativeIncrease = Double.MAX_VALUE;
+		
+		while(stepIter-- > 0 ? aapd > delta || relativeIncrease < delta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
 				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+aapd);
 			for(AMargin<T> margin : marginals){
@@ -227,18 +219,13 @@ public abstract class AGosplIPF<T extends Number> {
 				}
 			}
 
-			aapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
+			double cachedAapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
 					.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
-							.doubleValue()) / m.getControl(sd).getValue().doubleValue()).sum()).sum() / totalNumberOfMargins;
-
-			// TODO: better log and get back to debug
-			logger.trace("There is some delta exceeding convergence criteria\n{}", marginals.stream()
-					.map(margin -> margin.getSeedDimension().getAttributeName()+" IPF computed values:\n"+
-							margin.getSeedMarginalDescriptors().stream().map(smd -> Arrays.toString(smd.toArray())
-									+" => "+margin.getControl(smd)+" | "+seed.getVal(smd))
-							.reduce("", (s1, s2) -> s1.concat(s2+"\n")))
-					.reduce("", (s1, s2) -> s1.concat(s2)));
+							.doubleValue()) / total).sum()).sum() / totalNumberOfMargins;
+			relativeIncrease = Math.abs(aapd - cachedAapd);
+			aapd = cachedAapd;
 		}
+		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value");
 		return seed;
 	}
 

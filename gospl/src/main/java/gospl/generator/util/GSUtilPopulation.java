@@ -1,6 +1,8 @@
-package gospl.algo;
+package gospl.generator.util;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,12 +13,12 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.configuration.GenstarJsonUtil;
+import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
-import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -24,41 +26,78 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.generator.UtilGenerator;
 
-public class GosplAlgoUtilTest {
+public class GSUtilPopulation {
 
 	private Logger log = LogManager.getLogger();
 	
 	private ISyntheticGosplPopGenerator generator;
-	private Set<DemographicAttribute<? extends IValue>> attributes;
 	
 	private IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population = null;
-
-	public GosplAlgoUtilTest(Set<DemographicAttribute<? extends IValue>> attributes, 
+	
+	private DemographicDictionary<DemographicAttribute<? extends IValue>> dico;
+	private Path pathToDictionary = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
+	public static String defaultDictionary = "defaultDictionary.gns";
+	
+	@SuppressWarnings("unchecked")
+	public GSUtilPopulation(String dictionaryFile, 
 			ISyntheticGosplPopGenerator generator){
-		this.attributes = attributes;
+		try {
+			this.dico = new GenstarJsonUtil().unmarshalFromGenstarJson(pathToDictionary
+					.resolve(dictionaryFile), DemographicDictionary.class);
+		} catch (IllegalArgumentException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		this.generator = generator;
 	}
 	
-	public GosplAlgoUtilTest(Set<DemographicAttribute<? extends IValue>> attributes){
-		this(attributes, new UtilGenerator(attributes));
+	@SuppressWarnings("unchecked")
+	public GSUtilPopulation(Path dictionaryFile){
+		try {
+			this.dico = new GenstarJsonUtil().unmarshalFromGenstarJson(
+					dictionaryFile, DemographicDictionary.class);
+		} catch (IllegalArgumentException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.generator = new GSUtilGenerator(dico);
 	}
 	
-	public GosplAlgoUtilTest() throws GSIllegalRangedData{
-		this.attributes = new HashSet<>();
-		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
-				"Genre", GSEnumDataType.Nominal, Arrays.asList("Homme", "Femme")));
-		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age", GSEnumDataType.Range, 
-				Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus")));
-		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
-				"Couple", GSEnumDataType.Boolean, Arrays.asList("true", "false")));
-		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
-				"Education", GSEnumDataType.Order, Arrays.asList("pre-bac", "bac", "licence", "master et plus")));
-		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Activité", GSEnumDataType.Nominal, 
-				Arrays.asList("inactif", "chomage", "employé", "fonctionnaire", "indépendant", "retraité")));
-		this.generator = new UtilGenerator(attributes);
+	@SuppressWarnings("unchecked")
+	public GSUtilPopulation(String dictionaryFile){
+		try {
+			this.dico = new GenstarJsonUtil().unmarshalFromGenstarJson(pathToDictionary
+					.resolve(dictionaryFile), DemographicDictionary.class);
+		} catch (IllegalArgumentException | IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		this.generator = new GSUtilGenerator(dico);
 	}
+	
+	@SuppressWarnings("unchecked")
+	public GSUtilPopulation(Collection<DemographicAttribute<? extends IValue>> dictionary) {
+		dico = new DemographicDictionary<>();
+		dictionary.stream().forEach(att -> dico.addAttributes(att));
+		this.generator = new GSUtilGenerator(dico);
+	}
+	
+	public GSUtilPopulation() throws GSIllegalRangedData{
+		this(defaultDictionary);
+	}
+	
+	// ---------------------------------------------------- //
+	
+	public Path getPathToDictionary() {
+		return pathToDictionary;
+	}
+	
+	public DemographicDictionary<DemographicAttribute<? extends IValue>> getDictionary(){
+		return dico;
+	}
+	
+	// ---------------------------------------------------- //
 	
 	/**
 	 * Create a population with random component and given attributes
@@ -109,15 +148,16 @@ public class GosplAlgoUtilTest {
 	public ASegmentedNDimensionalMatrix<Double> getSegmentedFrequency(int segmentSize) 
 			throws IllegalDistributionCreation {
 		if(this.population == null)
-			this.buildPopulation(segmentSize);
-		log.debug("Try to build segmented matrix with {} dimensions", this.attributes.size());
-		Map<DemographicAttribute<? extends IValue>, Double> attributesProb = this.attributes.stream().collect(
-				Collectors.toMap(Function.identity(), att -> 0.5));
+			throw new NullPointerException("No population have been generated - see #buildPopulation");
+		log.debug("Try to build segmented matrix with {} dimensions", this.dico.getAttributes().size());
+		Map<DemographicAttribute<? extends IValue>, Double> attributesProb = this.dico.getAttributes()
+				.stream().collect(Collectors.toMap(Function.identity(), att -> 0.5));
 
 		Collection<Set<DemographicAttribute<? extends IValue>>> segmentedAttribute = new HashSet<>();
 		while(!segmentedAttribute.stream().flatMap(set -> set.stream())
-				.collect(Collectors.toSet()).containsAll(this.attributes)){
+				.collect(Collectors.toSet()).containsAll(this.dico.getAttributes())){
 			Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
+			// WARNING: linked attribute could be in the same matrix 
 			for(DemographicAttribute<? extends IValue> attribute : attributesProb.keySet()){
 				if(GenstarRandom.getInstance().nextDouble() < attributesProb.get(attribute)){
 					atts.add(attribute);

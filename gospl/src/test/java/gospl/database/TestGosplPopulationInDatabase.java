@@ -1,5 +1,6 @@
 package gospl.database;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
+import gospl.GosplPopulationInDatabase;
 import gospl.distribution.GosplInputDataManager;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;

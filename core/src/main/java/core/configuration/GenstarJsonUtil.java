@@ -1,5 +1,6 @@
 package core.configuration;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -70,15 +71,18 @@ public class GenstarJsonUtil {
 	 * 
 	 * @param toFile
 	 * @param targetToMarshal
+	 * @param tempFile TODO
 	 * @throws JsonGenerationException
 	 * @throws JsonMappingException
 	 * @throws IOException
 	 */
 	public void marshalToGenstarJson(Path toFile, Object targetToMarshal, 
-			SerializationFeature... features) 
-			throws JsonGenerationException, JsonMappingException, IOException { 
+			boolean tempFile, SerializationFeature... features) 
+			throws JsonGenerationException, JsonMappingException, IOException {
+		File outputFile = toFile.toFile(); 
+		if(tempFile) outputFile.deleteOnExit();
 		Stream.of(features).forEach(f -> om.enable(f)); 
-		om.writeValue(toFile.toFile(), targetToMarshal);
+		om.writeValue(outputFile, targetToMarshal);
 	}
 	
 	/**

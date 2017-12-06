@@ -10,13 +10,13 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
-import gospl.algo.GosplAlgoUtilTest;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.algo.sr.is.IndependantHypothesisAlgo;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.generator.DistributionBasedGenerator;
 import gospl.generator.ISyntheticGosplPopGenerator;
+import gospl.generator.util.GSUtilPopulation;
 import gospl.sampler.IDistributionSampler;
 import gospl.sampler.sr.GosplBasicSampler;
 
@@ -28,7 +28,7 @@ public class IndependentHypothesisAlgoTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		partialDistribution = new GosplAlgoUtilTest().getSegmentedFrequency(SEGMENT_SIZE);
+		partialDistribution = new GSUtilPopulation().getSegmentedFrequency(SEGMENT_SIZE);
 	}
 
 	@Test

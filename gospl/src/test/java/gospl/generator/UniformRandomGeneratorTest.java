@@ -9,10 +9,11 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.generator.util.GSUtilGenerator;
 
 public class UniformRandomGeneratorTest {
 
-	static UtilGenerator urg;
+	static GSUtilGenerator urg;
 	
 	static int maxAtt = 4, maxVal = 10;
 	
@@ -20,7 +21,7 @@ public class UniformRandomGeneratorTest {
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		urg = new UtilGenerator(maxAtt, maxVal);
+		urg = new GSUtilGenerator(maxAtt, maxVal);
 	}
 
 	@Test

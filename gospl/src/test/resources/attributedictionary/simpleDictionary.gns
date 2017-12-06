@@ -1,0 +1,64 @@
+{
+  "DEMOGRAPHIC DICTIONARY" : {
+    "ATTRIBUTES" : [ {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Couple",
+        "VALUE SPACE" : {
+          "TYPE" : "Boolean",
+          "VALUES" : [ {
+            "INPUT VALUE" : "false"
+          }, {
+            "INPUT VALUE" : "true"
+          } ],
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "null"
+          }
+        }
+      }
+    }, {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Genre",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Homme"
+          }, {
+            "INPUT VALUE" : "Femme"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        }
+      }
+    }, {
+      "DEMOGRAPHIC ATTRIBUTE" : {
+        "NAME" : "Range attribute",
+        "VALUE SPACE" : {
+          "TYPE" : "Range",
+          "VALUES" : [ {
+            "INPUT VALUE" : "moins de 14"
+          }, {
+            "INPUT VALUE" : "15 à 24"
+          }, {
+            "INPUT VALUE" : "25 à 34"
+          }, {
+            "INPUT VALUE" : "35 à 54"
+          }, {
+            "INPUT VALUE" : "55 et plus"
+          } ],
+          "min" : 0,
+          "max" : 120,
+          "rangeTemplate" : {
+            "numerciMatcher" : "INT_POSITIF_MATCH"
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "NaN à NaN"
+          }
+        }
+      }
+    } ]
+  }
+}
