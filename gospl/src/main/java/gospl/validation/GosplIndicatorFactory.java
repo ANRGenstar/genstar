@@ -164,7 +164,8 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public double getTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+	public double getTAE(
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable: 

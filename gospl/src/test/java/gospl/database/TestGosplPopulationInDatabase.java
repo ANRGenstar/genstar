@@ -7,11 +7,14 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
@@ -270,6 +273,69 @@ public class TestGosplPopulationInDatabase {
 		assertFalse("the entities should not accept to be added", p.addAll(fewEntities));
 		assertEquals("the count should be the same after adding existing objects", 11, p.size());
 		
+	}
+	
+
+	@Test
+	public void testCountEntitiesHavingOneValue() {
+
+		GosplPopulation o = getGoSPLPopulation();
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+
+		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		
+			int total = 0;
+			System.out.println(a.getAttributeName()+":");
+			for (IValue v: a.getValueSpace().getValues()) {
+			
+				int c = p.getEntitiesHavingValues(a, v);
+				System.out.println("* "+v.toString()+" : "+c);
+				
+				total += c;
+			}
+
+			assertEquals("the count of each value should sum up to the population size", o.size(), total);
+
+		}
+				
+	}
+	
+	@Test
+	public void testCountEntitiesHavingTwoValues() {
+
+		GosplPopulation o = getGoSPLPopulation();
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+
+		DemographicAttribute<? extends IValue> previousAttribute = null;
+		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		
+			if (previousAttribute == null) {
+				previousAttribute = a;
+				continue;
+			}
+			
+			int total = 0;
+			System.out.println(a.getAttributeName()+" and "+previousAttribute.getAttributeName()+":");
+			for (IValue vPrevious: previousAttribute.getValueSpace().getValues()) {
+
+				for (IValue v: a.getValueSpace().getValues()) {
+				
+					Map<DemographicAttribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
+					a2vv.put(a, Arrays.asList(v));
+					a2vv.put(previousAttribute, Arrays.asList(vPrevious));
+					
+					int c = p.getEntitiesHavingValues(a2vv);
+					System.out.println("* "+a2vv+" : "+c);
+					
+					total += c;
+				}
+				
+			}
+
+			assertEquals("the count of each value should sum up to the population size", o.size(), total);
+
+		}
+				
 	}
 
 }

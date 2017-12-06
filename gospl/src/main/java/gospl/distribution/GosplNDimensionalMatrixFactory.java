@@ -265,7 +265,8 @@ public class GosplNDimensionalMatrixFactory {
 
 		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
 		for(ADemoEntity entity : population){
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
+			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = 
+					new GosplCoordinate(entity.getAttributeMap());
 			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
 				matrix.getVal(entityCoord).add(1);
 		}

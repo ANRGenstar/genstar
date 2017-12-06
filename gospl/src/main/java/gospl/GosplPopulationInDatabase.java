@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 
-import core.metamodel.IPopulation;
+import core.metamodel.IQueryablePopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
@@ -40,7 +41,7 @@ import core.metamodel.value.binary.BooleanValue;
  * @author Samuel Thiriot
  */
 public class GosplPopulationInDatabase 
-	implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
+	implements IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 
 	public static final int VARCHAR_SIZE = 255;
 	public static final int MAX_BUFFER_QRY = 10000;
@@ -212,6 +213,25 @@ public class GosplPopulationInDatabase
 		Statement s = connection.createStatement();				
 		s.execute(qry);
 		s.close();
+		
+		// create indexes
+		Statement s2 = connection.createStatement();				
+		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
+ 
+			sb = new StringBuffer();
+			sb.append("CREATE INDEX idx_")
+				.append(getTableNameForEntityType(type))
+				.append("_")
+				.append(getAttributeColNameForType(type, a));
+			sb.append(" ON ");
+			sb.append(getTableNameForEntityType(type));
+			sb.append(" (");
+			sb.append(getAttributeColNameForType(type, a));
+			sb.append(")");
+			s2.execute(sb.toString());
+			
+		}
+		s2.close();
 	}
 	
 	/**
@@ -997,4 +1017,136 @@ public class GosplPopulationInDatabase
 		super.finalize();
 	}
 
+	@Override
+	public int getEntitiesHavingValues(DemographicAttribute<? extends IValue> attribute, IValue... values) {
+ 
+		int total = 0;
+		for (String type: entityType2tableName.keySet()) {
+			
+			// we don't even have this attribute stored, so no entity has any of these characteristics
+			if (!entityType2attributes.get(type).contains(attribute))
+				continue;
+			
+			try {
+				total += getEntitiesHavingValues(type, attribute, values);
+			} catch (SQLException e) {
+				throw new RuntimeException("error while counting entities of type "+type, e);
+			}
+		}
+		return total;
+	}
+
+	protected void addWhereClauseForAttribute(
+			StringBuffer sb,
+			String type,
+			DemographicAttribute<? extends IValue> attribute, 
+			IValue... values) {
+		
+		boolean first = true;
+		
+		switch (attribute.getValueSpace().getType()) {
+			case Integer:
+			case Continue:
+				// TODO to optimize by creating >= <= clauses
+				for (IValue v: values) {
+					if (first) first = false; else sb.append(" OR ");
+					sb.append(getAttributeColNameForType(type, attribute));
+					sb.append("=");
+					sb.append(v.getStringValue());
+				}
+				break;
+			case Range: 
+			case Nominal:
+			case Order:
+				for (IValue v: values) {
+					if (first) first = false; else sb.append(" OR ");
+					sb.append(getAttributeColNameForType(type, attribute));
+					sb.append("='");
+					sb.append(v.getStringValue());
+					sb.append("'");
+				}
+				break;
+			case Boolean:
+				for (IValue v: values) {
+					if (first) first = false; else sb.append(" OR ");
+					sb.append(getAttributeColNameForType(type, attribute));
+					sb.append("=");
+					sb.append(v.getStringValue());
+				}
+				break;
+			default:
+				throw new RuntimeException("unknown attribute type "+attribute.getValueSpace().getType());
+		}
+		 
+	}
+	public int getEntitiesHavingValues(
+						String type, 
+						DemographicAttribute<? extends IValue> attribute, 
+						IValue... values) throws SQLException {
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
+		sb.append(" WHERE ");
+		addWhereClauseForAttribute(sb, type, attribute, values);
+		
+		//System.out.println(sb.toString());
+		
+		Statement st = connection.createStatement();
+		ResultSet set = st.executeQuery(sb.toString());
+		set.next();
+		int res = set.getInt("TOTAL");
+		st.close();
+	
+		return res;
+	}
+
+	public int getEntitiesHavingValues(
+			String type,
+			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) throws SQLException {
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
+		
+		if (!attribute2values.isEmpty()) {
+		
+			sb.append(" WHERE (");
+			boolean first = true;
+			for (DemographicAttribute<? extends IValue> attribute: attribute2values.keySet()) {
+				if (first) first = false; else sb.append(") AND (");
+				Collection<IValue> values = attribute2values.get(attribute);
+				IValue[] vv = new IValue[values.size()];
+				values.toArray(vv);
+				addWhereClauseForAttribute(sb, type, attribute, vv);
+			}
+			sb.append(")");
+		}
+		//System.out.println(sb.toString());
+		
+		Statement st = connection.createStatement();
+		ResultSet set = st.executeQuery(sb.toString());
+		set.next();
+		int res = set.getInt("TOTAL");
+		st.close();
+	
+		return res;
+
+	}
+	
+	@Override
+	public int getEntitiesHavingValues(
+			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) {
+		
+		int total = 0;
+		for (String type: entityType2tableName.keySet()) {
+			
+			try {
+				total += getEntitiesHavingValues(type, attribute2values);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new RuntimeException("error while counting entities of type "+type, e);
+			}
+			
+		}
+		return total;
+	}
 }
