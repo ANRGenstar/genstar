@@ -118,7 +118,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 */
 	@Override
 	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
-		return getDimensions().stream().filter(d -> d.getValueSpace().getValues().contains(aspect))
+		return getDimensions().stream().filter(d -> d.getValueSpace().getValues().contains(aspect)
+				|| d.getValueSpace().getEmptyValue().equals(aspect))
 				.findFirst().get();
 	}
 

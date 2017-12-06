@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -334,7 +333,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public final AControl<T> getVal(String ... coordinates) {
 		
-		Set<IValue> l = new TreeSet<>();
+		Set<IValue> l = new HashSet<>();
 		
 		// collect all the attributes and index their names
 		Map<String,DemographicAttribute<? extends IValue>> name2attribute = dimensions.stream()
@@ -374,18 +373,10 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public boolean isCoordinateCompliant(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate) {
 		List<DemographicAttribute<? extends IValue>> dimensionsAspects = new ArrayList<>();
-		for(IValue aspect : coordinate.values()){
-			for(DemographicAttribute<? extends IValue> dim : dimensions){
-				if(dimensions.contains(dim)) {
-					if(dim.getValueSpace().getValues().contains(aspect))
-						dimensionsAspects.add(dim);
-				} else if(dim.getEmptyValue() != null 
-						&& dim.getEmptyValue().equals(aspect))
-					dimensionsAspects.add(dim);
-			}
-		}
-		Set<DemographicAttribute<? extends IValue>> dimSet = new HashSet<>(dimensionsAspects);
-		if(dimensionsAspects.size() == dimSet.size())
+		int matchDimension = (int) coordinate.values().stream().filter(a -> dimensions.stream()
+				.anyMatch(d -> d.getValueSpace().getValues().contains(a)
+						|| d.getEmptyValue().equals(a))).count();
+		if(dimensionsAspects.size() == matchDimension)
 			return true;
 		return false;
 	}

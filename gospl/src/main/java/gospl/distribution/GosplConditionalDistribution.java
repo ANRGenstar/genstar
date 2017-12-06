@@ -358,7 +358,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 					.stream().flatMap(val -> bottomupAtt.findMappedAttributeValues(val).stream())
 					.collect(Collectors.toSet());
 			Set<IValue> assignedMappedVals = currentMappedVals.stream().flatMap(val -> 
-			bottomupAtt.findMappedAttributeValues(val).stream())
+				bottomupAtt.findMappedAttributeValues(val).stream())
 					.collect(Collectors.toSet());
 			// Find the proper matrix to compute conditional probability
 			AFullNDimensionalMatrix<Double> matrix = this.jointDistributionSet.stream().filter(m -> 

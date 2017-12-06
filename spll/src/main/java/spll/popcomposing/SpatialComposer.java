@@ -23,8 +23,6 @@ import core.metamodel.io.IGSGeofile;
 import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
 import gospl.GosplMultitypePopulation;
-import gospl.GosplPopulation;
-import gospl.GosplPopulationInDatabase;
 import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.popmapper.constraint.ISpatialConstraint;
