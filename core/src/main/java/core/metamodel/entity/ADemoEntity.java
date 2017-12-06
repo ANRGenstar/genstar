@@ -160,7 +160,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	
 	@Override
 	public String toString() {
-		return attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()
+		return "Entity ["+this.id+"] "+attributes.entrySet().stream().map(e -> e.getKey().getAttributeName()
 				+":"+e.getValue().getStringValue()).collect(Collectors.joining(",\t"));
 	}
 	

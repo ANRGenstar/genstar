@@ -22,6 +22,8 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 
 	private IAttribute<BooleanValue> attribute;
 	
+	public final BooleanValue valueTrue;
+	public final BooleanValue valueFalse;
 	/**
 	 * Constraint bianry space constructor define with values: {@link Boolean#TRUE}, {@link Boolean#FALSE}
 	 * and a null {@link Boolean} as empty value
@@ -30,7 +32,9 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	 */
 	public BinarySpace(IAttribute<BooleanValue> attribute){
 		this.attribute = attribute;
-		this.values = Stream.of(new BooleanValue(this, true), new BooleanValue(this, false))
+		valueTrue = new BooleanValue(this, true);
+		valueFalse = new BooleanValue(this, false);
+		this.values = Stream.of(valueTrue, valueFalse)
 				.collect(Collectors.toSet());
 		this.emptyValue = new BooleanValue(this, null);
 	}

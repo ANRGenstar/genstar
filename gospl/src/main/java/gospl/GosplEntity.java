@@ -10,6 +10,7 @@ import core.metamodel.value.IValue;
 /**
  * A GoSPL Entity is a population entity
  * 
+ * TODO if an entity is removed, remove references to it in other agents !
  *
  */
 public class GosplEntity extends ADemoEntity {

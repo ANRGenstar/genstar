@@ -76,41 +76,58 @@ public class ReadDictionaryUtils {
 		if (modalities.size()<2)
 			return false;
 		
-		Pattern oneNumber = Pattern.compile("[\\D]*\\d+[\\D]*");
+		System.out.println("is this a range? "+modalities);
+		
+		 // we might have <anything not number><several numbers><anything but numbers>
+		Pattern oneNumber = Pattern.compile("[\\D]*\\d+[\\D]*"); 
 		
 		List<String> mods = new ArrayList<>(modalities);
 		
 		// if there is not one number in the first one, it's not a range
-		if (!oneNumber.matcher(mods.get(0)).matches())
+		if (!oneNumber.matcher(mods.get(0)).matches()) {
+			System.out.println("no, because the first number is not a number: "+mods.get(0));
 			return false;
+		}
 		
 		// there should also be only one number in the last one
-		if (!oneNumber.matcher(mods.get(mods.size()-1)).matches())
+		if (!oneNumber.matcher(mods.get(mods.size()-1)).matches()) {
+			System.out.println("no, because the last number is not a number: "+(mods.size()-1));
 			return false;
+		}
 		
-		Pattern twoNumbers = Pattern.compile("[\\D]*\\d+[\\D]*\\d+[\\D]*");
+		// we might have <anything not number><several numbers><anything but numbers><several numbers><anything but numbers>
+		Pattern twoNumbers = Pattern.compile("[\\D]*\\d+[\\D]+\\d+[\\D]*");
 
 		// and then two numbers inbetween
 		for (int i=1; i<mods.size()-2; i++) {
-			if (!twoNumbers.matcher(mods.get(i)).matches())
+			if (!twoNumbers.matcher(mods.get(i)).matches()) {
 				return false;
+			}
+			System.out.println("this might be a range:"+mods.get(i));
 		}
 		
 		return true;
 	}
 	
 	/**
-	 * return true if the modalities are numeric
+	 * return true if the modalities are numeric.
+	 * The detections works as: it is numeric if it is made of only numbers
+	 * or there is exactly one number inside it.
 	 * @param modalities
 	 * @return
 	 */
 	public static boolean detectIsInteger(Collection<String> modalities) {
+
+		Pattern oneNumber = Pattern.compile("[\\D]*\\d+[\\D]*"); 
+
 		for (String s: modalities) {
-			try {
+			if (!oneNumber.matcher(s).matches())
+				return false;
+			/*try {
 				Integer.parseInt(s);
 			} catch (NumberFormatException e) {
 				return false;
-			}
+			}*/
 		}
 		return true;
 	}
