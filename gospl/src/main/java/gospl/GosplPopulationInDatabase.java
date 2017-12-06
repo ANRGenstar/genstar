@@ -1018,7 +1018,7 @@ public class GosplPopulationInDatabase
 	}
 
 	@Override
-	public int getEntitiesHavingValues(DemographicAttribute<? extends IValue> attribute, IValue... values) {
+	public int getCountHavingValues(DemographicAttribute<? extends IValue> attribute, IValue... values) {
  
 		int total = 0;
 		for (String type: entityType2tableName.keySet()) {
@@ -1086,8 +1086,11 @@ public class GosplPopulationInDatabase
 
 		StringBuffer sb = new StringBuffer();
 		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
-		sb.append(" WHERE ");
-		addWhereClauseForAttribute(sb, type, attribute, values);
+		
+		if (values.length > 0) {
+			sb.append(" WHERE ");
+			addWhereClauseForAttribute(sb, type, attribute, values);
+		}
 		
 		//System.out.println(sb.toString());
 		
@@ -1133,7 +1136,7 @@ public class GosplPopulationInDatabase
 	}
 	
 	@Override
-	public int getEntitiesHavingValues(
+	public int getCountHavingValues(
 			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) {
 		
 		int total = 0;

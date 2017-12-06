@@ -22,11 +22,9 @@ import org.junit.rules.TemporaryFolder;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
-import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
-import gospl.GosplEntity;
 import gospl.GosplPopulation;
 import gospl.GosplPopulationInDatabase;
 import gospl.distribution.GosplInputDataManager;
@@ -288,7 +286,7 @@ public class TestGosplPopulationInDatabase {
 			System.out.println(a.getAttributeName()+":");
 			for (IValue v: a.getValueSpace().getValues()) {
 			
-				int c = p.getEntitiesHavingValues(a, v);
+				int c = p.getCountHavingValues(a, v);
 				System.out.println("* "+v.toString()+" : "+c);
 				
 				total += c;
@@ -324,7 +322,7 @@ public class TestGosplPopulationInDatabase {
 					a2vv.put(a, Arrays.asList(v));
 					a2vv.put(previousAttribute, Arrays.asList(vPrevious));
 					
-					int c = p.getEntitiesHavingValues(a2vv);
+					int c = p.getCountHavingValues(a2vv);
 					System.out.println("* "+a2vv+" : "+c);
 					
 					total += c;
