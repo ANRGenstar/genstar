@@ -5,9 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import org.geotools.feature.SchemaException;
@@ -42,6 +40,7 @@ public class LocalizerTest {
 	public static IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop;
 	public static SPLVectorFile sfAdmin;
 	public static SPLVectorFile sfBuildings;
+	public static SPLVectorFile sfRoads;
 	public static List<IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue>> endogeneousVarFile;
 	
 	@BeforeClass
@@ -51,8 +50,39 @@ public class LocalizerTest {
 
 	
 	@Test
+	public void testSimpleLocalisation() {
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	@Test
+	public void testCloseRoadsMaxDistance() {
+		((SPLVectorFile) sfRoads).minMaxDistance(0.0,5.0, false);
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	@Test
+	public void testCloseRoadsBetween() {
+		((SPLVectorFile) sfRoads).minMaxDistance(2.0, 5.0, false);
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	@Test
+	public void testCloseRoadsBetweenNonOverlapping() {
+		((SPLVectorFile) sfRoads).minMaxDistance(1.0, 5.0, true);
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	
+	@Test
 	public void testMatcher() {
-
 		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
 		
 		localizer.setMatcher(sfAdmin, "iris", "CODE_IRIS");
@@ -127,11 +157,12 @@ public class LocalizerTest {
 		
 		GSUtilGenerator ug = new GSUtilGenerator(atts);
 				
-		pop = ug.generate(100);
+		pop = ug.generate(50);
 		
 		try {
 			sfBuildings = SPLGeofileBuilder.getShapeFile(new File("src/test/resources/buildings.shp"), Arrays.asList("name", "type"), null);
 			sfAdmin = SPLGeofileBuilder.getShapeFile(new File("src/test/resources/irisR.shp"), null);
+			sfRoads = SPLGeofileBuilder.getShapeFile(new File("src/test/resources/roads.shp"), null);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidGeoFormatException e) {

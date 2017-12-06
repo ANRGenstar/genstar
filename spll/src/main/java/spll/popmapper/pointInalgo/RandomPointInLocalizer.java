@@ -70,13 +70,18 @@ public class RandomPointInLocalizer implements PointInLocalizer{
 				double newX = xMin + rand.nextDouble() * (xMax - xMin);
 				double newY= yMin + rand.nextDouble() * (yMax - yMin);
 				Point pt = fact.createPoint(new Coordinate(newX, newY)); 
-				while (!geom.intersects(pt)) {
+				int cpt = 1000;
+				while (!geom.intersects(pt) && cpt > 0) {
 					newX = xMin + rand.nextDouble() * (xMax - xMin);
 					newY= yMin + rand.nextDouble() * (yMax - yMin);
 					pt = fact.createPoint(new Coordinate(newX, newY)); 
+					cpt--;
 				}
+				if (cpt == 0) return fact.createPoint(geom.getCoordinate());
 				return pt;
 			}
+			if (geom.getLength() == 0) 
+				return fact.createPoint(geom.getCoordinate());
 			final Envelope env = geom.getEnvelopeInternal();
 			final double xMin = env.getMinX();
 			final double xMax = env.getMaxX();

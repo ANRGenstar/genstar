@@ -296,11 +296,14 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 
 	public void minMaxDistance(Double minDist, Double maxDist, Boolean avoidOverlapping)  {
 		Quadtree quadTreeMin = null;
-		if (minDist != null && minDist >= 0) {
+		if (minDist != null && minDist > 0) {
 			quadTreeMin = new Quadtree();
 			for (SpllFeature ft : features) {
-				Geometry g = ft.getGeometry().buffer(minDist);
-				quadTreeMin.insert(g.getEnvelopeInternal(), g);
+				Geometry g = ft.getGeometry().buffer(minDist);	
+				try {
+					quadTreeMin.insert(g.getEnvelopeInternal(), g);
+				} catch (Exception e){ quadTreeMin = null;}
+				
 			}
 		}
 		Quadtree quadTreeOverlap = null;
@@ -317,7 +320,24 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 					 
 				 }
 				 if (avoidOverlapping) {
-					 quadTreeOverlap.insert( newGeom.getEnvelopeInternal(), newGeom);
+					 try {
+						 quadTreeOverlap.insert( newGeom.getEnvelopeInternal(), newGeom);
+						} catch (Exception e){ quadTreeOverlap = null;}
+					}
+			 } else if (minDist > 0) {
+				 for (SpllFeature ft2 : features) {
+					if (ft == ft2) continue;
+					Geometry newGeom2 = ft2.getProxyGeometry();
+					if (newGeom2.isEmpty()) continue;
+					newGeom =  SpllUtil.difference(newGeom, newGeom2);
+					if (newGeom == null) break;
+					newGeom = manageGeometryCollection(newGeom);
+					 
+				 }
+				 if (avoidOverlapping) {
+					 try {
+						 quadTreeOverlap.insert( newGeom.getEnvelopeInternal(), newGeom);
+						} catch (Exception e){ quadTreeOverlap = null;}
 				 }
 			 }
 			ft.setProxyGeometry(newGeom);
@@ -329,13 +349,25 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 			
 			for (SpllFeature ft : fts_overlap) {
 				Geometry newGeom = ft.getProxyGeometry();
-				List<Geometry> intersection =  quadTreeOverlap.query(newGeom.getEnvelopeInternal());
-				 for (Geometry g : intersection) {
-					if (g.isEmpty() ||  (g == ft.getGeometry())) continue;
-					 newGeom =  SpllUtil.difference(newGeom, g);
-					 if (newGeom == null) break;
-					 newGeom = manageGeometryCollection(newGeom);
-					
+				 if (quadTreeOverlap != null && ! quadTreeOverlap.isEmpty()) {
+					List<Geometry> intersection =  quadTreeOverlap.query(newGeom.getEnvelopeInternal());
+					 for (Geometry g : intersection) {
+						if (g.isEmpty() ||  (g == ft.getGeometry())) continue;
+						 newGeom =  SpllUtil.difference(newGeom, g);
+						 if (newGeom == null) break;
+						 newGeom = manageGeometryCollection(newGeom);
+						
+					 }
+				 } else {
+					 for (SpllFeature ft2 : fts_overlap) {
+							if (ft == ft2) continue;
+							Geometry newGeom2 = ft2.getProxyGeometry();
+							if (newGeom2.isEmpty()) continue;
+							newGeom =  SpllUtil.difference(newGeom, newGeom2);
+							if (newGeom == null) break;
+							newGeom = manageGeometryCollection(newGeom);
+							 
+						 }
 				 }
 				 ft.setProxyGeometry(newGeom);
 			}
@@ -344,6 +376,10 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	
 	private Geometry manageGeometryCollection(Geometry geom) {
 		geom.buffer(0.0);
+		if (geom.getArea() == 0) {
+			if (geom.getLength() == 0) return geom.getFactory().createPoint(geom.getCoordinate());
+			return geom.getFactory().createLineString(geom.getCoordinates());
+		}
 		if (geom instanceof GeometryCollection) {
 			 List<Geometry> toKeep = new ArrayList<Geometry>();
 			 for (int i = 0; i < geom.getNumGeometries(); i++) {
@@ -358,6 +394,9 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 				 Polygon[] polys = new Polygon[toKeep.size()];
 				 for (int i = 0; i < toKeep.size(); i++) polys[i] = (Polygon) toKeep.get(i);
 				 geom = geom.getFactory().createMultiPolygon(polys);
+			 }
+			 else {
+				 return geom.getFactory().createPoint(geom.getCoordinate());
 			 }
 		 }
 		return geom;

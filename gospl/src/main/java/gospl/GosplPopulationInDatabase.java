@@ -7,8 +7,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,7 +18,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,7 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 
-import core.metamodel.IPopulation;
+import core.metamodel.IQueryablePopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
@@ -40,12 +41,14 @@ import core.metamodel.value.binary.BooleanValue;
  * @author Samuel Thiriot
  */
 public class GosplPopulationInDatabase 
-	implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
+	implements IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
 
 	public static final int VARCHAR_SIZE = 255;
 	public static final int MAX_BUFFER_QRY = 10000;
 	public static final String DEFAULT_ENTITY_TYPE = "unknown";
-
+	public static int REMOVE_ENTITIES_BATCH = 100;
+	public static int ADD_ENTITIES_BATCH = 500; // TODO more !
+	
 	private Logger logger = LogManager.getLogger();
 	
 	private final Connection connection;
@@ -188,7 +191,7 @@ public class GosplPopulationInDatabase
 			.append(getTableNameForEntityType(type))
 			.append(" (");
 		
-		sb.append("id VARCHAR(30) PRIMARY KEY"); // TODO maybe 30 is not enough?
+		sb.append("id VARCHAR(50) PRIMARY KEY"); // TODO maybe 30 is not enough?
 		
 		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
 			sb.append(", ");
@@ -209,7 +212,26 @@ public class GosplPopulationInDatabase
 		logger.info("creating table for type {} with SQL query: {}", type, qry);
 		Statement s = connection.createStatement();				
 		s.execute(qry);
+		s.close();
 		
+		// create indexes
+		Statement s2 = connection.createStatement();				
+		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
+ 
+			sb = new StringBuffer();
+			sb.append("CREATE INDEX idx_")
+				.append(getTableNameForEntityType(type))
+				.append("_")
+				.append(getAttributeColNameForType(type, a));
+			sb.append(" ON ");
+			sb.append(getTableNameForEntityType(type));
+			sb.append(" (");
+			sb.append(getAttributeColNameForType(type, a));
+			sb.append(")");
+			s2.execute(sb.toString());
+			
+		}
+		s2.close();
 	}
 	
 	/**
@@ -227,6 +249,7 @@ public class GosplPopulationInDatabase
 		// TODO indexes !
 		
 	}
+	
 	
 	/**
 	 * Loads the given collection: keeps in memory the attributes,
@@ -258,7 +281,7 @@ public class GosplPopulationInDatabase
 			
 		}
 	}
-	
+
 	/**
 	 * Returns the SQL value for the attribute of an entity
 	 * @param e
@@ -320,14 +343,19 @@ public class GosplPopulationInDatabase
 	}
 	
 	
-	protected void storeEntities(String type, Collection<? extends ADemoEntity> entities) throws SQLException {
+	protected int storeEntities(String type, Collection<? extends ADemoEntity> entities) throws SQLException {
 
+		if (!entityType2tableName.containsKey(type))
+			createTableForEntityType(type);
+		
+		int added = 0;
+		
 		// name columns 
 		List<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>(entityType2attributes.get(type));
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ").append(getTableNameForEntityType(type));
-		sb.append(" (id");
+		sb.append(" m (id");
 		for (DemographicAttribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getAttributeColNameForType(type, a));
@@ -346,6 +374,10 @@ public class GosplPopulationInDatabase
 				logger.info("adding entities with query {}", qry);
 				Statement st = connection.createStatement();
 				st.executeQuery(qry);
+				ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
+				rs.next();
+				added += rs.getInt(1);
+				rs.close();
 				st.close();
 				// restart from scratch 
 				first = true;
@@ -358,7 +390,7 @@ public class GosplPopulationInDatabase
 				sb.append(",");
 			}
 			sb.append("('");
-			sb.append(EntityUniqueId.createNextId(this, type));
+			sb.append(e.getEntityId());
 			sb.append("'");
 			for (DemographicAttribute<? extends IValue> a: attributes) {
 				sb.append(",");
@@ -375,8 +407,13 @@ public class GosplPopulationInDatabase
 			logger.info("adding last entities with query {}", qry);
 			Statement st = connection.createStatement();
 			st.executeQuery(qry);
+			ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
+			rs.next();
+			added += rs.getInt(1);
+			rs.close();
 			st.close();
 		}
+		return added;
 	}
 
 	@Override
@@ -386,8 +423,20 @@ public class GosplPopulationInDatabase
 		if (type == null)
 			type = DEFAULT_ENTITY_TYPE;
 			
+		if (!entityType2attributes.containsKey(type))
+			entityType2attributes.put(type, new HashSet<>(e.getAttributes()));
+		
+		if (!entityType2tableName.containsKey(type)) {
+			try {
+				createTableForEntityType(type);
+			} catch (SQLException ex) {
+				throw new RuntimeException("error while creating table for type "+type);
+			}
+		}
+		
 		// name columns 
-		List<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>(entityType2attributes.get(type));
+		List<DemographicAttribute<? extends IValue>> attributes = 
+				new LinkedList<>(entityType2attributes.get(type));
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ").append(getTableNameForEntityType(type));
@@ -396,29 +445,115 @@ public class GosplPopulationInDatabase
 			sb.append(",");
 			sb.append(getAttributeColNameForType(type, a));
 		}
-		sb.append(") VALUES (");
+		sb.append(") VALUES");
 		
 		sb.append("('");
-		sb.append(EntityUniqueId.createNextId(this, type));
+		sb.append(e.getEntityId());
 		sb.append("'");
 		for (DemographicAttribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getSQLValueFor(e,a));
 		}
-		sb.append(");");
+		sb.append(")");
 		
-		return true;
+		boolean anyChange = false;
+		try {
+			Statement st = connection.createStatement();
+			st.executeQuery(sb.toString());
+			st.close();
+			return true;
+		} catch(SQLIntegrityConstraintViolationException e1) {
+			return false;
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException("error while adding entity "+e, e1);
+		}
+		
 	}
 
 	@Override
 	public boolean addAll(Collection<? extends ADemoEntity> c) {
+		
+		int added = 0;
+		
+		Map<String,List<ADemoEntity>> type2entities = new HashMap<>();
+		
 		try {
-			storeEntities("unknown",c);
+				
+			for (Object o: c) {
+				ADemoEntity e = null;
+				try {
+					e = (ADemoEntity)o;
+				} catch (ClassCastException e1) {
+					// skip was is not an entity
+					continue;
+				}
+				
+				String type = e.getEntityType();
+				if (type == null)
+					type = DEFAULT_ENTITY_TYPE;
+				
+				if (!e._hasEntityId())
+					e._setEntityId(EntityUniqueId.createNextId(this, type));
+				
+				System.out.println("should add entity id: "+e.getEntityId());
+
+				if (!entityType2attributes.containsKey(type))
+					entityType2attributes.put(type, new HashSet<>(e.getAttributes()));
+				
+				if (!entityType2tableName.containsKey(type)) {
+					try {
+						createTableForEntityType(type);
+					} catch (SQLException ex) {
+						throw new RuntimeException("error while creating table for type "+type);
+					}
+				}
+				
+				List<ADemoEntity> l = type2entities.get(type);
+				if (l == null) { 
+					l = new ArrayList<>(ADD_ENTITIES_BATCH);
+					type2entities.put(type, l);
+				}
+				l.add(e);
+				
+				if (l.size() >= ADD_ENTITIES_BATCH) {
+					try {
+						added += storeEntities(type, l);
+					} catch (SQLIntegrityConstraintViolationException e2) {
+						// one of the entities already exist; 
+						// there is no easy and efficient synthax for sqldb to exclude the known ones
+						// the best is to just add them one by one
+						System.err.println("some of these agents already existed; switching to add 1 by 1");
+						for (ADemoEntity en: l) {
+							if (add(en))
+								added++;
+						}
+					}
+					l.clear();
+				}
+			}
+			
+			for (String type: type2entities.keySet()) {
+			
+				try {
+					added += storeEntities(type, type2entities.get(type));
+				} catch (SQLIntegrityConstraintViolationException e2) {
+					// one of the entities already exist; 
+					// there is no easy and efficient synthax for sqldb to exclude the known ones
+					// the best is to just add them one by one
+					System.err.println("some of these agents already existed; switching to add 1 by 1");
+					for (ADemoEntity en: type2entities.get(type)) {
+						if (add(en))
+							added++;
+					}
+				}
+			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException("error while inserting the population in database: "+e.getMessage(), e);
+			throw new RuntimeException("error while adding entities",e);
 		}
-		return true;
+		return added > 0;
+	
 	}
 
 	@Override
@@ -449,7 +584,7 @@ public class GosplPopulationInDatabase
 				Statement st = connection.createStatement();
 				ResultSet set = st.executeQuery("SELECT COUNT(*) FROM "+tableName+" WHERE id='"+e.getEntityId()+"'");
 				set.next();
-				Integer count = set.getInt(0);
+				Integer count = set.getInt(1);
 				return count > 0;
 			} catch (SQLException e1) {
 				e1.printStackTrace();
@@ -461,8 +596,9 @@ public class GosplPopulationInDatabase
 
 	@Override
 	public boolean containsAll(Collection<?> c) {
-		// TODO Auto-generated method stub
-		return false;
+		
+		// TODO implement that, we can do it (but its tedious and no one ever uses it !)
+		throw new NotImplementedException("Not yet implemented"); 
 	}
 
 	@Override
@@ -509,15 +645,20 @@ public class GosplPopulationInDatabase
 	    private String type;
 	    private Set<DemographicAttribute<? extends IValue>> attributes;
 	    
-	    public DatabaseEntitiesIterator(Connection connection, Set<DemographicAttribute<? extends IValue>> attributes, String type, String sql) {
+	    public DatabaseEntitiesIterator(
+	    		Connection connection, 
+	    		Set<DemographicAttribute<? extends IValue>> attributes, 
+	    		String type, 
+	    		String sqlWhereClause) {
 	        assert connection != null;
-	        assert sql != null;
+	        assert sqlWhereClause != null;
 	        assert type != null;
 	        assert attributes != null;
 	        this.connection = connection;
-	        this.sql = sql;
+	        this.sql = "SELECT * FROM "+entityType2tableName.get(type)+sqlWhereClause;
 	        this.attributes = attributes;
 	        this.type = type;
+	        
 	    }
 
 	    /**
@@ -525,8 +666,16 @@ public class GosplPopulationInDatabase
 	     * @param connection
 	     * @param type
 	     */
-	    public DatabaseEntitiesIterator(Connection connection, Set<DemographicAttribute<? extends IValue>> attributes, String type) {
-	    	this(connection, attributes, type, "SELECT * FROM "+entityType2tableName.get(type));
+	    public DatabaseEntitiesIterator(
+	    		Connection connection, 
+	    		Set<DemographicAttribute<? extends IValue>> attributes, 
+	    		String type) {
+	    	this(
+	    			connection, 
+	    			attributes, 
+	    			type,
+	    			""
+	    			);
 	    }
 	    
 	    public void init() {
@@ -582,38 +731,48 @@ public class GosplPopulationInDatabase
 	    @Override
 	    public ADemoEntity next() {
 	        
-	    	Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>();
+	    	if (ps == null) {
+	            init();
+	        }
+    	  
+	    	return createEntity(rs, type, attributes);
 	    	
-	    	// read the attributes of the current element 
-	    	String id;
-	    	try {
-	    		id = rs.getString("id");
-	    	} catch (SQLException e) {
-				e.printStackTrace();
-				throw new RuntimeException("error while reading the id from database: "+e.getMessage(), e);
-			}
-	    	for (DemographicAttribute<? extends IValue> a: attributes) {
-	    		try {
-					attribute2value.put(a, readValueForAttribute(type, a, rs));
-				} catch (SQLException e) {
-					e.printStackTrace();
-					throw new RuntimeException("error while reading the value "+a+" from database: "+e.getMessage(), e);
-				}
-	        } 
-	    	
-    		try {
-    			rs.next();
-    		} catch (SQLException e) {
-    			throw new RuntimeException("error while going to the next record: "+e.getMessage(), e);
-			}
-
-	    	// create the return result
-	    	GosplEntity res = new GosplEntity(attribute2value);
-	    	res._setEntityId(id);
-	    	res.setEntityType(type);
-	    	
-	    	return res;
 	    }
+	}
+	
+	private ADemoEntity createEntity(ResultSet rs, String type, Set<DemographicAttribute<? extends IValue>> attributes) {
+		
+		Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>();
+    	
+    	// read the attributes of the current element 
+    	String id;
+    	try {
+    		id = rs.getString("id");
+    	} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("error while reading the id from database: "+e.getMessage(), e);
+		}
+    	for (DemographicAttribute<? extends IValue> a: attributes) {
+    		try {
+				attribute2value.put(a, readValueForAttribute(type, a, rs));
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new RuntimeException("error while reading the value "+a+" from database: "+e.getMessage(), e);
+			}
+        } 
+    	
+		try {
+			rs.next();
+		} catch (SQLException e) {
+			throw new RuntimeException("error while going to the next record: "+e.getMessage(), e);
+		}
+
+    	// create the return result
+    	GosplEntity res = new GosplEntity(attribute2value);
+    	res._setEntityId(id);
+    	res.setEntityType(type);
+    	
+    	return res;
 	}
 	
 
@@ -624,38 +783,62 @@ public class GosplPopulationInDatabase
 	 */
 	public class AllTypesIterator implements Iterator<ADemoEntity> {
 
-	    private Connection connection;
-		private Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes;
+		protected Connection connection;
+		protected Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes;
 		
-		private Iterator<String> itTypes = null;
-		private DatabaseEntitiesIterator itEntities = null;
+		protected Iterator<String> itTypes = null;
+		protected DatabaseEntitiesIterator itEntities = null;
 		
-		private String currentType = null;
+		protected String whereClause = null;
 		
-		//TODO add SQL selector
-
 	    public AllTypesIterator(
 	    		Connection connection, 
 	    		Map<String,String> entityType2tableName,
 	    		Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes
 	    		) {
+
+	    	this(connection, entityType2tableName, entityType2attributes, "");
+	    	
+	    }
+	    
+	    /**
+	     * 
+	     * @param connection
+	     * @param entityType2tableName
+	     * @param entityType2attributes
+	     * @param whereClause
+	     */
+	    public AllTypesIterator(
+	    		Connection connection, 
+	    		Map<String,String> entityType2tableName,
+	    		Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes,
+	    		String whereClause
+	    		) {
+	    	
 	        assert connection != null;
+	        assert whereClause != null;
+	        assert entityType2attributes != null;
 	        
 	        this.connection = connection;
 	        this.entityType2attributes = entityType2attributes;
+	        this.whereClause = whereClause;
 	        
 	        itTypes = entityType2tableName.keySet().iterator();
 	        itTypes.hasNext();
 	    }
 
-	    protected void initEntitiesIterator() {
-    		String currentType = itTypes.next();
-    		itEntities = new DatabaseEntitiesIterator(
+	    protected void initEntitiesIteratorForType(String currentType) {
+	    	itEntities = new DatabaseEntitiesIterator(
     				connection, 
     				entityType2attributes.get(currentType), 
-    				currentType
+    				currentType,
+    				this.whereClause
     				);
 	    }
+	    protected void initEntitiesIterator() {
+    		initEntitiesIteratorForType(itTypes.next());
+	    }
+	    
 	    @Override
 	    public boolean hasNext() {
 	    	
@@ -685,6 +868,45 @@ public class GosplPopulationInDatabase
 	    }
 	}
 	
+	public class AllTypesWithWhereIterator extends AllTypesIterator {
+
+		Map<DemographicAttribute<? extends IValue>,Collection<IValue>> attribute2values;
+		
+		public AllTypesWithWhereIterator(
+				Connection connection, 
+				Map<String, String> entityType2tableName,
+				Map<String, Set<DemographicAttribute<? extends IValue>>> entityType2attributes,
+				Map<DemographicAttribute<? extends IValue>,Collection<IValue>> attribute2values
+				) {
+			
+			super(connection, entityType2tableName, entityType2attributes);
+			
+			this.attribute2values = attribute2values;
+			
+		}
+
+		@Override
+		protected void initEntitiesIteratorForType(String currentType) {
+			
+			// if there is no condition, let's come back to the original version
+			// which browses everything
+			if (attribute2values.isEmpty()) {
+				super.initEntitiesIteratorForType(currentType);
+				return;
+			}
+			
+			StringBuffer sb = new StringBuffer();
+			
+			addWhereClauseForAttributes(sb, currentType, attribute2values);
+						
+	    	itEntities = new DatabaseEntitiesIterator(
+    				connection, 
+    				entityType2attributes.get(currentType), 
+    				currentType,
+    				sb.toString()
+    				);
+	    }
+	}
 	
 	@Override
 	public Iterator<ADemoEntity> iterator() {
@@ -766,7 +988,6 @@ public class GosplPopulationInDatabase
 	@Override
 	public boolean removeAll(Collection<?> c) {
 
-		int REMOVE_ENTITIES_BATCH = 100;
 		
 		boolean anyChange = false;
 		
@@ -820,21 +1041,13 @@ public class GosplPopulationInDatabase
 		try {
 			int accumulated = 0;
 			System.out.println("in size");
-			Statement st = connection.createStatement(
-					ResultSet.TYPE_SCROLL_INSENSITIVE,
-		            ResultSet.CONCUR_READ_ONLY);
+			Statement st = connection.createStatement();
 			
 			for (String tableName: entityType2tableName.values()) {
-				//ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
 				
-				ResultSet set = st.executeQuery("SELECT * FROM "+tableName+";");
-				
-				if (set.next()) {
-					 set.last();
-					 return set.getRow();
-				} else {
-					return 0;
-				}
+				ResultSet set = st.executeQuery("SELECT COUNT(*) as TOTAL FROM "+tableName+";");
+				set.next();
+				accumulated += set.getInt("TOTAL");
 			}
 			return accumulated;
 		} catch (SQLException e1) {
@@ -888,6 +1101,207 @@ public class GosplPopulationInDatabase
 			this.connection.close();		
 		}
 		super.finalize();
+	}
+
+	@Override
+	public int getCountHavingValues(DemographicAttribute<? extends IValue> attribute, IValue... values) {
+ 
+		int total = 0;
+		for (String type: entityType2tableName.keySet()) {
+			
+			// we don't even have this attribute stored, so no entity has any of these characteristics
+			if (!entityType2attributes.get(type).contains(attribute))
+				continue;
+			
+			try {
+				total += getEntitiesHavingValues(type, attribute, values);
+			} catch (SQLException e) {
+				throw new RuntimeException("error while counting entities of type "+type, e);
+			}
+		}
+		return total;
+	}
+
+	protected void addWhereClauseForAttribute(
+			StringBuffer sb,
+			String type,
+			DemographicAttribute<? extends IValue> attribute, 
+			IValue... values) {
+		
+		boolean first = true;
+		
+		switch (attribute.getValueSpace().getType()) {
+			case Integer:
+			case Continue:
+				// TODO to optimize by creating >= <= clauses
+				for (IValue v: values) {
+					if (first) first = false; else sb.append(" OR ");
+					sb.append(getAttributeColNameForType(type, attribute));
+					sb.append("=");
+					sb.append(v.getStringValue());
+				}
+				break;
+			case Range: 
+			case Nominal:
+			case Order:
+				for (IValue v: values) {
+					if (first) first = false; else sb.append(" OR ");
+					sb.append(getAttributeColNameForType(type, attribute));
+					sb.append("='");
+					sb.append(v.getStringValue());
+					sb.append("'");
+				}
+				break;
+			case Boolean:
+				for (IValue v: values) {
+					if (first) first = false; else sb.append(" OR ");
+					sb.append(getAttributeColNameForType(type, attribute));
+					sb.append("=");
+					sb.append(v.getStringValue());
+				}
+				break;
+			default:
+				throw new RuntimeException("unknown attribute type "+attribute.getValueSpace().getType());
+		}
+		 
+	}
+	public int getEntitiesHavingValues(
+						String type, 
+						DemographicAttribute<? extends IValue> attribute, 
+						IValue... values) throws SQLException {
+
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
+		
+		if (values.length > 0) {
+			sb.append(" WHERE ");
+			addWhereClauseForAttribute(sb, type, attribute, values);
+		}
+		
+		//System.out.println(sb.toString());
+		
+		Statement st = connection.createStatement();
+		ResultSet set = st.executeQuery(sb.toString());
+		set.next();
+		int res = set.getInt("TOTAL");
+		st.close();
+	
+		return res;
+	}
+
+	public void addWhereClauseForAttributes(
+			StringBuffer sb,
+			String type,
+			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values
+			) {
+		sb.append(" WHERE (");
+		boolean first = true;
+		for (DemographicAttribute<? extends IValue> attribute: attribute2values.keySet()) {
+			if (first) first = false; else sb.append(") AND (");
+			Collection<IValue> values = attribute2values.get(attribute);
+			IValue[] vv = new IValue[values.size()];
+			values.toArray(vv);
+			addWhereClauseForAttribute(sb, type, attribute, vv);
+		}
+		sb.append(")");
+	}
+	
+	public int getEntitiesHavingValues(
+			String type,
+			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) throws SQLException {
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
+		
+		if (!attribute2values.isEmpty()) {
+			addWhereClauseForAttributes(sb, type, attribute2values);
+		}
+		//System.out.println(sb.toString());
+		
+		Statement st = connection.createStatement();
+		ResultSet set = st.executeQuery(sb.toString());
+		set.next();
+		int res = set.getInt("TOTAL");
+		st.close();
+	
+		return res;
+
+	}
+	
+	@Override
+	public int getCountHavingValues(
+			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) {
+		
+		int total = 0;
+		for (String type: entityType2tableName.keySet()) {
+			
+			try {
+				total += getEntitiesHavingValues(type, attribute2values);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new RuntimeException("error while counting entities of type "+type, e);
+			}
+			
+		}
+		return total;
+	}
+
+	@Override
+	public Iterator<ADemoEntity> getEntitiesHavingValues(
+			DemographicAttribute<? extends IValue> attribute,
+			IValue... values) {
+				
+		Map<DemographicAttribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
+		a2vv.put(attribute, Arrays.asList(values));
+		
+		return new AllTypesWithWhereIterator(
+				connection, 
+				entityType2tableName, 
+				entityType2attributes,
+				a2vv
+				);
+	}
+
+	@Override
+	public Iterator<ADemoEntity> getEntitiesHavingValues(
+			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) {
+		return new AllTypesWithWhereIterator(
+				connection, 
+				entityType2tableName, 
+				entityType2attributes,
+				attribute2values
+				);
+	}
+	
+	@Override
+	public ADemoEntity getEntityForId(String id) {
+
+		Statement st;
+		try {
+			st = connection.createStatement();
+		} catch (SQLException e1) {
+			e1.printStackTrace();
+			throw new RuntimeException(e1);
+		}
+		
+		for (String type: entityType2tableName.keySet()) {
+			try {
+				ResultSet rs = st.executeQuery("SELECT * FROM "+getTableNameForEntityType(type)+" WHERE id='"+id+"'");
+				rs.next(); // TODO check
+				return createEntity(rs, type, entityType2attributes.get(type));
+			} catch (SQLException e) {
+				// maybe its not in this population
+			}
+		}
+		
+		return null;
+
+	}
+
+	@Override
+	public Iterator<ADemoEntity> getEntitiesForIds(String... ids) {
+		// TODO !!!
+		throw new NotImplementedException("sorry.");
 	}
 
 }

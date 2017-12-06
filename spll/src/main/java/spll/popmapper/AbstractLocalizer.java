@@ -308,7 +308,8 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 				List<AGeoEntity<? extends IValue>> possibleNests = 
 						new ArrayList<>(population.getGeography().getGeoEntity());
 				List<AGeoEntity<? extends IValue>> possibleNestsInit = 
-						localizationConstraint.getSortedCandidates(null);
+						localizationConstraint.getSortedCandidates(possibleNests);
+				
 				possibleNests = new ArrayList<>(possibleNests);
 				for (ISpatialConstraint constraint : otherConstraints) {
 					possibleNests = constraint.getSortedCandidates(possibleNests);
