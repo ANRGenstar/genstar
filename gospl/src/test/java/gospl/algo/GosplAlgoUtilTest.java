@@ -52,7 +52,7 @@ public class GosplAlgoUtilTest {
 		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Age", GSEnumDataType.Range, 
 				Arrays.asList("0-5", "6-15", "16-25", "26-40", "40-55", "55 et plus")));
 		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
-				"Couple", GSEnumDataType.Boolean, Arrays.asList("oui", "non")));
+				"Couple", GSEnumDataType.Boolean, Arrays.asList("true", "false")));
 		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute(
 				"Education", GSEnumDataType.Order, Arrays.asList("pre-bac", "bac", "licence", "master et plus")));
 		this.attributes.add(DemographicAttributeFactory.getFactory().createAttribute("Activité", GSEnumDataType.Nominal, 

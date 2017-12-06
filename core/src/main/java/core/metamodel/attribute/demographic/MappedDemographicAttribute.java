@@ -63,6 +63,9 @@ public class MappedDemographicAttribute<K extends IValue, V extends IValue> exte
 				return Arrays.asList(this.getEmptyValue());
 			if(this.getValueSpace().getValues().contains(value))
 				return Arrays.asList(this.getReferentAttribute().getEmptyValue());
+			if(this.getEmptyValue().equals(value) || 
+					getReferentAttribute().getValueSpace().getEmptyValue().equals(value))
+				return Arrays.asList(value);
 			throw e;
 		}
 	}
