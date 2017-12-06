@@ -2,6 +2,8 @@ package gospl.database;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -334,6 +336,134 @@ public class TestGosplPopulationInDatabase {
 
 		}
 				
+	}
+	
+	@Test
+	public void testIterateEntitiesHavingOneValue() {
+
+		GosplPopulation o = getGoSPLPopulation();
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+
+		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		
+			int total = 0;
+			System.out.println(a.getAttributeName()+":");
+			for (IValue v: a.getValueSpace().getValues()) {
+			
+				System.out.println("testing "+a.getAttributeName()+"="+v);
+				
+				Iterator<ADemoEntity> it = p.getEntitiesHavingValues(a, v);
+				int i=0;
+				while (it.hasNext()) {
+					ADemoEntity e = it.next();
+					if (i < 30)
+						System.out.println("* "+e);
+					else if (i==30)
+						System.out.println("* [...]");
+					
+					assertEquals(
+							"the values should be filtered according to our demand",
+							v,
+							e.getValueForAttribute(a)
+							);
+					total++;
+					i++;
+					
+				}
+			}
+
+			assertEquals("the count of each value should sum up to the population size", o.size(), total);
+
+		}
+				
+	}
+	
+	@Test
+	public void testIterateEntitiesHavingTwoValues() {
+
+		GosplPopulation o = getGoSPLPopulation();
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+
+		DemographicAttribute<? extends IValue> previousAttribute = null;
+		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		
+			if (previousAttribute == null) {
+				previousAttribute = a;
+				continue;
+			}
+			
+			int total = 0;
+			System.out.println(a.getAttributeName()+" and "+previousAttribute.getAttributeName()+":");
+			for (IValue vPrevious: previousAttribute.getValueSpace().getValues()) {
+
+				for (IValue v: a.getValueSpace().getValues()) {
+				
+					Map<DemographicAttribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
+					a2vv.put(a, Arrays.asList(v));
+					a2vv.put(previousAttribute, Arrays.asList(vPrevious));
+					
+					System.out.println("testing "+a.getAttributeName()+"="+v+", "+previousAttribute+"="+vPrevious);
+					
+					Iterator<ADemoEntity> it = p.getEntitiesHavingValues(a2vv);
+					int i=0;
+					while (it.hasNext()) {
+						ADemoEntity e = it.next();
+						if (i < 30)
+							System.out.println("* "+e);
+						else if (i==30)
+							System.out.println("* [...]");
+						
+						assertEquals(
+								"the values should be filtered according to our demand",
+								v,
+								e.getValueForAttribute(a)
+								);
+						assertEquals(
+								"the values should be filtered according to our demand",
+								vPrevious,
+								e.getValueForAttribute(previousAttribute)
+								);
+						total++;
+						i++;
+						
+					}
+										
+				}
+				
+			}
+
+			assertEquals("the count of each value should sum up to the population size", o.size(), total);
+
+		}
+				
+	}
+	
+
+	@Test
+	public void testContains() {
+		GosplPopulation o = getGoSPLPopulation();
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+
+		ADemoEntity e = p.iterator().next();
+		
+		assertTrue(p.contains(e));
+		
+	}
+	
+	@Test
+	public void testGetEntityWithId() {
+		
+		GosplPopulation o = getGoSPLPopulation();
+		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
+
+		ADemoEntity e = p.iterator().next();
+		
+		assertNotNull(p.getEntityForId(e.getEntityId()));
+		// TODO check attributes ?
+
+		assertNull(p.getEntityForId("this does not exists"));
+
+	
 	}
 
 }
