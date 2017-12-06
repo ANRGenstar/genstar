@@ -1301,7 +1301,7 @@ public class GosplPopulationInDatabase
 	@Override
 	public Iterator<ADemoEntity> getEntitiesForIds(String... ids) {
 		// TODO !!!
-		throw new NotImplementedException("sorry.")
+		throw new NotImplementedException("sorry.");
 	}
 
 }
