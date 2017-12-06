@@ -14,6 +14,7 @@ import java.util.Map;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
@@ -40,6 +41,7 @@ public class TestDBaseConnection {
 	public void tearDown() throws Exception {
 	}
 
+	@Ignore("we need to find a way to store data for this test")
 	@Test
 	public void testReadContent() {
 		
