@@ -5,34 +5,27 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
-import core.metamodel.io.GSSurveyType;
-import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.GosplPopulationInDatabase;
-import gospl.distribution.GosplInputDataManager;
-import gospl.io.GosplSurveyFactory;
-import gospl.io.exception.InvalidSurveyFormatException;
-import gospl.io.insee.ReadINSEEDictionaryUtils;
+import gospl.io.insee.DownloadINSEEData;
+import gospl.io.insee.INSEETestURLs;
 
 public class TestGosplPopulationInDatabase {
 
@@ -40,39 +33,13 @@ public class TestGosplPopulationInDatabase {
 
 	
 	private GosplPopulation getGoSPLPopulation() {
+	
+		DownloadINSEEData inseeData = new DownloadINSEEData(
+				INSEETestURLs.url_RGP2014_LocaliseRegion_ZoneD_dBase,
+				"UTF-8");
 		
-		Collection<DemographicAttribute<? extends IValue>> attributes = ReadINSEEDictionaryUtils
-				.readDictionnaryFromMODFile("src/test/resources/MOD_GERLAND.txt");
-				
-		GosplSurveyFactory gsf = new GosplSurveyFactory();
-		IGSSurvey survey = null;
-		try {
-			survey = gsf.getSurvey("src/test/resources/gerland_sample_incomplete.csv",0,';',1,0, GSSurveyType.Sample);
-		} catch (InvalidFormatException e) {
-			e.printStackTrace();
-			fail("error in format" + e);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		} catch (InvalidSurveyFormatException e) {
-			e.printStackTrace();
-			fail("error in format" + e);
-		}
-		
-		GosplPopulation pop = null;
-		try {
-			pop = GosplInputDataManager.getSample(
-					survey, 
-					attributes, 
-					10000,
-					Collections.emptyMap() // TODO parameters for that
-					);
-		} catch (IOException | InvalidSurveyFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			throw new RuntimeException(e);
-		}
-		
-		return pop;
+					
+		return inseeData.getSamplePopulation(10000);
 	}
 	
 	@Test
@@ -131,7 +98,10 @@ public class TestGosplPopulationInDatabase {
 		while (itEntities.hasNext()) {
 			ADemoEntity e = itEntities.next();
 			count++;
-			System.out.println(e);
+			if (count < 10)
+				System.out.println(" * "+e);
+			else if (count == 10)
+				System.out.println(" * [...]");
 		}
 		assertEquals("wrong size", o.size(), count);
 		
@@ -289,7 +259,11 @@ public class TestGosplPopulationInDatabase {
 			for (IValue v: a.getValueSpace().getValues()) {
 			
 				int c = p.getCountHavingValues(a, v);
-				System.out.println("* "+v.toString()+" : "+c);
+				
+				if (total < 5)
+					System.out.println("* "+v.toString()+" : "+c);
+				else if (total == 5)
+					System.out.println("* [...]");
 				
 				total += c;
 			}
@@ -306,6 +280,8 @@ public class TestGosplPopulationInDatabase {
 		GosplPopulation o = getGoSPLPopulation();
 		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
 
+		int totalCombinationsTested = 0;
+		
 		DemographicAttribute<? extends IValue> previousAttribute = null;
 		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
 		
@@ -325,7 +301,11 @@ public class TestGosplPopulationInDatabase {
 					a2vv.put(previousAttribute, Arrays.asList(vPrevious));
 					
 					int c = p.getCountHavingValues(a2vv);
-					System.out.println("* "+a2vv+" : "+c);
+					
+					if (total < 5)
+						System.out.println("* "+a2vv+" : "+c);
+					else if (total == 10)
+						System.out.println("* [...]");
 					
 					total += c;
 				}
@@ -334,6 +314,8 @@ public class TestGosplPopulationInDatabase {
 
 			assertEquals("the count of each value should sum up to the population size", o.size(), total);
 
+			if (++totalCombinationsTested >= 10)
+				break;
 		}
 				
 	}
@@ -385,6 +367,7 @@ public class TestGosplPopulationInDatabase {
 		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
 
 		DemographicAttribute<? extends IValue> previousAttribute = null;
+		int totalCombinationsTested = 0;
 		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
 		
 			if (previousAttribute == null) {
@@ -408,9 +391,9 @@ public class TestGosplPopulationInDatabase {
 					int i=0;
 					while (it.hasNext()) {
 						ADemoEntity e = it.next();
-						if (i < 30)
+						if (i < 5)
 							System.out.println("* "+e);
-						else if (i==30)
+						else if (i==10)
 							System.out.println("* [...]");
 						
 						assertEquals(
@@ -434,6 +417,8 @@ public class TestGosplPopulationInDatabase {
 
 			assertEquals("the count of each value should sum up to the population size", o.size(), total);
 
+			if (++totalCombinationsTested >= 10)
+				break;
 		}
 				
 	}

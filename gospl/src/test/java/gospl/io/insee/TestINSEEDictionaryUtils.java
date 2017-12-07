@@ -69,7 +69,7 @@ public class TestINSEEDictionaryUtils {
 		Collection<DemographicAttribute<? extends IValue>> attributes = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/MOD_INDREG_2014.txt");
 		
-		assertEquals("wrong count of attributes", 96, attributes.size());
+		assertEquals("wrong count of attributes", 97, attributes.size());
 		
 		System.out.println(attributes);
 

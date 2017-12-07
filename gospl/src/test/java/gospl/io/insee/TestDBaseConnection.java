@@ -72,7 +72,7 @@ public class TestDBaseConnection {
 		//assertEquals("column content should match lines count", survey.getLastRowIndex(), column0.size());
 	}
 	
-
+	@Ignore("we need to find a way to store data for this test")
 	@Test
 	public void testDecodeData() {
 		

@@ -281,7 +281,8 @@ public class ReadINSEEDictionaryUtils {
 	 * @param f
 	 * @return
 	 */
-	public static Collection<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(File f, String encoding) {
+	public static Collection<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(
+			File f, String encoding) {
 		
 		logger.info("reading a dictionnary of data from file {}", f);
 		CSVReader reader = null;

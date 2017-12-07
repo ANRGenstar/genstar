@@ -38,6 +38,8 @@ import core.metamodel.value.binary.BooleanValue;
  * 
  * TODO prepared statements for perf
  * 
+ * TODO create indexes on dimensions often queried together
+ * 
  * @author Samuel Thiriot
  */
 public class GosplPopulationInDatabase 
@@ -46,8 +48,8 @@ public class GosplPopulationInDatabase
 	public static final int VARCHAR_SIZE = 255;
 	public static final int MAX_BUFFER_QRY = 10000;
 	public static final String DEFAULT_ENTITY_TYPE = "unknown";
-	public static int REMOVE_ENTITIES_BATCH = 100;
-	public static int ADD_ENTITIES_BATCH = 500; // TODO more !
+	public static int REMOVE_ENTITIES_BATCH = 500;
+	public static int ADD_ENTITIES_BATCH = 5000; // TODO more !
 	
 	private Logger logger = LogManager.getLogger();
 	
@@ -62,6 +64,8 @@ public class GosplPopulationInDatabase
 	
 	private String mySqlDBname = "GosplPopulation_"+(++currentInstanceCount);
 	
+	private Map<String,Set<String>> table2createdIndex = new HashMap<>();
+	
 	public GosplPopulationInDatabase(Connection connection, GosplPopulation population) {
 		this.connection = connection;
 		loadPopulationIntoDatabase(population);
@@ -72,10 +76,12 @@ public class GosplPopulationInDatabase
 	 */
 	public GosplPopulationInDatabase() {
 		try {
-			this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
+			this.connection = DriverManager.getConnection(
+					"jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException("error while trying to initialize the HDSQL database engine in memory: "+e.getMessage(), e);
+			throw new RuntimeException(
+					"error while trying to initialize the HDSQL database engine in memory: "+e.getMessage(), e);
 		}
 	} 
 	
@@ -87,10 +93,12 @@ public class GosplPopulationInDatabase
 	 */
 	public GosplPopulationInDatabase(GosplPopulation population) {
 		try {
-			this.connection = DriverManager.getConnection("jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
+			this.connection = DriverManager.getConnection(
+					"jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException("error while trying to initialize the HDSQL database engine in memory: "+e.getMessage(), e);
+			throw new RuntimeException(
+					"error while trying to initialize the HDSQL database engine in memory: "+e.getMessage(), e);
 		}
 		loadPopulationIntoDatabase(population);
 	} 
@@ -104,11 +112,13 @@ public class GosplPopulationInDatabase
 		
 		 try {
 			 //;ifexists=true
-			this.connection = DriverManager.getConnection("jdbc:hsqldb:file:"+databaseFile.getPath()+";create=true;shutdown=true;", "SA", "");
+			this.connection = DriverManager.getConnection(
+					"jdbc:hsqldb:file:"+databaseFile.getPath()+";create=true;shutdown=true;", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
-			throw new RuntimeException("error while trying to initialize the HDSQL database engine in file "
-								+databaseFile+": "+e.getMessage(), e);
+			throw new RuntimeException(
+						"error while trying to initialize the HDSQL database engine in file "
+						+databaseFile+": "+e.getMessage(), e);
 		}
 		 loadPopulationIntoDatabase(population);
 	}
@@ -129,7 +139,8 @@ public class GosplPopulationInDatabase
 		}
 
 		try {
-			this.connection = DriverManager.getConnection("jdbc:hsqldb:"+hsqlUrlServer+";shutdown=true", "SA", "");
+			this.connection = DriverManager.getConnection(
+					"jdbc:hsqldb:"+hsqlUrlServer+";shutdown=true", "SA", "");
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new RuntimeException("error while trying to initialize the HDSQL database engine in file "
@@ -215,6 +226,9 @@ public class GosplPopulationInDatabase
 		s.close();
 		
 		// create indexes
+		Set<String> setIndex = new HashSet<>();
+		table2createdIndex.put(getTableNameForEntityType(type), setIndex);
+		
 		Statement s2 = connection.createStatement();				
 		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
  
@@ -230,6 +244,7 @@ public class GosplPopulationInDatabase
 			sb.append(")");
 			s2.execute(sb.toString());
 			
+			setIndex.add(getAttributeColNameForType(type, a));
 		}
 		s2.close();
 	}
@@ -371,7 +386,7 @@ public class GosplPopulationInDatabase
 				sb.append(")");
 				final String qry = sb.toString();
 				// execute the query
-				logger.info("adding entities with query {}", qry);
+				logger.trace("adding entities with query {}", qry);
 				Statement st = connection.createStatement();
 				st.executeQuery(qry);
 				ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
@@ -404,7 +419,7 @@ public class GosplPopulationInDatabase
 			sb.append(")");
 			final String qry = sb.toString();
 			// execute the query
-			logger.info("adding last entities with query {}", qry);
+			logger.trace("adding last entities with query {}", qry);
 			Statement st = connection.createStatement();
 			st.executeQuery(qry);
 			ResultSet rs = st.executeQuery("CALL DIAGNOSTICS ( ROW_COUNT )");
@@ -735,39 +750,29 @@ public class GosplPopulationInDatabase
 	            init();
 	        }
     	  
-	    	return createEntity(rs, type, attributes);
-	    	
+	    	try {
+	    		return createEntity(rs, type, attributes);
+	    	} catch (SQLException e) {
+	    		throw new RuntimeException(e);
+	    	}
 	    }
 	}
 	
-	private ADemoEntity createEntity(ResultSet rs, String type, Set<DemographicAttribute<? extends IValue>> attributes) {
+	private ADemoEntity createEntity(ResultSet rs, String type, Set<DemographicAttribute<? extends IValue>> attributes) 
+			throws SQLException {
 		
 		Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>();
     	
     	// read the attributes of the current element 
-    	String id;
-    	try {
-    		id = rs.getString("id");
-    	} catch (SQLException e) {
-			e.printStackTrace();
-			throw new RuntimeException("error while reading the id from database: "+e.getMessage(), e);
-		}
+    	String id = rs.getString("id");
+
     	for (DemographicAttribute<? extends IValue> a: attributes) {
-    		try {
-				attribute2value.put(a, readValueForAttribute(type, a, rs));
-			} catch (SQLException e) {
-				e.printStackTrace();
-				throw new RuntimeException("error while reading the value "+a+" from database: "+e.getMessage(), e);
-			}
+    		attribute2value.put(a, readValueForAttribute(type, a, rs));
         } 
     	
-		try {
-			rs.next();
-		} catch (SQLException e) {
-			throw new RuntimeException("error while going to the next record: "+e.getMessage(), e);
-		}
-
-    	// create the return result
+		rs.next();
+		
+		// create the return result
     	GosplEntity res = new GosplEntity(attribute2value);
     	res._setEntityId(id);
     	res.setEntityType(type);
@@ -846,7 +851,7 @@ public class GosplPopulationInDatabase
 	        	initEntitiesIterator();
 	        	
 	        if (!itEntities.hasNext()) {
-	        	System.out.println("end of the entities iterator");
+	        	//System.out.println("end of the entities iterator");
 	        	return itTypes.hasNext();
 	        } else {
 	        	return true;
