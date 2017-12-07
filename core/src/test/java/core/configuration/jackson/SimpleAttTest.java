@@ -100,8 +100,8 @@ public class SimpleAttTest {
 			System.out.println(om.writeValueAsString(dico));
 			unmarshDico = om.readerFor(Dico.class).readValue(collectionFile);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		
 		assertThat(dico.getTheCollection(), Matchers.contains(unmarshDico.getTheCollection()));
