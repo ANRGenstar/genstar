@@ -21,7 +21,6 @@ import core.util.GSPerformanceUtil;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 
 /**
  * Make it possible to determine the signature of margin (how many dimensions, attributes, and theoretical margins)
@@ -119,8 +118,8 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 		for(DemographicAttribute<? extends IValue> cAttribute : controlToSeedAttribute.keySet()){
 			// The set of marginal descriptor, i.e. all combination of values, one per related attribute
 			Collection<Set<IValue>> cMarginalDescriptors = this.getMarginalDescriptors(cAttribute, 
-					controlToSeedAttribute.keySet().stream()
-						.filter(att -> !att.equals(cAttribute)).collect(Collectors.toSet()), control);
+					controlToSeedAttribute.keySet().stream().filter(att -> !att.equals(cAttribute)).collect(Collectors.toSet()), 
+					control);
 			
 			logger.debug("Attribute \'"+cAttribute.getAttributeName()+"\' marginal descriptors: "
 					+cMarginalDescriptors.size()+" margin(s), "
@@ -249,21 +248,25 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			marginalDescriptors = tmpDescriptors;
 		}
 		
-		// State equality between referent and mapped attribute
-		Set<DemographicAttribute<? extends IValue>> equiToTarget = control.getDimensions().stream()
-				.filter(att -> att.getReferentAttribute().equals(targetedAttribute))
-				.collect(Collectors.toSet());
+		/*
+		if(control.isSegmented()) {
+			// State equality between referent and mapped attribute
+			Set<DemographicAttribute<? extends IValue>> equiToTarget = control.getDimensions().stream()
+					.filter(att -> att.getReferentAttribute().equals(targetedAttribute))
+					.collect(Collectors.toSet());
+
+			// Translate into control compliant coordinate set of value
+			marginalDescriptors =  marginalDescriptors.stream()
+					.flatMap(set -> control.getCoordinates(set).stream()
+							.filter(coord -> coord.getDimensions().stream().anyMatch(dim -> equiToTarget.contains(dim)))
+							.map(coord -> coord.values().stream()
+									.filter(val -> !equiToTarget.contains(val.getValueSpace().getAttribute()))
+									.collect(Collectors.toSet()))).collect(Collectors.toSet());
+		}
 		
-		// Translate into control compliant coordinate set of value
-		Set<Set<IValue>> outputMarginalDescriptors =  marginalDescriptors.stream()
-				.flatMap(set -> control.getCoordinates(set).stream()
-						.filter(coord -> coord.getDimensions().stream().anyMatch(dim -> equiToTarget.contains(dim)))
-						.map(coord -> coord.values().stream()
-								.filter(val -> !equiToTarget.contains(val.getValueSpace().getAttribute()))
-								.collect(Collectors.toSet()))).collect(Collectors.toSet());
 		// Exclude overlapping marginal descriptors in segmented matrix: e.g. md1 = {age} & md2 = {age, gender}
 		final Set<Set<DemographicAttribute<? extends IValue>>> mdAttributes = new HashSet<>();
-		for(Set<IValue> marginalDescriptorSet : outputMarginalDescriptors) {
+		for(Set<IValue> marginalDescriptorSet : marginalDescriptors) {
 			Set<DemographicAttribute<? extends IValue>> mAttribute = marginalDescriptorSet.stream()
 					.map(aspect -> control.getDimension(aspect)).collect(Collectors.toSet());
 			mdAttributes.add(mAttribute);
@@ -271,9 +274,12 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 		Set<Set<DemographicAttribute<? extends IValue>>> mdArchitype = mdAttributes.stream().filter(archi -> mdAttributes.stream()
 				.noneMatch(mdAtt -> mdAtt.containsAll(archi) && mdAtt.size() > archi.size()))
 			.collect(Collectors.toSet());
-		return outputMarginalDescriptors.stream().filter(set -> mdArchitype
+		return marginalDescriptors.stream().filter(set -> mdArchitype
 				.stream().anyMatch(architype -> architype.stream().allMatch(att -> set.stream()
 						.anyMatch(val -> att.getValueSpace().getValues().contains(val)))))
 			.collect(Collectors.toList());
+			*/
+		return marginalDescriptors;
 	}
+	
 }

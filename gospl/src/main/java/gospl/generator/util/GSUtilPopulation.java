@@ -76,6 +76,11 @@ public class GSUtilPopulation {
 		this.generator = new GSUtilGenerator(dico);
 	}
 	
+	public GSUtilPopulation(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+		this.dico = dictionary;
+		this.generator = new GSUtilGenerator(dico);
+	}
+	
 	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(Collection<DemographicAttribute<? extends IValue>> dictionary) {
 		dico = new DemographicDictionary<>();
@@ -159,6 +164,8 @@ public class GSUtilPopulation {
 			Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
 			// WARNING: linked attribute could be in the same matrix 
 			for(DemographicAttribute<? extends IValue> attribute : attributesProb.keySet()){
+				if(atts.stream().anyMatch(a -> a.getReferentAttribute().equals(attribute)))
+					continue;
 				if(GenstarRandom.getInstance().nextDouble() < attributesProb.get(attribute)){
 					atts.add(attribute);
 					attributesProb.put(attribute, attributesProb.get(attribute) * 0.5); 

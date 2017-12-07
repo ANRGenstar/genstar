@@ -97,8 +97,10 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 					attributes.getAttributes().stream().filter(a -> !attributesProba.keySet().contains(a))
 						.collect(Collectors.toSet())){
 				IValue refValue = entity.getValueForAttribute(mapAtt.getReferentAttribute());
-				Collection<? extends IValue> mapValues = mapAtt.findMappedAttributeValues(refValue);
-				entity.setAttributeValue(mapAtt, randomUniformVal(mapValues));
+				if(refValue != null) {
+					Collection<? extends IValue> mapValues = mapAtt.findMappedAttributeValues(refValue);
+					entity.setAttributeValue(mapAtt, randomUniformVal(mapValues));
+				}
 			}		
 			gosplPop.add(entity);
 		}

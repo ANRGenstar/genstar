@@ -1,0 +1,8 @@
+Education;frequence;Genre;frequence;Age;frequence;Couple;frequence;Acitivté;frequence
+Bac;0,6;Homme;0,49;moins de 14;0,11;true;0,62;inactif;0,39
+null;0;Femme;0,51;35 à 54;0,05;false;0,38;fonctionnaire;0,11
+Master et plus;0,11;null;0;25 à 34;0,64;null;0;retraité;0,08
+Licence;0,13;;;55 et plus;0,1;;;chomage;0,14
+Brevet;0,16;;;15 à 24;0,1;;;null;0
+;;;;NaN à NaN;0;;;indépendant;0,2
+;;;;;;;;employé;0,09
