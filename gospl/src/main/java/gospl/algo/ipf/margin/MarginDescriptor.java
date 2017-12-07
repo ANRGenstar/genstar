@@ -21,16 +21,18 @@ public class MarginDescriptor {
 		return Collections.unmodifiableSet(seed);
 	}
 	
-	public void setSeed(Set<IValue> seed) {
+	public MarginDescriptor setSeed(Set<IValue> seed) {
 		this.seed = seed;
+		return this;
 	}
 	
 	public Set<IValue> getControl() {
 		return Collections.unmodifiableSet(control);
 	}
 	
-	public void setControl(Set<IValue> control) {
+	public MarginDescriptor setControl(Set<IValue> control) {
 		this.control = control;
+		return this;
 	}
 	
 }

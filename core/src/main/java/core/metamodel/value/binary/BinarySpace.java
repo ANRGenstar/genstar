@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
 /**
@@ -68,7 +69,12 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	public Set<BooleanValue> getValues(){
 		return Collections.unmodifiableSet(values);
 	}
-
+	
+	@Override
+	public boolean contains(IValue value) {
+		return values.contains(value);
+	}
+	
 	@Override
 	public IAttribute<BooleanValue> getAttribute() {
 		return attribute;

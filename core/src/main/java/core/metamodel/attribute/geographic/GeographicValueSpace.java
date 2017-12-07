@@ -108,6 +108,11 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	// ---------------------------------------------------- //
 
 	@Override
+	public boolean contains(IValue value) {
+		return innerValueSpace.contains(value);
+	}
+	
+	@Override
 	public boolean isValidCandidate(String value) {
 		return innerValueSpace.isValidCandidate(value);
 	}

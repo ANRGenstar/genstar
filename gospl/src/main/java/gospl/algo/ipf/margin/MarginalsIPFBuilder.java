@@ -167,14 +167,14 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 				|| (a.getReferentAttribute().equals(a) && !sideAttributes.contains(a.getReferentAttribute())))
 			.collect(Collectors.toSet());
 		
-		// Init. the output collection with any attribute
+		// Iterate to have the whole combination of value within targeted control attribute
 		List<Set<IValue>> controlMarginals = new ArrayList<>();
-		DemographicAttribute<? extends IValue> firstAtt = sideAttributes.iterator().next();
+		DemographicAttribute<? extends IValue> firstAtt = sAtt.iterator().next();
 		for(IValue value : firstAtt.getValueSpace().getValues())
 			controlMarginals.add(Stream.of(value).collect(Collectors.toSet()));
-		sideAttributes.remove(firstAtt);
+		sAtt.remove(firstAtt);
 		// Then iterate over all other attributes
-		for(DemographicAttribute<? extends IValue> att : sideAttributes){
+		for(DemographicAttribute<? extends IValue> att : sAtt){
 			List<Set<IValue>> tmpDescriptors = new ArrayList<>();
 			for(Set<IValue> descriptors : controlMarginals){
 				tmpDescriptors.addAll(att.getValueSpace().getValues().stream()
@@ -183,6 +183,28 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			}
 			controlMarginals = tmpDescriptors;
 		}
+		
+		// Start extracting seed marginal from known control marginal
+		// -------
+		for(Set<IValue> cm : controlMarginals) {
+			Set<IValue> sm = new HashSet<>();
+			for(IValue cv : cm) {
+				if(seed.getAspects().contains(cv)) // If seed contains same value
+					sm.add(cv);
+				else if(seed.getDimensions().stream()
+						.anyMatch(d -> control.getDimension(cv).getReferentAttribute().equals(d)))
+					// If seed value is a referent of control value
+					sm.addAll(control.getDimension(cv).findMappedAttributeValues(cv));
+				else if(seed.getDimensions().stream()
+						.anyMatch(d -> d.getReferentAttribute().equals(control.getDimension(cv))))
+					// If control value is a referent of a seed value
+					sm.addAll(seed.getDimensions().stream()
+							.filter(d -> d.getReferentAttribute().equals(control.getDimension(cv)))
+							.findFirst().get().findMappedAttributeValues(cv));
+			}
+			marginalDescriptors.add(new MarginDescriptor().setControl(cm).setSeed(sm));
+		}
+		
 		
 		/*
 		if(control.isSegmented()) {

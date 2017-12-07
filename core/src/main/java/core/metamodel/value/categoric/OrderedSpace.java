@@ -2,6 +2,7 @@ package core.metamodel.value.categoric;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
@@ -130,6 +132,13 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 			return opOv.get();
 		throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
+	}
+	
+	@Override
+	public boolean contains(IValue value) {
+		if(!value.getClass().equals(OrderedValue.class))
+			return false;
+		return new HashSet<>(values).contains(value);
 	}
 
 	@Override

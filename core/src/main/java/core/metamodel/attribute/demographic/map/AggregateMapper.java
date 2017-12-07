@@ -34,7 +34,7 @@ public class AggregateMapper<V extends IValue> implements IAttributeMapper<V, V>
 	public boolean add(V mapTo, V mapWith) {
 		if(map.containsKey(mapTo))
 			return map.get(mapTo).add(mapWith);
-		if(this.getRelatedAttribute().getValueSpace().getValues().contains(mapTo)
+		if(this.getRelatedAttribute().getValueSpace().contains(mapTo)
 				&& this.getRelatedAttribute().getReferentAttribute().getValueSpace()
 				.getValues().contains(mapWith)) {
 			map.put(mapTo, new ArrayList<>(Arrays.asList(mapWith)));
