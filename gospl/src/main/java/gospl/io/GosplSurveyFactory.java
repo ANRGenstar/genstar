@@ -62,7 +62,7 @@ public class GosplSurveyFactory {
 	private final DecimalFormatSymbols dfs;
 	private final DecimalFormat decimalFormat;
 
-	private char separator;
+	private char separator = ';'; // default separator for writing files if not specified 
 	private int sheetNb;
 	private int firstRowDataIdx;
 	private int firstColumnDataIdx;
@@ -189,16 +189,30 @@ public class GosplSurveyFactory {
 	public IGSSurvey getSurvey(GSSurveyWrapper wrapper, Path basePath) 
 			throws InvalidFormatException, IOException, InvalidSurveyFormatException {
 
-		File surveyFile = wrapper.getRelativePath().toFile();
+		Path expectedPath = wrapper.getRelativePath();
+		
+		// first try to decode this file as such 
+		File surveyFile = expectedPath.toFile();
+		if (!surveyFile.exists()) {
+		
+			expectedPath = basePath.resolve(expectedPath);
+			surveyFile = expectedPath.toFile();
+	
+			// does not seem necessary anymore (and that's weird !)
+			if (!surveyFile.exists())
+				throw new IllegalArgumentException("cannot load file "+surveyFile+" .");
+			if (!surveyFile.canRead())
+				throw new IllegalArgumentException("cannot read file "+surveyFile+" .");
 
-		if (!surveyFile.isAbsolute()) {
+		}
+		/*if (!surveyFile.isAbsolute()) {
 
 			if (basePath == null)
 				throw new IllegalArgumentException("cannot load relative file "+surveyFile+" if the configuration base path is not defined.");
 
 			surveyFile = basePath.resolve(surveyFile.toString()).toFile();
 
-		}
+		}*/
 		return this.getSurvey(surveyFile, wrapper.getSheetNumber(), 
 				wrapper.getCsvSeparator(), wrapper.getFirstRowIndex(), wrapper.getFirstColumnIndex(),
 				wrapper.getSurveyType());
@@ -628,7 +642,6 @@ public class GosplSurveyFactory {
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
 
-		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<DemographicAttribute<? extends IValue>> attributes = population.getPopulationAttributes();
 		bw.write("ID");

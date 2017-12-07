@@ -68,15 +68,14 @@ public class GenstarConfigurationFile {
 	
 	@JsonProperty(GenstarJsonUtil.INPUT_FILES)
 	public void setSurveyWrappers(List<GSSurveyWrapper> surveys) {
-		for(GSSurveyWrapper wrapper : surveys)
+		// do no check at construction time, 
+		// as we don't know yet our base path to find these files 
+		// when we are unmarshalled
+		// (life is complicated)
+		/*for(GSSurveyWrapper wrapper : surveys)
 			if(!wrapper.getRelativePath().toAbsolutePath().toFile().exists()){
-				try {
-					wrapper.setRelativePath(Paths.get(System.getProperty("user.dir")));
-				} catch (IllegalArgumentException e) {
-					e.printStackTrace();
-					throw new RuntimeException(e);
-				}
-			}
+				throw new RuntimeException("unable to find file: "+wrapper.getRelativePath().toAbsolutePath());
+			}*/
 		this.dataFileList.addAll(surveys);
 	}
 
@@ -121,6 +120,7 @@ public class GenstarConfigurationFile {
 	
 	@JsonProperty(GenstarJsonUtil.BASE_DIR)
 	public void setBaseDirectory(Path f) {
+		System.out.println("GenstarConfigurationFile: setting basepath to "+f);
 		this.baseDirectory = f;
 	}
 	
