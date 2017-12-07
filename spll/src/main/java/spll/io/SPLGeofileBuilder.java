@@ -120,6 +120,10 @@ public class SPLGeofileBuilder {
 	 */
 	public SPLGeofileBuilder setFile(File gisFile) 
 			throws InvalidGeoFormatException, FileNotFoundException {
+		File parentFile = gisFile.getParentFile();
+		if(!parentFile.exists()) {
+			parentFile.mkdirs();
+		}		
 		this.gisFile = gisFile;
 		//chekFile(SPLGisFileExtension.values());
 		return this;
