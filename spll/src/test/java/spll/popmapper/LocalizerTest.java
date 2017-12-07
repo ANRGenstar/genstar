@@ -57,6 +57,21 @@ public class LocalizerTest {
 	}
 	
 	@Test
+	public void testMaxNumber() {
+		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SpatialConstraintMaxNumber numberConstr = new SpatialConstraintMaxNumber(sfBuildings.getGeoEntity(), 1.0);
+		numberConstr.setPriority(10);
+		numberConstr.setIncreaseStep(2);
+		numberConstr.setMaxIncrease(60);
+		localizer.addConstraint(numberConstr);
+		SpllPopulation localizedPop = localizer.localisePopulation();
+		
+		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() > 0;
+	}
+	
+	
+	
+	@Test
 	public void testCloseRoadsMaxDistance() {
 		((SPLVectorFile) sfRoads).minMaxDistance(0.0,5.0, false);
 		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
