@@ -1,7 +1,7 @@
 package core.metamodel.value.categoric;
 
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -94,7 +94,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 */
 	@Override
 	public OrderedValue addValue(String value) throws IllegalArgumentException {
-		return addValue(values.size()-1, value);
+		return addValue(values.size(), value);
 	}
 
 	/**
@@ -119,7 +119,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	@Override
 	public Set<OrderedValue> getValues(){
-		return new HashSet<>(values);
+		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
@@ -174,7 +174,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	@Override
 	public boolean equals(Object obj) {
 		return this.isEqual(obj) && 
-				obj == null || this == null ? false : 
+				(obj == null || this == null) ? false : 
 					this.template.equals(((OrderedSpace)obj).getCategoricTemplate());
 	}
 	

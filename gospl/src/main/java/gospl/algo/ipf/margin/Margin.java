@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
@@ -23,17 +22,18 @@ import gospl.distribution.matrix.control.AControl;
  * @author kevinchapuis
  *
  */
-public abstract class AMargin<T extends Number> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
+public class Margin<T extends Number> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
 
 	private DemographicAttribute<? extends IValue> controlAttribute;
 	private DemographicAttribute<? extends IValue> seedAttribute;
 	
-	protected Map<Set<IValue>, AControl<T>> marginalControl;
+	protected Map<MarginDescriptor, AControl<T>> marginalControl;
 	
 	/*
 	 * protected constructor to unsure safe initialization
 	 */
-	protected AMargin(DemographicAttribute<? extends IValue> controlAttribute, DemographicAttribute<? extends IValue> seedAttribute){
+	protected Margin(DemographicAttribute<? extends IValue> controlAttribute, 
+			DemographicAttribute<? extends IValue> seedAttribute){
 		this.controlAttribute = controlAttribute;
 		this.seedAttribute = seedAttribute;
 		this.marginalControl = new HashMap<>();
@@ -45,8 +45,13 @@ public abstract class AMargin<T extends Number> implements IMargin<DemographicAt
 	}
 	
 	@Override
-	public AControl<T> getControl(Set<IValue> seedMargin) {
-		return marginalControl.get(seedMargin);
+	public AControl<T> getControl(MarginDescriptor descriptor) {
+		return marginalControl.get(descriptor);
+	}
+	
+	@Override
+	public Collection<MarginDescriptor> getMarginDescriptors() {
+		return marginalControl.keySet();
 	}
 	
 	@Override
@@ -62,6 +67,15 @@ public abstract class AMargin<T extends Number> implements IMargin<DemographicAt
 	@Override
 	public int size() {
 		return marginalControl.size();
+	}
+	
+	// --------------------------
+	
+	/*
+	 * Protected setter to unsure safe construction
+	 */
+	protected void addMargin(MarginDescriptor marginDescriptor, AControl<T> control){
+		marginalControl.put(marginDescriptor, control);
 	}
 
 }

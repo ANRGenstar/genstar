@@ -1,0 +1,23 @@
+{
+  "DEMOGRAPHIC ATTRIBUTE" : {
+    "NAME" : "Ordered attribute",
+    "VALUE SPACE" : {
+      "TYPE" : "Order",
+      "VALUES" : [ {
+        "INPUT VALUE" : "Master et plus"
+      }, {
+        "INPUT VALUE" : "Brevet"
+      }, {
+        "INPUT VALUE" : "Licence"
+      }, {
+        "INPUT VALUE" : "Bac"
+      } ],
+      "categoricTemplate" : {
+        "regex" : [ ]
+      },
+      "EMPTY VALUE" : {
+        "INPUT VALUE" : null
+      }
+    }
+  }
+}

@@ -17,7 +17,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  */
 public interface IMarginalsIPFBuilder<T extends Number> {
 
-	public Collection<AMargin<T>> buildCompliantMarginals(
+	public Collection<Margin<T>> buildCompliantMarginals(
 			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> matrix,
 			AFullNDimensionalMatrix<T> seed, boolean parallel);
 	

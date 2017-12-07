@@ -270,7 +270,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 			mapper.put(Arrays.asList(keyVal[0].split(AttributeMapperSerializer.SPLIT_SYM)).stream()
 						.map(key -> key.trim()).collect(Collectors.toList()), 
 					Arrays.asList(keyVal[1].split(AttributeMapperSerializer.SPLIT_SYM)).stream()
-						.map(val -> val.trim()).collect(Collectors.toSet()));
+						.map(val -> val.trim()).collect(Collectors.toList()));
 		}
 		return mapper;
 	}

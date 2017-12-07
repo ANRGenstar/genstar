@@ -1,7 +1,6 @@
 package gospl.algo.ipf.margin;
 
 import java.util.Collection;
-import java.util.Set;
 
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.control.AControl;
@@ -39,13 +38,13 @@ public interface IMargin<A, V, T extends Number> {
 	public A getSeedDimension();
 	
 	/**
-	 * Retrieves the all seed marginal descriptors for this dimension
+	 * Retrieves all marginal descriptors for this dimension
 	 * 
 	 * @param controlMargin
 	 * @return
 	 */
-	public Collection<Set<V>> getSeedMarginalDescriptors();
-	
+	public Collection<MarginDescriptor> getMarginDescriptors();
+		
 	/**
 	 * Gives the collection of controls 
 	 * 
@@ -59,7 +58,7 @@ public interface IMargin<A, V, T extends Number> {
 	 * @param seedMargin
 	 * @return
 	 */
-	public AControl<T> getControl(Set<V> seedMargin);
+	public AControl<T> getControl(MarginDescriptor descriptor);
 	
 	/**
 	 * Marginal size
