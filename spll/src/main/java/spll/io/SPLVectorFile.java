@@ -112,7 +112,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		features = new HashSet<>();
 		FeatureIterator<SimpleFeature> fItt = DataUtilities.collection(fSource.getFeatures(Filter.INCLUDE)).features();
 		GeoEntityFactory gef = new GeoEntityFactory(feature2SPLFeature);
-		System.out.println("loading from SPLVectorFile with attributes "+attributes);
 		while (fItt.hasNext()) {
 			SimpleFeature f = fItt.next();
 			SpllFeature sf = gef.createGeoEntity(f, attributes);
@@ -128,12 +127,11 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	protected SPLVectorFile(File file, Charset charset) throws IOException{
 		this(readDataStoreFromFile(file, charset), Collections.emptyList());
 	}
-
+	 static double t;
 	private static DataStore readDataStoreFromFile(File file, Charset charset) throws IOException {
 		
 		Map<String,Object> parameters = new HashMap<>();
 		parameters.put("url", file.toURI().toURL());
-		
 		DataStore datastore = DataStoreFinder.getDataStore(parameters);
 		
 		// set the charset (if possible)
@@ -141,7 +139,6 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 			&& datastore instanceof ShapefileDataStore) {
 			((ShapefileDataStore)datastore).setCharset(charset);
 		}
-		
 		return datastore;
 	}
 	

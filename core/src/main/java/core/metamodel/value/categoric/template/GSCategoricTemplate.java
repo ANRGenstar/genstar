@@ -39,6 +39,7 @@ public class GSCategoricTemplate extends Format {
 	 * @return
 	 */
 	public String getFormatedString(String string){
+		string = string.trim();
 		String formatedString = caseSensitive ? string : string.toLowerCase();
 		Arrays.asList(regex).stream().forEach(r -> formatedString
 				.replaceAll(caseSensitive ? r : r.toLowerCase(), ""));

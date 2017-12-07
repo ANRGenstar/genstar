@@ -153,7 +153,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 					+ "Trying to force attribute "+attribute.getAttributeName()+" of type "+attribute.getValueSpace().getType()
 					+ " to fit a numerical type");
 		
-		float[][] bands = new float[this.getRowNumber()][this.getColumnNumber()]; 
+		float[][] bands = new float[this.getColumnNumber()][this.getRowNumber()]; 
 		
 		Iterator<SpllPixel> it = this.getGeoEntityIterator();
 		while(it.hasNext()) {
