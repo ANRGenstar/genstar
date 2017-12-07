@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -16,8 +15,8 @@ import java.util.zip.ZipFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.xerces.impl.dv.xs.MonthDayDV;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
@@ -44,7 +43,7 @@ public class DownloadINSEESampleData {
 	
 	private File zipFile = null;
 	
-	private Collection<DemographicAttribute<? extends IValue>> dictionnary = null;
+	private IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = null;
 	
 	private File fileSample = null;
 	
@@ -96,7 +95,7 @@ public class DownloadINSEESampleData {
 	 * and returns its content 
 	 * @return
 	 */
-	public Collection<DemographicAttribute<? extends IValue>> getDictionnary() {
+	public IGenstarDictionary<DemographicAttribute<? extends IValue>> getDictionnary() {
 		
 		if (this.dictionnary != null)
 			return this.dictionnary;
@@ -127,7 +126,8 @@ public class DownloadINSEESampleData {
             fos.close();
             
 	    	logger.debug("reading dictionnary...");
-	        this.dictionnary = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(modFile, encoding);
+	        this.dictionnary = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
+	        		modFile, encoding);
 	        
 		    
 		} catch (IOException e) {
@@ -236,7 +236,8 @@ public class DownloadINSEESampleData {
 		
 		GosplPopulation pop = null;
 		
-		Set<DemographicAttribute<? extends IValue>> updatedAttributes = new HashSet<>(getDictionnary());
+		Set<DemographicAttribute<? extends IValue>> updatedAttributes = 
+				new HashSet<>(getDictionnary().getAttributes());
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();

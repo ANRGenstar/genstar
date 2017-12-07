@@ -3,8 +3,12 @@ package core.configuration.dictionary;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -32,16 +36,33 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	public static final String ATTRIBUTES = "ATTRIBUTES";
 	
 	private Set<A> attributes;
+	private Map<String,A> name2attribute;
 	
 	public DemographicDictionary() {
 		this.attributes = new LinkedHashSet<>();
+		this.name2attribute = new HashMap<>();
+	}
+	
+	/**
+	 * Clone constructor
+	 * @param d
+	 */
+	public DemographicDictionary(IGenstarDictionary<A> d) {
+		this.attributes = new LinkedHashSet<>(d.getAttributes());
+		this.name2attribute = d.getAttributes().stream()
+				.collect(Collectors.toMap(
+								IAttribute::getAttributeName,
+								Function.identity()));
 	}
 	
 	@JsonCreator
 	public DemographicDictionary(
 			@JsonProperty(DemographicDictionary.ATTRIBUTES) Collection<A> attributes) {
-		this();
-		this.attributes.addAll(attributes);
+		this.attributes = new LinkedHashSet<>(attributes);
+		this.name2attribute = attributes.stream()
+				.collect(Collectors.toMap(
+								IAttribute::getAttributeName,
+								Function.identity()));
 	}
 	
 	// ---------------------------- ADDERS ---------------------------- //
@@ -55,6 +76,10 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	@Override
 	public DemographicDictionary<A> addAttributes(A... attributes) {
 		this.attributes.addAll(Arrays.asList(attributes));
+		this.name2attribute.putAll(Arrays.asList(attributes).stream()
+				.collect(Collectors.toMap(
+								IAttribute::getAttributeName,
+								Function.identity())));
 		return this;
 	}
 	
@@ -62,7 +87,12 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	@JsonProperty(DemographicDictionary.ATTRIBUTES)
 	public void setAttributes(Collection<A> attributes) {
 		this.attributes.clear();
+		this.name2attribute.clear();
 		this.attributes.addAll(attributes);
+		this.name2attribute = attributes.stream()
+						.collect(Collectors.toMap(
+								IAttribute::getAttributeName,
+								Function.identity()));
 	}
 
 	// ---------------------------- ACCESSORS ---------------------------- //
@@ -86,9 +116,15 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	 */
 	@Override
 	public A getAttribute(String string) {
-		if(attributes.stream().noneMatch(att -> att.getAttributeName().equals(string)))
+		A a = name2attribute.get(string);
+		if (a == null)
 			throw new NullPointerException("This dictionary contains no reference to the attribute with name "+string);
-		return attributes.stream().filter(att -> att.getAttributeName().equals(string)).findFirst().get();
+		return a;
+	}
+
+	@Override
+	public int size() {
+		return attributes.size();
 	}
 	
 }

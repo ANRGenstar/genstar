@@ -26,4 +26,9 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	@SuppressWarnings("unchecked")
 	public IGenstarDictionary<A> addAttributes(A... attributes);
 
+	/**
+	 * returns the count of attributes
+	 * @return
+	 */
+	public int size();
 }

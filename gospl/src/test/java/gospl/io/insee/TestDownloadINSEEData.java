@@ -10,6 +10,7 @@ import java.util.Collection;
 
 import org.junit.Test;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
@@ -22,7 +23,7 @@ public class TestDownloadINSEEData {
 		DownloadINSEESampleData d = new DownloadINSEESampleData(
 				INSEETestURLs.url_RGP2014_LocaliseRegion_ZoneD_dBase, "UTF-8");
 		
-		Collection<DemographicAttribute<? extends IValue>> dico = d.getDictionnary();
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> dico = d.getDictionnary();
 		
 		assertEquals("wrong count of entities", 97, dico.size());
 		
