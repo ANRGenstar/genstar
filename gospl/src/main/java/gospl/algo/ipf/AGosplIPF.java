@@ -3,7 +3,6 @@ package gospl.algo.ipf;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
@@ -15,8 +14,9 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
-import gospl.algo.ipf.margin.AMargin;
 import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
+import gospl.algo.ipf.margin.Margin;
+import gospl.algo.ipf.margin.MarginDescriptor;
 import gospl.algo.ipf.margin.MarginalsIPFBuilder;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -187,15 +187,15 @@ public abstract class AGosplIPF<T extends Number> {
 			.stream().map(d -> d.getAttributeName()+" = "+d.getValueSpace().getValues().size())
 			.collect(Collectors.joining(";")));
 
-		Collection<AMargin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
+		Collection<Margin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
 
 		int stepIter = step;
-		int totalNumberOfMargins = marginals.stream().mapToInt(AMargin::size).sum();
+		int totalNumberOfMargins = marginals.stream().mapToInt(Margin::size).sum();
 		gspu.sysoStempMessage("Convergence criterias are: step = "+step+" | delta = "+delta);
 				
 		double total = this.marginals.getVal().getValue().doubleValue();
-		aapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
-				.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
+		aapd = marginals.stream().mapToDouble(m -> m.getMarginDescriptors()
+				.stream().mapToDouble(md -> Math.abs(seed.getVal(md.getSeed()).getDiff(m.getControl(md))
 						.doubleValue()) / total).sum()).sum() / totalNumberOfMargins;
 		gspu.sysoStempMessage("Start fitting iterations with AAPD = "+aapd);
 
@@ -204,13 +204,13 @@ public abstract class AGosplIPF<T extends Number> {
 		while(stepIter-- > 0 ? aapd > delta || relativeIncrease < delta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
 				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+aapd);
-			for(AMargin<T> margin : marginals){
-				for(Set<IValue> seedMarginalDescriptor : margin.getSeedMarginalDescriptors()){
+			for(Margin<T> margin : marginals){
+				for(MarginDescriptor seedMarginalDescriptor : margin.getMarginDescriptors()){
 					double marginValue = margin.getControl(seedMarginalDescriptor).getValue().doubleValue();
-					double actualValue = seed.getVal(seedMarginalDescriptor).getValue().doubleValue();
+					double actualValue = seed.getVal(seedMarginalDescriptor.getSeed()).getValue().doubleValue();
 					AControl<Double> factor = new ControlFrequency(marginValue/actualValue);
 					Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> relatedCoordinates = 
-							seed.getCoordinates(seedMarginalDescriptor); 
+							seed.getCoordinates(seedMarginalDescriptor.getSeed()); 
 					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates) {
 						AControl<T> av = seed.getVal(coord);
 						logger.trace("Coord {}: AV = {} and UpdatedV = {}",
@@ -219,8 +219,8 @@ public abstract class AGosplIPF<T extends Number> {
 				}
 			}
 
-			double cachedAapd = marginals.stream().mapToDouble(m -> m.getSeedMarginalDescriptors()
-					.stream().mapToDouble(sd -> Math.abs(seed.getVal(sd).getDiff(m.getControl(sd))
+			double cachedAapd = marginals.stream().mapToDouble(m -> m.getMarginDescriptors()
+					.stream().mapToDouble(md -> Math.abs(seed.getVal(md.getSeed()).getDiff(m.getControl(md))
 							.doubleValue()) / total).sum()).sum() / totalNumberOfMargins;
 			relativeIncrease = Math.abs(aapd - cachedAapd);
 			aapd = cachedAapd;
