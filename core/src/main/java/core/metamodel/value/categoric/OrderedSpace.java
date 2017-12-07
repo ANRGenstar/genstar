@@ -1,5 +1,6 @@
 package core.metamodel.value.categoric;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Optional;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
@@ -94,7 +96,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 */
 	@Override
 	public OrderedValue addValue(String value) throws IllegalArgumentException {
-		return addValue(values.size()-1, value);
+		return addValue(values.size(), value);
 	}
 
 	/**
@@ -119,7 +121,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	@Override
 	public Set<OrderedValue> getValues(){
-		return new HashSet<>(values);
+		return Collections.unmodifiableSet(values);
 	}
 
 	@Override
@@ -130,6 +132,13 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 			return opOv.get();
 		throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
+	}
+	
+	@Override
+	public boolean contains(IValue value) {
+		if(!value.getClass().equals(OrderedValue.class))
+			return false;
+		return new HashSet<>(values).contains(value);
 	}
 
 	@Override
@@ -174,7 +183,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	@Override
 	public boolean equals(Object obj) {
 		return this.isEqual(obj) && 
-				obj == null || this == null ? false : 
+				(obj == null || this == null) ? false : 
 					this.template.equals(((OrderedSpace)obj).getCategoricTemplate());
 	}
 	

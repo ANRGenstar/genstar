@@ -114,6 +114,22 @@ public class GenstarJsonUtil {
 		return om.readerFor(clazz).readValue(json.toFile());
 	} 
 	
+	/**
+	 * Specific case for the genstar configuration file, 
+	 * as it requires additional processing for the base path.
+	 * @param json
+	 * @return
+	 * @throws IOException 
+	 */
+	public GenstarConfigurationFile unmarchalConfigurationFileFromGenstarJson(Path json) 
+			throws IOException {
+		if(!json.toString().endsWith(GENSTAR_EXT))
+			throw new IllegalArgumentException("The file "+json.toFile().getName()+" is not a \"gns\" file");
+		GenstarConfigurationFile cf = om.readerFor(GenstarConfigurationFile.class).readValue(json.toFile());
+		cf.setBaseDirectory(json.getParent());
+		return cf;
+	}
+	
 	// ------------------ STATIC UTILITIES ------------------ //
 	
 	/**

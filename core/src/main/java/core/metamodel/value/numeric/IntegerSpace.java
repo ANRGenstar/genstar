@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 
@@ -75,6 +76,13 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	@Override
 	public Set<IntegerValue> getValues(){
 		return new HashSet<>(values.values());
+	}
+	
+	@Override
+	public boolean contains(IValue value) {
+		if(value.getClass().equals(IntegerValue.class))
+			return false;
+		return values.containsValue(value);
 	}
 
 	@Override

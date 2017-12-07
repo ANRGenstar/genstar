@@ -189,7 +189,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
 		if(!getDimensions().contains(aspect.getValueSpace().getAttribute()))
 			throw new NullPointerException("aspect "+aspect+ " does not fit any known dimension");
-		return dimensions.stream().filter(d -> d.getValueSpace().getValues().contains(aspect)
+		return dimensions.stream().filter(d -> d.getValueSpace().contains(aspect)
 					|| d.getEmptyValue().equals(aspect))
 				.findFirst().get();
 	}

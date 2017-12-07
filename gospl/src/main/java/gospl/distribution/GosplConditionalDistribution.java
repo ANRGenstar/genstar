@@ -115,7 +115,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			// COMPUTE CONDITIONAL PROBABILITY
 			// Setup conditional values (known probability to compute conditional probability)
 			Set<IValue> conditionalValues = concernedValues.stream()
-					.filter(val -> assignedDimension.stream().anyMatch(dim -> dim.getValueSpace().getValues().contains(val)))
+					.filter(val -> assignedDimension.stream().anyMatch(dim -> dim.getValueSpace().contains(val)))
 					.collect(Collectors.toSet());
 
 			// add bottom up & top down conditional values

@@ -140,7 +140,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	 * @return
 	 */
 	public Collection<? extends IValue> findMappedAttributeValues(IValue value){
-		if(this.getValueSpace().getValues().contains(value) ||
+		if(this.getValueSpace().contains(value) ||
 				this.getValueSpace().isValidCandidate(value.getStringValue()))
 			return Collections.singleton(value);
 		return Collections.emptySet();

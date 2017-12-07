@@ -39,7 +39,7 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 		} else if(map.containsValue(mapWith)) {
 			return map.keySet().stream().filter(key -> map.get(key).contains(mapWith))
 					.findFirst().get().add(mapTo);
-		} else if(this.getRelatedAttribute().getValueSpace().getValues().contains(mapTo) 
+		} else if(this.getRelatedAttribute().getValueSpace().contains(mapTo) 
 				&& this.getRelatedAttribute().getReferentAttribute().getValueSpace()
 				.getValues().contains(mapWith)) {
 			map.put(new ArrayList<>(Arrays.asList(mapTo)), new ArrayList<>(Arrays.asList(mapWith)));

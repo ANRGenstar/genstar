@@ -7,6 +7,7 @@ import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
@@ -77,6 +78,13 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 			throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
 		return val;
+	}
+	
+	@Override
+	public boolean contains(IValue value) {
+		if(!value.getClass().equals(NominalValue.class))
+			return false;
+		return values.values().contains(value);
 	}
 	
 	@Override

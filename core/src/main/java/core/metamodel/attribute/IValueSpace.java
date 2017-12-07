@@ -89,6 +89,16 @@ public interface IValueSpace<V extends IValue> {
 	public Set<V> getValues();
 	
 	/**
+	 * Test if this values space contain this value.
+	 * <br>WARNING: do not try to call contains() method with {@link #getValues()}
+	 * because inner collection could rely on comparators and leads to a class cast exception
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public boolean contains(IValue value);
+	
+	/**
 	 * Return the *empty value* for this value space
 	 * 
 	 */

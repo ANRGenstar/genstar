@@ -8,6 +8,7 @@ import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.RangeValue.RangeBound;
 import core.metamodel.value.numeric.template.GSRangeTemplate;
 import core.util.data.GSDataParser;
@@ -16,7 +17,12 @@ import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 
 /**
- * TODO: javadoc
+ * Encapsulate pair of number that represents bottom and top value of a range. It also
+ * provide a template reader to convert range value to original string and back to range value.
+ * 
+ * WARNING: when lower and upper bounds are not specified, max and min integer value are used
+ * 
+ * @see GSRangeTemplate
  * 
  * @author kevinchapuis
  *
@@ -33,6 +39,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	private List<RangeValue> values;
 	private RangeValue emptyValue;
 	
+	/**
+	 * 
+	 * @param attribute
+	 * @param rt
+	 */
 	public RangeSpace(IAttribute<RangeValue> attribute, GSRangeTemplate rt){
 		this(attribute, rt, Integer.MIN_VALUE, Integer.MAX_VALUE);
 	}
@@ -116,6 +127,13 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	@Override
 	public Set<RangeValue> getValues(){
 		return new HashSet<>(values);
+	}
+	
+	@Override
+	public boolean contains(IValue value) {
+		if(!value.getClass().equals(RangeValue.class))
+			return false;
+		return values.contains(value);
 	}
 	
 	@Override

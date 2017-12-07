@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class GenstarJsonUtilTest {
 	@Before
 	public void setupBefore() throws GSIllegalRangedData {
 		
-		path = FileSystems.getDefault().getPath("src","test","java","core","configuration","GS_json_config_test.gns");
+		path = FileSystems.getDefault().getPath("src","test","resources","json_test.gns");
 
 		dd = new DemographicDictionary<>();
 
@@ -101,8 +102,9 @@ public class GenstarJsonUtilTest {
 		dd.addAttributes(rangeAggAttribute);
 		
 		// MAPPED
-		Map<Collection<String>,Collection<String>> value2value = new HashMap<>();
-		value2value.put(Arrays.asList("Bébé", "Enfant"), Arrays.asList("15 à 24"));
+		Map<Collection<String>,Collection<String>> value2value = new LinkedHashMap<>();
+		value2value.put(Arrays.asList("Bébé", "Enfant"), Arrays.asList("moins de 14"));
+		value2value.put(Arrays.asList("Adolescent", "Jeune"), Arrays.asList("15 à 24"));
 		value2value.put(Arrays.asList("Adulte"), Arrays.asList("25 à 34", "35 à 54"));
 		value2value.put(Arrays.asList("Vieux"), Arrays.asList("55 et plus"));
 		
@@ -150,9 +152,8 @@ public class GenstarJsonUtilTest {
 			IGenstarDictionary<DemographicAttribute<? extends IValue>> dd2 = 
 					sju.unmarshalFromGenstarJson(path, dd.getClass());
 			
-			for(DemographicAttribute<? extends IValue> att : dd.getAttributes()) {
+			for(DemographicAttribute<? extends IValue> att : dd.getAttributes())
 				assertEquals(att, dd2.getAttribute(att.getAttributeName()));
-			}
 	}
 
 }

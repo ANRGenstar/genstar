@@ -65,19 +65,12 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		
 		 GenstarConfigurationFile gcf = null;
 		 try {
-			 gcf = new GenstarJsonUtil().unmarshalFromGenstarJson(
-					 Paths.get("../../template/target/classes/rouen/gospl/data/GSC_Rouen_IS.xml"),
-					 GenstarConfigurationFile.class);
-		 } catch (FileNotFoundException e) {
-			 // TODO Auto-generated catch block
+			 gcf = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
+					 Paths.get("src/test/resources/rouen_demographics/rouen_demographics.gns"));
+		 } catch (IllegalArgumentException | IOException e) {
 			 e.printStackTrace();
-		 } catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			 throw new RuntimeException("cannot find the configuration file or one of its subfiles: "+e.getMessage(), e);
+		 } 
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
 						 gcf.getDemoDictionary().getAttributes().size()+" attributs\n"+
 						 gcf.getSurveyWrappers().size()+" data files");
@@ -87,10 +80,10 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 	
 	@Test
-	public void test() {
+	public void testGenerateWithoutFailure() {
 		
 		// parameters of the test
-		int targetPopulationSize = 10000;
+		int targetPopulationSize = 500;
 		GenstarConfigurationFile confFile = this.getConfigurationFile();
 
 		// THE POPULATION TO BE GENERATED
@@ -100,7 +93,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		GosplInputDataManager df = new GosplInputDataManager(confFile);
 		
 		// RETRIEV INFORMATION FROM DATA IN FORM OF A SET OF JOINT DISTRIBUTIONS
-		try {
+		/*try {
 			df.buildDataTables();
 		} catch (final RuntimeException e) {
 			e.printStackTrace();
@@ -111,25 +104,16 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		} catch (InvalidFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}
+		}*/
 
 		// TRANSPOSE SAMPLES INTO IPOPULATION
 		// TODO: yet to be tested
 		try {
-			df.buildSamples();
-		} catch (final RuntimeException e) {
-			// TODO Auto-generated catch block
+			df.buildDataTables();	
+		} catch (RuntimeException|InvalidFormatException | IOException | InvalidSurveyFormatException e) {
 			e.printStackTrace();
-		} catch (final IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (final InvalidSurveyFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (InvalidFormatException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+			throw new RuntimeException(e);
+		} 
 
 		// HERE IS A CHOICE TO MAKE BASED ON THE TYPE OF GENERATOR WE WANT:
 		// Choice is made here to use distribution based generator

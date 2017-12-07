@@ -117,8 +117,13 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimension(core.metamodel.pop.IValue)
 	 */
 	@Override
-	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {
-		return getDimensions().stream().filter(d -> d.getValueSpace().getValues().contains(aspect)
+	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {	
+		if(getDimensions().stream().noneMatch(d -> d.getValueSpace().contains(aspect)
+				|| d.getValueSpace().getEmptyValue().equals(aspect)))
+			throw new NullPointerException("Trying to access to aspect value \""+aspect+"\" dimension (\""
+					+aspect.getValueSpace().getAttribute().getAttributeName()+"\") while this "
+							+ "matrix does not contains this dimension");
+		return getDimensions().stream().filter(d -> d.getValueSpace().contains(aspect)
 				|| d.getValueSpace().getEmptyValue().equals(aspect))
 				.findFirst().get();
 	}

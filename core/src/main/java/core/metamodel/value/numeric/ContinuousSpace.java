@@ -8,11 +8,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 
 /**
- * TODO: javadoc
+ * Encapsulates a set of double value
+ * 
+ * WARNING: inner structure is not time efficient, also for fast use of {@link ContinuousValue}
+ * try to use {@link #getInstanceValue(String)} or {@link #proposeValue(String)}, that do not
+ * store {@link ContinuousValue} in a collection
  * 
  * @author kevinchapuis
  *
@@ -81,6 +86,13 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	@Override
 	public Set<ContinuousValue> getValues(){
 		return new HashSet<>(values.values());
+	}
+	
+	@Override
+	public boolean contains(IValue value) {
+		if(!value.getClass().equals(ContinuousValue.class))
+			return false;
+		return values.containsValue(value);
 	}
 
 	@Override
