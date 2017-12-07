@@ -32,7 +32,9 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.IPopulation;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
@@ -398,6 +400,7 @@ public class GosplInputDataManager {
 	 * Based on a survey wrapping data, and for a given set of expected attributes, 
 	 * creates a GoSPl population.
 	 */
+	@Deprecated
 	public static GosplPopulation getSample(final IGSSurvey survey, 
 			final Collection<DemographicAttribute<? extends IValue>> attributes, 
 			Integer maxIndividuals,
@@ -409,6 +412,75 @@ public class GosplInputDataManager {
 		
 		// Read headers and store possible variables by column index
 		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = survey.getColumnSample(attributes);
+
+		if (columnHeaders.isEmpty()) 
+			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
+		
+		int unmatchSize = 0;
+		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
+		
+		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+			
+			// too much ?
+			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
+				break;
+			
+			final Map<DemographicAttribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
+			final List<String> indiVals = survey.readLine(i);
+			//System.err.println(i+" "+indiVals);
+
+			if(indiVals.size() <= maxIndivSize){
+				logger.warn("One individual does not fit required number of attributes: \n"
+						+ Arrays.toString(indiVals.toArray()));
+						
+				unmatchSize++;
+				continue;
+			}
+			for (final Integer idx : columnHeaders.keySet()){
+				
+				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
+				IValue val = att.getValueSpace().addValue(indiVals.get(idx));
+				
+				// filter
+				if (val != null) {
+					String expected = keepOnlyEqual.get(att.getAttributeName());
+					if (expected != null && !val.getStringValue().equals(expected))
+						// skip
+						continue loopLines;
+				}
+				
+				if (val!=null)
+					entityAttributes.put(att, val);
+				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
+					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
+				else {
+					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+							+att.getAttributeName());
+					unmatchSize++;
+				}
+			}
+			if(entityAttributes.size() == entityAttributes.size())
+				sampleSet.add(new GosplEntity(entityAttributes));
+		}
+		if (unmatchSize > 0) {
+			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
+				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
+		}
+		return sampleSet;
+	}
+	
+	public static GosplPopulation getSample(final IGSSurvey survey, 
+			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary, 
+			Integer maxIndividuals,
+			Map<String,String> keepOnlyEqual
+			)
+			throws IOException, InvalidSurveyFormatException {
+		
+		final GosplPopulation sampleSet = new GosplPopulation();
+		
+		// Read headers and store possible variables by column index
+		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = 
+				survey.getColumnSample(dictionnary);
 
 		if (columnHeaders.isEmpty()) 
 			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");

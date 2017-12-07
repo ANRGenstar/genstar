@@ -92,7 +92,7 @@ public class DataLocalRepository {
 		// copy
 		logger.debug("downloading into {}", targetFile.getAbsolutePath());
 		File targetFileTmp = new File(targetFile.getAbsolutePath()+".download");
-		FileOutputStream fos;
+		FileOutputStream fos = null;
 		try {
 			fos = new FileOutputStream(targetFileTmp);
 			fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
@@ -103,6 +103,13 @@ public class DataLocalRepository {
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
+		} finally {
+			if (fos != null)
+				try {
+					fos.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 		}
 	}
 	

@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
@@ -61,8 +62,10 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 * 
 	 * @return returns for each column id the list of attributes values
 	 */
+	@Deprecated
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(
+			Collection<DemographicAttribute<? extends IValue>> attributes) {
 		
 		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
@@ -89,11 +92,29 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return columnHeaders;
 	}
 	
+
+	@Override
+	public Map<Integer, Set<IValue>> getColumnHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+		return getColumnHeaders(dictionnary.getAttributes());
+	}
+
+
+	@Override
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+		
+		return getColumnSample(dictionnary.getAttributes());
+	}
+
 	@Override
 	/**
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
-	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	@Deprecated
+	public Map<Integer, Set<IValue>> getRowHeaders(
+			Collection<DemographicAttribute<? extends IValue>> attributes) {
+		
 		final List<Integer> attributeIdx = new ArrayList<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
 			final List<String> sLine = readLine(line);
@@ -149,8 +170,19 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return rowHeaders;
 	}
 	
+
 	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getRowHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+		return getRowHeaders(dictionnary.getAttributes());
+	}
+
+	
+	
+	@Deprecated
+	@Override
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
+			Collection<DemographicAttribute<? extends IValue>> attributes) {
 		
 		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
 		
@@ -178,6 +210,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return columnHeaders;
 	}
 	
+
 	@Override
 	public final GSSurveyType getDataFileType() {
 		return this.dataFileType;
