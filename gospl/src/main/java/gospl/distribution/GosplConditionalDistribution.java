@@ -133,40 +133,42 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 						.collect(Collectors.joining("\n"))
 						+ "\nTopdown: "+topdown.entrySet().stream().map(e -> e.toString())
 						.collect(Collectors.joining("\n")));
-
-			// Add new concerned bottomup/topdown values
-			concernedValues.addAll(Stream.concat(bottomup.keySet().stream().flatMap(set -> set.stream()),
-					topdown.keySet().stream().flatMap(set -> set.stream())).collect(Collectors.toSet()));
-			AControl<Double> newProbability = mat.getVal(concernedValues, true);
-
+			
 			// If there is any empty value associated with mapped attribute, then exit with empty value
 			// It means attributes has divergent encoding values
 			if(Stream.concat(bottomup.keySet().stream().flatMap(set -> set.stream()),
 					topdown.keySet().stream().flatMap(set -> set.stream()))
 					.anyMatch(value -> this.getDimension(value).getEmptyValue().equals(value)))
 				return this.getNulVal();
+			
+			Set<IValue> bottomAndTopConditional = Stream.concat(bottomup.keySet().stream().flatMap(set -> set.stream()),
+					topdown.keySet().stream().flatMap(set -> set.stream())).collect(Collectors.toSet()); 
 
+			// Add new concerned bottomup/topdown values
+			concernedValues.addAll(bottomAndTopConditional);
+			AControl<Double> newProbability = mat.getVal(concernedValues, true);
+
+			conditionalValues.addAll(bottomAndTopConditional);
 			AControl<Double> conditionalProbability = conditionalValues.isEmpty() ? 
 					this.getIdentityProductVal() : mat.getVal(conditionalValues); 
-
-			// Adjust conditional probability
-			conditionalProbability.multiply(Stream.concat(bottomup.values().stream(), topdown.values().stream())
-							.reduce(this.getIdentityProductVal(), (c1, c2) -> c1.multiply(c2)));
 			
 			// Useless ? only zero possible conditional probability is because mapped attribute
 			// have divergent encoded values
 			if(conditionalProbability.getValue().equals(this.getNulVal().getValue()))
 				return this.getNulVal();
 			
+			/*
 			// Adjust probability space definition: e.g. age from 15 to more than 65 & age from 0 to more than 100
 			// WARNING: impossible in probability theory / make assumption on the transition (uniformity)
 			AControl<Double> adjustSpaceDefinition = this.getIdentityProductVal()
 					.multiply(Stream.concat(bottomup.entrySet().stream(), topdown.entrySet().stream())
 					.map(e -> e.getValue().multiply(1/mat.getVal(e.getKey()).getValue()))
 							.reduce(this.getIdentityProductVal(), (c1, c2) -> c1.multiply(c2)));
+							*/
 
 			// COMPUTE BRUT PROBABILITY
-			newProbability.multiply(adjustSpaceDefinition.getValue() / conditionalProbability.getValue());
+			newProbability.multiply(1d / conditionalProbability.getValue());
+			//newProbability.multiply(adjustSpaceDefinition.getValue() / conditionalProbability.getValue());
 
 			// Update conditional probability
 			conditionalProba.multiply(newProbability);
