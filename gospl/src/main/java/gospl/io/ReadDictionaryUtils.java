@@ -6,6 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.IGenstarDictionary;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
@@ -13,6 +16,7 @@ import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
 import gospl.algo.sr.bn.NodeCategorical;
+import gospl.distribution.exception.IllegalDistributionCreation;
 
 /**
  * Provides tools to read dictionaries from various file formats 
@@ -30,7 +34,8 @@ public class ReadDictionaryUtils {
 	 * @param bn
 	 * @return
 	 */
-	public static Collection<DemographicAttribute<? extends IValue>> readBayesianNetworkAsDictionary(CategoricalBayesianNetwork bn) {
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> 
+				readBayesianNetworkAsDictionary(CategoricalBayesianNetwork bn) {
 		
 		Collection<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>();
 
@@ -61,7 +66,7 @@ public class ReadDictionaryUtils {
 			
 		}
 		
-		return attributes;
+		return new DemographicDictionary<>(attributes);
 		
 	}
 	

@@ -15,6 +15,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
@@ -47,7 +49,8 @@ public class TestBayesianNetworkCompletionSampler {
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(fileBN);
 		
 		// to read the incomplete sample, we need a dict
-		Collection<DemographicAttribute<? extends IValue>> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary = 
+				ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		// we need an incomplete sample
 		char sep;
@@ -80,7 +83,8 @@ public class TestBayesianNetworkCompletionSampler {
 		
 		GosplPopulation pop = null;
 		
-		Set<DemographicAttribute<? extends IValue>> updatedAttributes = new HashSet<>(attributes);
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> updaptedDictionary = 
+					new DemographicDictionary<>(dictionary);
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();
@@ -90,7 +94,7 @@ public class TestBayesianNetworkCompletionSampler {
 			
 			pop = GosplInputDataManager.getSample(
 					survey, 
-					updatedAttributes, 
+					updaptedDictionary, 
 					null,
 					Collections.emptyMap() // TODO parameters for that
 					);

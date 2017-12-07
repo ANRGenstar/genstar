@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
@@ -29,13 +30,14 @@ public class TestReadDictionary {
 
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(new File("./src/test/resources/bayesiannetworks/gerland.xbif"));
 
-		Collection<DemographicAttribute<? extends IValue>> attributes = ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary = 
+				ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
-		System.err.println(attributes);
+		System.err.println(dictionary);
 		
-		assertNotNull(attributes);
+		assertNotNull(dictionary);
 		
-		assertEquals(7, attributes.size());
+		assertEquals(7, dictionary.size());
 		
 		
 	}
