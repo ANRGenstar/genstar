@@ -19,7 +19,7 @@ public class TestDownloadINSEEData {
 	@Test
 	public void testOpenDictionnaryRGP2014() throws MalformedURLException {
 		
-		DownloadINSEEData d = new DownloadINSEEData(
+		DownloadINSEESampleData d = new DownloadINSEESampleData(
 				INSEETestURLs.url_RGP2014_LocaliseRegion_ZoneD_dBase, "UTF-8");
 		
 		Collection<DemographicAttribute<? extends IValue>> dico = d.getDictionnary();
@@ -32,7 +32,7 @@ public class TestDownloadINSEEData {
 	@Test
 	public void testOpenDBaseRGP2014() throws MalformedURLException {
 		
-		DownloadINSEEData d = new DownloadINSEEData(
+		DownloadINSEESampleData d = new DownloadINSEESampleData(
 				INSEETestURLs.url_RGP2014_LocaliseRegion_ZoneD_dBase, "UTF-8");
 		
 		File dbaseFile = d.getSampleFile();

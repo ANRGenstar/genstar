@@ -24,7 +24,7 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.GosplPopulationInDatabase;
-import gospl.io.insee.DownloadINSEEData;
+import gospl.io.insee.DownloadINSEESampleData;
 import gospl.io.insee.INSEETestURLs;
 
 public class TestGosplPopulationInDatabase {
@@ -34,7 +34,7 @@ public class TestGosplPopulationInDatabase {
 	
 	private GosplPopulation getGoSPLPopulation() {
 	
-		DownloadINSEEData inseeData = new DownloadINSEEData(
+		DownloadINSEESampleData inseeData = new DownloadINSEESampleData(
 				INSEETestURLs.url_RGP2014_LocaliseRegion_ZoneD_dBase,
 				"UTF-8");
 		
