@@ -45,6 +45,7 @@ import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.io.exception.InvalidSurveyFormatException;
 
 /**
@@ -83,7 +84,7 @@ public class GosplSurveyFactory {
 			));
 
 	public GosplSurveyFactory() {
-		
+
 		this.dfs = new DecimalFormatSymbols(Locale.FRANCE);
 		this.decimalFormat =	new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.FRANCE));
 		this.dfs.setDecimalSeparator('.');
@@ -99,7 +100,7 @@ public class GosplSurveyFactory {
 	 */
 	public GosplSurveyFactory(final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex) {
-		
+
 		this(
 				sheetNn, 
 				csvSeparator, 
@@ -109,7 +110,7 @@ public class GosplSurveyFactory {
 				new DecimalFormat("#.##", new DecimalFormatSymbols(Locale.FRANCE))
 				);
 	}
-	
+
 
 	/**
 	 * Replace default factory value by explicit ones
@@ -122,7 +123,7 @@ public class GosplSurveyFactory {
 	 */
 	public GosplSurveyFactory(final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex, Locale locale) {
-		
+
 		this(
 				sheetNn, 
 				csvSeparator, 
@@ -132,7 +133,7 @@ public class GosplSurveyFactory {
 				new DecimalFormat("#.##", new DecimalFormatSymbols(locale))
 				);
 	}
-	
+
 	/**
 	 * Replace default factory value by explicit ones
 	 * 
@@ -151,7 +152,7 @@ public class GosplSurveyFactory {
 			int firstColumnDataIndex, 
 			DecimalFormatSymbols decimalFormatSymbols, 
 			DecimalFormat decimalFormat) {
-		
+
 		this.dfs = decimalFormatSymbols;
 		this.decimalFormat = decimalFormat;
 		this.sheetNb = sheetNn;
@@ -220,7 +221,7 @@ public class GosplSurveyFactory {
 	public IGSSurvey getSurvey(final String filepath, final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException {
-		
+
 		if (filepath.endsWith(XLSX_EXT))
 			return new XlsxInputHandler(filepath, sheetNn, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
@@ -232,11 +233,11 @@ public class GosplSurveyFactory {
 					firstColumnDataIndex, dataFileType);
 		if (filepath.endsWith(DBF_EXT))
 			return new DBaseInputHandler(dataFileType, filepath);
-		
+
 		final String[] pathArray = filepath.split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}
-	
+
 	/**
 	 * 
 	 * @param filepath
@@ -255,7 +256,7 @@ public class GosplSurveyFactory {
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType, 
 			String processAsFormat) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException {
-		
+
 		if (processAsFormat.equals(XLSX_EXT))
 			return new XlsxInputHandler(filepath, sheetNn, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
@@ -267,7 +268,7 @@ public class GosplSurveyFactory {
 					firstColumnDataIndex, dataFileType);
 		if (processAsFormat.equals(DBF_EXT))
 			return new DBaseInputHandler(dataFileType, filepath);
-		
+
 		final String[] pathArray = filepath.split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}
@@ -366,7 +367,7 @@ public class GosplSurveyFactory {
 			throw new IllegalArgumentException("Cannot read format "+DBF_EXT+" from a, input stream, sorry");
 		throw new InvalidSurveyFormatException(fileName, supportedFileFormat);
 	}
-	
+
 	/**
 	 * TODO: javadoc
 	 * 
@@ -432,12 +433,12 @@ public class GosplSurveyFactory {
 	public IGSSurvey createContingencyTable(File surveyFile, Set<DemographicAttribute<? extends IValue>> format,
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
 					throws IOException, InvalidFormatException, InvalidSurveyFormatException{
-		
+
 		GSPerformanceUtil gspu = new GSPerformanceUtil("TEST OUTPUT TABLES", Level.TRACE);
-		
+
 		AFullNDimensionalMatrix<Integer> popMatrix = GosplNDimensionalMatrixFactory.getFactory()
 				.createContingency(population);
-		
+
 		if(format.stream().anyMatch(att -> !popMatrix.getDimensions().contains(att)))
 			throw new IllegalArgumentException("Format is not entirely aligned with population: \n"
 					+ "Format: "+Arrays.toString(format.toArray())+"\n"
@@ -452,7 +453,7 @@ public class GosplSurveyFactory {
 				.collect(Collectors.joining(" + ")));
 		gspu.sysoStempMessage("Rows: "+rowHeaders.stream().map(att -> att.getAttributeName())
 				.collect(Collectors.joining(" + ")));
-		
+
 		String report = "";
 
 		if(rowHeaders.isEmpty()){
@@ -471,10 +472,10 @@ public class GosplSurveyFactory {
 			String blankHeadLine = rowHeaders.stream().map(rAtt -> " "+String.valueOf(separator))
 					.collect(Collectors.joining());
 			report += IntStream.range(0, columnHeaders.size()).mapToObj(index -> blankHeadLine 
-							+ columnHead.values().stream().map(col -> col.get(index).getStringValue())
-						.collect(Collectors.joining(String.valueOf(separator))))
+					+ columnHead.values().stream().map(col -> col.get(index).getStringValue())
+					.collect(Collectors.joining(String.valueOf(separator))))
 					.collect(Collectors.joining("\n"))+String.valueOf(separator)+"TOTAL";
-			
+
 			gspu.sysoStempMessage("HEAD: "+report);
 			gspu.sysoStempMessage("ROW VALUE"+rowHead.keySet().stream().sorted()
 					.map(i -> rowHead.get(i).stream().map(val -> val.getStringValue())
@@ -487,17 +488,17 @@ public class GosplSurveyFactory {
 					data.add(colIdx, popMatrix.getVal(Stream.concat(columnHead.get(colIdx).stream(), 
 							rowHead.get(rowIdx).stream()).collect(Collectors.toSet())).getValue());
 				report += "\n"+rowHead.get(rowIdx).stream().map(row -> row.getStringValue())
-								.collect(Collectors.joining(String.valueOf(separator)))
-							+String.valueOf(separator)+data.stream().map(i -> i.toString())
+						.collect(Collectors.joining(String.valueOf(separator)))
+						+String.valueOf(separator)+data.stream().map(i -> i.toString())
 						.collect(Collectors.joining(String.valueOf(separator)));
 				report += String.valueOf(separator)+data.stream().reduce(0, (i1,i2) -> i1+i2);
 				gspu.sysoStempMessage("New line ("+Arrays.toString(rowHead.get(rowIdx).toArray())
-						+") = "+Arrays.toString(data.toArray()));
+				+") = "+Arrays.toString(data.toArray()));
 			}
-			
+
 			List<Integer> colTotals = IntStream.range(0, columnHead.size())
-				.mapToObj(colIdx -> popMatrix.getVal(columnHead.get(colIdx)).getValue())
-				.collect(Collectors.toList());
+					.mapToObj(colIdx -> popMatrix.getVal(columnHead.get(colIdx)).getValue())
+					.collect(Collectors.toList());
 			report += "\n"+colTotals.stream().map(col -> col.toString())
 					.collect(Collectors.joining(String.valueOf(separator)))+String.valueOf(separator)
 					+colTotals.stream().reduce(1, (i1,i2) -> i1+i2);			
@@ -507,13 +508,68 @@ public class GosplSurveyFactory {
 		return this.getSurvey(surveyFile, GSSurveyType.ContingencyTable);
 	}
 
+	// ------------------------------------------------------------------- //
+	// ---------------------- MATRIX EXPORT SECTION ---------------------- //
+	// ------------------------------------------------------------------- //
+
+	/**
+	 * Make a summary of a full matrix - print each total value
+	 * 
+	 * @param surveyFile
+	 * @param matrix
+	 * @param factorReport
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidFormatException
+	 * @throws InvalidSurveyFormatException
+	 */
+	public <T extends Number> IGSSurvey createSummary(Path surveyFile,
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> matrix) 
+					throws IOException, InvalidFormatException, InvalidSurveyFormatException{
+
+		Collection<DemographicAttribute<? extends IValue>> attributes = matrix.getDimensions();
+
+		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
+				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
+		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValueSpace().getValues().size()+1).max().getAsInt())
+				.mapToObj(i -> "").collect(Collectors.toList());
+
+		for(DemographicAttribute<? extends IValue> attribute : attributes){
+
+			int lineNumber = 0;
+
+			Set<IValue> attValues = Stream.concat(attribute.getValueSpace().getValues().stream(), 
+					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
+
+			for(IValue value : attValues) {
+				String val = "";
+				if(!value.getValueSpace().getEmptyValue().equals(value))
+					val = matrix.getVal(value).toString();
+				lines.set(lineNumber, lines.get(lineNumber)
+						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
+						value.getStringValue() + separator + val);
+			}
+
+			for(int i = lineNumber; i < lines.size(); i++)
+				lines.set(
+						i, 
+						lines.get(i).concat(lines.get(i).isEmpty() ? "" : separator + "") + separator + ""
+						);
+		}
+
+		report += String.join("\n", lines);
+		Files.write(surveyFile, report.getBytes());
+		return this.getSurvey(surveyFile.toFile(), matrix.getMetaDataType());
+
+	}
+
 	// ---------------------- inner methods ---------------------- // 
 
 	private IGSSurvey createTableSummary(File surveyFile, GSSurveyType surveyType,
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) throws IOException, InvalidFormatException, InvalidSurveyFormatException {
-		
+
 		Collection<DemographicAttribute<? extends IValue>> attributes = population.getPopulationAttributes();
-		
+
 		String report = attributes.stream().map(att -> att.getAttributeName() + separator + "frequence")
 				.collect(Collectors.joining(String.valueOf(separator)))+"\n";
 		List<String> lines = IntStream.range(0, attributes.stream().mapToInt(att -> att.getValueSpace().getValues().size()+1).max().getAsInt())
@@ -521,19 +577,19 @@ public class GosplSurveyFactory {
 
 		Map<IValue, Integer> mapReport = attributes.stream()
 				.flatMap(att -> Stream.concat(att.getValueSpace().getValues().stream(), Stream.of(att.getEmptyValue()))
-				.collect(Collectors.toSet()).stream())
+						.collect(Collectors.toSet()).stream())
 				.collect(Collectors.toMap(Function.identity(), value -> 0));
-		
+
 		population.stream().forEach(entity -> entity.getValues()
 				.forEach(eValue -> mapReport.put(eValue, mapReport.get(eValue)+1)));
 
 		for(DemographicAttribute<? extends IValue> attribute : attributes){
-			
+
 			int lineNumber = 0;
-			
+
 			Set<IValue> attValues = Stream.concat(attribute.getValueSpace().getValues().stream(), 
 					Stream.of(attribute.getEmptyValue())).collect(Collectors.toSet());
-			
+
 			for(IValue value : attValues) {
 				String val = "";
 				if(surveyType.equals(GSSurveyType.ContingencyTable))
@@ -544,7 +600,7 @@ public class GosplSurveyFactory {
 						.concat(lines.get(lineNumber++).isEmpty() ? "" : String.valueOf(separator)) + 
 						value.getStringValue() + separator + val);
 			}
-			
+
 			for(int i = lineNumber; i < lines.size(); i++)
 				lines.set(
 						i, 
@@ -571,7 +627,7 @@ public class GosplSurveyFactory {
 	private IGSSurvey createSample(File surveyFile, 
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
-		
+
 		int individual = 1;
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<DemographicAttribute<? extends IValue>> attributes = population.getPopulationAttributes();
@@ -585,7 +641,7 @@ public class GosplSurveyFactory {
 		bw.write(separator);
 		bw.write("count_children");
 		bw.write("\n");
-		
+
 		bw.write("Individual");
 		bw.write(separator);
 		bw.write("Type of the entity");
@@ -596,14 +652,14 @@ public class GosplSurveyFactory {
 		bw.write(separator);
 		bw.write("count of children of this entity");
 		bw.write("\n");
-		
+
 		for (final ADemoEntity e : population) {
 			if(e._hasEntityId()){
 				bw.write(e.getEntityId()); // String.valueOf(individual++)				
 			} else {
 				bw.write(" ");
 			}
-			
+
 			bw.write(separator);
 			if (e.getEntityType() != null)
 				bw.write(e.getEntityType());
@@ -612,10 +668,10 @@ public class GosplSurveyFactory {
 			for (final DemographicAttribute<? extends IValue> attribute : attributes) {
 				bw.write(separator);
 				try {
-		
+
 					IValue val = e.getValueForAttribute(attribute); 
 					String v = val.getStringValue();
-					
+
 					if (!attribute.getValueSpace().getType().isNumericValue()) {
 						bw.write("\"");
 						bw.write(v);
@@ -623,7 +679,7 @@ public class GosplSurveyFactory {
 					} else {
 						bw.write(v);
 					}
-					
+
 				} catch (NullPointerException e2) {
 					bw.write("\"?\"");
 				}

@@ -12,8 +12,6 @@ import gospl.sampler.ISampler;
 /**
  * A generator that take a defined distribution and a given sampler
  * 
- * TODO: make a builder > for example, build the sampler based on a distribution
- * 
  * @author kevinchapuis
  *
  */

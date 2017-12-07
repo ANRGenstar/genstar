@@ -356,7 +356,6 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 
 // ------------------------- utility methods ------------------------- //
 	
-	
 	/**
 	 * Checks if all of the coordinates of the matrix have defined values.
 	 * Note that not all matrices should have this contract. Sparse matricies are often relevant.

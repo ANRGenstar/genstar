@@ -16,7 +16,8 @@ import gospl.distribution.matrix.control.AControl;
  */
 public class SimpleMargin<T extends Number> extends AMargin<T> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
 
-	protected SimpleMargin(DemographicAttribute<? extends IValue> controlAttribute, DemographicAttribute<? extends IValue> seedAttribute) {
+	protected SimpleMargin(DemographicAttribute<? extends IValue> controlAttribute, 
+			DemographicAttribute<? extends IValue> seedAttribute) {
 		super(controlAttribute, seedAttribute);
 	}
 
