@@ -2,8 +2,6 @@ package spin;
 
 import org.graphstream.graph.Node;
 
-import spin.objects.SpinNetwork;
-
 public class ScenarJouet {
 	
 	/**

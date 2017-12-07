@@ -8,10 +8,10 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.util.GSUtilGenerator;
+import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 import spin.interfaces.ENetworkGenerator;
-import spin.objects.SpinNetwork;
 
 public class TestOnGenerator {
 
@@ -46,11 +46,11 @@ public class TestOnGenerator {
 		SpinNetwork networkSW = populationWithNetworkSW.getNetwork();
 		System.out.println("Fin de generation de reseau SmallWorld");
 */		
-		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
-		SpinNetwork networkTest = populationWithNetwork.getNetwork();
-		networkTest.network.display();
+//		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
+//		SpinNetwork networkTest = populationWithNetwork.getNetwork();
+//		networkTest.network.display();
 		
-		Graph sampleGraph = networkTest.randomWalkSample(50);
-		sampleGraph.display();
+//		Graph sampleGraph = networkTest.randomWalkSample(50);
+//		sampleGraph.display();
 	}
 }

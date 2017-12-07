@@ -1,4 +1,4 @@
-package spin.objects;
+package spin;
 
 import static org.graphstream.algorithm.Toolkit.clusteringCoefficient;
 import static org.graphstream.algorithm.Toolkit.density;
@@ -28,8 +28,11 @@ import spin.interfaces.INetProperties;
 public class SpinNetwork implements INetProperties{
 	
 	public Graph network;
+	boolean directed;
 	
 	// Map d'acces rapide;
+	// FIXME : is it useless ? 
+			// On peut récupérer les entite par un getAttribute sur les nodes
 	public Map<Node, ADemoEntity> kvNodeEntityFastList;
 	public Map<ADemoEntity, Node> kvEntityNodeFastList;
 	
@@ -38,8 +41,15 @@ public class SpinNetwork implements INetProperties{
 	 */
 	public SpinNetwork(){
 		network = new DefaultGraph("network");
+		directed = true;
+		
 		kvNodeEntityFastList = new HashMap<Node, ADemoEntity>();
+		
 		kvEntityNodeFastList = new HashMap<ADemoEntity, Node>();
+	}
+	
+	public Graph getNetwork() {
+		return network;
 	}
 	
 	/**
@@ -49,14 +59,21 @@ public class SpinNetwork implements INetProperties{
 	 * @param entite the population entity to which the Node is associated 
 	 */
 	public void putNode(String nodeId, ADemoEntity entite) {
-		network.addNode(nodeId);
-		
-		Node node = network.getNode(nodeId);
+	
+		Node node = network.addNode(nodeId);
 		
 		node.addAttribute("entity", entite);
 	
-		kvNodeEntityFastList.put(node, node.getAttribute("entity"));
-		kvEntityNodeFastList.put(node.getAttribute("entity"), node);
+		kvNodeEntityFastList.put(node, entite);
+		kvEntityNodeFastList.put(entite, node);
+	}
+
+	/** Ajout de link aux listes de link des noeuds
+	 * 
+	 * @param link
+	 */
+	public void putLink(String linkId, ADemoEntity n1, ADemoEntity n2){
+		network.addEdge(linkId, kvEntityNodeFastList.get(n1), kvEntityNodeFastList.get(n2),directed);
 	}
 
 	/** Ajout de link aux listes de link des noeuds
@@ -64,16 +81,15 @@ public class SpinNetwork implements INetProperties{
 	 * @param link
 	 */
 	public void putLink(String linkId, Node n1, Node n2){
-		network.addEdge(linkId, n1, n2);
-		// TODO [stage (?)] utiliser String plutot que Node pour identifier n1 et n2
-	}
+		network.addEdge(linkId, n1, n2, directed);
+	}	
 	
 	/** Remove a node from a graph
 	 * 
 	 * @param node the node we want to remove
 	 */
-	public void removeNode(Node node) {
-		network.removeNode(node);
+	public void removeNode(ADemoEntity entite) {
+		network.removeNode(kvEntityNodeFastList.get(entite));
 	}
 	
 	/** Remove a link from the graph
@@ -345,5 +361,12 @@ public class SpinNetwork implements INetProperties{
 	@Override
 	public double getDensity() {
 		return density(network);
+	}
+	
+	@Override
+	public String toString(){
+		String res = "Nodes: "+network.getNodeCount()+"\n" + network.getNodeSet() ;
+		res = res + "\nEdges: "+network.getEdgeCount()+"\n" + network.getEdgeSet();
+		return res;
 	}
 }

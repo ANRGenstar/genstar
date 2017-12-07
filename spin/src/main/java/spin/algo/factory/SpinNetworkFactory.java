@@ -4,14 +4,14 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import spin.SpinNetwork;
 import spin.SpinPopulation;
-import spin.algo.generator.RandomNetworkGenerator;
-import spin.algo.generator.RegularNetworkGenerator;
-import spin.algo.generator.SFNetworkGenerator;
-import spin.algo.generator.SWNetworkGenerator;
-import spin.algo.generator.SpatialNetworkGenerator;
+import spin.algo.generator.network.RandomNetworkGenerator;
+import spin.algo.generator.network.RegularNetworkGenerator;
+import spin.algo.generator.network.SFNetworkGenerator;
+import spin.algo.generator.network.SWNetworkGenerator;
+import spin.algo.generator.network.SpatialNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
-import spin.objects.SpinNetwork;
 
 /** Propose de generer des reseaux 
  * Si le reseau est non oriente, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
@@ -38,7 +38,7 @@ public class SpinNetworkFactory {
 	 * @param population
 	 * @return SpinNetwork. 
 	 */
-	public SpinNetwork loadPopulation(IPopulation<? extends ADemoEntity, DemographicAttribute<? extends IValue>> population){
+	public static SpinNetwork loadPopulation(IPopulation<? extends ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		// Create a SpinNetwork with nodes linked to population entities
 		// The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
@@ -60,7 +60,8 @@ public class SpinNetworkFactory {
 	 * @param population Population en parametre. 
 	 * @return SpinPopulation
 	 */
-	public <E extends ADemoEntity> SpinPopulation<E> generateNetwork(ENetworkGenerator typeGenerator, 
+	// FIXME : à remettre 
+/*	public <E extends ADemoEntity> SpinPopulation<E> generateNetwork(ENetworkGenerator typeGenerator, 
 			IPopulation<E, DemographicAttribute<? extends IValue>> population){
 		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
@@ -77,6 +78,7 @@ public class SpinNetworkFactory {
 		// Create the SpinPopulation
 		return new SpinPopulation<>(population, network);
 	}
+	*/
 	
 	public SpinNetwork getSpinNetwork(){
 		return this.network;

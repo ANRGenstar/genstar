@@ -1,4 +1,4 @@
-package spin.algo.generator;
+package spin.algo.generator.network;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,26 +6,46 @@ import java.util.Random;
 
 import org.graphstream.graph.Node;
 
-import spin.objects.SpinNetwork;
+import core.metamodel.IPopulation;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
+import spin.SpinNetwork;
+import spin.SpinPopulation;
+import spin.algo.factory.SpinNetworkFactory;
 
-public class SpatialNetworkGenerator {
+public class SpatialNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
 	
-	/** Génération d'un réseau spatialisé. 
+	private int xMax;
+	private int yMax;
+	private int nbTypes;
+	
+	public SpatialNetworkGenerator(int _xMax, int _yMax, int _nbTypes){
+		this.xMax = xMax;
+		this.yMax = yMax;
+		this.nbTypes = _nbTypes;
+	}
+	
+	/** Spatial network generation 
 	 * 
-	 * @param myNetwork réseau de base
-	 * @param xMax abscisse maximum
-	 * @param yMax ordonnée maximum
-	 * @param nbTypes nombre de types de noeuds différents
-	 * @return myNetwork réseau final
+	 * @param myNetwork rï¿½seau de base
+	 * @param xMax maximum abscisse
+	 * @param yMax maximum ordinate
+	 * @param nbTypes different node types
+	 * @return myNetwork rï¿½seau final
 	 */
-	public SpinNetwork generateNetwork(SpinNetwork myNetwork, int xMax, int yMax, int nbTypes) {
+//	public SpinNetwork generateNetwork(SpinNetwork myNetwork, int xMax, int yMax, int nbTypes) {
 		// Right now this program uses randomly generated coordinates to locate each node
 		// TODO Use a SpllPopulation to locate the nodes
+//
+	@Override
+	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);	
 		
 		Random rand = new Random();
 		
 		// List the nodes
-		List<Node> nodes = new ArrayList<>(myNetwork.getNodes());
+		List<Node> nodes = new ArrayList<>(network.getNodes());
 		int nbNodes = nodes.size();
 		
 		// Social reaches for the different types of nodes
@@ -103,7 +123,7 @@ public class SpatialNetworkGenerator {
 					int r2 = n2.getAttribute("reach");
 					double d = Math.sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1));
 					if(d<=r1 && d<=r2 && !n1.hasEdgeBetween(n2)) {
-						myNetwork.putLink(Integer.toString(link_id), n1, n2);
+						network.putLink(Integer.toString(link_id), n1, n2);
 						link_id++;
 					}
 				}
@@ -111,6 +131,6 @@ public class SpatialNetworkGenerator {
 			computedNodes.add(n1);
 		}
 		
-		return myNetwork;
+		return new SpinPopulation<>(myPop, network);
 	}
 }

@@ -4,12 +4,15 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.GosplEntity;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.util.GSUtilGenerator;
+import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
+import spin.algo.generator.SpinPopulationGenerator;
+import spin.algo.generator.network.RegularNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
-import spin.objects.SpinNetwork;
 
 public class TestOnProperties {
 
@@ -25,8 +28,12 @@ public class TestOnProperties {
 		generator.generate(100);
 	
 		System.out.println("Debut de la génération de réseau Regular");
-		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
-		SpinNetwork networkSW = populationWithNetwork.getNetwork();
+//		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
+		
+		SpinPopulationGenerator spinPopGen = new SpinPopulationGenerator(new RegularNetworkGenerator<>(4));
+		SpinPopulation<GosplEntity> networkedPop = spinPopGen.generate(30);	
+		
+//		SpinNetwork networkSW = populationWithNetwork.getNetwork();
 		System.out.println("Fin de génération de réseau Regular");
 	
 		//SpinPopulation populationWithNetwork = new SpinPopulation(population, networkSW);
