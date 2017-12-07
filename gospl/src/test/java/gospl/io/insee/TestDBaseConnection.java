@@ -5,9 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +15,8 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
@@ -91,7 +91,8 @@ public class TestDBaseConnection {
 		}
 		
 		
-		Collection<DemographicAttribute<? extends IValue>> attributes = ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> attributes = 
+				ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
 																dictionaryFilename
 																);
 
@@ -103,7 +104,7 @@ public class TestDBaseConnection {
 			
 			pop = GosplInputDataManager.getSample(
 					survey, 
-					new HashSet<>(attributes), 
+					new DemographicDictionary<DemographicAttribute<? extends IValue>>(attributes), 
 					100,
 					keepOnlyEqual
 					);
@@ -119,17 +120,14 @@ public class TestDBaseConnection {
 		}
 		
 		try {
-			new GosplSurveyFactory().createSummary(new File("/tmp/test1.csv"), GSSurveyType.Sample, pop);
-		} catch (InvalidFormatException e1) {
-			// TODO Auto-generated catch block
+			new GosplSurveyFactory().createSummary(
+					new File("/tmp/test1.csv"), 
+					GSSurveyType.Sample, 
+					pop);
+		} catch (InvalidFormatException | IOException | InvalidSurveyFormatException e1) {
 			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (InvalidSurveyFormatException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+			throw new RuntimeException(e1);
+		} 
 		
 		/*
 		assertEquals("first column of a DBF is always 0", 0, survey.getFirstColumnIndex());

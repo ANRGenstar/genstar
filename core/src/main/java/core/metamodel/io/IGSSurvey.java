@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 
@@ -32,7 +33,12 @@ public interface IGSSurvey {
 	 * @param attributes
 	 * @return
 	 */
-	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes);
+	@Deprecated
+	public Map<Integer, Set<IValue>> getColumnHeaders(
+			Collection<DemographicAttribute<? extends IValue>> attributes);
+	
+	public Map<Integer, Set<IValue>> getColumnHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
 	
 
 	/**
@@ -40,13 +46,28 @@ public interface IGSSurvey {
 	 * @param attributes
 	 * @return
 	 */
-	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes);
+	@Deprecated
+	public Map<Integer, Set<IValue>> getRowHeaders(
+			Collection<DemographicAttribute<? extends IValue>> attributes);
+	
+	public Map<Integer, Set<IValue>> getRowHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
 	
 	/**
 	 * Retrieves column headers from a sample data file
 	 */
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Collection<DemographicAttribute<? extends IValue>> attributes);
+	@Deprecated
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
+			Collection<DemographicAttribute<? extends IValue>> attributes);
 	
+	/**
+	 * Retrieves the column headers from a sample file
+	 * @param dictionnary
+	 * @return
+	 */
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
+
 	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}
 	 * 

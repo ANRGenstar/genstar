@@ -27,6 +27,9 @@ import org.htmlcleaner.XPather;
 import org.htmlcleaner.XPatherException;
 
 import au.com.bytecode.opencsv.CSVReader;
+import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.IGenstarDictionary;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
@@ -47,11 +50,13 @@ public class ReadINSEEDictionaryUtils {
 
 	private static Logger logger = LogManager.getLogger();
 	
-	public static Collection<DemographicAttribute<? extends IValue>> readFromWebsite(String url) {
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromWebsite(
+			String url) {
 		return readFromWebsite(url, null);
 	}
 	
-	public static Collection<DemographicAttribute<? extends IValue>> readFromWebsite(String url, String splitCode) {
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromWebsite(
+			String url, String splitCode) {
 		try {
 			return readFromWebsite(new URL(url), splitCode);
 		} catch (MalformedURLException e) {
@@ -103,7 +108,7 @@ public class ReadINSEEDictionaryUtils {
 	}
 	
 	// TODO use splitCode
-	public static Collection<DemographicAttribute<? extends IValue>> readFromWebsite(URL url, String splitCode) {
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromWebsite(URL url, String splitCode) {
 		
 		logger.debug("reading a dictionnary of data from URL {}", url);
 		
@@ -250,11 +255,11 @@ public class ReadINSEEDictionaryUtils {
 			}
 		}
 		
-        return attributes;
+		return new DemographicDictionary<DemographicAttribute<? extends IValue>>(attributes);
 	}
 
 	
-	public static Collection<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(String filename, String encoding) {
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(String filename, String encoding) {
 		
 		if (encoding == null) {
 			// TODO automatic detection
@@ -264,7 +269,7 @@ public class ReadINSEEDictionaryUtils {
 		return readDictionnaryFromMODFile(new File(filename), encoding);
 	}
 	
-	public static Collection<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(String filename) {
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(String filename) {
 		return readDictionnaryFromMODFile(filename, Charset.defaultCharset().name());
 	}
 	
@@ -281,7 +286,7 @@ public class ReadINSEEDictionaryUtils {
 	 * @param f
 	 * @return
 	 */
-	public static Collection<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(
 			File f, String encoding) {
 		
 		logger.info("reading a dictionnary of data from file {}", f);
@@ -420,7 +425,7 @@ public class ReadINSEEDictionaryUtils {
 		}
 		
 		
-		return attributes;
+		return new DemographicDictionary<DemographicAttribute<? extends IValue>>(attributes);
 		
 	}
 	private ReadINSEEDictionaryUtils() {}
