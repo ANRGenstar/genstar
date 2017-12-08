@@ -33,6 +33,7 @@ public class SpinNetwork implements INetProperties{
 	// Map d'acces rapide;
 	// FIXME : is it useless ? 
 			// On peut récupérer les entite par un getAttribute sur les nodes
+	// FIXME : set de 
 	public Map<Node, ADemoEntity> kvNodeEntityFastList;
 	public Map<ADemoEntity, Node> kvEntityNodeFastList;
 	
@@ -40,13 +41,17 @@ public class SpinNetwork implements INetProperties{
 	 * 
 	 */
 	public SpinNetwork(){
+		this(true);
+	}
+	
+	public SpinNetwork(boolean _directed){
 		network = new DefaultGraph("network");
-		directed = true;
+		directed = _directed;
 		
 		kvNodeEntityFastList = new HashMap<Node, ADemoEntity>();
 		
 		kvEntityNodeFastList = new HashMap<ADemoEntity, Node>();
-	}
+	}	
 	
 	public Graph getNetwork() {
 		return network;

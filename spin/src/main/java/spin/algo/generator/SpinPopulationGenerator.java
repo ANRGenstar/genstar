@@ -1,6 +1,9 @@
 package spin.algo.generator;
 
 import core.metamodel.IPopulation;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
 import gospl.GosplEntity;
 import gospl.GosplPopulation;
 import spin.SpinPopulation;
@@ -17,7 +20,7 @@ public class SpinPopulationGenerator {
 		this.networkGenerator = generator;
 	}
 	
-	public SpinPopulation generate(IPopulation pop) {
+	public SpinPopulation<? extends ADemoEntity> generate(IPopulation<? extends ADemoEntity, DemographicAttribute<? extends IValue>> pop) {
 		return networkGenerator.generateNetwork(pop);
 	}
 	
