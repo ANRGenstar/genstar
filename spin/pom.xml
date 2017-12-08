@@ -37,9 +37,14 @@
 	    <artifactId>gs-algo</artifactId>
 	    <version>${graphstream.version}</version>
 	</dependency> 
-	
 
- </dependencies>
+	<dependency>
+		<groupId>org.genstar</groupId>
+		<artifactId>genstar-spll</artifactId>
+		<version>1.0.3</version>
+		<type>bundle</type>
+	</dependency>
+</dependencies>
  
  <build>
     <plugins>
@@ -64,7 +69,7 @@
                             <Export-Package>spin.*</Export-Package>
                         </instructions>
               </configuration>
-            </plugin>
+            </plugin>		            
     </plugins>
     </build>
         <distributionManagement>
