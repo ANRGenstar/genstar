@@ -1,4 +1,4 @@
-package spin.algo.generator.network;
+package spin.algo.generator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,9 +15,9 @@ import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
-public class SFNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
+public class SpinSFNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E> {
 
-	public SFNetworkGenerator() {}
+	public SpinSFNetworkGenerator() {}
 	
 	/** Generation of a ScaleFree network 
 	 * 
@@ -25,7 +25,7 @@ public class SFNetworkGenerator<E extends ADemoEntity> implements INetworkGenera
 	 * @return network final network
 	 */
 	@Override
-	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);	
 		
 		// Listing the nodes

@@ -1,4 +1,4 @@
-package spin.algo.generator.network;
+package spin.algo.generator;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
@@ -10,16 +10,16 @@ import spin.algo.factory.SpinNetworkFactory;
 import spll.SpllEntity;
 import spll.SpllPopulation;
 
-public class SpatialNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
+public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E>  {
 	
 	private double distance;
 	
-	public SpatialNetworkGenerator(double _distance){
+	public SpinSpatialNetworkGenerator(double _distance){
 		this.distance = _distance;
 	}
 
 	@Override
-	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
 		if(myPop instanceof SpllPopulation) {
 			return (SpinPopulation<E>) generateNetwork((SpllPopulation) myPop);
 		} else {

@@ -1,4 +1,4 @@
-package spin.algo.generator.network;
+package spin.algo.generator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +14,15 @@ import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
-public class RandomNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
+public class SpinRandomNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E>  {
 	private double probability;
 	
-	public RandomNetworkGenerator(double proba) {
+	public SpinRandomNetworkGenerator(double proba) {
 		this.probability = proba;
 	}
 
 	@Override
-	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> pop) {
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> pop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(pop);
 
 		// TODO: check random generator 

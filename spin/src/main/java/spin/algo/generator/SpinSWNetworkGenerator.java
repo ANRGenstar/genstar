@@ -1,4 +1,4 @@
-package spin.algo.generator.network;
+package spin.algo.generator;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -12,22 +12,20 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
-import gospl.GosplEntity;
 import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
-import spin.algo.generator.SpinPopulationGenerator;
 
 /**Générateur SmallWorld
  * 
  *
  */
-public class SWNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
+public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E> {
 
 	private int k;
 	private double beta;
 	
-	public SWNetworkGenerator(int _k, double _beta){
+	public SpinSWNetworkGenerator(int _k, double _beta){
 		this.k = _k;
 		this.beta = _beta;
 	}
@@ -40,14 +38,11 @@ public class SWNetworkGenerator<E extends ADemoEntity> implements INetworkGenera
 	 * @return myNetwork final network
 	 */
 	@Override
-	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 
-		SpinPopulationGenerator spinPopGen = 
-				new SpinPopulationGenerator(new RegularNetworkGenerator<>(4));
-		SpinPopulation networkedPop = spinPopGen.generate(myPop);		
-		
-	//	SpinNetwork myNetwork = (new RegularNetworkGenerator()).generateNetwork(new SpinPopulation<>(myPop, network);
+		SpinRegularNetworkGenerator<E> spinPopGen = new SpinRegularNetworkGenerator<>(4);
+		SpinPopulation<E> networkedPop = spinPopGen.generate(myPop);
 				
 		//parcourir tous les liens
 		HashSet<Edge> links = new HashSet<>(network.getLinks());

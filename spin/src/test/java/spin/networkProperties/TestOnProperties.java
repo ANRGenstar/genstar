@@ -10,8 +10,7 @@ import gospl.generator.util.GSUtilGenerator;
 import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
-import spin.algo.generator.SpinPopulationGenerator;
-import spin.algo.generator.network.RegularNetworkGenerator;
+import spin.algo.generator.SpinRegularNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
 
 public class TestOnProperties {
@@ -30,7 +29,7 @@ public class TestOnProperties {
 		System.out.println("Debut de la génération de réseau Regular");
 //		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		
-		SpinPopulationGenerator spinPopGen = new SpinPopulationGenerator(new RegularNetworkGenerator<>(4));
+		SpinRegularNetworkGenerator spinPopGen = new SpinRegularNetworkGenerator(4);
 		SpinPopulation<GosplEntity> networkedPop = spinPopGen.generate(30);	
 		
 //		SpinNetwork networkSW = populationWithNetwork.getNetwork();
