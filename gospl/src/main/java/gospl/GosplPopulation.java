@@ -12,8 +12,16 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
+import gospl.io.ReadPopulationsUtils;
 
+/**
+ * To create a population from a sample read from file, refer to {@link ReadPopulationsUtils}
+ * 
+ * @author Samuel Thiriot
+ *
+ */
 public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
+	
 	
 	private final Collection<ADemoEntity> population;
 	private Set<DemographicAttribute<? extends IValue>> attributes = null;

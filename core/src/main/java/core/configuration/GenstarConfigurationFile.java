@@ -79,6 +79,10 @@ public class GenstarConfigurationFile {
 		this.dataFileList.addAll(surveys);
 	}
 
+	public void addSurveyWrapper(GSSurveyWrapper survey) {
+		this.dataFileList.add(survey);
+	}
+	
 	/**
 	 * Gives the dictionary of attribute
 	 * @return

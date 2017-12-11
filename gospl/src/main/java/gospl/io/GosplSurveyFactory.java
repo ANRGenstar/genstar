@@ -403,7 +403,8 @@ public class GosplSurveyFactory {
 	// ----------------------------------------------------------------------- //
 
 	/**
-	 * Export a population to a file. Each {@link GSSurveyType} will cause the export
+	 * Export a population to a file. 
+	 * Each {@link GSSurveyType} will cause the export
 	 * to be of the corresponding type; i.e. either a sample of the complete population
 	 * or the contingency / frequency of each attribute
 	 * <p>
@@ -628,8 +629,9 @@ public class GosplSurveyFactory {
 	}
 
 	/**
-	 * Create a sample survey from a population: each entity of the population
-	 * is depicted with their attribute's values 
+	 * Create a sample survey from a population: 
+	 * writes the population passed as a parameter into a CSV file, 
+	 * and returns it in the form of a {@link IGSSurvey} pointing to this file.
 	 * 
 	 * @param surveyFile
 	 * @param population
@@ -711,7 +713,14 @@ public class GosplSurveyFactory {
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}
 
-	private Map<Integer, List<IValue>> getTableHeader(Collection<DemographicAttribute<? extends IValue>> headerAttributes){
+	/**
+	 * TODO doc
+	 * @param headerAttributes
+	 * @return
+	 */
+	private Map<Integer, List<IValue>> getTableHeader(
+			Collection<DemographicAttribute<? extends IValue>> headerAttributes){
+		
 		DemographicAttribute<? extends IValue> anchor = headerAttributes.iterator().next();
 		List<List<IValue>> head = new ArrayList<>();
 		for(IValue value : anchor.getValueSpace().getValues())

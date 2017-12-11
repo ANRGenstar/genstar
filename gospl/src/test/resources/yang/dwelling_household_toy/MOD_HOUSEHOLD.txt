@@ -1,0 +1,6 @@
+VAR_CODE;VAR_LIB;MOD_CODE;MOD_LIB
+NBPERS;"number of persons";1;1
+NBPERS;"number of persons";2;2
+NBPERS;"number of persons";3;3
+NBPERS;"number of persons";4;4
+NBPERS;"number of persons";5;5

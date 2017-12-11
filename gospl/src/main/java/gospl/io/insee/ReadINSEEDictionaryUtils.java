@@ -29,13 +29,11 @@ import org.htmlcleaner.XPatherException;
 import au.com.bytecode.opencsv.CSVReader;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.io.CsvInputHandler;
 import gospl.io.ReadDictionaryUtils;
 
 /**
@@ -293,7 +291,7 @@ public class ReadINSEEDictionaryUtils {
 		CSVReader reader = null;
 		try {
 			InputStreamReader isReader = new InputStreamReader(new FileInputStream(f), encoding);
-			reader = new CSVReader(isReader, CsvInputHandler.detectSeparator(f)); // , '\t'
+			reader = new CSVReader(isReader,';'); // , '\t'
 		} catch (FileNotFoundException e) {
 			throw new IllegalArgumentException("unable to find file "+f);
 		} catch (IOException e) {

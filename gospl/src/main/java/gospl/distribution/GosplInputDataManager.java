@@ -34,7 +34,6 @@ import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
@@ -81,6 +80,12 @@ public class GosplInputDataManager {
 	private Set<AFullNDimensionalMatrix<? extends Number>> inputData;
 	private Set<GosplPopulation> samples;
 
+	/**
+	 * Loads a configuration file from the path provided as parameter 
+	 * @param configurationFilePath
+	 * @throws IllegalArgumentException
+	 * @throws IOException
+	 */
 	public GosplInputDataManager(final Path configurationFilePath) 
 			throws IllegalArgumentException, IOException {
 		this.configuration = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
@@ -88,10 +93,15 @@ public class GosplInputDataManager {
 		this.dataParser = new GSDataParser();
 	}
 	
+	/**
+	 * Loads the configuration file from a configuration file object passed as parameter. 
+	 * @param configurationFile
+	 */
 	public GosplInputDataManager(final GenstarConfigurationFile configurationFile) {
 		this.configuration = configurationFile;
 		this.dataParser = new GSDataParser();
 	}
+	
 
 	/**
 	 * 
@@ -100,7 +110,6 @@ public class GosplInputDataManager {
 	 * <p>
 	 * Method gets all data file from the builder and harmonizes them to one another using line identifier attributes
 	 * 
-	 * @return A {@link Set} of {@link INDimensionalMatrix}
 	 * @throws InputFileNotSupportedException
 	 * @throws IOException
 	 * @throws InvalidFormatException
@@ -118,7 +127,7 @@ public class GosplInputDataManager {
 										wrapper, 
 										this.configuration.getBaseDirectory()
 										), 
-						this.configuration.getDemoDictionary().getAttributes()
+								this.configuration.getDemoDictionary()
 						));
 	}
 
@@ -137,8 +146,14 @@ public class GosplInputDataManager {
 		samples = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
-						this.configuration.getDemoDictionary().getAttributes()));
+				samples.add(
+						getSample(
+								sf.getSurvey(
+										wrapper, 
+										this.configuration.getBaseDirectory()
+										), 
+						this.configuration.getDemoDictionary()
+						));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -149,7 +164,8 @@ public class GosplInputDataManager {
 	 * Returns an unmodifiable view of input data tables, as a raw set of matrices
 	 * @return
 	 */
-	public Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number>> getRawDataTables() {
+	public Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number>> 
+			getRawDataTables() {
 		return Collections.unmodifiableSet(this.inputData);
 	}
 	
@@ -160,8 +176,12 @@ public class GosplInputDataManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public Set<AFullNDimensionalMatrix<Integer>> getContingencyTables(){
-		return this.inputData.stream().filter(matrix -> matrix.getMetaDataType().equals(GSSurveyType.ContingencyTable))
-				.map(matrix -> (AFullNDimensionalMatrix<Integer>) matrix).collect(Collectors.toSet());
+		return this.inputData.stream()
+					.filter(
+							matrix -> matrix.getMetaDataType().equals(GSSurveyType.ContingencyTable))
+					.map(
+							matrix -> (AFullNDimensionalMatrix<Integer>) matrix)
+					.collect(Collectors.toSet());
 	}
 	
 	/**
@@ -182,13 +202,17 @@ public class GosplInputDataManager {
 	 * @throws MatrixCoordinateException
 	 *
 	 */
-	public INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> collapseDataTablesIntoDistribution()
-			throws IllegalDistributionCreation, IllegalControlTotalException {
+	public INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> 
+			collapseDataTablesIntoDistribution()
+					throws IllegalDistributionCreation, IllegalControlTotalException {
+		
 		if (inputData.isEmpty())
 			throw new IllegalArgumentException(
 					"To collapse matrices you must build at least one first: see buildDistributions method");
+		
 		if (inputData.size() == 1)
 			return getFrequency(inputData.iterator().next());
+		
 		final Set<AFullNDimensionalMatrix<Double>> fullMatrices = new HashSet<>();
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Proceed to distribution collapse", logger);
@@ -225,35 +249,45 @@ public class GosplInputDataManager {
 	/*
 	 * Get the distribution matrix from data files
 	 */
-	private Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
-			final Collection<DemographicAttribute<? extends IValue>> attributes) throws IOException, InvalidSurveyFormatException {
+	public Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(
+			final IGSSurvey survey,
+			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) 
+					throws IOException, InvalidSurveyFormatException {
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		
 		// Read headers and store possible variables by line index
-		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(attributes);
+		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionnary);
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(attributes);
+		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionnary);
 
 		// Store column related attributes while keeping unrelated attributes separated
 		final Set<Set<DemographicAttribute<? extends IValue>>> columnSchemas = new HashSet<>();
 		for(Set<IValue> cValues : columnHeaders.values())
 			columnSchemas.add(cValues.stream()
-					.map(v -> attributes.stream().filter(att -> att.equals(v.getValueSpace().getAttribute()))
-							.findFirst().get()).collect(Collectors.toSet()));
+										.map(v -> dictionnary.getAttributes()
+													.stream()
+													.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get()
+											)
+										.collect(Collectors.toSet()));
 						
 		// Remove lower generality schema: e.g. if we have scheam [A,B] then [A] or [B] will be skiped
 		columnSchemas.removeAll(columnSchemas.stream().filter(schema -> 
-			columnSchemas.stream().anyMatch(higherSchema -> schema.stream()
-					.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
-				.collect(Collectors.toSet()));
+			columnSchemas.stream()
+						.anyMatch(higherSchema -> schema.stream()
+														.allMatch(
+																att -> higherSchema.contains(att)) 
+																		&& higherSchema.size() > schema.size()))
+						.collect(Collectors.toSet()));
 		
 		// Store line related attributes while keeping unrelated attributes separated
 		final Set<Set<DemographicAttribute<? extends IValue>>> rowSchemas = new HashSet<>();
 		for(Set<IValue> rValues : rowHeaders.values())
 			rowSchemas.add(rValues.stream()
-					.map(v -> attributes.stream().filter(att -> att.equals(v.getValueSpace().getAttribute()))
-							.findFirst().get()).collect(Collectors.toSet()));
+					.map(v -> dictionnary.getAttributes()
+									.stream()
+									.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get())
+									.collect(Collectors.toSet()));
 		
 		rowSchemas.removeAll(rowSchemas.stream().filter(schema -> 
 			rowSchemas.stream().anyMatch(higherSchema -> schema.stream()
@@ -291,10 +325,15 @@ public class GosplInputDataManager {
 						final GSEnumDataType dt = dataParser.getValueType(stringVal);
 						// Store coordinate for the value. It is made of all line & column attribute's aspects
 						final Map<DemographicAttribute<? extends IValue>, IValue> coordSet =
-								Stream.concat(rowHeaders.get(row).stream(), columnHeaders.get(col).stream())
-										.collect(Collectors.toMap(val -> attributes.stream()
-												.filter(att -> att.equals(val.getValueSpace().getAttribute()))
-												.findFirst().get(), Function.identity()));
+								Stream.concat(
+										rowHeaders.get(row).stream(), 
+										columnHeaders.get(col).stream()
+										).collect(
+												Collectors.toMap(
+														val -> dictionnary.getAttributes().stream()
+																.filter(att -> att.equals(val.getValueSpace().getAttribute()))
+																.findFirst().get(), 
+														Function.identity()));
 						final ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordSet);
 						// Add the coordinate / parsed value pair into the matrix
 						if (dt.isNumericValue())
@@ -311,8 +350,9 @@ public class GosplInputDataManager {
 	/*
 	 * Transpose any matrix to a frequency based matrix
 	 */
-	private AFullNDimensionalMatrix<Double> getFrequency(final AFullNDimensionalMatrix<? extends Number> matrix)
-			throws IllegalControlTotalException {
+	private AFullNDimensionalMatrix<Double> getFrequency(
+			final AFullNDimensionalMatrix<? extends Number> matrix)
+					throws IllegalControlTotalException {
 		
 		// returned matrix
 		AFullNDimensionalMatrix<Double> freqMatrix = null;
@@ -395,84 +435,15 @@ public class GosplInputDataManager {
 	 * creates a GoSPl population.
 	 */
 	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final Collection<DemographicAttribute<? extends IValue>> attributes)
+			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary)
 			throws IOException, InvalidSurveyFormatException {
-		return getSample(survey, attributes, null, Collections.emptyMap());
+		return getSample(survey, dictionnary, null, Collections.emptyMap());
 	}
 	
 	/**
 	 * Based on a survey wrapping data, and for a given set of expected attributes, 
 	 * creates a GoSPl population.
 	 */
-	@Deprecated
-	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final Collection<DemographicAttribute<? extends IValue>> attributes, 
-			Integer maxIndividuals,
-			Map<String,String> keepOnlyEqual
-			)
-			throws IOException, InvalidSurveyFormatException {
-		
-		final GosplPopulation sampleSet = new GosplPopulation();
-		
-		// Read headers and store possible variables by column index
-		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = survey.getColumnSample(attributes);
-
-		if (columnHeaders.isEmpty()) 
-			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
-		
-		int unmatchSize = 0;
-		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
-		
-		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
-			
-			// too much ?
-			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
-				break;
-			
-			final Map<DemographicAttribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
-			final List<String> indiVals = survey.readLine(i);
-			//System.err.println(i+" "+indiVals);
-
-			if(indiVals.size() <= maxIndivSize){
-				logger.warn("One individual does not fit required number of attributes: \n"
-						+ Arrays.toString(indiVals.toArray()));
-						
-				unmatchSize++;
-				continue;
-			}
-			for (final Integer idx : columnHeaders.keySet()){
-				
-				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
-				IValue val = att.getValueSpace().addValue(indiVals.get(idx));
-				
-				// filter
-				if (val != null) {
-					String expected = keepOnlyEqual.get(att.getAttributeName());
-					if (expected != null && !val.getStringValue().equals(expected))
-						// skip
-						continue loopLines;
-				}
-				
-				if (val!=null)
-					entityAttributes.put(att, val);
-				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
-					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
-				else {
-					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
-							+att.getAttributeName());
-					unmatchSize++;
-				}
-			}
-			if(entityAttributes.size() == entityAttributes.size())
-				sampleSet.add(new GosplEntity(entityAttributes));
-		}
-		if (unmatchSize > 0) {
-			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
-				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
-		}
-		return sampleSet;
-	}
-	
 	public static GosplPopulation getSample(final IGSSurvey survey, 
 			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary, 
 			Integer maxIndividuals,

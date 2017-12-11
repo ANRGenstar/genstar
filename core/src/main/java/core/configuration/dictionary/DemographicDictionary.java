@@ -75,9 +75,16 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	@SuppressWarnings("unchecked")
 	@Override
 	public DemographicDictionary<A> addAttributes(A... attributes) {
-		this.attributes.addAll(Arrays.asList(attributes));
-		this.name2attribute.putAll(Arrays.asList(attributes).stream()
-				.collect(Collectors.toMap(
+		return addAttributes(Arrays.asList(attributes));
+	}
+	
+
+	@Override
+	public DemographicDictionary<A> addAttributes(Collection<A> attributes) {
+		this.attributes.addAll(attributes);
+		this.name2attribute.putAll(
+				attributes.stream()
+							.collect(Collectors.toMap(
 								IAttribute::getAttributeName,
 								Function.identity())));
 		return this;
@@ -121,10 +128,32 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 			throw new NullPointerException("This dictionary contains no reference to the attribute with name "+string);
 		return a;
 	}
+	
+	public boolean containsAttribute(String name) {
+		return name2attribute.containsKey(name);
+	}
+
 
 	@Override
 	public int size() {
 		return attributes.size();
 	}
-	
+
+	@Override
+	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary) {
+		IGenstarDictionary<A> d = new DemographicDictionary<>(this);
+		d.addAttributes(dictionnary.getAttributes());
+		return d;
+	}
+
+	@Override
+	public boolean containsValue(String valueStr) {
+		for (A a: attributes) {
+			if (a.getValueSpace().contains(valueStr))
+				return true;
+		}
+		return false;
+	}
+
+
 }

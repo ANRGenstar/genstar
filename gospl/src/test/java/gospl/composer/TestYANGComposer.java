@@ -1,0 +1,99 @@
+package gospl.composer;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.junit.Test;
+
+import core.configuration.GenstarConfigurationFile;
+import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.IGenstarDictionary;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.io.GSSurveyWrapper;
+import core.metamodel.io.IGSSurvey;
+import core.metamodel.value.IValue;
+import gospl.GosplPopulation;
+import gospl.distribution.GosplInputDataManager;
+import gospl.distribution.exception.IllegalControlTotalException;
+import gospl.distribution.exception.IllegalDistributionCreation;
+import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.io.GosplSurveyFactory;
+import gospl.io.ReadPopulationsUtils;
+import gospl.io.exception.InvalidSurveyFormatException;
+import gospl.io.insee.ReadINSEEDictionaryUtils;
+
+public class TestYANGComposer {
+
+
+	@Test
+	public void test() {
+
+		// load the list of dwellings
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoDwellings = ReadINSEEDictionaryUtils
+				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_DWELLING.txt");
+		
+		GosplPopulation popDwellings = ReadPopulationsUtils.readFromCSVFile(
+				"src/test/resources/yang/dwelling_household_toy/list_dwellings.csv", 
+				dicoDwellings);
+	
+		// load the list of households
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoHouseholds = ReadINSEEDictionaryUtils
+				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_HOUSEHOLD.txt");
+		
+		GosplPopulation popHouseholds = ReadPopulationsUtils.readFromCSVFile(
+				"src/test/resources/yang/dwelling_household_toy/list_households.csv", 
+				dicoHouseholds);
+	
+		// load the probabilities
+		GosplSurveyFactory gsf = new GosplSurveyFactory();
+
+		IGSSurvey survey;
+		try {
+			survey = gsf.getSurvey(
+					"src/test/resources/yang/dwelling_household_toy/surface vs size.csv", 
+					GSSurveyType.LocalFrequencyTable);
+		} catch (InvalidFormatException | IOException | InvalidSurveyFormatException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} 
+		
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoMerge = 
+				dicoDwellings.merge(dicoHouseholds);
+		
+		GenstarConfigurationFile gcf = new GenstarConfigurationFile();
+		gcf.setBaseDirectory(FileSystems.getDefault().getPath("."));
+		gcf.setDemoDictionary((DemographicDictionary<DemographicAttribute<? extends IValue>>) dicoMerge);
+		
+
+		GSSurveyWrapper surveyWrapper = new GSSurveyWrapper(
+				FileSystems.getDefault().getPath("src/test/resources/yang/dwelling_household_toy/surface vs size.csv"), 
+				GSSurveyType.LocalFrequencyTable,
+				';',
+				1,
+				1
+				);
+		gcf.addSurveyWrapper(surveyWrapper);
+		
+		GosplInputDataManager gidm = new GosplInputDataManager(gcf);
+		try {
+			gidm.buildDataTables();
+		} catch (InvalidFormatException | IOException | InvalidSurveyFormatException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+		} 
+		try {
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = 
+					gidm.collapseDataTablesIntoDistribution();
+		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {
+			e.printStackTrace();
+			throw new RuntimeException(e);
+
+		} 
+		
+		//fail("Not yet implemented");
+	}
+
+}

@@ -98,6 +98,9 @@ public interface IValueSpace<V extends IValue> {
 	 */
 	public boolean contains(IValue value);
 	
+	public boolean contains(String valueStr);
+
+	
 	/**
 	 * Return the *empty value* for this value space
 	 * 

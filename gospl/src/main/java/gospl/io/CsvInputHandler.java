@@ -108,7 +108,7 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	@Override
 	public List<String> readLine(int rowNum) {
-		List<String> line = new ArrayList<>(Arrays.asList(dataTable.get(rowNum)));
+		List<String> line = Arrays.asList(dataTable.get(rowNum));
 		return line;
 	}
 
@@ -326,6 +326,10 @@ public class CsvInputHandler extends AbstractInputHandler {
 		});
 		
 		Log.debug("order of merit for separators: "+relevant);
+		if (relevant.isEmpty()) {
+			Log.warn("no separator detected in this file; it probably contains one or no column");
+			return ';';
+		}
 		return candidates[relevant.get(0)];
 		
 	}

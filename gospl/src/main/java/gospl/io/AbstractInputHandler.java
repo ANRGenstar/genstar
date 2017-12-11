@@ -62,24 +62,26 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 * 
 	 * @return returns for each column id the list of attributes values
 	 */
-	@Deprecated
 	@Override
 	public Map<Integer, Set<IValue>> getColumnHeaders(
-			Collection<DemographicAttribute<? extends IValue>> attributes) {
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
 		
 		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
 			final List<String> column = readLines(0, getFirstRowIndex(), i);
 			for (String columnVal : column) {
-				Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().getValues().stream())
-						.filter(asp -> asp.getStringValue().equals(columnVal)).collect(Collectors.toSet());
+				Set<IValue> vals = dictionnary.getAttributes()
+						.stream()
+						.flatMap(att -> att.getValueSpace().getValues().stream())
+						.filter(asp -> asp.getStringValue().equals(columnVal))
+						.collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
 					final Set<IValue> vals2 = new HashSet<>(vals);
 					vals = column.stream()
-							.flatMap(s -> attributes.stream().filter(att -> att.getAttributeName().equals(s)))
+							.flatMap(s -> dictionnary.getAttributes().stream().filter(att -> att.getAttributeName().equals(s)))
 							.flatMap(att -> vals2.stream().filter(v -> v.getValueSpace().getAttribute().equals(att)))
 							.collect(Collectors.toSet());
 				}
@@ -94,39 +96,33 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	
 
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
-		return getColumnHeaders(dictionnary.getAttributes());
-	}
-
-
-	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
-		
-		return getColumnSample(dictionnary.getAttributes());
-	}
-
-	@Override
 	/**
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
-	@Deprecated
 	public Map<Integer, Set<IValue>> getRowHeaders(
-			Collection<DemographicAttribute<? extends IValue>> attributes) {
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
 		
 		final List<Integer> attributeIdx = new ArrayList<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
 			final List<String> sLine = readLine(line);
 			for (int idx = 0; idx < getFirstColumnIndex(); idx++) {
 				final String headAtt = sLine.get(idx);
-				if (attributes.stream().map(att -> att.getAttributeName())
-						.anyMatch(attName -> attName.equals(headAtt)))
+				
+				if (dictionnary.containsAttribute(headAtt))
+					// if this attribute is explicitely defined,
+					// we found it.
 					attributeIdx.add(idx);
+				
 				if (headAtt.isEmpty()) {
+					// detect the attribute by finding an attribute which has 
+					// all of these values as modalities
 					final List<String> valList = readColumn(idx);
-					if (attributes.stream().anyMatch(att -> att.getValueSpace().getValues().stream()
-							.allMatch(val -> valList.contains(val.getStringValue()))))
+					//if (dictionnary)
+					if (dictionnary.getAttributes()
+							.stream()
+							.anyMatch(att -> att.getValueSpace().getValues()
+												.stream()
+												.allMatch(val -> valList.contains(val.getStringValue()))))
 						attributeIdx.add(idx);
 				}
 			}
@@ -135,11 +131,16 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		final Map<Integer, Set<IValue>> rowHeaders = new HashMap<>();
 		for (int i = getFirstRowIndex(); i <= getLastRowIndex(); i++) {
 			final List<String> rawLine = readColumns(0, getFirstColumnIndex(), i);
-			final List<String> line = attributeIdx.stream().map(idx -> rawLine.get(idx)).collect(Collectors.toList());
+			final List<String> line = attributeIdx.stream()
+													.map(idx -> rawLine.get(idx))
+													.collect(Collectors.toList());
 			for (int j = 0; j < line.size(); j++) {
 				final String lineVal = line.get(j);
-				final Set<IValue> vals = attributes.stream().flatMap(att -> att.getValueSpace().getValues().stream())
-						.filter(asp -> asp.getStringValue().equals(lineVal)).collect(Collectors.toSet());
+				final Set<IValue> vals = dictionnary.getAttributes()
+													.stream()
+													.flatMap(att -> att.getValueSpace().getValues().stream())
+													.filter(asp -> asp.getStringValue().equals(lineVal))
+													.collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
@@ -147,13 +148,14 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					final List<String> headList = readLines(0, getFirstRowIndex(), j);
 					if (headList.stream().allMatch(s -> s.isEmpty())) {
 						for (final List<String> column : readColumns(0, getFirstColumnIndex()))
-							inferedHeads.addAll(attributes.stream()
+							inferedHeads.addAll(dictionnary.getAttributes()
+									.stream()
 									.filter(a -> a.getValueSpace().getValues().stream()
 											.allMatch(av -> column.contains(av.getStringValue())))
 									.collect(Collectors.toSet()));
 					} else {
-						inferedHeads.addAll(headList.stream()
-								.flatMap(s -> attributes.stream().filter(a -> a.getAttributeName().equals(s)))
+						inferedHeads.addAll(dictionnary.getAttributes().stream()
+								.flatMap(s -> dictionnary.getAttributes().stream().filter(a -> a.getAttributeName().equals(s)))
 								.collect(Collectors.toSet()));
 					}
 					final Set<IValue> vals2 = new HashSet<>(vals);
@@ -170,25 +172,16 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return rowHeaders;
 	}
 	
-
-	@Override
-	public Map<Integer, Set<IValue>> getRowHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
-		return getRowHeaders(dictionnary.getAttributes());
-	}
-
-	
-	
-	@Deprecated
 	@Override
 	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			Collection<DemographicAttribute<? extends IValue>> attributes) {
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
 		
 		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
 		
 		for(int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++){
 			List<String> columnAtt = readLines(0, getFirstRowIndex(), i);
-			Set<DemographicAttribute<? extends IValue>> attSet = attributes.stream()
+			Set<DemographicAttribute<? extends IValue>> attSet = dictionnary.getAttributes()
+					.stream()
 					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
 					.collect(Collectors.toSet());
 			if(attSet.isEmpty())
