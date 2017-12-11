@@ -134,5 +134,10 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	public String toString() {
 		return this.toPrettyString();
 	}
+
+	@Override
+	public boolean contains(String valueStr) {
+		return values.containsKey(valueStr);
+	}
 	
 }

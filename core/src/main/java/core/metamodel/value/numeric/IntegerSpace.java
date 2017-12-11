@@ -159,5 +159,10 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	public String toString() {
 		return this.toPrettyString();
 	}
+	
+	@Override
+	public boolean contains(String valueStr) {
+		return values.values().stream().anyMatch(v -> v.getStringValue().equals(valueStr));
+	}
 
 }

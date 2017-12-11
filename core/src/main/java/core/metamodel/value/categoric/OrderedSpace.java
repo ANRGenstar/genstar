@@ -192,4 +192,9 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 		return this.toPrettyString();
 	}
 
+	@Override
+	public boolean contains(String valueStr) {
+		return values.stream().anyMatch(v -> v.getStringValue().equals(valueStr));
+	}
+
 }

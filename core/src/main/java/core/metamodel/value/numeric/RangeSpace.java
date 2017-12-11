@@ -207,4 +207,9 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		return this.toPrettyString();
 	}
 	
+	@Override
+	public boolean contains(String valueStr) {
+		return values.stream().anyMatch(v -> v.getStringValue().equals(valueStr));
+	}
+	
 }

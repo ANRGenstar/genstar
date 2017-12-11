@@ -93,6 +93,7 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	@Override
 	public void setEmptyValue(String value){
 		// JUST DONT DO THAT
+		throw new UnsupportedOperationException();
 	}
 	
 	@Override
@@ -119,6 +120,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	@Override
 	public String toString() {
 		return this.toPrettyString();
+	}
+
+	@Override
+	public boolean contains(String valueStr) {
+		return false;
 	}
 	
 }

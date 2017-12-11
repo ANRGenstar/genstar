@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.io.GSSurveyType;
@@ -291,13 +292,16 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
 		
-		Map<Integer, Set<IValue>> res = new HashMap<>(attributes.size());
+		Map<Integer, Set<IValue>> res = new HashMap<>(dictionnary.getAttributes().size());
 				
 		// prepare attributes information
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = attributes.stream()
-				.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = 
+				dictionnary.getAttributes()
+							.stream()
+							.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		// prepare table information
 		final Table table = getDBFTable();
@@ -337,7 +341,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getRowHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
 		return Collections.emptyMap();
 	}
 	
@@ -390,12 +395,16 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
 
-		Map<Integer, DemographicAttribute<? extends IValue>> res = new HashMap<>(attributes.size());
+		Map<Integer, DemographicAttribute<? extends IValue>> res = new HashMap<>(dictionnary.size());
 				
 		// prepare attributes information
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = attributes.stream().collect(Collectors.toMap(a->a.getAttributeName(), a->a));
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = 
+				dictionnary.getAttributes()
+						.stream()
+						.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		// prepare table information
 		final Table table = getDBFTable();
@@ -432,8 +441,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 				try {
 					DemographicAttribute<? extends IValue> updatedAtt = DemographicAttributeFactory.getFactory()
 							.createRefinedAttribute(att, dt);
-					attributes.remove(att);
-					attributes.add(updatedAtt);
+					dictionnary.getAttributes().remove(att);
+					dictionnary.getAttributes().add(updatedAtt);
 					name2attribute.put(currentField.getName(), updatedAtt);
 				} catch (GSIllegalRangedData e) {
 					// unable to do that; don't touch this attribute

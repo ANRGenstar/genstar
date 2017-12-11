@@ -137,4 +137,9 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 		return innerValueSpace.getAttribute();
 	}
 	
+	@Override
+	public boolean contains(String valueStr) {
+		return innerValueSpace.contains(valueStr);
+	}
+	
 }

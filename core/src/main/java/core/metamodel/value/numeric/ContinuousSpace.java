@@ -164,4 +164,8 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 		return this.toPrettyString();
 	}
 
+	@Override
+	public boolean contains(String valueStr) {
+		return values.values().stream().anyMatch(v -> v.getStringValue().equals(valueStr));
+	}
 }

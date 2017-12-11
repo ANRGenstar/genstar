@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.io.GSSurveyType;
@@ -239,6 +240,9 @@ public class DownloadINSEESampleData {
 		Set<DemographicAttribute<? extends IValue>> updatedAttributes = 
 				new HashSet<>(getDictionnary().getAttributes());
 
+		IGenstarDictionary<DemographicAttribute<? extends IValue>> updatedDictionnary = 
+				new DemographicDictionary<>(dictionnary);
+
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();
 			//keepOnlyEqual.put("DEPT", "75");
@@ -247,7 +251,7 @@ public class DownloadINSEESampleData {
 			
 			pop = GosplInputDataManager.getSample(
 					survey, 
-					updatedAttributes, 
+					updatedDictionnary, 
 					maxToRead,
 					Collections.emptyMap() // TODO parameters for that
 					);
