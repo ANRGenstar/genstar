@@ -6,11 +6,11 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
 import spin.SpinPopulation;
-import spin.algo.generator.network.RandomNetworkGenerator;
-import spin.algo.generator.network.RegularNetworkGenerator;
-import spin.algo.generator.network.SFNetworkGenerator;
-import spin.algo.generator.network.SWNetworkGenerator;
-import spin.algo.generator.network.SpatialNetworkGenerator;
+import spin.algo.generator.SpinRandomNetworkGenerator;
+import spin.algo.generator.SpinRegularNetworkGenerator;
+import spin.algo.generator.SpinSFNetworkGenerator;
+import spin.algo.generator.SpinSWNetworkGenerator;
+import spin.algo.generator.SpinSpatialNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
 
 /** Propose de generer des reseaux 

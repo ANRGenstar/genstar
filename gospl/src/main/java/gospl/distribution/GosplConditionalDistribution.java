@@ -236,6 +236,10 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	public AControl<Double> getIdentityProductVal() {
 		return new ControlFrequency(1d);
 	}
+	
+	public AControl<Double> getAtomicVal() {
+		return jointDistributionSet.iterator().next().getAtomicVal();
+	}
 
 	// -------------------- Utilities -------------------- //
 

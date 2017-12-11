@@ -137,7 +137,7 @@
       }
     }, {
       "DEMOGRAPHIC ATTRIBUTE" : {
-        "NAME" : "Acitivté",
+        "NAME" : "Activité",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
           "VALUES" : [ {

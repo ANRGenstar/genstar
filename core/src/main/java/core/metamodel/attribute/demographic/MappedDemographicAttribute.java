@@ -61,7 +61,7 @@ public class MappedDemographicAttribute<K extends IValue, V extends IValue> exte
 		} catch (NullPointerException e) {
 			if(getReferentAttribute().getValueSpace().contains(value))
 				return Arrays.asList(this.getEmptyValue());
-			if(this.getValueSpace().getValues().contains(value))
+			if(this.getValueSpace().contains(value))
 				return Arrays.asList(this.getReferentAttribute().getEmptyValue());
 			if(this.getEmptyValue().equals(value) || 
 					getReferentAttribute().getValueSpace().getEmptyValue().equals(value))

@@ -314,6 +314,11 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	public final AControl<T> getIdentityProductVal() {
 		return m.getIdentityProductVal();
 	}
+	
+	@Override
+	public AControl<T> getAtomicVal() {
+		return m.getAtomicVal();
+	}
 
 	@Override
 	public final AControl<T> parseVal(GSDataParser parser, String val) {

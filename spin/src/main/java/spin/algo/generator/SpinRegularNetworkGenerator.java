@@ -1,4 +1,4 @@
-package spin.algo.generator.network;
+package spin.algo.generator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,11 +14,11 @@ import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
 
-public class RegularNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
+public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  AbstractSpinPopulationGenerator<E> {
 
 	private int k;
 	
-	public RegularNetworkGenerator(int _k) {
+	public SpinRegularNetworkGenerator(int _k) {
 		this.k = _k;
 	}
 	
@@ -26,10 +26,10 @@ public class RegularNetworkGenerator<E extends ADemoEntity> implements INetworkG
 	 * 
 	 * @param myNetwork base network
 	 * @param k network connectivity
-	 * @return myNetwork finak network
+	 * @return myNetwork final network
 	 */
 	@Override
-	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 	
 		List<Node> nodes = new ArrayList<>(network.getNodes());

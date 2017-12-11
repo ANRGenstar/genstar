@@ -1,4 +1,4 @@
-package spin.algo.generator.network;
+package spin.algo.generator;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
@@ -8,10 +8,10 @@ import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
-public class CompleteNetworkGenerator<E extends ADemoEntity> implements INetworkGenerator<E> {
+public class SpinCompleteNetworkGenerator<E extends ADemoEntity> extends  AbstractSpinPopulationGenerator<E> {
 
 	@Override
-	public SpinPopulation<E> generateNetwork(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 		
 		// TODO: manage directed / undirected grph ...
