@@ -11,7 +11,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
-import spin.objects.SpinNetwork;
+import gospl.GosplPopulation;
 
 /** Population Spin. 
  * 
@@ -22,14 +22,13 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 	// Network associe a la population.
 	private SpinNetwork network;
 	
-
 	// Interface qui permet d'avoir acces aux proprietes du reseau associe a la population.
 	// (pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
 	// de certaines proprietes)
 //	private INetProperties properties;
 	
-	// TODO IPopulation<APopulationEntity, APopulationAttribute, APopulationValue>
-	private final Collection<E> population;
+	IPopulation<E, DemographicAttribute<? extends IValue>> population;
+	//private final Collection<E> population;
 
 	/**
 	 * 
@@ -43,28 +42,28 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 		this.network = network; 
 	}
 	
-	/**
-	 * Default inner type collection is {@link Set}
-	 * 
-	 */
-	public SpinPopulation() {
-		population = new HashSet<>();
-	}
+//	/**
+//	 * Default inner type collection is {@link Set}
+//	 * 
+//	 */
+//	public SpinPopulation() {
+//		population =  new GosplPopulation();		
+//	}
 	
-	/**
-	 * Place the concrete type of collection you want this population be. If the propose
-	 * collection is not empty, then default inner collection type is choose.
-	 * 
-	 * @see GosplPopulation()
-	 * 
-	 * @param population
-	 */
-	public SpinPopulation(Collection<E> population){
-		if(!population.isEmpty())
-			this.population = new HashSet<>();
-		else
-			this.population = population;
-	}
+//	/**
+//	 * Place the concrete type of collection you want this population be. If the propose
+//	 * collection is not empty, then default inner collection type is choose.
+//	 * 
+//	 * @see GosplPopulation()
+//	 * 
+//	 * @param population
+//	 */
+//	public SpinPopulation(Collection<E> population){
+//		if(!population.isEmpty())
+//			this.population = new HashSet<>();
+//		else
+//			this.population = population;
+//	}
 	
 	public SpinNetwork getNetwork() {
 		return network;
@@ -171,5 +170,10 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 		return null;
 	}
 	
+	@Override 
+	public String toString() {
+		return"Population:\n" + population +
+				"\nNetwork: \n" + network + "\n" ;			
+	}
 
 }

@@ -58,7 +58,11 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	
 	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
 			IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile) {
-		this.population = population.stream().map(entity -> new SpllEntity(entity))
+		this.population = population.stream()
+				.map(entity -> {
+					SpllEntity e = new SpllEntity(entity);
+					e._setEntityId(EntityUniqueId.createNextId(this));
+					return e;})
 				.collect(Collectors.toSet());
 		this.attributes = population.getPopulationAttributes();
 		this.geoFile = geoFile;

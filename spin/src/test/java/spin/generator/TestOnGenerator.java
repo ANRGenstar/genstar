@@ -6,12 +6,18 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.GosplEntity;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.util.GSUtilGenerator;
+import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
+import spin.algo.generator.SpinCompleteNetworkGenerator;
+import spin.algo.generator.ISpinPopulationGenerator;
+import spin.algo.generator.SpinRandomNetworkGenerator;
+import spin.algo.generator.SpinRegularNetworkGenerator;
+import spin.algo.generator.SpinSFNetworkGenerator;
 import spin.interfaces.ENetworkGenerator;
-import spin.objects.SpinNetwork;
 
 public class TestOnGenerator {
 
@@ -46,11 +52,34 @@ public class TestOnGenerator {
 		SpinNetwork networkSW = populationWithNetworkSW.getNetwork();
 		System.out.println("Fin de generation de reseau SmallWorld");
 */		
-		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
-		SpinNetwork networkTest = populationWithNetwork.getNetwork();
-		networkTest.network.display();
+//		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.ScaleFree, population);
+//		SpinNetwork networkTest = populationWithNetwork.getNetwork();
+//		networkTest.network.display();
 		
-		Graph sampleGraph = networkTest.randomWalkSample(50);
-		sampleGraph.display();
+//		Graph sampleGraph = networkTest.randomWalkSample(50);
+//		sampleGraph.display();
+		
+		ISpinPopulationGenerator<GosplEntity> spinPopGen = new SpinCompleteNetworkGenerator<GosplEntity>();
+		SpinPopulation<GosplEntity> networkedPop = spinPopGen.generate(30);
+		
+		System.out.println(networkedPop.toString());
+
+		
+		spinPopGen = new SpinRegularNetworkGenerator<>(4);
+		networkedPop = spinPopGen.generate(30);
+		
+		System.out.println(networkedPop.toString());		
+
+		
+		spinPopGen = new SpinRandomNetworkGenerator<>(0.1);
+		networkedPop = spinPopGen.generate(30);
+		
+		System.out.println(networkedPop.toString());	
+		
+		
+		spinPopGen = new SpinSFNetworkGenerator<>();
+		networkedPop = spinPopGen.generate(30);
+		
+		System.out.println(networkedPop.toString());			
 	}
 }

@@ -7,19 +7,29 @@ import java.util.Random;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Node;
 
-import spin.objects.SpinNetwork;
+import core.metamodel.IPopulation;
+import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
+import spin.SpinNetwork;
+import spin.SpinPopulation;
+import spin.algo.factory.SpinNetworkFactory;
 
-public class SFNetworkGenerator {
+public class SpinSFNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E> {
 
-	/** Génération d'un réseau ScaleFree. 
+	public SpinSFNetworkGenerator() {}
+	
+	/** Generation of a ScaleFree network 
 	 * 
-	 * @param myNetwork réseau de base
-	 * @return myNetwork réseau final
+	 * @param myPop base population
+	 * @return network final network
 	 */
-	public SpinNetwork generateNetwork(SpinNetwork myNetwork){
+	@Override
+	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);	
 		
 		// Listing the nodes
-		List<Node> nodes = new ArrayList<>(myNetwork.getNodes());
+		List<Node> nodes = new ArrayList<>(network.getNodes());
 		int nbNodes = nodes.size();
 		
 		// List of links for the selection phase
@@ -27,8 +37,8 @@ public class SFNetworkGenerator {
 		
 		// Adding the first link
 		// At this point, the graph is composed of two linked nodes and a list of unlinked ones
-		myNetwork.putLink(String.valueOf(0), nodes.get(0), nodes.get(1));
-		links.add(myNetwork.network.getEdge(String.valueOf(0)));
+		network.putLink(String.valueOf(0), nodes.get(0), nodes.get(1));
+		links.add(network.network.getEdge(String.valueOf(0)));
 		int nbLinks = 1;
 		
 		Random rand = new Random();
@@ -58,13 +68,13 @@ public class SFNetworkGenerator {
 			
 			// Linking the new node and adding the new link to the list
 			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasEdgeBetween(nodeTo)) {
-				myNetwork.putLink(String.valueOf(newLinkId), nodeFrom, nodeTo);
-				links.add(myNetwork.network.getEdge(String.valueOf(newLinkId)));
+				network.putLink(String.valueOf(newLinkId), nodeFrom, nodeTo);
+				links.add(network.network.getEdge(String.valueOf(newLinkId)));
 				nbLinks ++;
 				newLinkId++;
 			}
 		}
 		
-		return myNetwork;
+		return new SpinPopulation<>(myPop, network);
 	}
 }
