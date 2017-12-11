@@ -10,6 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.junit.Test;
 
 import core.configuration.GenstarJsonUtil;
@@ -48,7 +49,8 @@ public class GosplIPFTest {
 	public void simpleTest() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
-				new GSUtilPopulation("simpleDictionary.gns").buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
+				new GSUtilPopulation("simpleDictionary.gns")
+				.buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 
 		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = 
 				new GosplNDimensionalMatrixFactory().createDistribution(
@@ -67,8 +69,8 @@ public class GosplIPFTest {
 		try {
 			seed = new GSUtilPopulation().buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 		} catch (GSIllegalRangedData e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			throw new RuntimeException(e1);
 		}
 
 		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = null;
@@ -76,8 +78,8 @@ public class GosplIPFTest {
 			marginals = new GosplNDimensionalMatrixFactory().createDistribution(
 					new GSUtilPopulation().buildPopulation(POPULATION_SIZE));
 		} catch (GSIllegalRangedData e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			throw new RuntimeException(e1);
 		}
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
@@ -93,8 +95,9 @@ public class GosplIPFTest {
 		try {
 			seed = new GSUtilPopulation().buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 		} catch (GSIllegalRangedData e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
+			throw new RuntimeException(e1);
+
 		}
 
 		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = null;
@@ -102,12 +105,9 @@ public class GosplIPFTest {
 			GSUtilPopulation gaut = new GSUtilPopulation();
 			gaut.buildPopulation(POPULATION_SIZE);
 			marginals = gaut.getSegmentedFrequency(SEGMENTATION);
-		} catch (GSIllegalRangedData e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IllegalDistributionCreation e) {
-			// TODO Auto-generated catch block
+		} catch (IllegalDistributionCreation | GSIllegalRangedData e) {
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
@@ -138,8 +138,8 @@ public class GosplIPFTest {
 					.filter(a -> mappedAttributes.stream().noneMatch(ma -> ma.getReferentAttribute().equals(a)))
 					.collect(Collectors.toSet()));
 		} catch (IllegalArgumentException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
@@ -156,8 +156,8 @@ public class GosplIPFTest {
 			sf.createSummary(PATH_TO_DICO.getParent().resolve("outputTest.csv").toFile(), GSSurveyType.GlobalFrequencyTable, popOut);
 			sf.createSummary(PATH_TO_DICO.getParent().resolve("inputTest.csv"), marginals);
 		} catch (InvalidFormatException | IOException | InvalidSurveyFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 
 		// Basic test of population size generation
@@ -174,8 +174,8 @@ public class GosplIPFTest {
 					.unmarshalFromGenstarJson(PATH_TO_DICO.resolve("withMapDictionary.gns"), 
 					DemographicDictionary.class);
 		} catch (IllegalArgumentException | IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		
 		Set<DemographicAttribute<? extends IValue>> refAttributes = gju.getAttributes().stream()
@@ -191,19 +191,25 @@ public class GosplIPFTest {
 			gaut.buildPopulation(POPULATION_SIZE);
 			marginals = gaut.getSegmentedFrequency(SEGMENTATION);
 		} catch (IllegalDistributionCreation e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
+
 		}
 		
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
 
 		final GosplSurveyFactory sf = new GosplSurveyFactory(0, ';', 1, 1);
 		try {
-			sf.createSummary(PATH_TO_DICO.getParent().resolve("outputTest.csv").toFile(), GSSurveyType.GlobalFrequencyTable, popOut);
-			sf.createSummary(PATH_TO_DICO.getParent().resolve("inputTest.csv"), marginals);
+			sf.createSummary(
+					PATH_TO_DICO.getParent().resolve("outputTest.csv").toFile(), 
+					GSSurveyType.GlobalFrequencyTable, 
+					popOut);
+			sf.createSummary(
+					PATH_TO_DICO.getParent().resolve("inputTest.csv"), 
+					marginals);
 		} catch (InvalidFormatException | IOException | InvalidSurveyFormatException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		
 		// Basic test of population size generation
@@ -221,8 +227,8 @@ public class GosplIPFTest {
 		try {
 			sampler = inferenceAlgo.inferSRSampler(marginals, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			throw new RuntimeException(e);
 		}
 		ISyntheticGosplPopGenerator gosplGenerator = new DistributionBasedGenerator(sampler);
 		return gosplGenerator.generate(GENERATION_SIZE);
