@@ -34,7 +34,6 @@ import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;

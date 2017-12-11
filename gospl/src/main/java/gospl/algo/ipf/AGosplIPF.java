@@ -52,6 +52,8 @@ import gospl.sampler.IEntitySampler;
  * <p>
  * 
  * TODO: make it possible to choose the function to establish criteria - here is AAPD but could have been SRMSE
+ * <br>
+ * TODO: make it possible to choose what IPF do when uncounter zero cell marginal
  * 
  * @author kevinchapuis
  *
@@ -180,10 +182,10 @@ public abstract class AGosplIPF<T extends Number> {
 
 		GSPerformanceUtil gspu = new GSPerformanceUtil("*** IPF PROCEDURE ***", logger, Level.DEBUG);
 
-		logger.debug(unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d
+		gspu.sysoStempMessage(unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d
 				+"% of samples dimensions will be estimate with output controls");
 		
-		logger.debug("Sample seed controls' dimension: "+seed.getDimensions()
+		gspu.sysoStempMessage("Sample seed controls' dimension: "+seed.getDimensions()
 			.stream().map(d -> d.getAttributeName()+" = "+d.getValueSpace().getValues().size())
 			.collect(Collectors.joining(";")));
 
@@ -208,12 +210,17 @@ public abstract class AGosplIPF<T extends Number> {
 				for(MarginDescriptor seedMarginalDescriptor : margin.getMarginDescriptors()){
 					double marginValue = margin.getControl(seedMarginalDescriptor).getValue().doubleValue();
 					double actualValue = seed.getVal(seedMarginalDescriptor.getSeed()).getValue().doubleValue();
-					AControl<Double> factor = new ControlFrequency(marginValue/actualValue);
+
+					AControl<Double> factor = new ControlFrequency(marginValue/ 
+							(actualValue == 0d ? marginValue : actualValue) ); // If zero seed marginal statu quo
 					Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> relatedCoordinates = 
 							seed.getCoordinates(seedMarginalDescriptor.getSeed()); 
 					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates) {
+						// When no data in seed but known marginal in control tables put atomic value in
+						if(actualValue == 0d && marginValue != 0d) {seed.setValue(coord, seed.getAtomicVal());}
 						AControl<T> av = seed.getVal(coord);
-						logger.trace("Coord {}: AV = {} and UpdatedV = {}",
+						// WARNING: erase after debug
+						logger.debug("Coord {}: AV = {} and UpdatedV = {}",
 							coord, av.getValue().doubleValue(), av.multiply(factor).getValue().doubleValue());
 					}
 				}
@@ -225,7 +232,7 @@ public abstract class AGosplIPF<T extends Number> {
 			relativeIncrease = Math.abs(aapd - cachedAapd);
 			aapd = cachedAapd;
 		}
-		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value");
+		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value and "+stepIter+" iteration(s)");
 		return seed;
 	}
 

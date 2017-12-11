@@ -354,7 +354,39 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public ACoordinate<D, A> getCoordinate(String ... keyAndVal) throws IllegalArgumentException;
 
-// ------------------------- utility methods ------------------------- //
+	// ------------------------- Inner value utilities ------------------------- //
+
+	/**
+	 * Get relative {@code T} null value
+	 * 
+	 * @return
+	 */
+	public AControl<T> getNulVal();
+
+	/**
+	 * Get the value that guarantee that any {@code T} value
+	 * multiply by {@link #getIdentityProductVal()} stay the same
+	 * 
+	 * @return
+	 */
+	public AControl<T> getIdentityProductVal();
+	
+	/**
+	 * Get the smallest unit value relative to {@code T} parametric type
+	 * @return
+	 */
+	public AControl<T> getAtomicVal();
+
+	/**
+	 * Parses a value from a string and encapsulates it in a {@link AControl} 
+	 * 
+	 * @param parser
+	 * @param val
+	 * @return
+	 */
+	public AControl<T> parseVal(GSDataParser parser, String val);
+	
+	// ------------------------- utility methods ------------------------- //
 	
 	/**
 	 * Checks if all of the coordinates of the matrix have defined values.
@@ -377,30 +409,6 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	public String toString();
 	
 	public String toCsv(char csvSeparator);
-
-	/**
-	 * Get relative {@code T} null value
-	 * 
-	 * @return
-	 */
-	public AControl<T> getNulVal();
-
-	/**
-	 * Get the value that guarantee that any {@code T} value
-	 * multiply by {@link #getIdentityProductVal()} stay the same
-	 * 
-	 * @return
-	 */
-	public AControl<T> getIdentityProductVal();
-
-	/**
-	 * Parses a value from a string and encapsulates it in a {@link AControl} 
-	 * 
-	 * @param parser
-	 * @param val
-	 * @return
-	 */
-	public AControl<T> parseVal(GSDataParser parser, String val);
 
 
 	/**

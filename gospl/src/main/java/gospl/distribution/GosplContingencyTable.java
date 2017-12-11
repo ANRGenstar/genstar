@@ -73,6 +73,11 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	}
 	
 	@Override
+	public AControl<Integer> getAtomicVal() {
+		return new ControlContingency(1);
+	}
+	
+	@Override
 	public AControl<Integer> parseVal(GSDataParser parser, String val){
 		if(!parser.getValueType(val).equals(GSEnumDataType.Integer))
 			return getNulVal();
@@ -93,7 +98,6 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 		throw new IllegalArgumentException("should not normalize a "+getMetaDataType());		
 		
 	}
-
 
 
 }

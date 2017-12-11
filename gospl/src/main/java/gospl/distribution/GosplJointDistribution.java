@@ -20,6 +20,8 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
+	private Double min = Math.pow(10, -8);
+	
 	protected GosplJointDistribution(Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> matrix){
 		super(matrix);
 	}
@@ -71,6 +73,11 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	@Override
 	public AControl<Double> getIdentityProductVal() {
 		return new ControlFrequency(1d);
+	}
+	
+	@Override
+	public AControl<Double> getAtomicVal() {
+		return new ControlFrequency(min / this.size());
 	}
 
 	@Override
