@@ -27,41 +27,32 @@ public interface IGSSurvey {
 	public int getLastColumnIndex();
 	public int getFirstRowIndex();
 	public int getFirstColumnIndex();
-
+	
 	/**
 	 * Returns, for the underlying file format, the indices of each column associated with its possible values
-	 * @param attributes
+	 * @param dictionnary
 	 * @return
 	 */
-	@Deprecated
-	public Map<Integer, Set<IValue>> getColumnHeaders(
-			Collection<DemographicAttribute<? extends IValue>> attributes);
-	
 	public Map<Integer, Set<IValue>> getColumnHeaders(
 			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
 	
-
 	/**
 	 * Returns, for the underlying file format, the indices of each row associated with its possible values
 	 * @param attributes
 	 * @return
 	 */
-	@Deprecated
-	public Map<Integer, Set<IValue>> getRowHeaders(
-			Collection<DemographicAttribute<? extends IValue>> attributes);
-	
 	public Map<Integer, Set<IValue>> getRowHeaders(
 			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
 	
 	/**
-	 * Retrieves column headers from a sample data file
+	 * Retrieves column headers from a data table-like file
 	 */
 	@Deprecated
 	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
 			Collection<DemographicAttribute<? extends IValue>> attributes);
 	
 	/**
-	 * Retrieves the column headers from a sample file
+	 * Retrieves the column headers from a data table-like file
 	 * @param dictionnary
 	 * @return
 	 */

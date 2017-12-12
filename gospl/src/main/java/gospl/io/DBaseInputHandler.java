@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.io.GSSurveyType;
@@ -39,8 +39,6 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	
 	private Table table = null;
 	private Map<Integer,String> idx2columnName = null;
-	
-	private GSSurveyType surveyType;
 			
 	public DBaseInputHandler(GSSurveyType surveyType, String databaseFilename) {
 
@@ -53,8 +51,6 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	public DBaseInputHandler(GSSurveyType surveyType, File databaseFile) {
 
 		super(surveyType, databaseFile);
-		
-		this.surveyType = surveyType;
 		
 		this.table = null;
 		this.idx2columnName = null;
@@ -291,12 +287,12 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
+	public Map<Integer, Set<IValue>> getColumnHeaders(IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
 		
-		Map<Integer, Set<IValue>> res = new HashMap<>(attributes.size());
+		Map<Integer, Set<IValue>> res = new HashMap<>(dictionary.size());
 				
 		// prepare attributes information
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = attributes.stream()
+		Map<String,DemographicAttribute<? extends IValue>> name2attribute = dictionary.getAttributesAndRecords().stream()
 				.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		// prepare table information
@@ -334,11 +330,6 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		}
 		
 		super.finalize();
-	}
-
-	@Override
-	public Map<Integer, Set<IValue>> getRowHeaders(Collection<DemographicAttribute<? extends IValue>> attributes) {
-		return Collections.emptyMap();
 	}
 	
 	/**

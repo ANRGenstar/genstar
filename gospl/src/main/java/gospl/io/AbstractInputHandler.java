@@ -56,17 +56,65 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	}
 	
 	/**
-	 * The default implementation tries to read the first line, and infer the corresponding values. 
-	 * It is valid as long as the content includes the title line. Else inherited classes should
-	 * override it.
-	 * 
-	 * @return returns for each column id the list of attributes values
+	 * {@inheritDoc}
+	 * <p>
+	 * Default implementation for sample data. Override if not suitable for specific format file.
 	 */
 	@Deprecated
 	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
 			Collection<DemographicAttribute<? extends IValue>> attributes) {
 		
+		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
+		
+		for(int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++){
+			List<String> columnAtt = readLines(0, getFirstRowIndex(), i);
+			Set<DemographicAttribute<? extends IValue>> attSet = attributes.stream()
+					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
+					.collect(Collectors.toSet());
+			if(attSet.isEmpty())
+				continue;
+			if(attSet.size() > 1){
+				int row = getFirstRowIndex();
+				Optional<DemographicAttribute<? extends IValue>> opAtt = null;
+				do {
+					String value = read(row++, i);
+					opAtt = attSet.stream().filter(att -> att.getValueSpace().getValues()
+							.stream().anyMatch(val -> val.getStringValue().equals(value)))
+							.findAny();
+				} while (opAtt.isPresent());
+				columnHeaders.put(i, opAtt.get());
+			} else {
+				columnHeaders.put(i, attSet.iterator().next());
+			}
+		}
+		return columnHeaders;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Default implementation for tabular data. Override if not suitable for another file format.
+	 */
+	@Override
+	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+		
+		return getColumnSample(dictionnary.getAttributesAndRecords());
+	}
+	
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Default implementation for tabular data. Override if not suitable for another file format.
+	 */
+	@Override
+	public Map<Integer, Set<IValue>> getColumnHeaders(
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+		
+		final Collection<DemographicAttribute<? extends IValue>> attributes =
+				dictionary.getAttributesAndRecords();
 		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
@@ -92,28 +140,14 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return columnHeaders;
 	}
 	
-
-	@Override
-	public Map<Integer, Set<IValue>> getColumnHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
-		return getColumnHeaders(dictionnary.getAttributes());
-	}
-
-
-	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
-		
-		return getColumnSample(dictionnary.getAttributes());
-	}
-
-	@Override
 	/**
+	 * {@inheritDoc}
+	 * <p>
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
-	@Deprecated
-	public Map<Integer, Set<IValue>> getRowHeaders(
-			Collection<DemographicAttribute<? extends IValue>> attributes) {
+	@Override
+	public Map<Integer, Set<IValue>> getRowHeaders(IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+		Collection<DemographicAttribute<? extends IValue>> attributes = dictionary.getAttributesAndRecords();
 		
 		final List<Integer> attributeIdx = new ArrayList<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
@@ -168,46 +202,6 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 			}
 		}
 		return rowHeaders;
-	}
-	
-
-	@Override
-	public Map<Integer, Set<IValue>> getRowHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
-		return getRowHeaders(dictionnary.getAttributes());
-	}
-
-	
-	
-	@Deprecated
-	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			Collection<DemographicAttribute<? extends IValue>> attributes) {
-		
-		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
-		
-		for(int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++){
-			List<String> columnAtt = readLines(0, getFirstRowIndex(), i);
-			Set<DemographicAttribute<? extends IValue>> attSet = attributes.stream()
-					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
-					.collect(Collectors.toSet());
-			if(attSet.isEmpty())
-				continue;
-			if(attSet.size() > 1){
-				int row = getFirstRowIndex();
-				Optional<DemographicAttribute<? extends IValue>> opAtt = null;
-				do {
-					String value = read(row++, i);
-					opAtt = attSet.stream().filter(att -> att.getValueSpace().getValues()
-							.stream().anyMatch(val -> val.getStringValue().equals(value)))
-							.findAny();
-				} while (opAtt.isPresent());
-				columnHeaders.put(i, opAtt.get());
-			} else {
-				columnHeaders.put(i, attSet.iterator().next());
-			}
-		}
-		return columnHeaders;
 	}
 	
 

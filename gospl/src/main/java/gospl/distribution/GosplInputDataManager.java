@@ -75,7 +75,6 @@ public class GosplInputDataManager {
 	private final double EPSILON = Math.pow(10d, -3);
 
 	private final GenstarConfigurationFile configuration;
-	private final GSDataParser dataParser;
 
 	private Set<AFullNDimensionalMatrix<? extends Number>> inputData;
 	private Set<GosplPopulation> samples;
@@ -84,12 +83,10 @@ public class GosplInputDataManager {
 			throws IllegalArgumentException, IOException {
 		this.configuration = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
 				configurationFilePath);
-		this.dataParser = new GSDataParser();
 	}
 	
 	public GosplInputDataManager(final GenstarConfigurationFile configurationFile) {
 		this.configuration = configurationFile;
-		this.dataParser = new GSDataParser();
 	}
 
 	/**
@@ -116,8 +113,8 @@ public class GosplInputDataManager {
 								sf.getSurvey(
 										wrapper, 
 										this.configuration.getBaseDirectory()
-										), 
-						this.configuration.getDemoDictionary().getAttributes()
+										),
+								this.configuration.getDemoDictionary()
 						));
 	}
 
@@ -136,8 +133,14 @@ public class GosplInputDataManager {
 		samples = new HashSet<>();
 		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers())
 			if (wrapper.getSurveyType().equals(GSSurveyType.Sample))
-				samples.add(getSample(sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
-						this.configuration.getDemoDictionary().getAttributes()));
+				samples.add(
+						getSample(
+								sf.getSurvey(
+										wrapper, 
+										this.configuration.getBaseDirectory()),
+								this.configuration.getDemoDictionary(), null,
+								Collections.emptyMap()
+						));
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -195,9 +198,10 @@ public class GosplInputDataManager {
 		
 		// Matrices that contain a record attribute
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
-				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> this.isRecordAttribute(d)))
+				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> 
+					this.configuration.getDemoDictionary().getRecords().contains(d)))
 				.collect(Collectors.toSet())){
-			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getRecords().getAttributes().contains(d))
+			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getDemoDictionary().getRecords().contains(d))
 					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
 		}
@@ -207,7 +211,8 @@ public class GosplInputDataManager {
 		
 		// Matrices that do not contain any record attribute
 		for (final AFullNDimensionalMatrix<? extends Number> mat : inputData.stream()
-				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !this.isRecordAttribute(d)))
+				.filter(mat -> mat.getDimensions().stream().allMatch(d -> 
+						!this.configuration.getDemoDictionary().getRecords().contains(d)))
 				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
 		
@@ -221,18 +226,27 @@ public class GosplInputDataManager {
 	// -------------------------- inner utility methods -------------------------- //
 	/////////////////////////////////////////////////////////////////////////////////
 
-	/*
-	 * Get the distribution matrix from data files
+	/**
+	 * Get the distribution matrix from data files, using provided dictionary
+	 * 
+	 * @param survey
+	 * @param dictionary
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
 	 */
-	private Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
-			final Collection<DemographicAttribute<? extends IValue>> attributes) throws IOException, InvalidSurveyFormatException {
+	public static Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
+			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) 
+			throws IOException, InvalidSurveyFormatException {
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
+		final Collection<DemographicAttribute<? extends IValue>> attributes = dictionary.getAttributesAndRecords();
+		final GSDataParser dataParser = new GSDataParser();
 		
 		// Read headers and store possible variables by line index
-		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(attributes);
+		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionary);
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(attributes);
+		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionary);
 
 		// Store column related attributes while keeping unrelated attributes separated
 		final Set<Set<DemographicAttribute<? extends IValue>>> columnSchemas = new HashSet<>();
@@ -306,7 +320,93 @@ public class GosplInputDataManager {
 		}
 		return cTableSet;
 	}
+	
+	/**
+	 * Get the sample as a population given provided dictionary, number of people to retain and
+	 * regex-like entity description as a map of attribute / value
+	 * 
+	 * @param survey
+	 * @param dictionnary
+	 * @param maxIndividuals
+	 * @param keepOnlyEqual
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
+	 */
+	public static GosplPopulation getSample(final IGSSurvey survey, 
+			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary, 
+			Integer maxIndividuals,
+			Map<String,String> keepOnlyEqual
+			)
+			throws IOException, InvalidSurveyFormatException {
+		
+		final GosplPopulation sampleSet = new GosplPopulation();
+		
+		// Read headers and store possible variables by column index
+		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = 
+				survey.getColumnSample(dictionnary);
 
+		if (columnHeaders.isEmpty()) 
+			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
+		
+		int unmatchSize = 0;
+		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
+		
+		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+			
+			// too much ?
+			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
+				break;
+			
+			final Map<DemographicAttribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
+			final List<String> indiVals = survey.readLine(i);
+			//System.err.println(i+" "+indiVals);
+
+			if(indiVals.size() <= maxIndivSize){
+				logger.warn("One individual does not fit required number of attributes: \n"
+						+ Arrays.toString(indiVals.toArray()));
+						
+				unmatchSize++;
+				continue;
+			}
+			for (final Integer idx : columnHeaders.keySet()){
+				
+				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
+				IValue val = att.getValueSpace().addValue(indiVals.get(idx));
+				
+				// filter
+				if (val != null) {
+					String expected = keepOnlyEqual.get(att.getAttributeName());
+					if (expected != null && !val.getStringValue().equals(expected))
+						// skip
+						continue loopLines;
+				}
+				
+				if (val!=null)
+					entityAttributes.put(att, val);
+				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
+					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
+				else {
+					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+							+att.getAttributeName());
+					unmatchSize++;
+				}
+			}
+			if(entityAttributes.size() == entityAttributes.size())
+				sampleSet.add(new GosplEntity(entityAttributes));
+		}
+		if (unmatchSize > 0) {
+			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
+				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
+		}
+		return sampleSet;
+	}
+	
+	// ---------------------------------------------------------------------------------------- //
+	//									  INNER UTILITIES									  //
+	// ---------------------------------------------------------------------------------------- //
+	
+	
 	/*
 	 * Transpose any matrix to a frequency based matrix
 	 */
@@ -388,158 +488,6 @@ public class GosplInputDataManager {
 
 		return freqMatrix;
 	}
-
-	/**
-	 * Based on a survey wrapping data, and for a given set of expected attributes, 
-	 * creates a GoSPl population.
-	 */
-	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final Collection<DemographicAttribute<? extends IValue>> attributes)
-			throws IOException, InvalidSurveyFormatException {
-		return getSample(survey, attributes, null, Collections.emptyMap());
-	}
-	
-	/**
-	 * Based on a survey wrapping data, and for a given set of expected attributes, 
-	 * creates a GoSPl population.
-	 */
-	@Deprecated
-	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final Collection<DemographicAttribute<? extends IValue>> attributes, 
-			Integer maxIndividuals,
-			Map<String,String> keepOnlyEqual
-			)
-			throws IOException, InvalidSurveyFormatException {
-		
-		final GosplPopulation sampleSet = new GosplPopulation();
-		
-		// Read headers and store possible variables by column index
-		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = survey.getColumnSample(attributes);
-
-		if (columnHeaders.isEmpty()) 
-			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
-		
-		int unmatchSize = 0;
-		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
-		
-		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
-			
-			// too much ?
-			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
-				break;
-			
-			final Map<DemographicAttribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
-			final List<String> indiVals = survey.readLine(i);
-			//System.err.println(i+" "+indiVals);
-
-			if(indiVals.size() <= maxIndivSize){
-				logger.warn("One individual does not fit required number of attributes: \n"
-						+ Arrays.toString(indiVals.toArray()));
-						
-				unmatchSize++;
-				continue;
-			}
-			for (final Integer idx : columnHeaders.keySet()){
-				
-				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
-				IValue val = att.getValueSpace().addValue(indiVals.get(idx));
-				
-				// filter
-				if (val != null) {
-					String expected = keepOnlyEqual.get(att.getAttributeName());
-					if (expected != null && !val.getStringValue().equals(expected))
-						// skip
-						continue loopLines;
-				}
-				
-				if (val!=null)
-					entityAttributes.put(att, val);
-				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
-					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
-				else {
-					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
-							+att.getAttributeName());
-					unmatchSize++;
-				}
-			}
-			if(entityAttributes.size() == entityAttributes.size())
-				sampleSet.add(new GosplEntity(entityAttributes));
-		}
-		if (unmatchSize > 0) {
-			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
-				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
-		}
-		return sampleSet;
-	}
-	
-	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary, 
-			Integer maxIndividuals,
-			Map<String,String> keepOnlyEqual
-			)
-			throws IOException, InvalidSurveyFormatException {
-		
-		final GosplPopulation sampleSet = new GosplPopulation();
-		
-		// Read headers and store possible variables by column index
-		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = 
-				survey.getColumnSample(dictionnary);
-
-		if (columnHeaders.isEmpty()) 
-			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
-		
-		int unmatchSize = 0;
-		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
-		
-		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
-			
-			// too much ?
-			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
-				break;
-			
-			final Map<DemographicAttribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
-			final List<String> indiVals = survey.readLine(i);
-			//System.err.println(i+" "+indiVals);
-
-			if(indiVals.size() <= maxIndivSize){
-				logger.warn("One individual does not fit required number of attributes: \n"
-						+ Arrays.toString(indiVals.toArray()));
-						
-				unmatchSize++;
-				continue;
-			}
-			for (final Integer idx : columnHeaders.keySet()){
-				
-				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
-				IValue val = att.getValueSpace().addValue(indiVals.get(idx));
-				
-				// filter
-				if (val != null) {
-					String expected = keepOnlyEqual.get(att.getAttributeName());
-					if (expected != null && !val.getStringValue().equals(expected))
-						// skip
-						continue loopLines;
-				}
-				
-				if (val!=null)
-					entityAttributes.put(att, val);
-				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
-					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
-				else {
-					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
-							+att.getAttributeName());
-					unmatchSize++;
-				}
-			}
-			if(entityAttributes.size() == entityAttributes.size())
-				sampleSet.add(new GosplEntity(entityAttributes));
-		}
-		if (unmatchSize > 0) {
-			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
-				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
-		}
-		return sampleSet;
-	}
 	
 	/*
 	 * Result in the same matrix without any record attribute
@@ -547,8 +495,8 @@ public class GosplInputDataManager {
 	private AFullNDimensionalMatrix<Double> getTransposedRecord(
 			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
 		
-		Set<DemographicAttribute<? extends IValue>> dims = recordMatrices.getDimensions().stream().filter(d -> !this.isRecordAttribute(d))
-				.collect(Collectors.toSet());
+		Set<DemographicAttribute<? extends IValue>> dims = recordMatrices.getDimensions().stream()
+				.filter(d -> !this.configuration.getDemoDictionary().getRecords().contains(d)).collect(Collectors.toSet());
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Transpose process of matrix "
 				+Arrays.toString(recordMatrices.getDimensions().toArray()), logger, Level.TRACE);
@@ -574,10 +522,5 @@ public class GosplInputDataManager {
 		
 		return freqMatrix;
 	}
-	
-	private boolean isRecordAttribute(DemographicAttribute<? extends IValue> attribute){
-		return configuration.getRecords().getAttributes().contains(attribute);
-	}
-
 
 }

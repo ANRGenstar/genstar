@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -235,9 +233,6 @@ public class DownloadINSEESampleData {
 		
 		
 		GosplPopulation pop = null;
-		
-		Set<DemographicAttribute<? extends IValue>> updatedAttributes = 
-				new HashSet<>(getDictionnary().getAttributes());
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();
@@ -247,7 +242,7 @@ public class DownloadINSEESampleData {
 			
 			pop = GosplInputDataManager.getSample(
 					survey, 
-					updatedAttributes, 
+					this.getDictionnary(), 
 					maxToRead,
 					Collections.emptyMap() // TODO parameters for that
 					);

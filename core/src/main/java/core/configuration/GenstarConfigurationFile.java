@@ -1,7 +1,6 @@
 package core.configuration;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -9,12 +8,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.LogManager;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 
@@ -43,7 +43,6 @@ public class GenstarConfigurationFile {
 
 	// Demographic attributes
 	private DemographicDictionary<DemographicAttribute<? extends IValue>> demoDictionary;
-	private DemographicDictionary<MappedDemographicAttribute<? extends IValue, ? extends IValue>> records;
 
 	/**
 	 * The path in which the files included in this configuration is stored, if known.
@@ -68,14 +67,6 @@ public class GenstarConfigurationFile {
 	
 	@JsonProperty(GenstarJsonUtil.INPUT_FILES)
 	public void setSurveyWrappers(List<GSSurveyWrapper> surveys) {
-		// do no check at construction time, 
-		// as we don't know yet our base path to find these files 
-		// when we are unmarshalled
-		// (life is complicated)
-		/*for(GSSurveyWrapper wrapper : surveys)
-			if(!wrapper.getRelativePath().toAbsolutePath().toFile().exists()){
-				throw new RuntimeException("unable to find file: "+wrapper.getRelativePath().toAbsolutePath());
-			}*/
 		this.dataFileList.addAll(surveys);
 	}
 
@@ -95,21 +86,6 @@ public class GenstarConfigurationFile {
 	}
 	
 	/**
-	 * Give dictionary of record attributes
-	 * @return
-	 */
-	@JsonProperty(GenstarJsonUtil.DEMO_RECORDS)
-	public DemographicDictionary<MappedDemographicAttribute<? extends IValue, ? extends IValue>> getRecords(){
-		return records;
-	}
-	
-	@JsonProperty(GenstarJsonUtil.DEMO_RECORDS)
-	public void setRecords(DemographicDictionary<MappedDemographicAttribute<? extends IValue, ? extends IValue>> records) {
-		this.records = records;
-		this.isCircleReferencedAttribute();
-	}
-	
-	/**
 	 * The root directory from when to resolve relative path
 	 * @return
 	 */
@@ -120,7 +96,7 @@ public class GenstarConfigurationFile {
 	
 	@JsonProperty(GenstarJsonUtil.BASE_DIR)
 	public void setBaseDirectory(Path f) {
-		System.out.println("GenstarConfigurationFile: setting basepath to "+f);
+		LogManager.getLogger().info("Setting Genstar configuration basepath to "+f);
 		this.baseDirectory = f;
 	}
 	
@@ -132,8 +108,7 @@ public class GenstarConfigurationFile {
 	 */
 	private void isCircleReferencedAttribute() throws IllegalArgumentException {
 		Collection<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
-		if(demoDictionary != null) attributes.addAll(demoDictionary.getAttributes());
-		if(records != null) attributes.addAll(records.getAttributes());
+		if(demoDictionary != null) attributes.addAll(demoDictionary.getAttributesAndRecords());
 		// store attributes that have referent attribute
 		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> attToRefAtt = 
 				attributes.stream().filter(att -> !att.getReferentAttribute().equals(att))

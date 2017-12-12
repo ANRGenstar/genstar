@@ -14,6 +14,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandom;
 import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
 import gospl.algo.ipf.margin.Margin;
 import gospl.algo.ipf.margin.MarginDescriptor;
@@ -219,9 +220,12 @@ public abstract class AGosplIPF<T extends Number> {
 						// When no data in seed but known marginal in control tables put atomic value in
 						if(actualValue == 0d && marginValue != 0d) {seed.setValue(coord, seed.getAtomicVal());}
 						AControl<T> av = seed.getVal(coord);
-						// WARNING: erase after debug
-						logger.debug("Coord {}: AV = {} and UpdatedV = {}",
-							coord, av.getValue().doubleValue(), av.multiply(factor).getValue().doubleValue());
+						
+						// DEBUG ONLY
+						if(GenstarRandom.getInstance().nextDouble() < 0.01)
+							gspu.sysoStempMessage("Coord "+coord+": AV = "
+								+av.getValue().doubleValue()+" and UpdatedV = "
+								+av.multiply(factor).getValue().doubleValue());
 					}
 				}
 			}
