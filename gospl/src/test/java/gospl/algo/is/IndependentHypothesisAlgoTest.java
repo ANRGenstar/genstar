@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
@@ -32,6 +33,7 @@ public class IndependentHypothesisAlgoTest {
 	}
 
 	@Test
+	@Ignore
 	public void test() {
 		assertTrue(partialDistribution.isSegmented());
 		assertTrue(!partialDistribution.getMatrix().isEmpty());

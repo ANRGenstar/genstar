@@ -288,23 +288,32 @@ public class ReadINSEEDictionaryUtils {
 		final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
 		final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
 				
-		List<String> labels = new LinkedList<>(modalitiesCode2Lib.values());
 		List<Object> actualValues = null;
 		
 		GSEnumDataType dataType = GSEnumDataType.Nominal;
 		if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
 			// TODO define how this should be... defined !
 			if (modalitiesCode2Lib.isEmpty())
-				modalitiesCode2Lib.put(previousCode, previousCode);
+				modalitiesCode2Lib.put(previousCode, previousLib);
 			dataType = GSEnumDataType.Nominal; // unfortunatly we don't know exactly what it is
+			actualValues = new LinkedList<>(modalitiesCode2Lib.keySet());
+
 		} else if (isRange) {
 			dataType = GSEnumDataType.Range;
 			actualValues = new LinkedList<>(modalitiesCode2Lib.keySet());
 		} else if (isInteger) {
 			dataType = GSEnumDataType.Integer;
+		} else {
+			actualValues = new LinkedList<>(modalitiesCode2Lib.keySet());
 		}
 		
-		logger.info("detected attribute {} - {}, {} with {} modalities", previousCode, previousLib, dataType, modalitiesCode2Lib.size());
+		List<String> labels = new LinkedList<>(modalitiesCode2Lib.values());
+
+		
+		logger.info("detected attribute {} - {}, {} with {} modalities: {} and codes {}", 
+				previousCode, previousLib, dataType, modalitiesCode2Lib.size(),
+				labels, actualValues);
+
 
 		DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute(
 				previousCode, 

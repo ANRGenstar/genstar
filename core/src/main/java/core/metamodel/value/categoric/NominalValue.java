@@ -15,12 +15,14 @@ import core.util.data.GSEnumDataType;
 public class NominalValue implements IValue {
 	
 	private String value;
+	private Object actualValue;
 	
 	@JsonManagedReference
 	private NominalSpace vs;
 	
 	protected NominalValue(NominalSpace vs, String value){
 		this.value = value;
+		this.actualValue = value;
 		this.vs = vs;
 	}
 
@@ -33,7 +35,7 @@ public class NominalValue implements IValue {
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getActualValue() {
-		return (T) this.value;
+		return (T) this.actualValue;
 	}
 	
 	@Override
@@ -63,10 +65,9 @@ public class NominalValue implements IValue {
 		return this.getStringValue();
 	}
 
-
 	@Override
 	public <T> void setActualValue(T v) throws UnsupportedOperationException {
-		throw new UnsupportedOperationException("cannot change the actual value of a Nominal attribute");
+		this.actualValue = v;
 	}
 
 	

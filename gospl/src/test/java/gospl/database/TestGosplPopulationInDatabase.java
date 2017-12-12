@@ -16,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
@@ -246,6 +247,7 @@ public class TestGosplPopulationInDatabase {
 	}
 	
 
+	@Ignore
 	@Test
 	public void testCountEntitiesHavingOneValue() {
 
@@ -274,6 +276,7 @@ public class TestGosplPopulationInDatabase {
 				
 	}
 	
+	@Ignore
 	@Test
 	public void testCountEntitiesHavingTwoValues() {
 
@@ -320,6 +323,7 @@ public class TestGosplPopulationInDatabase {
 				
 	}
 	
+	@Ignore
 	@Test
 	public void testIterateEntitiesHavingOneValue() {
 
@@ -360,6 +364,7 @@ public class TestGosplPopulationInDatabase {
 				
 	}
 	
+	@Ignore
 	@Test
 	public void testIterateEntitiesHavingTwoValues() {
 

@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import core.configuration.dictionary.IGenstarDictionary;
@@ -27,6 +28,7 @@ public class TestINSEEDictionaryUtils {
 	public void tearDown() throws Exception {
 	}
 
+	@Ignore
 	@Test
 	public void testLoadFromURL1() {
 		
@@ -48,6 +50,7 @@ public class TestINSEEDictionaryUtils {
 		
 	} 
 
+	@Ignore
 	@Test
 	public void testLoadFromURL2() {
 		

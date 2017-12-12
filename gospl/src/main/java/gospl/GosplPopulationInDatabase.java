@@ -700,7 +700,7 @@ public class GosplPopulationInDatabase
 	            rs.next();
 	        } catch (SQLException e) {
 	            close();
-	            throw new RuntimeException();
+	            throw new RuntimeException(e);
 	        }
 	    }
 
@@ -732,12 +732,14 @@ public class GosplPopulationInDatabase
 
 	    private void close() {
 	        try {
-	            rs.close();
-	            try {
-	                ps.close();
-	            } catch (SQLException e) {
-	                //nothing we can do here
-	            }
+	            if (rs != null)
+	            	rs.close();
+	            if (ps != null)
+		            try {
+		                ps.close();
+		            } catch (SQLException e) {
+		                //nothing we can do here
+		            }
 	        } catch (SQLException e) {
 	            //nothing we can do here
 	        }

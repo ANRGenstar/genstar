@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.bouncycastle.crypto.RuntimeCryptoException;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import core.configuration.GenstarJsonUtil;
@@ -166,6 +167,7 @@ public class GosplIPFTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
+	@Ignore
 	public void mappedWithSegmentedTest() {
 
 		DemographicDictionary<DemographicAttribute<? extends IValue>> gju = null;
