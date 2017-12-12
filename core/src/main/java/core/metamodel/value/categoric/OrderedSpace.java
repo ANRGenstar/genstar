@@ -3,7 +3,9 @@ package core.metamodel.value.categoric;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -38,6 +40,12 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	private IAttribute<OrderedValue> attribute;
 
 	private GSCategoricTemplate template;
+	
+	/**
+	 * Contains a cache of the search for a value based on its
+	 * string counterpart (performance)
+	 */
+	private Map<String,OrderedValue> str2value = new HashMap<>();
 	
 	private int instanceIndex;
 
@@ -132,10 +140,18 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	@Override
 	public OrderedValue getValue(String value) throws NullPointerException {
+		
+		OrderedValue val = str2value.get(value);
+		if (val != null)
+			return val;
+		
 		Optional<OrderedValue> opOv = values.stream().filter(ov -> ov.getStringValue()
 				.equals(template.format(value))).findAny();
-		if(opOv.isPresent())
-			return opOv.get();
+		if(opOv.isPresent()) {
+			val = opOv.get();
+			str2value.put(value, val);
+			return val;
+		}
 		throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
 	}
