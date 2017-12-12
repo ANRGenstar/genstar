@@ -66,7 +66,6 @@ public class GSRangeTemplate {
 	 * @return
 	 */
 	public boolean isValideRangeCandidate(String value) {
-		// TODO Auto-generated method stub
 		String valueTemplate = value.replaceAll(numMatcher.getMatch(), match);
 		return Stream.of(bottomBound, middle, topBound).anyMatch(template -> template.equals(valueTemplate));
 	}

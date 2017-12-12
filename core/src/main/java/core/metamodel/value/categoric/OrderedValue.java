@@ -1,5 +1,6 @@
 package core.metamodel.value.categoric;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import core.metamodel.attribute.IValueSpace;
@@ -19,6 +20,7 @@ import core.util.data.GSEnumDataType;
 public class OrderedValue implements IValue {
 
 	private String value;
+
 	private int order;
 
 	@JsonManagedReference
@@ -35,6 +37,13 @@ public class OrderedValue implements IValue {
 		return GSEnumDataType.Order;
 	}
 
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getActualValue() {
+		return (T) this.value;
+	}
+	
 	@Override
 	public String getStringValue() {
 		return value;
@@ -83,5 +92,12 @@ public class OrderedValue implements IValue {
 	public String toString() {
 		return this.getStringValue();
 	}
+
+	@Override
+	public <T> void setActualValue(T v) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("cannot change the actual value of a Ordered attribute");
+	}
+
+	
 	
 }

@@ -14,7 +14,7 @@ import core.util.data.GSEnumDataType;
  */
 public class ContinuousValue implements IValue, Comparable<ContinuousValue> {
 
-	private Double value;
+	private final Double value;
 
 	@JsonManagedReference
 	private ContinuousSpace cs;
@@ -33,7 +33,7 @@ public class ContinuousValue implements IValue, Comparable<ContinuousValue> {
 	public String getStringValue() {
 		return String.valueOf(value);
 	}
-	
+
 	@Override
 	public int compareTo(ContinuousValue o) {
 		return this.value.compareTo(o.getActualValue());
@@ -48,8 +48,10 @@ public class ContinuousValue implements IValue, Comparable<ContinuousValue> {
 	 * The actual encapsulated value
 	 * @return
 	 */
+	@Override
+	@SuppressWarnings("unchecked")
 	@JsonIgnore
-	public double getActualValue(){
+	public Double getActualValue(){
 		return value;
 	}
 	
@@ -69,5 +71,12 @@ public class ContinuousValue implements IValue, Comparable<ContinuousValue> {
 	public String toString() {
 		return this.getStringValue();
 	}
+
+	@Override
+	public <T> void setActualValue(T v) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("cannot change the actual value of a Continuous attribute, it will always be a Double");
+	}
+
+	
 	
 }

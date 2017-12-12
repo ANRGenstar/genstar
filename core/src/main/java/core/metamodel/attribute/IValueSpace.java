@@ -51,7 +51,7 @@ public interface IValueSpace<V extends IValue> {
 	 * @param value
 	 * @return
 	 */
-	public V proposeValue(String value);
+	public V proposeValue(String value, String label);
 	
 	/**
 	 * Create and return requested value according to value space specification
@@ -59,7 +59,7 @@ public interface IValueSpace<V extends IValue> {
 	 * @param value
 	 * @return
 	 */
-	public V getInstanceValue(String value);
+	public V getInstanceValue(String value, String label);
 	
 	/**
 	 * Create, add and return requested value according to value space specification. Must be compliant
@@ -70,8 +70,13 @@ public interface IValueSpace<V extends IValue> {
 	 */
 	public V addValue(String value) throws IllegalArgumentException;
 	
+	public V addValue(String value, String label) throws IllegalArgumentException;
+
 	/**
-	 * Retrieve the value from the operational value space as it as been defined. If
+	 * Retrieve the value from the operational value space as it as been defined. 
+	 * It might correspond to either the textual representation of the value in the space,
+	 * or to its actual value.
+	 * 
 	 * the value have not been define in the theoretical space first using {@link #addValue(String)}
 	 * then an exception is raised
 	 * 
@@ -101,7 +106,7 @@ public interface IValueSpace<V extends IValue> {
 	
 	public boolean contains(String valueStr);
 
-	public boolean containsAll(Collection<String> valuesStr);
+	public boolean containsAllLabels(Collection<String> valuesStr);
 
 	
 	/**

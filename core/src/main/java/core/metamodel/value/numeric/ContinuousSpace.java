@@ -53,7 +53,7 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	}
 	
 	@Override
-	public ContinuousValue getInstanceValue(String value) {
+	public ContinuousValue getInstanceValue(String value, String label) {
 		double currentVal = gsdp.getDouble(value);
 		if(currentVal < min || currentVal > max)
 			throw new IllegalArgumentException("Proposed value "+currentVal+" is "
@@ -63,7 +63,7 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	}
 
 	@Override
-	public ContinuousValue proposeValue(String value) {
+	public ContinuousValue proposeValue(String value, String label) {
 		return new ContinuousValue(this, gsdp.getDouble(value));
 	}
 	
@@ -73,10 +73,18 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	public ContinuousValue addValue(String value) {
 		ContinuousValue iv = getValue(value);
 		if(value == null) {
-			iv = this.getInstanceValue(value);
+			iv = this.getInstanceValue(value, value);
 			values.put(iv.getActualValue(), iv);
 		}
 		return iv;
+	}
+	
+	/**
+	 * For continuous space, label is ignored.
+	 */
+	@Override
+	public ContinuousValue addValue(String value, String label) throws IllegalArgumentException {
+		return addValue(value);
 	}
 
 	@Override
@@ -171,9 +179,10 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	}
 	
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
+	public boolean containsAllLabels(Collection<String> valuesStr) {
 		return this.values.values()
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
+
 }

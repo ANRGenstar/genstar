@@ -13,7 +13,8 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
 /**
- * A set of value of nominal type
+ * A set of value of nominal type.
+ * Nominal values represent Strings.
  * 
  * @author kevinchapuis
  *
@@ -47,22 +48,29 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 	
 	@Override
-	public NominalValue proposeValue(String value) {
+	public NominalValue proposeValue(String value, String label) {
 		return new NominalValue(this, value);
 	}
 	
 	@Override
-	public NominalValue getInstanceValue(String value) {
+	public NominalValue getInstanceValue(String value, String label) {
 		return new NominalValue(this, ct.getFormatedString(value));
 	}
 	
 	@Override
 	public NominalValue addValue(String value) throws IllegalArgumentException {
+		return this.addValue(value, value);
+	}
+	
+	@Override
+	public NominalValue addValue(String value, String label) throws IllegalArgumentException {
+
 		String val = ct.getFormatedString(value);
 		NominalValue nv = values.get(val);
 		if(nv == null) {
-			nv = new NominalValue(this, val);
+			nv = new NominalValue(this, val, label);
 			this.values.put(val, nv);
+			this.values.put(label, nv);
 		}
 		return nv;
 	}
@@ -74,7 +82,10 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 
 	@Override
 	public NominalValue getValue(String value) throws NullPointerException {
-		NominalValue val = values.get(ct.getFormatedString(value));
+		NominalValue val = values.get(value);
+		if (val == null)
+			val = values.get(ct.getFormatedString(value));
+		
 		if(val == null)
 			throw new NullPointerException("The string value "+value+" is not comprise "
 				+ "in the value space "+this.toString());
@@ -142,9 +153,10 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	}
 
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
+	public boolean containsAllLabels(Collection<String> valuesStr) {
 		return this.values.values()
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
+
 }

@@ -27,6 +27,12 @@ public class RangeValue implements IValue {
 	 * we cache it here
 	 */
 	private String stringValueCached = null;
+
+	/**
+	 * The actual value of a Range might be any object:
+	 * integer, string, etc.
+	 */
+	private Object actualValue = null;
 	
 	/**
 	 * a) When it's lower bound then max is used to setup other part of the range value
@@ -85,9 +91,11 @@ public class RangeValue implements IValue {
 	 * The actual encapsulated value
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	@JsonIgnore
-	public Number[] getActualValue(){
-		return new Number[]{bottomBound, topBound};
+	@Override
+	public Object getActualValue(){
+		return this.actualValue;
 	}
 	
 	// ------------------------------------------------------ //
@@ -106,5 +114,11 @@ public class RangeValue implements IValue {
 	public String toString() {
 		return this.getStringValue();
 	}
+
+	@Override
+	public <T> void setActualValue(T v) throws UnsupportedOperationException {
+		this.actualValue = v;
+	}
+
 	
 }

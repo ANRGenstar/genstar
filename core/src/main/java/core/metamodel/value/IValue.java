@@ -48,6 +48,26 @@ public interface IValue {
 	public GSEnumDataType getType();
 	
 	/**
+	 * Returns the actual, native value.
+	 * For a Boolean, the cast to Boolean will be implicit;
+	 * for a Nominal, will be an implicit cast to String, etc.
+	 * @return
+	 */
+	public <T> T getActualValue();
+	
+	/**
+	 * Defines the actual value. Provides the possibility to defined an encoding for this value;
+	 * for instance, a Range might be "less than 10" and have an actual value of 0 or 'A'.
+	 * 
+	 * Throws an exception if it makes no sense for the given type of value; 
+	 * for instance an Integer value does not supports changing the actual value, 
+	 * as this actual value is obviously always the integer value.
+	 * 
+	 * @throws UnsupportedOperationException 
+	 */
+	public <T> void setActualValue(T v) throws UnsupportedOperationException;
+	
+	/**
 	 * The value represented as a String
 	 * 
 	 * @return

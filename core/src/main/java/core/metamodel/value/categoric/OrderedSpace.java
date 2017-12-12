@@ -66,10 +66,10 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * WARNING: order consistency is not guarantee using this method
+	 * WARNING: order consistency is not guaranteed using this method
 	 */
 	@Override
-	public OrderedValue getInstanceValue(String value) {
+	public OrderedValue getInstanceValue(String value, String label) {
 		return new OrderedValue(this, value, instanceIndex++);
 	}
 	
@@ -78,8 +78,8 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * WARNING: completly break indexation rules
 	 */
 	@Override
-	public OrderedValue proposeValue(String value) {
-		return new OrderedValue(this, value, 0);
+	public OrderedValue proposeValue(String value, String label) {
+		return new OrderedValue(this, value,  0);
 	}
 
 
@@ -97,7 +97,12 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 */
 	@Override
 	public OrderedValue addValue(String value) throws IllegalArgumentException {
-		return addValue(values.size(), value);
+		return addValue(values.size(), value, value);
+	}
+	
+	@Override
+	public OrderedValue addValue(String value, String label) throws IllegalArgumentException {
+		return addValue(values.size(), value, label);
 	}
 
 	/**
@@ -107,7 +112,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public OrderedValue addValue(int order, String value) throws IllegalArgumentException {
+	public OrderedValue addValue(int order, String value, String label) throws IllegalArgumentException {
 		OrderedValue ov = null;
 		try {
 			ov = this.getValue(value);
@@ -199,9 +204,10 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	}
 
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
+	public boolean containsAllLabels(Collection<String> valuesStr) {
 		return this.values
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
+
 }

@@ -39,6 +39,8 @@ public class BooleanValue implements IValue {
 	 * @return
 	 */
 	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	@Override
 	public Boolean getActualValue(){
 		return value;
 	}
@@ -63,6 +65,11 @@ public class BooleanValue implements IValue {
 	@Override
 	public String toString() {
 		return this.getStringValue();
+	}
+
+	@Override
+	public <T> void setActualValue(T v) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("cannot change the actual value of a Boolean attribute");
 	}
 
 }

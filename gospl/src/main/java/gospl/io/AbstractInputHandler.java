@@ -73,6 +73,9 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
 			final List<String> column = readLines(0, getFirstRowIndex(), i);
+			
+			logger.info("trying to detect an attribute based on row values: {}", column);
+
 			for (String columnVal : column) {
 				Set<IValue> vals = dictionnary.getAttributes()
 						.stream()
@@ -124,7 +127,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					//if (dictionnary)
 					if (dictionnary.getAttributes()
 							.stream()
-							.anyMatch(att -> att.getValueSpace().containsAll(valList))) {
+							.anyMatch(att -> att.getValueSpace().containsAllLabels(valList))) {
 						attributeIdx.add(idx);
 						
 					} else {

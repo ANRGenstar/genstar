@@ -43,7 +43,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	}
 	
 	@Override
-	public IntegerValue getInstanceValue(String value) {
+	public IntegerValue getInstanceValue(String value, String label) {
 		int currentVal = gsdp.parseNumbers(value).intValue();
 		if(currentVal < min || currentVal > max)
 			throw new IllegalArgumentException("Proposed value "+value+" is "
@@ -53,7 +53,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	}
 	
 	@Override
-	public IntegerValue proposeValue(String value) {
+	public IntegerValue proposeValue(String value, String label) {
 		return new IntegerValue(this, gsdp.parseNumbers(value).intValue());
 	}
 
@@ -63,10 +63,18 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	public IntegerValue addValue(String value) {
 		IntegerValue iv = getValue(value);
 		if(iv == null) {
-			iv = this.getInstanceValue(value);
+			iv = this.getInstanceValue(value, value);
 			values.put(iv.getActualValue(), iv);
 		}
 		return iv;
+	}
+	
+	/**
+	 * For integers, label is ignored
+	 */
+	@Override
+	public IntegerValue addValue(String value, String label) throws IllegalArgumentException {
+		return addValue(value);
 	}
 
 	@Override
@@ -167,10 +175,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	}
 	
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
+	public boolean containsAllLabels(Collection<String> valuesStr) {
 		return this.values.values()
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
+
 
 }

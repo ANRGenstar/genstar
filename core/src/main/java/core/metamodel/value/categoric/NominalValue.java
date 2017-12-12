@@ -1,5 +1,6 @@
 package core.metamodel.value.categoric;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import core.metamodel.value.IValue;
@@ -18,6 +19,11 @@ public class NominalValue implements IValue {
 	@JsonManagedReference
 	private NominalSpace vs;
 	
+	protected NominalValue(NominalSpace vs, String value, String label){
+		this.value = value;
+		this.vs = vs;
+	}
+
 	protected NominalValue(NominalSpace vs, String value){
 		this.value = value;
 		this.vs = vs;
@@ -27,12 +33,19 @@ public class NominalValue implements IValue {
 	public GSEnumDataType getType() {
 		return GSEnumDataType.Nominal;
 	}
-
+	
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getActualValue() {
+		return (T) this.value;
+	}
+	
 	@Override
 	public String getStringValue() {
 		return value;
 	}
-
+	
 	@Override
 	public NominalSpace getValueSpace() {
 		return vs;
@@ -54,5 +67,12 @@ public class NominalValue implements IValue {
 	public String toString() {
 		return this.getStringValue();
 	}
+
+
+	@Override
+	public <T> void setActualValue(T v) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("cannot change the actual value of a Nominal attribute");
+	}
+
 	
 }

@@ -26,6 +26,7 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	
 	public final BooleanValue valueTrue;
 	public final BooleanValue valueFalse;
+	
 	/**
 	 * Constraint bianry space constructor define with values: {@link Boolean#TRUE}, {@link Boolean#FALSE}
 	 * and a null {@link Boolean} as empty value
@@ -44,12 +45,12 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	// ---------------------------------------------------------------------- //
 
 	@Override
-	public BooleanValue getInstanceValue(String value) {
+	public BooleanValue getInstanceValue(String value, String label) {
 		return this.getValue(value);
 	}
 	
 	@Override
-	public BooleanValue proposeValue(String value) {
+	public BooleanValue proposeValue(String value, String label) {
 		return this.getValue(value);
 	}
 	
@@ -58,6 +59,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 		return this.getValue(value);
 	}
 
+	@Override
+	public BooleanValue addValue(String value, String label) throws IllegalArgumentException {
+		return this.getValue(value);
+	}
+	
 	@Override
 	public BooleanValue getValue(String value) throws NullPointerException {
 		if(!isValidCandidate(value))
@@ -129,10 +135,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	}
 
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
+	public boolean containsAllLabels(Collection<String> valuesStr) {
 		return this.values
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
+
 	
 }

@@ -67,16 +67,16 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	// ---------------------- ADDER CONTRACT ---------------------- //
 	
 	@Override
-	public V proposeValue(String value) {
-		return this.innerValueSpace.proposeValue(value);
+	public V proposeValue(String value, String label) {
+		return this.innerValueSpace.proposeValue(value, label);
 	}
 	
 	@Override
-	public V getInstanceValue(String value) {
+	public V getInstanceValue(String value, String label) {
 		Optional<V> val = noDataValues.stream().filter(v -> v.getStringValue().equals(value)).findFirst();
 		if (val.isPresent())
 			return val.get();
-		return this.innerValueSpace.getInstanceValue(value); 
+		return this.innerValueSpace.getInstanceValue(value, label); 
 	}
 	
 	@Override
@@ -143,8 +143,8 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	}
 
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
-		return this.innerValueSpace.containsAll(valuesStr);
+	public boolean containsAllLabels(Collection<String> valuesStr) {
+		return this.innerValueSpace.containsAllLabels(valuesStr);
 	}
 	
 }

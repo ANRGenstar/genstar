@@ -294,7 +294,8 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			else
 				throw new NullPointerException("Aspect "+aspect+" is absent from this control table ("+this.hashCode()+")");
 		return this.matrix.entrySet().stream()
-				.filter(e -> e.getKey().values().contains(aspect)).map(Entry::getValue)
+				.filter(e -> e.getKey().values().contains(aspect))
+				.map(Entry::getValue)
 				.reduce(getNulVal(), (c1, c2) -> getSummedControl(c1, c2));
 	}
 
@@ -354,7 +355,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			DemographicAttribute<? extends IValue> attribute = name2attribute.get(attributeName);
 			if (attribute == null)
 				throw new IllegalArgumentException("unknown attribute "+attributeName);
-			l.add(attribute.getValueSpace().addValue(attributeValueStr)); // will raise exception if the value is not ok
+			l.add(attribute.getValueSpace().getValue(attributeValueStr)); // will raise exception if the value is not ok
 			
 		}
 		

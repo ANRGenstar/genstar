@@ -46,8 +46,10 @@ public class IntegerValue implements IValue {
 	 * The actual encapsulated value
 	 * @return
 	 */
+	@SuppressWarnings("unchecked")
 	@JsonIgnore
-	public int getActualValue(){
+	@Override
+	public Integer getActualValue(){
 		return value;
 	}
 	
@@ -67,5 +69,13 @@ public class IntegerValue implements IValue {
 	public String toString() {
 		return this.getStringValue();
 	}
+	
+
+	@Override
+	public <T> void setActualValue(T v) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("cannot change the actual value of an Integer attribute, it will always be the corresponding Integer value");
+	}
+
+	
 	
 }

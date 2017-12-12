@@ -102,8 +102,16 @@ public class DemographicAttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	public DemographicAttribute<? extends IValue> createAttribute(String name, GSEnumDataType dataType,
-			List<String> values) throws GSIllegalRangedData {
+	public DemographicAttribute<? extends IValue> createAttribute(
+			String name, 
+			GSEnumDataType dataType,
+			List<String> values, List<Object> actualValues) throws GSIllegalRangedData {
+		
+		if (actualValues == null)
+			return createAttribute(name, dataType, values);
+		
+		assert values.size() == actualValues.size();
+		
 		DemographicAttribute<? extends IValue> attribute = null;
 		try {
 			attribute = this.createAttribute(name, dataType);
@@ -111,7 +119,40 @@ public class DemographicAttributeFactory {
 			attribute = this.createRangeAttribute(name, new GSDataParser().getRangeTemplate(values));
 		}
 		final IValueSpace<? extends IValue> vs = attribute.getValueSpace(); 
-		values.stream().forEach(val -> vs.addValue(val));
+		
+		for (int i=0; i<values.size(); i++) {
+			IValue val = vs.addValue(values.get(i));
+			val.setActualValue(actualValues.get(i));
+		}
+		System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
+		return attribute;
+	}
+	
+	/**
+	 * Main method to create an attribute with default parameters
+	 * 
+	 * @param name
+	 * @param dataType
+	 * @param values
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public DemographicAttribute<? extends IValue> createAttribute(
+			String name, 
+			GSEnumDataType dataType,
+			List<String> values) throws GSIllegalRangedData {
+		
+		DemographicAttribute<? extends IValue> attribute = null;
+		try {
+			attribute = this.createAttribute(name, dataType);
+		} catch (IllegalArgumentException e) {
+			attribute = this.createRangeAttribute(name, new GSDataParser().getRangeTemplate(values));
+		}
+		final IValueSpace<? extends IValue> vs = attribute.getValueSpace(); 
+		
+		for (int i=0; i<values.size(); i++) {
+			vs.addValue(values.get(i));	
+		}
 		System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}

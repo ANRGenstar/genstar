@@ -1,6 +1,6 @@
 package gospl.distribution;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
@@ -15,14 +15,11 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.GSSurveyWrapper;
-import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
-import gospl.io.GosplSurveyFactory;
 import gospl.io.ReadDictionaryUtils;
 import gospl.io.ReadPopulationsUtils;
 import gospl.io.exception.InvalidSurveyFormatException;
@@ -282,70 +279,11 @@ public class TestReadMatriciesFromCSV {
 		// and compare them with what is expected
 		assertEquals(0.8/5, 
 					ndata.getVal(
-							"surface",	"moins de 10m2",
-							"number of persons", 	"1 person"
+							"SURF",		"moins de 10sm",
+							"NBPERS", 	"1"
 							).getValue().doubleValue(),
 					TOLERANCE
 					);
-		assertEquals(40923d/510833, 
-				ndata.getVal(
-							"Age_2",	"15 à 19 ans",
-							"Couple", 	"Ne vivant pas en couple"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-				
-		
-		assertEquals(89551d/510833, 
-				ndata.getVal(
-							"Age_2",	"40 à 54 ans",
-							"Couple", 	"Vivant en couple"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-		assertEquals(34756d/510833, 
-				ndata.getVal(
-							"Age_2",	"40 à 54 ans",
-							"Couple", 	"Ne vivant pas en couple"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-		
-		assertEquals(12073d/510833, 
-				ndata.getVal(
-							"Age_2",	"80 ans ou plus",
-							"Couple", 	"Vivant en couple"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-		assertEquals(20765d/510833, 
-				ndata.getVal(
-							"Age_2",	"80 ans ou plus",
-							"Couple", 	"Ne vivant pas en couple"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-		
-		// compare the more aggregate values
-		assertEquals( (89551d+34756d)/510833, 
-				ndata.getVal(
-							"Age_2",	"40 à 54 ans"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-		assertEquals( (12073d+20765d)/510833, 
-				ndata.getVal(
-							"Age_2",	"80 ans ou plus"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
-		
-		assertEquals( (297100d)/510833, 
-				ndata.getVal(
-							"Couple",	"Vivant en couple"
-							).getValue().doubleValue(),
-				TOLERANCE
-				);
 		
 	}
 	

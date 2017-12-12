@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
@@ -84,45 +85,50 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	}
 	
 	@Override
-	public RangeValue getInstanceValue(String value) {
+	public RangeValue getInstanceValue(String value, String label) {
 		if(!rt.isValideRangeCandidate(value))
-			throw new IllegalArgumentException("The string value "+value+" does not feet defined "
+			throw new IllegalArgumentException("The string value "+value+" does not fit defined "
 					+ "range "+rt);
 		
 		List<Number> currentVal = null;
-		currentVal = gsdp.getNumbers(value, rt.getNumerciMatcher());
+		currentVal = gsdp.getNumbers(label, rt.getNumerciMatcher());
 		if(currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) || 
 				currentVal.stream().anyMatch(d -> d.doubleValue() > max.doubleValue()))
-			throw new IllegalArgumentException("Proposed values "+value+" are "
+			throw new IllegalArgumentException("Proposed values "+label+" are "
 					+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? "below" : "beyond") + " given bound ("
 							+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? min : max) + ")");
 		return currentVal.size() == 1 ? 
-				(rt.getBottomTemplate(currentVal.get(0)).equals(value) ? 
+				(rt.getBottomTemplate(currentVal.get(0)).equals(label) ? 
 						new RangeValue(this, currentVal.get(0), RangeBound.LOWER) :
 							new RangeValue(this, currentVal.get(0), RangeBound.UPPER)) :
 			new RangeValue(this, currentVal.get(0), currentVal.get(1));
 	}
 	
 	@Override
-	public RangeValue proposeValue(String value) {
-		return getInstanceValue(value);
+	public RangeValue proposeValue(String value, String label) {
+		return getInstanceValue(value, label);
 	}
 	
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 
 	@Override
 	public RangeValue addValue(String value) throws IllegalArgumentException {
+		return addValue(value, value);
+	}
+	
+	@Override
+	public RangeValue addValue(String value, String label) throws IllegalArgumentException {
 		RangeValue iv = null;
 		try {
 			iv = getValue(value);
 		} catch (NullPointerException e) {
 			// create the value on the fly
-			iv = this.getInstanceValue(value);
+			iv = this.getInstanceValue(value, label);
 			this.values.add(iv);
 		}
 		return iv;
-	}
-
+	}	
+	
 	@Override
 	public RangeValue getValue(String value) throws NullPointerException {
 		
@@ -131,6 +137,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		if (val != null)
 			return val;
 		
+		// search for the string value 
 		Optional<RangeValue> opValue = values.stream()
 				.filter(v -> v.getStringValue().equals(value)).findAny();
 		if(opValue.isPresent()) {
@@ -138,6 +145,14 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			textual2valueCached.put(value, val);
 			return val;
 		}
+		opValue = values.stream()
+				.filter(v -> v.getActualValue().toString().equals(value)).findAny();
+		if(opValue.isPresent()) {
+			val = opValue.get();
+			textual2valueCached.put(value, val);
+			return val;
+		}
+		
 		throw new NullPointerException("The string value \""+value+"\" is not contained "
 				+ "in the value space "+this.toPrettyString());
 	}
@@ -233,10 +248,25 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	}
 	
 	@Override
-	public boolean containsAll(Collection<String> valuesStr) {
+	public boolean containsAllLabels(Collection<String> valuesStr) {
 		
 		return this.values
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
-	}	
+	}
+
+	@Override
+	public String toPrettyString() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("[").append(this.getType().toString()).append("] ");
+		sb.append(
+				values.stream()
+					.map(r -> r.getActualValue().toString() + ":" + r.getStringValue())
+					.collect(Collectors.joining(","))
+					);
+		return sb.toString();
+		
+		
+	}
+	
 }
