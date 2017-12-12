@@ -1,5 +1,6 @@
 package core.metamodel.value.categoric;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -197,4 +198,10 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 		return values.stream().anyMatch(v -> v.getStringValue().equals(valueStr));
 	}
 
+	@Override
+	public boolean containsAll(Collection<String> valuesStr) {
+		return this.values
+				.stream()
+				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}
 }

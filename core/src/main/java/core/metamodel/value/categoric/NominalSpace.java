@@ -1,5 +1,6 @@
 package core.metamodel.value.categoric;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -139,5 +140,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	public boolean contains(String valueStr) {
 		return values.containsKey(valueStr);
 	}
-	
+
+	@Override
+	public boolean containsAll(Collection<String> valuesStr) {
+		return this.values.values()
+				.stream()
+				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}
 }

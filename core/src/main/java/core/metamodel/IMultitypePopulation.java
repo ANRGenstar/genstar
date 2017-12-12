@@ -5,8 +5,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 

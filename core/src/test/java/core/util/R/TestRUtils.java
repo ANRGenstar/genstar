@@ -1,13 +1,16 @@
 package core.util.R;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.junit.Test;
 import org.math.R.Rsession;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPMismatchException;
-
-import core.util.R.RUtils;
 
 /**
  * Nota bene: this assume R is installed and configured in the current environment.

@@ -208,7 +208,8 @@ public class GosplInputDataManager {
 		
 		if (inputData.isEmpty())
 			throw new IllegalArgumentException(
-					"To collapse matrices you must build at least one first: see buildDistributions method");
+					"To collapse matrices you must build at least one first: "+
+					"see the buildDataTables method");
 		
 		if (inputData.size() == 1)
 			return getFrequency(inputData.iterator().next());
@@ -258,8 +259,14 @@ public class GosplInputDataManager {
 		
 		// Read headers and store possible variables by line index
 		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionnary);
+		logger.info("detected in {} {} row headers : {}", 
+				survey.getSurveyFilePath(), rowHeaders.size(), rowHeaders);
+		
 		// Read headers and store possible variables by column index
 		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionnary);
+		logger.info("detected in {} {} column headers : {}", 
+				survey.getSurveyFilePath(), columnHeaders.size(), columnHeaders);
+
 
 		// Store column related attributes while keeping unrelated attributes separated
 		final Set<Set<DemographicAttribute<? extends IValue>>> columnSchemas = new HashSet<>();
@@ -400,7 +407,7 @@ public class GosplInputDataManager {
 				}
 			} else
 				throw new IllegalControlTotalException("The matrix (" + matrix.getLabel()
-						+ ") must be align to globale frequency table but lack of a referent matrix", matrix);
+						+ ") must be aligned to global frequency table but lacks of a referent matrix", matrix);
 		} else {
 			// Init output matrix
 			freqMatrix = new GosplJointDistribution(matrix.getDimensions(), GSSurveyType.GlobalFrequencyTable);
@@ -495,7 +502,8 @@ public class GosplInputDataManager {
 				
 				if (val!=null)
 					entityAttributes.put(att, val);
-				else if (att.getEmptyValue().getStringValue() != null && att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
+				else if (	att.getEmptyValue().getStringValue() != null 
+							&& att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
 				else {
 					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "

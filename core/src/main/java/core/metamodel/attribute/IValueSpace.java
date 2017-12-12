@@ -1,5 +1,6 @@
 package core.metamodel.attribute;
 
+import java.util.Collection;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -99,6 +100,8 @@ public interface IValueSpace<V extends IValue> {
 	public boolean contains(IValue value);
 	
 	public boolean contains(String valueStr);
+
+	public boolean containsAll(Collection<String> valuesStr);
 
 	
 	/**

@@ -13,7 +13,7 @@ import core.util.data.GSEnumDataType;
  */
 public class IntegerValue implements IValue {
 
-	private Integer value;
+	private final Integer value;
 	
 	private IntegerSpace is;
 	

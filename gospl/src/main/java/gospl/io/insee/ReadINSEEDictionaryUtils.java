@@ -272,6 +272,52 @@ public class ReadINSEEDictionaryUtils {
 	}
 	
 	/**
+	 * Actual creation of an attribute
+	 * @param modalitiesCode2Lib
+	 * @param previousCode
+	 * @param previousLib
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	protected static DemographicAttribute<? extends IValue> createAttribute(
+			Map<String,String> modalitiesCode2Lib,
+			String previousCode,
+			String previousLib
+			) throws GSIllegalRangedData {
+
+		final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
+		final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
+		
+		List<String> valuesForCreation = null;
+		
+		GSEnumDataType dataType = GSEnumDataType.Nominal;
+		if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
+			// TODO define how this should be... defined !
+			if (modalitiesCode2Lib.isEmpty())
+				modalitiesCode2Lib.put(previousCode, previousCode);
+			dataType = GSEnumDataType.Nominal; // unfortunatly we don't know exactly what it is
+			valuesForCreation = new LinkedList<>(modalitiesCode2Lib.keySet());
+		} else if (isRange) {
+			dataType = GSEnumDataType.Range;
+			valuesForCreation = new LinkedList<>(modalitiesCode2Lib.values());
+		} else if (isInteger) {
+			dataType = GSEnumDataType.Integer;
+			valuesForCreation = new LinkedList<>(modalitiesCode2Lib.keySet());
+		}
+		
+		logger.info("detected attribute {} - {}, {} with {} modalities", previousCode, previousLib, dataType, modalitiesCode2Lib.size());
+
+		DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute(
+				previousCode, 
+				dataType, 
+				valuesForCreation
+				);
+		att.setDescription(previousLib);
+						
+		return att;
+	}
+	
+	/**
 	 * Example of such a file:
 	 * VAR_CODE;VAR_LIB;MOD_CODE;MOD_LIB
 	 * REGION;"Région du lieu de résidence";01;"Guadeloupe"
@@ -327,37 +373,9 @@ public class ReadINSEEDictionaryUtils {
 				if (!varCode.equals(previousCode)) {
 					if (previousCode != null) {
 						// we finished the previous attribute, let's create it
-						// TODO
-						
-						final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
-						final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
-						
-						GSEnumDataType dataType = GSEnumDataType.Nominal;
-						if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
-							// TODO define how this should be... defined !
-							if (modalitiesCode2Lib.isEmpty())
-								modalitiesCode2Lib.put(previousCode, previousCode);
-							dataType = GSEnumDataType.Nominal; // unfortunatly we don't know exactly what it is
-						} else if (isRange) {
-							dataType = GSEnumDataType.Range;
-						} else if (isInteger) {
-							dataType = GSEnumDataType.Integer;
-						}
-						
-						logger.info("detected attribute {} - {}, {} with {} modalities", previousCode, previousLib, dataType, modalitiesCode2Lib.size());
-
-						att = DemographicAttributeFactory.getFactory().createAttribute(
-								previousCode, 
-								dataType, 
-								new ArrayList<String>(modalitiesCode2Lib.keySet()) /*,
-								new ArrayList<String>(modalitiesCode2Lib.values()),
-								null,
-								null */
-								);
-						att.setDescription(previousLib);
-						
-						attributes.add(att);
-						
+						att = createAttribute(modalitiesCode2Lib, previousCode, previousLib);
+						attributes.add(att);						
+						// restart from a fresh ground
 						modalitiesCode2Lib.clear();
 					}
 					previousCode = varCode;
@@ -375,38 +393,8 @@ public class ReadINSEEDictionaryUtils {
 			
 			if (previousCode != null) {
 				// we finished the previous attribute, let's create it
-				// TODO
-				
-				final boolean isRange = ReadDictionaryUtils.detectIsRange(modalitiesCode2Lib.values());
-				final boolean isInteger = !isRange && ReadDictionaryUtils.detectIsInteger(modalitiesCode2Lib.values());
-				
-				GSEnumDataType dataType = GSEnumDataType.Nominal;
-				if (modalitiesCode2Lib.isEmpty() || modalitiesCode2Lib.size()==1) {
-					// TODO define how this should be... defined !
-					if (modalitiesCode2Lib.isEmpty())
-						modalitiesCode2Lib.put(previousCode, previousCode);
-					dataType = GSEnumDataType.Nominal; // unfortunatly we don't know exactly what it is
-				} else if (isRange) {
-					dataType = GSEnumDataType.Range;
-				} else if (isInteger) {
-					dataType = GSEnumDataType.Integer;
-				}
-				
-				logger.info("detected attribute {} - {}, {} with {} modalities", previousCode, previousLib, dataType, modalitiesCode2Lib.size());
-
-				DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute(
-						previousCode, 
-						dataType, 
-						new ArrayList<String>(modalitiesCode2Lib.keySet()) /*,
-						new ArrayList<String>(modalitiesCode2Lib.values()),
-						null,
-						null */
-						);
-				att.setDescription(previousLib);
-				
-				attributes.add(att);
-				
-				modalitiesCode2Lib.clear();
+				DemographicAttribute<? extends IValue> att = createAttribute(modalitiesCode2Lib, previousCode, previousLib);
+				attributes.add(att);		
 			}
 
 			

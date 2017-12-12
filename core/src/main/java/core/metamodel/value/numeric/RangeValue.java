@@ -23,6 +23,12 @@ public class RangeValue implements IValue {
 	private RangeSpace rs; 
 	
 	/**
+	 * as the String value if long to construct and often used, 
+	 * we cache it here
+	 */
+	private String stringValueCached = null;
+	
+	/**
 	 * a) When it's lower bound then max is used to setup other part of the range value
 	 * <p>
 	 * b) When it's upper bound then min is used to setup other part of the range value
@@ -52,16 +58,22 @@ public class RangeValue implements IValue {
 	
 	@Override
 	public GSEnumDataType getType() {
-		return GSEnumDataType.Integer;
+		return GSEnumDataType.Range;
 	}
 
-	@Override
-	public String getStringValue() {
+	protected String computeStringValue() {
 		if(topBound.equals(this.rs.getMax()))
 			return rs.getRangeTemplate().getTopTemplate(bottomBound);
 		if(bottomBound.equals(this.rs.getMin()))
 			return rs.getRangeTemplate().getBottomTemplate(topBound);
 		return rs.getRangeTemplate().getMiddleTemplate(bottomBound, topBound);
+	}
+	
+	@Override
+	public final String getStringValue() {
+		if (stringValueCached == null)
+			stringValueCached = computeStringValue();
+		return stringValueCached;
 	}
 	
 	@Override

@@ -1,11 +1,14 @@
 package gospl.io;
 
+import java.io.IOException;
+import java.nio.file.FileSystems;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.IAttribute;
@@ -140,5 +143,28 @@ public class ReadDictionaryUtils {
 
 	
 	private ReadDictionaryUtils() {}
+
+
+	/**
+	 * Reads a dictionnary in the Genstar JSON format.
+	 * @param filename
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromGenstarConfig(
+			String filename) {
+		
+		GenstarJsonUtil sju = new GenstarJsonUtil();
+
+		try {
+			return sju.unmarshalFromGenstarJson(
+					FileSystems.getDefault().getPath(filename), 
+					DemographicDictionary.class);
+		} catch (IllegalArgumentException | IOException e) {
+			e.printStackTrace();
+			throw new RuntimeException("error while reading the config file: "+e.getMessage(), e);
+		}
+		
+	}
 
 }

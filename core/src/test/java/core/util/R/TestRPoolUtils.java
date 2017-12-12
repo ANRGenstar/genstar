@@ -1,6 +1,8 @@
 package core.util.R;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -9,8 +11,6 @@ import java.util.Set;
 import org.junit.Test;
 import org.math.R.Rsession;
 import org.rosuda.REngine.REXP;
-
-import core.util.R.RPoolUtils;
 
 public class TestRPoolUtils {
 

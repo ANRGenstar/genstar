@@ -1,9 +1,7 @@
 package core.util.data;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BooleanValue;

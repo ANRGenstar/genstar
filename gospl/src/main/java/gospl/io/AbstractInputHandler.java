@@ -3,7 +3,6 @@ package gospl.io;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,6 +10,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
@@ -34,7 +36,8 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	protected final String surveyFilePath;
 	protected final GSSurveyType dataFileType;
 
-	
+	private static Logger logger = LogManager.getLogger();
+
 	public AbstractInputHandler(GSSurveyType dataFileType, String fileName) {
 
 		this.dataFileType = dataFileType;
@@ -117,13 +120,19 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					// detect the attribute by finding an attribute which has 
 					// all of these values as modalities
 					final List<String> valList = readColumn(idx);
+					logger.info("trying to detect an attribute based on header values: {}", valList);
 					//if (dictionnary)
 					if (dictionnary.getAttributes()
 							.stream()
-							.anyMatch(att -> att.getValueSpace().getValues()
-												.stream()
-												.allMatch(val -> valList.contains(val.getStringValue()))))
+							.anyMatch(att -> att.getValueSpace().containsAll(valList))) {
 						attributeIdx.add(idx);
+						
+					} else {
+						logger.warn("the values {} match none of our attributes: {}", 
+								valList,
+								dictionnary.getAttributes().stream().map(a -> a.getValueSpace().getValues().stream().map(v -> v.getStringValue()).collect(Collectors.toList())).collect(Collectors.toList())
+								);
+					}
 				}
 			}
 		}

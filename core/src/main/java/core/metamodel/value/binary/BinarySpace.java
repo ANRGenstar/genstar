@@ -1,5 +1,6 @@
 package core.metamodel.value.binary;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -125,6 +126,13 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	@Override
 	public boolean contains(String valueStr) {
 		return false;
+	}
+
+	@Override
+	public boolean containsAll(Collection<String> valuesStr) {
+		return this.values
+				.stream()
+				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
 	
 }

@@ -141,5 +141,10 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	public boolean contains(String valueStr) {
 		return innerValueSpace.contains(valueStr);
 	}
+
+	@Override
+	public boolean containsAll(Collection<String> valuesStr) {
+		return this.innerValueSpace.containsAll(valuesStr);
+	}
 	
 }

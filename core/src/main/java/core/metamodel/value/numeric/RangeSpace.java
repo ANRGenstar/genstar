@@ -1,8 +1,11 @@
 package core.metamodel.value.numeric;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -38,6 +41,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 
 	private List<RangeValue> values;
 	private RangeValue emptyValue;
+	
+	/**
+	 * Facilitates the costly retrieval of the value for a textual value
+	 */
+	private Map<String,RangeValue> textual2valueCached = new HashMap<>();
 	
 	/**
 	 * 
@@ -107,7 +115,8 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		RangeValue iv = null;
 		try {
 			iv = getValue(value);
-		} catch (NullPointerException e) {	
+		} catch (NullPointerException e) {
+			// create the value on the fly
 			iv = this.getInstanceValue(value);
 			this.values.add(iv);
 		}
@@ -116,11 +125,20 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 
 	@Override
 	public RangeValue getValue(String value) throws NullPointerException {
+		
+		// quick version
+		RangeValue val = textual2valueCached.get(value);
+		if (val != null)
+			return val;
+		
 		Optional<RangeValue> opValue = values.stream()
 				.filter(v -> v.getStringValue().equals(value)).findAny();
-		if(opValue.isPresent())
-			return opValue.get();
-		throw new NullPointerException("The string value \""+value+"\" is not comprise "
+		if(opValue.isPresent()) {
+			val = opValue.get();
+			textual2valueCached.put(value, val);
+			return val;
+		}
+		throw new NullPointerException("The string value \""+value+"\" is not contained "
 				+ "in the value space "+this.toPrettyString());
 	}
 	
@@ -209,7 +227,16 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	
 	@Override
 	public boolean contains(String valueStr) {
-		return values.stream().anyMatch(v -> v.getStringValue().equals(valueStr));
+		// returns true if we have a value for this string
+		// relies on the efficient cache which manages the getValue
+		return getValue(valueStr) != null;
 	}
 	
+	@Override
+	public boolean containsAll(Collection<String> valuesStr) {
+		
+		return this.values
+				.stream()
+				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}	
 }

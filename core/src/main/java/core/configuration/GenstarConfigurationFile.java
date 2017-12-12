@@ -1,7 +1,6 @@
 package core.configuration;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;

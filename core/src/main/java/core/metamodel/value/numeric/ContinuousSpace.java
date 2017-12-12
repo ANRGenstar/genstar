@@ -1,5 +1,6 @@
 package core.metamodel.value.numeric;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
@@ -167,5 +168,12 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	@Override
 	public boolean contains(String valueStr) {
 		return values.values().stream().anyMatch(v -> v.getStringValue().equals(valueStr));
+	}
+	
+	@Override
+	public boolean containsAll(Collection<String> valuesStr) {
+		return this.values.values()
+				.stream()
+				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
 }

@@ -1,0 +1,319 @@
+{
+    "DEMOGRAPHIC DICTIONARY" : {
+      "ATTRIBUTES" : [ {
+        "DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "Age",
+          "VALUE SPACE" : {
+            "TYPE" : "Range",
+            "VALUES" : [ {
+              "INPUT VALUE" : "Moins de 5 ans"
+            }, {
+              "INPUT VALUE" : "30 à 34 ans"
+            }, {
+              "INPUT VALUE" : "35 à 39 ans"
+            }, {
+              "INPUT VALUE" : "70 à 74 ans"
+            }, {
+              "INPUT VALUE" : "75 à 79 ans"
+            }, {
+              "INPUT VALUE" : "5 à 9 ans"
+            }, {
+              "INPUT VALUE" : "40 à 44 ans"
+            }, {
+              "INPUT VALUE" : "45 à 49 ans"
+            }, {
+              "INPUT VALUE" : "80 à 84 ans"
+            }, {
+              "INPUT VALUE" : "85 à 89 ans"
+            }, {
+              "INPUT VALUE" : "100 ans ou plus"
+            }, {
+              "INPUT VALUE" : "10 à 14 ans"
+            }, {
+              "INPUT VALUE" : "15 à 19 ans"
+            }, {
+              "INPUT VALUE" : "50 à 54 ans"
+            }, {
+              "INPUT VALUE" : "55 à 59 ans"
+            }, {
+              "INPUT VALUE" : "90 à 94 ans"
+            }, {
+              "INPUT VALUE" : "95 à 99 ans"
+            }, {
+              "INPUT VALUE" : "20 à 24 ans"
+            }, {
+              "INPUT VALUE" : "25 à 29 ans"
+            }, {
+              "INPUT VALUE" : "60 à 64 ans"
+            }, {
+              "INPUT VALUE" : "65 à 69 ans"
+            } ],
+            "min" : -2147483648,
+            "max" : 2147483647,
+            "rangeTemplate" : {
+              "numerciMatcher" : "INT_POSITIF_MATCH"
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : "NaN à NaN ans"
+            }
+          }
+        }
+      }, {
+        "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "Age_2",
+          "VALUE SPACE" : {
+            "TYPE" : "Range",
+            "VALUES" : [ {
+              "INPUT VALUE" : "55 à 64 ans"
+            }, {
+              "INPUT VALUE" : "80 ans ou plus"
+            }, {
+              "INPUT VALUE" : "20 à 24 ans"
+            }, {
+              "INPUT VALUE" : "25 à 39 ans"
+            }, {
+              "INPUT VALUE" : "40 à 54 ans"
+            }, {
+              "INPUT VALUE" : "65 à 79 ans"
+            }, {
+              "INPUT VALUE" : "15 à 19 ans"
+            } ],
+            "min" : -2147483648,
+            "max" : 2147483647,
+            "rangeTemplate" : {
+              "numerciMatcher" : "INT_POSITIF_MATCH"
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : "NaN à NaN ans"
+            }
+          },
+          "REFERENT ATTRIBUTE" : "Age",
+          "MAPPER" : {
+            "TYPE" : "AGG",
+            "THE MAP" : [ "55 à 64 ans : 55 à 59 ans; 60 à 64 ans", "80 ans ou plus : 85 à 89 ans; 90 à 94 ans; 100 ans ou plus; 95 à 99 ans; 80 à 84 ans", "20 à 24 ans : 20 à 24 ans", "25 à 39 ans : 35 à 39 ans; 25 à 29 ans; 30 à 34 ans", "40 à 54 ans : 50 à 54 ans; 40 à 44 ans; 45 à 49 ans", "65 à 79 ans : 70 à 74 ans; 75 à 79 ans; 65 à 69 ans", "15 à 19 ans : 15 à 19 ans" ]
+          }
+        }
+      }, {
+        "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "Age_3",
+          "VALUE SPACE" : {
+            "TYPE" : "Range",
+            "VALUES" : [ {
+              "INPUT VALUE" : "20 à 24 ans"
+            }, {
+              "INPUT VALUE" : "55 à 64 ans"
+            }, {
+              "INPUT VALUE" : "15 à 19 ans"
+            }, {
+              "INPUT VALUE" : "65 ans ou plus"
+            }, {
+              "INPUT VALUE" : "25 à 39 ans"
+            }, {
+              "INPUT VALUE" : "40 à 54 ans"
+            } ],
+            "min" : -2147483648,
+            "max" : 2147483647,
+            "rangeTemplate" : {
+              "numerciMatcher" : "INT_POSITIF_MATCH"
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : "NaN à NaN ans"
+            }
+          },
+          "REFERENT ATTRIBUTE" : "Age",
+          "MAPPER" : {
+            "TYPE" : "AGG",
+            "THE MAP" : [ "20 à 24 ans : 20 à 24 ans", "55 à 64 ans : 55 à 59 ans; 60 à 64 ans", "15 à 19 ans : 15 à 19 ans", "65 ans ou plus : 85 à 89 ans; 70 à 74 ans; 90 à 94 ans; 75 à 79 ans; 100 ans ou plus; 65 à 69 ans; 95 à 99 ans; 80 à 84 ans", "25 à 39 ans : 35 à 39 ans; 25 à 29 ans; 30 à 34 ans", "40 à 54 ans : 50 à 54 ans; 40 à 44 ans; 45 à 49 ans" ]
+          }
+        }
+      }, {
+        "DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "Couple",
+          "VALUE SPACE" : {
+            "TYPE" : "Nominal",
+            "VALUES" : [ {
+              "INPUT VALUE" : "Vivant en couple"
+            }, {
+              "INPUT VALUE" : "Ne vivant pas en couple"
+            } ],
+            "categoricTemplate" : {
+              "regex" : [ ]
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : "Ne vivant pas en couple"
+            }
+          }
+        }
+      }, {
+        "DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "Sexe",
+          "VALUE SPACE" : {
+            "TYPE" : "Nominal",
+            "VALUES" : [ {
+              "INPUT VALUE" : "Hommes"
+            }, {
+              "INPUT VALUE" : "Femmes"
+            } ],
+            "categoricTemplate" : {
+              "regex" : [ ]
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : null
+            }
+          }
+        }
+      }, {
+        "DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "CSP",
+          "VALUE SPACE" : {
+            "TYPE" : "Nominal",
+            "VALUES" : [ {
+              "INPUT VALUE" : "Employés"
+            }, {
+              "INPUT VALUE" : "Cadres et professions intellectuelles supérieures"
+            }, {
+              "INPUT VALUE" : "Ouvriers"
+            }, {
+              "INPUT VALUE" : "Artisans. commerçants. chefs d'entreprise"
+            }, {
+              "INPUT VALUE" : "Retraités"
+            }, {
+              "INPUT VALUE" : "Agriculteurs exploitants"
+            }, {
+              "INPUT VALUE" : "Professions intermédiaires"
+            }, {
+              "INPUT VALUE" : "Autres personnes sans activité professionnelle"
+            } ],
+            "categoricTemplate" : {
+              "regex" : [ ]
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : "Autres personnes sans activité professionnelle"
+            }
+          }
+        }
+      }, {
+        "DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "iris",
+          "VALUE SPACE" : {
+            "TYPE" : "Nominal",
+            "VALUES" : [ {
+              "INPUT VALUE" : "765400901"
+            }, {
+              "INPUT VALUE" : "765401002"
+            }, {
+              "INPUT VALUE" : "765400503"
+            }, {
+              "INPUT VALUE" : "765400404"
+            }, {
+              "INPUT VALUE" : "765401004"
+            }, {
+              "INPUT VALUE" : "765400602"
+            }, {
+              "INPUT VALUE" : "765400701"
+            }, {
+              "INPUT VALUE" : "765401006"
+            }, {
+              "INPUT VALUE" : "765400604"
+            }, {
+              "INPUT VALUE" : "765400802"
+            }, {
+              "INPUT VALUE" : "765400305"
+            }, {
+              "INPUT VALUE" : "765400302"
+            }, {
+              "INPUT VALUE" : "765400203"
+            }, {
+              "INPUT VALUE" : "765400104"
+            }, {
+              "INPUT VALUE" : "765400201"
+            }, {
+              "INPUT VALUE" : "765400102"
+            }, {
+              "INPUT VALUE" : "765400401"
+            }, {
+              "INPUT VALUE" : "765401001"
+            }, {
+              "INPUT VALUE" : "765401003"
+            }, {
+              "INPUT VALUE" : "765401005"
+            }, {
+              "INPUT VALUE" : "765400601"
+            }, {
+              "INPUT VALUE" : "765400306"
+            }, {
+              "INPUT VALUE" : "765400502"
+            }, {
+              "INPUT VALUE" : "765400403"
+            }, {
+              "INPUT VALUE" : "765400304"
+            }, {
+              "INPUT VALUE" : "765400205"
+            }, {
+              "INPUT VALUE" : "765400801"
+            }, {
+              "INPUT VALUE" : "765400603"
+            }, {
+              "INPUT VALUE" : "765400702"
+            }, {
+              "INPUT VALUE" : "765400902"
+            }, {
+              "INPUT VALUE" : "765400106"
+            }, {
+              "INPUT VALUE" : "765400504"
+            }, {
+              "INPUT VALUE" : "765400405"
+            }, {
+              "INPUT VALUE" : "765400105"
+            }, {
+              "INPUT VALUE" : "765400303"
+            }, {
+              "INPUT VALUE" : "765400204"
+            }, {
+              "INPUT VALUE" : "765400103"
+            }, {
+              "INPUT VALUE" : "765400402"
+            }, {
+              "INPUT VALUE" : "765400501"
+            }, {
+              "INPUT VALUE" : "765400301"
+            }, {
+              "INPUT VALUE" : "765400202"
+            }, {
+              "INPUT VALUE" : "765400101"
+            } ],
+            "categoricTemplate" : {
+              "regex" : [ ]
+            },
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : null
+            }
+          }
+        }
+      } ]
+    }
+  },
+  "DEMOGRAPHIC RECORDS" : {
+    "DEMOGRAPHIC DICTIONARY" : {
+      "ATTRIBUTES" : [ {
+        "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+          "NAME" : "P13_POP",
+          "VALUE SPACE" : {
+            "TYPE" : "Integer",
+            "VALUES" : [ ],
+            "EMPTY VALUE" : {
+              "INPUT VALUE" : "null"
+            },
+            "min" : -2147483648,
+            "max" : 2147483647
+          },
+          "REFERENT ATTRIBUTE" : "iris",
+          "MAPPER" : {
+            "TYPE" : "REC",
+            "THE MAP" : [ ]
+          }
+        }
+      } ]
+    }
+  }
+}

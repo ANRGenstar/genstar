@@ -1,6 +1,6 @@
 package core.util.random;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.util.Arrays;
 import java.util.HashMap;
