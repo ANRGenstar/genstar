@@ -11,7 +11,6 @@ import java.util.regex.Pattern;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
@@ -19,7 +18,6 @@ import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
 import gospl.algo.sr.bn.NodeCategorical;
-import gospl.distribution.exception.IllegalDistributionCreation;
 
 /**
  * Provides tools to read dictionaries from various file formats 

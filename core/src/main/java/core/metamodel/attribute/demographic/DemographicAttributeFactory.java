@@ -14,6 +14,7 @@ import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.demographic.map.AggregateMapper;
 import core.metamodel.attribute.demographic.map.RecordMapper;
 import core.metamodel.attribute.demographic.map.UndirectedMapper;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BinarySpace;
 import core.metamodel.value.binary.BooleanValue;
@@ -46,6 +47,8 @@ import core.util.excpetion.GSIllegalRangedData;
 public class DemographicAttributeFactory {
 	
 	private static DemographicAttributeFactory gaf = new DemographicAttributeFactory();
+	
+	public static String RECORD_NAME_EXTENSION = "_rec";
 	
 	private DemographicAttributeFactory(){};
 	
@@ -149,10 +152,7 @@ public class DemographicAttributeFactory {
 			attribute = this.createRangeAttribute(name, new GSDataParser().getRangeTemplate(values));
 		}
 		final IValueSpace<? extends IValue> vs = attribute.getValueSpace(); 
-		
-		for (int i=0; i<values.size(); i++) {
-			vs.addValue(values.get(i));	
-		}
+		values.stream().forEach(val -> vs.addValue(val));
 		System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}
@@ -283,6 +283,32 @@ public class DemographicAttributeFactory {
 			throw new RuntimeException("Cannot instanciate "+dataType+" data type mapped attribute");
 		}
 		return attribute;
+	}
+	
+	/**
+	 * Create record attribute either integer or continuous
+	 * <br/> throw an {@link IllegalAccessException} if record attribute {@code dataType} is not
+	 * {@link GSEnumDataType#Integer} or {@link GSEnumDataType#Continue} 
+	 * 
+	 * @see RecordAttribute
+	 * 
+	 * @param name
+	 * @param dataType
+	 * @param referentAttribute
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public <K extends IValue> RecordAttribute<K, ? extends IValue> createRecordAttribute(
+			String name, GSEnumDataType dataType, DemographicAttribute<K> referentAttribute) throws GSIllegalRangedData{
+		String recordName = name+RECORD_NAME_EXTENSION;
+		switch (dataType) {
+		case Integer:
+			return new RecordAttribute<>(name, this.createIntegerAttribute(recordName), referentAttribute);
+		case Continue:
+			return new RecordAttribute<>(name, this.createContinueAttribute(recordName), referentAttribute);
+		default:
+			throw new IllegalArgumentException("Cannot define "+dataType+" value record attribute");
+		}
 	}
 	
 

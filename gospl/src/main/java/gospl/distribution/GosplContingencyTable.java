@@ -23,7 +23,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
-	protected GosplContingencyTable(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public GosplContingencyTable(Set<DemographicAttribute<? extends IValue>> attributes) {
 		super(attributes, GSSurveyType.ContingencyTable);
 	}
 		

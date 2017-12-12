@@ -75,33 +75,19 @@ public class GosplInputDataManager {
 	private final double EPSILON = Math.pow(10d, -3);
 
 	private final GenstarConfigurationFile configuration;
-	private final GSDataParser dataParser;
 
 	private Set<AFullNDimensionalMatrix<? extends Number>> inputData;
 	private Set<GosplPopulation> samples;
 
-	/**
-	 * Loads a configuration file from the path provided as parameter 
-	 * @param configurationFilePath
-	 * @throws IllegalArgumentException
-	 * @throws IOException
-	 */
 	public GosplInputDataManager(final Path configurationFilePath) 
 			throws IllegalArgumentException, IOException {
 		this.configuration = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
 				configurationFilePath);
-		this.dataParser = new GSDataParser();
 	}
 	
-	/**
-	 * Loads the configuration file from a configuration file object passed as parameter. 
-	 * @param configurationFile
-	 */
 	public GosplInputDataManager(final GenstarConfigurationFile configurationFile) {
 		this.configuration = configurationFile;
-		this.dataParser = new GSDataParser();
 	}
-	
 
 	/**
 	 * 
@@ -110,6 +96,7 @@ public class GosplInputDataManager {
 	 * <p>
 	 * Method gets all data file from the builder and harmonizes them to one another using line identifier attributes
 	 * 
+	 * @return A {@link Set} of {@link INDimensionalMatrix}
 	 * @throws InputFileNotSupportedException
 	 * @throws IOException
 	 * @throws InvalidFormatException
@@ -127,7 +114,7 @@ public class GosplInputDataManager {
 										wrapper, 
 										this.configuration.getBaseDirectory()
 										), 
-								this.configuration.getDemoDictionary()
+						this.configuration.getDemoDictionary()
 						));
 	}
 
@@ -150,9 +137,9 @@ public class GosplInputDataManager {
 						getSample(
 								sf.getSurvey(
 										wrapper, 
-										this.configuration.getBaseDirectory()
-										), 
-						this.configuration.getDemoDictionary()
+										this.configuration.getBaseDirectory()),
+								this.configuration.getDemoDictionary(), null,
+								Collections.emptyMap()
 						));
 	}
 
@@ -221,11 +208,10 @@ public class GosplInputDataManager {
 		
 		// Matrices that contain a record attribute
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
-				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> this.isRecordAttribute(d)))
+				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> 
+					this.configuration.getDemoDictionary().getRecords().contains(d)))
 				.collect(Collectors.toSet())){
-			if(recordMatrices.getDimensions()
-					.stream()
-					.filter(d -> !configuration.getRecords().getAttributes().contains(d))
+			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getDemoDictionary().getRecords().contains(d))
 					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
 		}
@@ -235,7 +221,8 @@ public class GosplInputDataManager {
 		
 		// Matrices that do not contain any record attribute
 		for (final AFullNDimensionalMatrix<? extends Number> mat : inputData.stream()
-				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !this.isRecordAttribute(d)))
+				.filter(mat -> mat.getDimensions().stream().allMatch(d -> 
+						!this.configuration.getDemoDictionary().getRecords().contains(d)))
 				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
 		
@@ -249,32 +236,38 @@ public class GosplInputDataManager {
 	// -------------------------- inner utility methods -------------------------- //
 	/////////////////////////////////////////////////////////////////////////////////
 
-	/*
-	 * Get the distribution matrix from data files
+	/**
+	 * Get the distribution matrix from data files, using provided dictionary
+	 * 
+	 * @param survey
+	 * @param dictionary
+	 * @return
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
 	 */
-	public Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(
-			final IGSSurvey survey,
-			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) 
-					throws IOException, InvalidSurveyFormatException {
+	public static Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
+			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) 
+			throws IOException, InvalidSurveyFormatException {
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
+		final Collection<DemographicAttribute<? extends IValue>> attributes = dictionary.getAttributesAndRecords();
+		final GSDataParser dataParser = new GSDataParser();
 		
 		// Read headers and store possible variables by line index
-		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionnary);
+		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionary);
 		logger.info("detected in {} {} row headers : {}", 
 				survey.getSurveyFilePath(), rowHeaders.size(), rowHeaders);
 		
 		// Read headers and store possible variables by column index
-		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionnary);
+		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionary);
 		logger.info("detected in {} {} column headers : {}", 
 				survey.getSurveyFilePath(), columnHeaders.size(), columnHeaders);
-
 
 		// Store column related attributes while keeping unrelated attributes separated
 		final Set<Set<DemographicAttribute<? extends IValue>>> columnSchemas = new HashSet<>();
 		for(Set<IValue> cValues : columnHeaders.values())
 			columnSchemas.add(cValues.stream()
-										.map(v -> dictionnary.getAttributes()
+										.map(v -> dictionary.getAttributes()
 													.stream()
 													.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get()
 											)
@@ -293,7 +286,7 @@ public class GosplInputDataManager {
 		final Set<Set<DemographicAttribute<? extends IValue>>> rowSchemas = new HashSet<>();
 		for(Set<IValue> rValues : rowHeaders.values())
 			rowSchemas.add(rValues.stream()
-					.map(v -> dictionnary.getAttributes()
+									.map(v -> dictionary.getAttributes()
 									.stream()
 									.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get())
 									.collect(Collectors.toSet()));
@@ -343,7 +336,7 @@ public class GosplInputDataManager {
 										columnHeaders.get(col).stream()
 										).collect(
 												Collectors.toMap(
-														val -> dictionnary.getAttributes().stream()
+														val -> dictionary.getAttributes().stream()
 																.filter(att -> att.equals(val.getValueSpace().getAttribute()))
 																.findFirst().get(), 
 														Function.identity()));
@@ -359,7 +352,7 @@ public class GosplInputDataManager {
 		}
 		return cTableSet;
 	}
-
+	
 	/*
 	 * Transpose any matrix to a frequency based matrix
 	 */
@@ -533,8 +526,8 @@ public class GosplInputDataManager {
 	private AFullNDimensionalMatrix<Double> getTransposedRecord(
 			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
 		
-		Set<DemographicAttribute<? extends IValue>> dims = recordMatrices.getDimensions().stream().filter(d -> !this.isRecordAttribute(d))
-				.collect(Collectors.toSet());
+		Set<DemographicAttribute<? extends IValue>> dims = recordMatrices.getDimensions().stream()
+				.filter(d -> !this.configuration.getDemoDictionary().getRecords().contains(d)).collect(Collectors.toSet());
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Transpose process of matrix "
 				+Arrays.toString(recordMatrices.getDimensions().toArray()), logger, Level.TRACE);
@@ -562,7 +555,7 @@ public class GosplInputDataManager {
 	}
 	
 	private boolean isRecordAttribute(DemographicAttribute<? extends IValue> attribute){
-		return configuration.getRecords().getAttributes().contains(attribute);
+		return configuration.getDemoDictionary().getRecords().contains(attribute);
 	}
 
 

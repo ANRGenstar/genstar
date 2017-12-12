@@ -1,5 +1,6 @@
 package core.metamodel.io;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,13 +30,12 @@ public interface IGSSurvey {
 
 	/**
 	 * Returns, for the underlying file format, the indices of each column associated with its possible values
-	 * @param attributes
+	 * @param dictionnary
 	 * @return
 	 */
 	public Map<Integer, Set<IValue>> getColumnHeaders(
 			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
 	
-
 	/**
 	 * Returns, for the underlying file format, the indices of each row associated with its possible values
 	 * @param attributes

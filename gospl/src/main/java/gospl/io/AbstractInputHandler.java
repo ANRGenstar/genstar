@@ -3,6 +3,7 @@ package gospl.io;
 import java.io.File;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -100,8 +101,6 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return columnHeaders;
 	}
 	
-
-	@Override
 	/**
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */

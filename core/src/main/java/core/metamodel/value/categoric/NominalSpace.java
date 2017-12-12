@@ -23,7 +23,7 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 
 	private IAttribute<NominalValue> attribute; 
 	
-	private Map<String, NominalValue> values;
+	protected Map<String, NominalValue> values;
 	private NominalValue emptyValue;
 	
 	private GSCategoricTemplate ct;

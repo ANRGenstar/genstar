@@ -1,6 +1,5 @@
 package gospl.composer;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 
@@ -16,6 +15,7 @@ import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
+import gospl.algo.composer.yang.YangComposerAlgo;
 import gospl.distribution.GosplInputDataManager;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -70,7 +70,7 @@ public class TestYANGComposer {
 
 		GSSurveyWrapper surveyWrapper = new GSSurveyWrapper(
 				FileSystems.getDefault().getPath("src/test/resources/yang/dwelling_household_toy/surface vs size.csv"), 
-				GSSurveyType.LocalFrequencyTable,
+				GSSurveyType.GlobalFrequencyTable,
 				';',
 				1,
 				1
@@ -84,14 +84,21 @@ public class TestYANGComposer {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} 
+		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata;
 		try {
-			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = 
-					gidm.collapseDataTablesIntoDistribution();
+			 ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 
 		} 
+		
+		YangComposerAlgo yang = new YangComposerAlgo(
+				popDwellings,
+				popHouseholds,
+				ndata
+				);
+		yang.computeExpectedChildrenProperties();
 		
 		//fail("Not yet implemented");
 	}
