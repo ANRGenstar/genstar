@@ -257,7 +257,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		sb.append("[").append(this.getType().toString()).append("] ");
 		sb.append(
 				values.stream()
-					.map(r -> r.getActualValue().toString() + ":" + r.getStringValue())
+					.map(r -> (r.getActualValue() == null ? "": r.getActualValue().toString() + ":") + r.getStringValue())
 					.collect(Collectors.joining(","))
 					);
 		return sb.toString();
