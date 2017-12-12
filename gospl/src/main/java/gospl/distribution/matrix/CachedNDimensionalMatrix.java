@@ -1,10 +1,11 @@
 package gospl.distribution.matrix;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import org.apache.commons.collections4.map.LRUMap;
 
 import core.metamodel.io.GSSurveyType;
 import core.util.data.GSDataParser;
@@ -27,16 +28,21 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimensionalMatrix<D, A, T> {
 
+	/**
+	 * The maximal count of values to keep in cache
+	 */
+	public static final int MAX_SIZE = 100000;
+	
 	private final INDimensionalMatrix<D, A, T> m;
 	
-	private Map<Object,AControl<T>> cachedAspect2value;
+	private LRUMap<Object,AControl<T>> cachedAspect2value;
 	
 	private long hits = 0;
 	private long missed = 0;
 	
 	public CachedNDimensionalMatrix(INDimensionalMatrix<D, A, T> originalMatrix) {
 		this.m = originalMatrix;
-		this.cachedAspect2value = new HashMap<>(originalMatrix.size()); // TODO too big ?
+		this.cachedAspect2value = new LRUMap<>(Math.min(MAX_SIZE, originalMatrix.size())); // TODO too big ?
 	}
 
 	public long getHits() {
