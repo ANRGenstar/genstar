@@ -1143,7 +1143,7 @@ public class GosplPopulationInDatabase
 					if (first) first = false; else sb.append(" OR ");
 					sb.append(getAttributeColNameForType(type, attribute));
 					sb.append("=");
-					sb.append(v.getStringValue());
+					sb.append(v.getActualValue().toString());
 				}
 				break;
 			case Range: 
@@ -1153,7 +1153,7 @@ public class GosplPopulationInDatabase
 					if (first) first = false; else sb.append(" OR ");
 					sb.append(getAttributeColNameForType(type, attribute));
 					sb.append("='");
-					sb.append(v.getStringValue());
+					sb.append(v.getActualValue().toString());
 					sb.append("'");
 				}
 				break;

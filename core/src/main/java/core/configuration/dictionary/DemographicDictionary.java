@@ -67,6 +67,10 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	public DemographicDictionary(
 			@JsonProperty(DemographicDictionary.ATTRIBUTES) Collection<A> attributes,
 			@JsonProperty(DemographicDictionary.RECORDS) Collection<A> records) {
+		
+		if (records == null)
+			records = Collections.emptyList();
+		
 		this.attributes = new LinkedHashSet<>(attributes);
 		this.records = new HashSet<>(records);
 		this.name2attribute = Stream.concat(attributes.stream(), records.stream())
@@ -107,7 +111,7 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	@Override
 	@JsonProperty(DemographicDictionary.ATTRIBUTES)
 	public void setAttributes(Collection<A> attributes) {
-		this.attributes.clear();
+		this.attributes.stream().forEach(att -> name2attribute.remove(att.getAttributeName()));
 		this.name2attribute.clear();
 		this.attributes.addAll(attributes);
 		this.name2attribute = attributes.stream()
@@ -130,7 +134,7 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	@Override
 	@JsonProperty(DemographicDictionary.RECORDS)
 	public void setRecords(Collection<A> records) {
-		this.records.stream().forEach(att -> name2attribute.remove(att));
+		this.records.stream().forEach(att -> name2attribute.remove(att.getAttributeName()));
 		this.records.clear();
 		this.records.addAll(records);
 		this.name2attribute.putAll(records.stream()

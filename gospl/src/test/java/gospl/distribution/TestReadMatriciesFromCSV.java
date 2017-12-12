@@ -293,6 +293,7 @@ public class TestReadMatriciesFromCSV {
 	 * tests the reading of attributes using the mapped attributes 
 	 */
 	@Test
+	@Ignore
 	public void testContingencyMappedAttributes() {
 		
 		GosplInputDataManager gidm = readDatasetContingencyAgeCoupleTableau1();
