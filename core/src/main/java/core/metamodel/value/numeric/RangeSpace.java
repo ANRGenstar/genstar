@@ -85,45 +85,41 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	}
 	
 	@Override
-	public RangeValue getInstanceValue(String value, String label) {
+	public RangeValue getInstanceValue(String value) {
 		if(!rt.isValideRangeCandidate(value))
 			throw new IllegalArgumentException("The string value "+value+" does not fit defined "
 					+ "range "+rt);
 		
 		List<Number> currentVal = null;
-		currentVal = gsdp.getNumbers(label, rt.getNumerciMatcher());
+		currentVal = gsdp.getNumbers(value, rt.getNumerciMatcher());
 		if(currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) || 
 				currentVal.stream().anyMatch(d -> d.doubleValue() > max.doubleValue()))
-			throw new IllegalArgumentException("Proposed values "+label+" are "
+			throw new IllegalArgumentException("Proposed values "+value+" are "
 					+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? "below" : "beyond") + " given bound ("
 							+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? min : max) + ")");
 		return currentVal.size() == 1 ? 
-				(rt.getBottomTemplate(currentVal.get(0)).equals(label) ? 
+				(rt.getBottomTemplate(currentVal.get(0)).equals(value) ? 
 						new RangeValue(this, currentVal.get(0), RangeBound.LOWER) :
 							new RangeValue(this, currentVal.get(0), RangeBound.UPPER)) :
 			new RangeValue(this, currentVal.get(0), currentVal.get(1));
 	}
 	
 	@Override
-	public RangeValue proposeValue(String value, String label) {
-		return getInstanceValue(value, label);
+	public RangeValue proposeValue(String value) {
+		return getInstanceValue(value);
 	}
 	
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 
-	@Override
-	public RangeValue addValue(String value) throws IllegalArgumentException {
-		return addValue(value, value);
-	}
 	
 	@Override
-	public RangeValue addValue(String value, String label) throws IllegalArgumentException {
+	public RangeValue addValue(String value) throws IllegalArgumentException {
 		RangeValue iv = null;
 		try {
 			iv = getValue(value);
 		} catch (NullPointerException e) {
 			// create the value on the fly
-			iv = this.getInstanceValue(value, label);
+			iv = this.getInstanceValue(value);
 			this.values.add(iv);
 		}
 		return iv;

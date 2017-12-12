@@ -77,7 +77,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * WARNING: order consistency is not guaranteed using this method
 	 */
 	@Override
-	public OrderedValue getInstanceValue(String value, String label) {
+	public OrderedValue getInstanceValue(String value) {
 		return new OrderedValue(this, value, instanceIndex++);
 	}
 	
@@ -86,7 +86,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * WARNING: completly break indexation rules
 	 */
 	@Override
-	public OrderedValue proposeValue(String value, String label) {
+	public OrderedValue proposeValue(String value) {
 		return new OrderedValue(this, value,  0);
 	}
 
@@ -105,13 +105,9 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 */
 	@Override
 	public OrderedValue addValue(String value) throws IllegalArgumentException {
-		return addValue(values.size(), value, value);
+		return addValue(values.size(), value);
 	}
-	
-	@Override
-	public OrderedValue addValue(String value, String label) throws IllegalArgumentException {
-		return addValue(values.size(), value, label);
-	}
+
 
 	/**
 	 * 
@@ -120,7 +116,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public OrderedValue addValue(int order, String value, String label) throws IllegalArgumentException {
+	public OrderedValue addValue(int order, String value) throws IllegalArgumentException {
 		OrderedValue ov = null;
 		try {
 			ov = this.getValue(value);

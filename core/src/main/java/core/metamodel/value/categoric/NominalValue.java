@@ -19,11 +19,6 @@ public class NominalValue implements IValue {
 	@JsonManagedReference
 	private NominalSpace vs;
 	
-	protected NominalValue(NominalSpace vs, String value, String label){
-		this.value = value;
-		this.vs = vs;
-	}
-
 	protected NominalValue(NominalSpace vs, String value){
 		this.value = value;
 		this.vs = vs;

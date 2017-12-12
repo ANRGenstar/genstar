@@ -45,12 +45,12 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	// ---------------------------------------------------------------------- //
 
 	@Override
-	public BooleanValue getInstanceValue(String value, String label) {
+	public BooleanValue getInstanceValue(String value) {
 		return this.getValue(value);
 	}
 	
 	@Override
-	public BooleanValue proposeValue(String value, String label) {
+	public BooleanValue proposeValue(String value) {
 		return this.getValue(value);
 	}
 	
@@ -59,11 +59,6 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 		return this.getValue(value);
 	}
 
-	@Override
-	public BooleanValue addValue(String value, String label) throws IllegalArgumentException {
-		return this.getValue(value);
-	}
-	
 	@Override
 	public BooleanValue getValue(String value) throws NullPointerException {
 		if(!isValidCandidate(value))

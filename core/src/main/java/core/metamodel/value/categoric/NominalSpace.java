@@ -48,29 +48,24 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 	
 	@Override
-	public NominalValue proposeValue(String value, String label) {
+	public NominalValue proposeValue(String value) {
 		return new NominalValue(this, value);
 	}
 	
 	@Override
-	public NominalValue getInstanceValue(String value, String label) {
+	public NominalValue getInstanceValue(String value) {
 		return new NominalValue(this, ct.getFormatedString(value));
 	}
 	
-	@Override
-	public NominalValue addValue(String value) throws IllegalArgumentException {
-		return this.addValue(value, value);
-	}
 	
 	@Override
-	public NominalValue addValue(String value, String label) throws IllegalArgumentException {
+	public NominalValue addValue(String value) throws IllegalArgumentException {
 
 		String val = ct.getFormatedString(value);
 		NominalValue nv = values.get(val);
 		if(nv == null) {
-			nv = new NominalValue(this, val, label);
+			nv = new NominalValue(this, val);
 			this.values.put(val, nv);
-			this.values.put(label, nv);
 		}
 		return nv;
 	}

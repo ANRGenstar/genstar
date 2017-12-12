@@ -48,8 +48,10 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	 * @return
 	 */
 	public boolean addExceludedValue(String... values) {
-		return this.addExcludedValues(Arrays.asList(values).stream()
-				.map(value -> this.proposeValue(value)).collect(Collectors.toSet()));
+		return this.addExcludedValues(
+				Arrays.asList(values).stream()
+					.map(value -> this.proposeValue(value))
+					.collect(Collectors.toSet()));
 	}
 	
 	/**
@@ -67,16 +69,16 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	// ---------------------- ADDER CONTRACT ---------------------- //
 	
 	@Override
-	public V proposeValue(String value, String label) {
-		return this.innerValueSpace.proposeValue(value, label);
+	public V proposeValue(String value) {
+		return this.innerValueSpace.proposeValue(value);
 	}
 	
 	@Override
-	public V getInstanceValue(String value, String label) {
+	public V getInstanceValue(String value) {
 		Optional<V> val = noDataValues.stream().filter(v -> v.getStringValue().equals(value)).findFirst();
 		if (val.isPresent())
 			return val.get();
-		return this.innerValueSpace.getInstanceValue(value, label); 
+		return this.innerValueSpace.getInstanceValue(value); 
 	}
 	
 	@Override

@@ -51,7 +51,7 @@ public interface IValueSpace<V extends IValue> {
 	 * @param value
 	 * @return
 	 */
-	public V proposeValue(String value, String label);
+	public V proposeValue(String value);
 	
 	/**
 	 * Create and return requested value according to value space specification
@@ -59,7 +59,7 @@ public interface IValueSpace<V extends IValue> {
 	 * @param value
 	 * @return
 	 */
-	public V getInstanceValue(String value, String label);
+	public V getInstanceValue(String value);
 	
 	/**
 	 * Create, add and return requested value according to value space specification. Must be compliant
@@ -70,8 +70,6 @@ public interface IValueSpace<V extends IValue> {
 	 */
 	public V addValue(String value) throws IllegalArgumentException;
 	
-	public V addValue(String value, String label) throws IllegalArgumentException;
-
 	/**
 	 * Retrieve the value from the operational value space as it as been defined. 
 	 * It might correspond to either the textual representation of the value in the space,
