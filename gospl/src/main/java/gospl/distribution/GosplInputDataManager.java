@@ -223,7 +223,9 @@ public class GosplInputDataManager {
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> this.isRecordAttribute(d)))
 				.collect(Collectors.toSet())){
-			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getRecords().getAttributes().contains(d))
+			if(recordMatrices.getDimensions()
+					.stream()
+					.filter(d -> !configuration.getRecords().getAttributes().contains(d))
 					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
 		}
@@ -307,21 +309,25 @@ public class GosplInputDataManager {
 				// Create a matrix for each set of related attribute
 				AFullNDimensionalMatrix<? extends Number> jDistribution;
 				// Matrix 'dimension / aspect' map
-				final Set<DemographicAttribute<? extends IValue>> dimTable = Stream.concat(rSchema.stream(), cSchema.stream())
-						.collect(Collectors.toSet());
+				final Set<DemographicAttribute<? extends IValue>> dimTable = 
+						Stream.concat(rSchema.stream(), cSchema.stream())
+								.collect(Collectors.toSet());
 				// Instantiate either contingency (int and global frame of reference) or frequency (double and either
 				// global or local frame of reference) matrix
 				if (survey.getDataFileType().equals(GSSurveyType.ContingencyTable))
 					jDistribution = new GosplContingencyTable(dimTable);
 				else
 					jDistribution = new GosplJointDistribution(dimTable, survey.getDataFileType());
+				
 				jDistribution.setLabel(survey.getName());
 				jDistribution.addGenesis("from file "+survey.getName());
+				
 				// Fill in the matrix through line & column
 				for (final Integer row : rowHeaders.entrySet().stream()
 						.filter(e -> rSchema.stream().allMatch(att -> e.getValue().stream()
 								.anyMatch(val -> val.getValueSpace().getAttribute().equals(att))))
 						.map(e -> e.getKey()).collect(Collectors.toSet())) {
+					
 					for (final Integer col : columnHeaders.entrySet().stream()
 							.filter(e -> cSchema.stream().allMatch(att -> e.getValue().stream()
 									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att))))
