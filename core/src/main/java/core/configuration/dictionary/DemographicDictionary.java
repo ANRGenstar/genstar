@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -20,6 +19,7 @@ import core.configuration.GenstarJsonUtil;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
@@ -41,9 +41,9 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	public static final String RECORDS = "RECORD ATTRIBUTES";
 	
 	private Set<A> attributes;
-	private Set<A> records;
-	
 	private Map<String,A> name2attribute;
+	
+	private Set<RecordAttribute<A, A, ? extends IValue>> records;
 	
 	public DemographicDictionary() {
 		this.attributes = new LinkedHashSet<>();
@@ -66,14 +66,14 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	@JsonCreator
 	public DemographicDictionary(
 			@JsonProperty(DemographicDictionary.ATTRIBUTES) Collection<A> attributes,
-			@JsonProperty(DemographicDictionary.RECORDS) Collection<A> records) {
+			@JsonProperty(DemographicDictionary.RECORDS) Collection<RecordAttribute<A, A, ? extends IValue>> records) {
 		
 		if (records == null)
 			records = Collections.emptyList();
 		
 		this.attributes = new LinkedHashSet<>(attributes);
 		this.records = new HashSet<>(records);
-		this.name2attribute = Stream.concat(attributes.stream(), records.stream())
+		this.name2attribute = attributes.stream()
 				.collect(Collectors.toMap(
 								IAttribute::getAttributeName,
 								Function.identity()));
@@ -120,27 +120,19 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 								Function.identity()));
 	}
 
+	// ---------------- RECORDS
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public IGenstarDictionary<A> addRecords(A... records) {
+	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A, ? extends IValue>... records) {
 		this.records.addAll(Arrays.asList(records));
-		this.name2attribute.putAll(Arrays.asList(records).stream()
-				.collect(Collectors.toMap(
-								IAttribute::getAttributeName,
-								Function.identity())));
 		return this;
 	}
 	
 	@Override
 	@JsonProperty(DemographicDictionary.RECORDS)
-	public void setRecords(Collection<A> records) {
-		this.records.stream().forEach(att -> name2attribute.remove(att.getAttributeName()));
-		this.records.clear();
-		this.records.addAll(records);
-		this.name2attribute.putAll(records.stream()
-				.collect(Collectors.toMap(
-								IAttribute::getAttributeName,
-								Function.identity())));
+	public Collection<RecordAttribute<A, A, ? extends IValue>> getRecords() {
+		return Collections.unmodifiableSet(records);
 	}
 
 	// ---------------------------- ACCESSORS ---------------------------- //
@@ -170,21 +162,10 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 		return a;
 	}
 	
+	// ------------------- UTILITIES
+	
 	public boolean containsAttribute(String name) {
 		return name2attribute.containsKey(name);
-	}
-
-
-	@Override
-	@JsonProperty(DemographicDictionary.RECORDS)
-	public Collection<A> getRecords() {
-		return Collections.unmodifiableSet(records);
-	}
-
-	@Override
-	public Collection<A> getAttributesAndRecords() {
-		return Stream.concat(attributes.stream(), records.stream())
-				.collect(Collectors.toSet());
 	}
 	
 	@Override

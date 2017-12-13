@@ -3,7 +3,6 @@ package gospl.io;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -40,8 +39,6 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	
 	private Table table = null;
 	private Map<Integer,String> idx2columnName = null;
-	
-	private GSSurveyType surveyType;
 			
 	public DBaseInputHandler(GSSurveyType surveyType, String databaseFilename) {
 
@@ -54,8 +51,6 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	public DBaseInputHandler(GSSurveyType surveyType, File databaseFile) {
 
 		super(surveyType, databaseFile);
-		
-		this.surveyType = surveyType;
 		
 		this.table = null;
 		this.idx2columnName = null;
@@ -440,7 +435,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 
 				try {
 					DemographicAttribute<? extends IValue> updatedAtt = DemographicAttributeFactory.getFactory()
-							.createRefinedAttribute(att, dt);
+							.createAttribute(att.getAttributeName(), dt, att.getValueSpace().getValues().stream()
+									.map(IValue::getStringValue).collect(Collectors.toList()));
 					dictionnary.getAttributes().remove(att);
 					dictionnary.getAttributes().add(updatedAtt);
 					name2attribute.put(currentField.getName(), updatedAtt);

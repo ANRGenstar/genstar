@@ -285,60 +285,6 @@ public class DemographicAttributeFactory {
 		return attribute;
 	}
 	
-	/**
-	 * Create record attribute either integer or continuous
-	 * <br/> throw an {@link IllegalAccessException} if record attribute {@code dataType} is not
-	 * {@link GSEnumDataType#Integer} or {@link GSEnumDataType#Continue} 
-	 * 
-	 * @see RecordAttribute
-	 * 
-	 * @param name
-	 * @param dataType
-	 * @param referentAttribute
-	 * @return
-	 * @throws GSIllegalRangedData
-	 */
-	public <K extends IValue> RecordAttribute<K, ? extends IValue> createRecordAttribute(
-			String name, GSEnumDataType dataType, DemographicAttribute<K> referentAttribute) throws GSIllegalRangedData{
-		String recordName = name+RECORD_NAME_EXTENSION;
-		switch (dataType) {
-		case Integer:
-			return new RecordAttribute<>(name, this.createIntegerAttribute(recordName), referentAttribute);
-		case Continue:
-			return new RecordAttribute<>(name, this.createContinueAttribute(recordName), referentAttribute);
-		default:
-			throw new IllegalArgumentException("Cannot define "+dataType+" value record attribute");
-		}
-	}
-	
-
-	/**
-	 * In case we have better information about an attribute after its definition - for instance 
-	 * because the definition was imprecise but is better defined when reading the data - then 
-	 * we can create a novel attribute based on the past one by changing or or several of its properties
-	 * 
-	 * FIXME: fix based on new {@link DemographicAttribute} creation rules
-	 * 
-	 * @param orignalAtt
-	 * @param datatype
-	 * @return
-	 * @throws GSIllegalRangedData
-	 */
-	public DemographicAttribute<? extends IValue> createRefinedAttribute(DemographicAttribute<? extends IValue> orignalAtt, 
-			GSEnumDataType datatype) throws GSIllegalRangedData {
-
-		//Map<Set<String>, Set<String>> mapper = null;
-		
-		DemographicAttribute<? extends IValue> novel = createAttribute(
-				orignalAtt.getAttributeName(),
-				datatype, 
-				orignalAtt.getValueSpace().getValues().stream().map(a->a.getStringValue()).collect(Collectors.toList()) /*,
-				orignalAtt.getReferentAttribute(), 
-				mapper */
-				);
-		return novel;
-	}
-	
 	// ------------------------------------------------------------- //
 	//                          BUILD METHOD							//
 	
@@ -429,6 +375,21 @@ public class DemographicAttributeFactory {
 	public <V extends IValue> MappedDemographicAttribute<IntegerValue, V> createIntegerRecordAttribute(String name,
 			DemographicAttribute<V> referentAttribute){
 		return this.createIntegerRecordAttribute(name, referentAttribute, Collections.emptyMap());
+	}
+	
+	/**
+	 * Create integer record attribute
+	 * 
+	 * @see RecordAttribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public RecordAttribute<DemographicAttribute<? extends IValue>, DemographicAttribute<IntegerValue>, IntegerValue> createRecordContingencyAttribute(
+			String name, DemographicAttribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
+		return new RecordAttribute<>(name, this.createIntegerAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
 	}
 	
 	/* ------------------ *
@@ -532,6 +493,19 @@ public class DemographicAttributeFactory {
 	public <V extends IValue> MappedDemographicAttribute<ContinuousValue, V> createContinueRecordAttribute(
 			String name, DemographicAttribute<V> referentAttribute) {
 		return this.createContinueRecordAttribute(name, referentAttribute, Collections.emptyMap());
+	}
+	
+	/**
+	 * Create continuous value record attribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public RecordAttribute<DemographicAttribute<? extends IValue>, DemographicAttribute<ContinuousValue>, ContinuousValue> createRecordContinuousAttribute(
+			String name, DemographicAttribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
+		return new RecordAttribute<>(name, this.createContinueAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
 	}
 	
 	/* ----------------- *

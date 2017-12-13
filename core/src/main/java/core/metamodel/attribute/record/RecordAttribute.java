@@ -1,30 +1,32 @@
 package core.metamodel.attribute.record;
 
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
-import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 
-public class RecordAttribute<K extends IValue, V extends IValue> extends DemographicAttribute<NominalValue> {
+public class RecordAttribute<R extends IAttribute<? extends IValue>, 
+	P extends IAttribute<V>, V extends IValue> implements IAttribute<NominalValue> {
 
-	private DemographicAttribute<V> proxy;
-	private DemographicAttribute<K> referent;
+	private final P proxy;
+	private final R referent;
 	
 	private RecordValueSpace valuesSpace = null;
+	
+	private final String name;
 
-	public RecordAttribute(String name, DemographicAttribute<V> proxy, 
-			DemographicAttribute<K> referent) {
-		super(name);
+	public RecordAttribute(String name, P proxy, R referent) {
+		this.name = name;
 		this.proxy = proxy;
 		this.referent = referent;
 	}
 	
 	@Override
-	public DemographicAttribute<K> getReferentAttribute() {
-		return referent;
+	public String getAttributeName() {
+		return name;
 	}
-
+	
 	@Override
 	public IValueSpace<NominalValue> getValueSpace() {
 		if(valuesSpace == null)
@@ -38,8 +40,21 @@ public class RecordAttribute<K extends IValue, V extends IValue> extends Demogra
 		// DO NOTHING
 	}
 	
-	public IValueSpace<V> getProxyValueSpace(){
-		return proxy.getValueSpace();
+	/**
+	 * Get the referent attribute to which record will be linked
+	 * @return
+	 */
+	public R getReferentAttribute() {
+		return referent;
+	}
+	
+	/**
+	 * Get the proxy attribute that store record relationship. 
+	 * 
+	 * @return
+	 */
+	public P getProxyAttribute(){
+		return proxy;
 	}
 
 }

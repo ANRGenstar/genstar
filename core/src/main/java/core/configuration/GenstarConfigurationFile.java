@@ -112,7 +112,7 @@ public class GenstarConfigurationFile {
 	 */
 	private void isCircleReferencedAttribute() throws IllegalArgumentException {
 		Collection<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
-		if(demoDictionary != null) attributes.addAll(demoDictionary.getAttributesAndRecords());
+		if(demoDictionary != null) attributes.addAll(demoDictionary.getAttributes());
 		// store attributes that have referent attribute
 		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> attToRefAtt = 
 				attributes.stream().filter(att -> !att.getReferentAttribute().equals(att))

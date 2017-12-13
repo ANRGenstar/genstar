@@ -2,12 +2,11 @@ package core.configuration.dictionary;
 
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -40,8 +39,6 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 */
 	public Collection<A> getAttributes();
 	
-	public boolean containsAttribute(String name);
-
 	/**
 	 * Access to attribute using attribute name define as {@link IAttribute#getAttributeName()}
 	 * 
@@ -50,35 +47,30 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 */
 	public A getAttribute(String string);
 	
-/**
+	/**
+	 * true if this dictionary contain an attribute associated to given attribute name; false
+	 * otherwise
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean containsAttribute(String name);
+	
+	/**
 	 * returns true if one of the attributes of the dictionnary has 
 	 * any space containing any value corresponding to this value
 	 * @param s
 	 * @return
 	 */
 	public boolean containsValue(String valueStr);
-	
 
-	/**
-	 * Retrives record attributes contain in this dictionary. Records attribute
-	 * are {@link MappedDemographicAttribute} that do not describe any meaningful attribute
-	 * for synthetic population but help to parse data. For ex., when we have contingency for
-	 * an attribute, it is often coded in data with a corresponding attribute 'population' or
-	 * 'frequency'
-	 * 
-	 * TODO: better description of record
-	 * 
-	 * @return
-	 */
-	public Collection<A> getRecords();
-	
-	/**
-	 * Get all attributes in this dictionary
-	 * @return
-	 */
-	@JsonIgnore
-	public Collection<A> getAttributesAndRecords();
+	// ---------------------- ADD & SET
 
+	@SuppressWarnings("unchecked")
+	public IGenstarDictionary<A> addAttributes(A... attributes);
+	
+	public IGenstarDictionary<A> addAttributes(Collection<A> attributes);
+	
 	/**
 	 * Replaces all pre-existing meaningful attributes by the provided collection of attribute.
 	 * Ordering of argument collection will be preserve.
@@ -87,19 +79,17 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 */
 	public void setAttributes(Collection<A> attributes);
 	
-	/**
-	 * Replaces all pre-existing record attributes by the provided collection of attribute.
-	 * Ordering of argument collection is not guaranteed to be preserve.
-	 * 
-	 * @param attributes
-	 */
-	public void setRecords(Collection<A> attributes);
-
-	@SuppressWarnings("unchecked")
-	public IGenstarDictionary<A> addAttributes(A... attributes);
+	// ------------------------ RECORDS
 	
-	public IGenstarDictionary<A> addAttributes(Collection<A> attributes);
-
+	/**
+	 * Retrives record attributes contain in this dictionary.
+	 * 
+	 * TODO: better description of record
+	 * 
+	 * @return
+	 */
+	public Collection<RecordAttribute<A, A, ? extends IValue>> getRecords();
+	
 	/**
 	 * Add record attributes to this dictionary.
 	 * 
@@ -107,20 +97,21 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public IGenstarDictionary<A> addRecords(A... records);
-
-
-	/**
-	 * add the dictionnary passed as parameter to this one and returns 
-	 * a novel dictionnary which contains all their attributes.
-	 * @param dictionnary
-	 * @return
-	 */
-	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary);
+	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A, ? extends IValue>... records);
+	
+	// ----------- UTILITIES
 
 	/**
 	 * returns the count of attributes
 	 * @return
 	 */
 	public int size();
+	
+	/**
+	 * add the dictionary passed as parameter to this one and returns 
+	 * a novel dictionary which contains all their attributes.
+	 * @param dictionnary
+	 * @return
+	 */
+	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary);
 }

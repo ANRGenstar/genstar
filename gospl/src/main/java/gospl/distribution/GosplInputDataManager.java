@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -239,6 +238,8 @@ public class GosplInputDataManager {
 	/**
 	 * Get the distribution matrix from data files, using provided dictionary
 	 * 
+	 * FIXME: must check for record attribute to build data table accordingly
+	 * 
 	 * @param survey
 	 * @param dictionary
 	 * @return
@@ -250,7 +251,6 @@ public class GosplInputDataManager {
 			throws IOException, InvalidSurveyFormatException {
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
-		final Collection<DemographicAttribute<? extends IValue>> attributes = dictionary.getAttributesAndRecords();
 		final GSDataParser dataParser = new GSDataParser();
 		
 		// Read headers and store possible variables by line index
@@ -267,13 +267,12 @@ public class GosplInputDataManager {
 		final Set<Set<DemographicAttribute<? extends IValue>>> columnSchemas = new HashSet<>();
 		for(Set<IValue> cValues : columnHeaders.values())
 			columnSchemas.add(cValues.stream()
-										.map(v -> dictionary.getAttributes()
-													.stream()
+										.map(v -> dictionary.getAttributes().stream()
 													.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get()
 											)
 										.collect(Collectors.toSet()));
 						
-		// Remove lower generality schema: e.g. if we have scheam [A,B] then [A] or [B] will be skiped
+		// Remove lower generality schema: e.g. if we have schema [A,B] then [A] or [B] will be skiped
 		columnSchemas.removeAll(columnSchemas.stream().filter(schema -> 
 			columnSchemas.stream()
 						.anyMatch(higherSchema -> schema.stream()
