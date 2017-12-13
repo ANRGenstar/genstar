@@ -24,6 +24,7 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeValue;
@@ -116,7 +117,7 @@ public class GenstarJsonUtilTest {
 						);
 		dd.addAttributes(nominalToRangeAttribute);
 		
-		// RECORD
+		// RECORD (CODE)
 		Map<String,String> value2value2 = new HashMap<>();
 		value2value2.put("1", "true");
 		value2value2.put("2", "false");
@@ -125,8 +126,14 @@ public class GenstarJsonUtilTest {
 					.createIntegerRecordAttribute("Record attribute", dd.getAttribute("Boolean attribute"),
 							value2value2);
 		dd.addAttributes(intToBoolAttribute);
+		
+		// RECORD
+		dd.addRecords(DemographicAttributeFactory.getFactory()
+				.createRecordAttribute("Population", GSEnumDataType.Integer, 
+						dd.getAttribute("Range aggregated attribute")));
 
 		sju = new GenstarJsonUtil();
+		
 	}
 
 	@Test

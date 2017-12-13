@@ -2,6 +2,7 @@ package core.configuration.dictionary;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -30,6 +31,9 @@ import core.metamodel.value.IValue;
 })
 public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 
+	public static final String ATTRIBUTES = "ATTRIBUTES";
+	public static final String RECORDS = "RECORD ATTRIBUTES";
+	
 	/**
 	 * Retrieves meaningful attributes describe by this dictionary
 	 * 
@@ -37,6 +41,7 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * 
 	 * @return
 	 */
+	@JsonProperty(DemographicDictionary.ATTRIBUTES)
 	public Collection<A> getAttributes();
 	
 	/**
@@ -74,10 +79,12 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	/**
 	 * Replaces all pre-existing meaningful attributes by the provided collection of attribute.
 	 * Ordering of argument collection will be preserve.
+	 * <p>
+	 * used to serialize & deserialize configuration file
 	 * 
 	 * @param attributes
 	 */
-	public void setAttributes(Collection<A> attributes);
+	//public void setAttributes(Collection<A> attributes);
 	
 	// ------------------------ RECORDS
 	
@@ -88,7 +95,8 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * 
 	 * @return
 	 */
-	public Collection<RecordAttribute<A, A, ? extends IValue>> getRecords();
+	@JsonProperty(DemographicDictionary.RECORDS)
+	public Collection<RecordAttribute<A, A>> getRecords();
 	
 	/**
 	 * Add record attributes to this dictionary.
@@ -97,7 +105,9 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A, ? extends IValue>... records);
+	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A>... records);
+	
+	//public void setRecords(Collection<RecordAttribute<A, A>> records);
 	
 	// ----------- UTILITIES
 

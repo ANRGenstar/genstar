@@ -2,7 +2,6 @@ package core.metamodel.attribute.demographic;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -285,6 +284,29 @@ public class DemographicAttributeFactory {
 		return attribute;
 	}
 	
+	/**
+	 * Create integer record attribute
+	 * 
+	 * @see RecordAttribute
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public RecordAttribute<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> createRecordAttribute(
+			String name, GSEnumDataType dataType, DemographicAttribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
+		switch (dataType) {
+		case Integer:
+			return new RecordAttribute<>(name, this.createIntegerAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
+		case Continue:
+			return new RecordAttribute<>(name, this.createContinueAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
+		default:
+			throw new IllegalArgumentException("Cannot create "+dataType+" record attribute - suppose to be "
+					+GSEnumDataType.Integer+" or "+GSEnumDataType.Continue);
+		}
+	}
+	
 	// ------------------------------------------------------------- //
 	//                          BUILD METHOD							//
 	
@@ -362,34 +384,6 @@ public class DemographicAttributeFactory {
 				));
 		 */
 		return attribute;
-	}
-	
-	/**
-	 * Create integer record value attribute (no prior mapping)
-	 * 
-	 * @param name
-	 * @param referentAttribute
-	 * @param mapper
-	 * @return
-	 */
-	public <V extends IValue> MappedDemographicAttribute<IntegerValue, V> createIntegerRecordAttribute(String name,
-			DemographicAttribute<V> referentAttribute){
-		return this.createIntegerRecordAttribute(name, referentAttribute, Collections.emptyMap());
-	}
-	
-	/**
-	 * Create integer record attribute
-	 * 
-	 * @see RecordAttribute
-	 * 
-	 * @param name
-	 * @param referentAttribute
-	 * @return
-	 * @throws GSIllegalRangedData
-	 */
-	public RecordAttribute<DemographicAttribute<? extends IValue>, DemographicAttribute<IntegerValue>, IntegerValue> createRecordContingencyAttribute(
-			String name, DemographicAttribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
-		return new RecordAttribute<>(name, this.createIntegerAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
 	}
 	
 	/* ------------------ *
@@ -483,31 +477,6 @@ public class DemographicAttributeFactory {
 		return attribute;
 	}
 	
-	/**
-	 * Create continued record value attribute (no prior mapping)
-	 * 
-	 * @param name
-	 * @param referentAttribute
-	 * @return
-	 */
-	public <V extends IValue> MappedDemographicAttribute<ContinuousValue, V> createContinueRecordAttribute(
-			String name, DemographicAttribute<V> referentAttribute) {
-		return this.createContinueRecordAttribute(name, referentAttribute, Collections.emptyMap());
-	}
-	
-	/**
-	 * Create continuous value record attribute
-	 * 
-	 * @param name
-	 * @param referentAttribute
-	 * @return
-	 * @throws GSIllegalRangedData
-	 */
-	public RecordAttribute<DemographicAttribute<? extends IValue>, DemographicAttribute<ContinuousValue>, ContinuousValue> createRecordContinuousAttribute(
-			String name, DemographicAttribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
-		return new RecordAttribute<>(name, this.createContinueAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
-	}
-	
 	/* ----------------- *
 	 * Boolean attribute *
 	 * ----------------- */
@@ -594,18 +563,6 @@ public class DemographicAttributeFactory {
 						referentAttribute.getValueSpace().getValue(record.get(key))
 						));
 		return attribute;
-	}
-	
-	/**
-	 * Create boolean record value attribute (no prior mapping)
-	 * 
-	 * @param name
-	 * @param referentAttribute
-	 * @return
-	 */
-	public <V extends IValue> MappedDemographicAttribute<BooleanValue, V> createBooleanRecordAttribute(String name,
-			DemographicAttribute<V> referentAttribute) {
-		return this.createBooleanRecordAttribute(name, referentAttribute, Collections.emptyMap());
 	}
 	
 	/* ------------------------- *
@@ -778,20 +735,6 @@ public class DemographicAttributeFactory {
 		return this.createOrderedRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, record);
 	}
 	
-	/**
-	 * Create ordered record value attribute (no prior mapping) and default template
-	 * 
-	 * @param name
-	 * @param gsCategoricTemplate
-	 * @param referentAttribute
-	 * @param mapper
-	 * @return
-	 */
-	public <V extends IValue> MappedDemographicAttribute<OrderedValue, V> createOrderedRecordAttribute(String name,
-			DemographicAttribute<V> referentAttribute){
-		return this.createOrderedRecordAttribute(name, referentAttribute, new LinkedHashMap<>());
-	}
-	
 	/* ----------------- *
 	 * Nominal attribute *
 	 * ----------------- */
@@ -910,19 +853,6 @@ public class DemographicAttributeFactory {
 	public <V extends IValue> MappedDemographicAttribute<NominalValue, V> createNominalRecordAttribute(String name, 
 			DemographicAttribute<V> referentAttribute, Map<String, String> record) {
 		return this.createNominalRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, record);
-	}
-	
-	/**
-	 * Create a nominal record value attribute (no prior mapping) and default template
-	 * 
-	 * @param name
-	 * @param referentAttribute
-	 * @param mapper
-	 * @return
-	 */
-	public <V extends IValue> MappedDemographicAttribute<NominalValue, V> createNominalRecordAttribute(String name, 
-			DemographicAttribute<V> referentAttribute) {
-		return this.createNominalRecordAttribute(name, referentAttribute, Collections.emptyMap());
 	}
 	
 	/* ----------- *

@@ -36,14 +36,11 @@ import core.metamodel.value.IValue;
 @JsonTypeName(GenstarJsonUtil.DEMO_DICO)
 public class DemographicDictionary<A extends DemographicAttribute<? extends IValue>>
 	implements IGenstarDictionary<A> {
-
-	public static final String ATTRIBUTES = "ATTRIBUTES";
-	public static final String RECORDS = "RECORD ATTRIBUTES";
 	
 	private Set<A> attributes;
 	private Map<String,A> name2attribute;
 	
-	private Set<RecordAttribute<A, A, ? extends IValue>> records;
+	private Set<RecordAttribute<A, A>> records;
 	
 	public DemographicDictionary() {
 		this.attributes = new LinkedHashSet<>();
@@ -65,8 +62,8 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	
 	@JsonCreator
 	public DemographicDictionary(
-			@JsonProperty(DemographicDictionary.ATTRIBUTES) Collection<A> attributes,
-			@JsonProperty(DemographicDictionary.RECORDS) Collection<RecordAttribute<A, A, ? extends IValue>> records) {
+			@JsonProperty(IGenstarDictionary.ATTRIBUTES) Collection<A> attributes,
+			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<A, A>> records) {
 		
 		if (records == null)
 			records = Collections.emptyList();
@@ -108,8 +105,8 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 		return this;
 	}
 	
+	/*
 	@Override
-	@JsonProperty(DemographicDictionary.ATTRIBUTES)
 	public void setAttributes(Collection<A> attributes) {
 		this.attributes.stream().forEach(att -> name2attribute.remove(att.getAttributeName()));
 		this.name2attribute.clear();
@@ -119,21 +116,29 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 								IAttribute::getAttributeName,
 								Function.identity()));
 	}
+	*/
 
 	// ---------------- RECORDS
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A, ? extends IValue>... records) {
+	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A>... records) {
 		this.records.addAll(Arrays.asList(records));
 		return this;
 	}
 	
 	@Override
-	@JsonProperty(DemographicDictionary.RECORDS)
-	public Collection<RecordAttribute<A, A, ? extends IValue>> getRecords() {
+	public Collection<RecordAttribute<A, A>> getRecords() {
 		return Collections.unmodifiableSet(records);
 	}
+	
+	/*
+	@Override
+	public void setRecords(Collection<RecordAttribute<A, A>> records) {
+		this.records.clear();
+		this.records.addAll(records);
+	}
+	*/
 
 	// ---------------------------- ACCESSORS ---------------------------- //
 	
@@ -143,7 +148,6 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	 * @return
 	 */
 	@Override
-	@JsonProperty(DemographicDictionary.ATTRIBUTES)
 	public Collection<A> getAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}

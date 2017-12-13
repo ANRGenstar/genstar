@@ -27,6 +27,7 @@ import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.attribute.demographic.map.IAttributeMapper;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalValue;
@@ -76,6 +77,8 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 				default:
 					throw new IllegalArgumentException("Trying to deserialize unrecognized mapper: "+mapperType);
 				}
+			case RecordAttribute.SELF:
+				return this.deserializeRA(on);
 			case GeographicAttribute.SELF:
 				return this.deserializeGA(on);
 				//throw new RuntimeException("Geographical attribute deserialization has not been yet implemented: DO IT, QUICK !");
@@ -89,7 +92,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	}
 	
 	// ------------------ SPECIFIC DESERIALIZER ------------------ //
-	
+
 	/*
 	 * Deserialize basic demographic attribute
 	 */
@@ -187,6 +190,16 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	private GeographicAttribute<? extends IValue> deserializeGA(JsonNode node){
 		return GeographicAttributeFactory.getFactory()
 				.createAttribute(this.getName(node), this.getType(node));
+	}
+	
+	/*
+	 * Deserialize record attribute
+	 */
+	private RecordAttribute<? extends IAttribute<? extends IValue>, ? extends IAttribute<? extends IValue>> deserializeRA(JsonNode node) 
+			throws GSIllegalRangedData { 
+		return DemographicAttributeFactory.getFactory()
+				.createRecordAttribute(this.getName(node), this.getType(node), 
+						this.getReferentAttribute(node));
 	}
 	
 	// ------------------ BASIC INNER UTILITIES ------------------ //

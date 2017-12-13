@@ -14,6 +14,7 @@ import core.configuration.jackson.AttributeDeserializer;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -29,7 +30,8 @@ import core.metamodel.value.IValue;
 @JsonSubTypes({
 	        @JsonSubTypes.Type(value = DemographicAttribute.class),
 	        @JsonSubTypes.Type(value = MappedDemographicAttribute.class),
-	        @JsonSubTypes.Type(value = GeographicAttribute.class)
+	        @JsonSubTypes.Type(value = GeographicAttribute.class),
+	        @JsonSubTypes.Type(value = RecordAttribute.class)
 	    })
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property=IAttribute.NAME)
 @JsonDeserialize(using = AttributeDeserializer.class)

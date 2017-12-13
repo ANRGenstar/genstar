@@ -1,17 +1,36 @@
 package core.metamodel.attribute.record;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import core.configuration.jackson.RecordAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 
+/**
+ * A type of attribute which is not aimed to describe entity but only focus on
+ * data parsing. Main purpose is to 
+ * 
+ * @author kevinchapuis
+ *
+ * @param <R>
+ * @param <P>
+ */
+@JsonTypeName(RecordAttribute.SELF)
+@JsonSerialize(using = RecordAttributeSerializer.class)
 public class RecordAttribute<R extends IAttribute<? extends IValue>, 
-	P extends IAttribute<V>, V extends IValue> implements IAttribute<NominalValue> {
+	P extends IAttribute<? extends IValue>> implements IAttribute<NominalValue> {
 
+	public static final String SELF = "RECORD ATTRIBUTE";
+	
 	private final P proxy;
 	private final R referent;
 	
+	@JsonIgnore
 	private RecordValueSpace valuesSpace = null;
 	
 	private final String name;

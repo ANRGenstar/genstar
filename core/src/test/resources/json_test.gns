@@ -27,9 +27,9 @@
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
           "VALUES" : [ {
-            "INPUT VALUE" : "Célibataire"
-          }, {
             "INPUT VALUE" : "En couple"
+          }, {
+            "INPUT VALUE" : "Célibataire"
           } ],
           "categoricTemplate" : {
             "regex" : [ ]
@@ -67,25 +67,25 @@
         "VALUE SPACE" : {
           "TYPE" : "Integer",
           "VALUES" : [ {
-            "INPUT VALUE" : "7"
+            "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "0"
+          }, {
+            "INPUT VALUE" : "5"
           }, {
             "INPUT VALUE" : "6"
           }, {
-            "INPUT VALUE" : "5"
+            "INPUT VALUE" : "3"
           }, {
             "INPUT VALUE" : "4"
           }, {
             "INPUT VALUE" : "9"
           }, {
+            "INPUT VALUE" : "7"
+          }, {
             "INPUT VALUE" : "8"
-          }, {
-            "INPUT VALUE" : "3"
-          }, {
-            "INPUT VALUE" : "2"
-          }, {
-            "INPUT VALUE" : "1"
-          }, {
-            "INPUT VALUE" : "0"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
@@ -113,15 +113,15 @@
         "VALUE SPACE" : {
           "TYPE" : "Range",
           "VALUES" : [ {
+            "INPUT VALUE" : "25 à 34"
+          }, {
             "INPUT VALUE" : "moins de 14"
           }, {
             "INPUT VALUE" : "35 à 54"
           }, {
-            "INPUT VALUE" : "25 à 34"
+            "INPUT VALUE" : "55 et plus"
           }, {
             "INPUT VALUE" : "15 à 24"
-          }, {
-            "INPUT VALUE" : "55 et plus"
           } ],
           "min" : 0,
           "max" : 120,
@@ -214,6 +214,37 @@
         }
       }
     } ],
-    "RECORD ATTRIBUTES" : [ ]
+    "RECORD ATTRIBUTES" : [ {
+      "RECORD ATTRIBUTE" : {
+        "NAME" : "Population",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Population"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "PROXY ATTRIBUTE" : {
+          "DEMOGRAPHIC ATTRIBUTE" : {
+            "NAME" : "Population_rec",
+            "VALUE SPACE" : {
+              "TYPE" : "Integer",
+              "VALUES" : [ ],
+              "EMPTY VALUE" : {
+                "INPUT VALUE" : "null"
+              },
+              "min" : -2147483648,
+              "max" : 2147483647
+            }
+          }
+        },
+        "REFERENT ATTRIBUTE" : "Range aggregated attribute"
+      }
+    } ]
   }
 }
