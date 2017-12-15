@@ -1,12 +1,14 @@
 package core.metamodel.attribute.record;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.RecordAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
+import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
@@ -26,8 +28,11 @@ public class RecordAttribute<R extends IAttribute<? extends IValue>,
 	P extends IAttribute<? extends IValue>> implements IAttribute<NominalValue> {
 
 	public static final String SELF = "RECORD ATTRIBUTE";
+	public static final String PROXY_TYPE = "PROXY ATTRIBUTE "+IValueSpace.TYPE;
 	
 	private final P proxy;
+	
+	@JsonProperty(MappedDemographicAttribute.REF)
 	private final R referent;
 	
 	@JsonIgnore

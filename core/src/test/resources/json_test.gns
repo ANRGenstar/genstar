@@ -217,32 +217,7 @@
     "RECORD ATTRIBUTES" : [ {
       "RECORD ATTRIBUTE" : {
         "NAME" : "Population",
-        "VALUE SPACE" : {
-          "TYPE" : "Nominal",
-          "VALUES" : [ {
-            "INPUT VALUE" : "Population"
-          } ],
-          "categoricTemplate" : {
-            "regex" : [ ]
-          },
-          "EMPTY VALUE" : {
-            "INPUT VALUE" : null
-          }
-        },
-        "PROXY ATTRIBUTE" : {
-          "DEMOGRAPHIC ATTRIBUTE" : {
-            "NAME" : "Population_rec",
-            "VALUE SPACE" : {
-              "TYPE" : "Integer",
-              "VALUES" : [ ],
-              "EMPTY VALUE" : {
-                "INPUT VALUE" : "null"
-              },
-              "min" : -2147483648,
-              "max" : 2147483647
-            }
-          }
-        },
+        "PROXY ATTRIBUTE TYPE" : "Integer",
         "REFERENT ATTRIBUTE" : "Range aggregated attribute"
       }
     } ]

@@ -198,7 +198,8 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	private RecordAttribute<? extends IAttribute<? extends IValue>, ? extends IAttribute<? extends IValue>> deserializeRA(JsonNode node) 
 			throws GSIllegalRangedData { 
 		return DemographicAttributeFactory.getFactory()
-				.createRecordAttribute(this.getName(node), this.getType(node), 
+				.createRecordAttribute(this.getName(node), 
+						GSEnumDataType.valueOf(node.findValue(RecordAttribute.PROXY_TYPE).asText()), 
 						this.getReferentAttribute(node));
 	}
 	
