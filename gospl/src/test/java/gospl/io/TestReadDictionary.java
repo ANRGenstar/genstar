@@ -14,6 +14,7 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
+import gospl.io.util.ReadDictionaryUtils;
 
 public class TestReadDictionary {
 

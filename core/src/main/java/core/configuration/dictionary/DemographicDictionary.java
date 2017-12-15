@@ -10,9 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.configuration.GenstarJsonUtil;
@@ -34,6 +36,7 @@ import core.metamodel.value.IValue;
  * @param <A>
  */
 @JsonTypeName(GenstarJsonUtil.DEMO_DICO)
+@JsonPropertyOrder({ IGenstarDictionary.ATTRIBUTES, IGenstarDictionary.RECORDS })
 public class DemographicDictionary<A extends DemographicAttribute<? extends IValue>>
 	implements IGenstarDictionary<A> {
 	
@@ -104,19 +107,6 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 								Function.identity())));
 		return this;
 	}
-	
-	/*
-	@Override
-	public void setAttributes(Collection<A> attributes) {
-		this.attributes.stream().forEach(att -> name2attribute.remove(att.getAttributeName()));
-		this.name2attribute.clear();
-		this.attributes.addAll(attributes);
-		this.name2attribute = attributes.stream()
-						.collect(Collectors.toMap(
-								IAttribute::getAttributeName,
-								Function.identity()));
-	}
-	*/
 
 	// ---------------- RECORDS
 	
@@ -131,14 +121,6 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	public Collection<RecordAttribute<A, A>> getRecords() {
 		return Collections.unmodifiableSet(records);
 	}
-	
-	/*
-	@Override
-	public void setRecords(Collection<RecordAttribute<A, A>> records) {
-		this.records.clear();
-		this.records.addAll(records);
-	}
-	*/
 
 	// ---------------------------- ACCESSORS ---------------------------- //
 	
@@ -172,11 +154,8 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 		return name2attribute.containsKey(name);
 	}
 	
-	@Override
-	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary) {
-		IGenstarDictionary<A> d = new DemographicDictionary<>(this);
-		d.addAttributes(dictionnary.getAttributes());
-		return d;
+	public boolean containsRecord(String name) {
+		return records.stream().anyMatch(rec -> rec.getAttributeName().equals(name));
 	}
 
 	@Override
@@ -189,9 +168,21 @@ public class DemographicDictionary<A extends DemographicAttribute<? extends IVal
 	}
 	
 	@Override
+	public Collection<IAttribute<? extends IValue>> getAttributeAndRecord() {
+		return Stream.concat(attributes.stream(), records.stream())
+				.collect(Collectors.toCollection(HashSet::new));
+	}
+	
+	@Override
+	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary) {
+		IGenstarDictionary<A> d = new DemographicDictionary<>(this);
+		d.addAttributes(dictionnary.getAttributes());
+		return d;
+	}
+	
+	@Override
 	public int size() {
 		return attributes.size();
 	}
-
 	
 }

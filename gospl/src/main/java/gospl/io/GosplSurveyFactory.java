@@ -205,14 +205,6 @@ public class GosplSurveyFactory {
 				throw new IllegalArgumentException("cannot read file "+surveyFile+" .");
 
 		}
-		/*if (!surveyFile.isAbsolute()) {
-
-			if (basePath == null)
-				throw new IllegalArgumentException("cannot load relative file "+surveyFile+" if the configuration base path is not defined.");
-
-			surveyFile = basePath.resolve(surveyFile.toString()).toFile();
-
-		}*/
 		return this.getSurvey(surveyFile, wrapper.getSheetNumber(), 
 				wrapper.getCsvSeparator(), wrapper.getFirstRowIndex(), wrapper.getFirstColumnIndex(),
 				wrapper.getSurveyType());

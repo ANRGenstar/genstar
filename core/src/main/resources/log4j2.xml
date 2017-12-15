@@ -8,7 +8,7 @@
   </Appenders>
   <!-- LOGGER -->
   <Loggers>
-    <Logger name="gospl.algo" level="debug" additivity="false">
+    <Logger name="gospl.algo" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
     <Logger name="gospl.algo.bn" level="info" additivity="false">

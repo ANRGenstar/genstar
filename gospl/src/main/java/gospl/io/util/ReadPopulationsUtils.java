@@ -1,4 +1,4 @@
-package gospl.io;
+package gospl.io.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +13,8 @@ import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
 import gospl.distribution.GosplInputDataManager;
+import gospl.io.CsvInputHandler;
+import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
 
 /**

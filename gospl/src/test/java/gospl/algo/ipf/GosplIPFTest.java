@@ -10,7 +10,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.bouncycastle.crypto.RuntimeCryptoException;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -46,7 +45,7 @@ public class GosplIPFTest {
 	
 	public static Path PATH_TO_DICO = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 
-	//@Test
+	@Test
 	public void simpleTest() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
@@ -63,7 +62,8 @@ public class GosplIPFTest {
 		assertEquals(GENERATION_SIZE, popOut.size());
 	}
 
-	//@Test
+	@Test
+	@Ignore
 	public void defaultTest() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = null;
@@ -89,7 +89,8 @@ public class GosplIPFTest {
 		assertEquals(GENERATION_SIZE, popOut.size());
 	}
 	
-	//@Test
+	@Test
+	@Ignore
 	public void defaultTestWithSegmentedMatrix() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = null;
@@ -119,7 +120,8 @@ public class GosplIPFTest {
 	
 	
 	
-	//@Test
+	@Test
+	@Ignore
 	public void mappedTest() {
 
 		Set<DemographicAttribute<? extends IValue>> refAttributes = new HashSet<>();

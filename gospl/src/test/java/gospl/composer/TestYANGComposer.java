@@ -21,9 +21,9 @@ import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.io.GosplSurveyFactory;
-import gospl.io.ReadPopulationsUtils;
 import gospl.io.exception.InvalidSurveyFormatException;
 import gospl.io.insee.ReadINSEEDictionaryUtils;
+import gospl.io.util.ReadPopulationsUtils;
 
 public class TestYANGComposer {
 
