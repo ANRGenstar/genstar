@@ -27,8 +27,8 @@ import gospl.GosplPopulation;
 import gospl.distribution.GosplInputDataManager;
 import gospl.io.CsvInputHandler;
 import gospl.io.GosplSurveyFactory;
-import gospl.io.ReadDictionaryUtils;
 import gospl.io.exception.InvalidSurveyFormatException;
+import gospl.io.util.ReadDictionaryUtils;
 
 public class TestBayesianNetworkCompletionSampler {
 

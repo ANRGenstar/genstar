@@ -34,7 +34,7 @@ import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
-import gospl.io.ReadDictionaryUtils;
+import gospl.io.util.ReadDictionaryUtils;
 
 /**
  * provides utils to parse dictionaries describing data from various sources

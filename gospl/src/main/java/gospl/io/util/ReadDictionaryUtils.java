@@ -1,4 +1,4 @@
-package gospl.io;
+package gospl.io.util;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

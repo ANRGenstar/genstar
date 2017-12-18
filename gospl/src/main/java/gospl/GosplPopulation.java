@@ -12,7 +12,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
-import gospl.io.ReadPopulationsUtils;
+import gospl.io.util.ReadPopulationsUtils;
 
 /**
  * To create a population from a sample read from file, refer to {@link ReadPopulationsUtils}

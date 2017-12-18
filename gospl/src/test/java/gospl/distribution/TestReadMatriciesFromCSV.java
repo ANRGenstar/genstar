@@ -1,18 +1,22 @@
 package gospl.distribution;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;
+import java.nio.file.Paths;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import core.configuration.GenstarConfigurationFile;
+import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
@@ -20,10 +24,10 @@ import gospl.GosplPopulation;
 import gospl.distribution.exception.IllegalControlTotalException;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.io.ReadDictionaryUtils;
-import gospl.io.ReadPopulationsUtils;
 import gospl.io.exception.InvalidSurveyFormatException;
 import gospl.io.insee.ReadINSEEDictionaryUtils;
+import gospl.io.util.ReadDictionaryUtils;
+import gospl.io.util.ReadPopulationsUtils;
 
 public class TestReadMatriciesFromCSV {
 
@@ -584,6 +588,25 @@ public class TestReadMatriciesFromCSV {
 				TOLERANCE
 				);
 		
+	}
+	
+	@Test
+	public void testRecordAttribute() throws IOException, InvalidFormatException, 
+		InvalidSurveyFormatException, IllegalDistributionCreation, IllegalControlTotalException {
+		
+		GenstarConfigurationFile gcf = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
+				Paths.get("src","test","resources","rouen_demographics","rouen_iris.gns").toAbsolutePath());
+		
+		assertTrue(gcf.getDemoDictionary().size() > 0);
+		assertTrue(gcf.getDemoDictionary().getRecords().size() > 0);
+		
+		GosplInputDataManager gidm = new GosplInputDataManager(gcf);
+		
+		// Read data
+		gidm.buildDataTables();
+		// Has correctly collapse record attribute
+		assertTrue(gidm.getContingencyTables().stream().flatMap(matrix -> matrix.getDimensions().stream())
+				.noneMatch(d -> d.getClass().equals(RecordAttribute.class)));
 	}
 	
 }

@@ -121,6 +121,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			// create the value on the fly
 			iv = this.getInstanceValue(value);
 			this.values.add(iv);
+			this.textual2valueCached.put(iv.getStringValue(), iv);
 		}
 		return iv;
 	}	
@@ -163,6 +164,20 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		if(!value.getClass().equals(RangeValue.class))
 			return false;
 		return values.contains(value);
+	}
+	
+	@Override
+	public boolean contains(String valueStr) {
+		// returns true if we have a value for this string
+		// relies on the efficient cache which manages the getValue
+		return textual2valueCached.get(valueStr) != null;
+	}
+	
+	@Override
+	public boolean containsAllLabels(Collection<String> valuesStr) {
+		return this.values
+				.stream()
+				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
 	
 	@Override
@@ -234,21 +249,6 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	@Override
 	public String toString() {
 		return this.toPrettyString();
-	}
-	
-	@Override
-	public boolean contains(String valueStr) {
-		// returns true if we have a value for this string
-		// relies on the efficient cache which manages the getValue
-		return getValue(valueStr) != null;
-	}
-	
-	@Override
-	public boolean containsAllLabels(Collection<String> valuesStr) {
-		
-		return this.values
-				.stream()
-				.allMatch(val -> valuesStr.contains(val.getStringValue()));
 	}
 
 	@Override

@@ -145,4 +145,5 @@ public class GenstarJsonUtil {
 				+" is null ? "+e.getValue().isNull())
 				.collect(Collectors.joining("\n"));
 	}
+	
 }

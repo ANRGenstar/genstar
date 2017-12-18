@@ -80,14 +80,23 @@ public class GosplInputDataManager {
 
 	public GosplInputDataManager(final Path configurationFilePath) 
 			throws IllegalArgumentException, IOException {
-		this.configuration = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
-				configurationFilePath);
+		this.configuration = new GenstarJsonUtil()
+				.unmarchalConfigurationFileFromGenstarJson(configurationFilePath);
 	}
 	
 	public GosplInputDataManager(final GenstarConfigurationFile configurationFile) {
 		this.configuration = configurationFile;
 	}
 
+	/**
+	 * Returns the configuration file used to manage data
+	 * 
+	 * @return
+	 */
+	public GenstarConfigurationFile getConfiguration() {
+		return configuration;
+	}
+	
 	/**
 	 * 
 	 * Main methods to parse and get control totals from a {@link GSDataFile} file and with the help of a specified set
@@ -209,19 +218,15 @@ public class GosplInputDataManager {
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> 
 					this.configuration.getDemoDictionary().getRecords().contains(d)))
-				.collect(Collectors.toSet())){
-			if(recordMatrices.getDimensions().stream().filter(d -> !configuration.getDemoDictionary().getRecords().contains(d))
-					.allMatch(d -> fullMatrices.stream().allMatch(matOther -> !matOther.getDimensions().contains(d))))
+				.collect(Collectors.toSet()))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
-		}
 		
 		gspu.sysoStempPerformance(1, this);
 		gspu.sysoStempMessage("Collapse record attribute: done");
 		
 		// Matrices that do not contain any record attribute
 		for (final AFullNDimensionalMatrix<? extends Number> mat : inputData.stream()
-				.filter(mat -> mat.getDimensions().stream().allMatch(d -> 
-						!this.configuration.getDemoDictionary().getRecords().contains(d)))
+				.filter(mat -> mat.getDimensions().stream().allMatch(d -> !isRecordAttribute(d)))
 				.collect(Collectors.toSet()))
 			fullMatrices.add(getFrequency(mat));
 		
@@ -264,45 +269,50 @@ public class GosplInputDataManager {
 				survey.getSurveyFilePath(), columnHeaders.size(), columnHeaders);
 
 		// Store column related attributes while keeping unrelated attributes separated
-		final Set<Set<DemographicAttribute<? extends IValue>>> columnSchemas = new HashSet<>();
+		// WARNING: Works with attribute name because of record attribute
+		final Set<Set<String>> columnSchemas = new HashSet<>();
 		for(Set<IValue> cValues : columnHeaders.values())
 			columnSchemas.add(cValues.stream()
-										.map(v -> dictionary.getAttributes().stream()
-													.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get()
-											)
-										.collect(Collectors.toSet()));
+										.map(v -> v.getValueSpace().getAttribute().getAttributeName())
+										.collect(Collectors.toSet())
+										);
 						
 		// Remove lower generality schema: e.g. if we have schema [A,B] then [A] or [B] will be skiped
 		columnSchemas.removeAll(columnSchemas.stream().filter(schema -> 
 			columnSchemas.stream()
 						.anyMatch(higherSchema -> schema.stream()
-														.allMatch(
-																att -> higherSchema.contains(att)) 
-																		&& higherSchema.size() > schema.size()))
+								.allMatch(att -> higherSchema.contains(att)) 
+									&& higherSchema.size() > schema.size()))
 						.collect(Collectors.toSet()));
 		
 		// Store line related attributes while keeping unrelated attributes separated
-		final Set<Set<DemographicAttribute<? extends IValue>>> rowSchemas = new HashSet<>();
+		// WARNING: Works with attribute name because of record attribute
+		final Set<Set<String>> rowSchemas = new HashSet<>();
 		for(Set<IValue> rValues : rowHeaders.values())
 			rowSchemas.add(rValues.stream()
-									.map(v -> dictionary.getAttributes()
-									.stream()
-									.filter(att -> att.equals(v.getValueSpace().getAttribute())).findFirst().get())
-									.collect(Collectors.toSet()));
+									.map(v -> v.getValueSpace().getAttribute().getAttributeName())
+									.collect(Collectors.toSet())
+									);
 		
 		rowSchemas.removeAll(rowSchemas.stream().filter(schema -> 
-			rowSchemas.stream().anyMatch(higherSchema -> schema.stream()
-				.allMatch(att -> higherSchema.contains(att)) && higherSchema.size() > schema.size()))
+			rowSchemas.stream()
+				.anyMatch(higherSchema -> schema.stream()
+						.allMatch(att -> higherSchema.contains(att)) 
+							&& higherSchema.size() > schema.size()))
 				.collect(Collectors.toSet()));
 
 		// Start iterating over each related set of attribute
-		for (final Set<DemographicAttribute<? extends IValue>> rSchema : rowSchemas) {
-			for (final Set<DemographicAttribute<? extends IValue>> cSchema : columnSchemas) {
+		for (final Set<String> rSchema : rowSchemas) {
+			for (final Set<String> cSchema : columnSchemas) {
 				// Create a matrix for each set of related attribute
 				AFullNDimensionalMatrix<? extends Number> jDistribution;
 				// Matrix 'dimension / aspect' map
 				final Set<DemographicAttribute<? extends IValue>> dimTable = 
-						Stream.concat(rSchema.stream(), cSchema.stream())
+						Stream.concat(
+								rSchema.stream().filter(ra -> dictionary.containsAttribute(ra))
+									.map(ra -> dictionary.getAttribute(ra)), 
+								cSchema.stream().filter(ra -> dictionary.containsAttribute(ra))
+									.map(ra -> dictionary.getAttribute(ra)))
 								.collect(Collectors.toSet());
 				// Instantiate either contingency (int and global frame of reference) or frequency (double and either
 				// global or local frame of reference) matrix
@@ -317,12 +327,12 @@ public class GosplInputDataManager {
 				// Fill in the matrix through line & column
 				for (final Integer row : rowHeaders.entrySet().stream()
 						.filter(e -> rSchema.stream().allMatch(att -> e.getValue().stream()
-								.anyMatch(val -> val.getValueSpace().getAttribute().equals(att))))
+								.anyMatch(val -> val.getValueSpace().getAttribute().getAttributeName().equals(att))))
 						.map(e -> e.getKey()).collect(Collectors.toSet())) {
 					
 					for (final Integer col : columnHeaders.entrySet().stream()
 							.filter(e -> cSchema.stream().allMatch(att -> e.getValue().stream()
-									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att))))
+									.anyMatch(val -> val.getValueSpace().getAttribute().getAttributeName().equals(att))))
 							.map(e -> e.getKey()).collect(Collectors.toSet())) {
 						// The value
 						final String stringVal = survey.read(row, col);
@@ -330,15 +340,11 @@ public class GosplInputDataManager {
 						final GSEnumDataType dt = dataParser.getValueType(stringVal);
 						// Store coordinate for the value. It is made of all line & column attribute's aspects
 						final Map<DemographicAttribute<? extends IValue>, IValue> coordSet =
-								Stream.concat(
-										rowHeaders.get(row).stream(), 
-										columnHeaders.get(col).stream()
-										).collect(
-												Collectors.toMap(
-														val -> dictionary.getAttributes().stream()
-																.filter(att -> att.equals(val.getValueSpace().getAttribute()))
-																.findFirst().get(), 
-														Function.identity()));
+								Stream.concat(rowHeaders.get(row).stream(), columnHeaders.get(col).stream())
+									.filter(vals -> dictionary.containsValue(vals.getStringValue())) // Filter record value
+									.collect(Collectors.toMap(
+											val -> dictionary.getAttribute(val.getValueSpace().getAttribute().getAttributeName()), 
+											Function.identity()));
 						final ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordSet);
 						// Add the coordinate / parsed value pair into the matrix
 						if (dt.isNumericValue())
@@ -526,7 +532,7 @@ public class GosplInputDataManager {
 			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
 		
 		Set<DemographicAttribute<? extends IValue>> dims = recordMatrices.getDimensions().stream()
-				.filter(d -> !this.configuration.getDemoDictionary().getRecords().contains(d)).collect(Collectors.toSet());
+				.filter(d -> !isRecordAttribute(d)).collect(Collectors.toSet());
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Transpose process of matrix "
 				+Arrays.toString(recordMatrices.getDimensions().toArray()), logger, Level.TRACE);

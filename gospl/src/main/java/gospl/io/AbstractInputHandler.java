@@ -2,20 +2,20 @@ package gospl.io;
 
 import java.io.File;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.configuration.dictionary.IGenstarDictionary;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
@@ -68,7 +68,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 */
 	@Override
 	public Map<Integer, Set<IValue>> getColumnHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
 		
 		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
@@ -78,8 +78,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 			logger.info("trying to detect an attribute based on row values: {}", column);
 
 			for (String columnVal : column) {
-				Set<IValue> vals = dictionnary.getAttributes()
-						.stream()
+				Set<IValue> vals = dictionary.getAttributeAndRecord().stream()
 						.flatMap(att -> att.getValueSpace().getValues().stream())
 						.filter(asp -> asp.getStringValue().equals(columnVal))
 						.collect(Collectors.toSet());
@@ -88,7 +87,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 				if (vals.size() > 1) {
 					final Set<IValue> vals2 = new HashSet<>(vals);
 					vals = column.stream()
-							.flatMap(s -> dictionnary.getAttributes().stream().filter(att -> att.getAttributeName().equals(s)))
+							.flatMap(s -> dictionary.getAttributeAndRecord().stream().filter(att -> att.getAttributeName().equals(s)))
 							.flatMap(att -> vals2.stream().filter(v -> v.getValueSpace().getAttribute().equals(att)))
 							.collect(Collectors.toSet());
 				}
@@ -105,16 +104,17 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
 	public Map<Integer, Set<IValue>> getRowHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
 		
-		final List<Integer> attributeIdx = new ArrayList<>();
+		final Set<Integer> attributeIdx = new TreeSet<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
 			final List<String> sLine = readLine(line);
 			for (int idx = 0; idx < getFirstColumnIndex(); idx++) {
 				final String headAtt = sLine.get(idx);
 				
-				if (dictionnary.containsAttribute(headAtt))
-					// if this attribute is explicitely defined,
+				if (dictionary.containsAttribute(headAtt) 
+						|| dictionary.containsRecord(headAtt))
+					// if this attribute (or record) is explicitely defined,
 					// we found it.
 					attributeIdx.add(idx);
 				
@@ -124,21 +124,21 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					final List<String> valList = readColumn(idx);
 					logger.info("trying to detect an attribute based on header values: {}", valList);
 					//if (dictionnary)
-					if (dictionnary.getAttributes()
-							.stream()
+					if (dictionary.getAttributes().stream()
 							.anyMatch(att -> att.getValueSpace().containsAllLabels(valList))) {
 						attributeIdx.add(idx);
 						
 					} else {
 						logger.warn("the values {} match none of our attributes: {}", 
 								valList,
-								dictionnary.getAttributes().stream().map(a -> a.getValueSpace().getValues().stream().map(v -> v.getStringValue()).collect(Collectors.toList())).collect(Collectors.toList())
+								dictionary.getAttributes().stream().map(a -> a.getValueSpace().getValues().stream()
+										.map(v -> v.getStringValue()).collect(Collectors.toList())).collect(Collectors.toList())
 								);
 					}
 				}
 			}
 		}
-
+		
 		final Map<Integer, Set<IValue>> rowHeaders = new HashMap<>();
 		for (int i = getFirstRowIndex(); i <= getLastRowIndex(); i++) {
 			final List<String> rawLine = readColumns(0, getFirstColumnIndex(), i);
@@ -147,26 +147,25 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 													.collect(Collectors.toList());
 			for (int j = 0; j < line.size(); j++) {
 				final String lineVal = line.get(j);
-				final Set<IValue> vals = dictionnary.getAttributes()
-													.stream()
+				final Set<IValue> vals = dictionary.getAttributeAndRecord().stream()
 													.flatMap(att -> att.getValueSpace().getValues().stream())
 													.filter(asp -> asp.getStringValue().equals(lineVal))
 													.collect(Collectors.toSet());
 				if (vals.isEmpty())
 					continue;
 				if (vals.size() > 1) {
-					final Set<DemographicAttribute<? extends IValue>> inferedHeads = new HashSet<>();
+					final Set<IAttribute<? extends IValue>> inferedHeads = new HashSet<>();
 					final List<String> headList = readLines(0, getFirstRowIndex(), j);
 					if (headList.stream().allMatch(s -> s.isEmpty())) {
 						for (final List<String> column : readColumns(0, getFirstColumnIndex()))
-							inferedHeads.addAll(dictionnary.getAttributes()
-									.stream()
+							inferedHeads.addAll(dictionary.getAttributeAndRecord().stream()
 									.filter(a -> a.getValueSpace().getValues().stream()
 											.allMatch(av -> column.contains(av.getStringValue())))
 									.collect(Collectors.toSet()));
 					} else {
-						inferedHeads.addAll(dictionnary.getAttributes().stream()
-								.flatMap(s -> dictionnary.getAttributes().stream().filter(a -> a.getAttributeName().equals(s)))
+						inferedHeads.addAll(dictionary.getAttributeAndRecord().stream()
+								.flatMap(s -> dictionary.getAttributeAndRecord().stream()
+										.filter(a -> a.getAttributeName().equals(s)))
 								.collect(Collectors.toSet()));
 					}
 					final Set<IValue> vals2 = new HashSet<>(vals);

@@ -2,6 +2,7 @@ package core.configuration.dictionary;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -44,6 +45,9 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	@JsonProperty(DemographicDictionary.ATTRIBUTES)
 	public Collection<A> getAttributes();
 	
+	@JsonIgnore
+	public Collection<IAttribute<? extends IValue>> getAttributeAndRecord();
+	
 	/**
 	 * Access to attribute using attribute name define as {@link IAttribute#getAttributeName()}
 	 * 
@@ -53,13 +57,22 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	public A getAttribute(String string);
 	
 	/**
-	 * true if this dictionary contain an attribute associated to given attribute name; false
-	 * otherwise
+	 * true if this dictionary contains an attribute associated to the attribute name passed as argument; 
+	 * false otherwise
 	 * 
 	 * @param name
 	 * @return
 	 */
 	public boolean containsAttribute(String name);
+	
+	/**
+	 * true if this dictionary contains a record attribute associated to attribute name passed as argument; 
+	 * false otherwise
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean containsRecord(String name);
 	
 	/**
 	 * returns true if one of the attributes of the dictionnary has 
@@ -124,4 +137,5 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * @return
 	 */
 	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary);
+
 }

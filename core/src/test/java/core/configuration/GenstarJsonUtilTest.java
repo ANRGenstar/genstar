@@ -24,7 +24,6 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
-import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeValue;
@@ -156,6 +155,7 @@ public class GenstarJsonUtilTest {
 			// DEBUG
 			System.out.println(sju.genstarJsonToString(dd));
 			
+			@SuppressWarnings("unchecked")
 			IGenstarDictionary<DemographicAttribute<? extends IValue>> dd2 = 
 					sju.unmarshalFromGenstarJson(path, dd.getClass());
 			
