@@ -77,8 +77,8 @@ public class SpinNetwork implements INetProperties{
 	 * 
 	 * @param link
 	 */
-	public void putLink(String linkId, ADemoEntity n1, ADemoEntity n2){
-		network.addEdge(linkId, kvEntityNodeFastList.get(n1), kvEntityNodeFastList.get(n2),directed);
+	public void putLink(String linkId, ADemoEntity e1, ADemoEntity e2){
+		network.addEdge(linkId, kvEntityNodeFastList.get(e1), kvEntityNodeFastList.get(e2),directed);
 	}
 
 	/** Ajout de link aux listes de link des noeuds
@@ -370,8 +370,8 @@ public class SpinNetwork implements INetProperties{
 	
 	@Override
 	public String toString(){
-		String res = "Nodes: "+network.getNodeCount()+"\n" + network.getNodeSet() ;
-		res = res + "\nEdges: "+network.getEdgeCount()+"\n" + network.getEdgeSet();
+		String res = "Nodes: "+network.getNodeCount()+"\n" ;//+ network.getNodeSet() ;
+		res = res + "\nEdges: "+network.getEdgeCount()+"\n" ;//+ network.getEdgeSet();
 		return res;
 	}
 }
