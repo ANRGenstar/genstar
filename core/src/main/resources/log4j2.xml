@@ -11,6 +11,9 @@
     <Logger name="gospl.algo" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
+    <Logger name="gospl.algo.sampler.sr.GosplHierarchicalSampler" level="error" additivity="false">
+    	<AppenderRef ref="Console"/>
+    </Logger>
     <Logger name="gospl.algo.bn" level="info" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
@@ -48,13 +51,12 @@
     <Logger name="test.util.R" level="trace" additivity="false">
       <AppenderRef ref="Console"/>
     </Logger>
+    <Logger name="gospl.algo.ipf.GosplIPFTest" level="debug" additivity="false">
+      <AppenderRef ref="Console"/>
+    </Logger>
     <Logger name="gospl.algo.ipf.margin.MarginalsIPFProcessor" level="info" additivity="false">
     	<AppenderRef ref="Console"/>
     </Logger>
-     <Logger name="gospl.algo.sampler.sr.GosplHierarchicalSampler" level="error" additivity="false">
-    	<AppenderRef ref="Console"/>
-    </Logger>
-    
  
     <Root level="debug">
       <AppenderRef ref="Console"/>

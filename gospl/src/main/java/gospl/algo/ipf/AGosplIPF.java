@@ -236,6 +236,11 @@ public abstract class AGosplIPF<T extends Number> {
 			relativeIncrease = Math.abs(aapd - cachedAapd);
 			aapd = cachedAapd;
 		}
+		
+		// WARNING: need to be verified theoretically : but in fact because IPF does not
+		// guarantee convergence, normalization needs to be done but can disrupt validation process
+		seed.normalize();
+		
 		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value and "+stepIter+" iteration(s)");
 		return seed;
 	}

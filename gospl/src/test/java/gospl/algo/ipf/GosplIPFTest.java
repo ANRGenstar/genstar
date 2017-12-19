@@ -169,7 +169,6 @@ public class GosplIPFTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	@Ignore
 	public void mappedWithSegmentedTest() {
 
 		DemographicDictionary<DemographicAttribute<? extends IValue>> gju = null;
