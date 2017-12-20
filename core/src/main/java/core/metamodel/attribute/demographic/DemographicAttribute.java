@@ -153,7 +153,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 
 	@Override
 	public String toString(){
-		return name+" ("+this.getValueSpace().getType()+") - "+this.getValueSpace()+" values";
+		return name+" ("+this.getValueSpace().getType()+")";
 	}
 
 	@Override

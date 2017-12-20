@@ -229,7 +229,8 @@ public class GSUtilPopulation {
 			Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
 			// WARNING: linked attribute could be in the same matrix 
 			for(DemographicAttribute<? extends IValue> attribute : attributesProb.keySet()){
-				if(atts.stream().anyMatch(a -> a.getReferentAttribute().equals(attribute)))
+				if(atts.stream().anyMatch(a -> a.getReferentAttribute().equals(attribute)
+						|| a.equals(attribute.getReferentAttribute())))
 					continue;
 				if(GenstarRandom.getInstance().nextDouble() < attributesProb.get(attribute)){
 					atts.add(attribute);

@@ -126,7 +126,7 @@ public class DemographicAttributeFactory {
 			IValue val = vs.addValue(values.get(i));
 			val.setActualValue(actualValues.get(i));
 		}
-		System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
+		//System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}
 	
@@ -152,7 +152,7 @@ public class DemographicAttributeFactory {
 		}
 		final IValueSpace<? extends IValue> vs = attribute.getValueSpace(); 
 		values.stream().forEach(val -> vs.addValue(val));
-		System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
+		//System.err.println("["+DemographicAttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}
 	

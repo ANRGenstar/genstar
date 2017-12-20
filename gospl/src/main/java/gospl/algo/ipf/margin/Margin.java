@@ -69,6 +69,14 @@ public class Margin<T extends Number> implements IMargin<DemographicAttribute<? 
 		return marginalControl.size();
 	}
 	
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName()+" "
+				+controlAttribute.getAttributeName() +
+				(controlAttribute.equals(seedAttribute) ? "" :
+				" ("+seedAttribute.getAttributeName()+")");
+	}
+	
 	// --------------------------
 	
 	/*

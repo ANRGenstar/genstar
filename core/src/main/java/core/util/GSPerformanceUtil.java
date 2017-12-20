@@ -83,8 +83,39 @@ public class GSPerformanceUtil {
 		sysoStempMessage(getStempPerformance(message), caller);
 	}
 	
+	// MESSAGE
+	
 	public void sysoStempMessage(String message){
-		this.printLog(message);
+		this.printLog(message, null);
+	}
+	
+	public void sysoStempMessage(String message, Level level) {
+		this.printLog(message, level);
+	}
+	
+	private void sysoStempMessage(String message, Object caller){
+		String callerString = caller.getClass().getSimpleName();
+		if(caller.getClass().equals(String.class))
+			callerString = caller.toString();
+		
+		if(firstSyso){
+			this.printLog("\nMethod caller: "+callerString+
+					"\n-------------------------\n"+
+					performanceTestDescription+
+					"\n-------------------------", null);
+			firstSyso = false;
+		}
+		this.printLog(message, null);
+	}
+	
+	// OBJECTIF PART (to compute advancement toward a goal)
+
+	public void setObjectif(double objectif) {
+		this.objectif = objectif;
+	}
+	
+	public double getObjectif(){
+		return objectif;
 	}
 	
 	public void resetStemp(){
@@ -99,41 +130,22 @@ public class GSPerformanceUtil {
 		cumulStemp = 0d;
 	}
 	
-	private void sysoStempMessage(String message, Object caller){
-		String callerString = caller.getClass().getSimpleName();
-		if(caller.getClass().equals(String.class))
-			callerString = caller.toString();
-		
-		if(firstSyso){
-			this.printLog("\nMethod caller: "+callerString+
-					"\n-------------------------\n"+
-					performanceTestDescription+
-					"\n-------------------------");
-			firstSyso = false;
-		}
-		this.printLog(message);
-	}
-
-	public void setObjectif(double objectif) {
-		this.objectif = objectif;
-	}
-	
-	public double getObjectif(){
-		return objectif;
-	}
+	// LOGGER PART
 	
 	public Logger getLogger(){
 		return logger;
 	}
 	
-	private void printLog(String message){
-		if(level.equals(Level.ERROR))
+	private void printLog(String message, Level loglevel){
+		if(loglevel == null)
+			loglevel = this.level;
+		if(loglevel.equals(Level.ERROR))
 			logger.error(message);
-		else if(level.equals(Level.WARN))
+		else if(loglevel.equals(Level.WARN))
 			logger.warn(message);
-		else if(level.equals(Level.INFO))
+		else if(loglevel.equals(Level.INFO))
 			logger.info(message);
-		else if(level.equals(Level.DEBUG))
+		else if(loglevel.equals(Level.DEBUG))
 			logger.debug(message);
 		else
 			logger.trace(message);

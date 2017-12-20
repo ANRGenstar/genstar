@@ -50,12 +50,12 @@ public class ControlFrequency extends AControl<Double> {
 
 	@Override
 	public boolean equalsVal(AControl<Double> val, double delta) {
-		return Math.abs(this.getValue() - val.getValue()) < this.getValue() * delta;
+		return Math.abs(this.getValue() - val.getValue()) <= this.getValue() * delta;
 	}
 	
 	@Override
 	public boolean equalsCastedVal(AControl<? extends Number> val, double delta){
-		return Math.abs(this.getValue() - val.getValue().doubleValue()) < this.getValue() * delta;
+		return Math.abs(this.getValue() - val.getValue().doubleValue()) <= this.getValue() * delta;
 	}
 
 	@Override

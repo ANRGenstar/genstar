@@ -8,12 +8,11 @@ import gospl.distribution.matrix.control.AControl;
 /**
  * Higher order abstraction that describes marginal of a n dimensional matrix,
  * which can be a segmented matrix in the sens of {@link ASegmentedNDimensionalMatrix}.
- * <\p>
+ * <p>
  * A marginal is constructed as follow: we have a referent dimension of type A, and a
  * set of n other related dimension. Marginal of A is the set of all margin composed of
  * set of values from the other n dimension: a margin is a combination of values, one for
  * each dimensions, and margins being all possible conjonction of values for the n dimensions
- * <\p>
  * 
  * @author kevinchapuis
  *

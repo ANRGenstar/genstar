@@ -93,7 +93,7 @@ public interface IValueSpace<V extends IValue> {
 	public Set<V> getValues();
 	
 	/**
-	 * Test if this values space contain this value.
+	 * Test if this value space contains {@code value}.
 	 * <br>WARNING: do not try to call contains() method with {@link #getValues()}
 	 * because inner collection could rely on comparators and leads to a class cast exception
 	 * 
@@ -102,8 +102,18 @@ public interface IValueSpace<V extends IValue> {
 	 */
 	public boolean contains(IValue value);
 	
+	/**
+	 * Test if this value space contains value provided as a String
+	 * @param valueStr
+	 * @return
+	 */
 	public boolean contains(String valueStr);
 
+	/**
+	 * Test if this value space contains all provided values as a collection of String
+	 * @param valuesStr
+	 * @return
+	 */
 	public boolean containsAllLabels(Collection<String> valuesStr);
 
 	
