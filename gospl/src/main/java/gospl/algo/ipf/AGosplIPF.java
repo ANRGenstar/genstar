@@ -14,8 +14,6 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
-import core.util.random.GenstarRandom;
-import gospl.algo.ipf.margin.IMarginalsIPFBuilder;
 import gospl.algo.ipf.margin.Margin;
 import gospl.algo.ipf.margin.MarginDescriptor;
 import gospl.algo.ipf.margin.MarginalsIPFBuilder;
@@ -69,10 +67,10 @@ public abstract class AGosplIPF<T extends Number> {
 
 	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed;
 	protected INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> marginals;
-	protected IMarginalsIPFBuilder<T> marginalProcessor;
+	protected MarginalsIPFBuilder<T> marginalProcessor;
 
 	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
-			IMarginalsIPFBuilder<T> marginalProcessor, int step, double delta){
+			MarginalsIPFBuilder<T> marginalProcessor, int step, double delta){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
 		this.step = step;
@@ -85,7 +83,7 @@ public abstract class AGosplIPF<T extends Number> {
 	}
 
 	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
-			IMarginalsIPFBuilder<T> marginalProcessor){
+			MarginalsIPFBuilder<T> marginalProcessor){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
 	}
@@ -181,7 +179,8 @@ public abstract class AGosplIPF<T extends Number> {
 						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
 				.collect(Collectors.toList());
 
-		GSPerformanceUtil gspu = new GSPerformanceUtil("*** IPF PROCEDURE ***", logger, Level.DEBUG);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("*** IPF PROCEDURE ***", logger, Level.INFO);
+		gspu.sysoStempPerformance(0, this);
 
 		gspu.sysoStempMessage(unmatchSeedAttribute.size() / (double) seed.getDimensions().size() * 100d
 				+"% of samples dimensions will be estimate with output controls");
@@ -190,7 +189,7 @@ public abstract class AGosplIPF<T extends Number> {
 			.stream().map(d -> d.getAttributeName()+" = "+d.getValueSpace().getValues().size())
 			.collect(Collectors.joining(";")));
 
-		Collection<Margin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed, true);
+		Collection<Margin<T>> marginals = marginalProcessor.buildCompliantMarginals(this.marginals, seed);
 
 		int stepIter = step;
 		int totalNumberOfMargins = marginals.stream().mapToInt(Margin::size).sum();
@@ -206,26 +205,31 @@ public abstract class AGosplIPF<T extends Number> {
 		
 		while(stepIter-- > 0 ? aapd > delta || relativeIncrease < delta : false){
 			if(stepIter % (int) (step * 0.1) == 0d)
-				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+aapd);
+				gspu.sysoStempMessage("Step = "+(step - stepIter)+" | average error = "+aapd, Level.DEBUG);
 			for(Margin<T> margin : marginals){
 				for(MarginDescriptor seedMarginalDescriptor : margin.getMarginDescriptors()){
 					double marginValue = margin.getControl(seedMarginalDescriptor).getValue().doubleValue();
 					double actualValue = seed.getVal(seedMarginalDescriptor.getSeed()).getValue().doubleValue();
-
-					AControl<Double> factor = new ControlFrequency(marginValue/ 
+					
+					AControl<Double> factor = new ControlFrequency(marginValue / 
 							(actualValue == 0d ? marginValue : actualValue) ); // If zero seed marginal statu quo
 					Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> relatedCoordinates = 
 							seed.getCoordinates(seedMarginalDescriptor.getSeed()); 
 					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates) {
 						// When no data in seed but known marginal in control tables put atomic value in
-						if(actualValue == 0d && marginValue != 0d) {seed.setValue(coord, seed.getAtomicVal());}
+						if(actualValue == 0d && marginValue > 0d) {seed.setValue(coord, seed.getAtomicVal());}
 						AControl<T> av = seed.getVal(coord);
+						// Store value for debug
+						// double avbu = av.getValue().doubleValue();
+						// Update value
+						av.multiply(factor);
 						
-						// DEBUG ONLY
+						// DEBUG ONLY 
+						/*
 						if(GenstarRandom.getInstance().nextDouble() < 0.01)
-							gspu.sysoStempMessage("Coord "+coord+": AV = "
-								+av.getValue().doubleValue()+" and UpdatedV = "
-								+av.multiply(factor).getValue().doubleValue());
+							gspu.sysoStempMessage("Coord "+coord+":\n AV = "+avbu+" | Factor = "
+									+factor.getValue().doubleValue()+" | UV = "+av.getValue().doubleValue());
+						*/
 					}
 				}
 			}
@@ -236,6 +240,11 @@ public abstract class AGosplIPF<T extends Number> {
 			relativeIncrease = Math.abs(aapd - cachedAapd);
 			aapd = cachedAapd;
 		}
+		
+		// WARNING: need to be verified theoretically : but in fact because IPF does not
+		// guarantee convergence, normalization needs to be done but can disrupt validation process
+		seed.normalize();
+		
 		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value and "+stepIter+" iteration(s)");
 		return seed;
 	}

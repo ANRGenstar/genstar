@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,6 +22,7 @@ import core.util.GSPerformanceUtil;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
+import gospl.distribution.matrix.control.AControl;
 
 /**
  * Make it possible to determine the signature of margin (how many dimensions, attributes, and theoretical margins)
@@ -32,11 +34,13 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  *
  * @param <T>
  */
-public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuilder<T> {
+public class MarginalsIPFBuilder<T extends Number> {
 
 	private Logger logger = LogManager.getLogger();
 
 	/**
+	 * Build the set of margin for the given control margin and seed matrices
+	 * <p>
 	 * All marginals are calculated using {@link INDimensionalMatrix#getVal(Collection values)}, 
 	 * hence comprising different knowledge depending on matrix concrete type: 
 	 * <p>
@@ -48,97 +52,127 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 	 * <p>
 	 * After all controls have been retrieve, then we must transpose coordinate into seed compliant
 	 * value - attribute requirement through {@link DemographicAttribute#getReferentAttribute()}
-	 * <p>
-	 * WARNING: let the user define if this method should use {@link Stream#parallel()} capabilities or not
-	 * 
-	 * @param parallel
+	 *
+	 * @param matrix: describe the original aggregated marginal constraints
+	 * @param seed: describe the original sample based seed distribution of attribute
 	 * @return
 	 */
-	@Override
 	public Collection<Margin<T>> buildCompliantMarginals(
 			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> control,
-			AFullNDimensionalMatrix<T> seed,
-			boolean parallel){
-		
+			AFullNDimensionalMatrix<T> seed){
+
 		// check that the dimensions are correct and inform the user of potential issues
 		{
-		StringBuffer sbErrors = new StringBuffer();
-		for (DemographicAttribute<? extends IValue> dimControl: control.getDimensions()) {
-			if (!seed.getDimensions().contains(dimControl) 
-					&& !control.getDimensions().contains(dimControl.getReferentAttribute())
-					&& !seed.getDimensions().stream().anyMatch(dimSeed -> dimSeed.getReferentAttribute().equals(dimControl))
-					) {
-				sbErrors.append("control does not contains seed dimension ")
+			StringBuffer sbErrors = new StringBuffer();
+			for (DemographicAttribute<? extends IValue> dimControl: control.getDimensions()) {
+				if (!seed.getDimensions().contains(dimControl) 
+						&& !control.getDimensions().contains(dimControl.getReferentAttribute())
+						&& !seed.getDimensions().stream().anyMatch(dimSeed -> dimSeed.getReferentAttribute().equals(dimControl))
+						) {
+					sbErrors.append("control does not contains seed dimension ")
 					.append(dimControl).append(" (you might add a referent attribute?);\n");
-			} 
+				} 
+			}
+			if (sbErrors.length() > 0) 
+				throw new IllegalArgumentException(
+						"Cannot build marginals for control and seed that does not match their attributes: "
+								+sbErrors.toString()
+						);
 		}
-		if (sbErrors.length() > 0) 
-			throw new IllegalArgumentException(
-					"Cannot build marginals for control and seed that does not match their attributes: "
-					+sbErrors.toString()
-					);
-		}
-		
+
 		// ... no error, let's go ahead
-		
+
 		// now let's build the marginals
 		logger.info("Estimates seed's referent marginals from control matrix {}", 
 				control.getDimensions().stream().map(att -> att.getAttributeName()
 						.substring(0, att.getAttributeName().length() < 5 ? att.getAttributeName().length() : 5))
 				.collect(Collectors.joining(" x ")));
-		
-		// control to seed attribute - relationship can be from referent-to-referent, referent-to-referee, referee-to-referent
-		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> controlToSeedAttribute = new HashMap<>();
-		for(DemographicAttribute<? extends IValue> sAttribute : seed.getDimensions()){
-			List<DemographicAttribute<? extends IValue>> cAttList = control.getDimensions().stream()
-					.filter(ca -> ca.isLinked(sAttribute))
-					.collect(Collectors.toList());
-			if(!cAttList.isEmpty())
-				for(DemographicAttribute<? extends IValue> cAtt : cAttList)
-					controlToSeedAttribute.put(cAtt, sAttribute);
-		}
-		logger.debug("Matching attributes are: {}", controlToSeedAttribute.entrySet()
+
+		// Seed to control attribute - relationship can be from referent-to-referent, referent-to-referee, referee-to-referent
+		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> seedToControlAttribute = 
+				this.getSeedToControl(control, seed);
+
+		logger.debug("Matching seed-control attributes are: {}", seedToControlAttribute.entrySet()
 				.stream().map(entry -> "["+entry.getKey().getAttributeName()+" - "
 						+entry.getValue().getAttributeName()+"]").collect(Collectors.joining(" ")));
 		logger.debug("Unmatched attributes are: {}", Arrays.toString(seed.getDimensions()
-				.stream().filter(dim -> !controlToSeedAttribute.values().contains(dim)).toArray()));
+				.stream().filter(dim -> !seedToControlAttribute.keySet().contains(dim)).toArray()));
 
-		if(controlToSeedAttribute.isEmpty())
+		if(seedToControlAttribute.isEmpty())
 			throw new IllegalArgumentException("Seed attributes do not match any attributes in control distribution");
 
 		// let's create the marginals based on this information
 		Collection<Margin<T>> marginals = new ArrayList<>();
-		
+
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Trying to build marginals for attribute set "
-				+Arrays.toString(controlToSeedAttribute.keySet().toArray()), logger, Level.TRACE);
+				+Arrays.toString(seedToControlAttribute.keySet().toArray()), logger, Level.TRACE);
 		gspu.sysoStempPerformance(0, this);
-		
+
 		// For each dimension of the control matrix connected to seed matrix
 		// we will setup a margin with control attributes
-		for(DemographicAttribute<? extends IValue> cAttribute : controlToSeedAttribute.keySet()){
+		for(DemographicAttribute<? extends IValue> cAttribute : seedToControlAttribute.values()){
 			// The set of marginal descriptor, i.e. all combination of values, one per related attribute
 			Collection<MarginDescriptor> marginDescriptors = this.getMarginalDescriptors(cAttribute, 
-					controlToSeedAttribute.keySet().stream().filter(att -> !att.equals(cAttribute))
-						.collect(Collectors.toSet()), 
+					seedToControlAttribute.values().stream().filter(att -> !att.equals(cAttribute))
+					.collect(Collectors.toSet()), 
 					control, seed);
-			
+
 			logger.debug("Attribute \'"+cAttribute.getAttributeName()+"\' marginal descriptors: "
 					+marginDescriptors.size()+" margin(s), "
 					+marginDescriptors.stream().flatMap(md -> md.getSeed().stream()).collect(Collectors.toSet()).size()
 					+" seed values over ");
-			
-			Margin<T> mrg = new Margin<>(cAttribute, controlToSeedAttribute.get(cAttribute));
-			for(MarginDescriptor marge : marginDescriptors)
-				mrg.addMargin(marge, control.getVal(marge.getControl()));
+
+			Margin<T> mrg = new Margin<>(cAttribute, seedToControlAttribute.get(cAttribute));
+			AControl<T> nullControl = control.getNulVal();
+			for(MarginDescriptor marge : marginDescriptors) {
+				AControl<T> controlMarginal = control.getVal(marge.getControl());
+				if(!controlMarginal.equalsVal(nullControl, 0d))
+					mrg.addMargin(marge, controlMarginal);
+			}
 			marginals.add(mrg);
-			
+
 			gspu.sysoStempPerformance(1, this);
 			double totalMRG = mrg.marginalControl.values().stream().mapToDouble(c -> c.getValue().doubleValue()).sum();
-			logger.info("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
+			logger.debug("Created marginals (size = {}): cd = {} | sd = {} | sum_of_c = {}", mrg.size() == 0 ? "empty" : mrg.size(),
 					mrg.getControlDimension(), mrg.getSeedDimension(), totalMRG); 
 		}
 
 		return marginals;
+	}
+
+	// ---------------------
+	// PRIVATE INNER METHODS
+	// ---------------------
+	
+	
+	/**
+	 * 
+	 * @param control
+	 * @param seed
+	 * @return
+	 */
+	private Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> getSeedToControl(
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> control, AFullNDimensionalMatrix<T> seed){
+		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> seedToControlAttribute = new HashMap<>();
+		for(DemographicAttribute<? extends IValue> sAttribute : seed.getDimensions()){
+			List<DemographicAttribute<? extends IValue>> cAttList = control.getDimensions().stream()
+					.filter(ca -> ca.isLinked(sAttribute))
+					.collect(Collectors.toList());
+			// Only keep the most inform control attribute
+			DemographicAttribute<? extends IValue> mostInformedControlAtt = null;
+			if(cAttList.size() == 1)
+				mostInformedControlAtt = cAttList.get(0);
+			else if(cAttList.size() > 1) {
+				Optional<DemographicAttribute<? extends IValue>> opt = cAttList.stream()
+						.filter(ca -> ca.getReferentAttribute().equals(ca))
+						.findFirst();
+				if(opt.isPresent())
+					mostInformedControlAtt = opt.get();
+			}
+			if(mostInformedControlAtt != null)
+				seedToControlAttribute.put(sAttribute, mostInformedControlAtt);
+		}
+		return seedToControlAttribute;
 	}
 
 
@@ -158,15 +192,15 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			throw new IllegalArgumentException("Targeted attributes must be compliant with n-dimensional matrix passed as parameter");
 		// Setup output - marginal descriptor describe all combination of value that can be related to target attribute
 		Collection<MarginDescriptor> marginalDescriptors = new ArrayList<>();
-		
+
 		// Start by extracting control marginal
 		// ------
-		
+
 		// Exclude mapped attribute for which we have referent attribute
 		Set<DemographicAttribute<? extends IValue>> sAtt = sideAttributes.stream().filter(a -> a.getReferentAttribute().equals(a)
-				|| (a.getReferentAttribute().equals(a) && !sideAttributes.contains(a.getReferentAttribute())))
-			.collect(Collectors.toSet());
-		
+				|| (!a.getReferentAttribute().equals(a) && !sideAttributes.contains(a.getReferentAttribute())))
+				.collect(Collectors.toSet());
+
 		// Iterate to have the whole combination of value within targeted control attribute
 		List<Set<IValue>> controlMarginals = new ArrayList<>();
 		DemographicAttribute<? extends IValue> firstAtt = sAtt.iterator().next();
@@ -183,7 +217,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			}
 			controlMarginals = tmpDescriptors;
 		}
-		
+
 		// Start extracting seed marginal from known control marginal
 		// -------
 		for(Set<IValue> cm : controlMarginals) {
@@ -204,40 +238,7 @@ public class MarginalsIPFBuilder<T extends Number> implements IMarginalsIPFBuild
 			}
 			marginalDescriptors.add(new MarginDescriptor().setControl(cm).setSeed(sm));
 		}
-		
-		
-		/*
-		if(control.isSegmented()) {
-			// State equality between referent and mapped attribute
-			Set<DemographicAttribute<? extends IValue>> equiToTarget = control.getDimensions().stream()
-					.filter(att -> att.getReferentAttribute().equals(targetedAttribute))
-					.collect(Collectors.toSet());
-
-			// Translate into control compliant coordinate set of value
-			marginalDescriptors =  marginalDescriptors.stream()
-					.flatMap(set -> control.getCoordinates(set).stream()
-							.filter(coord -> coord.getDimensions().stream().anyMatch(dim -> equiToTarget.contains(dim)))
-							.map(coord -> coord.values().stream()
-									.filter(val -> !equiToTarget.contains(val.getValueSpace().getAttribute()))
-									.collect(Collectors.toSet()))).collect(Collectors.toSet());
-		}
-		
-		// Exclude overlapping marginal descriptors in segmented matrix: e.g. md1 = {age} & md2 = {age, gender}
-		final Set<Set<DemographicAttribute<? extends IValue>>> mdAttributes = new HashSet<>();
-		for(Set<IValue> marginalDescriptorSet : marginalDescriptors) {
-			Set<DemographicAttribute<? extends IValue>> mAttribute = marginalDescriptorSet.stream()
-					.map(aspect -> control.getDimension(aspect)).collect(Collectors.toSet());
-			mdAttributes.add(mAttribute);
-		}
-		Set<Set<DemographicAttribute<? extends IValue>>> mdArchitype = mdAttributes.stream().filter(archi -> mdAttributes.stream()
-				.noneMatch(mdAtt -> mdAtt.containsAll(archi) && mdAtt.size() > archi.size()))
-			.collect(Collectors.toSet());
-		return marginalDescriptors.stream().filter(set -> mdArchitype
-				.stream().anyMatch(architype -> architype.stream().allMatch(att -> set.stream()
-						.anyMatch(val -> att.getValueSpace().getValues().contains(val)))))
-			.collect(Collectors.toList());
-			*/
 		return marginalDescriptors;
 	}
-	
+
 }

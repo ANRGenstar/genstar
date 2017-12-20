@@ -27,6 +27,16 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.generator.ISyntheticGosplPopGenerator;
 
+/**
+ * Util class to generate population from a dictionary using either a custom generator or, if not provided,
+ * a random default generator.
+ * <p> 
+ * <b>HINT</b>: Could be realy usefull when you want to quickly generate a population and you do not care about how reliable it is.
+ * For ex. to make test on or to be used for localisation / networking.
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class GSUtilPopulation {
 
 	private Logger log = LogManager.getLogger();
@@ -39,6 +49,44 @@ public class GSUtilPopulation {
 	private Path pathToDictionary = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 	public static String defaultDictionary = "defaultDictionary.gns";
 	
+	/**
+	 * Default constructor that use a pre-define dictionary of attributes.
+	 * 
+	 * @throws GSIllegalRangedData
+	 */
+	public GSUtilPopulation() throws GSIllegalRangedData{
+		this(defaultDictionary);
+	}
+	
+	/**
+	 * Uses custom generator to generate a population. Relationship to dictionary is not guarantee and
+	 * must be set before calling {@link GSUtilPopulation}
+	 * 
+	 * @param dictionary
+	 * @param generator
+	 */
+	public GSUtilPopulation(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary,
+			ISyntheticGosplPopGenerator generator) {
+		this.dico = dictionary;
+		this.generator = generator;
+	}
+	
+	/**
+	 * Uses a random generator to generate a population based on a dictionary of attribute
+	 * 
+	 * @param dictionary
+	 */
+	public GSUtilPopulation(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+		this.dico = dictionary;
+		this.generator = new GSUtilGenerator(dico);
+	}
+	
+	/**
+	 * Uses custom generator to generate a population based on a dictionary of attribute
+	 * 
+	 * @param dictionaryFile
+	 * @param generator
+	 */
 	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(String dictionaryFile, 
 			ISyntheticGosplPopGenerator generator){
@@ -52,6 +100,11 @@ public class GSUtilPopulation {
 		this.generator = generator;
 	}
 	
+	/**
+	 * same as {@link #GSUtilPopulation(DemographicDictionary)} with dictionary path
+	 * 
+	 * @param dictionaryFile
+	 */
 	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(Path dictionaryFile){
 		try {
@@ -64,6 +117,11 @@ public class GSUtilPopulation {
 		this.generator = new GSUtilGenerator(dico);
 	}
 	
+	/**
+	 * same as {@link #GSUtilPopulation(DemographicDictionary)} with dictionary path provided as {@link String}
+	 * 
+	 * @param dictionaryFile
+	 */
 	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(String dictionaryFile){
 		try {
@@ -76,28 +134,35 @@ public class GSUtilPopulation {
 		this.generator = new GSUtilGenerator(dico);
 	}
 	
-	public GSUtilPopulation(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary) {
-		this.dico = dictionary;
-		this.generator = new GSUtilGenerator(dico);
-	}
-	
+	/**
+	 * same as {@link #GSUtilPopulation(DemographicDictionary)} but with a custom dictionary based on attribute
+	 * collection passed as argument
+	 * 
+	 * @param dictionary
+	 */
 	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(Collection<DemographicAttribute<? extends IValue>> dictionary) {
 		dico = new DemographicDictionary<>();
 		dictionary.stream().forEach(att -> dico.addAttributes(att));
 		this.generator = new GSUtilGenerator(dico);
 	}
-	
-	public GSUtilPopulation() throws GSIllegalRangedData{
-		this(defaultDictionary);
-	}
-	
+		
 	// ---------------------------------------------------- //
 	
+	/**
+	 * Path to dictionary
+	 * 
+	 * @return
+	 */
 	public Path getPathToDictionary() {
 		return pathToDictionary;
 	}
 	
+	/**
+	 * The dictionary of attribute used to generate entity wi
+	 * th
+	 * @return
+	 */
 	public DemographicDictionary<DemographicAttribute<? extends IValue>> getDictionary(){
 		return dico;
 	}
@@ -164,7 +229,8 @@ public class GSUtilPopulation {
 			Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
 			// WARNING: linked attribute could be in the same matrix 
 			for(DemographicAttribute<? extends IValue> attribute : attributesProb.keySet()){
-				if(atts.stream().anyMatch(a -> a.getReferentAttribute().equals(attribute)))
+				if(atts.stream().anyMatch(a -> a.getReferentAttribute().equals(attribute)
+						|| a.equals(attribute.getReferentAttribute())))
 					continue;
 				if(GenstarRandom.getInstance().nextDouble() < attributesProb.get(attribute)){
 					atts.add(attribute);

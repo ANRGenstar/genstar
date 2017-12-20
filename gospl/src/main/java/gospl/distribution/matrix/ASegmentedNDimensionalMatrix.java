@@ -120,7 +120,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {	
 		if(getDimensions().stream().noneMatch(d -> d.getValueSpace().contains(aspect)
 				|| d.getValueSpace().getEmptyValue().equals(aspect)))
-			throw new NullPointerException("Trying to access to aspect value \""+aspect+"\" dimension (\""
+			throw new NullPointerException("Trying to access to aspect value \""+aspect+"\" (\""
 					+aspect.getValueSpace().getAttribute().getAttributeName()+"\") while this "
 							+ "matrix does not contains this dimension");
 		return getDimensions().stream().filter(d -> d.getValueSpace().contains(aspect)
@@ -271,7 +271,9 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 			if(val == null)
 				val = distribution.getVal(aspect, defaultToNull);
 			else if(!val.getValue().equals(distribution.getVal(aspect).getValue()))
-				throw new IllegalNDimensionalMatrixAccess("Incongruent probability in underlying distributions");
+				throw new IllegalNDimensionalMatrixAccess("Incongruent probability in underlying distributions: "
+						+"pv = "+val.getValue().doubleValue()+" | nv = "
+						+distribution.getVal(aspect).getValue().doubleValue());
 		return val;
 	}
 

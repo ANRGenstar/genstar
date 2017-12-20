@@ -46,6 +46,7 @@ public class GosplIPFTest {
 	public static Path PATH_TO_DICO = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 
 	@Test
+	@Ignore
 	public void simpleTest() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
@@ -169,7 +170,6 @@ public class GosplIPFTest {
 	
 	@SuppressWarnings("unchecked")
 	@Test
-	@Ignore
 	public void mappedWithSegmentedTest() {
 
 		DemographicDictionary<DemographicAttribute<? extends IValue>> gju = null;
@@ -218,6 +218,14 @@ public class GosplIPFTest {
 		
 		// Basic test of population size generation
 		assertEquals(GENERATION_SIZE, popOut.size());
+	}
+	
+	// Partial means that control and seed are not express at the same level
+	// at least one attribute is aggregated in one side and desaggregated in the other
+	@Test
+	// TODO
+	public void mappedWithSegmentedAndPartialTest() {
+		
 	}
 	
 	/*

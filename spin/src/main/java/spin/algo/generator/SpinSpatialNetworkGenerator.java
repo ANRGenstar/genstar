@@ -1,5 +1,10 @@
 package spin.algo.generator;
 
+import java.util.List;
+
+import com.vividsolutions.jts.geom.Geometry;
+import com.vividsolutions.jts.index.quadtree.Quadtree;
+
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
@@ -39,22 +44,21 @@ public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  Abstra
 	public SpinPopulation<SpllEntity> generateNetwork(SpllPopulation myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);			
 		
-		//TODO : use genstar Random Generator 
-		//Random rand = new Random();
-		
-		// List the nodes
-		//List<Node> nodes = new ArrayList<>(network.getNodes());
-		//int nbNodes = nodes.size();
-		
-		int link_id = 0;		
+		Quadtree quad = new Quadtree();
+		for(SpllEntity e1: myPop) {
+			quad.insert(e1.getLocation().getEnvelopeInternal(), e1);
+		}
+
+		long link_id = 0;		
+
 		for(SpllEntity e1 : myPop) {
-			for(SpllEntity e2 : myPop) {
-				double d = e1.getLocation().distance(e2.getLocation());
-				if( d <= distance ) {
-					network.putLink(Integer.toString(link_id), e1, e2);
-					link_id++;
-				}				
-				
+			Geometry geom = e1.getLocation().buffer(distance);
+			List<SpllEntity> l = quad.query(geom.getEnvelopeInternal());
+			for (SpllEntity sp : l) {
+				if (sp != e1 && geom.intersects(sp.getLocation())) {
+					network.putLink(Long.toString(link_id), e1, sp);
+					link_id++;								
+				}
 			}
 		}
 
