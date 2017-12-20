@@ -120,5 +120,15 @@ public class RangeValue implements IValue {
 		this.actualValue = v;
 	}
 
+	public Number getBottomBound() {
+		return bottomBound;
+	}
+
+	public Number getTopBound() {
+		return topBound;
+	}
+	
+	
+
 	
 }
