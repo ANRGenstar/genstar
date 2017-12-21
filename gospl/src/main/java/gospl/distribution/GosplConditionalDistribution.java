@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
+import core.util.random.GenstarRandom;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -293,16 +294,30 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 
 	// -------------------- Inner Utilities -------------------- //
 
+	/*
+	 * Setup conditional bottom up values: value for which this matrix has partial 
+	 * bottom-up information, i.e. one attribute of this matrix has for referent
+	 * one value attribute for which probability has already be defined 
+	 */
 	private Map<Set<IValue>, AControl<Double>> estimateBottomUpReferences(
 			AFullNDimensionalMatrix<Double> mat, Collection<IValue> aspects,
 			Set<DemographicAttribute<? extends IValue>> assignedDimension){
-		// Setup conditional bottom up values: value for which this matrix has partial 
-		// bottom-up information, i.e. one attribute of this matrix has for referent
-		// one value attribute for which probability has already be defined 
-		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> refAttributeToBottomup = mat.getDimensions().stream()
+		Map<DemographicAttribute<? extends IValue>, Set<DemographicAttribute<? extends IValue>>> ratb = mat.getDimensions().stream()
 				.filter(att -> !att.getReferentAttribute().equals(att)
 						&& assignedDimension.contains(att.getReferentAttribute()))
-				.collect(Collectors.toMap(DemographicAttribute::getReferentAttribute, Function.identity()));
+				.collect(Collectors.groupingBy(
+						DemographicAttribute::getReferentAttribute, 
+						Collectors.mapping(Function.identity(), Collectors.toSet())));
+		
+		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> refAttributeToBottomup = new HashMap<>();
+		for(DemographicAttribute<? extends IValue> da : ratb.keySet())
+			refAttributeToBottomup.put(da, ratb.get(da).stream()
+					.sorted((a1, a2) -> 
+					a1.getValueSpace().getValues().size() < a2.getValueSpace().getValues().size() ? -1 :
+						a1.getValueSpace().getValues().size() > a2.getValueSpace().getValues().size() ? 1 :
+							GenstarRandom.getInstance().nextDouble() > 0.5 ? -1 : 1).findFirst().get());
+				
+		
 		if(refAttributeToBottomup.isEmpty())
 			return Collections.emptyMap();
 		// Transpose top down value set to control proportional referent
@@ -322,12 +337,14 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		return res;
 	}
 
+	/*
+	 * Setup conditional top down values: value for which this matrix has partial 
+	 * top down information, i.e. one attribute of this matrix is the referent of
+	 * one value attribute for which probability has already be defined
+	 */
 	private Map<Set<IValue>, AControl<Double>> estimateTopDownReferences(
 			AFullNDimensionalMatrix<Double> mat, Collection<IValue> aspects,
 			Set<DemographicAttribute<? extends IValue>> assignedDimension){
-		// Setup conditional top down values: value for which this matrix has partial 
-		// top down information, i.e. one attribute of this matrix is the referent of
-		// one value attribute for which probability has already be defined
 		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> assignedAttributeToTopdown = assignedDimension.stream()
 				.filter(att -> !att.getReferentAttribute().equals(att)
 						&& mat.getDimensions().contains(att.getReferentAttribute()))

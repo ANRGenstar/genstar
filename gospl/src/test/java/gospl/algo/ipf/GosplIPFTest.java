@@ -46,7 +46,6 @@ public class GosplIPFTest {
 	public static Path PATH_TO_DICO = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 
 	@Test
-	@Ignore
 	public void simpleTest() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
@@ -64,7 +63,6 @@ public class GosplIPFTest {
 	}
 
 	@Test
-	@Ignore
 	public void defaultTest() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = null;
@@ -91,7 +89,6 @@ public class GosplIPFTest {
 	}
 	
 	@Test
-	@Ignore
 	public void defaultTestWithSegmentedMatrix() {
 
 		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = null;
@@ -122,7 +119,6 @@ public class GosplIPFTest {
 	
 	
 	@Test
-	@Ignore
 	public void mappedTest() {
 
 		Set<DemographicAttribute<? extends IValue>> refAttributes = new HashSet<>();

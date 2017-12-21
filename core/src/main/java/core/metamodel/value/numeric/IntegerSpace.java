@@ -81,7 +81,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	
 	@Override
 	public boolean contains(IValue value) {
-		if(value.getClass().equals(IntegerValue.class))
+		if(!value.getClass().equals(IntegerValue.class))
 			return false;
 		return values.containsValue(value);
 	}

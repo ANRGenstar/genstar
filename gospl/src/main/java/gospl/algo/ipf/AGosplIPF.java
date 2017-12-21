@@ -245,7 +245,7 @@ public abstract class AGosplIPF<T extends Number> {
 		// guarantee convergence, normalization needs to be done but can disrupt validation process
 		seed.normalize();
 		
-		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value and "+stepIter+" iteration(s)");
+		gspu.sysoStempMessage("IPF fitting ends with final "+aapd+" AAPD value and "+(this.step - stepIter)+" iteration(s)");
 		return seed;
 	}
 

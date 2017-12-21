@@ -690,7 +690,7 @@ public class GosplSurveyFactory {
 					}
 
 				} catch (NullPointerException e2) {
-					bw.write(UNKNOWN_VARIABLE+"\"");
+					bw.write(UNKNOWN_VARIABLE+"\""); // WARNING: i don't understand why i have to add extra "
 				}
 			}
 			bw.write(separator);
