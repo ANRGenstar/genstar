@@ -493,8 +493,14 @@ public class GosplInputDataManager {
 			}
 			for (final Integer idx : columnHeaders.keySet()){
 				
+				String actualStringValue = indiVals.get(idx);
+				
 				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
-				IValue val = att.getValueSpace().addValue(indiVals.get(idx));
+				IValue val = null;
+				if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
+					val = att.getValueSpace().getEmptyValue();
+				else
+					val = att.getValueSpace().addValue(actualStringValue);
 				
 				// filter
 				if (val != null) {

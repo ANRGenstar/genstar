@@ -85,8 +85,8 @@ public class ReadPopulationsUtils {
 			pop = GosplInputDataManager.getSample(
 					survey, 
 					dictionnary, 
-					Integer.MAX_VALUE, // TODO ???!!!
-					Collections.emptyMap() // TODO parameters for that
+					null, // extract the entire sample
+					Collections.emptyMap() // extract entity with no limitation of attribute content
 					);
 		} catch (IOException e) {
 			throw new RuntimeException(e);

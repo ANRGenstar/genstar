@@ -66,6 +66,8 @@ public class GosplSurveyFactory {
 	private int sheetNb;
 	private int firstRowDataIdx;
 	private int firstColumnDataIdx;
+	
+	public static final String UNKNOWN_VARIABLE = "?";
 
 	public static final String CSV_EXT 	= ".csv";
 	public static final String XLS_EXT 	= ".xls";
@@ -688,7 +690,7 @@ public class GosplSurveyFactory {
 					}
 
 				} catch (NullPointerException e2) {
-					bw.write("\"?\"");
+					bw.write(UNKNOWN_VARIABLE+"\"");
 				}
 			}
 			bw.write(separator);

@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.IAttribute;
@@ -20,6 +20,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
+import core.util.GSPerformanceUtil;
 
 /**
  * Abstraction for any input handler: able to store the path to the file its based on, 
@@ -36,12 +37,13 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	protected final String surveyFileName;
 	protected final String surveyFilePath;
 	protected final GSSurveyType dataFileType;
-
-	private static Logger logger = LogManager.getLogger();
+	
+	private GSPerformanceUtil gspu;
 
 	public AbstractInputHandler(GSSurveyType dataFileType, String fileName) {
 
 		this.dataFileType = dataFileType;
+		this.gspu = new GSPerformanceUtil("Read header from survey file", LogManager.getLogger());
 		
 		this.surveyCompleteFile = fileName;
 		this.surveyFileName = Paths.get(fileName).getFileName().toString();
@@ -52,6 +54,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	public AbstractInputHandler(GSSurveyType dataFileType, File file) {
 
 		this.dataFileType = dataFileType;
+		this.gspu = new GSPerformanceUtil("Read header from survey file", LogManager.getLogger());
 		
 		this.surveyCompleteFile = file.getAbsolutePath();
 		this.surveyFileName = file.getName();
@@ -75,7 +78,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
 			final List<String> column = readLines(0, getFirstRowIndex(), i);
 			
-			logger.info("trying to detect an attribute based on row values: {}", column);
+			gspu.sysoStempMessage("trying to detect an attribute based on row values: "+ column, Level.DEBUG);
 
 			for (String columnVal : column) {
 				Set<IValue> vals = dictionary.getAttributeAndRecord().stream()
@@ -122,17 +125,17 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					// detect the attribute by finding an attribute which has 
 					// all of these values as modalities
 					final List<String> valList = readColumn(idx);
-					logger.info("trying to detect an attribute based on header values: {}", valList);
+					gspu.sysoStempMessage("trying to detect an attribute based on header values: "+valList, Level.DEBUG);
 					//if (dictionnary)
 					if (dictionary.getAttributes().stream()
 							.anyMatch(att -> att.getValueSpace().containsAllLabels(valList))) {
 						attributeIdx.add(idx);
 						
 					} else {
-						logger.warn("the values {} match none of our attributes: {}", 
-								valList,
+						gspu.sysoStempMessage("the values "+valList+" match none of our attributes: "+
 								dictionary.getAttributes().stream().map(a -> a.getValueSpace().getValues().stream()
-										.map(v -> v.getStringValue()).collect(Collectors.toList())).collect(Collectors.toList())
+										.map(v -> v.getStringValue()).collect(Collectors.toList())).collect(Collectors.toList()),
+								Level.WARN
 								);
 					}
 				}
