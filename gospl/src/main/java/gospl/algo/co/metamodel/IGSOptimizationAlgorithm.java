@@ -5,7 +5,7 @@ import java.util.Set;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 
 /**
- * Main interfaces for Genstar formated optimization algorithm
+ * Main interfaces for combinatorial optimization algorithm
  * 
  * @author kevinchapuis
  *

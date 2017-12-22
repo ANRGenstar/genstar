@@ -294,6 +294,13 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 * @return
 	 */
 	public GSSurveyType getMetaDataType();
+	
+	/**
+	 * To be use to compute the chi square degree of freedom for this n dimensional matrix
+	 * 
+	 * @return
+	 */
+	public int getDegree();
 
 // ------------------------- coordinate management ------------------------- //
 

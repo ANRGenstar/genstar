@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.Function;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
 
 import core.metamodel.IPopulation;
+import core.metamodel.IQueryablePopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
@@ -62,7 +64,7 @@ public class GosplIndicatorFactory {
 	 */
 	public int getTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
-		double chiFiveCritical = new ChiSquaredDistribution(1)
+		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
 				.inverseCumulativeProbability(criticalPValue);
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable: 
@@ -76,7 +78,34 @@ public class GosplIndicatorFactory {
 					+ "of type "+ inputMatrix.getMetaDataType());
 		default:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
-					+ "a segmented matrix with multiple matrix meta data type");
+					+ "a segmented matrix with multiple matrix meta data type : it should have been collapse"
+					+ " [see GosplInputDataManager#collapseDataTablesIntoDistribution]");
+		}
+	}
+	
+	/**
+	 * Same as {@link #getTACE(INDimensionalMatrix, IPopulation)} but with queryable population to fasten computation
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public int getTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
+				.inverseCumulativeProbability(criticalPValue);
+		switch (inputMatrix.getMetaDataType()) {
+		case ContingencyTable: 
+			return getIntegerTACE(inputMatrix, population, chiFiveCritical);
+		case GlobalFrequencyTable:
+			return getDoubleTACE(inputMatrix, population, chiFiveCritical);
+		case LocalFrequencyTable:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "of type "+ inputMatrix.getMetaDataType());
+		default:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "a segmented matrix with multiple matrix meta data type : it should have been collapse"
+					+ " [see GosplInputDataManager#collapseDataTablesIntoDistribution]");
 		}
 	}
 
@@ -106,7 +135,8 @@ public class GosplIndicatorFactory {
 					+ "of type "+ inputMatrix.getMetaDataType());
 		default:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
-					+ "a segmented matrix with multiple matrix meta data type");
+					+ "a segmented matrix with multiple matrix meta data type : it should have been collapse"
+					+ " [see GosplInputDataManager#collapseDataTablesIntoDistribution]");
 		}
 	}
 	
@@ -146,6 +176,43 @@ public class GosplIndicatorFactory {
 						.getValue() - e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
 				.sum();
 	}
+	
+	/**
+	 * Total Absolute Cell error with a queryable population to fasten computation
+	 * 
+	 * @param inputMatrix
+	 * @param queryablePopulation
+	 * @param delta
+	 * @return
+	 */
+	public int getIntegerTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> queryablePopulation, double delta) {
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToInt(e -> Math.abs(queryablePopulation.getCountHavingValues(e.getKey().values().stream()
+							.collect(Collectors.groupingBy(v -> inputMatrix.getDimension(v),
+									Collectors.toCollection(ArrayList::new)))) - 
+						e.getValue().getValue().intValue()) / 
+						e.getValue().getValue().doubleValue() > delta ? 1 : 0)
+				.sum();
+	}
+	
+	/**
+	 * Total Absolute Cell error with a queryable population to fasten computation
+	 * 
+	 * @param inputMatrix
+	 * @param queryablePopulation
+	 * @param delta
+	 * @return
+	 */
+	public int getDoubleTACE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> queryablePopulation, double delta){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToInt(e -> Math.abs(queryablePopulation.getCountHavingValues(e.getKey().values().stream()
+						.collect(Collectors.groupingBy(v -> inputMatrix.getDimension(v),
+								Collectors.toCollection(ArrayList::new)))) / queryablePopulation.size() 
+						- e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
+				.sum();
+	}
 
 	// ---------------------- Total Absolute Error ---------------------- //
 
@@ -154,7 +221,8 @@ public class GosplIndicatorFactory {
 	 * just compute the number of misclassified individual from the population
 	 * compared to record of the {@code inputMatrix}.
 	 * <p>
-	 * TODO: little background for the method and advise to read output indicator
+	 * If provided input matrix is a distribution of probability, hence indicator is an estimation
+	 * of the number of misclassified individual (sum of frequency difference normalize to population size)
 	 * 
 	 * @see P. Williamson, M. Birkin, Phil H. Rees, 1998. The estimation of population microdata 
 	 * by using data from small area statistics and samples of anonymised records; 
@@ -164,7 +232,7 @@ public class GosplIndicatorFactory {
 	 * @param population
 	 * @return
 	 */
-	public double getTAE(
+	public int getTAE(
 			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		switch (inputMatrix.getMetaDataType()) {
@@ -172,8 +240,32 @@ public class GosplIndicatorFactory {
 			return getIntegerTAE(inputMatrix, GosplNDimensionalMatrixFactory
 					.getFactory().createContingency(population));
 		case GlobalFrequencyTable:
-			return getDoubleTAE(inputMatrix, GosplNDimensionalMatrixFactory
-					.getFactory().createDistribution(population));
+			return Math.round(Math.round(getDoubleTAE(inputMatrix, GosplNDimensionalMatrixFactory
+					.getFactory().createDistribution(population)) * population.size()));
+		case LocalFrequencyTable:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "of type "+ inputMatrix.getMetaDataType());
+		default:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "a segmented matrix with multiple matrix meta data type");
+		}
+	}
+	
+	/**
+	 * Same as {@link #getTAE(INDimensionalMatrix, IPopulation)} but with queryable population to fasten computation
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public int getTAE(
+			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+		switch (inputMatrix.getMetaDataType()) {
+		case ContingencyTable: 
+			return getIntegerTAE(inputMatrix, population);
+		case GlobalFrequencyTable:
+			return Math.round(Math.round(getDoubleTAE(inputMatrix, population) * population.size()));
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -192,11 +284,28 @@ public class GosplIndicatorFactory {
 	 * @param populationMatrix
 	 * @return
 	 */
-	public double getIntegerTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+	public int getIntegerTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix){
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
 						.getValue() - e.getValue().getValue().intValue()))
+				.sum();
+	}
+	
+	/**
+	 * Total absolute error with queryable population to fasten process
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public int getIntegerTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToInt(e -> Math.abs(population.getCountHavingValues(e.getKey().values().stream()
+						.collect(Collectors.groupingBy(v -> inputMatrix.getDimension(v),
+								Collectors.toCollection(ArrayList::new)))) 
+						- e.getValue().getValue().intValue()))
 				.sum();
 	}
 	
@@ -214,6 +323,23 @@ public class GosplIndicatorFactory {
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToDouble(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
 						.getValue() - e.getValue().getValue().doubleValue()))
+				.sum();
+	}
+	
+	/**
+	 * Total absolute error with queryable population to fasten process
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public double getDoubleTAE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+		return inputMatrix.getMatrix().entrySet().stream()
+				.mapToDouble(e -> Math.abs(population.getCountHavingValues(e.getKey().values().stream()
+						.collect(Collectors.groupingBy(v -> inputMatrix.getDimension(v),
+								Collectors.toCollection(ArrayList::new)))) / (1d * population.size())
+						- e.getValue().getValue().doubleValue()))
 				.sum();
 	}
 	
@@ -346,7 +472,7 @@ public class GosplIndicatorFactory {
 		double expectedValue = 0d;
 		double actualValue = 0d;
 		double ssz = 0d;
-		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.size())
+		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
 				.inverseCumulativeProbability(criticalPValue);
 		AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
 				.getFactory().createContingency(population);

@@ -84,7 +84,6 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 		return new ControlContingency(Integer.valueOf(val));
 	}
 
-
 	@Override
 	public boolean checkGlobalSum() {
 		// always true

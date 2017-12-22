@@ -15,6 +15,12 @@ import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AGSSampleBasedCOSolution;
 import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
 
+/**
+ * State implementation for simulated annealing which provide neighbor retrieving options.
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class GSSAState extends AGSSampleBasedCOSolution {
 
 	public GSSAState(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,

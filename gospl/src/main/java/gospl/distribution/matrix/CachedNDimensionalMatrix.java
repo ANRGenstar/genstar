@@ -260,6 +260,11 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	public final int size() {
 		return m.size();
 	}
+	
+	@Override
+	public final int getDegree() {
+		return m.getDegree();
+	}
 
 	@Override
 	public final boolean isSegmented() {

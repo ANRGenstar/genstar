@@ -14,16 +14,14 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
+import gospl.GosplPopulationInDatabase;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.validation.GosplIndicatorFactory;
 
 /**
- * WARNING: huge performance issue with {@link #getTabuValue(Set)} because of transposed population
- * to contingency table (with possible population of several million of entity)
- * 
- * TODO: have a 'proxy' solution from current state solution, i.e. only store differences, that is
- * entity which have been remove and added 
+ * Abstract Combinatorial Optimization solution to be used in {@link IGSOptimizationAlgorithm}. 
+ * Provide essential fitness calculation, stores the original data sample to help define neighboring,
  * 
  * @author kevinchapuis
  *
@@ -39,7 +37,7 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	
 	public AGSSampleBasedCOSolution(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
 			Collection<ADemoEntity> sample){
-		this.population = population;
+		this.population = new GosplPopulationInDatabase(population);
 		this.sample = sample;
 		this.valueList = population.stream().flatMap(entity -> entity.getValues().stream())
 				.collect(Collectors.toSet());

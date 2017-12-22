@@ -156,6 +156,19 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		this.label = label;
 	}
 	
+	@Override
+	public int size(){
+		return matrix.size();
+	}
+	
+	
+	@Override
+	public int getDegree() {
+		return this.getDimensions().stream()
+				.mapToInt(d -> d.getValueSpace().getValues().size() - 1)
+			.reduce(1, (i1, i2) -> i1 * i2);
+	}
+	
 	// ---------------------- GLOBAL ACCESSORS ---------------------- //
 
 
@@ -167,12 +180,6 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	@Override
 	public final boolean setValue(T value, String... coordinates) {
 		return this.setValue(GosplCoordinate.createCoordinate(dimensions, coordinates), value);
-	}
-
-	
-	@Override
-	public int size(){
-		return matrix.size();
 	}
 
 	@Override

@@ -90,6 +90,11 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	public boolean isSegmented(){
 		return true;
 	}
+	
+	@Override
+	public int getDegree() {
+		return this.jointDistributionSet.stream().mapToInt(m -> m.getDegree()).sum();
+	}
 
 	// ---------------- Getters ---------------- //
 

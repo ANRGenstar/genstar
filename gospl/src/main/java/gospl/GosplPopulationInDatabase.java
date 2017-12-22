@@ -25,6 +25,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 
+import core.metamodel.IPopulation;
 import core.metamodel.IQueryablePopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.ADemoEntity;
@@ -62,11 +63,11 @@ public class GosplPopulationInDatabase
 	
 	private static int currentInstanceCount = 0;
 	
-	private String mySqlDBname = "GosplPopulation_"+(++currentInstanceCount);
+	private String mySqlDBname = "IPopulation_"+(++currentInstanceCount);
 	
 	private Map<String,Set<String>> table2createdIndex = new HashMap<>();
 	
-	public GosplPopulationInDatabase(Connection connection, GosplPopulation population) {
+	public GosplPopulationInDatabase(Connection connection, IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
 		this.connection = connection;
 		loadPopulationIntoDatabase(population);
 	} 
@@ -91,7 +92,7 @@ public class GosplPopulationInDatabase
 	 * @param population
 	 * @param connection
 	 */
-	public GosplPopulationInDatabase(GosplPopulation population) {
+	public GosplPopulationInDatabase(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
 		try {
 			this.connection = DriverManager.getConnection(
 					"jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
@@ -108,7 +109,7 @@ public class GosplPopulationInDatabase
 	 * @param databaseFile
 	 * @param population
 	 */
-	public GosplPopulationInDatabase(File databaseFile, GosplPopulation population) {
+	public GosplPopulationInDatabase(File databaseFile, IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
 		
 		 try {
 			 //;ifexists=true
@@ -129,7 +130,7 @@ public class GosplPopulationInDatabase
 	 * @param hsqlUrlServer
 	 * @param pop
 	 */
-	public GosplPopulationInDatabase(URL hsqlUrlServer, GosplPopulation population) {
+	public GosplPopulationInDatabase(URL hsqlUrlServer, IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
 		try {
 		     Class.forName("org.hsqldb.jdbc.JDBCDriver" );
 		} catch (Exception e) {
@@ -271,7 +272,7 @@ public class GosplPopulationInDatabase
 	 * create tables, and loads entities into them.
 	 * @param pop
 	 */
-	protected void loadPopulationIntoDatabase(GosplPopulation pop) {
+	protected void loadPopulationIntoDatabase(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop) {
 		assert this.connection != null;
 		assert pop != null;
 		

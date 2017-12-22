@@ -9,6 +9,13 @@ import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
+/**
+ * Define higher order behavior for {@link IEntitySampler}. It relies on {@link RandomSampler}
+ * 
+ * @author kevinchapuis
+ *
+ * @param <A>
+ */
 public abstract class AOptiAlgoSampler<A extends IGSOptimizationAlgorithm> implements IEntitySampler {
 
 	protected Collection<ADemoEntity> sample;
