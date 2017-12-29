@@ -39,19 +39,20 @@ public class SPUniformLocalizer extends AbstractLocalizer {
 		}else {
 			chosenEntities = entities;
 		}
+		candidatesDistribution.releaseCache();
 		for (SpllEntity entity : chosenEntities) {
 			if (possibleNests.isEmpty()) {
 				break;
 			}
-			int index = rand.nextInt(possibleNests.size());
-			AGeoEntity<? extends IValue> nest = possibleNests.get(index);
+			
+			AGeoEntity<? extends IValue> nest = candidatesDistribution.getCandidate(entity, possibleNests);
 			boolean removeObject = false;
 			
 			for (ISpatialConstraint constraint: constraints) {
 				removeObject = removeObject || constraint.updateConstraint(nest);
 			}
 			
-			if (removeObject) possibleNests.remove(index);
+			if (removeObject) possibleNests.remove(0);
 			entity.setNest(nest);
 			entity.setLocation(pointInLocalizer.pointIn(nest.getProxyGeometry()));
 			

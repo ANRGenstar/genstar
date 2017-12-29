@@ -14,7 +14,7 @@ import core.metamodel.value.IValue;
  */
 public interface ISpatialConstraint {
 	
-	public List<AGeoEntity<? extends IValue>> getSortedCandidates(List<AGeoEntity<? extends IValue>> nests);
+	public List<AGeoEntity<? extends IValue>> getCandidates(List<AGeoEntity<? extends IValue>> nests);
 	
 	public boolean updateConstraint(AGeoEntity<? extends IValue> nest);
 	

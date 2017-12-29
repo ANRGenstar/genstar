@@ -22,20 +22,27 @@ public class SpatialConstraintLocalization extends ASpatialConstraint {
 	}
 
 	@Override
-	public List<AGeoEntity<? extends IValue>> getSortedCandidates(List<AGeoEntity<? extends IValue>> nests) {
+	public List<AGeoEntity<? extends IValue>> getCandidates(List<AGeoEntity<? extends IValue>> nests) {
 		if (bounds == null) return nests;
+		
 		//System.out.println("nests: " + nests.size());
 		List<AGeoEntity<? extends IValue>> cands = null;
 		if (referenceFile != null) {
 			cands = new ArrayList<>(referenceFile.getGeoEntityWithin(bounds));
-			if (nests != null)cands.removeIf(a -> !nests.stream().anyMatch(b -> b.getGenstarName().equals(b.getGenstarName())));
+			if (nests != null) {
+				Collection<String> nestNames = new ArrayList<>();
+				for (AGeoEntity nest : nests) {
+					nestNames.add(nest.getGenstarName());
+				}
+				cands.removeIf(a -> !nestNames.contains(a.getGenstarName()));
+			}
 		} else {
 			cands = nests.stream().filter(a -> a.getGeometry().intersects(bounds)).collect(Collectors.toList());
 		}
-		if (sortCandidates) 
+		/*if (sortCandidates) 
 			return cands.stream().sorted((n1, n2) -> Double.compare(bounds.getCentroid()
 					.distance(n1.getGeometry()),bounds.getCentroid().distance(n2.getGeometry())))
-					.collect(Collectors.toList());
+					.collect(Collectors.toList());*/
 		return cands;
 	}
 
