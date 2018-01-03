@@ -1,5 +1,8 @@
 package spll;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.entity.ADemoEntity;
@@ -8,7 +11,8 @@ import core.metamodel.value.IValue;
 
 /**
  * Represents a spatialized entity which can have attributes, be localated at a point (represents
- * where it is) and a Nest (representing where it "lives"). 
+ * where it is) and a Nest (representing where it "lives"). The linkedPlaces represents the list 
+ * of places linked to the entity (key: type of place, value: corresponding place).
  * Such an entity might be generated.
  * 
  * @author Kevin Chapuis
@@ -17,6 +21,8 @@ public class SpllEntity extends ADemoEntity {
 	
 	protected Point location = null;
 	protected AGeoEntity<? extends IValue> nest = null;
+
+	protected Map<String,AGeoEntity<? extends IValue>> linkedPlaces = null;
 	
 
 	public SpllEntity(ADemoEntity entity) {
@@ -74,6 +80,16 @@ public class SpllEntity extends ADemoEntity {
 	public void setNest(AGeoEntity<? extends IValue> nest){
 		this.nest = nest;
 	}
+
+	public Map<String, AGeoEntity<? extends IValue>> getLinkedPlaces() {
+		return linkedPlaces;
+	}
+	
+	public void addLinkedPlaces(String key, AGeoEntity<? extends IValue> place) {
+		if (linkedPlaces == null) linkedPlaces = new HashMap<String, AGeoEntity<? extends IValue>>();
+		linkedPlaces.put(key, place);
+	}
+	
 
 	
 }

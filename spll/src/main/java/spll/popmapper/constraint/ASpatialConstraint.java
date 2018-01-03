@@ -8,7 +8,6 @@ import core.metamodel.value.IValue;
 public abstract class ASpatialConstraint implements ISpatialConstraint{
 
 	protected int priority = 1;
-	protected boolean sortCandidates = false;
 	protected double maxIncrease = 0.0;
 	protected double increaseStep = 0.0;
 	protected double currentValue = 0.0;
@@ -22,14 +21,6 @@ public abstract class ASpatialConstraint implements ISpatialConstraint{
 
 	public void setPriority(int priority) {
 		this.priority = priority;
-	}
-
-	public boolean isSortedCandidates() {
-		return sortCandidates;
-	}
-
-	public void setSortedCandidates(boolean sortedCandidates) {
-		this.sortCandidates = sortedCandidates;
 	}
 
 	public double getMaxIncrease() {

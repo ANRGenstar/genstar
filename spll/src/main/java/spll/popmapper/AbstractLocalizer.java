@@ -53,6 +53,8 @@ import spll.io.SPLVectorFile;
 import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.constraint.SpatialConstraintLocalization;
+import spll.popmapper.distribution.ISpatialDistribution;
+import spll.popmapper.distribution.UniformSpatialDistribution;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 import spll.popmapper.pointInalgo.PointInLocalizer;
 import spll.popmapper.pointInalgo.RandomPointInLocalizer;
@@ -76,7 +78,8 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 	protected List<ISpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest 
 	protected SpatialConstraintLocalization localizationConstraint; //the localization constraint;
 	protected PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
-
+	protected ISpatialDistribution candidatesDistribution; // specify how to order possible candidates;
+	
 	protected String keyAttMap; //name of the attribute that contains the number of entities in the map file
 	protected String keyAttPop; //name of the attribute that is used to store the id of the referenced area in the population
 	protected String keyAttMatch; //name of the attribute that is used to store the id of the referenced area in the match file
@@ -102,6 +105,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		localizationConstraint = new SpatialConstraintLocalization(null);
 		localizationConstraint.setReferenceFile(population.getGeography());
 		constraints = new ArrayList<>();
+		candidatesDistribution = new UniformSpatialDistribution();
 		constraints.add(localizationConstraint);
 	}
 
@@ -252,6 +256,7 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 	@Override
 	public SpllPopulation localisePopulation() {
 		constraints = constraints.stream().sorted((n1, n2) -> Integer.compare( n1.getPriority(), n2.getPriority())).collect(Collectors.toList());
+		
 		try {
 			//case where the referenced file is not defined
 			if (match == null) {
@@ -305,17 +310,19 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		localizationConstraint.setBounds(spatialBounds);
 		for (ISpatialConstraint cr : constraints) {
 			while (!cr.isConstraintLimitReach()) {
+				System.out.println("la");
 				List<AGeoEntity<? extends IValue>> possibleNests = 
 						new ArrayList<>(population.getGeography().getGeoEntity());
 				List<AGeoEntity<? extends IValue>> possibleNestsInit = 
-						localizationConstraint.getSortedCandidates(possibleNests);
-				
+						localizationConstraint.getCandidates(possibleNests); 
+				System.out.println("la2");
 				possibleNests = new ArrayList<>(possibleNests);
 				for (ISpatialConstraint constraint : otherConstraints) {
-					possibleNests = constraint.getSortedCandidates(possibleNests);
+					possibleNests = constraint.getCandidates(possibleNests);
 				}
-				
+				System.out.println("la3");
 				remainingEntities = localizationInNestOp(remainingEntities, possibleNests, null);
+				System.out.println("la4");
 				if (remainingEntities != null && !remainingEntities.isEmpty()) 
 					 cr.relaxConstraint(possibleNestsInit);
 				else return;
@@ -362,10 +369,10 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 			if (entities.isEmpty()) break;
 			for (ISpatialConstraint cr : constraints) {
 				while (!remainingEntities.isEmpty() && !cr.isConstraintLimitReach()) {
-					List<AGeoEntity<? extends IValue>> possibleNestsInit = localizationConstraint.getSortedCandidates(null);
+					List<AGeoEntity<? extends IValue>> possibleNestsInit = localizationConstraint.getCandidates(null);
 					List<AGeoEntity<? extends IValue>>  possibleNests = new ArrayList<>(possibleNestsInit);
 					for (ISpatialConstraint constraint : otherConstraints) {
-						possibleNests = constraint.getSortedCandidates(possibleNests);
+						possibleNests = constraint.getCandidates(possibleNests);
 					}
 					remainingEntities = localizationInNestOp(remainingEntities, possibleNests, val);
 					if (!remainingEntities.isEmpty()) {
@@ -491,6 +498,15 @@ public abstract class AbstractLocalizer implements ISPLocalizer {
 		if (map != null && map instanceof SPLRasterFile) 
 			((SPLRasterFile) map).clearCache();
 	}
+
+	public ISpatialDistribution getCandidatesDistribution() {
+		return candidatesDistribution;
+	}
+
+	public void setCandidatesDistribution(ISpatialDistribution candidatesDistribution) {
+		this.candidatesDistribution = candidatesDistribution;
+	}
+
 	
 	
 }

@@ -24,17 +24,18 @@ public class SpatialConstraintMaxDistance extends ASpatialConstraint {
 	}
 	
 	@Override
-	public List<AGeoEntity<? extends IValue>> getSortedCandidates(List<AGeoEntity<? extends IValue>> nests) {
+	public List<AGeoEntity<? extends IValue>> getCandidates(List<AGeoEntity<? extends IValue>> nests) {
 		return nests.stream().filter(nest -> distanceToEntities.keySet()
 				.stream().anyMatch(entity -> nest.getGeometry()
 						.buffer(distanceToEntities.get(entity))
-						.intersects(entity.getGeometry())))
-				.sorted((c1, c2) -> Double.compare(
+						.intersects(entity.getGeometry()))).collect(Collectors.toList());
+		
+		/*		.sorted((c1, c2) -> Double.compare(
 						distanceToEntities.keySet().stream().mapToDouble(entity -> c1.getGeometry().getCentroid()
 								.distance(entity.getGeometry())).min().getAsDouble(),
 						distanceToEntities.keySet().stream().mapToDouble(entity -> c2.getGeometry().getCentroid()
-								.distance(entity.getGeometry())).min().getAsDouble()))
-				.collect(Collectors.toList());
+								.distance(entity.getGeometry())).min().getAsDouble()))*/
+				
 	}
 
 	@Override
