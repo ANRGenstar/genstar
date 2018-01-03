@@ -472,7 +472,6 @@ public class GosplPopulationInDatabase
 		}
 		sb.append(")");
 		
-		boolean anyChange = false;
 		try {
 			Statement st = connection.createStatement();
 			st.executeQuery(sb.toString());
@@ -1197,7 +1196,10 @@ public class GosplPopulationInDatabase
 		return res;
 	}
 
-	public void addWhereClauseForAttributes(
+	/*
+	 * Private inner method to setup query
+	 */
+	private void addWhereClauseForAttributes(
 			StringBuffer sb,
 			String type,
 			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values
@@ -1214,7 +1216,24 @@ public class GosplPopulationInDatabase
 		sb.append(")");
 	}
 	
-	public int getEntitiesHavingValues(
+	/*
+	 * Private inner method to setupe query
+	 */
+	private void addWhereClauseForCoordinate(
+			StringBuffer sb,
+			String type,
+			Map<DemographicAttribute<? extends IValue>, IValue> attribute2values
+			) {
+		sb.append(" WHERE (");
+		boolean first = true;
+		for (DemographicAttribute<? extends IValue> attribute: attribute2values.keySet()) {
+			if (first) first = false; else sb.append(") AND (");
+			addWhereClauseForAttribute(sb, type, attribute, new IValue[] {attribute2values.get(attribute)});
+		}
+		sb.append(")");
+	}
+	
+	protected int getEntitiesHavingValues(
 			String type,
 			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) throws SQLException {
 		
@@ -1245,6 +1264,46 @@ public class GosplPopulationInDatabase
 			
 			try {
 				total += getEntitiesHavingValues(type, attribute2values);
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw new RuntimeException("error while counting entities of type "+type, e);
+			}
+			
+		}
+		return total;
+	}
+	
+	protected int getEntitiesHavingCoordinate(
+			String type,
+			Map<DemographicAttribute<? extends IValue>, IValue> attribute2value) throws SQLException {
+		
+		StringBuffer sb = new StringBuffer();
+		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
+		
+		if (!attribute2value.isEmpty()) {
+			addWhereClauseForCoordinate(sb, type, attribute2value);
+		}
+		//System.out.println(sb.toString());
+		
+		Statement st = connection.createStatement();
+		ResultSet set = st.executeQuery(sb.toString());
+		set.next();
+		int res = set.getInt("TOTAL");
+		st.close();
+	
+		return res;
+
+	}
+	
+	@Override
+	public int getCountHavingCoordinate(
+			Map<DemographicAttribute<? extends IValue>, IValue> attribute2value) {
+		
+		int total = 0;
+		for (String type: entityType2tableName.keySet()) {
+			
+			try {
+				total += getEntitiesHavingCoordinate(type, attribute2value);
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw new RuntimeException("error while counting entities of type "+type, e);

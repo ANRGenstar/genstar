@@ -31,6 +31,8 @@ public interface IQueryablePopulation<E extends IEntity<A>, A extends IAttribute
 	 * @return
 	 */
 	public int getCountHavingValues(Map<A,Collection<IValue>> attribute2values);
+	
+	public int getCountHavingCoordinate(Map<A,IValue> attribute2value);
 
 	public Iterator<E> getEntitiesHavingValues(A attribute, IValue ... values);
 

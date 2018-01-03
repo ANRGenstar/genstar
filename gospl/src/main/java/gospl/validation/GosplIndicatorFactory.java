@@ -365,6 +365,18 @@ public class GosplIndicatorFactory {
 			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
 		return this.getTAE(inputMatrix, population) / inputMatrix.size();
 	}
+	
+	/**
+	 * @see #getAAPD(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public double getAAPD(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+		return this.getTAE(inputMatrix, population) / inputMatrix.size();
+	}
 
 	
 	// ---------------------- Standardize Root Mean Square Error ---------------------- //
@@ -405,6 +417,30 @@ public class GosplIndicatorFactory {
 	}
 	
 	/**
+	 * 
+	 * @see #getSRMSE(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public double getSRMSE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+		switch (inputMatrix.getMetaDataType()) {
+		case ContingencyTable:
+			return getIntegerSRMSE(inputMatrix, population);
+		case GlobalFrequencyTable:
+			return getDoubleSRMSE(inputMatrix, population);
+		case LocalFrequencyTable:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "of type "+ inputMatrix.getMetaDataType());
+		default:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "a segmented matrix with multiple matrix meta data type");
+		}
+	}
+	
+	/**
 	 * Standardized Root Mean Square Error with population transposed and input data as a contingency table
 	 * <p>
 	 * @see #getSRMSE(INDimensionalMatrix, IPopulation)
@@ -423,6 +459,27 @@ public class GosplIndicatorFactory {
 			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 		}
 		return Math.sqrt(rmse) / inputMatrix.getVal().getValue().intValue();
+	}
+	
+	/**
+	 * Uses faster access population interface {@link IQueryablePopulation}
+	 * 
+	 * @see #getIntegerSRMSE(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public double getIntegerSRMSE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+		int nbCells = inputMatrix.size();
+		double expectedValue, actualValue, sumofSquarError = 0d;
+		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
+			actualValue = population.getCountHavingCoordinate(coord.getMap());
+			sumofSquarError += Math.pow(expectedValue - actualValue, 2) / nbCells;
+		}
+		return Math.sqrt(sumofSquarError) / inputMatrix.getVal().getValue().intValue();
 	}
 
 	/**
@@ -449,6 +506,28 @@ public class GosplIndicatorFactory {
 		return Math.sqrt(rmse) / s;
 	}
 	
+	/**
+	 * Uses faster access population interface {@link IQueryablePopulation}
+	 * 
+	 * @see #getDoubleSRMSE(INDimensionalMatrix, AFullNDimensionalMatrix, int)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @param popSize
+	 * @return
+	 */
+	public double getDoubleSRMSE(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+		int nbCells = inputMatrix.size();
+		double expectedValue, actualValue, sumofSquarError = 0d;
+		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
+			actualValue = population.getCountHavingCoordinate(coord.getMap());
+			sumofSquarError += Math.pow(expectedValue - actualValue, 2) / nbCells;
+		}
+		return Math.sqrt(sumofSquarError) / inputMatrix.getVal().getValue().intValue();
+	}
+	
 	// ---------------------- Relative Sum of Square Modified Z-Score ---------------------- //
 	
 	
@@ -458,7 +537,7 @@ public class GosplIndicatorFactory {
 	 * the sum of square Z-score and RSSZ is a proposed relative indicator, that is the SSZ
 	 * divided by the chi square 5% critical value.
 	 * <p>
-	 * WARNING: do not use because of inconsistent result
+	 * FIXME: do not use because of inconsistent result
 	 * 
 	 * @see Williamson, Pau, 2012. “An Evaluation of Two Synthetic Small-Area Microdata Simulation 
 	 * Methodologies: Synthetic Reconstruction and Combinatorial Optimisation.” 
@@ -488,6 +567,46 @@ public class GosplIndicatorFactory {
 			for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
 				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
+				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
+			}
+			return ssz / chiFiveCritical;
+		case LocalFrequencyTable:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "of type "+ inputMatrix.getMetaDataType());
+		default:
+			throw new IllegalArgumentException("Input contingency argument cannot be "
+					+ "a segmented matrix with multiple matrix meta data type");
+		}
+	}
+	
+	/**
+	 * Uses faster access population interface {@link IQueryablePopulation}
+	 * 
+	 * @see #getRSSZstar(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param population
+	 * @return
+	 */
+	public double getRSSZstar(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+		double expectedValue = 0d;
+		double actualValue = 0d;
+		double ssz = 0d;
+		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
+				.inverseCumulativeProbability(criticalPValue);
+		switch (inputMatrix.getMetaDataType()) {
+		case ContingencyTable:
+			for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
+				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
+				actualValue = population.getCountHavingCoordinate(coord.getMap());
+				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
+			}
+			return ssz / chiFiveCritical;
+		case GlobalFrequencyTable:
+			for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
+				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
+				actualValue = population.getCountHavingCoordinate(coord.getMap());
 				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
 			}
 			return ssz / chiFiveCritical;
