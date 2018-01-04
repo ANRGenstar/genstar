@@ -53,14 +53,14 @@ public class LocalizerTest {
 	
 	@Test
 	public void testSimpleLocalisation() {
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfBuildings));
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() == 50;
 	}
 	
 	@Test
 	public void testMaxNumber() {
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfBuildings));
 		SpatialConstraintMaxNumber numberConstr = new SpatialConstraintMaxNumber(sfBuildings.getGeoEntity(), 3.0);
 		numberConstr.setPriority(10);
 		numberConstr.setIncreaseStep(2);
@@ -73,7 +73,7 @@ public class LocalizerTest {
 	
 	@Test
 	public void testMaxDensity() {
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfBuildings));
 		SpatialConstraintMaxDensity numberConstr = new SpatialConstraintMaxDensity(sfBuildings.getGeoEntity(), 0.5);
 		numberConstr.setPriority(10);
 		numberConstr.setIncreaseStep(0.1);
@@ -88,7 +88,7 @@ public class LocalizerTest {
 	@Test
 	public void testCloseRoadsMaxDistance() {
 		((SPLVectorFile) sfRoads).minMaxDistance(0.0,5.0, false);
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfRoads));
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() == 50;
 	}
@@ -96,7 +96,7 @@ public class LocalizerTest {
 	@Test
 	public void testCloseRoadsBetween() {
 		((SPLVectorFile) sfRoads).minMaxDistance(2.0, 5.0, false);
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfRoads));
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() == 50;
 	}
@@ -104,7 +104,7 @@ public class LocalizerTest {
 	@Test
 	public void testCloseRoadsBetweenNonOverlapping() {
 		((SPLVectorFile) sfRoads).minMaxDistance(1.0, 5.0, true);
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfRoads));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfRoads));
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() == 50;
 	}
@@ -112,7 +112,7 @@ public class LocalizerTest {
 	
 	@Test
 	public void testMatcher() {
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfBuildings));
 		
 		localizer.setMatcher(sfAdmin, "iris", "CODE_IRIS");
 		localizer.getLocalizationConstraint().setIncreaseStep(10.0);
@@ -125,7 +125,7 @@ public class LocalizerTest {
 	@Test
 	public void testMatcherMapperRegression() {
 
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfBuildings));
 		
 		localizer.setMatcher(sfAdmin, "iris", "CODE_IRIS");
 		localizer.getLocalizationConstraint().setIncreaseStep(100.0);
@@ -147,7 +147,7 @@ public class LocalizerTest {
 	@Test
 	public void testMatcherMapperRegressionNumber() {
 
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, sfBuildings));
 		
 		localizer.setMatcher(sfAdmin, "iris", "CODE_IRIS");
 		localizer.getLocalizationConstraint().setIncreaseStep(100.0);
@@ -174,7 +174,7 @@ public class LocalizerTest {
 	
 	@Test
 	public void testConstraintRelax() {
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(popBig, sfBuildings));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(popBig, sfBuildings));
 		localizer.setMatcher(sfAdmin, "iris", "CODE_IRIS");
 		localizer.getLocalizationConstraint().setIncreaseStep(10.0);
 		localizer.getLocalizationConstraint().setMaxIncrease(30.0); 

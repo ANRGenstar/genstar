@@ -1,13 +1,10 @@
 package spll.popcomposing;
 
-import java.util.List;
-
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
 import spll.SpllPopulation;
-import spll.popmapper.constraint.ISpatialConstraint;
 
 /**
  * A ISpatialMatcher is an algorithm which takes two populations of entities as an inputs,

@@ -11,6 +11,9 @@ import core.metamodel.value.IValue;
 
 /**
  * TODO: javadoc
+ * <p>
+ * Not even sure if there should be specific attribute for geographical entity or if it
+ * should define spatial attribute for any entity
  * 
  * @author kevinchapuis
  *

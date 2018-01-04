@@ -2,6 +2,7 @@ package spll.popmapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -11,6 +12,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
@@ -22,6 +24,8 @@ import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.constraint.ISpatialConstraint;
+import spll.popmapper.distribution.ISpatialDistribution;
+import spll.popmapper.linker.ISPLinker;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 
 /**
@@ -39,6 +43,8 @@ import spll.popmapper.normalizer.SPLUniformNormalizer;
  * (2) match entity with the geography {@link ADemoEntity#getLocation()} (if no match, it is equal to the nest) <br> 
  * (3) ancillary information on density (even estimated one using regression techniques) <br>
  * <p>
+ * Localizer also provide spatial linking process, which consists in binding entity of the population to places.
+ * Usually this places will be school, work place, etc.
  * 
  * @author kevinchapuis
  * @author taillandier patrick
@@ -49,13 +55,44 @@ public interface ISPLocalizer {
 	// -------------- MAIN CONTRACT -------------- //
 	
 	/**
-	 * Provide the higher order method that take a population and 
-	 * return the population with localisation indication 
+	 * The main method to localize a population of entity. Returns a population
+	 * of located entity, i.e. SpllEntity 
+	 * <p>
+	 * Make extensive use of {@link ISpatialConstraint} and {@link ISpatialDistribution}
+	 * to localize entity. Hence, most of parametric properties will be made adding constraints
+	 * and defining the type of spatial distribution algorithm to be used
 	 * 
 	 * @param population
 	 * @return
 	 */
 	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> localisePopulation();
+	
+	/**
+	 * The main method to link entity of a population to a spatial entity. Will use the default
+	 * (can be change using #setLinker(ISPLinker) ) linker to bind entity and places.
+	 * 
+	 * @param linkedPlaces
+	 * @param attribute
+	 * @return
+	 */
+	public default IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> linkPopulation(
+			Collection<AGeoEntity<? extends IValue>> linkedPlaces, 
+			GeographicAttribute<? extends IValue> attribute){
+		return this.linkPopulation(linkedPlaces, attribute, this.getDefaultLinker());
+	}
+	
+	/**
+	 * Link entity of a population to a spatial entity using provided linker
+	 * 
+	 * @param linkedPlaces
+	 * @param attribute
+	 * @param linker
+	 * @return
+	 */
+	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> linkPopulation(
+			Collection<AGeoEntity<? extends IValue>> linkedPlaces, 
+			GeographicAttribute<? extends IValue> attribute, 
+			ISPLinker linker);
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //
@@ -165,7 +202,7 @@ public interface ISPLocalizer {
 	// 	  constraint corresponds to variable that    // 
 	// 	  shapes final localization step: choose     //
 	//	  a nest whitin defined constraints and a    //
-	//	  x, y within it							 //
+	//	  x, y within it							    //
 	///////////////////////////////////////////////////
 	
 	/**
@@ -190,5 +227,47 @@ public interface ISPLocalizer {
 	 * @return
 	 */
 	public List<ISpatialConstraint> getConstraints();
+	
+	/////////////////////////////////////////////////////
+	// -------------- DISTRIBUTION PART -------------- //
+	// 	   distribution encapsulate the type of        //
+	//	   algorithm used to localize each entity	  //
+	//	   within a given spatial entity (nest)		  //
+	/////////////////////////////////////////////////////
+	
+	/**
+	 * Set the spatial distribution to be used in order to draw a nest from a list of candidate
+	 * 
+	 * @param distribution
+	 * @return
+	 */
+	public void setDistribution(ISpatialDistribution distribution);
+	
+	/**
+	 * Get the spatial distribution
+	 * 
+	 * @return
+	 */
+	public ISpatialDistribution getDistribution();
+	
+	///////////////////////////////////////////////
+	// -------------- LINKER PART -------------- //
+	//		linker provide algorithm to 			//
+	//		determine the proper candidate     	//
+	//		to bind entity with a place			//
+	//		e.g. a workplace						//
+	///////////////////////////////////////////////
+	
+	/**
+	 * Set the default linker to be used to bind entity with spatial entity
+	 * @param linker
+	 */
+	public void setDefaultLinker(ISPLinker linker);
+	
+	/**
+	 * Get the linker
+	 * @return
+	 */
+	public ISPLinker getDefaultLinker();
 	
 }

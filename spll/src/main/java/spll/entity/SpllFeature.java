@@ -11,7 +11,7 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 /**
- * A Feature is an entity read from a shapefile.
+ * A Feature is an entity read from a vector style GIS file.
  * It might have attributes which are less detailed or qualified than DemoAttributes. 
  * It is not generated, but more read-only.
  * 

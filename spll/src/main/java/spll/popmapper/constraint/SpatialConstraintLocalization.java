@@ -31,7 +31,7 @@ public class SpatialConstraintLocalization extends ASpatialConstraint {
 			cands = new ArrayList<>(referenceFile.getGeoEntityWithin(bounds));
 			if (nests != null) {
 				Collection<String> nestNames = new ArrayList<>();
-				for (AGeoEntity nest : nests) {
+				for (AGeoEntity<? extends IValue> nest : nests) {
 					nestNames.add(nest.getGenstarName());
 				}
 				cands.removeIf(a -> !nestNames.contains(a.getGenstarName()));

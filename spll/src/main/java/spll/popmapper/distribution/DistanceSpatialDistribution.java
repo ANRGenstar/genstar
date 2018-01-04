@@ -8,13 +8,13 @@ import core.metamodel.value.IValue;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import spll.SpllEntity;
 
-public class AreaSpatialDistribution implements ISpatialDistribution {
+public class DistanceSpatialDistribution implements ISpatialDistribution {
 	
 	@Override
 	public AGeoEntity<? extends IValue> getCandidate(SpllEntity entity, List<AGeoEntity<? extends IValue>> candidates) {
 		return candidates.get(RouletteWheelSelectionFactory.getRouletteWheel(candidates.stream()
-				.map(a -> a.getArea()).collect(Collectors.toList()))
+				.map(a -> a.getGeometry().distance(entity.getLocation())).collect(Collectors.toList()))
 			.drawIndex());
 	}
-	
+
 }

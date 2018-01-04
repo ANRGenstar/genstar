@@ -27,7 +27,7 @@ import core.util.excpetion.GSIllegalRangedData;
 import gospl.generator.util.GSUtilGenerator;
 import spll.SpllPopulation;
 import spll.io.exception.InvalidGeoFormatException;
-import spll.popmapper.SPUniformLocalizer;
+import spll.popmapper.SPLocalizer;
 
 public class IoTest {
 
@@ -52,7 +52,7 @@ public class IoTest {
 		} catch (InvalidGeoFormatException e) {
 			e.printStackTrace();
 		}
-		SPUniformLocalizer localizer = new SPUniformLocalizer(new SpllPopulation(pop, vectorF));
+		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, vectorF));
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		File f = new File("src/test/resources/pop.shp");
 		

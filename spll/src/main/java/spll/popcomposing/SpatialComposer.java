@@ -200,7 +200,7 @@ public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 		// with the closest parent.
 		// the idea is: often we have points which are on the very same location, 
 		// so the very same (slow) query is going to be computed again and again
-		LRUMap<Geometry,SpllEntity> childGeom2closestGeom = new LRUMap(1000);
+		LRUMap<Geometry,SpllEntity> childGeom2closestGeom = new LRUMap<>(1000);
 		
 		while (itChildOrphan.hasNext()) {
 			

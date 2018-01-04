@@ -9,13 +9,9 @@ import spll.SpllEntity;
 
 public class UniformSpatialDistribution implements ISpatialDistribution{
 
-
-
 	@Override
 	public AGeoEntity<? extends IValue> getCandidate(SpllEntity entity, List<AGeoEntity<? extends IValue>> candidates) {
 		return candidates.get(GenstarRandom.getInstance().nextInt(candidates.size()));
 	}
-
-	@Override
-	public void releaseCache() {}
+	
 }

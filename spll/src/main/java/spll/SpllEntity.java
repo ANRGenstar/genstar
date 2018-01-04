@@ -81,10 +81,19 @@ public class SpllEntity extends ADemoEntity {
 		this.nest = nest;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Map<String, AGeoEntity<? extends IValue>> getLinkedPlaces() {
 		return linkedPlaces;
 	}
 	
+	/**
+	 * 
+	 * @param key
+	 * @param place
+	 */
 	public void addLinkedPlaces(String key, AGeoEntity<? extends IValue> place) {
 		if (linkedPlaces == null) linkedPlaces = new HashMap<String, AGeoEntity<? extends IValue>>();
 		linkedPlaces.put(key, place);
