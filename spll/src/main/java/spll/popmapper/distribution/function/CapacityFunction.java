@@ -1,0 +1,26 @@
+package spll.popmapper.distribution.function;
+
+import core.metamodel.entity.AGeoEntity;
+import core.metamodel.value.IValue;
+import spll.popmapper.constraint.SpatialConstraintMaxNumber;
+
+public class CapacityFunction implements ISpatialEntityToNumber<Integer> {
+
+	private SpatialConstraintMaxNumber scNumber;
+
+	public CapacityFunction(SpatialConstraintMaxNumber scNumber) {
+		this.scNumber = scNumber;
+	}
+	
+	@Override
+	public Integer apply(AGeoEntity<? extends IValue> t) {
+		return scNumber.getNestCapacities().get(t.getGenstarName());
+	}
+
+	@Override
+	public void updateFunctionState(AGeoEntity<? extends IValue> entity) {
+		int capacity = scNumber.getNestCapacities().get(entity.getGenstarName());
+		scNumber.getNestCapacities().put(entity.getGenstarName(), capacity == 0 ? 0 : capacity - 1);
+	}
+
+}

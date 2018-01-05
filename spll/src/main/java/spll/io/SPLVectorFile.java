@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.geotools.data.DataStore;
 import org.geotools.data.DataStoreFinder;
 import org.geotools.data.DataUtilities;
@@ -64,8 +62,6 @@ import spll.util.SpllUtil;
  *
  */
 public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
-
-	private Logger logger = LogManager.getLogger();
 
 	private Set<SpllFeature> features = null;
 

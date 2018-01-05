@@ -2,7 +2,9 @@ package spll.popmapper.distribution;
 
 import java.util.List;
 
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
 
@@ -12,7 +14,7 @@ import spll.SpllEntity;
  * @author kevinchapuis
  *
  */
-public interface ISpatialDistribution {
+public interface ISpatialDistribution<E extends IEntity<DemographicAttribute<? extends IValue>>> {
 
 	/**
 	 * Draw a spatial entity from a list of candidates, given that it will be link to the provided {@link SpllEntity} 
@@ -20,6 +22,6 @@ public interface ISpatialDistribution {
 	 * @param candidates
 	 * @return
 	 */
-	public AGeoEntity<? extends IValue> getCandidate(SpllEntity entity, List<AGeoEntity<? extends IValue>> candidates);
+	public AGeoEntity<? extends IValue> getCandidate(E entity, List<AGeoEntity<? extends IValue>> candidates);
 
 }

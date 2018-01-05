@@ -28,7 +28,9 @@ import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.io.IGSGeofile.GeoGSFileType;
 import core.metamodel.value.IValue;
@@ -54,7 +56,7 @@ import spll.io.exception.InvalidGeoFormatException;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.constraint.SpatialConstraintLocalization;
 import spll.popmapper.distribution.ISpatialDistribution;
-import spll.popmapper.distribution.UniformSpatialDistribution;
+import spll.popmapper.distribution.SpatialDistributionFactory;
 import spll.popmapper.linker.ISPLinker;
 import spll.popmapper.normalizer.SPLUniformNormalizer;
 import spll.popmapper.pointInalgo.PointInLocalizer;
@@ -78,11 +80,11 @@ public class SPLocalizer implements ISPLocalizer {
 	
 	protected List<ISpatialConstraint> constraints; //spatial constraints related to the placement of the entities in their nest 
 	protected SpatialConstraintLocalization localizationConstraint; //the localization constraint;
-	protected ISpatialDistribution candidatesDistribution; // specify how to order possible candidates;
+	protected ISpatialDistribution<ADemoEntity> candidatesDistribution; // specify how to order possible candidates;
 	
 	protected PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
 	
-	protected ISPLinker linker; // default linker to bind entity to places
+	protected ISPLinker<SpllEntity> linker; // default linker to bind entity to places
 	
 	protected String keyAttMap; //name of the attribute that contains the number of entities in the map file
 	protected String keyAttPop; //name of the attribute that is used to store the id of the referenced area in the population
@@ -109,7 +111,7 @@ public class SPLocalizer implements ISPLocalizer {
 		localizationConstraint = new SpatialConstraintLocalization(null);
 		localizationConstraint.setReferenceFile(population.getGeography());
 		constraints = new ArrayList<>();
-		candidatesDistribution = new UniformSpatialDistribution();
+		candidatesDistribution = SpatialDistributionFactory.getInstance().getUniformDistribution();
 		constraints.add(localizationConstraint);
 	}
 	
@@ -163,7 +165,7 @@ public class SPLocalizer implements ISPLocalizer {
 	public SpllPopulation linkPopulation(
 			Collection<AGeoEntity<? extends IValue>> linkedPlaces, 
 			GeographicAttribute<? extends IValue> attribute,
-			ISPLinker linker) {
+			ISPLinker<SpllEntity> linker) {
 		population.forEach(entity -> entity
 				.addLinkedPlaces(
 						attribute.getAttributeName(), 
@@ -314,12 +316,12 @@ public class SPLocalizer implements ISPLocalizer {
 	// ----------------------------------------------------- //
 
 	@Override
-	public ISpatialDistribution getDistribution() {
+	public ISpatialDistribution<ADemoEntity> getDistribution() {
 		return candidatesDistribution;
 	}
 
 	@Override
-	public void setDistribution(ISpatialDistribution candidatesDistribution) {
+	public void setDistribution(ISpatialDistribution<ADemoEntity> candidatesDistribution) {
 		this.candidatesDistribution = candidatesDistribution;
 	}
 	
@@ -328,12 +330,12 @@ public class SPLocalizer implements ISPLocalizer {
 	// ----------------------------------------------------- //
 	
 	@Override
-	public ISPLinker getDefaultLinker() {
+	public ISPLinker<SpllEntity> getDefaultLinker() {
 		return linker;
 	}
 	
 	@Override
-	public void setDefaultLinker(ISPLinker linker) {
+	public void setDefaultLinker(ISPLinker<SpllEntity> linker) {
 		this.linker = linker;
 	}
 

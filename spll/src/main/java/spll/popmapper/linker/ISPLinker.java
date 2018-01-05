@@ -3,9 +3,10 @@ package spll.popmapper.linker;
 import java.util.Collection;
 import java.util.Optional;
 
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
-import spll.SpllEntity;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.distribution.ISpatialDistribution;
 
@@ -21,7 +22,7 @@ import spll.popmapper.distribution.ISpatialDistribution;
  *
  * @param <SD>
  */
-public interface ISPLinker {
+public interface ISPLinker<E extends IEntity<DemographicAttribute<? extends IValue>>> {
 
 	/**
 	 * Main method to link an entity to one candidate draw from a collection
@@ -30,7 +31,7 @@ public interface ISPLinker {
 	 * @param candidates
 	 * @return
 	 */
-	public Optional<AGeoEntity<? extends IValue>> getCandidate(SpllEntity entity,
+	public Optional<AGeoEntity<? extends IValue>> getCandidate(E entity,
 			Collection<AGeoEntity<? extends IValue>> candidates);
 
 	/**
@@ -38,7 +39,7 @@ public interface ISPLinker {
 	 * 
 	 * @return
 	 */
-	public ISpatialDistribution getDistribution();
+	public ISpatialDistribution<E> getDistribution();
 
 	/**
 	 * Add constraints to filter candidates with

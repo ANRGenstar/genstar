@@ -15,6 +15,7 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
@@ -92,7 +93,7 @@ public interface ISPLocalizer {
 	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> linkPopulation(
 			Collection<AGeoEntity<? extends IValue>> linkedPlaces, 
 			GeographicAttribute<? extends IValue> attribute, 
-			ISPLinker linker);
+			ISPLinker<SpllEntity> linker);
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //
@@ -241,14 +242,14 @@ public interface ISPLocalizer {
 	 * @param distribution
 	 * @return
 	 */
-	public void setDistribution(ISpatialDistribution distribution);
+	public void setDistribution(ISpatialDistribution<ADemoEntity> distribution);
 	
 	/**
 	 * Get the spatial distribution
 	 * 
 	 * @return
 	 */
-	public ISpatialDistribution getDistribution();
+	public ISpatialDistribution<ADemoEntity> getDistribution();
 	
 	///////////////////////////////////////////////
 	// -------------- LINKER PART -------------- //
@@ -262,12 +263,12 @@ public interface ISPLocalizer {
 	 * Set the default linker to be used to bind entity with spatial entity
 	 * @param linker
 	 */
-	public void setDefaultLinker(ISPLinker linker);
+	public void setDefaultLinker(ISPLinker<SpllEntity> linker);
 	
 	/**
 	 * Get the linker
 	 * @return
 	 */
-	public ISPLinker getDefaultLinker();
+	public ISPLinker<SpllEntity> getDefaultLinker();
 	
 }

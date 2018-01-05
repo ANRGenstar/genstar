@@ -7,9 +7,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
-import spll.SpllEntity;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.distribution.ISpatialDistribution;
 
@@ -20,17 +21,17 @@ import spll.popmapper.distribution.ISpatialDistribution;
  * @author kevinchapuis
  *
  */
-public class SPLinker implements ISPLinker {
+public class SPLinker<E extends IEntity<DemographicAttribute<? extends IValue>>> implements ISPLinker<E> {
 	
-	private ISpatialDistribution distribution;
+	private ISpatialDistribution<E> distribution;
 	private Collection<ISpatialConstraint> constraints;
 	
-	public SPLinker(ISpatialDistribution distribution) {
+	public SPLinker(ISpatialDistribution<E> distribution) {
 		this.distribution = distribution;
 	}
 
 	@Override
-	public Optional<AGeoEntity<? extends IValue>> getCandidate(SpllEntity entity,
+	public Optional<AGeoEntity<? extends IValue>> getCandidate(E entity,
 			Collection<AGeoEntity<? extends IValue>> candidates) {
 		List<AGeoEntity<? extends IValue>> filteredCandidates = new ArrayList<>(candidates);
 		for(ISpatialConstraint sc : constraints) {
@@ -49,7 +50,7 @@ public class SPLinker implements ISPLinker {
 	}
 
 	@Override
-	public ISpatialDistribution getDistribution() {
+	public ISpatialDistribution<E> getDistribution() {
 		return distribution;
 	}
 
