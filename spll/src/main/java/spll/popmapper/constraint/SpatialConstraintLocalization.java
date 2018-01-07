@@ -14,7 +14,7 @@ import core.metamodel.value.IValue;
 public class SpatialConstraintLocalization extends ASpatialConstraint {
 
 	Geometry bounds;
-	protected IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> referenceFile;
+	protected IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> referenceFile;
 	
 	public SpatialConstraintLocalization(Geometry bounds) {
 		super();
@@ -72,11 +72,11 @@ public class SpatialConstraintLocalization extends ASpatialConstraint {
 	}
 
 
-	public IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> getReferenceFile() {
+	public IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> getReferenceFile() {
 		return referenceFile;
 	}
 
-	public void setReferenceFile(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> referenceFile) {
+	public void setReferenceFile(IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> referenceFile) {
 		this.referenceFile = referenceFile;
 	}
 

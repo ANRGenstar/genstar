@@ -1,6 +1,7 @@
 package spll.popmapper.linker;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import core.metamodel.attribute.demographic.DemographicAttribute;
@@ -32,8 +33,15 @@ public interface ISPLinker<E extends IEntity<DemographicAttribute<? extends IVal
 	 * @return
 	 */
 	public Optional<AGeoEntity<? extends IValue>> getCandidate(E entity,
-			Collection<AGeoEntity<? extends IValue>> candidates);
+			Collection<? extends AGeoEntity<? extends IValue>> candidates);
 
+	/**
+	 * Set the distribution to be used to sort linked places
+	 * 
+	 * @param distribution
+	 */
+	public void setDistribution(ISpatialDistribution<E> distribution);
+	
 	/**
 	 * The distribution to be used
 	 * 
@@ -41,6 +49,13 @@ public interface ISPLinker<E extends IEntity<DemographicAttribute<? extends IVal
 	 */
 	public ISpatialDistribution<E> getDistribution();
 
+	/**
+	 * Set a new list of constraints
+	 * 
+	 * @param constraints
+	 */
+	public void setConstraints(List<ISpatialConstraint> constraints);
+	
 	/**
 	 * Add constraints to filter candidates with
 	 * 
@@ -53,6 +68,6 @@ public interface ISPLinker<E extends IEntity<DemographicAttribute<? extends IVal
 	 * 
 	 * @return
 	 */
-	public Collection<ISpatialConstraint> getConstraints();
+	public List<ISpatialConstraint> getConstraints();
 
 }

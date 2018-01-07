@@ -7,7 +7,7 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
-import spll.popmapper.distribution.function.ISpatialEntityToNumber;
+import spll.popmapper.distribution.function.ISpatialEntityFunction;
 
 /**
  * Spatial Distribution that relies on spatial entity attribute to asses probability. For exemple,
@@ -17,16 +17,16 @@ import spll.popmapper.distribution.function.ISpatialEntityToNumber;
  *
  * @param <N>
  */
-public class BasicSpatialDistribution<N extends Number> implements ISpatialDistribution<ADemoEntity> {
+public class BasicSpatialDistribution<N extends Number, E extends ADemoEntity> implements ISpatialDistribution<E> {
 	
-	private ISpatialEntityToNumber<N> function;
+	private ISpatialEntityFunction<N> function;
 
-	public BasicSpatialDistribution(ISpatialEntityToNumber<N> function) {
+	public BasicSpatialDistribution(ISpatialEntityFunction<N> function) {
 		this.function = function;
 	}
 	
 	@Override
-	public AGeoEntity<? extends IValue> getCandidate(ADemoEntity entity, List<AGeoEntity<? extends IValue>> candidates) {
+	public AGeoEntity<? extends IValue> getCandidate(E entity, List<? extends AGeoEntity<? extends IValue>> candidates) {
 		return RouletteWheelSelectionFactory.getRouletteWheel(candidates.stream()
 				.map(a -> function.apply(a)).collect(Collectors.toList()), candidates)
 			.drawObject();

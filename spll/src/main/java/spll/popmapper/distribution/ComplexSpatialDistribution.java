@@ -26,7 +26,8 @@ public class ComplexSpatialDistribution<N extends Number> implements ISpatialDis
 	}
 	
 	@Override
-	public AGeoEntity<? extends IValue> getCandidate(SpllEntity entity, List<AGeoEntity<? extends IValue>> candidates) {
+	public AGeoEntity<? extends IValue> getCandidate(SpllEntity entity, 
+			List<? extends AGeoEntity<? extends IValue>> candidates) {
 		return RouletteWheelSelectionFactory.getRouletteWheel(candidates.stream()
 				.map(candidate -> function.apply(candidate, entity)).collect(Collectors.toList()), candidates)
 			.drawObject();

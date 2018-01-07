@@ -12,10 +12,13 @@ import spll.popmapper.distribution.function.CapacityFunction;
 import spll.popmapper.distribution.function.DistanceFunction;
 import spll.popmapper.distribution.function.GravityFunction;
 import spll.popmapper.distribution.function.ISpatialComplexFunction;
-import spll.popmapper.distribution.function.ISpatialEntityToNumber;
+import spll.popmapper.distribution.function.ISpatialEntityFunction;
 
 /**
- * Build distribution to asses spatial entity probability to be bind with synthetic population entity
+ * Build distribution to asses spatial entity probability to be bind with synthetic population entity.
+ * This factory if purely praticle, as it is very easy to build new distribution: you only need to choose
+ * basic or complex distribution (or even build your own by implementing {@link ISpatialDistribution}) and
+ * build it using cutsom function, like for example by implementing {@link ISpatialComplexFunction} 
  * @author kevinchapuis
  *
  */
@@ -37,16 +40,16 @@ public class SpatialDistributionFactory {
 	 * @param function
 	 * @return
 	 */
-	public <N extends Number> ISpatialDistribution<ADemoEntity> getDistribution(ISpatialEntityToNumber<N> function){
-		return new BasicSpatialDistribution<N>(function);
+	public <N extends Number, E extends ADemoEntity> ISpatialDistribution<E> getDistribution(ISpatialEntityFunction<N> function){
+		return new BasicSpatialDistribution<N, E>(function);
 	}
 	
 	/**
 	 * All provided spatial entities have the same probability - uniform distribution
 	 * @return
 	 */
-	public ISpatialDistribution<ADemoEntity> getUniformDistribution(){
-		return new BasicSpatialDistribution<>(new ISpatialEntityToNumber<Integer>() {
+	public <E extends ADemoEntity> ISpatialDistribution<E> getUniformDistribution(){
+		return new BasicSpatialDistribution<>(new ISpatialEntityFunction<Integer>() {
 			@Override public Integer apply(AGeoEntity<? extends IValue> t) {return 1;}
 			@Override public void updateFunctionState(AGeoEntity<? extends IValue> entity) {}
 		} );
@@ -58,7 +61,7 @@ public class SpatialDistributionFactory {
 	 * 
 	 * @return
 	 */
-	public ISpatialDistribution<ADemoEntity> getAreaBasedDistribution(){
+	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(){
 		return new BasicSpatialDistribution<>(new AreaFunction());
 	}
 	
@@ -68,7 +71,7 @@ public class SpatialDistributionFactory {
 	 * @param scNumber
 	 * @return
 	 */
-	public ISpatialDistribution<ADemoEntity> getCapacityBasedDistribution(SpatialConstraintMaxNumber scNumber){
+	public <E extends ADemoEntity> ISpatialDistribution<E> getCapacityBasedDistribution(SpatialConstraintMaxNumber scNumber){
 		return new BasicSpatialDistribution<>(new CapacityFunction(scNumber));
 	}
 	
@@ -98,7 +101,8 @@ public class SpatialDistributionFactory {
 	 * @param entities
 	 * @return
 	 */
-	public ISpatialDistribution<SpllEntity> getGravityModelDistribution(Collection<AGeoEntity<? extends IValue>> candidates, 
+	public ISpatialDistribution<SpllEntity> getGravityModelDistribution(
+			Collection<? extends AGeoEntity<? extends IValue>> candidates, 
 			SpllEntity... entities){
 		return new ComplexSpatialDistribution<>(new GravityFunction(candidates, entities));
 	}
@@ -111,7 +115,8 @@ public class SpatialDistributionFactory {
 	 * @param entities
 	 * @return
 	 */
-	public ISpatialDistribution<SpllEntity> getGravityModelDistribution(Collection<AGeoEntity<? extends IValue>> candidates, 
+	public ISpatialDistribution<SpllEntity> getGravityModelDistribution(
+			Collection<? extends AGeoEntity<? extends IValue>> candidates, 
 			double buffer, SpllEntity... entities){
 		return new ComplexSpatialDistribution<>(new GravityFunction(candidates, buffer, entities));
 	}

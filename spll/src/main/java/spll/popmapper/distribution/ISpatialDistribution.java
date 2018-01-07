@@ -22,6 +22,6 @@ public interface ISpatialDistribution<E extends IEntity<DemographicAttribute<? e
 	 * @param candidates
 	 * @return
 	 */
-	public AGeoEntity<? extends IValue> getCandidate(E entity, List<AGeoEntity<? extends IValue>> candidates);
+	public AGeoEntity<? extends IValue> getCandidate(E entity, List<? extends AGeoEntity<? extends IValue>> candidates);
 
 }

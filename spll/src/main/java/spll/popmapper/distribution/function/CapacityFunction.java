@@ -4,7 +4,7 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import spll.popmapper.constraint.SpatialConstraintMaxNumber;
 
-public class CapacityFunction implements ISpatialEntityToNumber<Integer> {
+public class CapacityFunction implements ISpatialEntityFunction<Integer> {
 
 	private SpatialConstraintMaxNumber scNumber;
 

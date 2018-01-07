@@ -7,9 +7,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
-import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import spll.popmapper.constraint.ISpatialConstraint;
 import spll.popmapper.distribution.ISpatialDistribution;
@@ -21,18 +20,19 @@ import spll.popmapper.distribution.ISpatialDistribution;
  * @author kevinchapuis
  *
  */
-public class SPLinker<E extends IEntity<DemographicAttribute<? extends IValue>>> implements ISPLinker<E> {
+public class SPLinker<E extends ADemoEntity> implements ISPLinker<E> {
 	
 	private ISpatialDistribution<E> distribution;
-	private Collection<ISpatialConstraint> constraints;
+	private List<ISpatialConstraint> constraints;
 	
 	public SPLinker(ISpatialDistribution<E> distribution) {
 		this.distribution = distribution;
+		this.constraints = new ArrayList<>();
 	}
 
 	@Override
 	public Optional<AGeoEntity<? extends IValue>> getCandidate(E entity,
-			Collection<AGeoEntity<? extends IValue>> candidates) {
+			Collection<? extends AGeoEntity<? extends IValue>> candidates) {
 		List<AGeoEntity<? extends IValue>> filteredCandidates = new ArrayList<>(candidates);
 		for(ISpatialConstraint sc : constraints) {
 			List<AGeoEntity<? extends IValue>> newFilteredCandidates = sc.getCandidates(filteredCandidates);
@@ -48,6 +48,11 @@ public class SPLinker<E extends IEntity<DemographicAttribute<? extends IValue>>>
 		}
 		return Optional.ofNullable(distribution.getCandidate(entity, filteredCandidates));
 	}
+	
+	@Override
+	public void setDistribution(ISpatialDistribution<E> distribution) {
+		this.distribution = distribution;
+	}
 
 	@Override
 	public ISpatialDistribution<E> getDistribution() {
@@ -55,14 +60,19 @@ public class SPLinker<E extends IEntity<DemographicAttribute<? extends IValue>>>
 	}
 
 	@Override
+	public void setConstraints(List<ISpatialConstraint> constraints) {
+		this.constraints = constraints;
+	}
+	
+	@Override
 	public void addConstraints(ISpatialConstraint... constraints) {
 		this.constraints.addAll(Arrays.asList(constraints));
 		
 	}
 
 	@Override
-	public Collection<ISpatialConstraint> getConstraints() {
-		return Collections.unmodifiableCollection(constraints);
+	public List<ISpatialConstraint> getConstraints() {
+		return Collections.unmodifiableList(constraints);
 	}
 
 }

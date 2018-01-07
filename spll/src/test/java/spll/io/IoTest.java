@@ -52,7 +52,7 @@ public class IoTest {
 		} catch (InvalidGeoFormatException e) {
 			e.printStackTrace();
 		}
-		SPLocalizer localizer = new SPLocalizer(new SpllPopulation(pop, vectorF));
+		SPLocalizer localizer = new SPLocalizer(pop, vectorF);
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		File f = new File("src/test/resources/pop.shp");
 		

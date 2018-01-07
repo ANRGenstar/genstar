@@ -15,7 +15,6 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
-import core.metamodel.entity.IEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
@@ -69,20 +68,6 @@ public interface ISPLocalizer {
 	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> localisePopulation();
 	
 	/**
-	 * The main method to link entity of a population to a spatial entity. Will use the default
-	 * (can be change using #setLinker(ISPLinker) ) linker to bind entity and places.
-	 * 
-	 * @param linkedPlaces
-	 * @param attribute
-	 * @return
-	 */
-	public default IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> linkPopulation(
-			Collection<AGeoEntity<? extends IValue>> linkedPlaces, 
-			GeographicAttribute<? extends IValue> attribute){
-		return this.linkPopulation(linkedPlaces, attribute, this.getDefaultLinker());
-	}
-	
-	/**
 	 * Link entity of a population to a spatial entity using provided linker
 	 * 
 	 * @param linkedPlaces
@@ -90,10 +75,9 @@ public interface ISPLocalizer {
 	 * @param linker
 	 * @return
 	 */
-	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> linkPopulation(
-			Collection<AGeoEntity<? extends IValue>> linkedPlaces, 
-			GeographicAttribute<? extends IValue> attribute, 
-			ISPLinker<SpllEntity> linker);
+	public SpllPopulation linkPopulation(SpllPopulation population, ISPLinker<SpllEntity> linker, 
+			Collection<? extends AGeoEntity<? extends IValue>> linkedPlaces, 
+			GeographicAttribute<? extends IValue> attribute);
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //
@@ -213,7 +197,7 @@ public interface ISPLocalizer {
 	 * 
 	 * @param constraint
 	 */
-	public boolean addConstraint(ISpatialConstraint constraint);
+	public void addConstraint(ISpatialConstraint constraint);
 	
 	/**
 	 * Set the constraint all in a row
@@ -250,25 +234,5 @@ public interface ISPLocalizer {
 	 * @return
 	 */
 	public ISpatialDistribution<ADemoEntity> getDistribution();
-	
-	///////////////////////////////////////////////
-	// -------------- LINKER PART -------------- //
-	//		linker provide algorithm to 			//
-	//		determine the proper candidate     	//
-	//		to bind entity with a place			//
-	//		e.g. a workplace						//
-	///////////////////////////////////////////////
-	
-	/**
-	 * Set the default linker to be used to bind entity with spatial entity
-	 * @param linker
-	 */
-	public void setDefaultLinker(ISPLinker<SpllEntity> linker);
-	
-	/**
-	 * Get the linker
-	 * @return
-	 */
-	public ISPLinker<SpllEntity> getDefaultLinker();
 	
 }

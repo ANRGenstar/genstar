@@ -3,7 +3,7 @@ package spll.popmapper.distribution.function;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
-public class AreaFunction implements ISpatialEntityToNumber<Double> {
+public class AreaFunction implements ISpatialEntityFunction<Double> {
 
 	@Override
 	public Double apply(AGeoEntity<? extends IValue> t) {

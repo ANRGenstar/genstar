@@ -36,7 +36,7 @@ public class GravityFunction implements ISpatialComplexFunction<Double> {
 	 * @param candidates
 	 * @param entities
 	 */
-	public GravityFunction(Collection<AGeoEntity<? extends IValue>> candidates, SpllEntity... entities) {
+	public GravityFunction(Collection<? extends AGeoEntity<? extends IValue>> candidates, SpllEntity... entities) {
 		this();
 		this.mass = candidates.stream().collect(Collectors.toMap(Function.identity(), se -> Arrays.asList(entities).stream()
 				.mapToDouble(e -> se.getGeometry().distance(e.getLocation())).sum()));
@@ -49,7 +49,7 @@ public class GravityFunction implements ISpatialComplexFunction<Double> {
 	 * @param buffer
 	 * @param entities
 	 */
-	public GravityFunction(Collection<AGeoEntity<? extends IValue>> candidates, 
+	public GravityFunction(Collection<? extends AGeoEntity<? extends IValue>> candidates, 
 			double buffer, SpllEntity... entities) {
 		this();
 		this.mass = candidates.stream().collect(Collectors.toMap(Function.identity(), spacEntity -> (double) Arrays.asList(entities).stream()
