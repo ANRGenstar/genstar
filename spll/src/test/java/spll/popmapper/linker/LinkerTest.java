@@ -19,6 +19,8 @@ public class LinkerTest {
 
 	public static SpllSetupTest sst;
 	
+	public static String ATT_NAME = "driving place";
+	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		sst = new SpllSetupTest();
@@ -34,9 +36,9 @@ public class LinkerTest {
 						SpatialDistributionFactory.getInstance()
 						.getUniformDistribution()),
 				sst.sfRoads.getGeoEntity(), 
-				GeographicAttributeFactory.getFactory().createAttribute("Driving", GSEnumDataType.Nominal));
+				GeographicAttributeFactory.getFactory().createAttribute(ATT_NAME, GSEnumDataType.Nominal));
 		
-		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() == 50;
+		assert localizedPop.stream().allMatch(a -> a.getLinkedPlaces().containsKey(ATT_NAME));
 	}
 	
 	@Test
@@ -53,7 +55,7 @@ public class LinkerTest {
 		localizer.linkPopulation(localizedPop, linker, candidates, 
 				GeographicAttributeFactory.getFactory().createAttribute("Driving", GSEnumDataType.Nominal));
 		
-		assert localizedPop.stream().filter(a -> a.getLocation() != null).count() == 50;
+		assert localizedPop.stream().allMatch(a -> a.getLinkedPlaces().containsKey(ATT_NAME));
 	}
 	
 }
