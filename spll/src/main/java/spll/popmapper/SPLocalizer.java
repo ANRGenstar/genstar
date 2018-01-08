@@ -346,24 +346,21 @@ public class SPLocalizer implements ISPLocalizer {
 		List<ISpatialConstraint> otherConstraints = linker.getConstraints().stream()
 				.sorted((n1, n2) -> Integer.compare( n1.getPriority(), n2.getPriority()))
 				.collect(Collectors.toList());;
-				otherConstraints.remove(localizationConstraint);
+				//remove this line because I have no idea why it is here.
+				//otherConstraints.remove(localizationConstraint);
 				Collection<SpllEntity> remainingEntities = entities;
 				localizationConstraint.setBounds(spatialBounds);
 				for (ISpatialConstraint cr : otherConstraints) {
 					while (!cr.isConstraintLimitReach()) {
-						System.out.println("la");
 						List<AGeoEntity<? extends IValue>> possibleNests = 
 								new ArrayList<>(localizationConstraint.getReferenceFile().getGeoEntity());
 						List<AGeoEntity<? extends IValue>> possibleNestsInit = 
 								localizationConstraint.getCandidates(possibleNests); 
-						System.out.println("la2");
 						possibleNests = new ArrayList<>(possibleNests);
 						for (ISpatialConstraint constraint : otherConstraints) {
 							possibleNests = constraint.getCandidates(possibleNests);
 						}
-						System.out.println("la3");
 						remainingEntities = localizationInNestOp(remainingEntities, possibleNests, null);
-						System.out.println("la4");
 						if (remainingEntities != null && !remainingEntities.isEmpty()) 
 							cr.relaxConstraint(possibleNestsInit);
 						else return;
@@ -419,8 +416,10 @@ public class SPLocalizer implements ISPLocalizer {
 	private void localizationInNestWithNumbers(List<SpllEntity> entities, Geometry spatialBounds) 
 			throws IOException, TransformException {
 		List<ISpatialConstraint> otherConstraints = new ArrayList<>(linker.getConstraints());
-		otherConstraints.remove(localizationConstraint);
-
+		//remove this line because I have no idea why it is here.
+		//otherConstraints.remove(localizationConstraint);
+	
+	
 		Collection<? extends AGeoEntity<? extends IValue>> areas = spatialBounds == null ? 
 				map.getGeoEntity() : map.getGeoEntityWithin(spatialBounds);
 				Map<String,Double> vals = map.getGeoEntity().stream()
