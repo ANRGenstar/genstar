@@ -94,8 +94,9 @@ public class SPLocalizer implements ISPLocalizer {
 	 * Private constructor to setup random engine
 	 */
 	private SPLocalizer() {
-		rand = GenstarRandom.getInstance();
-		pointInLocalizer = new RandomPointInLocalizer(rand);
+		this.rand = GenstarRandom.getInstance();
+		this.pointInLocalizer = new RandomPointInLocalizer(rand);
+		this.linker = new SPLinker<>(SpatialDistributionFactory.getInstance().getUniformDistribution());
 	}
 
 	/**
@@ -109,7 +110,6 @@ public class SPLocalizer implements ISPLocalizer {
 		this.population = population;
 		this.localizationConstraint = new SpatialConstraintLocalization(null);
 		this.localizationConstraint.setReferenceFile(geoFile);
-		this.linker = new SPLinker<>(SpatialDistributionFactory.getInstance().getUniformDistribution());
 		this.linker.addConstraints(localizationConstraint);
 	}
 
