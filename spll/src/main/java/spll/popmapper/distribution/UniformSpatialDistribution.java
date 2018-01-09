@@ -8,10 +8,9 @@ import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
 
 /**
- * Spatial Distribution that relies on spatial entity attribute to asses probability. For exemple,
- * probability could be computed based on the area of spatial entity.
+ * Uniform Spatial Distribution: each candidate has the same probability to be chosen 
  * 
- * @author kevinchapuis
+ * @author patricktaillandier
  *
  * @param <N>
  */

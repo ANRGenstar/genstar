@@ -13,10 +13,10 @@ import core.util.random.roulette.RouletteWheelSelectionFactory;
 import spll.popmapper.distribution.function.ISpatialEntityFunction;
 
 /**
- * Static Spatial Distribution that relies on spatial entity attribute to asses probability. For exemple,
+ * Static Spatial Distribution (the value of the distribution is computed once at the creation) that relies on spatial entity attribute to asses probability. For exemple,
  * probability could be computed based on the area of spatial entity.
  * 
- * @author kevinchapuis
+ * @author patricktaillandier
  *
  * @param <N>
  */
