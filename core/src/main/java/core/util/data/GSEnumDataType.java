@@ -65,7 +65,7 @@ public enum GSEnumDataType {
 		return wrapperClass;
 	}
 	
-	private static Map<Class,GSEnumDataType> wrapperClass2enum;
+	private static Map<Class<?>,GSEnumDataType> wrapperClass2enum;
 
 	/**
 	 * Returns a datatype for a IValue type

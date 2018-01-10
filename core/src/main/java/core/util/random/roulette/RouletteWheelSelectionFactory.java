@@ -14,7 +14,7 @@ public final class RouletteWheelSelectionFactory {
 
 	
 	@SuppressWarnings("unchecked")
-	public static <X extends Number> ARouletteWheelSelection<X> getRouletteWheel(List<X> distribution) {
+	public static <X extends Number, K> ARouletteWheelSelection<X, K> getRouletteWheel(List<X> distribution) {
 		
 		if (distribution.isEmpty())
 			throw new IllegalArgumentException("the distribution cannot be empty for roulette wheel selection");
@@ -23,18 +23,18 @@ public final class RouletteWheelSelectionFactory {
 		Object val = distribution.get(0);
 		// and find the right selection based on its type
 		if (val instanceof Double) {
-			return (ARouletteWheelSelection<X>) new DoubleRouletteWheelSelection((List<Double>) distribution);
+			return (ARouletteWheelSelection<X, K>) new DoubleRouletteWheelSelection<K>((List<Double>) distribution);
 		}
 		if (val instanceof Integer) {
-			return (ARouletteWheelSelection<X>) new IntegerRouletteWheelSelection((List<Integer>) distribution);
+			return (ARouletteWheelSelection<X, K>) new IntegerRouletteWheelSelection<K>((List<Integer>) distribution);
 		} 
 		
 		throw new IllegalArgumentException("roulette wheel selection is only implemented for Double or Integer; "+val.getClass().getSimpleName()+" found instead.");
 		
 	}
 	
-	public static <X extends Number> ARouletteWheelSelection<?> getRouletteWheel(List<X> distribution, List<?> keys) {
-		ARouletteWheelSelection<X> res = getRouletteWheel(distribution);
+	public static <X extends Number, K> ARouletteWheelSelection<X, K> getRouletteWheel(List<X> distribution, List<K> keys) {
+		ARouletteWheelSelection<X, K> res = getRouletteWheel(distribution);
 		res.setKeys(keys);
 		return res;
 	}

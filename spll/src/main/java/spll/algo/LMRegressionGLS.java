@@ -19,6 +19,7 @@ import spll.datamapper.variable.SPLVariable;
 
 /**
  * WARNING: not functional
+ * FIXME
  * 
  * @author kevinchapuis
  *

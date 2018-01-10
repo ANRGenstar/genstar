@@ -237,6 +237,7 @@ public class DownloadINSEESampleData {
 		
 		GosplPopulation pop = null;
 		
+		@SuppressWarnings("unused")
 		Set<DemographicAttribute<? extends IValue>> updatedAttributes = 
 				new HashSet<>(getDictionnary().getAttributes());
 

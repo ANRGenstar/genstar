@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import core.util.random.GenstarRandom;
 
-public class DoubleRouletteWheelSelection extends ARouletteWheelSelection<Double> {
+public class DoubleRouletteWheelSelection<K> extends ARouletteWheelSelection<Double, K> {
 
 	public DoubleRouletteWheelSelection(List<Double> distribution) {
 		super(distribution);
