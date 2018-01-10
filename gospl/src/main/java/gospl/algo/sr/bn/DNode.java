@@ -171,6 +171,7 @@ public final class DNode {
 		this.varsUnion();
 	}
 	
+	@SuppressWarnings("unused")
 	private void compute() {
 		computeVarsUnion();
 		
@@ -384,6 +385,7 @@ public final class DNode {
 		return varsInter;
 	}
 	
+	@SuppressWarnings("unused")
 	private Set<NodeCategorical> cutsetWithACutset() {
 		
 		Set<NodeCategorical> cutset = new HashSet<>(left.varsUnion());
@@ -711,6 +713,7 @@ public final class DNode {
 	 * @param right2
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private final boolean shouldComputeFirst(DNode candidate, DNode challenger, Map<NodeCategorical,String> n2v) {
 		
 		/*Set<NodeCategorical> left = new HashSet<>(candidate.varsUnion());
@@ -969,6 +972,7 @@ public final class DNode {
 		
 	}
 
+	@SuppressWarnings("unchecked")
 	private void exportAsGraphvizInto(StringBuffer sb, Map<DNode,String> node2id, String toDisplayFunc) {
 		
 		String thisId = node2id.get(this);

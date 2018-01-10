@@ -18,11 +18,11 @@ public class TestRouletteWheelSelection {
 
 	private Logger logger = LogManager.getLogger();
 	
-	private <X extends Number> void testDistribution(List<X> distribution, int samples, double epsilon) {
+	private <X extends Number, K> void testDistribution(List<X> distribution, int samples, double epsilon) {
 
 		logger.debug("required wheel {}", distribution);
 		
-		ARouletteWheelSelection<X> roulette = RouletteWheelSelectionFactory.getRouletteWheel(distribution);
+		ARouletteWheelSelection<X, K> roulette = RouletteWheelSelectionFactory.getRouletteWheel(distribution);
 		
 		final double totalRequired =  distribution.stream().collect(Collectors.summingDouble(n -> n.doubleValue()));
 

@@ -1,5 +1,6 @@
 package core.util.random.roulette;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -8,10 +9,10 @@ import java.util.List;
  * 
  * @author Samuel Thiriot	
  */
-public abstract class ARouletteWheelSelection<T extends Number> {
+public abstract class ARouletteWheelSelection<T extends Number, K> {
 
 	protected List<T> distribution = null;
-	protected List<?> keys = null;
+	protected List<K> keys = null;
 
 	T total = null;
 
@@ -20,8 +21,19 @@ public abstract class ARouletteWheelSelection<T extends Number> {
 		this.setDistribution(distribution);
 	}
 	
+	/**
+	 * Return unmodifiable view of the keys to return when call {@link #drawObject()}
+	 * @return
+	 */
+	public List<K> getKeys() {
+		return Collections.unmodifiableList(keys);
+	}
 
-	public void setKeys(List<?> keys) {
+	/**
+	 * Set the keys from which to draw when calling {@link #drawObject()}
+	 * @param keys
+	 */
+	public void setKeys(List<K> keys) {
 		this.keys = keys;
 	}
 	

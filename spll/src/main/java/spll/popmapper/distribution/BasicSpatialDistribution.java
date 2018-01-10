@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
+import core.util.random.roulette.ARouletteWheelSelection;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import spll.popmapper.distribution.function.ISpatialEntityFunction;
 
@@ -20,6 +21,7 @@ import spll.popmapper.distribution.function.ISpatialEntityFunction;
 public class BasicSpatialDistribution<N extends Number, E extends ADemoEntity> implements ISpatialDistribution<E> {
 	
 	private ISpatialEntityFunction<N> function;
+	private ARouletteWheelSelection<N, ? extends AGeoEntity<? extends IValue>> roulette;
 
 	public BasicSpatialDistribution(ISpatialEntityFunction<N> function) {
 		this.function = function;
@@ -30,6 +32,24 @@ public class BasicSpatialDistribution<N extends Number, E extends ADemoEntity> i
 		return RouletteWheelSelectionFactory.getRouletteWheel(candidates.stream()
 				.map(a -> function.apply(a)).collect(Collectors.toList()), candidates)
 			.drawObject();
+	}
+
+	@Override
+	public AGeoEntity<? extends IValue> getCandidate(E entity) {
+		if(this.roulette == null || this.roulette.getKeys().isEmpty())
+			throw new NullPointerException("No candidate geographic entity to draw from");
+		return roulette.drawObject();
+	}
+
+	@Override
+	public void setCandidate(List<? extends AGeoEntity<? extends IValue>> candidates) {
+		this.roulette = RouletteWheelSelectionFactory.getRouletteWheel(candidates.stream()
+				.map(a -> function.apply(a)).collect(Collectors.toList()), candidates);
+	}
+
+	@Override
+	public List<? extends AGeoEntity<? extends IValue>> getCandidates() {
+		return roulette.getKeys();
 	}
 	
 }
