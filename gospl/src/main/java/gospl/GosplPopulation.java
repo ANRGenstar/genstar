@@ -35,6 +35,22 @@ public class GosplPopulation implements IPopulation<ADemoEntity, DemographicAttr
 	}
 	
 	/**
+	 * "Clone" operator 
+	 * @param populationOfParentCandidates
+	 */
+	public GosplPopulation(GosplPopulation pop) {
+		
+		this.population = new HashSet<>();
+		for (ADemoEntity original : pop.population) {
+			ADemoEntity clone = original.clone();
+			this.population.add(clone);
+		}
+
+		this.attributes = new HashSet<>(pop.getPopulationAttributes());
+	}
+	
+	
+	/**
 	 * Population with a given collection of entity within
 	 * 
 	 * @see GosplPopulation()
