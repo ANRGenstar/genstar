@@ -47,7 +47,7 @@ public class LinkerTest {
 		SpllPopulation localizedPop = localizer.localisePopulation();
 				
 		ISPLinker<SpllEntity> linker = new SPLinker<>(SpatialDistributionFactory.getInstance()
-				.getGravityModelDistribution(sst.sfRoads.getGeoEntity(), 
+				.getGravityModelDistribution(sst.sfRoads.getGeoEntity(), 1.0,
 						localizedPop.toArray(new SpllEntity[localizedPop.size()])));
 		
 		Collection<? extends AGeoEntity<? extends IValue>> candidates = sst.sfRoads.getGeoEntity();
