@@ -247,6 +247,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	@Override 
 	public Iterator<SpllPixel> getGeoEntityIteratorIntersect(Geometry geom) {
 		return getGeoEntityIteratorWithin(geom);
+	
 	}
 	
 	// ------------------- specific geotiff accessors ------------------- //

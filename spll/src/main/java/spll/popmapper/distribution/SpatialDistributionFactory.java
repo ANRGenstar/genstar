@@ -1,11 +1,16 @@
 package spll.popmapper.distribution;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
+import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
+import spll.entity.SpllFeature;
 import spll.popmapper.constraint.SpatialConstraintMaxNumber;
 import spll.popmapper.distribution.function.AreaFunction;
 import spll.popmapper.distribution.function.CapacityFunction;
@@ -49,10 +54,7 @@ public class SpatialDistributionFactory {
 	 * @return
 	 */
 	public <E extends ADemoEntity> ISpatialDistribution<E> getUniformDistribution(){
-		return new BasicSpatialDistribution<>(new ISpatialEntityFunction<Integer>() {
-			@Override public Integer apply(AGeoEntity<? extends IValue> t) {return 1;}
-			@Override public void updateFunctionState(AGeoEntity<? extends IValue> entity) {}
-		} );
+		return new UniformSpatialDistribution<>();
 	}
 	
 	/**
@@ -61,10 +63,25 @@ public class SpatialDistributionFactory {
 	 * 
 	 * @return
 	 */
-	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(){
-		return new BasicSpatialDistribution<>(new AreaFunction());
+	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(List<? extends AGeoEntity<? extends IValue>> candidates){
+		return new StaticSpatialDistribution<>(candidates,new AreaFunction());
 	}
 	
+	/**
+	 * Probability is computed as a linear function of spatial entity area. That is,
+	 * the bigger the are is, the bigger will be the probability to be located in.
+	 * 
+	 * @return
+	 */
+	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(IGSGeofile<SpllFeature, IValue> geofile){
+		List<? extends AGeoEntity<? extends IValue>> candidates = null;
+		try {
+			candidates = new ArrayList<AGeoEntity<? extends IValue>>(geofile.getGeoEntity());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return new StaticSpatialDistribution<>(candidates,new AreaFunction());
+	}
 	/**
 	 * Probability is computed as a linear function of spatial entity capacity. This capacity
 	 * is provided by {@code scNumber} argument and can be dynamically updated
