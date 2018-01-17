@@ -50,6 +50,43 @@ public class SpatialDistributionFactory {
 	}
 	
 	/**
+	 * General factory method to build distribution with cached candidates
+	 * @see #getDistribution(ISpatialEntityFunction)
+	 * 
+	 * @param function
+	 * @param candidates
+	 * @return
+	 */
+	public <N extends Number, E extends ADemoEntity> ISpatialDistribution<E> getDistribution(ISpatialEntityFunction<N> function,
+			List<? extends AGeoEntity<? extends IValue>> candidates){
+		ISpatialDistribution<E> distribution = new BasicSpatialDistribution<>(function);
+		distribution.setCandidate(candidates);
+		return distribution;
+	}
+	
+	/**
+	 * General factory method to build distribution with cached candidates from a {@link IGSGeofile}
+	 * 
+	 * @param function
+	 * @param geofile
+	 * @return
+	 */
+	public <N extends Number, E extends ADemoEntity> ISpatialDistribution<E> getDistribution(ISpatialEntityFunction<N> function,
+			IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> geofile){
+		List<? extends AGeoEntity<? extends IValue>> candidates = null;
+		try {
+			candidates = new ArrayList<AGeoEntity<? extends IValue>>(geofile.getGeoEntity());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return this.getDistribution(function, candidates);
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////
+	//							Example distribution                              //
+	/////////////////////////////////////////////////////////////////////////////////
+	
+	/**
 	 * All provided spatial entities have the same probability - uniform distribution
 	 * @return
 	 */
@@ -63,24 +100,30 @@ public class SpatialDistributionFactory {
 	 * 
 	 * @return
 	 */
-	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(List<? extends AGeoEntity<? extends IValue>> candidates){
-		return new StaticSpatialDistribution<>(candidates,new AreaFunction());
+	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(){
+		return this.getDistribution(new AreaFunction());
 	}
 	
 	/**
-	 * Probability is computed as a linear function of spatial entity area. That is,
-	 * the bigger the are is, the bigger will be the probability to be located in.
+	 * @see #getAreaBasedDistribution()
+	 * <p>
+	 * adds cached candidates
+	 * 
+	 * @return
+	 */
+	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(List<? extends AGeoEntity<? extends IValue>> candidates){
+		return this.getDistribution(new AreaFunction(), candidates);
+	}
+	
+	/**
+	 * @see #getAreaBasedDistribution()
+	 * <p>
+	 * adds cached candidates from vector file
 	 * 
 	 * @return
 	 */
 	public <E extends ADemoEntity> ISpatialDistribution<E> getAreaBasedDistribution(IGSGeofile<SpllFeature, IValue> geofile){
-		List<? extends AGeoEntity<? extends IValue>> candidates = null;
-		try {
-			candidates = new ArrayList<AGeoEntity<? extends IValue>>(geofile.getGeoEntity());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return new StaticSpatialDistribution<>(candidates,new AreaFunction());
+		return this.getDistribution(new AreaFunction(), geofile);
 	}
 	/**
 	 * Probability is computed as a linear function of spatial entity capacity. This capacity
@@ -102,6 +145,26 @@ public class SpatialDistributionFactory {
 	public <N extends Number> ISpatialDistribution<SpllEntity> getDistribution(ISpatialComplexFunction<N> function){
 		return new ComplexSpatialDistribution<N>(function);
 	}
+	
+	/**
+	 * General factory method to build complex function based distribution with cached candidates
+	 * 
+	 * @see #getDistribution(ISpatialComplexFunction)
+	 * 
+	 * @param function
+	 * @param candidates
+	 * @return
+	 */
+	public <N extends Number> ISpatialDistribution<SpllEntity> getDistribution(ISpatialComplexFunction<N> function,
+			List<? extends AGeoEntity<? extends IValue>> candidates){
+		ISpatialDistribution<SpllEntity> distribution = new ComplexSpatialDistribution<N>(function);
+		distribution.setCandidate(candidates);
+		return distribution;
+	}
+	
+	/////////////////////////////////////////////////////////////////////////////////
+	//							Example distribution                              //
+	/////////////////////////////////////////////////////////////////////////////////
 	
 	/**
 	 * Probability is computed as a linear function of distance between spatial and population entities

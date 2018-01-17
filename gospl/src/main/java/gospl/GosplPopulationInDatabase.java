@@ -272,7 +272,7 @@ public class GosplPopulationInDatabase
 	 * create tables, and loads entities into them.
 	 * @param pop
 	 */
-	protected void loadPopulationIntoDatabase(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop) {
+	protected void loadPopulationIntoDatabase(IPopulation<? extends ADemoEntity, DemographicAttribute<? extends IValue>> pop) {
 		assert this.connection != null;
 		assert pop != null;
 		
