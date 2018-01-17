@@ -21,12 +21,14 @@ public class GravityFunction implements ISpatialComplexFunction<Double> {
 
 	private Map<AGeoEntity<? extends IValue>, Double> mass; 
 	private double buffer = -1;
+	private double frictionCoeff = 1.0;
 	
 	private BiFunction<Double, Double, Double> function;
 
 	private GravityFunction() {
 		this.function = new BiFunction<Double, Double, Double>() {
-			@Override public Double apply(Double mass, Double distance) { return mass / distance; }
+			@Override public Double apply(Double mass, Double distance) { 
+				return mass / Math.pow(distance, frictionCoeff); }
 		};
 	}
 	
@@ -34,10 +36,12 @@ public class GravityFunction implements ISpatialComplexFunction<Double> {
 	 * Mass of spatial entity is defined as the sum of distance between the spatial entity and all entities
 	 * 
 	 * @param candidates
+	 * @param frictionCoeff
 	 * @param entities
 	 */
-	public GravityFunction(Collection<? extends AGeoEntity<? extends IValue>> candidates, SpllEntity... entities) {
+	public GravityFunction( Collection<? extends AGeoEntity<? extends IValue>> candidates, double frictionCoeff, SpllEntity... entities) {
 		this();
+		this.frictionCoeff = frictionCoeff;
 		this.mass = candidates.stream().collect(Collectors.toMap(Function.identity(), se -> Arrays.asList(entities).stream()
 				.mapToDouble(e -> se.getGeometry().distance(e.getLocation())).sum()));
 	}
@@ -46,15 +50,17 @@ public class GravityFunction implements ISpatialComplexFunction<Double> {
 	 * Mass of spatial entity is defined as the number of entity within a given buffer around the spatial entity
 	 * 
 	 * @param candidates
+	 * @param frictionCoeff
 	 * @param buffer
 	 * @param entities
 	 */
 	public GravityFunction(Collection<? extends AGeoEntity<? extends IValue>> candidates, 
-			double buffer, SpllEntity... entities) {
+			double frictionCoeff, double buffer, SpllEntity... entities) {
 		this();
 		this.mass = candidates.stream().collect(Collectors.toMap(Function.identity(), spacEntity -> (double) Arrays.asList(entities).stream()
 				.filter(e -> spacEntity.getGeometry().buffer(buffer).contains(e.getLocation())).count()));
 		this.buffer = buffer;
+		this.frictionCoeff = frictionCoeff;
 	}
 	
 	// ------------------------------------------ //

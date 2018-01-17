@@ -178,27 +178,30 @@ public class SpatialDistributionFactory {
 	 * Gravity model that compute 
 	 * 
 	 * @param candidates
+	 * @param frictionCoeff
 	 * @param entities
 	 * @return
 	 */
 	public ISpatialDistribution<SpllEntity> getGravityModelDistribution(
 			Collection<? extends AGeoEntity<? extends IValue>> candidates, 
+			double frictionCoeff,
 			SpllEntity... entities){
-		return new ComplexSpatialDistribution<>(new GravityFunction(candidates, entities));
+		return new ComplexSpatialDistribution<>(new GravityFunction(candidates, frictionCoeff, entities));
 	}
 	
 	/**
 	 * 
 	 * 
 	 * @param candidates
+	 * @param frictionCoeff
 	 * @param buffer
 	 * @param entities
 	 * @return
 	 */
 	public ISpatialDistribution<SpllEntity> getGravityModelDistribution(
 			Collection<? extends AGeoEntity<? extends IValue>> candidates, 
-			double buffer, SpllEntity... entities){
-		return new ComplexSpatialDistribution<>(new GravityFunction(candidates, buffer, entities));
+			double frictionCoeff, double buffer, SpllEntity... entities){
+		return new ComplexSpatialDistribution<>(new GravityFunction(candidates, frictionCoeff, buffer, entities));
 	}
 	
 }

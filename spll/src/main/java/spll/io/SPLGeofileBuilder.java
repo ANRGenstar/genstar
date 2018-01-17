@@ -76,6 +76,7 @@ import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.stats.GSBasicStats;
 import core.util.stats.GSEnumStats;
+import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
@@ -293,6 +294,61 @@ public class SPLGeofileBuilder {
 		
 		return this;
 	}
+	
+	/**
+	 * Add new feature to build shapefile with
+	 * <p>
+	 * because {@link Feature} are immutable object, we must erase former {@link SpllFeature}
+	 * with new one that encapsulate updated {@link SimpleFeature} build from former one plus
+	 * {@link GeographicAttribute} created from information from the csv
+	 * 
+	 * @param csvFile
+	 * @param seperator
+	 * @param keyAttribute
+	 * @param keyCSV
+	 * @param newAttributes
+	 * @return
+	 * @throws IOException 
+	 */
+	public SPLGeofileBuilder addIdToFeature() throws IOException {
+		if (features== null && features.isEmpty()) 
+			throw new IllegalStateException(this.getClass().getCanonicalName()
+					+" is not able to add the id if not any feature have been added before");
+		Map<String, GeographicAttribute<? extends IValue>> attAGeo = new Hashtable<>();
+		
+		String attName = "id";
+		attAGeo.put(attName, GeographicAttributeFactory.getFactory()
+					.createAttribute(attName, GSEnumDataType.Nominal));
+
+		
+		//Create the new type using the former as a template
+        Set<FeatureType> fTypes = features.stream()
+        		.map(feat -> feat.getInnerFeature().getType()).collect(Collectors.toSet());
+        if(fTypes.size() > 1)
+        		throw new IllegalStateException("There is more than one feature type in feature collection"); 
+        SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder(); 
+        stb.init((SimpleFeatureType) fTypes.iterator().next()); 
+        stb.setName("augmented feature type"); 
+        // add new attributes
+        GeoEntityFactory gef = new GeoEntityFactory(new HashSet<>(attAGeo.values()), stb.buildFeatureType());
+		
+        Set<SpllFeature> newSpllFeatures = new HashSet<>();
+		for (SpllFeature ft : features) {
+			
+			Map<String, String> vals = new Hashtable<String, String>();
+			vals.put(attName, ft.getGenstarName());
+			
+			
+			// New Spll feature attribute setup
+			Map<GeographicAttribute<? extends IValue>, IValue> newValues = new HashMap<>(ft.getAttributeMap());
+			newValues.putAll(vals.keySet().stream().collect(Collectors.toMap(vn -> attAGeo.get(vn), 
+					vn -> attAGeo.get(vn).getValueSpace().addValue(vals.get(vn)))));
+			newSpllFeatures.add(gef.createGeoEntity(ft.getGeometry(), newValues));
+		}
+		this.features = newSpllFeatures;
+		
+		return this;
+	}
 
 	// ------------------------------------------------------------ //
 	//						CREATE GEOFILE						   //
@@ -403,18 +459,33 @@ public class SPLGeofileBuilder {
 					atts.add(at.getAttributeName());
 					String name = at.getAttributeName().replaceAll("\"", "").replaceAll("'", "");
 					specs.append(',').append(name).append(':').append("String");
+					
+				}
+				this.features = Collections.emptyList();
+				Set<String> links = new HashSet<>();
+				for(SpllEntity ent: population) {
+					links.addAll(ent.getLinkedPlaces().keySet());
+				}
+				for (String link : links) {
+					specs.append(',').append(link).append(':').append("String");
 				}
 				newDataStore.createSchema(DataUtilities.createType("Pop", specs.toString()));
 				FeatureWriter<SimpleFeatureType, SimpleFeature> fw = newDataStore
 						.getFeatureWriter(newDataStore.getTypeNames()[0], Transaction.AUTO_COMMIT);
 				
-				for (final ADemoEntity entity : population) {
+				for (final SpllEntity entity : population) {
 					
 						SimpleFeature f = ((SimpleFeature) fw.next());
-						
-						f.setAttributes(
-								Stream.concat(Stream.of(geoms.get(entity)),
-								entity.getValues().stream()).collect(Collectors.toList()));
+						List<Object> at = Stream.concat(Stream.of(geoms.get(entity)),
+								entity.getValues().stream()).collect(Collectors.toList());
+						for (String link : links) {
+							AGeoEntity<? extends IValue> lp = entity.getLinkedPlaces().get(link);
+							if (lp == null) 
+								at.add("?");
+							else
+								at.add(lp.getGenstarName());
+						}
+						f.setAttributes(at);
 						fw.write();
 						fw.hasNext();
 						
@@ -442,6 +513,8 @@ public class SPLGeofileBuilder {
 					.map(feat -> feat.getInnerFeature().getType()).collect(Collectors.toSet());
 			if(featTypeSet.size() > 1)
 				throw new SchemaException("Multiple feature type to instantiate schema:\n"+Arrays.toString(featTypeSet.toArray()));
+			
+			
 			SimpleFeatureType featureType = (SimpleFeatureType) featTypeSet.iterator().next();
 			newDataStore.createSchema(featureType);
 
