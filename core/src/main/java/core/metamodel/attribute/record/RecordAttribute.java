@@ -52,7 +52,7 @@ public class RecordAttribute<R extends IAttribute<? extends IValue>,
 	}
 	
 	@Override
-	public IValueSpace<NominalValue> getValueSpace() {
+	public RecordValueSpace getValueSpace() {
 		if(valuesSpace == null)
 			valuesSpace = new RecordValueSpace(this, new GSCategoricTemplate(), this.getAttributeName());
 		return valuesSpace;

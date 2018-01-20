@@ -145,19 +145,19 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * returns the set of children
 	 * @return
 	 */
-	public Set<IEntity<?>> getChildren();
+	public Set<IEntity<? extends IAttribute<? extends IValue>>> getChildren();
 	
 	/**
 	 * Adds a child to the list of children
 	 * @param e
 	 */
-	public void addChild(IEntity<?> e);
+	public void addChild(IEntity<? extends IAttribute<? extends IValue>> e);
 	
 	/**
 	 * Adds several children to the list of children
 	 * @param e
 	 */
-	public void addChildren(Collection<IEntity<?>> e);
+	public void addChildren(Collection<IEntity<? extends IAttribute<? extends IValue>>> e);
 	
 
 }
