@@ -78,7 +78,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 */
 	@Override
 	public OrderedValue getInstanceValue(String value) {
-		return new OrderedValue(this, value, instanceIndex++);
+		return new OrderedValue(this, value, ++instanceIndex);
 	}
 	
 	/**
@@ -116,11 +116,11 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * @return
 	 * @throws IllegalArgumentException
 	 */
-	public OrderedValue addValue(int order, String value) throws IllegalArgumentException {
+	public OrderedValue addValue(Number order, String value) throws IllegalArgumentException {
 		OrderedValue ov = null;
 		try {
 			ov = this.getValue(value);
-			if(ov.getOrder() != order)
+			if(ov.getOrder().equals(order))
 				throw new IllegalArgumentException("Ordered value "+value+" already exists with order "+ov.getOrder());
 		} catch (NullPointerException e) {
 			ov = new OrderedValue(this, value, order);

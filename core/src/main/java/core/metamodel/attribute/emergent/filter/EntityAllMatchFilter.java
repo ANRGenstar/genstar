@@ -9,28 +9,34 @@ import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
-public class EntityAllMatchFilter<E extends IEntity<? extends IAttribute<? extends IValue>>> 
-	implements IEntityChildFilter<E> {
+/**
+ * Filter entities if they match with all value given as matches
+ * 
+ * @author kevinchapuis
+ *
+ */
+public class EntityAllMatchFilter implements IEntityChildFilter {
 	
-	Comparator<E> comparator;
+	Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator;
 	
 	public EntityAllMatchFilter() {
 		this.comparator = this.getComparator();
 	}
 	
-	public EntityAllMatchFilter(Comparator<E> comparator) {
+	public EntityAllMatchFilter(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator) {
 		this.comparator = comparator;
 	}
 	
 	@Override
-	public Collection<E> retain(Collection<E> entities, IValue... matches){
-		return entities.stream().filter(e -> e.getValues().containsAll(Arrays.asList(matches)))
-				.collect(Collectors.toCollection(this.getSupplier()));
+	public Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator(){
+		return comparator;
 	}
 	
 	@Override
-	public Comparator<E> getComparator(){
-		return comparator;
+	public Collection<IEntity<? extends IAttribute<? extends IValue>>> retain(
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches){
+		return entities.stream().filter(e -> e.getValues().containsAll(Arrays.asList(matches)))
+				.collect(Collectors.toCollection(this.getSupplier()));
 	}
 	
 }

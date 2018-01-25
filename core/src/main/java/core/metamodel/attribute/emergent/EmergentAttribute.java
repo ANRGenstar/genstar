@@ -32,23 +32,6 @@ public class EmergentAttribute<V extends IValue,
 	}
 	
 	/**
-	 * 
-	 * WARNING: The given value space must be implicitly consistent with emergent value return by 
-	 * the emergent function
-	 * 
-	 * @param name
-	 * @param vs
-	 * @param function
-	 */
-	public EmergentAttribute(String name, IValueSpace<V> vs, 
-			IEntityEmergentFunction<E, U, V> function) {
-		this(name);
-		this.vs = vs;
-		this.function = function;
-		this.function.setValueSpace(vs);
-	}
-	
-	/**
 	 * The main method that can retrieve the value of an attribute based on
 	 * any child properties
 	 * 
@@ -59,10 +42,28 @@ public class EmergentAttribute<V extends IValue,
 	public V getEmergentValue(E entity, U predicate) {
 		return function.apply(entity, predicate);
 	}
+	
+	/**
+	 * The main function that will look at sub-entities property to asses super entity attribute value 
+	 * 
+	 * @return
+	 */
+	public IEntityEmergentFunction<E, U, V> getFunction(){
+		return this.function;
+	}
+	
+	/**
+	 * Defines the main function to make attribute value emerge from sub entities properties
+	 * 
+	 * @param function
+	 */
+	public void setFunction(IEntityEmergentFunction<E, U, V> function){
+		this.function = function;
+	}
 
 	@Override
 	public IValueSpace<V> getValueSpace() {
-		return vs;
+		return this.vs;
 	}
 
 	@Override

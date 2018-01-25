@@ -21,12 +21,12 @@ public class OrderedValue implements IValue {
 
 	private String value;
 
-	private int order;
+	private Number order;
 
 	@JsonManagedReference
 	private OrderedSpace sv;
 	
-	protected OrderedValue(OrderedSpace sv, String value, int order){
+	protected OrderedValue(OrderedSpace sv, String value, Number order){
 		this.sv =sv;
 		this.value = value;
 		this.order = order;
@@ -55,14 +55,15 @@ public class OrderedValue implements IValue {
 	}
 
 	protected int compareTo(OrderedValue o) {
-		return order < o.getOrder() ? -1 : order > o.getOrder() ? 1 : 0;
+		return order.doubleValue() < o.getOrder().doubleValue() ? -1 : 
+			order.doubleValue() > o.getOrder().doubleValue() ? 1 : 0;
 	}
 
 	protected void setOrder(int order){
 		this.order = order;
 	}
 	
-	protected int getOrder() {
+	public Number getOrder() {
 		return order;
 	}
 	

@@ -16,7 +16,7 @@ import core.util.data.GSEnumDataType;
  */
 public class RangeValue implements IValue {
 
-	public enum RangeBound{LOWER,UPPER}
+	public static enum RangeBound{LOWER,UPPER}
 	
 	private Number bottomBound, topBound;
 
@@ -127,8 +127,5 @@ public class RangeValue implements IValue {
 	public Number getTopBound() {
 		return topBound;
 	}
-	
-	
-
 	
 }

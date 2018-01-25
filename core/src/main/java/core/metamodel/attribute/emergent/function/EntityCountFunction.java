@@ -7,51 +7,32 @@ import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
 
+/**
+ * Count the number of sub entities. If no filter have been define, this function will just return the number of child.
+ * When using any filter, it will count the number of entities having identified matches
+ * 
+ * @see IEntityChildFilter
+ * 
+ * @author kevinchapuis
+ *
+ * @param <E>
+ * @param <U>
+ */
 public class EntityCountFunction<E extends IEntity<? extends IAttribute<? extends IValue>>, U> 
+	extends AEntityEmergentFunction<E, U, IntegerValue>
 	implements IEntityEmergentFunction<E, U, IntegerValue> {
-
-	private IValueSpace<IntegerValue> vs;
 	
-	private IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> filter;
-	private IValue[] matches;
-	
-	public EntityCountFunction(
-			IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> filter,
-			IValue... matches) {
-		this.filter = filter;
-		this.matches = matches;
-	}
-	
-	public EntityCountFunction(IValueSpace<IntegerValue> vs,
-			IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> filter,
-			IValue... matches) {
-		this.setValueSpace(vs);
-		this.filter = filter;
-		this.matches = matches;
+	public EntityCountFunction(IValueSpace<IntegerValue> is, IEntityChildFilter filter, IValue... matches) {
+		super(is, filter, matches);
 	}
 
 	@Override
 	public IntegerValue apply(E entity, U useless) {
 		return this.getValueSpace().proposeValue(
-				Integer.toString(filter != null && matches != null ? 
-					filter.retain(entity.getChildren(), matches).size() : 
+				Integer.toString(super.getFilter() != null && super.getMatchers() != null ? 
+					super.getFilter().retain(entity.getChildren(), super.getMatchers()).size() : 
 						entity.getCountChildren())
 				);
-	}
-
-	@Override
-	public IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> getFilter() {
-		return filter;
-	}
-
-	@Override
-	public IValueSpace<IntegerValue> getValueSpace() {
-		return this.vs;
-	}
-
-	@Override
-	public void setValueSpace(IValueSpace<IntegerValue> vs) {
-		this.vs = vs;
 	}
 
 }

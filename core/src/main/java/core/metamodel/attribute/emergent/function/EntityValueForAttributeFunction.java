@@ -6,49 +6,36 @@ import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
+/**
+ * Function that will return the value for attribute of a particular sub entities. In this case, filter and matches
+ * are mandatory, because they make it possible to elicit only one individual. As define by filters, if several sub-entities
+ * correspond to the filter restriction, there is an inner ordering process that will sort sub entities, hence allowing to
+ * chose the first one.
+ * 
+ * @author kevinchapuis
+ *
+ * @param <E>
+ * @param <A>
+ * @param <V>
+ */
 public class EntityValueForAttributeFunction<E extends IEntity<? extends IAttribute<? extends IValue>>,
-		 A extends IAttribute<? extends IValue>> 
-	implements IEntityEmergentFunction<E, A, IValue> {
+		 A extends IAttribute<V>, V extends IValue> 
+	extends AEntityEmergentFunction<E, A, V>
+	implements IEntityEmergentFunction<E, A, V> {
 
-	private IValueSpace<IValue> vs;
-	
-	private IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> filter;
-	private IValue[] matches;
-	
-	public EntityValueForAttributeFunction(
-			IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> filter,
-			IValue... matches) {
-		this.filter = filter;
-		this.matches = matches;
-	}
-	
-	public EntityValueForAttributeFunction(IValueSpace<IValue> vs,
-			IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> filter,
-			IValue... matches) {
-		this.setValueSpace(vs);
-		this.filter = filter;
-		this.matches = matches;
+	public EntityValueForAttributeFunction(IValueSpace<V> vs, IEntityChildFilter filter, IValue... matches) {
+		super(vs, filter, matches);
+		if(filter == null || matches == null)
+			throw new IllegalArgumentException("Value for attribute function cannot be instantiated "
+					+ "without filter and matches");
 	}
 
 	@Override
-	public IValue apply(E entity, A attribute) {
-		return filter.choseOne(entity.getChildren(), matches)
-				.getValueForAttribute(attribute.getAttributeName());
-	}
-
-	@Override
-	public IEntityChildFilter<IEntity<? extends IAttribute<? extends IValue>>> getFilter() {
-		return this.filter;
-	}
-
-	@Override
-	public IValueSpace<IValue> getValueSpace() {
-		return this.vs;
-	}
-
-	@Override
-	public void setValueSpace(IValueSpace<IValue> vs) {
-		this.vs = vs;
+	public V apply(E entity, A attribute) {
+		return attribute.getValueSpace().getValue(
+				super.getFilter().choseOne(entity.getChildren(), super.getMatchers())
+				.getValueForAttribute(attribute.getAttributeName())
+				.getStringValue());
 	}
 
 }

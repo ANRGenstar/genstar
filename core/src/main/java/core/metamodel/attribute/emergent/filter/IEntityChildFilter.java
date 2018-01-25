@@ -19,7 +19,7 @@ import core.metamodel.value.IValue;
  *
  * @param <E>
  */
-public interface IEntityChildFilter<E extends IEntity<? extends IAttribute<? extends IValue>>> {
+public interface IEntityChildFilter {
 	
 	/**
 	 * Retain only entities that match values - with custom matching rule, e.g. all or one of match
@@ -28,7 +28,8 @@ public interface IEntityChildFilter<E extends IEntity<? extends IAttribute<? ext
 	 * @param filters
 	 * @return
 	 */
-	public Collection<E> retain(Collection<E> entities, IValue... matches); 
+	public Collection<IEntity<? extends IAttribute<? extends IValue>>> retain(
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches); 
 	
 	/**
 	 * Chose only one entity among a collect of entities. Have to be consistent, that is the same
@@ -38,8 +39,9 @@ public interface IEntityChildFilter<E extends IEntity<? extends IAttribute<? ext
 	 * @param matches
 	 * @return
 	 */
-	default E choseOne(Collection<E> entities, IValue... matches) {
-		List<E> retains = new ArrayList<>(this.retain(entities, matches));
+	default IEntity<? extends IAttribute<? extends IValue>> choseOne(
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches) {
+		List<IEntity<? extends IAttribute<? extends IValue>>> retains = new ArrayList<>(this.retain(entities, matches));
 		Collections.sort(retains, this.getComparator());
 		return retains.get(0);
 	}
@@ -48,11 +50,11 @@ public interface IEntityChildFilter<E extends IEntity<? extends IAttribute<? ext
 	 * The default supplier to collect retained entities
 	 * @return
 	 */
-	default Supplier<Collection<E>> getSupplier(){
-		return new Supplier<Collection<E>>() {
+	default Supplier<Collection<IEntity<? extends IAttribute<? extends IValue>>>> getSupplier(){
+		return new Supplier<Collection<IEntity<? extends IAttribute<? extends IValue>>>>() {
 			@Override
-			public Collection<E> get() {
-				return new HashSet<E>();
+			public Collection<IEntity<? extends IAttribute<? extends IValue>>> get() {
+				return new HashSet<IEntity<? extends IAttribute<? extends IValue>>>();
 			}
 		};
 	}
@@ -61,10 +63,11 @@ public interface IEntityChildFilter<E extends IEntity<? extends IAttribute<? ext
 	 * The default comparator of entities that compare entity ID
 	 * @return
 	 */
-	default Comparator<E> getComparator(){
-		return new Comparator<E>() {
+	default Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator(){
+		return new Comparator<IEntity<? extends IAttribute<? extends IValue>>>() {
 			@Override
-			public int compare(E o1, E o2) {
+			public int compare(IEntity<? extends IAttribute<? extends IValue>> o1, 
+					IEntity<? extends IAttribute<? extends IValue>> o2) {
 				return o1.getEntityId().compareTo(o2.getEntityId());
 			}
 		};
