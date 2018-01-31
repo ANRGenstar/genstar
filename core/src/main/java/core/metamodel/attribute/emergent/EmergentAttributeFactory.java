@@ -53,8 +53,7 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, U, V extends IValue> 
-	EmergentAttribute<V, E, U> getAttribute(String name, E entity,
-			IEntityEmergentFunction<E, U, V> emergentFunction) {
+	EmergentAttribute<V, E, U> getAttribute(String name, IEntityEmergentFunction<E, U, V> emergentFunction) {
 		EmergentAttribute<V, E, U> attribute = new EmergentAttribute<>(name);
 		attribute.setValueSpace(emergentFunction.getValueSpace());
 		attribute.setFunction(emergentFunction);
@@ -73,7 +72,7 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
-	EmergentAttribute<IntegerValue, E, Object> getCountAttribute(String name, E entity, 
+	EmergentAttribute<IntegerValue, E, Object> getCountAttribute(String name, 
 			IEntityChildFilter filter, IValue... matches) {
 		EmergentAttribute<IntegerValue, E, Object> attribute = new EmergentAttribute<>(name);
 		attribute.setValueSpace(new IntegerSpace(attribute));
@@ -94,7 +93,7 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue, A extends IAttribute<V>> 
-	EmergentAttribute<V, E, A> getValueOfAttribute(String name, E entity, A attribute,  
+	EmergentAttribute<V, E, A> getValueOfAttribute(String name, A attribute,  
 			IEntityChildFilter filter, IValue... matches) {
 		EmergentAttribute<V, E, A> eAttribute = new EmergentAttribute<>(name);
 		eAttribute.setValueSpace(attribute.getValueSpace());
@@ -115,7 +114,7 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue, A extends IAttribute<V>, R extends IValue> 
-	EmergentAttribute<R, E, A> getAggregatedValueOfAttribute(String name, E entity, A attribute,  
+	EmergentAttribute<R, E, A> getAggregatedValueOfAttribute(String name, A attribute,  
 			IAggregateValueFunction<R, V> aggFunction, IEntityChildFilter filter, IValue... matches) {
 		EmergentAttribute<R, E, A> eAttribute = new EmergentAttribute<>(name);
 		eAttribute.setValueSpace(aggFunction.getValueSpace());
@@ -139,9 +138,9 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends IAttribute<BooleanValue>>
-	EmergentAttribute<BooleanValue, E, A> getAggregatedBooleanAttribute(String name, E entity, A attribute,
+	EmergentAttribute<BooleanValue, E, A> getAggregatedBooleanAttribute(String name, A attribute,
 			IEntityChildFilter filter, IValue... matches){
-		return this.getAggregatedValueOfAttribute(name, entity, attribute, 
+		return this.getAggregatedValueOfAttribute(name, attribute, 
 				new BooleanAggValueFunction(attribute.getValueSpace()), filter, matches);
 	}
 	
@@ -158,9 +157,9 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends IAttribute<IntegerValue>>
-	EmergentAttribute<IntegerValue, E, A> getAggregatedIntegerAttribute(String name, E entity, A attribute,
+	EmergentAttribute<IntegerValue, E, A> getAggregatedIntegerAttribute(String name, A attribute,
 			IEntityChildFilter filter, IValue... matches){
-		return this.getAggregatedValueOfAttribute(name, entity, attribute, 
+		return this.getAggregatedValueOfAttribute(name, attribute, 
 				new IntegerSumValueFunction(attribute.getValueSpace()), filter, matches);
 	}
 	
@@ -177,9 +176,9 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends IAttribute<ContinuousValue>>
-	EmergentAttribute<ContinuousValue, E, A> getAggregatedContinuousAttribute(String name, E entity, A attribute,
+	EmergentAttribute<ContinuousValue, E, A> getAggregatedContinuousAttribute(String name, A attribute,
 			IEntityChildFilter filter, IValue... matches){
-		return this.getAggregatedValueOfAttribute(name, entity, attribute, 
+		return this.getAggregatedValueOfAttribute(name, attribute, 
 				new ContinueSumValueFunction(attribute.getValueSpace()), filter, matches);
 	}
 	
@@ -196,9 +195,9 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends IAttribute<NominalValue>>
-	EmergentAttribute<NominalValue, E, A> getAggregatedNominalAttribute(String name, E entity, A attribute,
+	EmergentAttribute<NominalValue, E, A> getAggregatedNominalAttribute(String name, A attribute,
 			IEntityChildFilter filter, IValue... matches){
-		return this.getAggregatedValueOfAttribute(name, entity, attribute, 
+		return this.getAggregatedValueOfAttribute(name, attribute, 
 				new NominalAggValueFunction(attribute.getValueSpace()), filter, matches);
 	}
 	
@@ -215,7 +214,7 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends IAttribute<OrderedValue>>
-	EmergentAttribute<OrderedValue, E, A> getAggregatedOrderedAttribute(String name, E entity, A attribute,
+	EmergentAttribute<OrderedValue, E, A> getAggregatedOrderedAttribute(String name, A attribute,
 			IEntityChildFilter filter, IValue... matches){
 		EmergentAttribute<OrderedValue, E, A> eAttribute = new EmergentAttribute<>(name);
 		eAttribute.setValueSpace(new OrderedSpace(eAttribute, new GSCategoricTemplate()));
@@ -237,7 +236,7 @@ public class EmergentAttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends IAttribute<RangeValue>>
-	EmergentAttribute<RangeValue, E, A> getAggregatedRangeAttribute(String name, E entity, A attribute,
+	EmergentAttribute<RangeValue, E, A> getAggregatedRangeAttribute(String name, A attribute,
 			IEntityChildFilter filter, IValue... matches){
 		EmergentAttribute<RangeValue, E, A> eAttribute = new EmergentAttribute<>(name);
 		RangeSpace rs = new RangeSpace(eAttribute, attribute.getValueSpace().getValues()

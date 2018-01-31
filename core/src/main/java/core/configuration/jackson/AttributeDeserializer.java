@@ -25,9 +25,14 @@ import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.attribute.demographic.map.IAttributeMapper;
+import core.metamodel.attribute.emergent.EmergentAttribute;
+import core.metamodel.attribute.emergent.EmergentAttributeFactory;
+import core.metamodel.attribute.emergent.function.EntityAggregatedAttributeFunction;
+import core.metamodel.attribute.emergent.function.IEntityEmergentFunction;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.attribute.record.RecordAttribute;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalValue;
@@ -81,7 +86,8 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 				return this.deserializeRA(on);
 			case GeographicAttribute.SELF:
 				return this.deserializeGA(on);
-				//throw new RuntimeException("Geographical attribute deserialization has not been yet implemented: DO IT, QUICK !");
+			case EmergentAttribute.SELF:
+				return this.deserializeEA(on);
 			default:
 				throw new IllegalArgumentException("Trying to parse unknown attribute type: "+attributeType); 
 			}
@@ -92,6 +98,19 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	}
 	
 	// ------------------ SPECIFIC DESERIALIZER ------------------ //
+
+	/*
+	 * Deserialize emergent attribute
+	 */
+	private IAttribute<? extends IValue> deserializeEA(JsonNode node) {
+		String id = this.getName(node);
+		if(DES_DEMO_ATTRIBUTES.containsKey(id))
+			return DES_DEMO_ATTRIBUTES.get(id);
+		EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute =
+				this.getEmergentAttribute(node);
+		DES_DEMO_ATTRIBUTES.put(id, attribute);
+		return attribute;
+	}
 
 	/*
 	 * Deserialize basic demographic attribute
@@ -317,6 +336,20 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 			throw new IllegalArgumentException("Trying to unmap the mapper but cannot access array mapping: "
 					+ "node type instade is "+mapArray.getNodeType());
 		return mapArray;
+	}
+	
+	// EMERGENT
+	
+	/**
+	 * TODO
+	 * 
+	 * @param node
+	 * @return
+	 */
+	private EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> getEmergentAttribute(
+			JsonNode node) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

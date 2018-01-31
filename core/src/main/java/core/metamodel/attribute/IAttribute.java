@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import core.configuration.jackson.AttributeDeserializer;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.emergent.EmergentAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
@@ -31,7 +32,8 @@ import core.metamodel.value.IValue;
 	        @JsonSubTypes.Type(value = DemographicAttribute.class),
 	        @JsonSubTypes.Type(value = MappedDemographicAttribute.class),
 	        @JsonSubTypes.Type(value = GeographicAttribute.class),
-	        @JsonSubTypes.Type(value = RecordAttribute.class)
+	        @JsonSubTypes.Type(value = RecordAttribute.class),
+	        @JsonSubTypes.Type(value = EmergentAttribute.class)
 	    })
 @JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property=IAttribute.NAME)
 @JsonDeserialize(using = AttributeDeserializer.class)
@@ -46,7 +48,7 @@ public interface IAttribute<V extends IValue> {
 	 * 
 	 * @return the name - {@link String}
 	 */
-	@JsonProperty(IAttribute.NAME)
+	@JsonProperty(NAME)
 	public String getAttributeName();
 	
 // ------------------------- value related methods ------------------------- //

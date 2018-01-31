@@ -2,6 +2,15 @@ package core.metamodel.attribute.emergent.function;
 
 import java.util.function.BiFunction;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import core.configuration.jackson.AttributeDeserializer;
+import core.configuration.jackson.EmergentAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
@@ -9,7 +18,16 @@ import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
- * The main function to compute an emergent attribute value based on sub entity property 
+ * The main function to compute an emergent attribute value based on sub entity properties. The function contains a filter
+ * that make possible to match entities before computing emergent attribute value. Hence, one can filter sub-entities and
+ * then apply the function.
+ * </p>
+ * We identify 3 basic forms of emergent function:
+ * <p><ul>
+ * <li> {@link EntityCountFunction} : count the number of entities
+ * <li> {@link EntityValueForAttributeFunction} : get the value for an attribute and one sub-entity (filter is here essential)
+ * <li> {@link EntityAggregatedAttributeFunction} : get one value from several
+ * </ul><p>
  * 
  * @author kevinchapuis
  *
@@ -17,6 +35,18 @@ import core.metamodel.value.IValue;
  * @param <U>
  * @param <V>
  */
+@JsonTypeInfo(
+	      use = JsonTypeInfo.Id.CLASS,
+	      include = JsonTypeInfo.As.PROPERTY
+	      )
+@JsonSubTypes({
+	        @JsonSubTypes.Type(value = EntityAggregatedAttributeFunction.class),
+	        @JsonSubTypes.Type(value = EntityCountFunction.class),
+	        @JsonSubTypes.Type(value = EntityValueForAttributeFunction.class)
+	    })
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
+@JsonDeserialize(using = AttributeDeserializer.class)
+@JsonSerialize(using = EmergentAttributeSerializer.class)
 public interface IEntityEmergentFunction<
 		E extends IEntity<? extends IAttribute<? extends IValue>>, U, V extends IValue> 
 	extends BiFunction<E, U, V> {
