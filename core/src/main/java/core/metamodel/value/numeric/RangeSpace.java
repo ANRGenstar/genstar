@@ -91,7 +91,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 					+ "range "+rt);
 		
 		List<Number> currentVal = null;
-		currentVal = gsdp.getNumbers(value, rt.getNumerciMatcher());
+		currentVal = gsdp.getNumbers(value, rt.getNumberMatcher());
 		if(currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) || 
 				currentVal.stream().anyMatch(d -> d.doubleValue() > max.doubleValue()))
 			throw new IllegalArgumentException("Proposed values "+value+" are "
@@ -193,7 +193,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			} catch (Exception e) {
 				List<Double> currentVal = null;
 				try {
-					currentVal = gsdp.getRangedDoubleData(value, rt.getNumerciMatcher());
+					currentVal = gsdp.getRangedDoubleData(value, rt.getNumberMatcher());
 				} catch (GSIllegalRangedData e1) {
 					// TODO Auto-generated catch block
 					throw new IllegalArgumentException("SHOULD NOT HAPPEN");

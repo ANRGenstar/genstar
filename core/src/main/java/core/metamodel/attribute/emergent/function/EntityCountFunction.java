@@ -1,7 +1,8 @@
 package core.metamodel.attribute.emergent.function;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -18,17 +19,20 @@ import core.metamodel.value.numeric.IntegerValue;
  * @param <E>
  * @param <U>
  */
+@JsonTypeName(EntityCountFunction.SELF)
 public class EntityCountFunction<E extends IEntity<? extends IAttribute<? extends IValue>>, U> 
 	extends AEntityEmergentFunction<E, U, IntegerValue>
 	implements IEntityEmergentFunction<E, U, IntegerValue> {
 	
-	public EntityCountFunction(IValueSpace<IntegerValue> is, IEntityChildFilter filter, IValue... matches) {
-		super(is, filter, matches);
+	public static final String SELF = "COUNT FUNCTION";
+	
+	public EntityCountFunction(IAttribute<IntegerValue> referent, IEntityChildFilter filter, IValue... matches) {
+		super(referent, filter, matches);
 	}
 
 	@Override
 	public IntegerValue apply(E entity, U useless) {
-		return this.getValueSpace().proposeValue(
+		return this.getReferentAttribute().getValueSpace().proposeValue(
 				Integer.toString(super.getFilter() != null && super.getMatchers() != null ? 
 					super.getFilter().retain(entity.getChildren(), super.getMatchers()).size() : 
 						entity.getCountChildren())

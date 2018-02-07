@@ -75,7 +75,7 @@ public class GSRangeTemplate {
 	 * 
 	 * @return
 	 */
-	public NumMatcher getNumerciMatcher(){
+	public NumMatcher getNumberMatcher(){
 		return numMatcher;
 	}
 	

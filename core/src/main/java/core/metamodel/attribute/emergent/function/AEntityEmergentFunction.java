@@ -1,7 +1,7 @@
 package core.metamodel.attribute.emergent.function;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
+import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -10,19 +10,17 @@ public abstract class AEntityEmergentFunction<E extends IEntity<? extends IAttri
 		U, V extends IValue> 
 	implements IEntityEmergentFunction<E, U, V> {
 
-	private IValueSpace<V> vs;
+	private IAttribute<V> referent;
 	
 	private IEntityChildFilter filter;
 	private IValue[] matches;
 	
-	public AEntityEmergentFunction(IEntityChildFilter filter, IValue... matches) {
-		this.filter = filter;
-		this.matches = matches;
-	}
-	
-	public AEntityEmergentFunction(IValueSpace<V> vs, IEntityChildFilter filter, IValue... matches) {
-		this.setValueSpace(vs);
-		this.filter = filter;
+	public AEntityEmergentFunction(IAttribute<V> referent, IEntityChildFilter filter, IValue... matches) {
+		this.setReferentAttribute(referent);
+		if(filter == null)
+			this.filter = EChildFilter.All.getFilter();
+		else
+			this.filter = filter;
 		this.matches = matches;
 	}
 	
@@ -47,13 +45,13 @@ public abstract class AEntityEmergentFunction<E extends IEntity<? extends IAttri
 	}
 
 	@Override
-	public IValueSpace<V> getValueSpace() {
-		return this.vs;
+	public IAttribute<V> getReferentAttribute() {
+		return this.referent;
 	}
 
 	@Override
-	public void setValueSpace(IValueSpace<V> vs) {
-		this.vs = vs;
+	public void setReferentAttribute(IAttribute<V> referent) {
+		this.referent = referent;
 	}
 	
 }

@@ -2,15 +2,12 @@ package core.metamodel.attribute.emergent.function;
 
 import java.util.function.BiFunction;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import core.configuration.jackson.AttributeDeserializer;
-import core.configuration.jackson.EmergentAttributeSerializer;
+import core.configuration.jackson.EmergentFunctionSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
@@ -36,7 +33,7 @@ import core.metamodel.value.IValue;
  * @param <V>
  */
 @JsonTypeInfo(
-	      use = JsonTypeInfo.Id.CLASS,
+	      use = JsonTypeInfo.Id.NAME,
 	      include = JsonTypeInfo.As.PROPERTY
 	      )
 @JsonSubTypes({
@@ -44,47 +41,55 @@ import core.metamodel.value.IValue;
 	        @JsonSubTypes.Type(value = EntityCountFunction.class),
 	        @JsonSubTypes.Type(value = EntityValueForAttributeFunction.class)
 	    })
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
-@JsonDeserialize(using = AttributeDeserializer.class)
-@JsonSerialize(using = EmergentAttributeSerializer.class)
+@JsonSerialize(using = EmergentFunctionSerializer.class)
 public interface IEntityEmergentFunction<
 		E extends IEntity<? extends IAttribute<? extends IValue>>, U, V extends IValue> 
 	extends BiFunction<E, U, V> {
+	
+	public static final String FILTER = "FILTER";
+	public static final String MATCHERS = "MATCHERS";
+	public static final String TYPE = "CLASS TYPE";
 	
 	/**
 	 * Returns the filter that will select the appropriate child to compute emergent attribute value
 	 * @return
 	 */
+	@JsonProperty(FILTER)
 	public IEntityChildFilter getFilter();
 	
 	/**
 	 * Defines the filter to be use to select sub entities
 	 * @param filter
 	 */
+	@JsonProperty(FILTER)
 	public void setFilter(IEntityChildFilter filter);
 	
 	/**
 	 * Returns the values to be used to filter sub-entities
 	 * @return
 	 */
+	@JsonProperty(MATCHERS)
 	public IValue[] getMatchers();
 	
 	/**
 	 * Defines the values to be used to filter sub-entities
 	 * @param matchers
 	 */
+	@JsonProperty(MATCHERS)
 	public void setMatchers(IValue... matchers);
 	
 	/**
 	 * returns the value space attached to this function
 	 * @return
 	 */
-	public IValueSpace<V> getValueSpace();
+	@JsonProperty(IValueSpace.REF_ATT)
+	public IAttribute<V> getReferentAttribute();
 	
 	/**
 	 * Define the value space attached to this function
 	 * @param vs
 	 */
-	public void setValueSpace(IValueSpace<V> vs);
+	@JsonProperty(IValueSpace.REF_ATT)
+	public void setReferentAttribute(IAttribute<V> referentAttribute);
 	
 }

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,9 +12,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
@@ -27,8 +31,14 @@ import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.attribute.demographic.map.IAttributeMapper;
 import core.metamodel.attribute.emergent.EmergentAttribute;
 import core.metamodel.attribute.emergent.EmergentAttributeFactory;
+import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
+import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
+import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.emergent.function.EntityAggregatedAttributeFunction;
+import core.metamodel.attribute.emergent.function.EntityCountFunction;
+import core.metamodel.attribute.emergent.function.EntityValueForAttributeFunction;
 import core.metamodel.attribute.emergent.function.IEntityEmergentFunction;
+import core.metamodel.attribute.emergent.function.aggregator.IAggregateValueFunction;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.attribute.record.RecordAttribute;
@@ -106,10 +116,14 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute =
-				this.getEmergentAttribute(node);
-		DES_DEMO_ATTRIBUTES.put(id, attribute);
-		return attribute;
+		EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute = null;
+		try {
+			attribute = this.getEmergentAttribute(node);
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+		}
+		return DES_DEMO_ATTRIBUTES.put(id, attribute);
 	}
 
 	/*
@@ -122,57 +136,68 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 			return DES_DEMO_ATTRIBUTES.get(id);
 		DemographicAttribute<? extends IValue> attribute = DemographicAttributeFactory.getFactory()
 				.createAttribute(id, this.getType(node), this.getValues(node));
-		DES_DEMO_ATTRIBUTES.put(id, attribute);
-		return attribute;
+		return DES_DEMO_ATTRIBUTES.put(id, attribute);
 	}
 		
 	/*
 	 * Deserialize undirected mapped demographic attribute
 	 */
 	private DemographicAttribute<? extends IValue> deserializeUDA(JsonNode node) throws GSIllegalRangedData {
-		return DemographicAttributeFactory.getFactory()
+		String id = this.getName(node);
+		if(DES_DEMO_ATTRIBUTES.containsKey(id))
+			return DES_DEMO_ATTRIBUTES.get(id);
+		DemographicAttribute<? extends IValue> attribute = DemographicAttributeFactory.getFactory()
 				.createMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedMapper(node));
+		return DES_DEMO_ATTRIBUTES.put(id, attribute);
 	}
 
 	/*
 	 * Deserialize record demographic attribute
 	 */
 	private DemographicAttribute<? extends IValue> deserializeRDA(JsonNode node) throws GSIllegalRangedData {
-		return DemographicAttributeFactory.getFactory()
+		String id = this.getName(node);
+		if(DES_DEMO_ATTRIBUTES.containsKey(id))
+			return DES_DEMO_ATTRIBUTES.get(id);
+		DemographicAttribute<? extends IValue> attribute = DemographicAttributeFactory.getFactory()
 				.createRecordAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedRecord(node));
+		return DES_DEMO_ATTRIBUTES.put(id, attribute);
 	}
 
 	/*
 	 * Deserialize aggregated demographic attribute
 	 */
-	private MappedDemographicAttribute<? extends IValue, ? extends IValue> deserializeADA(JsonNode node) 
+	private DemographicAttribute<? extends IValue> deserializeADA(JsonNode node) 
 			throws GSIllegalRangedData{
+		String id = this.getName(node);
+		if(DES_DEMO_ATTRIBUTES.containsKey(id))
+			return DES_DEMO_ATTRIBUTES.get(id);
+		
 		MappedDemographicAttribute<? extends IValue, ? extends IValue> attribute = null;
 		Map<String, Collection<String>> map = this.getOrderedAggregate(node);
 		switch (this.getType(node)) {
 		case Range:
 			attribute = DemographicAttributeFactory.getFactory()
-					.createRangeAggregatedAttribute(this.getName(node), 
+					.createRangeAggregatedAttribute(id, 
 							this.deserializeDA(RangeValue.class, node.findValue(MappedDemographicAttribute.REF)),
 								map);
 			break;
 		case Boolean:
 			attribute = DemographicAttributeFactory.getFactory()
-					.createBooleanAggregatedAttribute(this.getName(node), 
+					.createBooleanAggregatedAttribute(id, 
 							this.deserializeDA(BooleanValue.class, node.findValue(MappedDemographicAttribute.REF)),
 								map);
 			break;
 		case Nominal:
 			attribute = DemographicAttributeFactory.getFactory()
-					.createNominalAggregatedAttribute(this.getName(node), 
+					.createNominalAggregatedAttribute(id, 
 							this.deserializeDA(NominalValue.class, node.findValue(MappedDemographicAttribute.REF)),
 								map);
 			break;
 		case Order:
 			attribute = DemographicAttributeFactory.getFactory()
-					.createOrderedAggregatedAttribute(this.getName(node), 
+					.createOrderedAggregatedAttribute(id, 
 							this.deserializeDA(OrderedValue.class, node.findValue(MappedDemographicAttribute.REF)),
 								map.entrySet().stream().collect(Collectors.toMap(
 										Entry::getKey, 
@@ -183,7 +208,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		default:
 			throw new IllegalArgumentException("Trying to parse unknown value type: "+this.getType(node));
 		}
-		return attribute;
+		return DES_DEMO_ATTRIBUTES.put(id, attribute);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -340,16 +365,77 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	
 	// EMERGENT
 	
-	/**
-	 * TODO
-	 * 
-	 * @param node
-	 * @return
+	/*
+	 * Build emergent attribute 
 	 */
+	@SuppressWarnings("unchecked")
 	private EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> getEmergentAttribute(
-			JsonNode node) {
-		// TODO Auto-generated method stub
-		return null;
+			JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+		
+		String name = this.getName(node);
+		JsonNode function = node.findValue(EmergentAttribute.FUNCTION);
+		JsonNode filter = function.get(IEntityEmergentFunction.FILTER);
+			
+		EmergentAttribute<? extends IValue, IEntity<? extends IAttribute<? extends IValue>>, ?> att = null;
+		
+		ObjectMapper om = new ObjectMapper();
+		switch (function.get(IEntityEmergentFunction.TYPE).textValue()) {
+		case EntityCountFunction.SELF:
+			att = EmergentAttributeFactory.getFactory().getCountAttribute(name, this.getFilter(filter), 
+							this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS)));
+			break;
+		case EntityAggregatedAttributeFunction.SELF:
+			att = EmergentAttributeFactory.getFactory().getAggregatedValueOfAttribute(name,  
+					om.readValue(om.writeValueAsBytes(function.get(EntityAggregatedAttributeFunction.AGGREGATOR)), 
+							IAggregateValueFunction.class), 
+					this.getFilter(filter), this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS)));
+			break;
+		case EntityValueForAttributeFunction.SELF:
+			String refAtt = function.get(IAttribute.VALUE_SPACE).get(IValueSpace.REF_ATT).asText();
+			att = EmergentAttributeFactory.getFactory().getValueOfAttribute(name, 
+					DES_DEMO_ATTRIBUTES.get(refAtt), 
+					this.getFilter(filter), 
+					this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS)));
+			break;
+		default:
+			throw new IllegalStateException("Emergent function type "
+					+function.get(IEntityEmergentFunction.TYPE).textValue()+" is unrecognized");
+		}
+		
+		return att;
+	}
+	
+	/*
+	 * Retrieve the filter
+	 */
+	private IEntityChildFilter getFilter(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+		EChildFilter type = EChildFilter.valueOf(node.get(IEntityChildFilter.TYPE).asText());
+		JsonNode comparatorNode = node.get(IEntityChildFilter.COMPARATOR); 
+		if(comparatorNode.isNull())
+			return type.getFilter();
+		ObjectMapper mapper = new ObjectMapper();
+		return EntityChildFilterFactory.getFactory().getFilter(type, 
+				mapper.readValue(mapper.writeValueAsString(comparatorNode), 
+						new TypeReference<Comparator<IEntity<? extends IAttribute<? extends IValue>>>>() { }));
+	}
+	
+	/*
+	 * Retrieve the value in a matcher array
+	 */
+	private IValue[] getMatchers(JsonNode node) {
+		if(!node.isArray())
+			throw new IllegalArgumentException("This node is not an array of matchers (node type is "
+					+node.getNodeType()+")");
+		List<IValue> values = new ArrayList<>();
+		int i = 0;
+		while(node.has(i)) {
+			String val = node.get(i++).asText();
+			IValue value = DES_DEMO_ATTRIBUTES.values().stream()
+					.filter(att -> att.getValueSpace().contains(val))
+					.findFirst().get().getValueSpace().getValue(val);
+			values.add(value);
+		}
+		return values.toArray(new IValue[values.size()]);
 	}
 	
 }

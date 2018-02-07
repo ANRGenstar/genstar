@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -20,7 +21,7 @@ public class EntityOneOfMatchFilter implements IEntityChildFilter {
 	private Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator;
 	
 	public EntityOneOfMatchFilter() {
-		this.comparator = this.getComparator();
+		this.comparator = this.getDefaultComparator();
 	}
 	
 	public EntityOneOfMatchFilter(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator) {
@@ -38,6 +39,16 @@ public class EntityOneOfMatchFilter implements IEntityChildFilter {
 	@Override
 	public Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator(){
 		return this.comparator;
+	}
+
+	@Override
+	public void setComparator(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator) {
+		this.comparator = comparator;
+	}
+
+	@Override
+	public EChildFilter getType() {
+		return EChildFilter.OneOf;
 	}
 
 }

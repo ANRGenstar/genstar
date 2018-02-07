@@ -3,9 +3,10 @@ package core.metamodel.attribute.emergent;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import core.configuration.jackson.EmergentAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.emergent.function.IEntityEmergentFunction;
 import core.metamodel.entity.IEntity;
@@ -13,9 +14,9 @@ import core.metamodel.value.IValue;
 
 /**
  * Attribute that can retrieve value based on emergent properties. It is based on
- * the implementation of a {@link IEntityEmergentFunction}
+ * the implementation of a {@link EmergentAttribute}
  * 
- * @see IEntityEmergentFunction
+ * @see EmergentAttribute
  * 
  * @author kevinchapuis
  *
@@ -24,16 +25,16 @@ import core.metamodel.value.IValue;
  * @param <U>
  */
 @JsonTypeName(EmergentAttribute.SELF)
+@JsonSerialize(using = EmergentAttributeSerializer.class)
 public class EmergentAttribute<V extends IValue, 
 	E extends IEntity<? extends IAttribute<? extends IValue>>,
 			U> 
 	extends DemographicAttribute<V> {
 
 	public static final String SELF = "EMERGENT ATTRIBUTE";
-
 	public static final String FUNCTION = "EMERGENT FUNCTION";
 	
-	private IValueSpace<V> vs;
+	@JsonProperty(FUNCTION)
 	private IEntityEmergentFunction<E, U, V> function;
 
 	protected EmergentAttribute(String name) {
@@ -71,18 +72,6 @@ public class EmergentAttribute<V extends IValue,
 	@JsonProperty(FUNCTION)
 	public void setFunction(IEntityEmergentFunction<E, U, V> function){
 		this.function = function;
-	}
-
-	@JsonIgnore
-	@Override
-	public IValueSpace<V> getValueSpace() {
-		return this.vs;
-	}
-
-	@JsonIgnore
-	@Override
-	public void setValueSpace(IValueSpace<V> valueSpace) {
-		this.vs = valueSpace;
 	}
 
 }

@@ -2,9 +2,12 @@ package core.metamodel.attribute.emergent.function.aggregator;
 
 import java.util.Collection;
 
-import core.metamodel.attribute.IValueSpace;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.numeric.RangeSpace;
 import core.metamodel.value.numeric.RangeValue;
+import core.metamodel.value.numeric.template.GSRangeTemplate;
 
 
 /**
@@ -15,12 +18,17 @@ import core.metamodel.value.numeric.RangeValue;
  * @author kevinchapuis
  *
  */
+@JsonTypeName(RangeAggValueFunction.SELF)
 public class RangeAggValueFunction implements IAggregateValueFunction<RangeValue, RangeValue> {
 
-	private RangeSpace rs;
+	public static final String SELF = "RANGE AGGREGATOR";
 	
-	public RangeAggValueFunction(RangeSpace rs) {
-		this.rs = rs;
+	private IAttribute<RangeValue> referent;
+	private GSRangeTemplate rt;
+	
+	public RangeAggValueFunction(IAttribute<RangeValue> referent) {
+		this.referent = referent;
+		this.rt = ((RangeSpace) referent.getValueSpace()).getRangeTemplate();
 	}
 	
 	@Override
@@ -29,7 +37,7 @@ public class RangeAggValueFunction implements IAggregateValueFunction<RangeValue
 				.reduce(0, (b1, b2) -> this.add(b1, b2));
 		Number top = values.stream().map(r -> r.getTopBound())
 				.reduce(0, (b1, b2) -> this.add(b1, b2));
-		return rs.getInstanceValue(rs.getRangeTemplate().getMiddleTemplate(bottom, top));
+		return referent.getValueSpace().getInstanceValue(rt.getMiddleTemplate(bottom, top));
 	}
 	
 	private Number add(Number n1, Number n2) {
@@ -40,8 +48,8 @@ public class RangeAggValueFunction implements IAggregateValueFunction<RangeValue
 	}
 
 	@Override
-	public IValueSpace<RangeValue> getValueSpace() {
-		return this.rs;
+	public IAttribute<RangeValue> getReferentAttribute() {
+		return this.referent;
 	}
 
 }

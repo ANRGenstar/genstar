@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
@@ -24,9 +25,12 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.emergent.EmergentAttributeFactory;
+import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeValue;
+import core.util.GSUtilAttribute;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 
@@ -130,12 +134,24 @@ public class GenstarJsonUtilTest {
 		dd.addRecords(DemographicAttributeFactory.getFactory()
 				.createRecordAttribute("Population", GSEnumDataType.Integer, 
 						dd.getAttribute("Range aggregated attribute")));
+		
+		// EMERGENT
+		IValue[] matches = GSUtilAttribute.getIValues(rangeAttribute, "25 à 34", "35 à 54", "55 et plus").toArray(new IValue[3]);
+		dd.addAttributes(EmergentAttributeFactory.getFactory()
+				.getValueOfAttribute("Age du référent du ménage", rangeAttribute, EChildFilter.OneOf.getFilter(), 
+						matches));
+		
+		IValue[] matchesTwo = GSUtilAttribute.getIValues(rangeAggAttribute, "moins de 24 ans").toArray(new IValue[1]);
+		dd.addAttributes(EmergentAttributeFactory.getFactory()
+				.getAggregatedRangeAttribute("Age cumulé des enfants", rangeAggAttribute, 
+						EChildFilter.OneOf.getFilter(), matchesTwo));
 
 		sju = new GenstarJsonUtil();
 		
 	}
 
 	@Test
+	@Ignore
 	public void test() throws JsonGenerationException, JsonMappingException, IOException {
 		for(DemographicAttribute<? extends IValue> att : dd.getAttributes()) {
 			

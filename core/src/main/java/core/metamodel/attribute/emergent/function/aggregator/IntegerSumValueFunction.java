@@ -2,7 +2,9 @@ package core.metamodel.attribute.emergent.function.aggregator;
 
 import java.util.Collection;
 
-import core.metamodel.attribute.IValueSpace;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.numeric.IntegerValue;
 
 /**
@@ -11,23 +13,26 @@ import core.metamodel.value.numeric.IntegerValue;
  * @author kevinchapuis
  *
  */
+@JsonTypeName(IntegerSumValueFunction.SELF)
 public class IntegerSumValueFunction implements IAggregateValueFunction<IntegerValue, IntegerValue> {
 
-	private IValueSpace<IntegerValue> is;
+	public static final String SELF = "INTEGER AGGREGATOR";
 	
-	public IntegerSumValueFunction(IValueSpace<IntegerValue> is) {
-		this.is = is;
+	private IAttribute<IntegerValue> referent;
+	
+	public IntegerSumValueFunction(IAttribute<IntegerValue> referent) {
+		this.referent = referent;
 	}
 	
 	@Override
 	public IntegerValue aggregate(Collection<IntegerValue> values) {
-		return is.proposeValue(Integer.toString(values.stream()
+		return referent.getValueSpace().proposeValue(Integer.toString(values.stream()
 				.mapToInt(v -> v.getActualValue()).sum()));
 	}
 
 	@Override
-	public IValueSpace<IntegerValue> getValueSpace() {
-		return this.is;
+	public IAttribute<IntegerValue> getReferentAttribute() {
+		return this.referent;
 	}
 
 }

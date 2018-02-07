@@ -1,7 +1,8 @@
 package core.metamodel.attribute.emergent.function;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -15,23 +16,23 @@ import core.metamodel.value.IValue;
  * @author kevinchapuis
  *
  * @param <E>
- * @param <A>
+ * @param <U>
  * @param <V>
  */
+@JsonTypeName(EntityValueForAttributeFunction.SELF)
 public class EntityValueForAttributeFunction<E extends IEntity<? extends IAttribute<? extends IValue>>,
-		 A extends IAttribute<V>, V extends IValue> 
-	extends AEntityEmergentFunction<E, A, V>
-	implements IEntityEmergentFunction<E, A, V> {
+		 U extends IAttribute<V>, V extends IValue> 
+	extends AEntityEmergentFunction<E, U, V>
+	implements IEntityEmergentFunction<E, U, V> {
 
-	public EntityValueForAttributeFunction(IValueSpace<V> vs, IEntityChildFilter filter, IValue... matches) {
-		super(vs, filter, matches);
-		if(filter == null || matches == null)
-			throw new IllegalArgumentException("Value for attribute function cannot be instantiated "
-					+ "without filter and matches");
+	public static final String SELF = "VALUE FOR ATTRIBUTE FUNCTION";
+	
+	public EntityValueForAttributeFunction(IAttribute<V> referent, IEntityChildFilter filter, IValue... matches) {
+		super(referent, filter, matches);
 	}
 
 	@Override
-	public V apply(E entity, A attribute) {
+	public V apply(E entity, U attribute) {
 		return attribute.getValueSpace().getValue(
 				super.getFilter().choseOne(entity.getChildren(), super.getMatchers())
 				.getValueForAttribute(attribute.getAttributeName())

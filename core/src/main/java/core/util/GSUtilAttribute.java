@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
@@ -44,6 +46,10 @@ public class GSUtilAttribute {
 	public static <A extends IAttribute<? extends IValue>> Collection<Map<A, IValue>> getValuesCombination(
 			@SuppressWarnings("unchecked") A... attributes){
 		return getValuesCombination(Arrays.asList(attributes));
+	}
+	
+	public static Collection<IValue> getIValues(IAttribute<? extends IValue> attribute, String... values){
+		return Stream.of(values).map(val -> attribute.getValueSpace().getValue(val)).collect(Collectors.toSet());
 	}
 	
 }

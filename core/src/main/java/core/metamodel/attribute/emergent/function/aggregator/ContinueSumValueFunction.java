@@ -2,7 +2,9 @@ package core.metamodel.attribute.emergent.function.aggregator;
 
 import java.util.Collection;
 
-import core.metamodel.attribute.IValueSpace;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.numeric.ContinuousValue;
 
 /**
@@ -11,23 +13,26 @@ import core.metamodel.value.numeric.ContinuousValue;
  * @author kevinchapuis
  *
  */
+@JsonTypeName(ContinueSumValueFunction.SELF)
 public class ContinueSumValueFunction implements IAggregateValueFunction<ContinuousValue, ContinuousValue> {
 
-	public IValueSpace<ContinuousValue> cs;
+	public static final String SELF = "CONTINUOUS AGGREGATOR"; 
 	
-	public ContinueSumValueFunction(IValueSpace<ContinuousValue> cs) {
-		this.cs = cs;
+	public IAttribute<ContinuousValue> referent;
+	
+	public ContinueSumValueFunction(IAttribute<ContinuousValue> referent) {
+		this.referent = referent;
 	}
 	
 	@Override
 	public ContinuousValue aggregate(Collection<ContinuousValue> values) {
-		return cs.proposeValue(Double.toString(values.stream()
+		return referent.getValueSpace().proposeValue(Double.toString(values.stream()
 				.mapToDouble(v -> v.getActualValue()).sum()));
 	}
 
 	@Override
-	public IValueSpace<ContinuousValue> getValueSpace() {
-		return this.cs;
+	public IAttribute<ContinuousValue> getReferentAttribute() {
+		return this.referent;
 	}
 
 }

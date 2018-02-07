@@ -4,11 +4,11 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.categoric.OrderedSpace;
 import core.metamodel.value.categoric.OrderedValue;
-import core.metamodel.value.categoric.template.GSCategoricTemplate;
 
 /**
  * Function that aggregate ordered value into ordered value in a dynamic way, based on inner ordered value.
@@ -19,17 +19,20 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
  * @author kevinchapuis
  *
  */
+@JsonTypeName(OrderedAggValueFunction.SELF)
 public class OrderedAggValueFunction implements IAggregateValueFunction<OrderedValue, OrderedValue> {
 
-	private OrderedSpace os;
+	public static final String SELF = "ORDERED AGGREGATOR";
 	
-	public OrderedAggValueFunction(IAttribute<OrderedValue> attribute) {
-		this.os = new OrderedSpace(attribute, new GSCategoricTemplate());
+	private IAttribute<OrderedValue> referent;
+	
+	public OrderedAggValueFunction(IAttribute<OrderedValue> referent) {
+		this.referent = referent;
 	}
 	
 	@Override
 	public OrderedValue aggregate(Collection<OrderedValue> values) {
-		return os.addValue(this.getAggregate(values), 
+		return ((OrderedSpace)referent.getValueSpace()).addValue(this.getAggregate(values), 
 				values.stream().map(v -> v.getStringValue()).collect(Collectors.joining(";")));
 	}
 
@@ -45,8 +48,8 @@ public class OrderedAggValueFunction implements IAggregateValueFunction<OrderedV
 	}
 
 	@Override
-	public IValueSpace<OrderedValue> getValueSpace() {
-		return this.os;
+	public IAttribute<OrderedValue> getReferentAttribute() {
+		return this.referent;
 	}
 	
 }

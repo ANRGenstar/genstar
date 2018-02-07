@@ -2,7 +2,9 @@ package core.metamodel.attribute.emergent.function.aggregator;
 
 import java.util.Collection;
 
-import core.metamodel.attribute.IValueSpace;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.binary.BooleanValue;
 
 /**
@@ -14,15 +16,18 @@ import core.metamodel.value.binary.BooleanValue;
  * @author kevinchapuis
  *
  */
+@JsonTypeName(BooleanAggValueFunction.SELF)
 public class BooleanAggValueFunction implements IAggregateValueFunction<BooleanValue, BooleanValue> {
 
+	public static final String SELF = "BOOLEAN AGGREGATOR"; 
+	
 	public static enum BooleanAggregationStyle {MOST, ALL, ATLEASTONE}
 	
-	private IValueSpace<BooleanValue> bs;
+	private IAttribute<BooleanValue> referent;
 	private BooleanAggregationStyle bas = BooleanAggregationStyle.ALL;
 	
-	public BooleanAggValueFunction(IValueSpace<BooleanValue> bs) {
-		this.bs = bs;
+	public BooleanAggValueFunction(IAttribute<BooleanValue> referent) {
+		this.referent = referent;
 	}
 	
 	@Override
@@ -39,8 +44,8 @@ public class BooleanAggValueFunction implements IAggregateValueFunction<BooleanV
 	}
 	
 	@Override
-	public IValueSpace<BooleanValue> getValueSpace() {
-		return this.bs;
+	public IAttribute<BooleanValue> getReferentAttribute() {
+		return this.referent;
 	}
 	
 	public void setAggregationStyle(BooleanAggregationStyle style) {
@@ -48,16 +53,18 @@ public class BooleanAggValueFunction implements IAggregateValueFunction<BooleanV
 	}
 
 	private BooleanValue all(Collection<BooleanValue> values) {
-		return bs.getValue(Boolean.toString(values.stream().anyMatch(v -> !v.getActualValue())));
+		return this.referent.getValueSpace().getValue(Boolean
+				.toString(values.stream().anyMatch(v -> !v.getActualValue())));
 	}
 	
 	private BooleanValue most(Collection<BooleanValue> values) {
-		return bs.getValue(Boolean.toString(values.stream()
+		return this.referent.getValueSpace().getValue(Boolean.toString(values.stream()
 				.filter(v -> v.getActualValue()).count() >= values.size() / 2d));
 	}
 	
 	private BooleanValue atLeastOne(Collection<BooleanValue> values) {
-		return bs.getValue(Boolean.toString(values.stream().anyMatch(v -> v.getActualValue())));
+		return this.referent.getValueSpace().getValue(Boolean
+				.toString(values.stream().anyMatch(v -> v.getActualValue())));
 	}
 	
 }

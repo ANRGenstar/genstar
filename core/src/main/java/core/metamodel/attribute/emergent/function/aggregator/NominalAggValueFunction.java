@@ -3,22 +3,28 @@ package core.metamodel.attribute.emergent.function.aggregator;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.IValueSpace;
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.categoric.NominalValue;
 
+@JsonTypeName(NominalAggValueFunction.SELF)
 public class NominalAggValueFunction implements IAggregateValueFunction<NominalValue, NominalValue> {
 
-	private IValueSpace<NominalValue> ns;
+	public static final String SELF = "NOMINAL AGGREGATOR";
+	
+	private IAttribute<NominalValue> referent;
 	
 	private String aggChar = "-";
 	
-	public NominalAggValueFunction(IValueSpace<NominalValue> ns) {
-		this.ns = ns;
+	public NominalAggValueFunction(IAttribute<NominalValue> referent) {
+		this.referent = referent;
 	}
 	
 	@Override
 	public NominalValue aggregate(Collection<NominalValue> values) {
-		return ns.getInstanceValue(values.stream().map(v -> v.getStringValue()).collect(Collectors.joining(aggChar)));
+		return referent.getValueSpace().getInstanceValue(values.stream()
+				.map(v -> v.getStringValue()).collect(Collectors.joining(aggChar)));
 	}
 	
 	public void setAggChar(String aggChar) {
@@ -26,8 +32,8 @@ public class NominalAggValueFunction implements IAggregateValueFunction<NominalV
 	}
 
 	@Override
-	public IValueSpace<NominalValue> getValueSpace() {
-		return this.ns;
+	public IAttribute<NominalValue> getReferentAttribute() {
+		return this.referent;
 	}
 
 }

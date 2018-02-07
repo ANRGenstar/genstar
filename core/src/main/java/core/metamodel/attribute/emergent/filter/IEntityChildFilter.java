@@ -8,7 +8,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Supplier;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -19,7 +27,21 @@ import core.metamodel.value.IValue;
  *
  * @param <E>
  */
+@JsonTypeInfo(
+	      use = JsonTypeInfo.Id.NAME,
+	      include = JsonTypeInfo.As.EXISTING_PROPERTY,
+	      property = IEntityChildFilter.TYPE
+	      )
+@JsonSubTypes({
+	        @JsonSubTypes.Type(value = EntityOneOfMatchFilter.class),
+	        @JsonSubTypes.Type(value = EntityOneOfEachMatchFilter.class),
+	        @JsonSubTypes.Type(value = EntityAllMatchFilter.class)
+	    })
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public interface IEntityChildFilter {
+	
+	public static final String COMPARATOR = "COMPARATOR";
+	public static final String TYPE = "TYPE";
 	
 	/**
 	 * Retain only entities that match values - with custom matching rule, e.g. all or one of match
@@ -50,6 +72,7 @@ public interface IEntityChildFilter {
 	 * The default supplier to collect retained entities
 	 * @return
 	 */
+	@JsonIgnore
 	default Supplier<Collection<IEntity<? extends IAttribute<? extends IValue>>>> getSupplier(){
 		return new Supplier<Collection<IEntity<? extends IAttribute<? extends IValue>>>>() {
 			@Override
@@ -63,7 +86,8 @@ public interface IEntityChildFilter {
 	 * The default comparator of entities that compare entity ID
 	 * @return
 	 */
-	default Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator(){
+	@JsonIgnore
+	default Comparator<IEntity<? extends IAttribute<? extends IValue>>> getDefaultComparator(){
 		return new Comparator<IEntity<? extends IAttribute<? extends IValue>>>() {
 			@Override
 			public int compare(IEntity<? extends IAttribute<? extends IValue>> o1, 
@@ -72,5 +96,13 @@ public interface IEntityChildFilter {
 			}
 		};
 	}
+	
+	@JsonProperty(COMPARATOR)
+	public Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator();
+	
+	public void setComparator(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator);
+	
+	@JsonProperty(TYPE)
+	public EChildFilter getType();
 	
 }
