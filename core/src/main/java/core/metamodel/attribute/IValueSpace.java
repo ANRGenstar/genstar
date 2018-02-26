@@ -138,6 +138,13 @@ public interface IValueSpace<V extends IValue> {
 	public GSEnumDataType getType();
 	
 	/**
+	 * Return the type class of value
+	 * @return
+	 */
+	@JsonIgnore
+	public Class<V> getTypeClass();
+	
+	/**
 	 * States if passed value is a theoretical valid candidate to be part
 	 * of this value space
 	 * @param value
@@ -153,6 +160,13 @@ public interface IValueSpace<V extends IValue> {
 	@JsonProperty(IValueSpace.REF_ATT)
 	@JsonBackReference(value = IValueSpace.REF_ATT)
 	public IAttribute<V> getAttribute();
+	
+	/**
+	 * Return a blank (no value store) clone of this value space
+	 * 
+	 * @return
+	 */
+	public IValueSpace<V> clone(IAttribute<V> newReferent);
 	
 	// -------------------------------------------------------- //
 	

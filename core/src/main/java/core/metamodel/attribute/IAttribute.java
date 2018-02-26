@@ -12,8 +12,8 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import core.configuration.jackson.AttributeDeserializer;
 import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.demographic.EmergentAttribute;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
-import core.metamodel.attribute.emergent.EmergentAttribute;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;

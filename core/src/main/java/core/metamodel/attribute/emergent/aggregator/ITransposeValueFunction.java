@@ -1,4 +1,4 @@
-package core.metamodel.attribute.emergent.function.aggregator;
+package core.metamodel.attribute.emergent.aggregator;
 
 import java.util.Collection;
 
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
 
 /**
@@ -23,25 +23,18 @@ import core.metamodel.value.IValue;
 	      include = JsonTypeInfo.As.PROPERTY
 	      )
 @JsonSubTypes({
-	        @JsonSubTypes.Type(value = BooleanAggValueFunction.class),
-	        @JsonSubTypes.Type(value = ContinueSumValueFunction.class),
-	        @JsonSubTypes.Type(value = IntegerSumValueFunction.class),
-	        @JsonSubTypes.Type(value = NominalAggValueFunction.class),
-	        @JsonSubTypes.Type(value = OrderedAggValueFunction.class),
-	        @JsonSubTypes.Type(value = RangeAggValueFunction.class)
+	        @JsonSubTypes.Type(value = IAggregatorValueFunction.class)
 	    })
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
-public interface IAggregateValueFunction<RV extends IValue, IV extends IValue> {
+public interface ITransposeValueFunction<IV extends IValue, RV extends IValue> {
 
-	public static final String TYPE = "TYPE";
-
+	public static final String ID = "TYPE ID";
+	
 	/**
 	 * The main aggregation method. Return value type can be of another type than of input values
 	 * @param values
 	 * @return a unique aggregated value
 	 */
-	public RV aggregate(Collection<IV> values);
-
-	public IAttribute<RV> getReferentAttribute();
+	public RV transpose(Collection<IV> values, IValueSpace<RV> valueSpace);
 	
 }

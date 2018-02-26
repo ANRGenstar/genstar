@@ -19,7 +19,11 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
 /**
- * TODO: javadoc
+ * Define a space for ordered value: each value that pertain to this value space has an index that define
+ * its relative position to all other values.
+ * <p>
+ * Hence, if values were added as it is, ordering is based on insertion order. This is also possible
+ * to add values with a given index and manages indexes as list does.
  * 
  * @author kevinchapuis
  *
@@ -64,6 +68,11 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	@Override
 	public GSEnumDataType getType() {
 		return GSEnumDataType.Order;
+	}
+	
+	@Override
+	public Class<OrderedValue> getTypeClass() {
+		return OrderedValue.class;
 	}
 
 	@Override
@@ -220,6 +229,11 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 		return this.values
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}
+
+	@Override
+	public IValueSpace<OrderedValue> clone(IAttribute<OrderedValue> newReferent) {
+		return new OrderedSpace(newReferent, getCategoricTemplate());
 	}
 
 }

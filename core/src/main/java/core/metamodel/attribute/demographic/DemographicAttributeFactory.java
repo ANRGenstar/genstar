@@ -9,11 +9,18 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.demographic.map.AggregateMapper;
 import core.metamodel.attribute.demographic.map.RecordMapper;
 import core.metamodel.attribute.demographic.map.UndirectedMapper;
+import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
+import core.metamodel.attribute.emergent.EntityCountFunction;
+import core.metamodel.attribute.emergent.EntityValueForAttributeFunction;
+import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
+import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.record.RecordAttribute;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BinarySpace;
 import core.metamodel.value.binary.BooleanValue;
@@ -305,6 +312,89 @@ public class DemographicAttributeFactory {
 			throw new IllegalArgumentException("Cannot create "+dataType+" record attribute - suppose to be "
 					+GSEnumDataType.Integer+" or "+GSEnumDataType.Continue);
 		}
+	}
+	
+	/**
+	 * Attribute that will count the number of sub-entities. As for any emergent attribute
+	 * it is possible to filter agent before counting; makes it possible to number sub-entities
+	 * that match any predicate
+	 * 
+	 * @param name
+	 * @param entity
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
+	EmergentAttribute<IntegerValue, E, Object> getCountAttribute(String name, 
+			IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<IntegerValue, E, Object> attribute = new EmergentAttribute<>(name);
+		attribute.setValueSpace(new IntegerSpace(attribute));
+		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
+		return attribute;
+	}
+
+	/**
+	 * Attribute that will retrieve the value of one particular sub-entity attribute. This is done
+	 * by providing a filter function which drive the selection process (filter and sort sub entities)
+	 * and then retrieve associated value for the given attribute
+	 * 
+	 * @param name
+	 * @param entity
+	 * @param attribute
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
+	EmergentAttribute<V, E, DemographicAttribute<V>> getValueOfAttribute(String name, DemographicAttribute<V> referent,  
+			IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<V, E, DemographicAttribute<V>> eAttribute = new EmergentAttribute<>(name, referent);
+		eAttribute.setValueSpace(referent.getValueSpace());
+		eAttribute.setFunction(new EntityValueForAttributeFunction<E, DemographicAttribute<V>, V>(referent, filter, matches));
+		return eAttribute;
+	}
+
+
+	/**
+	 * Attribute that aggregate input values into single output value based on a default aggregator
+	 * 
+	 * see {@link IAggregatorValueFunction#getDefaultAggregator(Class)}
+	 * 
+	 * @param name
+	 * @param referent
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
+	EmergentAttribute<V, E, DemographicAttribute<V>> getAggregatedValueOfAttribute(String name, DemographicAttribute<V> inputAttribute, 
+			IEntityChildFilter filter, IValue... matches) {
+		return this.getAggregatedValueOfAttribute(name, inputAttribute, 
+				IAggregatorValueFunction.getDefaultAggregator(inputAttribute.getValueSpace().getTypeClass()), 
+				filter, matches);
+	}
+		
+	/**
+	 * Attribute that will aggregate several value to a unique value of the same type: for example, it can be used to sum up
+	 * the revenue of all individual of a household (and works even if it is integer, continuous or range value) 
+	 * <p>
+	 * 
+	 * @param name
+	 * @param entity
+	 * @param attribute
+	 * @param aggFunction
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends DemographicAttribute<V>, V extends IValue>
+	EmergentAttribute<V, E, A> getAggregatedValueOfAttribute(String name, DemographicAttribute<V> inputAttribute, 
+			IAggregatorValueFunction<V> aggFunction, IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<V, E, A> eAttribute = new EmergentAttribute<>(name, inputAttribute);
+		eAttribute.setValueSpace(inputAttribute.getValueSpace().clone(eAttribute));
+		eAttribute.setFunction(new EntityAggregatedAttributeFunction<E, A, V>(eAttribute, aggFunction, filter, matches));
+		return eAttribute;
 	}
 	
 	// ------------------------------------------------------------- //
@@ -760,7 +850,7 @@ public class DemographicAttributeFactory {
 	 * 
 	 * @param name
 	 * @param gsCategoricTemplate
-	 * @param referent
+	 * @param vs
 	 * @param mapper
 	 * @return
 	 */
@@ -798,7 +888,7 @@ public class DemographicAttributeFactory {
 	 * 
 	 * @param name
 	 * @param gsCategoricTemplate
-	 * @param referent
+	 * @param vs
 	 * @param mapper
 	 * @return
 	 */
@@ -931,7 +1021,7 @@ public class DemographicAttributeFactory {
 	 * 
 	 * @param name
 	 * @param gsCategoricTemplate
-	 * @param referent
+	 * @param vs
 	 * @param mapper
 	 * @return
 	 */
@@ -956,7 +1046,7 @@ public class DemographicAttributeFactory {
 	 * Create range aggregated value attribute
 	 * 
 	 * @param name
-	 * @param referent
+	 * @param vs
 	 * @param mapper
 	 * @return
 	 * @throws GSIllegalRangedData 
@@ -974,7 +1064,7 @@ public class DemographicAttributeFactory {
 	 * 
 	 * @param name
 	 * @param rangeTemplate
-	 * @param referent
+	 * @param vs
 	 * @param mapper
 	 * @return
 	 */

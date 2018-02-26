@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -27,22 +26,23 @@ import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.attribute.demographic.EmergentAttribute;
 import core.metamodel.attribute.demographic.MappedDemographicAttribute;
 import core.metamodel.attribute.demographic.map.IAttributeMapper;
-import core.metamodel.attribute.emergent.EmergentAttribute;
-import core.metamodel.attribute.emergent.EmergentAttributeFactory;
+import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
+import core.metamodel.attribute.emergent.EntityCountFunction;
+import core.metamodel.attribute.emergent.EntityValueForAttributeFunction;
+import core.metamodel.attribute.emergent.IEntityEmergentFunction;
+import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
-import core.metamodel.attribute.emergent.function.EntityAggregatedAttributeFunction;
-import core.metamodel.attribute.emergent.function.EntityCountFunction;
-import core.metamodel.attribute.emergent.function.EntityValueForAttributeFunction;
-import core.metamodel.attribute.emergent.function.IEntityEmergentFunction;
-import core.metamodel.attribute.emergent.function.aggregator.IAggregateValueFunction;
 import core.metamodel.attribute.geographic.GeographicAttribute;
 import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
+import core.metamodel.entity.comparator.ImplicitEntityComparator;
+import core.metamodel.entity.comparator.function.IComparatorFunction;
 import core.metamodel.value.IValue;
 import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalValue;
@@ -368,34 +368,31 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Build emergent attribute 
 	 */
-	@SuppressWarnings("unchecked")
 	private EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> getEmergentAttribute(
 			JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		
 		String name = this.getName(node);
-		JsonNode function = node.findValue(EmergentAttribute.FUNCTION);
+		
+		JsonNode function = node.get(EmergentAttribute.FUNCTION);
 		JsonNode filter = function.get(IEntityEmergentFunction.FILTER);
 			
 		EmergentAttribute<? extends IValue, IEntity<? extends IAttribute<? extends IValue>>, ?> att = null;
+		String refAtt = node.get(MappedDemographicAttribute.REF).asText();
 		
-		ObjectMapper om = new ObjectMapper();
+		
+		IEntityChildFilter f = this.getFilter(filter);
+		IValue[] m = this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS));
 		switch (function.get(IEntityEmergentFunction.TYPE).textValue()) {
 		case EntityCountFunction.SELF:
-			att = EmergentAttributeFactory.getFactory().getCountAttribute(name, this.getFilter(filter), 
-							this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS)));
+			att = DemographicAttributeFactory.getFactory().getCountAttribute(name, f, m);
 			break;
 		case EntityAggregatedAttributeFunction.SELF:
-			att = EmergentAttributeFactory.getFactory().getAggregatedValueOfAttribute(name,  
-					om.readValue(om.writeValueAsBytes(function.get(EntityAggregatedAttributeFunction.AGGREGATOR)), 
-							IAggregateValueFunction.class), 
-					this.getFilter(filter), this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS)));
+			att = DemographicAttributeFactory.getFactory().getAggregatedValueOfAttribute(name, DES_DEMO_ATTRIBUTES.get(refAtt), 
+					this.getAggrgatorFunction(function.get(EntityAggregatedAttributeFunction.AGGREGATOR)), f, m);
 			break;
 		case EntityValueForAttributeFunction.SELF:
-			String refAtt = function.get(IAttribute.VALUE_SPACE).get(IValueSpace.REF_ATT).asText();
-			att = EmergentAttributeFactory.getFactory().getValueOfAttribute(name, 
-					DES_DEMO_ATTRIBUTES.get(refAtt), 
-					this.getFilter(filter), 
-					this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS)));
+			att = DemographicAttributeFactory.getFactory().getValueOfAttribute(name, 
+					DES_DEMO_ATTRIBUTES.get(refAtt), f, m);
 			break;
 		default:
 			throw new IllegalStateException("Emergent function type "
@@ -404,21 +401,30 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		
 		return att;
 	}
-	
+
+
+	@SuppressWarnings("unchecked")
+	private <V extends IValue> IAggregatorValueFunction<V> getAggrgatorFunction(JsonNode jsonNode) 
+			throws JsonParseException, JsonMappingException, IOException {
+		return new ObjectMapper().readValue(jsonNode.toString(), IAggregatorValueFunction.class);
+	}
+
 	/*
 	 * Retrieve the filter
 	 */
 	private IEntityChildFilter getFilter(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		EChildFilter type = EChildFilter.valueOf(node.get(IEntityChildFilter.TYPE).asText());
-		JsonNode comparatorNode = node.get(IEntityChildFilter.COMPARATOR); 
-		if(comparatorNode.isNull())
-			return type.getFilter();
-		ObjectMapper mapper = new ObjectMapper();
-		return EntityChildFilterFactory.getFactory().getFilter(type, 
-				mapper.readValue(mapper.writeValueAsString(comparatorNode), 
-						new TypeReference<Comparator<IEntity<? extends IAttribute<? extends IValue>>>>() { }));
+		
+		JsonNode comparatorNode = node.get(IEntityChildFilter.COMPARATOR);		
+		ImplicitEntityComparator comparator = new ImplicitEntityComparator();
+		this.getCompAttributes(comparatorNode.get(ImplicitEntityComparator.ATTRIBUTES_REF))
+			.entrySet().stream().forEach(entry -> comparator.setAttribute(entry.getKey(), entry.getValue()));
+		this.getCompFunctions(comparatorNode.get(ImplicitEntityComparator.COMP_FUNCTIONS))
+			.stream().forEach(function -> comparator.setComparatorFunction(function));
+		
+		return EntityChildFilterFactory.getFactory().getFilter(type, comparator);
 	}
-	
+
 	/*
 	 * Retrieve the value in a matcher array
 	 */
@@ -436,6 +442,38 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 			values.add(value);
 		}
 		return values.toArray(new IValue[values.size()]);
+	}
+	
+	/*
+	 * Return attribute and relationship (reverse or not) to comparison process
+	 */
+	private Map<IAttribute<? extends IValue>, Boolean> getCompAttributes(JsonNode arrayAttributes){
+		int index = -1;
+		Map<IAttribute<? extends IValue>, Boolean> attributes = new HashMap<>();
+		while(arrayAttributes.has(++index)) {
+			String[] entry = arrayAttributes.get(index).asText()
+					.split(EntityComparatorSerializer.REVERSE_SEPARATOR);
+			attributes.put(
+					DES_DEMO_ATTRIBUTES.get(entry[0]), 
+					Boolean.valueOf(entry[1]));
+		}
+		return attributes;
+	}
+	
+	/*
+	 * Return custom comparison function for specific value type
+	 */
+	private Collection<IComparatorFunction<? extends IValue>> getCompFunctions(JsonNode arrayFunctions) 
+			throws JsonParseException, JsonMappingException, IllegalArgumentException, IOException {
+		int index = -1;
+		Collection<IComparatorFunction<? extends IValue>> functions = new HashSet<>();
+		ObjectMapper om = new ObjectMapper();
+		while(arrayFunctions.has(++index)) {
+			IComparatorFunction<? extends IValue> func = om.readValue(arrayFunctions.get(index).asText(), 
+					om.getTypeFactory().constructFromCanonical(IComparatorFunction.class.getCanonicalName()));
+			functions.add(func);
+		}
+		return functions;
 	}
 	
 }

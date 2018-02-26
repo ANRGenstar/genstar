@@ -8,10 +8,11 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.demographic.EmergentAttribute;
+import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
+import core.metamodel.attribute.emergent.IEntityEmergentFunction;
+import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
-import core.metamodel.attribute.emergent.function.EntityAggregatedAttributeFunction;
-import core.metamodel.attribute.emergent.function.IEntityEmergentFunction;
-import core.metamodel.attribute.emergent.function.aggregator.IAggregateValueFunction;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -46,17 +47,11 @@ public class EmergentFunctionSerializer extends StdSerializer<
 		
 		String type = typeSer.getTypeIdResolver().idFromValue(function);
 		
+		gen.writeFieldName(EmergentAttribute.FUNCTION);
 		gen.writeStartObject();
-		gen.writeStringField(IEntityEmergentFunction.TYPE, type);
 		
-			// VALUE SPACE
-		/*
-			gen.writeFieldName(IAttribute.VALUE_SPACE);
-			gen.writeStartObject();
-			gen.writeStringField(IValueSpace.TYPE, function.getValueSpace().getType().toString());
-			gen.writeStringField(IValueSpace.REF_ATT, function.getValueSpace().getAttribute().getAttributeName());
-			gen.writeEndObject();
-			*/
+			// TYPE
+			gen.writeStringField(IEntityEmergentFunction.TYPE, type);
 			
 			// FILTER
 			gen.writeFieldName(IEntityEmergentFunction.FILTER);
@@ -72,7 +67,7 @@ public class EmergentFunctionSerializer extends StdSerializer<
 			if(type.equals(EntityAggregatedAttributeFunction.SELF)) {
 				gen.writeFieldName(EntityAggregatedAttributeFunction.AGGREGATOR);
 				gen.writeStartObject();
-				gen.writeStringField(IAggregateValueFunction.TYPE, typeSer.getTypeIdResolver()
+				gen.writeStringField(IAggregatorValueFunction.TYPE, typeSer.getTypeIdResolver()
 						.idFromValue(((EntityAggregatedAttributeFunction) function)
 								.getAggregationFunction()));
 				gen.writeEndObject();

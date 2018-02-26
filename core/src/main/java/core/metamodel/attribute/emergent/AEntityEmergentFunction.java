@@ -1,4 +1,4 @@
-package core.metamodel.attribute.emergent.function;
+package core.metamodel.attribute.emergent;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;

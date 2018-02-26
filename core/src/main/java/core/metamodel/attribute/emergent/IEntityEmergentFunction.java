@@ -1,4 +1,4 @@
-package core.metamodel.attribute.emergent.function;
+package core.metamodel.attribute.emergent;
 
 import java.util.function.BiFunction;
 

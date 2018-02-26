@@ -10,12 +10,6 @@
           }, {
             "INPUT VALUE" : "true"
           } ],
-          "valueTrue" : {
-            "INPUT VALUE" : "true"
-          },
-          "valueFalse" : {
-            "INPUT VALUE" : "false"
-          },
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
           }
@@ -215,4 +209,46 @@
       }
     }, {
       "EMERGENT ATTRIBUTE" : {
-        "REFERENCE ATTRIBUTE" : "Range attribute"
+        "NAME" : "Age du référent du ménage",
+        "REFERENT ATTRIBUTE" : "Range attribute",
+        "EMERGENT FUNCTION" : {
+          "CLASS TYPE" : "VALUE FOR ATTRIBUTE FUNCTION",
+          "FILTER" : {
+            "TYPE" : "OneOf",
+            "COMPARATOR" : {
+              "LISTED ATTRIBUTES" : [ "Boolean attribute : false", "Mapped attribute : true" ],
+              "CUSTOM COMPARATOR FUNCTIONS" : [ ]
+            },
+            "MATCHERS" : [ "55 et plus", "25 à 34", "35 à 54" ]
+          }
+        }
+      }
+    }, {
+      "EMERGENT ATTRIBUTE" : {
+        "NAME" : "Age cumulé des enfants",
+        "REFERENT ATTRIBUTE" : "Range aggregated attribute",
+        "EMERGENT FUNCTION" : {
+          "CLASS TYPE" : "AGG ATTRIBUTE FUNCTION",
+          "FILTER" : {
+            "TYPE" : "OneOf",
+            "COMPARATOR" : {
+              "LISTED ATTRIBUTES" : [ ],
+              "CUSTOM COMPARATOR FUNCTIONS" : [ ]
+            },
+            "MATCHERS" : [ "moins de 24 ans" ]
+          },
+          "AGGREGATOR" : {
+            "TYPE" : "DEFAULT - RANGE AGGREGATOR"
+          }
+        }
+      }
+    } ],
+    "RECORD ATTRIBUTES" : [ {
+      "RECORD ATTRIBUTE" : {
+        "NAME" : "Population",
+        "PROXY ATTRIBUTE TYPE" : "Integer",
+        "REFERENT ATTRIBUTE" : "Range aggregated attribute"
+      }
+    } ]
+  }
+}

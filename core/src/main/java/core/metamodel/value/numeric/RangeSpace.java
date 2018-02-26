@@ -222,6 +222,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		return this.attribute;
 	}
 	
+	@Override
+	public Class<RangeValue> getTypeClass() {
+		return RangeValue.class;
+	}
+	
 	/**
 	 * Get the minimum value
 	 * @return
@@ -263,6 +268,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		return sb.toString();
 		
 		
+	}
+
+	@Override
+	public IValueSpace<RangeValue> clone(IAttribute<RangeValue> newReferent) {
+		return new RangeSpace(newReferent, getRangeTemplate(), getMin(), getMax());
 	}
 	
 }

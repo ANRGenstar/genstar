@@ -6,6 +6,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
@@ -24,7 +26,9 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 
 	private IAttribute<BooleanValue> attribute;
 	
+	@JsonIgnore
 	public final BooleanValue valueTrue;
+	@JsonIgnore
 	public final BooleanValue valueFalse;
 	
 	/**
@@ -88,6 +92,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	}
 	
 	@Override
+	public Class<BooleanValue> getTypeClass() {
+		return BooleanValue.class;
+	}
+	
+	@Override
 	public BooleanValue getEmptyValue() {
 		return emptyValue;
 	}
@@ -134,6 +143,11 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 		return this.values
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}
+
+	@Override
+	public IValueSpace<BooleanValue> clone(IAttribute<BooleanValue> newReferent) {
+		return new BinarySpace(newReferent);
 	}
 
 	

@@ -3,21 +3,19 @@ package core.metamodel.attribute.emergent.filter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.Supplier;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.IEntity;
+import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
 
 /**
@@ -37,7 +35,6 @@ import core.metamodel.value.IValue;
 	        @JsonSubTypes.Type(value = EntityOneOfEachMatchFilter.class),
 	        @JsonSubTypes.Type(value = EntityAllMatchFilter.class)
 	    })
-@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 public interface IEntityChildFilter {
 	
 	public static final String COMPARATOR = "COMPARATOR";
@@ -82,25 +79,11 @@ public interface IEntityChildFilter {
 		};
 	}
 	
-	/**
-	 * The default comparator of entities that compare entity ID
-	 * @return
-	 */
-	@JsonIgnore
-	default Comparator<IEntity<? extends IAttribute<? extends IValue>>> getDefaultComparator(){
-		return new Comparator<IEntity<? extends IAttribute<? extends IValue>>>() {
-			@Override
-			public int compare(IEntity<? extends IAttribute<? extends IValue>> o1, 
-					IEntity<? extends IAttribute<? extends IValue>> o2) {
-				return o1.getEntityId().compareTo(o2.getEntityId());
-			}
-		};
-	}
+	@JsonProperty(COMPARATOR)
+	public ImplicitEntityComparator getComparator();
 	
 	@JsonProperty(COMPARATOR)
-	public Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator();
-	
-	public void setComparator(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator);
+	public void setComparator(ImplicitEntityComparator comparator);
 	
 	@JsonProperty(TYPE)
 	public EChildFilter getType();

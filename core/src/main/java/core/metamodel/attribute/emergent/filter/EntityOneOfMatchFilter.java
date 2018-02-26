@@ -2,12 +2,12 @@ package core.metamodel.attribute.emergent.filter;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.IEntity;
+import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
 
 /**
@@ -18,13 +18,13 @@ import core.metamodel.value.IValue;
  */
 public class EntityOneOfMatchFilter implements IEntityChildFilter {
 
-	private Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator;
+	private ImplicitEntityComparator comparator;
 	
-	public EntityOneOfMatchFilter() {
-		this.comparator = this.getDefaultComparator();
+	protected EntityOneOfMatchFilter() {
+		this.comparator = new ImplicitEntityComparator();
 	}
 	
-	public EntityOneOfMatchFilter(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator) {
+	protected EntityOneOfMatchFilter(ImplicitEntityComparator comparator) {
 		this.comparator = comparator;
 	}
 	
@@ -37,12 +37,12 @@ public class EntityOneOfMatchFilter implements IEntityChildFilter {
 	}
 	
 	@Override
-	public Comparator<IEntity<? extends IAttribute<? extends IValue>>> getComparator(){
+	public ImplicitEntityComparator getComparator(){
 		return this.comparator;
 	}
 
 	@Override
-	public void setComparator(Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator) {
+	public void setComparator(ImplicitEntityComparator comparator) {
 		this.comparator = comparator;
 	}
 

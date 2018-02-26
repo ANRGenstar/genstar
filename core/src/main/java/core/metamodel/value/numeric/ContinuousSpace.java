@@ -53,6 +53,11 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	}
 	
 	@Override
+	public Class<ContinuousValue> getTypeClass() {
+		return ContinuousValue.class;
+	}
+	
+	@Override
 	public ContinuousValue getInstanceValue(String value) {
 		double currentVal = gsdp.getDouble(value);
 		if(currentVal < min || currentVal > max)
@@ -176,6 +181,11 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 		return this.values.values()
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}
+
+	@Override
+	public IValueSpace<ContinuousValue> clone(IAttribute<ContinuousValue> newReferent) {
+		return new ContinuousSpace(newReferent, getMin(), getMax());
 	}
 
 }

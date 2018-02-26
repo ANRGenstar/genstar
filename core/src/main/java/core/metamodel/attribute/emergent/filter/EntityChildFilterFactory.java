@@ -1,10 +1,6 @@
 package core.metamodel.attribute.emergent.filter;
 
-import java.util.Comparator;
-
-import core.metamodel.attribute.IAttribute;
-import core.metamodel.entity.IEntity;
-import core.metamodel.value.IValue;
+import core.metamodel.entity.comparator.ImplicitEntityComparator;
 
 public class EntityChildFilterFactory {
 
@@ -26,8 +22,7 @@ public class EntityChildFilterFactory {
 		return FACTORY;
 	}
 	
-	public IEntityChildFilter getFilter(EChildFilter filter,
-			Comparator<IEntity<? extends IAttribute<? extends IValue>>> comparator) {
+	public IEntityChildFilter getFilter(EChildFilter filter, ImplicitEntityComparator comparator) {
 		switch (filter) {
 		case OneOf:
 			return new EntityOneOfMatchFilter(comparator);

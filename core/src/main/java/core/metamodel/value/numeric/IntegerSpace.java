@@ -118,6 +118,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 	public GSEnumDataType getType() {
 		return GSEnumDataType.Integer;
 	}
+	
+	@Override
+	public Class<IntegerValue> getTypeClass() {
+		return IntegerValue.class;
+	}
 
 	@Override
 	public IAttribute<IntegerValue> getAttribute() {
@@ -171,6 +176,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 		return this.values.values()
 				.stream()
 				.allMatch(val -> valuesStr.contains(val.getStringValue()));
+	}
+
+	@Override
+	public IValueSpace<IntegerValue> clone(IAttribute<IntegerValue> newReferent) {
+		return new IntegerSpace(newReferent, getMin(), getMax());
 	}
 
 

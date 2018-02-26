@@ -41,6 +41,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	}
 	
 	@Override
+	public Class<NominalValue> getTypeClass() {
+		return NominalValue.class;
+	}
+	
+	@Override
 	public boolean isValidCandidate(String value) {
 		return true;
 	}
@@ -119,6 +124,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	 */
 	public GSCategoricTemplate getCategoricTemplate() {
 		return ct;
+	}
+	
+	@Override
+	public IValueSpace<NominalValue> clone(IAttribute<NominalValue> newReferent){
+		return new NominalSpace(newReferent, getCategoricTemplate());
 	}
 	
 	// ---------------------------------------------- //

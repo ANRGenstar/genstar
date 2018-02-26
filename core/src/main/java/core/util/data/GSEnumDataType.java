@@ -12,7 +12,15 @@ import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeValue;
 
 /**
- * 
+ * Define all possible value type that can define attribute instance value:
+ * <p><ul>
+ * <li> {@link GSEnumDataType#Continue} : double value - {@link Double}
+ * <li> {@link GSEnumDataType#Integer} : integer value - {@link Integer}
+ * <li> {@link GSEnumDataType#Range} : couple of numeric values - {@link Number}
+ * <li> {@link GSEnumDataType#Boolean} : boolean value - {@link Boolean}
+ * <li> {@link GSEnumDataType#Order} : ordered nominal value - {@link String}
+ * <li> {@link GSEnumDataType#Nominal} : nominal value - {@link String}
+ * </ul><p>
  * 
  * @author kevinchapuis
  * @author Vo Duc An

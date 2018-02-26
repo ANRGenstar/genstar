@@ -148,5 +148,15 @@ public class GeographicValueSpace<V extends IValue> implements IValueSpace<V> {
 	public boolean containsAllLabels(Collection<String> valuesStr) {
 		return this.innerValueSpace.containsAllLabels(valuesStr);
 	}
+
+	@Override
+	public IValueSpace<V> clone(IAttribute<V> newReferent) {
+		return this.innerValueSpace.clone(newReferent);
+	}
+
+	@Override
+	public Class<V> getTypeClass() {
+		return this.innerValueSpace.getTypeClass();
+	}
 	
 }
