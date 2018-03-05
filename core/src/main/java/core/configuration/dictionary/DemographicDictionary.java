@@ -19,15 +19,15 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.configuration.GenstarJsonUtil;
 import core.metamodel.IPopulation;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.DemographicAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
 /**
  * Encapsulate the whole set of a given attribute type. 
- * For example, it can describe the all {@link DemographicAttribute}
+ * For example, it can describe the all {@link Attribute}
  * used to model a {@link IPopulation} of {@link ADemoEntity} 
  * 
  * @author kevinchapuis
@@ -37,7 +37,7 @@ import core.metamodel.value.IValue;
  */
 @JsonTypeName(GenstarJsonUtil.DEMO_DICO)
 @JsonPropertyOrder({ IGenstarDictionary.ATTRIBUTES, IGenstarDictionary.RECORDS })
-public class DemographicDictionary<A extends DemographicAttribute<? extends IValue>>
+public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	implements IGenstarDictionary<A> {
 	
 	private Set<A> attributes;

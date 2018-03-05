@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -62,6 +62,6 @@ public interface IGSSampleBasedCOSolution {
 	 * 
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> getSolution();
+	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getSolution();
 	
 }

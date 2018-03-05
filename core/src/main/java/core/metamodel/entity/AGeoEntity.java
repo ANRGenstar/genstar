@@ -11,11 +11,11 @@ import org.apache.poi.ss.formula.eval.NotImplementedException;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 
-public abstract class AGeoEntity<V extends IValue> implements IEntity<GeographicAttribute<? extends V>> {
+public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<? extends V>> {
  
 	/**
 	 * The unique identifier of the entity. See {@link EntityUniqueId}
@@ -24,7 +24,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 		
 	private String gsName;
 	
-	private Map<GeographicAttribute<? extends V>, V> attributes;
+	private Map<Attribute<? extends V>, V> attributes;
 	
 
 	/**
@@ -40,23 +40,23 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	private String type;
 	
 	
-	public AGeoEntity(Map<GeographicAttribute<? extends V>, V> attributes, String id) {
+	public AGeoEntity(Map<Attribute<? extends V>, V> attributes, String id) {
 		this.attributes = attributes;
 		this.gsName = id;
 	}
 
 	@Override
-	public Collection<GeographicAttribute<? extends V>> getAttributes() {
+	public Collection<Attribute<? extends V>> getAttributes() {
 		return attributes.keySet();
 	}
 	
 	@Override
-	public Map<GeographicAttribute<? extends V>, IValue> getAttributeMap() {
+	public Map<Attribute<? extends V>, IValue> getAttributeMap() {
 		return Collections.unmodifiableMap(attributes);
 	}
 
 	@Override
-	public boolean hasAttribute(GeographicAttribute<? extends V> attribute) {
+	public boolean hasAttribute(Attribute<? extends V> attribute) {
 		return attributes.containsKey(attribute);
 	}
 
@@ -66,7 +66,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	}
 
 	@Override
-	public V getValueForAttribute(GeographicAttribute<? extends V> attribute) {
+	public V getValueForAttribute(Attribute<? extends V> attribute) {
 		return attributes.get(attribute);
 	}
 
@@ -85,14 +85,14 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	 * @param attribute
 	 * @return
 	 */
-	public Number getNumericValueForAttribute(GeographicAttribute<? extends V> attribute) {
+	public Number getNumericValueForAttribute(Attribute<? extends V> attribute) {
 		if(attribute.getValueSpace().getType().isNumericValue())
 			return new GSDataParser().parseNumbers(this.getValueForAttribute(attribute).getStringValue());
 		return Double.NaN;
 	}
 	
 	/**
-	 * Based on #getNumericValueForAttribute(GeographicAttribute) method, using 
+	 * Based on #getNumericValueForAttribute(Attribute) method, using 
 	 * {@link #getValueForAttribute(String)} to retrieve proper attribute
 	 * 
 	 * @param attribute
@@ -126,7 +126,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Geographic
 	 */
 	public Collection<String> getPropertiesAttribute(){
 		return this.getAttributes().stream()
-				.map(GeographicAttribute::getAttributeName).collect(Collectors.toList());
+				.map(Attribute::getAttributeName).collect(Collectors.toList());
 	}
 	
 	/**

@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -23,7 +23,7 @@ import spll.popmapper.distribution.ISpatialDistribution;
  *
  * @param <SD>
  */
-public interface ISPLinker<E extends IEntity<DemographicAttribute<? extends IValue>>> {
+public interface ISPLinker<E extends IEntity<Attribute<? extends IValue>>> {
 
 	/**
 	 * Main method to link an entity to one candidate draw from a collection

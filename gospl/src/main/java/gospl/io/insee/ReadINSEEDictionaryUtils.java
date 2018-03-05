@@ -29,8 +29,8 @@ import org.htmlcleaner.XPatherException;
 import au.com.bytecode.opencsv.CSVReader;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -39,7 +39,7 @@ import gospl.io.util.ReadDictionaryUtils;
 /**
  * provides utils to parse dictionaries describing data from various sources
  * 
- * FIXME: change the way attribute are created - then suppress options > see {@link DemographicAttributeFactory}
+ * FIXME: change the way attribute are created - then suppress options > see {@link AttributeFactory}
  * 
  * @author Samuel Thiriot
  *
@@ -48,12 +48,12 @@ public class ReadINSEEDictionaryUtils {
 
 	private static Logger logger = LogManager.getLogger();
 	
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromWebsite(
+	public static IGenstarDictionary<Attribute<? extends IValue>> readFromWebsite(
 			String url) {
 		return readFromWebsite(url, null);
 	}
 	
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromWebsite(
+	public static IGenstarDictionary<Attribute<? extends IValue>> readFromWebsite(
 			String url, String splitCode) {
 		try {
 			return readFromWebsite(new URL(url), splitCode);
@@ -106,7 +106,7 @@ public class ReadINSEEDictionaryUtils {
 	}
 	
 	// TODO use splitCode
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromWebsite(URL url, String splitCode) {
+	public static IGenstarDictionary<Attribute<? extends IValue>> readFromWebsite(URL url, String splitCode) {
 		
 		logger.debug("reading a dictionnary of data from URL {}", url);
 		
@@ -209,7 +209,7 @@ public class ReadINSEEDictionaryUtils {
 		String separatorName = detectSeparator(variable2modalities.keySet());
 		
 		// now we have everything to construct variables !
-		List<DemographicAttribute<? extends IValue>> attributes = new ArrayList<>(variable2modality2text.size());
+		List<Attribute<? extends IValue>> attributes = new ArrayList<>(variable2modality2text.size());
 
 		for (Map.Entry<String,Map<String,String>> e: variable2modality2text.entrySet()) {
 			String variableName;
@@ -236,7 +236,7 @@ public class ReadINSEEDictionaryUtils {
 			// TODO add coding as a mapped attribute ???
 			
 			try {
-				DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute(
+				Attribute<? extends IValue> att = AttributeFactory.getFactory().createAttribute(
 						variableName, 
 						dataType, 
 						new ArrayList<String>(modalities.keySet()) /*, 
@@ -253,11 +253,11 @@ public class ReadINSEEDictionaryUtils {
 			}
 		}
 		
-		return new DemographicDictionary<DemographicAttribute<? extends IValue>>(attributes);
+		return new DemographicDictionary<Attribute<? extends IValue>>(attributes);
 	}
 
 	
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(String filename, String encoding) {
+	public static IGenstarDictionary<Attribute<? extends IValue>> readDictionnaryFromMODFile(String filename, String encoding) {
 		
 		if (encoding == null) {
 			// TODO automatic detection
@@ -267,7 +267,7 @@ public class ReadINSEEDictionaryUtils {
 		return readDictionnaryFromMODFile(new File(filename), encoding);
 	}
 	
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(String filename) {
+	public static IGenstarDictionary<Attribute<? extends IValue>> readDictionnaryFromMODFile(String filename) {
 		return readDictionnaryFromMODFile(filename, Charset.defaultCharset().name());
 	}
 	
@@ -279,7 +279,7 @@ public class ReadINSEEDictionaryUtils {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	protected static DemographicAttribute<? extends IValue> createAttribute(
+	protected static Attribute<? extends IValue> createAttribute(
 			Map<String,String> modalitiesCode2Lib,
 			String previousCode,
 			String previousLib
@@ -315,7 +315,7 @@ public class ReadINSEEDictionaryUtils {
 				labels, actualValues);
 
 
-		DemographicAttribute<? extends IValue> att = DemographicAttributeFactory.getFactory().createAttribute(
+		Attribute<? extends IValue> att = AttributeFactory.getFactory().createAttribute(
 				previousCode, 
 				dataType, 
 				labels,
@@ -339,7 +339,7 @@ public class ReadINSEEDictionaryUtils {
 	 * @param f
 	 * @return
 	 */
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readDictionnaryFromMODFile(
+	public static IGenstarDictionary<Attribute<? extends IValue>> readDictionnaryFromMODFile(
 			File f, String encoding) {
 		
 		logger.info("reading a dictionnary of data from file {}", f);
@@ -353,7 +353,7 @@ public class ReadINSEEDictionaryUtils {
 			throw new RuntimeException(e);
 		}
 		
-		Collection<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>();
+		Collection<Attribute<? extends IValue>> attributes = new LinkedList<>();
 		
 		try {
 			
@@ -374,7 +374,7 @@ public class ReadINSEEDictionaryUtils {
 					continue;
 				
 				
-				DemographicAttribute<? extends IValue> att = null;
+				Attribute<? extends IValue> att = null;
 
 				final String varCode = s[0];
 				final String varLib = s[1];
@@ -402,7 +402,7 @@ public class ReadINSEEDictionaryUtils {
 			
 			if (previousCode != null) {
 				// we finished the previous attribute, let's create it
-				DemographicAttribute<? extends IValue> att = createAttribute(modalitiesCode2Lib, previousCode, previousLib);
+				Attribute<? extends IValue> att = createAttribute(modalitiesCode2Lib, previousCode, previousLib);
 				attributes.add(att);		
 			}
 
@@ -420,7 +420,7 @@ public class ReadINSEEDictionaryUtils {
 		}
 		
 		
-		return new DemographicDictionary<DemographicAttribute<? extends IValue>>(attributes);
+		return new DemographicDictionary<Attribute<? extends IValue>>(attributes);
 		
 	}
 	private ReadINSEEDictionaryUtils() {}

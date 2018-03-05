@@ -22,12 +22,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.JsonNodeType;
 
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
-import core.metamodel.attribute.demographic.EmergentAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.attribute.demographic.map.IAttributeMapper;
 import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
 import core.metamodel.attribute.emergent.EntityCountFunction;
@@ -37,13 +36,12 @@ import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
-import core.metamodel.attribute.geographic.GeographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttributeFactory;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.entity.comparator.function.IComparatorFunction;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.OrderedValue;
@@ -53,7 +51,7 @@ import core.util.excpetion.GSIllegalRangedData;
 
 public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends IValue>> {
 	
-	public static Map<String, DemographicAttribute<? extends IValue>> DES_DEMO_ATTRIBUTES = new HashMap<>();
+	public static Map<String, Attribute<? extends IValue>> DES_DEMO_ATTRIBUTES = new HashMap<>();
 	
 	/**
 	 * 
@@ -77,10 +75,10 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		String attributeType = p.getParsingContext().getCurrentName();
 		try {
 			switch (attributeType) {
-			case DemographicAttribute.SELF:
+			case Attribute.SELF:
 				return this.deserializeDA(on);
-			case MappedDemographicAttribute.SELF:
-				String mapperType = on.get(MappedDemographicAttribute.MAP)
+			case MappedAttribute.SELF:
+				String mapperType = on.get(MappedAttribute.MAP)
 					.get(IAttributeMapper.TYPE).asText();
 				switch (mapperType) {
 				case IAttributeMapper.REC:
@@ -94,8 +92,6 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 				}
 			case RecordAttribute.SELF:
 				return this.deserializeRA(on);
-			case GeographicAttribute.SELF:
-				return this.deserializeGA(on);
 			case EmergentAttribute.SELF:
 				return this.deserializeEA(on);
 			default:
@@ -129,12 +125,12 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize basic demographic attribute
 	 */
-	private DemographicAttribute<? extends IValue> deserializeDA(JsonNode node) 
+	private Attribute<? extends IValue> deserializeDA(JsonNode node) 
 			throws GSIllegalRangedData {
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		DemographicAttribute<? extends IValue> attribute = DemographicAttributeFactory.getFactory()
+		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
 				.createAttribute(id, this.getType(node), this.getValues(node));
 		return DES_DEMO_ATTRIBUTES.put(id, attribute);
 	}
@@ -142,11 +138,11 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize undirected mapped demographic attribute
 	 */
-	private DemographicAttribute<? extends IValue> deserializeUDA(JsonNode node) throws GSIllegalRangedData {
+	private Attribute<? extends IValue> deserializeUDA(JsonNode node) throws GSIllegalRangedData {
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		DemographicAttribute<? extends IValue> attribute = DemographicAttributeFactory.getFactory()
+		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
 				.createMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedMapper(node));
 		return DES_DEMO_ATTRIBUTES.put(id, attribute);
@@ -155,11 +151,11 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize record demographic attribute
 	 */
-	private DemographicAttribute<? extends IValue> deserializeRDA(JsonNode node) throws GSIllegalRangedData {
+	private Attribute<? extends IValue> deserializeRDA(JsonNode node) throws GSIllegalRangedData {
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		DemographicAttribute<? extends IValue> attribute = DemographicAttributeFactory.getFactory()
+		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
 				.createRecordAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedRecord(node));
 		return DES_DEMO_ATTRIBUTES.put(id, attribute);
@@ -168,37 +164,37 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize aggregated demographic attribute
 	 */
-	private DemographicAttribute<? extends IValue> deserializeADA(JsonNode node) 
+	private Attribute<? extends IValue> deserializeADA(JsonNode node) 
 			throws GSIllegalRangedData{
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
 		
-		MappedDemographicAttribute<? extends IValue, ? extends IValue> attribute = null;
+		MappedAttribute<? extends IValue, ? extends IValue> attribute = null;
 		Map<String, Collection<String>> map = this.getOrderedAggregate(node);
 		switch (this.getType(node)) {
 		case Range:
-			attribute = DemographicAttributeFactory.getFactory()
+			attribute = AttributeFactory.getFactory()
 					.createRangeAggregatedAttribute(id, 
-							this.deserializeDA(RangeValue.class, node.findValue(MappedDemographicAttribute.REF)),
+							this.deserializeDA(RangeValue.class, node.findValue(MappedAttribute.REF)),
 								map);
 			break;
 		case Boolean:
-			attribute = DemographicAttributeFactory.getFactory()
+			attribute = AttributeFactory.getFactory()
 					.createBooleanAggregatedAttribute(id, 
-							this.deserializeDA(BooleanValue.class, node.findValue(MappedDemographicAttribute.REF)),
+							this.deserializeDA(BooleanValue.class, node.findValue(MappedAttribute.REF)),
 								map);
 			break;
 		case Nominal:
-			attribute = DemographicAttributeFactory.getFactory()
+			attribute = AttributeFactory.getFactory()
 					.createNominalAggregatedAttribute(id, 
-							this.deserializeDA(NominalValue.class, node.findValue(MappedDemographicAttribute.REF)),
+							this.deserializeDA(NominalValue.class, node.findValue(MappedAttribute.REF)),
 								map);
 			break;
 		case Order:
-			attribute = DemographicAttributeFactory.getFactory()
+			attribute = AttributeFactory.getFactory()
 					.createOrderedAggregatedAttribute(id, 
-							this.deserializeDA(OrderedValue.class, node.findValue(MappedDemographicAttribute.REF)),
+							this.deserializeDA(OrderedValue.class, node.findValue(MappedAttribute.REF)),
 								map.entrySet().stream().collect(Collectors.toMap(
 										Entry::getKey, 
 										entry -> new ArrayList<>(entry.getValue()),
@@ -212,28 +208,18 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	}
 	
 	@SuppressWarnings("unchecked")
-	private <V extends IValue> DemographicAttribute<V> deserializeDA(Class<V> clazz, JsonNode node) 
+	private <V extends IValue> Attribute<V> deserializeDA(Class<V> clazz, JsonNode node) 
 			throws GSIllegalRangedData {
 		if(!node.asText().isEmpty()) {
-			DemographicAttribute<? extends IValue> attribute = DES_DEMO_ATTRIBUTES.get(node.asText());
+			Attribute<? extends IValue> attribute = DES_DEMO_ATTRIBUTES.get(node.asText());
 			if(attribute.getValueSpace().getType().equals(GSEnumDataType.getType(clazz)))
-				return (DemographicAttribute<V>) attribute;
+				return (Attribute<V>) attribute;
 			throw new IllegalStateException("Trying to deserialize attribute \""+node.asText()+"\" of type "
 					+ attribute.getValueSpace().getType() + " as a " + clazz.getCanonicalName() +" attribute type");
 		}
-		return DemographicAttributeFactory.getFactory().createAttribute(
-				this.getName(node.findValue(DemographicAttribute.SELF)), 
-				this.getValues(node.findValue(DemographicAttribute.SELF)), clazz);
-	}
-	
-	/*
-	 * Deserialize geographic attribute
-	 * FIXME: must follow the whole procedure with value transfert
-	 * WARNING: see factory to further enhance capacities
-	 */
-	private GeographicAttribute<? extends IValue> deserializeGA(JsonNode node){
-		return GeographicAttributeFactory.getFactory()
-				.createAttribute(this.getName(node), this.getType(node));
+		return AttributeFactory.getFactory().createAttribute(
+				this.getName(node.findValue(Attribute.SELF)), 
+				this.getValues(node.findValue(Attribute.SELF)), clazz);
 	}
 	
 	/*
@@ -241,7 +227,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	 */
 	private RecordAttribute<? extends IAttribute<? extends IValue>, ? extends IAttribute<? extends IValue>> deserializeRA(JsonNode node) 
 			throws GSIllegalRangedData { 
-		return DemographicAttributeFactory.getFactory()
+		return AttributeFactory.getFactory()
 				.createRecordAttribute(this.getName(node), 
 						GSEnumDataType.valueOf(node.findValue(RecordAttribute.PROXY_TYPE).asText()), 
 						this.getReferentAttribute(node));
@@ -282,16 +268,16 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 
 	/*
 	 * Get the referent attribute within the attribute describes as a json node
-	 * WARNING: only functional for MappedDemographicAttribute
+	 * WARNING: only functional for MappedAttribute
 	 */
-	private DemographicAttribute<? extends IValue> getReferentAttribute(JsonNode attributeNode) 
+	private Attribute<? extends IValue> getReferentAttribute(JsonNode attributeNode) 
 			throws GSIllegalRangedData {
-		JsonNode referent = attributeNode.findValue(MappedDemographicAttribute.REF); 
+		JsonNode referent = attributeNode.findValue(MappedAttribute.REF); 
 		if(referent.getNodeType().equals(JsonNodeType.STRING))
 			return DES_DEMO_ATTRIBUTES.get(referent.asText());
 		return this.deserializeDA(attributeNode
-				.findValue(MappedDemographicAttribute.REF)
-				.findValue(DemographicAttribute.SELF));
+				.findValue(MappedAttribute.REF)
+				.findValue(Attribute.SELF));
 	}
 	
 	// MAPPER
@@ -377,21 +363,21 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		JsonNode filter = function.get(IEntityEmergentFunction.FILTER);
 			
 		EmergentAttribute<? extends IValue, IEntity<? extends IAttribute<? extends IValue>>, ?> att = null;
-		String refAtt = node.get(MappedDemographicAttribute.REF).asText();
+		String refAtt = node.get(MappedAttribute.REF).asText();
 		
 		
 		IEntityChildFilter f = this.getFilter(filter);
 		IValue[] m = this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS));
 		switch (function.get(IEntityEmergentFunction.TYPE).textValue()) {
 		case EntityCountFunction.SELF:
-			att = DemographicAttributeFactory.getFactory().getCountAttribute(name, f, m);
+			att = AttributeFactory.getFactory().getCountAttribute(name, f, m);
 			break;
 		case EntityAggregatedAttributeFunction.SELF:
-			att = DemographicAttributeFactory.getFactory().getAggregatedValueOfAttribute(name, DES_DEMO_ATTRIBUTES.get(refAtt), 
+			att = AttributeFactory.getFactory().getAggregatedValueOfAttribute(name, DES_DEMO_ATTRIBUTES.get(refAtt), 
 					this.getAggrgatorFunction(function.get(EntityAggregatedAttributeFunction.AGGREGATOR)), f, m);
 			break;
 		case EntityValueForAttributeFunction.SELF:
-			att = DemographicAttributeFactory.getFactory().getValueOfAttribute(name, 
+			att = AttributeFactory.getFactory().getValueOfAttribute(name, 
 					DES_DEMO_ATTRIBUTES.get(refAtt), f, m);
 			break;
 		default:
@@ -469,8 +455,9 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		Collection<IComparatorFunction<? extends IValue>> functions = new HashSet<>();
 		ObjectMapper om = new ObjectMapper();
 		while(arrayFunctions.has(++index)) {
-			IComparatorFunction<? extends IValue> func = om.readValue(arrayFunctions.get(index).asText(), 
-					om.getTypeFactory().constructFromCanonical(IComparatorFunction.class.getCanonicalName()));
+			@SuppressWarnings("unchecked")
+			IComparatorFunction<? extends IValue> func = om.readValue(
+					arrayFunctions.get(index).asText(), IComparatorFunction.class);
 			functions.add(func);
 		}
 		return functions;

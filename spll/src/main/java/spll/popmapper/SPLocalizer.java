@@ -27,9 +27,9 @@ import org.opengis.referencing.operation.TransformException;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
@@ -73,7 +73,7 @@ public class SPLocalizer implements ISPLocalizer {
 	 */
 	protected GSPerformanceUtil gspu;
 
-	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population;
+	protected IPopulation<ADemoEntity, Attribute<? extends IValue>> population;
 
 	//main referenced area for placing the agents (e.g. Iris)
 	protected IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> match;
@@ -105,7 +105,7 @@ public class SPLocalizer implements ISPLocalizer {
 	 *  
 	 * @param population
 	 */
-	public SPLocalizer(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+	public SPLocalizer(IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
 			IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile) {
 		this();
 		this.population = population;
@@ -164,7 +164,7 @@ public class SPLocalizer implements ISPLocalizer {
 	public SpllPopulation linkPopulation(
 			SpllPopulation population, ISPLinker<SpllEntity> linker,
 			Collection<? extends AGeoEntity<? extends IValue>> linkedPlaces, 
-					GeographicAttribute<? extends IValue> attribute) {
+					Attribute<? extends IValue> attribute) {
 		population.forEach(entity -> entity
 				.addLinkedPlaces(
 						attribute.getAttributeName(), 
@@ -206,7 +206,7 @@ public class SPLocalizer implements ISPLocalizer {
 		// Logger to track process
 		gspu = new GSPerformanceUtil("Create a file to store entity-space match (called 'matcher')", LogManager.getLogger());
 		Map<? extends AGeoEntity<? extends IValue>, Number> transfer = this.estimateMatches(this.match, this.keyAttMatch, this.keyAttPop);
-		final GeographicAttribute<? extends IValue> transferAttribute = GeographicAttributeFactory.getFactory()
+		final Attribute<? extends IValue> transferAttribute = AttributeFactory.getFactory()
 				.createIntegerAttribute("count");
 		return this.match.transferTo(destination, transfer, transferAttribute);
 	}
@@ -529,7 +529,7 @@ public class SPLocalizer implements ISPLocalizer {
 	protected SPLVectorFile createMatchFile(File output, SPLVectorFile matchFile,
 			Map<AGeoEntity<? extends IValue>, Number> eMatches, String keyAttMatch) 
 					throws IOException, SchemaException, InvalidGeoFormatException {
-		Optional<GeographicAttribute<? extends IValue>> keyAtt = matchFile.getGeoAttributes().stream()
+		Optional<Attribute<? extends IValue>> keyAtt = matchFile.getGeoAttributes().stream()
 				.filter(att -> att.getAttributeName().equals(keyAttMatch)).findFirst();
 		if(!keyAtt.isPresent())
 			throw new IllegalArgumentException("key attribute matcher "
@@ -538,8 +538,8 @@ public class SPLocalizer implements ISPLocalizer {
 				|| !eMatches.keySet().stream().allMatch(entity -> entity.getValueForAttribute(keyAtt.get().getAttributeName()) != null))
 			throw new IllegalArgumentException("Matches entity must contain attribute "+keyAttMatch);
 
-		GeographicAttribute<? extends IValue> key = keyAtt.get();
-		GeographicAttribute<IntegerValue> contAtt = GeographicAttributeFactory.getFactory()
+		Attribute<? extends IValue> key = keyAtt.get();
+		Attribute<IntegerValue> contAtt = AttributeFactory.getFactory()
 				.createIntegerAttribute(GeoEntityFactory.ATTRIBUTE_FEATURE_POP);
 
 		// Transpose entity-contingency map into a collection of feature
@@ -565,12 +565,12 @@ public class SPLocalizer implements ISPLocalizer {
 	 * Create a set of GSFeature
 	 */
 	protected Collection<SpllFeature> constructFeatureCollection(Map<AGeoEntity<? extends IValue>, Number> eMatches, 
-			GeographicAttribute<IntegerValue> contAtt, GeographicAttribute<? extends IValue> keyAtt, SimpleFeatureType featType){
+			Attribute<IntegerValue> contAtt, Attribute<? extends IValue> keyAtt, SimpleFeatureType featType){
 		GeoEntityFactory ef = new GeoEntityFactory(Stream.of(contAtt, keyAtt).collect(Collectors.toSet()), 
 				featType);
 		Collection<SpllFeature> features = new HashSet<>();
 		for(AGeoEntity<? extends IValue> entity : eMatches.keySet()) {
-			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
+			Map<Attribute<? extends IValue>, IValue> theMap = new HashMap<>();
 			theMap.put(contAtt, contAtt.getValueSpace().addValue(eMatches.get(entity).toString()));
 			theMap.put(keyAtt, entity.getValueForAttribute(keyAtt.getAttributeName()));
 			features.add(ef.createGeoEntity(entity.getProxyGeometry(), theMap));

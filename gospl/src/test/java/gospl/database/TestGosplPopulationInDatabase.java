@@ -20,7 +20,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
@@ -254,7 +254,7 @@ public class TestGosplPopulationInDatabase {
 		GosplPopulation o = getGoSPLPopulation();
 		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
 
-		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		for (Attribute<? extends IValue> a : o.getPopulationAttributes()) {
 		
 			int total = 0;
 			System.out.println(a.getAttributeName()+":");
@@ -285,8 +285,8 @@ public class TestGosplPopulationInDatabase {
 
 		int totalCombinationsTested = 0;
 		
-		DemographicAttribute<? extends IValue> previousAttribute = null;
-		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		Attribute<? extends IValue> previousAttribute = null;
+		for (Attribute<? extends IValue> a : o.getPopulationAttributes()) {
 		
 			if (previousAttribute == null) {
 				previousAttribute = a;
@@ -299,7 +299,7 @@ public class TestGosplPopulationInDatabase {
 
 				for (IValue v: a.getValueSpace().getValues()) {
 				
-					Map<DemographicAttribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
+					Map<Attribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
 					a2vv.put(a, Arrays.asList(v));
 					a2vv.put(previousAttribute, Arrays.asList(vPrevious));
 					
@@ -330,7 +330,7 @@ public class TestGosplPopulationInDatabase {
 		GosplPopulation o = getGoSPLPopulation();
 		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
 
-		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		for (Attribute<? extends IValue> a : o.getPopulationAttributes()) {
 		
 			int total = 0;
 			System.out.println(a.getAttributeName()+":");
@@ -371,9 +371,9 @@ public class TestGosplPopulationInDatabase {
 		GosplPopulation o = getGoSPLPopulation();
 		GosplPopulationInDatabase p = new GosplPopulationInDatabase(o);
 
-		DemographicAttribute<? extends IValue> previousAttribute = null;
+		Attribute<? extends IValue> previousAttribute = null;
 		int totalCombinationsTested = 0;
-		for (DemographicAttribute<? extends IValue> a : o.getPopulationAttributes()) {
+		for (Attribute<? extends IValue> a : o.getPopulationAttributes()) {
 		
 			if (previousAttribute == null) {
 				previousAttribute = a;
@@ -386,7 +386,7 @@ public class TestGosplPopulationInDatabase {
 
 				for (IValue v: a.getValueSpace().getValues()) {
 				
-					Map<DemographicAttribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
+					Map<Attribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
 					a2vv.put(a, Arrays.asList(v));
 					a2vv.put(previousAttribute, Arrays.asList(vPrevious));
 					

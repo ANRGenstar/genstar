@@ -13,8 +13,8 @@ import java.util.TreeSet;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
@@ -40,6 +40,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	private TreeSet<OrderedValue> values;
 	private OrderedValue emptyValue;
+	private Set<String> excludedValues;
 
 	private IAttribute<OrderedValue> attribute;
 
@@ -55,6 +56,7 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 
 	public OrderedSpace(IAttribute<OrderedValue> attribute, GSCategoricTemplate template){
 		this.values = new TreeSet<>(comp);
+		this.excludedValues = new HashSet<>();
 		this.attribute = attribute;
 		this.template = template;
 		this.emptyValue = new OrderedValue(this, null, 0);
@@ -126,6 +128,8 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 	 * @throws IllegalArgumentException
 	 */
 	public OrderedValue addValue(Number order, String value) throws IllegalArgumentException {
+		if(excludedValues.contains(value))
+			return this.getEmptyValue();
 		OrderedValue ov = null;
 		try {
 			ov = this.getValue(value);
@@ -180,6 +184,11 @@ public class OrderedSpace implements IValueSpace<OrderedValue> {
 		} catch (NullPointerException e) {
 			this.emptyValue = new OrderedValue(this, value, 0);
 		}
+	}
+	
+	@Override
+	public void addExceludedValue(String value) {
+		this.excludedValues.add(value);
 	}
 
 	@Override

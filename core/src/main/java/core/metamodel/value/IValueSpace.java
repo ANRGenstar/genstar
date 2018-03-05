@@ -1,4 +1,4 @@
-package core.metamodel.attribute;
+package core.metamodel.value;
 
 import java.util.Collection;
 import java.util.Set;
@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 
-import core.metamodel.value.IValue;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.binary.BinarySpace;
 import core.metamodel.value.categoric.NominalSpace;
 import core.metamodel.value.categoric.OrderedSpace;
@@ -64,6 +64,8 @@ public interface IValueSpace<V extends IValue> {
 	/**
 	 * Create, add and return requested value according to value space specification. Must be compliant
 	 * with concrete value type (or throw an exception) - contract should be define by {@link #getInstanceValue(String)}.
+	 * <p>
+	 * If one asking to add excluded value, returns the empty value
 	 * 
 	 * @param value
 	 * @return
@@ -130,6 +132,15 @@ public interface IValueSpace<V extends IValue> {
 	 * @param value
 	 */
 	void setEmptyValue(String value);
+	
+	/**
+	 * Set explicit no data
+	 * 
+	 * @param string
+	 */
+	public void addExceludedValue(String string);
+	
+	// ------------------------------------------------------ //
 	
 	/**
 	 * Return the type of value this space contains

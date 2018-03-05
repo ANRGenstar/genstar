@@ -4,7 +4,7 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.numeric.IntegerValue;
 
 @JsonTypeName(IntegerValueAggregator.SELF)

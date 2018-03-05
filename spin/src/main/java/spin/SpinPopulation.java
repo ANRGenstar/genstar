@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
@@ -17,7 +17,7 @@ import gospl.GosplPopulation;
  * 
  *
  */
-public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, DemographicAttribute<? extends IValue>> {
+public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Attribute<? extends IValue>> {
 
 	// Network associe a la population.
 	private SpinNetwork network;
@@ -27,7 +27,7 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 	// de certaines proprietes)
 //	private INetProperties properties;
 	
-	IPopulation<E, DemographicAttribute<? extends IValue>> population;
+	IPopulation<E, Attribute<? extends IValue>> population;
 	//private final Collection<E> population;
 
 	/**
@@ -36,7 +36,7 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 	 * @param prop
 	 * @param network
 	 */
-	public SpinPopulation(IPopulation<E, DemographicAttribute<? extends IValue>> popRef, 
+	public SpinPopulation(IPopulation<E, Attribute<? extends IValue>> popRef, 
 						 SpinNetwork network){
 		population = popRef;
 		this.network = network; 
@@ -145,7 +145,7 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
-	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes(){
+	public Set<Attribute<? extends IValue>> getPopulationAttributes(){
 		return population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 	}
 	
@@ -160,9 +160,9 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Dem
 	}
 
 	@Override
-	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+	public Attribute<? extends IValue> getPopulationAttributeNamed(String name) {
 		for (E e: population) {
-			for (DemographicAttribute<? extends IValue> a: e.getAttributes()) {
+			for (Attribute<? extends IValue> a: e.getAttributes()) {
 				if (a.getAttributeName().equals(name))
 					return a;
 			}

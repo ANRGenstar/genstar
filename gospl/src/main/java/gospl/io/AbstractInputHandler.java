@@ -16,7 +16,7 @@ import org.apache.logging.log4j.LogManager;
 
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
@@ -71,7 +71,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 */
 	@Override
 	public Map<Integer, Set<IValue>> getColumnHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+			IGenstarDictionary<Attribute<? extends IValue>> dictionary) {
 		
 		final Map<Integer, Set<IValue>> columnHeaders = new HashMap<>();
 		
@@ -107,7 +107,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	 * Default implementation for tabular data. Override if not suitable for another file format.
 	 */
 	public Map<Integer, Set<IValue>> getRowHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+			IGenstarDictionary<Attribute<? extends IValue>> dictionary) {
 		
 		final Set<Integer> attributeIdx = new TreeSet<>();
 		for (int line = 0; line < getFirstRowIndex(); line++) {
@@ -186,14 +186,14 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	}
 	
 	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+	public Map<Integer, Attribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary) {
 		
-		Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = new HashMap<>();
+		Map<Integer, Attribute<? extends IValue>> columnHeaders = new HashMap<>();
 		
 		for(int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++){
 			List<String> columnAtt = readLines(0, getFirstRowIndex(), i);
-			Set<DemographicAttribute<? extends IValue>> attSet = dictionnary.getAttributes()
+			Set<Attribute<? extends IValue>> attSet = dictionnary.getAttributes()
 					.stream()
 					.filter(att -> columnAtt.stream().anyMatch(s -> att.getAttributeName().equals(s)))
 					.collect(Collectors.toSet());
@@ -201,7 +201,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 				continue;
 			if(attSet.size() > 1){
 				int row = getFirstRowIndex();
-				Optional<DemographicAttribute<? extends IValue>> opAtt = null;
+				Optional<Attribute<? extends IValue>> opAtt = null;
 				do {
 					String value = read(row++, i);
 					opAtt = attSet.stream().filter(att -> att.getValueSpace().getValues()

@@ -11,8 +11,8 @@ import org.opengis.geometry.MismatchedDimensionException;
 import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
@@ -65,7 +65,7 @@ public interface ISPLocalizer {
 	 * @param population
 	 * @return
 	 */
-	public IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> localisePopulation();
+	public IPopulation<SpllEntity, Attribute<? extends IValue>> localisePopulation();
 	
 	/**
 	 * Link entity of a population to a spatial entity using provided linker
@@ -77,7 +77,7 @@ public interface ISPLocalizer {
 	 */
 	public SpllPopulation linkPopulation(SpllPopulation population, ISPLinker<SpllEntity> linker, 
 			Collection<? extends AGeoEntity<? extends IValue>> linkedPlaces, 
-			GeographicAttribute<? extends IValue> attribute);
+			Attribute<? extends IValue> attribute);
 	
 	////////////////////////////////////////////////
 	// -------------- MATCHER PART -------------- //

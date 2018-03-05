@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -23,7 +23,7 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 
 	private Map<Collection<K>,Collection<V>> map;
 
-	private MappedDemographicAttribute<K, V> relatedAttribute;
+	private MappedAttribute<K, V> relatedAttribute;
 
 	public UndirectedMapper() {
 		this.map = new LinkedHashMap<>();
@@ -63,12 +63,12 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 	// -------------------- GETTER & SETTER -------------------- //
 
 	@Override
-	public void setRelatedAttribute(MappedDemographicAttribute<K, V> relatedAttribute) {
+	public void setRelatedAttribute(MappedAttribute<K, V> relatedAttribute) {
 		this.relatedAttribute = relatedAttribute;
 	}
 
 	@Override
-	public MappedDemographicAttribute<K, V> getRelatedAttribute() {
+	public MappedAttribute<K, V> getRelatedAttribute() {
 		return this.relatedAttribute;
 	}
 

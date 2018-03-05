@@ -8,8 +8,8 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 
@@ -29,6 +29,7 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 
 	private ContinuousValue emptyValue;
 	private TreeMap<Double, ContinuousValue> values;
+	private Set<String> excludedValues;
 
 	private double min, max;
 
@@ -45,6 +46,7 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 		this.max = max;
 		this.emptyValue = new ContinuousValue(this, Double.NaN);
 		this.values = new TreeMap<>();
+		this.excludedValues = new HashSet<>();
 	}
 
 	@Override
@@ -76,6 +78,8 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 
 	@Override
 	public ContinuousValue addValue(String value) {
+		if(excludedValues.contains(value))
+			return this.getEmptyValue();
 		ContinuousValue iv = getValue(value);
 		if(value == null) {
 			iv = this.getInstanceValue(value);
@@ -119,6 +123,11 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 				// just keep with default empty value
 			}
 		}
+	}
+	
+	@Override
+	public void addExceludedValue(String value) {
+		this.excludedValues.add(value);
 	}
 
 	@Override

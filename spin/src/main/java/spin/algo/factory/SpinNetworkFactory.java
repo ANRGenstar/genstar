@@ -1,7 +1,7 @@
 package spin.algo.factory;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
@@ -38,7 +38,7 @@ public class SpinNetworkFactory {
 	 * @param population
 	 * @return SpinNetwork. 
 	 */
-	public static SpinNetwork loadPopulation(IPopulation<? extends ADemoEntity, DemographicAttribute<? extends IValue>> population){
+	public static SpinNetwork loadPopulation(IPopulation<? extends ADemoEntity, Attribute<? extends IValue>> population){
 		// Create a SpinNetwork with nodes linked to population entities
 		// The SpinNetwork has all the needed nodes and no links
 		SpinNetwork myNetwork = new SpinNetwork();
@@ -62,7 +62,7 @@ public class SpinNetworkFactory {
 	 */
 	// FIXME : à remettre 
 /*	public <E extends ADemoEntity> SpinPopulation<E> generateNetwork(ENetworkGenerator typeGenerator, 
-			IPopulation<E, DemographicAttribute<? extends IValue>> population){
+			IPopulation<E, Attribute<? extends IValue>> population){
 		SpinNetwork baseNetwork = loadPopulation(population);
 		if(typeGenerator.equals(ENetworkGenerator.SmallWorld))
 			network = new SWNetworkGenerator().generateNetwork(baseNetwork, 5, .1); 

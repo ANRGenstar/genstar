@@ -23,11 +23,12 @@ import org.opengis.feature.simple.SimpleFeatureType;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.ContinuousValue;
 import core.util.data.GSDataParser;
+import core.util.excpetion.GSIllegalRangedData;
 import spll.io.SPLRasterFile;
 import spll.util.SpllGeotoolsAdapter;
 
@@ -44,7 +45,7 @@ public class GeoEntityFactory {
 	public static String ATTRIBUTE_PIXEL_BAND = "Band";
 	public static String ATTRIBUTE_FEATURE_POP = "Population";
 	
-	private final Map<String, GeographicAttribute<? extends IValue>> featureAttributes;
+	private final Map<String, Attribute<? extends IValue>> featureAttributes;
 	
 	private SimpleFeatureBuilder contingencyFeatureBuilder;
 	
@@ -70,9 +71,9 @@ public class GeoEntityFactory {
 	 * 
 	 * @param attributes
 	 */
-	public GeoEntityFactory(Set<GeographicAttribute<? extends IValue>> attributes) {
+	public GeoEntityFactory(Set<Attribute<? extends IValue>> attributes) {
 		this.featureAttributes = attributes.stream().collect(Collectors
-				.toMap(GeographicAttribute::getAttributeName, Function.identity()));
+				.toMap(Attribute::getAttributeName, Function.identity()));
 	}
 	
 	/**
@@ -84,7 +85,7 @@ public class GeoEntityFactory {
 	 * @param crs
 	 * @param geomClazz
 	 */
-	public GeoEntityFactory(Set<GeographicAttribute<? extends IValue>> attributes, SimpleFeatureType schema){
+	public GeoEntityFactory(Set<Attribute<? extends IValue>> attributes, SimpleFeatureType schema){
 		this(attributes);
         SimpleFeatureTypeBuilder builder = new SimpleFeatureTypeBuilder();
         builder.setName("SimpleFeatureTypeBuilder");
@@ -94,7 +95,7 @@ public class GeoEntityFactory {
         		builder.getName(),
         		schema.getGeometryDescriptor().getType().getBinding().getSimpleName(), 
         		attributes.stream().map(a -> a.getAttributeName()).collect(Collectors.joining(", ")));
-        for(GeographicAttribute<? extends IValue> attribute : attributes)
+        for(Attribute<? extends IValue> attribute : attributes)
             builder.add(attribute.getAttributeName(), attribute.getValueSpace().getValues().stream()
         			.allMatch(value -> value.getType().isNumericValue()) ? Number.class : String.class);
         
@@ -108,14 +109,15 @@ public class GeoEntityFactory {
 	 * 
 	 * @param feature
 	 * @return
+	 * @throws GSIllegalRangedData 
 	 */
-	public SpllFeature createGeoEntity(Feature feature, List<String> attList) {
+	public SpllFeature createGeoEntity(Feature feature, List<String> attList) throws GSIllegalRangedData {
 		
 		SpllFeature cached = feature2splFeature.get(feature);
 		if (cached != null)
 			return cached;
 		
-		Map<GeographicAttribute<? extends IValue>, IValue> values = new HashMap<>();
+		Map<Attribute<? extends IValue>, IValue> values = new HashMap<>();
 		
 		Collection<Property> propertyList = feature.getProperties().stream()
 				.filter(property -> !BasicFeatureTypes.GEOMETRY_ATTRIBUTE_NAME.equals(property.getName().getLocalPart()) 
@@ -123,11 +125,11 @@ public class GeoEntityFactory {
 				.collect(Collectors.toSet());
 		for(Property property : propertyList){
 			String name = property.getName().getLocalPart();
-			GeographicAttribute<? extends IValue> attribute = null;
+			Attribute<? extends IValue> attribute = null;
 			attribute = featureAttributes.get(name);
 			if (attribute == null) {
 				// if the corresponding attribute does not yet exist, we create it on the fly
-				attribute = SpllGeotoolsAdapter.getInstance().getGeographicAttribute(property);
+				attribute = SpllGeotoolsAdapter.getInstance().getAttribute(property);
 				featureAttributes.put(name, attribute);
 			}
 			if (attribute == null)
@@ -164,11 +166,11 @@ public class GeoEntityFactory {
 	 * @param featureValues
 	 * @return
 	 */
-	public SpllFeature createGeoEntity(Geometry the_geom, Map<GeographicAttribute<? extends IValue>, IValue> featureValues){
+	public SpllFeature createGeoEntity(Geometry the_geom, Map<Attribute<? extends IValue>, IValue> featureValues){
 		GSDataParser gsdp = new GSDataParser();
 		// Use factory defined feature constructor to build the inner feature
 		contingencyFeatureBuilder.add(the_geom);
-		for (GeographicAttribute<? extends IValue> att : featureValues.keySet()) {
+		for (Attribute<? extends IValue> att : featureValues.keySet()) {
 			String name = att.getAttributeName() ;
 			IValue val = featureValues.get(att) ;
 			if (val == null) continue;
@@ -178,7 +180,7 @@ public class GeoEntityFactory {
 		Feature feat = contingencyFeatureBuilder.buildFeature(null);
 		
 		// Add non previously encountered attribute to attributes set
-		for(GeographicAttribute<? extends IValue> att : featureValues.keySet())
+		for(Attribute<? extends IValue> att : featureValues.keySet())
 			if(!featureAttributes.containsValue(att))
 				featureAttributes.put(att.getAttributeName(), att);
 		
@@ -198,18 +200,18 @@ public class GeoEntityFactory {
 	 * @return
 	 */
 	public SpllPixel createGeoEntity(Number[] pixelBands, Envelope2D pixel, int gridX, int gridY) {
-		Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> values = new HashMap<>();
-		Set<GeographicAttribute<ContinuousValue>> pixelAttributes = new HashSet<>();
+		Map<Attribute<? extends ContinuousValue>, ContinuousValue> values = new HashMap<>();
+		Set<Attribute<ContinuousValue>> pixelAttributes = new HashSet<>();
 		for(int i = 0; i < pixelBands.length; i++){
 			String bandsName = ATTRIBUTE_PIXEL_BAND+i;
-			GeographicAttribute<ContinuousValue> attribute = null;
-			Optional<GeographicAttribute<ContinuousValue>> opAtt = pixelAttributes.stream()
+			Attribute<ContinuousValue> attribute = null;
+			Optional<Attribute<ContinuousValue>> opAtt = pixelAttributes.stream()
 					.filter(att -> att.getAttributeName().equals(bandsName)).findAny();
 			
 			if(opAtt.isPresent())
 				attribute = opAtt.get();
 			else {
-				attribute = GeographicAttributeFactory.getFactory().createContinueAttribute(bandsName);
+				attribute = AttributeFactory.getFactory().createContinueAttribute(bandsName);
 				attribute.getValueSpace().addExceludedValue(SPLRasterFile.DEF_NODATA.toString());
 				pixelAttributes.add(attribute);
 			}

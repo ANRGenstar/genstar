@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Set;
 
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -33,7 +33,7 @@ public interface IGSSurvey {
 	 * @return
 	 */
 	public Map<Integer, Set<IValue>> getColumnHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary);
 	
 	/**
 	 * Returns, for the underlying file format, the indices of each row associated with its possible values
@@ -41,15 +41,15 @@ public interface IGSSurvey {
 	 * @return
 	 */
 	public Map<Integer, Set<IValue>> getRowHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary);
 	
 	/**
 	 * Retrieves the column headers from a sample file
 	 * @param dictionnary
 	 * @return
 	 */
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary);
+	public Map<Integer, Attribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary);
 
 	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}

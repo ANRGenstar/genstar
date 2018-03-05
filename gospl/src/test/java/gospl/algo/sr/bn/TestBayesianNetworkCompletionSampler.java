@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
@@ -49,7 +49,7 @@ public class TestBayesianNetworkCompletionSampler {
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(fileBN);
 		
 		// to read the incomplete sample, we need a dict
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary = 
+		IGenstarDictionary<Attribute<? extends IValue>> dictionary = 
 				ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		// we need an incomplete sample
@@ -83,7 +83,7 @@ public class TestBayesianNetworkCompletionSampler {
 		
 		GosplPopulation pop = null;
 		
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> updaptedDictionary = 
+		IGenstarDictionary<Attribute<? extends IValue>> updaptedDictionary = 
 					new DemographicDictionary<>(dictionary);
 
 		try {

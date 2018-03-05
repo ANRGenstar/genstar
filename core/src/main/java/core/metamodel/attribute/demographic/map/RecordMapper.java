@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -25,7 +25,7 @@ public class RecordMapper<K extends IValue, V extends IValue> implements IAttrib
 	@JsonProperty(IAttributeMapper.THE_MAP)
 	private Map<K, V> record;
 	
-	private MappedDemographicAttribute<K,V> relatedAttribute;
+	private MappedAttribute<K,V> relatedAttribute;
 	
 	public RecordMapper() {
 		this.record = new LinkedHashMap<>();
@@ -55,12 +55,12 @@ public class RecordMapper<K extends IValue, V extends IValue> implements IAttrib
 	// -------------------- GETTER & SETTER -------------------- //
 	
 	@Override
-	public void setRelatedAttribute(MappedDemographicAttribute<K, V> relatedAttribute) {
+	public void setRelatedAttribute(MappedAttribute<K, V> relatedAttribute) {
 		this.relatedAttribute = relatedAttribute;
 	}
 	
 	@Override
-	public MappedDemographicAttribute<K, V> getRelatedAttribute(){
+	public MappedAttribute<K, V> getRelatedAttribute(){
 		return this.relatedAttribute;
 	}
 	

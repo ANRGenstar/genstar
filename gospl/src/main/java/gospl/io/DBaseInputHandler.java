@@ -14,8 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
@@ -288,12 +288,12 @@ public class DBaseInputHandler extends AbstractInputHandler {
 
 	@Override
 	public Map<Integer, Set<IValue>> getColumnHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary) {
 		
 		Map<Integer, Set<IValue>> res = new HashMap<>(dictionnary.getAttributes().size());
 				
 		// prepare attributes information
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = 
+		Map<String,Attribute<? extends IValue>> name2attribute = 
 				dictionnary.getAttributes()
 							.stream()
 							.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
@@ -306,7 +306,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		
 			Field currentField = fields.get(iField);
 			
-			DemographicAttribute<? extends IValue> att = name2attribute.get(currentField.getName());
+			Attribute<? extends IValue> att = name2attribute.get(currentField.getName());
 			
 			if (att == null)
 				// ignore missing attributes
@@ -337,7 +337,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 
 	@Override
 	public Map<Integer, Set<IValue>> getRowHeaders(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary) {
 		return Collections.emptyMap();
 	}
 	
@@ -390,13 +390,13 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	}
 
 	@Override
-	public Map<Integer, DemographicAttribute<? extends IValue>> getColumnSample(
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary) {
+	public Map<Integer, Attribute<? extends IValue>> getColumnSample(
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary) {
 
-		Map<Integer, DemographicAttribute<? extends IValue>> res = new HashMap<>(dictionnary.size());
+		Map<Integer, Attribute<? extends IValue>> res = new HashMap<>(dictionnary.size());
 				
 		// prepare attributes information
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = 
+		Map<String,Attribute<? extends IValue>> name2attribute = 
 				dictionnary.getAttributes()
 						.stream()
 						.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
@@ -410,7 +410,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		
 			Field currentField = fields.get(iField);
 			
-			DemographicAttribute<? extends IValue> att = name2attribute.get(currentField.getName());
+			Attribute<? extends IValue> att = name2attribute.get(currentField.getName());
 			
 			if (att == null)
 				// ignore missing attributes
@@ -434,7 +434,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 				logger.info("refining the properties of attribute {} based on database content: its type is now {}", att, dt);
 
 				try {
-					DemographicAttribute<? extends IValue> updatedAtt = DemographicAttributeFactory.getFactory()
+					Attribute<? extends IValue> updatedAtt = AttributeFactory.getFactory()
 							.createAttribute(att.getAttributeName(), dt, att.getValueSpace().getValues().stream()
 									.map(IValue::getStringValue).collect(Collectors.toList()));
 					dictionnary.getAttributes().remove(att);

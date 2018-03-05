@@ -2,7 +2,7 @@ package gospl.generator;
 
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
 import gospl.GosplPopulation;
@@ -17,9 +17,9 @@ import gospl.sampler.ISampler;
  */
 public class DistributionBasedGenerator implements ISyntheticGosplPopGenerator {
 	
-	private ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> sampler;
+	private ISampler<ACoordinate<Attribute<? extends IValue>, IValue>> sampler;
 	
-	public DistributionBasedGenerator(ISampler< ACoordinate<DemographicAttribute<? extends IValue>, IValue>> sampler) {
+	public DistributionBasedGenerator(ISampler< ACoordinate<Attribute<? extends IValue>, IValue>> sampler) {
 		this.sampler = sampler;
 	}
 	

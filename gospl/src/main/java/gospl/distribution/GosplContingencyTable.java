@@ -2,7 +2,7 @@ package gospl.distribution;
 
 import java.util.Set;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
@@ -23,7 +23,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	
-	public GosplContingencyTable(Set<DemographicAttribute<? extends IValue>> attributes) {
+	public GosplContingencyTable(Set<Attribute<? extends IValue>> attributes) {
 		super(attributes, GSSurveyType.ContingencyTable);
 	}
 		
@@ -32,7 +32,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 
 	
 	@Override
-	public boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
@@ -40,12 +40,12 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 
 
 	@Override
-	public final boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, Integer value) {
+	public final boolean addValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, Integer value) {
 		return addValue(coordinates, new ControlContingency(value));
 	}
 	
 	@Override
-	public boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size());
 			matrix.put(coordinate, new ControlContingency(value.getValue().intValue()));
@@ -55,7 +55,7 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	}
 
 	@Override
-	public final boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, Integer value) {
+	public final boolean setValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinate, Integer value) {
 		return setValue(coordinate, new ControlContingency(value));
 	}
 	

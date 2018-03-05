@@ -1,4 +1,4 @@
-package core.metamodel.attribute.demographic;
+package core.metamodel.attribute;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,7 +6,6 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.EmergentAttributeSerializer;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.IEntityEmergentFunction;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -28,16 +27,16 @@ import core.metamodel.value.IValue;
 public class EmergentAttribute<V extends IValue, 
 	E extends IEntity<? extends IAttribute<? extends IValue>>,
 			U> 
-	extends DemographicAttribute<V> {
+	extends Attribute<V> {
 
 	public static final String SELF = "EMERGENT ATTRIBUTE";
 	public static final String FUNCTION = "EMERGENT FUNCTION";
 	
 	@JsonProperty(FUNCTION)
 	private IEntityEmergentFunction<E, U, V> function;
-	private DemographicAttribute<? extends IValue> referent;
+	private Attribute<? extends IValue> referent;
 
-	protected EmergentAttribute(String name, DemographicAttribute<? extends IValue> referent) {
+	protected EmergentAttribute(String name, Attribute<? extends IValue> referent) {
 		super(name);
 		this.referent = referent == null ? this : referent;
 	}
@@ -80,7 +79,7 @@ public class EmergentAttribute<V extends IValue,
 	}
 	
 	@Override
-	public DemographicAttribute<? extends IValue> getReferentAttribute(){
+	public Attribute<? extends IValue> getReferentAttribute(){
 		return referent;
 	}
 

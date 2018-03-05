@@ -3,8 +3,8 @@ package gospl.algo.sr.bn;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
@@ -21,8 +21,8 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 
 	private final CategoricalBayesianNetwork bn;
 	private final AbstractInferenceEngine engine;
-	private final Map<String,DemographicAttribute<? extends IValue>> bnVariable2popAttribute;
-	private final Map<DemographicAttribute<? extends IValue>,NodeCategorical> popAttribute2bnVariable;
+	private final Map<String,Attribute<? extends IValue>> bnVariable2popAttribute;
+	private final Map<Attribute<? extends IValue>,NodeCategorical> popAttribute2bnVariable;
 
 	public BayesianNetworkCompletionSampler(CategoricalBayesianNetwork bn) throws GSIllegalRangedData {
 		this(bn, new EliminationInferenceEngine(bn));
@@ -41,7 +41,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 		for (NodeCategorical n: bn.getNodes()) {
 			bnVariable2popAttribute.put(
 					n.name, 
-					DemographicAttributeFactory.getFactory().createAttribute(
+					AttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						GSEnumDataType.Nominal,
 						n.getDomain()
@@ -53,7 +53,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 	}
 	
 
-	protected NodeCategorical getBNVariableForAttribute(DemographicAttribute<? extends IValue> a) {
+	protected NodeCategorical getBNVariableForAttribute(Attribute<? extends IValue> a) {
 		
 		NodeCategorical n = null;
 		
@@ -72,15 +72,15 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 		
 	}
 	
-	protected DemographicAttribute<? extends IValue> getPopulationAttributeForBNVariable(NodeCategorical n) {
+	protected Attribute<? extends IValue> getPopulationAttributeForBNVariable(NodeCategorical n) {
 		
-		DemographicAttribute<? extends IValue> a = bnVariable2popAttribute.get(n.name);
+		Attribute<? extends IValue> a = bnVariable2popAttribute.get(n.name);
 		
 		if (!bnVariable2popAttribute.containsKey(n.name)) {
 			// we don't have any counterpart for this population attribute now
 			// let's create it !
 			try {
-				a = DemographicAttributeFactory.getFactory().createAttribute(
+				a = AttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						GSEnumDataType.Nominal,
 						n.getDomain()
@@ -103,7 +103,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 		// we already have the original entity
 		
 		// let's use it as evidence
-		for (DemographicAttribute<? extends IValue> aOriginal: originalEntity.getAttributes()) {
+		for (Attribute<? extends IValue> aOriginal: originalEntity.getAttributes()) {
 			
 			NodeCategorical n = getBNVariableForAttribute(aOriginal);
 			
@@ -126,7 +126,7 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 		
 		for (Map.Entry<NodeCategorical,String> eNew: variable2value.entrySet()) {
 			
-			DemographicAttribute<? extends IValue> a = getPopulationAttributeForBNVariable(eNew.getKey());
+			Attribute<? extends IValue> a = getPopulationAttributeForBNVariable(eNew.getKey());
 			
 			// skip the known attributes
 			if (resultEntity.hasAttribute(a)) {

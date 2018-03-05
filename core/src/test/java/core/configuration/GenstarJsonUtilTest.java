@@ -22,9 +22,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
@@ -37,7 +37,7 @@ import core.util.excpetion.GSIllegalRangedData;
 
 public class GenstarJsonUtilTest {
 
-	private IGenstarDictionary<DemographicAttribute<? extends IValue>> dd;
+	private IGenstarDictionary<Attribute<? extends IValue>> dd;
 
 	private GenstarJsonUtil sju;
 	private Path path;
@@ -51,16 +51,16 @@ public class GenstarJsonUtilTest {
 		dd = new DemographicDictionary<>();
 
 		// BOOLEAN 
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.createAttribute("Boolean attribute", GSEnumDataType.Boolean));
 		
 		// NOMINAL
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.createAttribute("Nominal attribute", GSEnumDataType.Nominal, 
 						Arrays.asList("Célibataire", "En couple")));
 		
 		// ORDERED
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.createAttribute("Ordered attribute", GSEnumDataType.Order, 
 						Arrays.asList("Brevet", "Bac", "Licence", "Master et plus")));
 		
@@ -79,16 +79,16 @@ public class GenstarJsonUtilTest {
 		}
 
 		// INTEGER
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.createAttribute("Int attribute", GSEnumDataType.Integer, fiboList));
 		
 		// CONTINUE
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.createAttribute("Double attribute", GSEnumDataType.Continue, 
 						Arrays.asList("0,1", "0.3", "0,5", "0.7", "0.9")));
 		
 		// RANGE
-		DemographicAttribute<RangeValue> rangeAttribute = DemographicAttributeFactory.getFactory()
+		Attribute<RangeValue> rangeAttribute = AttributeFactory.getFactory()
 				.createRangeAttribute("Range attribute", 
 						Arrays.asList("moins de 14", "15 à 24", "25 à 34", "35 à 54", "55 et plus"),
 						0, 120);
@@ -100,8 +100,8 @@ public class GenstarJsonUtilTest {
 		value2values.put("25 à 54", Arrays.asList("25 à 34", "35 à 54"));
 		value2values.put("55 et plus", Arrays.asList("55 et plus"));
 		
-		MappedDemographicAttribute<RangeValue, RangeValue> rangeAggAttribute = 
-				DemographicAttributeFactory.getFactory()
+		MappedAttribute<RangeValue, RangeValue> rangeAggAttribute = 
+				AttributeFactory.getFactory()
 					.createRangeAggregatedAttribute("Range aggregated attribute", rangeAttribute, 
 						value2values);
 		dd.addAttributes(rangeAggAttribute);
@@ -113,8 +113,8 @@ public class GenstarJsonUtilTest {
 		value2value.put(Arrays.asList("Adulte"), Arrays.asList("25 à 34", "35 à 54"));
 		value2value.put(Arrays.asList("Vieux"), Arrays.asList("55 et plus"));
 		
-		MappedDemographicAttribute<? extends IValue, RangeValue> nominalToRangeAttribute = 
-				DemographicAttributeFactory.getFactory()
+		MappedAttribute<? extends IValue, RangeValue> nominalToRangeAttribute = 
+				AttributeFactory.getFactory()
 					.createMappedAttribute("Mapped attribute", GSEnumDataType.Order, 
 							rangeAttribute, 
 							value2value
@@ -125,20 +125,20 @@ public class GenstarJsonUtilTest {
 		Map<String,String> value2value2 = new HashMap<>();
 		value2value2.put("1", "true");
 		value2value2.put("2", "false");
-		MappedDemographicAttribute<IntegerValue, ? extends IValue> intToBoolAttribute =
-				DemographicAttributeFactory.getFactory()
+		MappedAttribute<IntegerValue, ? extends IValue> intToBoolAttribute =
+				AttributeFactory.getFactory()
 					.createIntegerRecordAttribute("Record attribute", dd.getAttribute("Boolean attribute"),
 							value2value2);
 		dd.addAttributes(intToBoolAttribute);
 		
 		// RECORD
-		dd.addRecords(DemographicAttributeFactory.getFactory()
+		dd.addRecords(AttributeFactory.getFactory()
 				.createRecordAttribute("Population", GSEnumDataType.Integer, 
 						dd.getAttribute("Range aggregated attribute")));
 		
 		// EMERGENT
 		IValue[] matches = GSUtilAttribute.getIValues(rangeAttribute, "25 à 34", "35 à 54", "55 et plus").toArray(new IValue[3]);
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.getValueOfAttribute("Age du référent du ménage", rangeAttribute, 
 						EntityChildFilterFactory.getFactory().getFilter(EChildFilter.OneOf, 
 								new ImplicitEntityComparator().setAttribute(dd.getAttribute("Boolean attribute"), false)
@@ -146,7 +146,7 @@ public class GenstarJsonUtilTest {
 						matches));
 		
 		IValue[] matchesTwo = GSUtilAttribute.getIValues(rangeAggAttribute, "moins de 24 ans").toArray(new IValue[1]);
-		dd.addAttributes(DemographicAttributeFactory.getFactory()
+		dd.addAttributes(AttributeFactory.getFactory()
 				.getAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, 
 						EChildFilter.OneOf.getFilter(), matchesTwo));
 
@@ -157,12 +157,12 @@ public class GenstarJsonUtilTest {
 	@Test
 	@Ignore
 	public void test() throws JsonGenerationException, JsonMappingException, IOException {
-		for(DemographicAttribute<? extends IValue> att : dd.getAttributes()) {
+		for(Attribute<? extends IValue> att : dd.getAttributes()) {
 			
 			sju.marshalToGenstarJson(path, att, false);
 			
 			@SuppressWarnings("unchecked")
-			DemographicAttribute<? extends IValue> unmarshalAtt = sju.unmarshalFromGenstarJson(path, att.getClass());
+			Attribute<? extends IValue> unmarshalAtt = sju.unmarshalFromGenstarJson(path, att.getClass());
 			
 			assertEquals(att.getValueSpace(), unmarshalAtt.getValueSpace());
 		}
@@ -176,10 +176,10 @@ public class GenstarJsonUtilTest {
 			System.out.println(sju.genstarJsonToString(dd));
 			
 			@SuppressWarnings("unchecked")
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dd2 = 
+			IGenstarDictionary<Attribute<? extends IValue>> dd2 = 
 					sju.unmarshalFromGenstarJson(path, dd.getClass());
 			
-			for(DemographicAttribute<? extends IValue> att : dd.getAttributes())
+			for(Attribute<? extends IValue> att : dd.getAttributes())
 				assertEquals(att, dd2.getAttribute(att.getAttributeName()));
 	}
 

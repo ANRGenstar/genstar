@@ -11,7 +11,7 @@ import javax.xml.crypto.dsig.TransformException;
 import com.vividsolutions.jts.geom.Envelope;
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
@@ -50,7 +50,7 @@ public interface IGSGeofile<E extends AGeoEntity<V>, V extends IValue> {
 	 * 
 	 * @return
 	 */
-	public Collection<GeographicAttribute<? extends V>> getGeoAttributes();
+	public Collection<Attribute<? extends V>> getGeoAttributes();
 
 
 	/**
@@ -132,7 +132,7 @@ public interface IGSGeofile<E extends AGeoEntity<V>, V extends IValue> {
 	 * @throws IllegalArgumentException 
 	 */
 	public IGSGeofile<E, V> transferTo(File destinationTmp, Map<? extends AGeoEntity<? extends IValue>,Number> transfer, 
-			GeographicAttribute<? extends IValue> attribute) 
+			Attribute<? extends IValue> attribute) 
 					throws IllegalArgumentException, IOException;
 	
 }

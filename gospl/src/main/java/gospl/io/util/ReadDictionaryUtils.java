@@ -11,8 +11,8 @@ import java.util.regex.Pattern;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -35,10 +35,10 @@ public class ReadDictionaryUtils {
 	 * @param bn
 	 * @return
 	 */
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> 
+	public static IGenstarDictionary<Attribute<? extends IValue>> 
 				readBayesianNetworkAsDictionary(CategoricalBayesianNetwork bn) {
 		
-		Collection<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>();
+		Collection<Attribute<? extends IValue>> attributes = new LinkedList<>();
 
 		for (NodeCategorical n: bn.getNodes()) {
 			
@@ -52,9 +52,9 @@ public class ReadDictionaryUtils {
 				dataType = GSEnumDataType.Integer;
 			}
 				
-			DemographicAttribute<? extends IValue> att;
+			Attribute<? extends IValue> att;
 			try {
-				att = DemographicAttributeFactory.getFactory().createAttribute(
+				att = AttributeFactory.getFactory().createAttribute(
 						n.getName(), 
 						dataType,
 						new ArrayList<String>(n.getDomain())
@@ -149,7 +149,7 @@ public class ReadDictionaryUtils {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public static IGenstarDictionary<DemographicAttribute<? extends IValue>> readFromGenstarConfig(
+	public static IGenstarDictionary<Attribute<? extends IValue>> readFromGenstarConfig(
 			String filename) {
 		
 		GenstarJsonUtil sju = new GenstarJsonUtil();

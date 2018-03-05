@@ -11,7 +11,7 @@ import org.junit.rules.TemporaryFolder;
 
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
@@ -28,7 +28,7 @@ import gospl.io.exception.InvalidSurveyFormatException;
 import gospl.sampler.IHierarchicalSampler;
 import gospl.sampler.ISampler;
 
-public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>>> {
+public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<ACoordinate<Attribute<? extends IValue>, IValue>>> {
 
 	public static String INDIV_CLASS_PATH = "Rouen_insee_indiv";
 	public static String INDIV_EXPORT = "GSC_RouenIndividual";
@@ -122,7 +122,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 		final long timestampStart = System.currentTimeMillis();
 		
 		// so we collapse all distribution build from the data
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> distribution = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> distribution = null;
 		try {
 			distribution = df.collapseDataTablesIntoDistribution();
 		} catch (final IllegalDistributionCreation e1) {
@@ -133,7 +133,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 
 		// BUILD THE SAMPLER WITH THE INFERENCE ALGORITHM
 		final ISyntheticReconstructionAlgo<SamplerType> distributionInfAlgo = this.getInferenceAlgoToTest();
-		ISampler<ACoordinate<DemographicAttribute<? extends IValue>,IValue>> sampler = null;
+		ISampler<ACoordinate<Attribute<? extends IValue>,IValue>> sampler = null;
 		try {
 			sampler = distributionInfAlgo.inferSRSampler(
 					distribution, 

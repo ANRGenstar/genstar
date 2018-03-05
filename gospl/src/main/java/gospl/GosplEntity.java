@@ -3,7 +3,7 @@ package gospl;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
@@ -15,7 +15,7 @@ import core.metamodel.value.IValue;
  */
 public class GosplEntity extends ADemoEntity {
 	
-	public GosplEntity(Map<DemographicAttribute<? extends IValue>, IValue> attributes){
+	public GosplEntity(Map<Attribute<? extends IValue>, IValue> attributes){
 		super(attributes);
 	}
 

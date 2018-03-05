@@ -3,7 +3,7 @@ package spin.generator;
 import org.graphstream.graph.Graph;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
@@ -30,7 +30,7 @@ public class TestOnGenerator {
 	 */
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new GSUtilGenerator(2, 4);
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population = generator.generate(100);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> population = generator.generate(100);
 /*		
 		System.out.println("Debut de la generation de reseau regulier");
 		SpinPopulation populationWithNetworkRegular = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);

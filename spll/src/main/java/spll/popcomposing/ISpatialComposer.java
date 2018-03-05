@@ -1,7 +1,7 @@
 package spll.popcomposing;
 
 import core.metamodel.IMultitypePopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
 import spll.SpllPopulation;
@@ -52,7 +52,7 @@ public interface ISpatialComposer<E extends SpllEntity> {
 	public int getCountEmptyParents();
 	public int getCountOrphanChildren();
 	
-	public IMultitypePopulation<E, DemographicAttribute<? extends IValue>> getMatchedPopulation();
+	public IMultitypePopulation<E, Attribute<? extends IValue>> getMatchedPopulation();
 	
 	public void clearMatchedPopulation();
 	

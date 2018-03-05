@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
@@ -53,8 +53,8 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 	private Logger logger = LogManager.getLogger();
 
 	@Override
-	public ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> inferSRSampler(
-			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix,
+	public ISampler<ACoordinate<Attribute<? extends IValue>, IValue>> inferSRSampler(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> matrix,
 			IDistributionSampler sampler) throws IllegalDistributionCreation {
 		if(matrix == null || matrix.getMatrix().isEmpty())
 			throw new IllegalArgumentException("matrix passed in parameter cannot be null or empty");
@@ -76,7 +76,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		}
 
 		// Reject attribute with referent, to only account for referent attribute
-		Set<DemographicAttribute<? extends IValue>> targetedDimensions = matrix.getDimensions()
+		Set<Attribute<? extends IValue>> targetedDimensions = matrix.getDimensions()
 				.stream().filter(att -> att.getReferentAttribute().equals(att))
 				.collect(Collectors.toSet());
 
@@ -87,14 +87,14 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
 
 		// Extrapolate the whole set of coordinates
-		Collection<Map<DemographicAttribute<? extends IValue>, IValue>> coordinates = GSUtilAttribute.getValuesCombination(targetedDimensions);
+		Collection<Map<Attribute<? extends IValue>, IValue>> coordinates = GSUtilAttribute.getValuesCombination(targetedDimensions);
 
 		gspu.sysoStempPerformance(1, this);
 		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
 
-		for(Map<DemographicAttribute<? extends IValue>, IValue> coordinate : coordinates){
+		for(Map<Attribute<? extends IValue>, IValue> coordinate : coordinates){
 			AControl<Double> nulVal = freqMatrix.getNulVal();
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
+			ACoordinate<Attribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
 			AControl<Double> freq = matrix.getVal(coord);
 			if(!nulVal.getValue().equals(freq.getValue()))
 				freqMatrix.addValue(coord, freq);
@@ -102,7 +102,7 @@ public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<I
 				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
 				gspu.sysoStempMessage("Goes into a referent empty correlate: "
 						+Arrays.toString(coordinate.values().toArray()));
-				ACoordinate<DemographicAttribute<? extends IValue>, IValue	> newCoord = new GosplCoordinate(
+				ACoordinate<Attribute<? extends IValue>, IValue	> newCoord = new GosplCoordinate(
 						coord.getDimensions().stream().collect(Collectors.toMap(Function.identity(), 
 						att -> matrix.getEmptyReferentCorrelate(coord).stream()
 									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att)) ?

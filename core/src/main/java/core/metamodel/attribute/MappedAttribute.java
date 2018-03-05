@@ -1,4 +1,4 @@
-package core.metamodel.attribute.demographic;
+package core.metamodel.attribute;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,20 +22,20 @@ import core.metamodel.value.IValue;
  * @param <K> value type associated with this attribute
  * @param <V> value type associated with referent attribute
  */
-@JsonTypeName(MappedDemographicAttribute.SELF)
-public class MappedDemographicAttribute<K extends IValue, V extends IValue> extends DemographicAttribute<K> {
+@JsonTypeName(MappedAttribute.SELF)
+public class MappedAttribute<K extends IValue, V extends IValue> extends Attribute<K> {
 	
 	public static final String SELF = "MAPPED DEMOGRAPHIC ATTRIBUTE";
 	
 	public static final String REF = "REFERENT ATTRIBUTE";
 	public static final String MAP = "MAPPER";
 	
-	@JsonProperty(MappedDemographicAttribute.REF)
-	private DemographicAttribute<V> referentAttribute;
+	@JsonProperty(MappedAttribute.REF)
+	private Attribute<V> referentAttribute;
 	
 	private IAttributeMapper<K, V> attributeMapper;
 
-	protected MappedDemographicAttribute(String name, DemographicAttribute<V> referentAttribute,
+	protected MappedAttribute(String name, Attribute<V> referentAttribute,
 			IAttributeMapper<K, V> attributeMapper) {
 		super(name);
 		this.referentAttribute = referentAttribute;
@@ -45,12 +45,12 @@ public class MappedDemographicAttribute<K extends IValue, V extends IValue> exte
 	// ------------------------------------------------------------------ //
 	
 	@Override
-	public boolean isLinked(DemographicAttribute<? extends IValue> attribute){
+	public boolean isLinked(Attribute<? extends IValue> attribute){
 		return attribute.equals(referentAttribute);	
 	}
 	
 	@Override
-	public DemographicAttribute<V> getReferentAttribute(){
+	public Attribute<V> getReferentAttribute(){
 		return referentAttribute;
 	}
 	
@@ -72,7 +72,7 @@ public class MappedDemographicAttribute<K extends IValue, V extends IValue> exte
 	
 	// ------------------------------------------------------------------- //
 	
-	@JsonProperty(MappedDemographicAttribute.MAP)
+	@JsonProperty(MappedAttribute.MAP)
 	public IAttributeMapper<K, V> getAttributeMapper(){
 		return attributeMapper;
 	}
@@ -111,7 +111,7 @@ public class MappedDemographicAttribute<K extends IValue, V extends IValue> exte
 		if(!this.isEqual(obj))
 			return false;
 		@SuppressWarnings("rawtypes")
-		MappedDemographicAttribute other = (MappedDemographicAttribute) obj;
+		MappedAttribute other = (MappedAttribute) obj;
 		if (attributeMapper == null) {
 			if (other.attributeMapper != null)
 				return false;

@@ -6,7 +6,7 @@ import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
@@ -22,7 +22,7 @@ public class SpllFeature extends AGeoEntity<IValue> {
  
 	private final Feature innerFeature;
 	
-	protected SpllFeature(Map<GeographicAttribute<? extends IValue>, IValue> values, Feature innerFeature) {
+	protected SpllFeature(Map<Attribute<? extends IValue>, IValue> values, Feature innerFeature) {
 		super(values, innerFeature.getIdentifier().getID());
 		this.innerFeature = innerFeature;
 	}

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.metamodel.attribute.IValueSpace;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.NominalValue;
 
 @JsonTypeName(NominalValueAggregator.SELF)

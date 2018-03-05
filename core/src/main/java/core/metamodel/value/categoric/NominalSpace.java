@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 import core.util.data.GSEnumDataType;
 
@@ -25,12 +25,14 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	protected Map<String, NominalValue> values;
 	private NominalValue emptyValue;
+	private Set<String> excludedValues;
 	
 	private GSCategoricTemplate ct;
 	
 	public NominalSpace(IAttribute<NominalValue> attribute, GSCategoricTemplate ct){
 		this.attribute = attribute;
 		this.values = new HashMap<>();
+		this.excludedValues = new HashSet<>();
 		this.emptyValue = new NominalValue(this, null);
 		this.ct = ct;
 	}
@@ -65,7 +67,9 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	@Override
 	public NominalValue addValue(String value) throws IllegalArgumentException {
-
+		if(excludedValues.contains(value))
+			return this.emptyValue;
+		
 		String val = ct.getFormatedString(value);
 		NominalValue nv = values.get(val);
 		if(nv == null) {
@@ -111,6 +115,11 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 		if(nv == null)
 			nv = new NominalValue(this, val);
 		this.emptyValue = nv;
+	}
+	
+	@Override
+	public void addExceludedValue(String string) {
+		excludedValues.add(string);
 	}
 
 	@Override

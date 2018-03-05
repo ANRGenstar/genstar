@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
@@ -28,14 +28,14 @@ import gospl.validation.GosplIndicatorFactory;
  */
 public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSolution {
 
-	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population;
+	protected IPopulation<ADemoEntity, Attribute<? extends IValue>> population;
 	protected Set<IValue> valueList;
 	
 	protected Collection<ADemoEntity> sample;
 	
 	private double fitness = -1;
 	
-	public AGSSampleBasedCOSolution(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+	public AGSSampleBasedCOSolution(IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
 			Collection<ADemoEntity> sample){
 		this.population = new GosplPopulationInDatabase(population);
 		this.sample = sample;
@@ -60,7 +60,7 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	}
 	
 	@Override
-	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> getSolution() {
+	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getSolution() {
 		return population;
 	}
 	
@@ -102,7 +102,7 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	 * May returns an empty map if no pair is find
 	 */
 	protected Map<ADemoEntity, ADemoEntity> findAnyTargetRemoveAddPair(
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
 			IValue value){
 		Map<ADemoEntity, Collection<IValue>> expectedRemove = population.stream()
 				.filter(entity -> entity.getValues().contains(value))
@@ -128,8 +128,8 @@ public abstract class AGSSampleBasedCOSolution implements IGSSampleBasedCOSoluti
 	 * the new entity cannot be add (population.add(newEntity) returns false)
 	 * the method throw an exception
 	 */
-	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> deepSwitch(
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population, 
+	protected IPopulation<ADemoEntity, Attribute<? extends IValue>> deepSwitch(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
 			ADemoEntity oldEntity, ADemoEntity newEntity){
 		if(!population.remove(oldEntity) || !population.add(newEntity))
 				throw new RuntimeException("Encounter a problem while switching between two entities:\n"

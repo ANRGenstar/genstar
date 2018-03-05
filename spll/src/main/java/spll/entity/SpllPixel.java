@@ -8,7 +8,7 @@ import org.geotools.geometry.jts.GeometryBuilder;
 import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.numeric.ContinuousValue;
 
@@ -19,7 +19,7 @@ public class SpllPixel extends AGeoEntity<ContinuousValue> {
 	private int gridX;
 	private int gridY;
 	
-	protected SpllPixel(Map<GeographicAttribute<? extends ContinuousValue>, ContinuousValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
+	protected SpllPixel(Map<Attribute<? extends ContinuousValue>, ContinuousValue> bandsData, Envelope2D pixel, int gridX, int gridY) {
 		super(bandsData, "px ["+pixel.getCenterX()+";"+pixel.getCenterY()+"]");
 		this.gridX = gridX;
 		this.gridY = gridY;

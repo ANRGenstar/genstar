@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
@@ -32,7 +32,7 @@ import gospl.sampler.IDistributionSampler;
  */
 public class GosplBinarySampler implements IDistributionSampler {
 		
-	private List<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> indexedKey;
+	private List<ACoordinate<Attribute<? extends IValue>, IValue>> indexedKey;
 	private List<Double> indexedProbabilitySum;
 	
 	private final double EPSILON = Math.pow(10, -6);
@@ -49,7 +49,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
 		double sumOfProbabilities = 0d;
 		int count = 1;
-		for(Entry<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> entry : 
+		for(Entry<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> entry : 
 				distribution.getMatrix().entrySet()){
 			indexedKey.add(entry.getKey());
 			sumOfProbabilities += entry.getValue().getValue();
@@ -64,7 +64,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 	// -------------------- main contract -------------------- //
 		
 	@Override
-	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> draw(){
+	public ACoordinate<Attribute<? extends IValue>, IValue> draw(){
 		double rand = GenstarRandom.getInstance().nextDouble();
 		int floor = 0;
 		int top = indexedKey.size() - 1;
@@ -94,7 +94,7 @@ public class GosplBinarySampler implements IDistributionSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 		
@@ -103,15 +103,15 @@ public class GosplBinarySampler implements IDistributionSampler {
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<DemographicAttribute<? extends IValue>> attributs = new ArrayList<>(indexedKey
+		List<Attribute<? extends IValue>> attributs = new ArrayList<>(indexedKey
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
 		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
 		double formerProba = 0d;
-		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : indexedKey){
+		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : indexedKey){
 			String line = "";
-			for(DemographicAttribute<? extends IValue> att : attributs){
+			for(Attribute<? extends IValue> att : attributs){
 				if(coord.getDimensions().contains(att)){
 					if(line.isEmpty())
 						line += coord.getMap().get(att).getStringValue();

@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.EmergentAttribute;
 import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
 import core.metamodel.attribute.emergent.IEntityEmergentFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;

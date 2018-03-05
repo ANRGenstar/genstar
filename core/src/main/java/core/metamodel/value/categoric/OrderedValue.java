@@ -3,8 +3,8 @@ package core.metamodel.value.categoric;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**

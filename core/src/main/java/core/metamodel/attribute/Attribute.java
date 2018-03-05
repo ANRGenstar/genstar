@@ -1,4 +1,4 @@
-package core.metamodel.attribute.demographic;
+package core.metamodel.attribute;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -6,9 +6,8 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**
@@ -26,15 +25,15 @@ import core.util.data.GSEnumDataType;
  * explicitly bind to values of the second
  * </ul>
  * <p> 
- * {@link DemographicAttribute} are defined at population level, where all entity should have
+ * {@link Attribute} are defined at population level, where all entity should have
  * a value for each.
  * 
  * @author kevinchapuis
  * @author Duc an vo
  */
 
-@JsonTypeName(DemographicAttribute.SELF)
-public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
+@JsonTypeName(Attribute.SELF)
+public class Attribute<V extends IValue> implements IAttribute<V> {
 
 	public static final String SELF = "DEMOGRAPHIC ATTRIBUTE";
 
@@ -45,7 +44,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	@JsonIgnore
 	private String description = null;
 
-	protected DemographicAttribute(String name) {
+	protected Attribute(String name) {
 		this.name = name;
 	}
 
@@ -92,7 +91,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	 * @return
 	 */
 	@JsonIgnore
-	public DemographicAttribute<? extends IValue> getReferentAttribute(){
+	public Attribute<? extends IValue> getReferentAttribute(){
 		return this;
 	}
 
@@ -112,7 +111,7 @@ public class DemographicAttribute<V extends IValue> implements IAttribute<V> {
 	 * @param attribute
 	 * @return
 	 */
-	public boolean isLinked(DemographicAttribute<? extends IValue> attribute){
+	public boolean isLinked(Attribute<? extends IValue> attribute){
 		if(this.equals(attribute) || this.equals(attribute.getReferentAttribute())
 				|| this.getReferentAttribute().equals(attribute))
 			return true;

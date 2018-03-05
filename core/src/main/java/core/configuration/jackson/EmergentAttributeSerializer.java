@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.EmergentAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -45,7 +45,7 @@ public class EmergentAttributeSerializer extends StdSerializer<EmergentAttribute
 		gen.writeFieldName(typeSer.getTypeIdResolver().idFromValue(attribute));
 		gen.writeStartObject();
 		gen.writeStringField(IAttribute.NAME, attribute.getAttributeName());
-		gen.writeStringField(MappedDemographicAttribute.REF, attribute.getReferentAttribute().getAttributeName());
+		gen.writeStringField(MappedAttribute.REF, attribute.getReferentAttribute().getAttributeName());
 		EmergentFunctionSerializer fs = new EmergentFunctionSerializer();
 		fs.serializeWithType(attribute.getFunction(), gen, serializers, typeSer);
 		gen.writeEndObject();

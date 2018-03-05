@@ -27,7 +27,7 @@ import org.apache.poi.ss.formula.eval.NotImplementedException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.IQueryablePopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
@@ -44,7 +44,7 @@ import core.metamodel.value.binary.BooleanValue;
  * @author Samuel Thiriot
  */
 public class GosplPopulationInDatabase 
-	implements IQueryablePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> {
+	implements IQueryablePopulation<ADemoEntity, Attribute<? extends IValue>> {
 
 	public static final int VARCHAR_SIZE = 255;
 	public static final int MAX_BUFFER_QRY = 10000;
@@ -57,9 +57,9 @@ public class GosplPopulationInDatabase
 	private final Connection connection;
 
 	private Map<String,String> entityType2tableName = new HashMap<>();
-	private Map<String,Map<DemographicAttribute<? extends IValue>,String>> entityType2attribute2colName = new HashMap<>();
+	private Map<String,Map<Attribute<? extends IValue>,String>> entityType2attribute2colName = new HashMap<>();
 
-	private Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes = new HashMap<>();
+	private Map<String,Set<Attribute<? extends IValue>>> entityType2attributes = new HashMap<>();
 	
 	private static int currentInstanceCount = 0;
 	
@@ -67,7 +67,7 @@ public class GosplPopulationInDatabase
 	
 	private Map<String,Set<String>> table2createdIndex = new HashMap<>();
 	
-	public GosplPopulationInDatabase(Connection connection, IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+	public GosplPopulationInDatabase(Connection connection, IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		this.connection = connection;
 		loadPopulationIntoDatabase(population);
 	} 
@@ -92,7 +92,7 @@ public class GosplPopulationInDatabase
 	 * @param population
 	 * @param connection
 	 */
-	public GosplPopulationInDatabase(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+	public GosplPopulationInDatabase(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		try {
 			this.connection = DriverManager.getConnection(
 					"jdbc:hsqldb:mem:"+mySqlDBname+";shutdown=true", "SA", "");
@@ -109,7 +109,7 @@ public class GosplPopulationInDatabase
 	 * @param databaseFile
 	 * @param population
 	 */
-	public GosplPopulationInDatabase(File databaseFile, IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+	public GosplPopulationInDatabase(File databaseFile, IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		
 		 try {
 			 //;ifexists=true
@@ -130,7 +130,7 @@ public class GosplPopulationInDatabase
 	 * @param hsqlUrlServer
 	 * @param pop
 	 */
-	public GosplPopulationInDatabase(URL hsqlUrlServer, IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+	public GosplPopulationInDatabase(URL hsqlUrlServer, IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		try {
 		     Class.forName("org.hsqldb.jdbc.JDBCDriver" );
 		} catch (Exception e) {
@@ -160,8 +160,8 @@ public class GosplPopulationInDatabase
 		return tableName;
 	}
 	
-	protected String getAttributeColNameForType(String type, DemographicAttribute<? extends IValue> a) {
-		Map<DemographicAttribute<? extends IValue>,String> a2name = entityType2attribute2colName.get(type);
+	protected String getAttributeColNameForType(String type, Attribute<? extends IValue> a) {
+		Map<Attribute<? extends IValue>,String> a2name = entityType2attribute2colName.get(type);
 		if (a2name == null) {
 			a2name = new HashMap<>();
 			entityType2attribute2colName.put(type, a2name);
@@ -174,7 +174,7 @@ public class GosplPopulationInDatabase
 		return colName;
 	}
 	
-	protected String getSQLTypeForAttribute(DemographicAttribute<? extends IValue> a) {
+	protected String getSQLTypeForAttribute(Attribute<? extends IValue> a) {
 		
 		switch (a.getValueSpace().getType()) {
 		case Integer:
@@ -205,7 +205,7 @@ public class GosplPopulationInDatabase
 		
 		sb.append("id VARCHAR(50) PRIMARY KEY"); // TODO maybe 30 is not enough?
 		
-		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
+		for (Attribute<? extends IValue> a: entityType2attributes.get(type)) {
 			sb.append(", ");
 			
 			// colname
@@ -231,7 +231,7 @@ public class GosplPopulationInDatabase
 		table2createdIndex.put(getTableNameForEntityType(type), setIndex);
 		
 		Statement s2 = connection.createStatement();				
-		for (DemographicAttribute<? extends IValue> a: entityType2attributes.get(type)) {
+		for (Attribute<? extends IValue> a: entityType2attributes.get(type)) {
  
 			sb = new StringBuffer();
 			sb.append("CREATE INDEX idx_")
@@ -272,7 +272,7 @@ public class GosplPopulationInDatabase
 	 * create tables, and loads entities into them.
 	 * @param pop
 	 */
-	protected void loadPopulationIntoDatabase(IPopulation<? extends ADemoEntity, DemographicAttribute<? extends IValue>> pop) {
+	protected void loadPopulationIntoDatabase(IPopulation<? extends ADemoEntity, Attribute<? extends IValue>> pop) {
 		assert this.connection != null;
 		assert pop != null;
 		
@@ -304,7 +304,7 @@ public class GosplPopulationInDatabase
 	 * @param a
 	 * @return
 	 */
-	private String getSQLValueFor(ADemoEntity e, DemographicAttribute<? extends IValue> a) {
+	private String getSQLValueFor(ADemoEntity e, Attribute<? extends IValue> a) {
 		
 		IValue v = e.getValueForAttribute(a);
 		
@@ -333,7 +333,7 @@ public class GosplPopulationInDatabase
 	 * @return
 	 * @throws SQLException 
 	 */
-	protected IValue readValueForAttribute(String type, DemographicAttribute<? extends IValue> a, ResultSet r) throws SQLException {
+	protected IValue readValueForAttribute(String type, Attribute<? extends IValue> a, ResultSet r) throws SQLException {
 		final String colName = getAttributeColNameForType(type, a);
 		switch (a.getValueSpace().getType()) {
 		case Integer:
@@ -367,12 +367,12 @@ public class GosplPopulationInDatabase
 		int added = 0;
 		
 		// name columns 
-		List<DemographicAttribute<? extends IValue>> attributes = new LinkedList<>(entityType2attributes.get(type));
+		List<Attribute<? extends IValue>> attributes = new LinkedList<>(entityType2attributes.get(type));
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ").append(getTableNameForEntityType(type));
 		sb.append(" m (id");
-		for (DemographicAttribute<? extends IValue> a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getAttributeColNameForType(type, a));
 		}
@@ -408,7 +408,7 @@ public class GosplPopulationInDatabase
 			sb.append("('");
 			sb.append(e.getEntityId());
 			sb.append("'");
-			for (DemographicAttribute<? extends IValue> a: attributes) {
+			for (Attribute<? extends IValue> a: attributes) {
 				sb.append(",");
 				sb.append(getSQLValueFor(e,a));
 			}
@@ -451,13 +451,13 @@ public class GosplPopulationInDatabase
 		}
 		
 		// name columns 
-		List<DemographicAttribute<? extends IValue>> attributes = 
+		List<Attribute<? extends IValue>> attributes = 
 				new LinkedList<>(entityType2attributes.get(type));
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("INSERT INTO ").append(getTableNameForEntityType(type));
 		sb.append(" (id");
-		for (DemographicAttribute<? extends IValue> a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getAttributeColNameForType(type, a));
 		}
@@ -466,7 +466,7 @@ public class GosplPopulationInDatabase
 		sb.append("('");
 		sb.append(e.getEntityId());
 		sb.append("'");
-		for (DemographicAttribute<? extends IValue> a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			sb.append(",");
 			sb.append(getSQLValueFor(e,a));
 		}
@@ -658,11 +658,11 @@ public class GosplPopulationInDatabase
 	    private Connection connection;
 	    private String sql;
 	    private String type;
-	    private Set<DemographicAttribute<? extends IValue>> attributes;
+	    private Set<Attribute<? extends IValue>> attributes;
 	    
 	    public DatabaseEntitiesIterator(
 	    		Connection connection, 
-	    		Set<DemographicAttribute<? extends IValue>> attributes, 
+	    		Set<Attribute<? extends IValue>> attributes, 
 	    		String type, 
 	    		String sqlWhereClause) {
 	        assert connection != null;
@@ -683,7 +683,7 @@ public class GosplPopulationInDatabase
 	     */
 	    public DatabaseEntitiesIterator(
 	    		Connection connection, 
-	    		Set<DemographicAttribute<? extends IValue>> attributes, 
+	    		Set<Attribute<? extends IValue>> attributes, 
 	    		String type) {
 	    	this(
 	    			connection, 
@@ -760,15 +760,15 @@ public class GosplPopulationInDatabase
 	    }
 	}
 	
-	private ADemoEntity createEntity(ResultSet rs, String type, Set<DemographicAttribute<? extends IValue>> attributes) 
+	private ADemoEntity createEntity(ResultSet rs, String type, Set<Attribute<? extends IValue>> attributes) 
 			throws SQLException {
 		
-		Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>();
+		Map<Attribute<? extends IValue>,IValue> attribute2value = new HashMap<>();
     	
     	// read the attributes of the current element 
     	String id = rs.getString("id");
 
-    	for (DemographicAttribute<? extends IValue> a: attributes) {
+    	for (Attribute<? extends IValue> a: attributes) {
     		attribute2value.put(a, readValueForAttribute(type, a, rs));
         } 
     	
@@ -791,7 +791,7 @@ public class GosplPopulationInDatabase
 	public class AllTypesIterator implements Iterator<ADemoEntity> {
 
 		protected Connection connection;
-		protected Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes;
+		protected Map<String,Set<Attribute<? extends IValue>>> entityType2attributes;
 		
 		protected Iterator<String> itTypes = null;
 		protected DatabaseEntitiesIterator itEntities = null;
@@ -801,7 +801,7 @@ public class GosplPopulationInDatabase
 	    public AllTypesIterator(
 	    		Connection connection, 
 	    		Map<String,String> entityType2tableName,
-	    		Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes
+	    		Map<String,Set<Attribute<? extends IValue>>> entityType2attributes
 	    		) {
 
 	    	this(connection, entityType2tableName, entityType2attributes, "");
@@ -818,7 +818,7 @@ public class GosplPopulationInDatabase
 	    public AllTypesIterator(
 	    		Connection connection, 
 	    		Map<String,String> entityType2tableName,
-	    		Map<String,Set<DemographicAttribute<? extends IValue>>> entityType2attributes,
+	    		Map<String,Set<Attribute<? extends IValue>>> entityType2attributes,
 	    		String whereClause
 	    		) {
 	    	
@@ -877,13 +877,13 @@ public class GosplPopulationInDatabase
 	
 	public class AllTypesWithWhereIterator extends AllTypesIterator {
 
-		Map<DemographicAttribute<? extends IValue>,Collection<IValue>> attribute2values;
+		Map<Attribute<? extends IValue>,Collection<IValue>> attribute2values;
 		
 		public AllTypesWithWhereIterator(
 				Connection connection, 
 				Map<String, String> entityType2tableName,
-				Map<String, Set<DemographicAttribute<? extends IValue>>> entityType2attributes,
-				Map<DemographicAttribute<? extends IValue>,Collection<IValue>> attribute2values
+				Map<String, Set<Attribute<? extends IValue>>> entityType2attributes,
+				Map<Attribute<? extends IValue>,Collection<IValue>> attribute2values
 				) {
 			
 			super(connection, entityType2tableName, entityType2attributes);
@@ -1074,7 +1074,7 @@ public class GosplPopulationInDatabase
 	}
 
 	@Override
-	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
+	public Set<Attribute<? extends IValue>> getPopulationAttributes() {
 		return entityType2attributes.values().stream()
 				.flatMap(coll -> coll.stream())
 				.collect(Collectors.toSet());
@@ -1086,12 +1086,12 @@ public class GosplPopulationInDatabase
 	}
 
 	@Override
-	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+	public Attribute<? extends IValue> getPopulationAttributeNamed(String name) {
 		// TODO index
-		Set<DemographicAttribute<? extends IValue>> attributes = getPopulationAttributes();
+		Set<Attribute<? extends IValue>> attributes = getPopulationAttributes();
 		if (attributes == null)
 			return null;
-		for (DemographicAttribute<? extends IValue> a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			if (a.getAttributeName().equals(name))
 				return a;
 		}
@@ -1111,7 +1111,7 @@ public class GosplPopulationInDatabase
 	}
 
 	@Override
-	public int getCountHavingValues(DemographicAttribute<? extends IValue> attribute, IValue... values) {
+	public int getCountHavingValues(Attribute<? extends IValue> attribute, IValue... values) {
  
 		int total = 0;
 		for (String type: entityType2tableName.keySet()) {
@@ -1132,7 +1132,7 @@ public class GosplPopulationInDatabase
 	protected void addWhereClauseForAttribute(
 			StringBuffer sb,
 			String type,
-			DemographicAttribute<? extends IValue> attribute, 
+			Attribute<? extends IValue> attribute, 
 			IValue... values) {
 		
 		boolean first = true;
@@ -1174,7 +1174,7 @@ public class GosplPopulationInDatabase
 	}
 	public int getEntitiesHavingValues(
 						String type, 
-						DemographicAttribute<? extends IValue> attribute, 
+						Attribute<? extends IValue> attribute, 
 						IValue... values) throws SQLException {
 
 		StringBuffer sb = new StringBuffer();
@@ -1202,11 +1202,11 @@ public class GosplPopulationInDatabase
 	private void addWhereClauseForAttributes(
 			StringBuffer sb,
 			String type,
-			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values
+			Map<Attribute<? extends IValue>, Collection<IValue>> attribute2values
 			) {
 		sb.append(" WHERE (");
 		boolean first = true;
-		for (DemographicAttribute<? extends IValue> attribute: attribute2values.keySet()) {
+		for (Attribute<? extends IValue> attribute: attribute2values.keySet()) {
 			if (first) first = false; else sb.append(") AND (");
 			Collection<IValue> values = attribute2values.get(attribute);
 			IValue[] vv = new IValue[values.size()];
@@ -1222,11 +1222,11 @@ public class GosplPopulationInDatabase
 	private void addWhereClauseForCoordinate(
 			StringBuffer sb,
 			String type,
-			Map<DemographicAttribute<? extends IValue>, IValue> attribute2values
+			Map<Attribute<? extends IValue>, IValue> attribute2values
 			) {
 		sb.append(" WHERE (");
 		boolean first = true;
-		for (DemographicAttribute<? extends IValue> attribute: attribute2values.keySet()) {
+		for (Attribute<? extends IValue> attribute: attribute2values.keySet()) {
 			if (first) first = false; else sb.append(") AND (");
 			addWhereClauseForAttribute(sb, type, attribute, new IValue[] {attribute2values.get(attribute)});
 		}
@@ -1235,7 +1235,7 @@ public class GosplPopulationInDatabase
 	
 	protected int getEntitiesHavingValues(
 			String type,
-			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) throws SQLException {
+			Map<Attribute<? extends IValue>, Collection<IValue>> attribute2values) throws SQLException {
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
@@ -1257,7 +1257,7 @@ public class GosplPopulationInDatabase
 	
 	@Override
 	public int getCountHavingValues(
-			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) {
+			Map<Attribute<? extends IValue>, Collection<IValue>> attribute2values) {
 		
 		int total = 0;
 		for (String type: entityType2tableName.keySet()) {
@@ -1275,7 +1275,7 @@ public class GosplPopulationInDatabase
 	
 	protected int getEntitiesHavingCoordinate(
 			String type,
-			Map<DemographicAttribute<? extends IValue>, IValue> attribute2value) throws SQLException {
+			Map<Attribute<? extends IValue>, IValue> attribute2value) throws SQLException {
 		
 		StringBuffer sb = new StringBuffer();
 		sb.append("SELECT COUNT(*) AS TOTAL FROM ").append(getTableNameForEntityType(type));
@@ -1297,7 +1297,7 @@ public class GosplPopulationInDatabase
 	
 	@Override
 	public int getCountHavingCoordinate(
-			Map<DemographicAttribute<? extends IValue>, IValue> attribute2value) {
+			Map<Attribute<? extends IValue>, IValue> attribute2value) {
 		
 		int total = 0;
 		for (String type: entityType2tableName.keySet()) {
@@ -1315,10 +1315,10 @@ public class GosplPopulationInDatabase
 
 	@Override
 	public Iterator<ADemoEntity> getEntitiesHavingValues(
-			DemographicAttribute<? extends IValue> attribute,
+			Attribute<? extends IValue> attribute,
 			IValue... values) {
 				
-		Map<DemographicAttribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
+		Map<Attribute<? extends IValue>,Collection<IValue>> a2vv = new HashMap<>();
 		a2vv.put(attribute, Arrays.asList(values));
 		
 		return new AllTypesWithWhereIterator(
@@ -1331,7 +1331,7 @@ public class GosplPopulationInDatabase
 
 	@Override
 	public Iterator<ADemoEntity> getEntitiesHavingValues(
-			Map<DemographicAttribute<? extends IValue>, Collection<IValue>> attribute2values) {
+			Map<Attribute<? extends IValue>, Collection<IValue>> attribute2values) {
 		return new AllTypesWithWhereIterator(
 				connection, 
 				entityType2tableName, 

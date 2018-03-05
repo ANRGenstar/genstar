@@ -16,7 +16,7 @@ import org.junit.Test;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
@@ -48,15 +48,15 @@ public class GosplIPFTest {
 	@Test
 	public void simpleTest() {
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> seed = 
 				new GSUtilPopulation("simpleDictionary.gns")
 				.buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = 
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> marginals = 
 				new GosplNDimensionalMatrixFactory().createDistribution(
 						new GSUtilPopulation("simpleDictionary.gns").buildPopulation(POPULATION_SIZE));
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> popOut = doIPF(seed, marginals);
 
 		// Basic test of population size generation
 		assertEquals(GENERATION_SIZE, popOut.size());
@@ -65,7 +65,7 @@ public class GosplIPFTest {
 	@Test
 	public void defaultTest() {
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = null;
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> seed = null;
 		try {
 			seed = new GSUtilPopulation().buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 		} catch (GSIllegalRangedData e1) {
@@ -73,7 +73,7 @@ public class GosplIPFTest {
 			throw new RuntimeException(e1);
 		}
 
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> marginals = null;
 		try {
 			marginals = new GosplNDimensionalMatrixFactory().createDistribution(
 					new GSUtilPopulation().buildPopulation(POPULATION_SIZE));
@@ -82,7 +82,7 @@ public class GosplIPFTest {
 			throw new RuntimeException(e1);
 		}
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> popOut = doIPF(seed, marginals);
 
 		// Basic test of population size generation
 		assertEquals(GENERATION_SIZE, popOut.size());
@@ -91,7 +91,7 @@ public class GosplIPFTest {
 	@Test
 	public void defaultTestWithSegmentedMatrix() {
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = null;
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> seed = null;
 		try {
 			seed = new GSUtilPopulation().buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 		} catch (GSIllegalRangedData e1) {
@@ -100,7 +100,7 @@ public class GosplIPFTest {
 
 		}
 
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> marginals = null;
 		try {
 			GSUtilPopulation gaut = new GSUtilPopulation();
 			gaut.buildPopulation(POPULATION_SIZE);
@@ -110,7 +110,7 @@ public class GosplIPFTest {
 			throw new RuntimeException(e);
 		}
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> popOut = doIPF(seed, marginals);
 
 		// Basic test of population size generation
 		assertEquals(GENERATION_SIZE, popOut.size());
@@ -121,15 +121,15 @@ public class GosplIPFTest {
 	@Test
 	public void mappedTest() {
 
-		Set<DemographicAttribute<? extends IValue>> refAttributes = new HashSet<>();
-		Set<DemographicAttribute<? extends IValue>> mappedAttributes = new HashSet<>();
+		Set<Attribute<? extends IValue>> refAttributes = new HashSet<>();
+		Set<Attribute<? extends IValue>> mappedAttributes = new HashSet<>();
 		try {
 			@SuppressWarnings("unchecked")
-			DemographicDictionary<DemographicAttribute<? extends IValue>> gju = new GenstarJsonUtil()
+			DemographicDictionary<Attribute<? extends IValue>> gju = new GenstarJsonUtil()
 					.unmarshalFromGenstarJson(PATH_TO_DICO.resolve("withMapDictionary.gns"), 
 					DemographicDictionary.class);
 			refAttributes.addAll(gju.getAttributes().stream()
-					.map(DemographicAttribute::getReferentAttribute)
+					.map(Attribute::getReferentAttribute)
 				.collect(Collectors.toSet()));
 			mappedAttributes.addAll(gju.getAttributes().stream()
 					.filter(a -> !a.getReferentAttribute().equals(a))
@@ -142,14 +142,14 @@ public class GosplIPFTest {
 			throw new RuntimeException(e);
 		}
 		
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> seed = 
 				new GSUtilPopulation(refAttributes).buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 
 		AFullNDimensionalMatrix<Double> marginals = 
 				new GosplNDimensionalMatrixFactory().createDistribution(
 					new GSUtilPopulation(mappedAttributes).buildPopulation(POPULATION_SIZE));
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> popOut = doIPF(seed, marginals);
 
 		final GosplSurveyFactory sf = new GosplSurveyFactory(0, ';', 1, 1);
 		try {
@@ -168,7 +168,7 @@ public class GosplIPFTest {
 	@Test
 	public void mappedWithSegmentedTest() {
 
-		DemographicDictionary<DemographicAttribute<? extends IValue>> gju = null;
+		DemographicDictionary<Attribute<? extends IValue>> gju = null;
 		try {
 			gju = new GenstarJsonUtil()
 					.unmarshalFromGenstarJson(PATH_TO_DICO.resolve("withMapDictionary.gns"), 
@@ -178,14 +178,14 @@ public class GosplIPFTest {
 			throw new RuntimeException(e);
 		}
 		
-		Set<DemographicAttribute<? extends IValue>> refAttributes = gju.getAttributes().stream()
-				.map(DemographicAttribute::getReferentAttribute)
+		Set<Attribute<? extends IValue>> refAttributes = gju.getAttributes().stream()
+				.map(Attribute::getReferentAttribute)
 			.collect(Collectors.toSet());
 
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed = 
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> seed = 
 				new GSUtilPopulation(refAttributes).buildPopulation((int)(POPULATION_SIZE * SEED_RATIO));
 		
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> marginals = null;
 		try {
 			GSUtilPopulation gaut = new GSUtilPopulation(gju);
 			gaut.buildPopulation(POPULATION_SIZE);
@@ -196,7 +196,7 @@ public class GosplIPFTest {
 
 		}
 		
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popOut = doIPF(seed, marginals);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> popOut = doIPF(seed, marginals);
 
 		final GosplSurveyFactory sf = new GosplSurveyFactory(0, ';', 1, 1);
 		try {
@@ -227,11 +227,11 @@ public class GosplIPFTest {
 	/*
 	 * DO THE IPF
 	 */
-	private IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> doIPF(
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> seed,
-			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> marginals){
+	private IPopulation<ADemoEntity, Attribute<? extends IValue>> doIPF(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> seed,
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> marginals){
 		ISyntheticReconstructionAlgo<IDistributionSampler> inferenceAlgo = new SRIPFAlgo(seed);
-		ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> sampler = null;
+		ISampler<ACoordinate<Attribute<? extends IValue>, IValue>> sampler = null;
 		try {
 			sampler = inferenceAlgo.inferSRSampler(marginals, new GosplBasicSampler());
 		} catch (IllegalDistributionCreation e) {

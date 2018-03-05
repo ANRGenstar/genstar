@@ -7,7 +7,7 @@ import java.util.Random;
 import org.graphstream.graph.Node;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
@@ -22,7 +22,7 @@ public class SpinRandomNetworkGenerator<E extends ADemoEntity>  extends  Abstrac
 	}
 
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> pop) {
+	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> pop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(pop);
 
 		// TODO: check random generator 

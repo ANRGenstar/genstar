@@ -16,13 +16,13 @@ import java.util.stream.Collectors;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
+import core.util.excpetion.GSIllegalRangedData;
 import gospl.GosplEntity;
 import spll.entity.SpllFeature;
 import spll.io.SPLGeofileBuilder;
@@ -38,7 +38,7 @@ import spll.util.SpllUtil;
  * @author Kevin Chapuis
  * @author Samuel Thiriot
  */
-public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttribute<? extends IValue>> {
+public class SpllPopulation implements IPopulation<SpllEntity, Attribute<? extends IValue>> {
 
 	private Set<SpllEntity> population;
 
@@ -47,7 +47,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	 */
 	private IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile; 
 
-	private Set<DemographicAttribute<? extends IValue>> attributes;
+	private Set<Attribute<? extends IValue>> attributes;
 	
 	/**
 	 * A map which associates each geoentity with its corresponding SpllEntity.
@@ -56,7 +56,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	 */
 	protected Map<AGeoEntity<IValue>,SpllEntity> feature2entity = new HashMap<>();
 	
-	public SpllPopulation(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+	public SpllPopulation(IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
 			IGSGeofile<? extends AGeoEntity<? extends IValue>, IValue> geoFile) {
 		this.population = population.stream()
 				.map(entity -> {
@@ -77,11 +77,12 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	 * @param maxEntities
 	 * @throws IOException
 	 * @throws InvalidGeoFormatException
+	 * @throws GSIllegalRangedData 
 	 */
 	public SpllPopulation(	File sfFile, 
-							Collection<DemographicAttribute<? extends IValue>> dictionnary, 
+							Collection<Attribute<? extends IValue>> dictionnary, 
 							Charset charset, 
-							int maxEntities) throws IOException, InvalidGeoFormatException {
+							int maxEntities) throws IOException, InvalidGeoFormatException, GSIllegalRangedData {
 
 		this.population=new HashSet<>();
 		this.attributes=new HashSet<>(dictionnary);
@@ -90,7 +91,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 		System.err.println("max entities:"+maxEntities);
 
 		List<String> attributesNamesToKeep = dictionnary.stream()
-													.map(DemographicAttribute::getAttributeName)
+													.map(Attribute::getAttributeName)
 													.collect(Collectors.toList());
 		SPLVectorFile sf = SPLGeofileBuilder.getShapeFile(sfFile,  attributesNamesToKeep, charset);
 		this.geoFile = sf;
@@ -106,7 +107,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	 * @param the maximum count of entities to read (-1 to ignore)
 	 */
 	public SpllPopulation(	SPLVectorFile sf, 
-							Collection<DemographicAttribute<? extends IValue>> dictionnary, 
+							Collection<Attribute<? extends IValue>> dictionnary, 
 							int maxEntities) {
 		
 		this.population=new HashSet<>();
@@ -155,12 +156,12 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	 * @param maxEntities
 	 */
 	private void addDataFromVector(	SPLVectorFile sf, 
-									Collection<DemographicAttribute<? extends IValue>> dictionnary, 
+									Collection<Attribute<? extends IValue>> dictionnary, 
 									int maxEntities) {
 
 		// index the dictionnary by name
-		Map<String,DemographicAttribute<? extends IValue>> dictionnaryName2attribute = new HashMap<>(dictionnary.size());
-		for (DemographicAttribute<? extends IValue> a: dictionnary)
+		Map<String,Attribute<? extends IValue>> dictionnaryName2attribute = new HashMap<>(dictionnary.size());
+		for (Attribute<? extends IValue> a: dictionnary)
 			dictionnaryName2attribute.put(a.getAttributeName(), a);
 		//System.out.println("working on attributes: "+dictionnaryName2attribute);
 
@@ -177,17 +178,17 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 			SpllFeature feature = itGeoEntity.next();
 			//System.out.println("working on feature: "+feature.getGenstarName());
 
-			Map<DemographicAttribute<? extends IValue>,IValue> attribute2value = new HashMap<>(dictionnary.size());
+			Map<Attribute<? extends IValue>,IValue> attribute2value = new HashMap<>(dictionnary.size());
 			
-			for (Map.Entry<GeographicAttribute<? extends IValue>, IValue> attributeAndValue : 
+			for (Map.Entry<Attribute<? extends IValue>, IValue> attributeAndValue : 
 								feature.getAttributeMap().entrySet()) {
 				
-				final GeographicAttribute<? extends IValue> attribute = attributeAndValue.getKey();
+				final Attribute<? extends IValue> attribute = attributeAndValue.getKey();
 				final IValue value = attributeAndValue.getValue();
 				
 
 				// find in the dictionnary the attribute definition with the same name as this geo attribute
-				DemographicAttribute<? extends IValue> gosplType = dictionnaryName2attribute.get(
+				Attribute<? extends IValue> gosplType = dictionnaryName2attribute.get(
 						attribute.getAttributeName());
 				
 				// skip attributes not defined
@@ -260,7 +261,7 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	}
 	
 	@Override
-	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
+	public Set<Attribute<? extends IValue>> getPopulationAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}
 	
@@ -365,10 +366,10 @@ public class SpllPopulation implements IPopulation<SpllEntity, DemographicAttrib
 	}
 
 	@Override
-	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
+	public Attribute<? extends IValue> getPopulationAttributeNamed(String name) {
 		if (attributes == null)
 			return null;
-		for (DemographicAttribute<? extends IValue> a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			if (a.getAttributeName().equals(name))
 				return a;
 		}

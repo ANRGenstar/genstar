@@ -15,7 +15,7 @@ import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.GSSurveyWrapper;
@@ -33,13 +33,13 @@ public class TestReadMatriciesFromCSV {
 
 	protected GosplInputDataManager readFromFile(
 			String filenameMatrix,
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary,
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary,
 			GSSurveyType surveyType) {
 
 		// load the probabilities
 		GenstarConfigurationFile gcf = new GenstarConfigurationFile();
 		gcf.setBaseDirectory(FileSystems.getDefault().getPath("."));
-		gcf.setDemoDictionary((DemographicDictionary<DemographicAttribute<? extends IValue>>) dictionnary);
+		gcf.setDemoDictionary((DemographicDictionary<Attribute<? extends IValue>>) dictionnary);
 		
 
 		GSSurveyWrapper surveyWrapper = new GSSurveyWrapper(
@@ -70,7 +70,7 @@ public class TestReadMatriciesFromCSV {
 	 */
 	protected GosplInputDataManager readDatasetContingencyAgeCoupleTableau1() {
 
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = 
+		IGenstarDictionary<Attribute<? extends IValue>> dictionnary = 
 				ReadDictionaryUtils.readFromGenstarConfig(
 						"src/test/resources/tables/Dico-Tableau 1.gns");
 		
@@ -90,7 +90,7 @@ public class TestReadMatriciesFromCSV {
 	 */
 	protected GosplInputDataManager readDatasetLocalFrequencyyAgeCoupleTableau1() {
 
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = 
+		IGenstarDictionary<Attribute<? extends IValue>> dictionnary = 
 				ReadDictionaryUtils.readFromGenstarConfig(
 						"src/test/resources/tables/Dico-Tableau 1.gns");
 		
@@ -112,7 +112,7 @@ public class TestReadMatriciesFromCSV {
 	 */
 	protected GosplInputDataManager readDatasetGlobalFrequencyAgeCoupleTableau1() {
 
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = 
+		IGenstarDictionary<Attribute<? extends IValue>> dictionnary = 
 				ReadDictionaryUtils.readFromGenstarConfig(
 						"src/test/resources/tables/Dico-Tableau 1.gns");
 		
@@ -128,7 +128,7 @@ public class TestReadMatriciesFromCSV {
 	protected GosplInputDataManager readDatasetGlobalFrequencySurfaceAndSize() {
 
 		// load the list of dwellings
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoDwellings = ReadINSEEDictionaryUtils
+		IGenstarDictionary<Attribute<? extends IValue>> dicoDwellings = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_DWELLING.txt");
 		
 		GosplPopulation popDwellings = ReadPopulationsUtils.readFromCSVFile(
@@ -136,7 +136,7 @@ public class TestReadMatriciesFromCSV {
 				dicoDwellings);
 	
 		// load the list of households
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoHouseholds = ReadINSEEDictionaryUtils
+		IGenstarDictionary<Attribute<? extends IValue>> dicoHouseholds = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_HOUSEHOLD.txt");
 		
 		GosplPopulation popHouseholds = ReadPopulationsUtils.readFromCSVFile(
@@ -144,7 +144,7 @@ public class TestReadMatriciesFromCSV {
 				dicoHouseholds);
 	
 
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoMerge = 
+		IGenstarDictionary<Attribute<? extends IValue>> dicoMerge = 
 				dicoDwellings.merge(dicoHouseholds);
 		
 		GosplInputDataManager gidm = readFromFile(
@@ -164,7 +164,7 @@ public class TestReadMatriciesFromCSV {
 		
 		GosplInputDataManager gidm = readDatasetContingencyAgeCoupleTableau1();
 		
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> ndata = null;
 		try {
 			ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {
@@ -262,7 +262,7 @@ public class TestReadMatriciesFromCSV {
 		
 		GosplInputDataManager gidm = readDatasetGlobalFrequencySurfaceAndSize();
 		
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> ndata = null;
 		try {
 			ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {
@@ -302,7 +302,7 @@ public class TestReadMatriciesFromCSV {
 		
 		GosplInputDataManager gidm = readDatasetContingencyAgeCoupleTableau1();
 		
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> ndata = null;
 		try {
 			ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {
@@ -403,7 +403,7 @@ public class TestReadMatriciesFromCSV {
 		
 		GosplInputDataManager gidm = readDatasetGlobalFrequencyAgeCoupleTableau1();
 		
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> ndata = null;
 		try {
 			ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {
@@ -501,7 +501,7 @@ public class TestReadMatriciesFromCSV {
 		
 		GosplInputDataManager gidm = readDatasetLocalFrequencyyAgeCoupleTableau1();
 		
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata = null;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> ndata = null;
 		try {
 			ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {

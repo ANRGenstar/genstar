@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
@@ -23,7 +23,7 @@ import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
  */
 public class GSSAState extends AGSSampleBasedCOSolution {
 
-	public GSSAState(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+	public GSSAState(IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
 			Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
@@ -44,7 +44,7 @@ public class GSSAState extends AGSSampleBasedCOSolution {
 		List<IValue> popShift = valueList.stream().skip(GenstarRandom.getInstance().nextInt(
 				valueList.size() < dimensionalShiftNumber ? valueList.size() : dimensionalShiftNumber))
 				.collect(Collectors.toList());
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> newPop = new GosplPopulation(population);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> newPop = new GosplPopulation(population);
 		for(IValue value : popShift){
 			Map<ADemoEntity, ADemoEntity> removeAddPair = super.findAnyTargetRemoveAddPair(
 					newPop, value);

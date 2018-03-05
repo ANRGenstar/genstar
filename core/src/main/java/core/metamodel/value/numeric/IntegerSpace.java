@@ -8,8 +8,8 @@ import java.util.TreeMap;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 
@@ -25,6 +25,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 
 	private IntegerValue emptyValue;
 	private TreeMap<Integer, IntegerValue> values;
+	private Set<String> excludedValues;
 
 	private int min, max;
 
@@ -36,6 +37,7 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 
 	public IntegerSpace(IAttribute<IntegerValue> attribute, Integer min, Integer max) {
 		this.values = new TreeMap<>();
+		this.excludedValues = new HashSet<>();
 		this.emptyValue = new IntegerValue(this);
 		this.attribute = attribute;
 		this.min = min;
@@ -61,6 +63,8 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 
 	@Override
 	public IntegerValue addValue(String value) {
+		if(excludedValues.contains(value))
+			return this.getEmptyValue();
 		IntegerValue iv = getValue(value);
 		if(iv == null) {
 			iv = this.getInstanceValue(value);
@@ -103,6 +107,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 				// default value as it is 
 			}
 		}
+	}
+	
+	@Override
+	public void addExceludedValue(String value) {
+		this.excludedValues.add(value);
 	}
 
 	@Override

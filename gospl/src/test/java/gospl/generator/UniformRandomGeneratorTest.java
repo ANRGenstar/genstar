@@ -7,7 +7,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.generator.util.GSUtilGenerator;
@@ -28,7 +28,7 @@ public class UniformRandomGeneratorTest {
 	@Test
 	@Ignore
 	public void test() {
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop = urg.generate(popSize);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> pop = urg.generate(popSize);
 		assertEquals(popSize, pop.size());
 	}
 

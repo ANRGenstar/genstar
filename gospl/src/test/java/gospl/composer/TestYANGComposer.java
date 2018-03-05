@@ -9,7 +9,7 @@ import org.junit.Test;
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.io.IGSSurvey;
@@ -32,7 +32,7 @@ public class TestYANGComposer {
 	public void test() {
 
 		// load the list of dwellings
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoDwellings = ReadINSEEDictionaryUtils
+		IGenstarDictionary<Attribute<? extends IValue>> dicoDwellings = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_DWELLING.txt");
 		
 		GosplPopulation popDwellings = ReadPopulationsUtils.readFromCSVFile(
@@ -40,7 +40,7 @@ public class TestYANGComposer {
 				dicoDwellings);
 	
 		// load the list of households
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoHouseholds = ReadINSEEDictionaryUtils
+		IGenstarDictionary<Attribute<? extends IValue>> dicoHouseholds = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_HOUSEHOLD.txt");
 		
 		GosplPopulation popHouseholds = ReadPopulationsUtils.readFromCSVFile(
@@ -60,12 +60,12 @@ public class TestYANGComposer {
 			throw new RuntimeException(e);
 		} 
 		
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dicoMerge = 
+		IGenstarDictionary<Attribute<? extends IValue>> dicoMerge = 
 				dicoDwellings.merge(dicoHouseholds);
 		
 		GenstarConfigurationFile gcf = new GenstarConfigurationFile();
 		gcf.setBaseDirectory(FileSystems.getDefault().getPath("."));
-		gcf.setDemoDictionary((DemographicDictionary<DemographicAttribute<? extends IValue>>) dicoMerge);
+		gcf.setDemoDictionary((DemographicDictionary<Attribute<? extends IValue>>) dicoMerge);
 		
 
 		GSSurveyWrapper surveyWrapper = new GSSurveyWrapper(
@@ -84,7 +84,7 @@ public class TestYANGComposer {
 			e.printStackTrace();
 			throw new RuntimeException(e);
 		} 
-		INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> ndata;
+		INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> ndata;
 		try {
 			 ndata = gidm.collapseDataTablesIntoDistribution();
 		} catch (IllegalDistributionCreation | IllegalControlTotalException e) {

@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
@@ -35,7 +35,7 @@ import gospl.sampler.IHierarchicalSampler;
 public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	private Logger logger = LogManager.getLogger();
-	private Collection<List<DemographicAttribute<? extends IValue>>> explorationOrder = null;
+	private Collection<List<Attribute<? extends IValue>>> explorationOrder = null;
 	private ISegmentedNDimensionalMatrix<Double> segmentedMatrix;
 	
 	public GosplHierarchicalSampler() {
@@ -50,7 +50,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 
 	@Override
 	public void setDistribution(
-			Collection<List<DemographicAttribute<? extends IValue>>> explorationOrder,
+			Collection<List<Attribute<? extends IValue>>> explorationOrder,
 			ASegmentedNDimensionalMatrix<Double> segmentedMatrix
 			) {
 		this.explorationOrder = explorationOrder;
@@ -64,14 +64,14 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	// -------------------- main contract -------------------- //
 
 	@Override
-	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> draw() {
+	public ACoordinate<Attribute<? extends IValue>, IValue> draw() {
 
-		Map<DemographicAttribute<? extends IValue>, IValue> att2value = new HashMap<>();
+		Map<Attribute<? extends IValue>, IValue> att2value = new HashMap<>();
 		
 		logger.debug("starting hierarchical sampling...");
-		for (List<DemographicAttribute<? extends IValue>> subgraph : explorationOrder) {
+		for (List<Attribute<? extends IValue>> subgraph : explorationOrder) {
 			logger.debug("starting hierarchical sampling for the first subgraph {}", subgraph);
-			for (DemographicAttribute<? extends IValue> att: subgraph) {
+			for (Attribute<? extends IValue> att: subgraph) {
 			
 				// maybe we processed it already ? (because of control attributes / mapped aspects)
 				if (att2value.containsKey(att))
@@ -111,7 +111,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 					List<Double> distribution = new ArrayList<>(att.getValueSpace().getValues().size()+1);
 					List<IValue> a = new ArrayList<>();
 					// ... we want to add the values already defined that can condition the attribute of interest
-					for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> m : this.segmentedMatrix
+					for (INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> m : this.segmentedMatrix
 							.getMatricesInvolving(this.segmentedMatrix.getDimensions().stream()
 									.filter(dim -> dim.equals(att.getReferentAttribute())).findAny().get())) {
 						a.addAll(
@@ -192,7 +192,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
+	public final List<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	

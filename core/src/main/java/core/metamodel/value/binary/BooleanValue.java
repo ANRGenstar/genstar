@@ -2,8 +2,8 @@ package core.metamodel.value.binary;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**

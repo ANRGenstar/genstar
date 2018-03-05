@@ -22,6 +22,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
+import core.util.excpetion.GSIllegalRangedData;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
 
@@ -84,7 +85,14 @@ public class GSFeatureIterator implements Iterator<SpllFeature> {
 				e.printStackTrace();
 			}
 		}
-		return factory.createGeoEntity(feature, Collections.emptyList());
+		SpllFeature spllFeature = null;
+		try {
+			spllFeature = factory.createGeoEntity(feature, Collections.emptyList());
+		} catch (GSIllegalRangedData e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return spllFeature;
 	}
 
 }

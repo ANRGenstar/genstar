@@ -1,7 +1,7 @@
 package spin.networkProperties;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
@@ -23,7 +23,7 @@ public class TestOnProperties {
 	 */
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new GSUtilGenerator(2, 4);
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population =
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> population =
 		generator.generate(100);
 	
 		System.out.println("Debut de la génération de réseau Regular");

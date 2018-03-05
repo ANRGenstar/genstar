@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import gospl.distribution.exception.IllegalDistributionCreation;
@@ -102,7 +102,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimensions()
 	 */
 	@Override
-	public Set<DemographicAttribute<? extends IValue>> getDimensions() {
+	public Set<Attribute<? extends IValue>> getDimensions() {
 		return jointDistributionSet.stream().flatMap(jd -> jd.getDimensions().stream()).collect(Collectors.toSet());
 	}
 
@@ -110,8 +110,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimensionsAsAttributesAndValues()
 	 */
 	@Override
-	public Map<DemographicAttribute<? extends IValue>, Set<? extends IValue>> getDimensionsAsAttributesAndValues() {
-		Map<DemographicAttribute<? extends IValue>, Set<? extends IValue>>  res = new HashMap<>();
+	public Map<Attribute<? extends IValue>, Set<? extends IValue>> getDimensionsAsAttributesAndValues() {
+		Map<Attribute<? extends IValue>, Set<? extends IValue>>  res = new HashMap<>();
 		for (AFullNDimensionalMatrix<T> m: jointDistributionSet) {
 			res.putAll(m.getDimensionsAsAttributesAndValues());
 		}
@@ -122,7 +122,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimension(core.metamodel.pop.IValue)
 	 */
 	@Override
-	public DemographicAttribute<? extends IValue> getDimension(IValue aspect) {	
+	public Attribute<? extends IValue> getDimension(IValue aspect) {	
 		if(getDimensions().stream().noneMatch(d -> d.getValueSpace().contains(aspect)
 				|| d.getValueSpace().getEmptyValue().equals(aspect))) 
 			throw new NullPointerException("Trying to access to aspect value \""+aspect+"\" (\""
@@ -145,7 +145,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getAspects(core.metamodel.pop.APopulationAttribute)
 	 */
 	@Override
-	public Set<IValue> getAspects(DemographicAttribute<? extends IValue> dimension) {
+	public Set<IValue> getAspects(Attribute<? extends IValue> dimension) {
 		return Collections.unmodifiableSet(dimension.getValueSpace().getValues());
 	}
 
@@ -161,7 +161,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getEmptyCoordinate()
 	 */
 	@Override
-	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> getEmptyCoordinate() {
+	public ACoordinate<Attribute<? extends IValue>, IValue> getEmptyCoordinate() {
 		return jointDistributionSet.iterator().next().getEmptyCoordinate();
 	}
 
@@ -169,8 +169,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.util.Set)
 	 */
 	@Override
-	public Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> getCoordinates(Set<IValue> values){
-		Map<DemographicAttribute<? extends IValue>, Set<IValue>> attValues = values.stream()
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getCoordinates(Set<IValue> values){
+		Map<Attribute<? extends IValue>, Set<IValue>> attValues = values.stream()
 				.collect(Collectors.groupingBy(value -> this.getDimension(value),
 						Collectors.mapping(Function.identity(), Collectors.toSet())));
 		List<AFullNDimensionalMatrix<T>> concernedJointDistributions = jointDistributionSet.stream()
@@ -180,11 +180,11 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		if(concernedJointDistributions.size() == 1)
 			return concernedJointDistributions.get(0).getCoordinates(values);
 
-		Map<DemographicAttribute<? extends IValue>, Set<IValue>> overallMapLink = new HashMap<>();
-		Set<DemographicAttribute<? extends IValue>> overallAttributes = concernedJointDistributions
+		Map<Attribute<? extends IValue>, Set<IValue>> overallMapLink = new HashMap<>();
+		Set<Attribute<? extends IValue>> overallAttributes = concernedJointDistributions
 				.stream().flatMap(mat -> mat.getDimensions().stream()).collect(Collectors.toSet());
-		for(DemographicAttribute<? extends IValue> attribute : attValues.keySet()){
-			for(DemographicAttribute<? extends IValue> mapAtt : overallAttributes.stream()
+		for(Attribute<? extends IValue> attribute : attValues.keySet()){
+			for(Attribute<? extends IValue> mapAtt : overallAttributes.stream()
 					.filter(att -> att.isLinked(attribute)).collect(Collectors.toList())){
 				Set<IValue> mapVals = new HashSet<>();
 				for(IValue val : attValues.get(attribute))
@@ -193,8 +193,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 			}
 		}
 
-		Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> coords = new ArrayList<>();
-		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : concernedJointDistributions
+		Collection<ACoordinate<Attribute<? extends IValue>, IValue>> coords = new ArrayList<>();
+		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : concernedJointDistributions
 				.stream().flatMap(matrix -> matrix.getMatrix().keySet().stream()).collect(Collectors.toSet())){ 
 			if(coord.getMap().entrySet().stream().filter(entry -> overallMapLink.keySet().contains(entry.getKey()))
 					.allMatch(entry -> overallMapLink.get(entry.getKey()).contains(entry.getValue())))
@@ -210,7 +210,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMatrices()
 	 */
 	@Override
-	public Collection<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>> getMatrices(){
+	public Collection<INDimensionalMatrix<Attribute<? extends IValue>, IValue,T>> getMatrices(){
 		return Collections.unmodifiableSet(jointDistributionSet);
 	}
 
@@ -218,8 +218,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMatrix()
 	 */
 	@Override
-	public Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> getMatrix(){
-		Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> matrix = new HashMap<>();
+	public Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<T>> getMatrix(){
+		Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<T>> matrix = new HashMap<>();
 		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
 			matrix.putAll(jd.getMatrix());
 		return matrix;
@@ -229,8 +229,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getOrderedMatrix()
 	 */
 	@Override
-	public LinkedHashMap<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> getOrderedMatrix(){
-		LinkedHashMap<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<T>> matrix = 
+	public LinkedHashMap<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<T>> getOrderedMatrix(){
+		LinkedHashMap<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<T>> matrix = 
 				new LinkedHashMap<>();
 		for(AFullNDimensionalMatrix<T> jd : jointDistributionSet)
 			matrix.putAll(jd.getOrderedMatrix());
@@ -255,7 +255,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getVal(gospl.distribution.matrix.coordinate.ACoordinate)
 	 */
 	@Override
-	public AControl<T> getVal(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate) {
+	public AControl<T> getVal(ACoordinate<Attribute<? extends IValue>, IValue> coordinate) {
 		return getVal(new HashSet<>(coordinate.values()), true);
 	}
 
@@ -348,8 +348,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getMatricesInvolving(core.metamodel.pop.APopulationAttribute)
 	 */
 	@Override
-	public Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue,T>> getMatricesInvolving(
-			DemographicAttribute<? extends IValue> att) {
+	public Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue,T>> getMatricesInvolving(
+			Attribute<? extends IValue> att) {
 		return this.jointDistributionSet.stream().filter(matrix -> matrix.getDimensions().contains(att)).collect(Collectors.toSet());
 	}
 
@@ -359,7 +359,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.lang.String)
 	 */
 	@Override
-	public Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> getCoordinates(String... keyAndVal)
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getCoordinates(String... keyAndVal)
 			throws IllegalArgumentException {
 
 		
@@ -377,8 +377,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		Set<IValue> coordinateValues = new HashSet<>();
 		
 		// collect all the attributes and index their names
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
-															.collect(Collectors.toMap(DemographicAttribute::getAttributeName,Function.identity()));
+		Map<String,Attribute<? extends IValue>> name2attribute = getDimensionsAsAttributesAndValues().keySet().stream()
+															.collect(Collectors.toMap(Attribute::getAttributeName,Function.identity()));
 
 		if (keyAndVal.length % 2 != 0) {
 			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, "
@@ -390,7 +390,7 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 			final String attributeName = keyAndVal[i];
 			final String attributeValueStr = keyAndVal[i+1];
 			
-			DemographicAttribute<? extends IValue> attribute = name2attribute.get(attributeName);
+			Attribute<? extends IValue> attribute = name2attribute.get(attributeName);
 			if (attribute == null)
 				throw new IllegalArgumentException("unknown attribute "+attributeName);
 			coordinateValues.add(attribute.getValueSpace().addValue(attributeValueStr)); // will raise exception if the value is not ok
@@ -407,10 +407,10 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinate(java.lang.String)
 	 */
 	@Override
-	public ACoordinate<DemographicAttribute<? extends IValue>, IValue> getCoordinate(String... keyAndVal)
+	public ACoordinate<Attribute<? extends IValue>, IValue> getCoordinate(String... keyAndVal)
 			throws IllegalArgumentException {
 		
-		Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> s = getCoordinates(keyAndVal);
+		Collection<ACoordinate<Attribute<? extends IValue>, IValue>> s = getCoordinates(keyAndVal);
 				
 		if (s.size() > 1) 
 			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
@@ -427,10 +427,10 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getDimension(java.lang.String)
 	 */
 	@Override
-	public DemographicAttribute<? extends IValue> getDimension(String name) throws IllegalArgumentException {
+	public Attribute<? extends IValue> getDimension(String name) throws IllegalArgumentException {
 		
 		for (AFullNDimensionalMatrix<T> m: jointDistributionSet) {
-			for (DemographicAttribute<? extends IValue> a: m.getDimensions()) {
+			for (Attribute<? extends IValue> a: m.getDimensions()) {
 				if (a.getAttributeName().equals(name)) {
 					return a;
 				}

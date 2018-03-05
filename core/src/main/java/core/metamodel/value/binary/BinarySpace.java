@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**
@@ -148,6 +148,12 @@ public class BinarySpace implements IValueSpace<BooleanValue> {
 	@Override
 	public IValueSpace<BooleanValue> clone(IAttribute<BooleanValue> newReferent) {
 		return new BinarySpace(newReferent);
+	}
+
+	@Override
+	public void addExceludedValue(String string) {
+		// TODO Auto-generated method stub
+		
 	}
 
 	

@@ -9,10 +9,11 @@ import org.opengis.feature.simple.SimpleFeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
+import core.util.excpetion.GSIllegalRangedData;
 
 /**
  * A simple utility class that unable 
@@ -33,13 +34,13 @@ public class SpllGeotoolsAdapter {
 	/**
 	 * Establish a Geotools feature type from a set of Genstar attribute 
 	 * <p>
-	 * From a set of {@link GeographicAttribute} to a {@link SimpleFeatureType}
+	 * From a set of {@link Attribute} to a {@link SimpleFeatureType}
 	 * 
 	 * @param attributes
 	 * @return
 	 */
 	public SimpleFeatureType getGeotoolsFeatureType(String name,
-			Set<GeographicAttribute<? extends IValue>> attributes, CoordinateReferenceSystem crs,
+			Set<Attribute<? extends IValue>> attributes, CoordinateReferenceSystem crs,
 			GeometryDescriptor geometry) {
 		SimpleFeatureTypeBuilder stb = new SimpleFeatureTypeBuilder();
 		stb.setName(name);
@@ -52,15 +53,16 @@ public class SpllGeotoolsAdapter {
 	/**
 	 * Transpose a Geotools property into a Genstar attribute
 	 * <p>
-	 * From {@link Property} to {@link GeographicAttribute} with basic value transposition that can be of type
+	 * From {@link Property} to {@link Attribute} with basic value transposition that can be of type
 	 * {@link GSEnumDataType#Boolean} {@link GSEnumDataType#Continue} {@link GSEnumDataType#Integer} {@link GSEnumDataType#Nominal}
 	 * 
 	 * @param property
 	 * @return
+	 * @throws GSIllegalRangedData 
 	 */
-	public GeographicAttribute<? extends IValue> getGeographicAttribute(Property property) {
+	public Attribute<? extends IValue> getAttribute(Property property) throws GSIllegalRangedData {
 		
-		return GeographicAttributeFactory.getFactory().createAttribute(
+		return AttributeFactory.getFactory().createAttribute(
 					property.getName().getLocalPart(), 
 					GSEnumDataType.getTypeForJavaType(property.getType().getBinding())
 					);

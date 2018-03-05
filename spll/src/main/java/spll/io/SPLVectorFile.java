@@ -40,10 +40,11 @@ import com.vividsolutions.jts.geom.GeometryCollection;
 import com.vividsolutions.jts.geom.Polygon;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
+import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
@@ -99,8 +100,9 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	 * @param dataStore
 	 * @param attributes
 	 * @throws IOException
+	 * @throws GSIllegalRangedData 
 	 */
-	protected SPLVectorFile(DataStore dataStore, List<String> attributes) throws IOException {
+	protected SPLVectorFile(DataStore dataStore, List<String> attributes) throws IOException, GSIllegalRangedData {
 		this.dataStore = dataStore;
 		this.crs = dataStore.getSchema(dataStore.getTypeNames()[0]).getCoordinateReferenceSystem();
 		FeatureSource<SimpleFeatureType,SimpleFeature> fSource = dataStore
@@ -116,11 +118,11 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		}
 	}
 
-	protected SPLVectorFile(File file, Charset charset, List<String> attributes) throws IOException{
+	protected SPLVectorFile(File file, Charset charset, List<String> attributes) throws IOException, GSIllegalRangedData{
 		this(readDataStoreFromFile(file, charset), attributes);
 	}
 
-	protected SPLVectorFile(File file, Charset charset) throws IOException{
+	protected SPLVectorFile(File file, Charset charset) throws IOException, GSIllegalRangedData{
 		this(readDataStoreFromFile(file, charset), Collections.emptyList());
 	}
 	 static double t;
@@ -176,12 +178,12 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	@Override
 	public IGSGeofile<SpllFeature, IValue> transferTo(File destination,
 			Map<? extends AGeoEntity<? extends IValue>,Number> transfer,
-			GeographicAttribute<? extends IValue> attribute) throws IllegalArgumentException, IOException {
+			Attribute<? extends IValue> attribute) throws IllegalArgumentException, IOException {
 		if(features.stream().anyMatch(feat -> !transfer.containsKey(feat)))
 			throw new IllegalArgumentException("There is a mismatch between provided set of geographical entity and "
 					+ "geographic entity of this SPLVector file "+this.toString());
 		
-		Set<GeographicAttribute<? extends IValue>> attrSet = new HashSet<GeographicAttribute<? extends IValue>>();
+		Set<Attribute<? extends IValue>> attrSet = new HashSet<Attribute<? extends IValue>>();
 		attrSet.add(attribute);
 		GeoEntityFactory gef = new GeoEntityFactory(
 				attrSet, 
@@ -193,7 +195,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		
 		Collection<SpllFeature> newFeatures = new HashSet<>();
 		for(AGeoEntity<? extends IValue> entity : this.features) {
-			Map<GeographicAttribute<? extends IValue>, IValue> theMap = new HashMap<>();
+			Map<Attribute<? extends IValue>, IValue> theMap = new HashMap<>();
 			theMap.put(attribute, attribute.getValueSpace().getInstanceValue(transfer.get(entity).toString()));
 			newFeatures.add(gef.createGeoEntity(entity.getGeometry(), theMap));
 		}
@@ -230,7 +232,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	 * @return
 	 */
 	@Override
-	public Collection<GeographicAttribute<? extends IValue>> getGeoAttributes() {
+	public Collection<Attribute<? extends IValue>> getGeoAttributes() {
 		return features.stream().flatMap(f -> f.getAttributes().stream())
 				.collect(Collectors.toSet());
 	}

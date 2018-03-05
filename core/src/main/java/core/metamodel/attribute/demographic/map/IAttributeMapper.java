@@ -8,9 +8,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.AttributeMapperSerializer;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -60,7 +60,7 @@ public interface IAttributeMapper<K extends IValue, V extends IValue> {
 	/**
 	 * Retrieve all values that are mapped to value passed as argument
 	 * 
-	 * @see DemographicAttribute#findMappedAttributeValues(IValue)
+	 * @see Attribute#findMappedAttributeValues(IValue)
 	 * 
 	 * @param value
 	 * @return
@@ -69,9 +69,9 @@ public interface IAttributeMapper<K extends IValue, V extends IValue> {
 	
 	// ----------------- GETTER & SETTER ----------------- //
 
-	public void setRelatedAttribute(MappedDemographicAttribute<K, V> relatedAttribute);
+	public void setRelatedAttribute(MappedAttribute<K, V> relatedAttribute);
 	
-	public MappedDemographicAttribute<K, V> getRelatedAttribute();
+	public MappedAttribute<K, V> getRelatedAttribute();
 
 	public Map<Collection<K>, Collection<V>> getRawMapper();
 	

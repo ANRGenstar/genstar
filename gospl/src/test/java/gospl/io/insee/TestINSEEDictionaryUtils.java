@@ -14,7 +14,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.RangeSpace;
 
@@ -32,7 +32,7 @@ public class TestINSEEDictionaryUtils {
 	@Test
 	public void testLoadFromURL1() {
 		
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = ReadINSEEDictionaryUtils
+		IGenstarDictionary<Attribute<? extends IValue>> dictionnary = ReadINSEEDictionaryUtils
 				.readFromWebsite("https://www.insee.fr/fr/statistiques/2863616?sommaire=2867837#dictionnaire");
 		
 		assertEquals("wrong count of attributes", 5, dictionnary.size());
@@ -40,7 +40,7 @@ public class TestINSEEDictionaryUtils {
 		System.out.println(dictionnary);
 
 		
-		Map<String,DemographicAttribute<? extends IValue>> name2att = dictionnary.getAttributes()
+		Map<String,Attribute<? extends IValue>> name2att = dictionnary.getAttributes()
 							.stream()
 							.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
@@ -54,7 +54,7 @@ public class TestINSEEDictionaryUtils {
 	@Test
 	public void testLoadFromURL2() {
 		
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = 
+		IGenstarDictionary<Attribute<? extends IValue>> dictionnary = 
 				ReadINSEEDictionaryUtils.readFromWebsite("https://www.insee.fr/fr/statistiques/2863607?sommaire=2867825#dictionnaire");
 		
 		assertEquals("wrong count of attributes", 10, dictionnary.size());
@@ -62,7 +62,7 @@ public class TestINSEEDictionaryUtils {
 		System.out.println(dictionnary);
 
 		
-		Map<String,DemographicAttribute<? extends IValue>> name2att = dictionnary.getAttributes()
+		Map<String,Attribute<? extends IValue>> name2att = dictionnary.getAttributes()
 				.stream()
 				.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
@@ -75,14 +75,14 @@ public class TestINSEEDictionaryUtils {
 	@Test
 	public void testLoadFromDictionaryMODFile() {
 		
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = ReadINSEEDictionaryUtils
+		IGenstarDictionary<Attribute<? extends IValue>> dictionnary = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/MOD_INDREG_2014.txt");
 		
 		assertEquals("wrong count of attributes", 97, dictionnary.size());
 		
 		System.out.println(dictionnary);
 
-		Map<String,DemographicAttribute<? extends IValue>> name2att = dictionnary.getAttributes()
+		Map<String,Attribute<? extends IValue>> name2att = dictionnary.getAttributes()
 					.stream()
 					.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		

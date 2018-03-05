@@ -6,7 +6,7 @@ import java.io.PrintStream;
 
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
@@ -26,7 +26,7 @@ public class GraphMLWriter {
 	 */
 	public static void writePopulationAsGraphML(
 									File file, 
-									IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
+									IPopulation<ADemoEntity, Attribute<? extends IValue>> population) 
 									throws FileNotFoundException {
 
 		PrintStream ps = new PrintStream(file);	
@@ -53,7 +53,7 @@ public class GraphMLWriter {
 	
 	public static void writePopulationAsGraphML(
 			File file, 
-			IMultitypePopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) 
+			IMultitypePopulation<ADemoEntity, Attribute<? extends IValue>> population) 
 			throws FileNotFoundException {
 		
 		PrintStream ps = new PrintStream(file);	
@@ -91,14 +91,14 @@ public class GraphMLWriter {
 	}
 	
 	protected static void writeDeclarationNodeAttributes(PrintStream ps, 
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 
 		// the type
 		ps.println("<key id=\"__type\" attr.name=\"Type of entity\" attr.type=\"String\">");
 		ps.println("  <default>untyped</default>");
 		ps.println("</key>");
 		
-		for (DemographicAttribute<? extends IValue> a: population.getPopulationAttributes()) {
+		for (Attribute<? extends IValue> a: population.getPopulationAttributes()) {
 			ps.print("<key id=\"");
 			ps.print(a.getAttributeName()); // TODO escape
 			ps.print("\" for=\"node\" attr.name=\"");
@@ -154,7 +154,7 @@ public class GraphMLWriter {
 		ps.println("</data>");
 		
 		// attributes
-		for (DemographicAttribute<? extends IValue> a: e.getAttributes()) {
+		for (Attribute<? extends IValue> a: e.getAttributes()) {
 			ps.print("        <data key=\"");
 			ps.print(a.getAttributeName()); // TODO escape
 			ps.print("\">");

@@ -11,8 +11,8 @@ import org.opengis.referencing.operation.TransformException;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
@@ -26,8 +26,8 @@ import spll.io.exception.InvalidGeoFormatException;
 
 public class SpllSetupTest {
 
-	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop;
-	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> popBig;
+	public IPopulation<ADemoEntity, Attribute<? extends IValue>> pop;
+	public IPopulation<ADemoEntity, Attribute<? extends IValue>> popBig;
 	public SPLVectorFile sfAdmin;
 	public SPLVectorFile sfBuildings;
 	public SPLVectorFile sfRoads;
@@ -35,9 +35,9 @@ public class SpllSetupTest {
 	
 	@SuppressWarnings("unchecked")
 	public SpllSetupTest() {
-		DemographicDictionary<DemographicAttribute<? extends IValue>> atts = new DemographicDictionary<>();
+		DemographicDictionary<Attribute<? extends IValue>> atts = new DemographicDictionary<>();
 		try {
-			atts.addAttributes(DemographicAttributeFactory.getFactory()
+			atts.addAttributes(AttributeFactory.getFactory()
 					.createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101")));
 		} catch (GSIllegalRangedData e1) {
 			e1.printStackTrace();
@@ -56,6 +56,9 @@ public class SpllSetupTest {
 			e.printStackTrace();
 		} catch (InvalidGeoFormatException e) {
 			e.printStackTrace();
+		} catch (GSIllegalRangedData e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		Collection<String> stringPathToAncilaryGeofiles = new ArrayList<>();
 		stringPathToAncilaryGeofiles.add("src/test/resources/CLC12_D076_RGF_S.tif");
@@ -63,7 +66,7 @@ public class SpllSetupTest {
 		for(String path : stringPathToAncilaryGeofiles){
 			try {
 				endogeneousVarFile.add(new SPLGeofileBuilder().setFile(new File(path)).buildGeofile());
-			} catch (IllegalArgumentException | TransformException | IOException | InvalidGeoFormatException e2) {
+			} catch (IllegalArgumentException | TransformException | IOException | InvalidGeoFormatException | GSIllegalRangedData e2) {
 				e2.printStackTrace();
 			}
 		}

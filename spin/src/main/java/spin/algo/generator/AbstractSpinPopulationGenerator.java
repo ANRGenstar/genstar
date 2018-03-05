@@ -1,7 +1,7 @@
 package spin.algo.generator;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
@@ -17,7 +17,7 @@ public abstract class AbstractSpinPopulationGenerator<E extends ADemoEntity> imp
 		for(int i = 0 ; i<numberOfIndividual;i++) {
 			pop.add(new GosplEntity());
 		}
-		return (SpinPopulation<GosplEntity>) generate( (IPopulation<E, DemographicAttribute<? extends IValue>>) pop);
+		return (SpinPopulation<GosplEntity>) generate( (IPopulation<E, Attribute<? extends IValue>>) pop);
 	}	
 	
 }

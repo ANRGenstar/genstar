@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.excpetion.GSIllegalRangedData;
@@ -43,9 +43,9 @@ public class GSUtilPopulation {
 	
 	private ISyntheticGosplPopGenerator generator;
 	
-	private IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population = null;
+	private IPopulation<ADemoEntity, Attribute<? extends IValue>> population = null;
 	
-	private DemographicDictionary<DemographicAttribute<? extends IValue>> dico;
+	private DemographicDictionary<Attribute<? extends IValue>> dico;
 	private Path pathToDictionary = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 	public static String defaultDictionary = "defaultDictionary.gns";
 	
@@ -65,7 +65,7 @@ public class GSUtilPopulation {
 	 * @param dictionary
 	 * @param generator
 	 */
-	public GSUtilPopulation(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary,
+	public GSUtilPopulation(DemographicDictionary<Attribute<? extends IValue>> dictionary,
 			ISyntheticGosplPopGenerator generator) {
 		this.dico = dictionary;
 		this.generator = generator;
@@ -76,7 +76,7 @@ public class GSUtilPopulation {
 	 * 
 	 * @param dictionary
 	 */
-	public GSUtilPopulation(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+	public GSUtilPopulation(DemographicDictionary<Attribute<? extends IValue>> dictionary) {
 		this.dico = dictionary;
 		this.generator = new GSUtilGenerator(dico);
 	}
@@ -141,7 +141,7 @@ public class GSUtilPopulation {
 	 * @param dictionary
 	 */
 	@SuppressWarnings("unchecked")
-	public GSUtilPopulation(Collection<DemographicAttribute<? extends IValue>> dictionary) {
+	public GSUtilPopulation(Collection<Attribute<? extends IValue>> dictionary) {
 		dico = new DemographicDictionary<>();
 		dictionary.stream().forEach(att -> dico.addAttributes(att));
 		this.generator = new GSUtilGenerator(dico);
@@ -163,7 +163,7 @@ public class GSUtilPopulation {
 	 * th
 	 * @return
 	 */
-	public DemographicDictionary<DemographicAttribute<? extends IValue>> getDictionary(){
+	public DemographicDictionary<Attribute<? extends IValue>> getDictionary(){
 		return dico;
 	}
 	
@@ -176,7 +176,7 @@ public class GSUtilPopulation {
 	 * @return 
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> buildPopulation(int size){
+	public IPopulation<ADemoEntity, Attribute<? extends IValue>> buildPopulation(int size){
 		this.population = generator.generate(size);
 		return this.population;
 	}
@@ -220,15 +220,15 @@ public class GSUtilPopulation {
 		if(this.population == null)
 			throw new NullPointerException("No population have been generated - see #buildPopulation");
 		log.debug("Try to build segmented matrix with {} dimensions", this.dico.getAttributes().size());
-		Map<DemographicAttribute<? extends IValue>, Double> attributesProb = this.dico.getAttributes()
+		Map<Attribute<? extends IValue>, Double> attributesProb = this.dico.getAttributes()
 				.stream().collect(Collectors.toMap(Function.identity(), att -> 0.5));
 
-		Collection<Set<DemographicAttribute<? extends IValue>>> segmentedAttribute = new HashSet<>();
+		Collection<Set<Attribute<? extends IValue>>> segmentedAttribute = new HashSet<>();
 		while(!segmentedAttribute.stream().flatMap(set -> set.stream())
 				.collect(Collectors.toSet()).containsAll(this.dico.getAttributes())){
-			Set<DemographicAttribute<? extends IValue>> atts = new HashSet<>();
+			Set<Attribute<? extends IValue>> atts = new HashSet<>();
 			// WARNING: linked attribute could be in the same matrix 
-			for(DemographicAttribute<? extends IValue> attribute : attributesProb.keySet()){
+			for(Attribute<? extends IValue> attribute : attributesProb.keySet()){
 				if(atts.stream().anyMatch(a -> a.getReferentAttribute().equals(attribute)
 						|| a.equals(attribute.getReferentAttribute())))
 					continue;

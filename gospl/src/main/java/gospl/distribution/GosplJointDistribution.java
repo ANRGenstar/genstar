@@ -3,7 +3,7 @@ package gospl.distribution;
 import java.util.Map;
 import java.util.Set;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
@@ -22,11 +22,11 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
 	private Double min = Math.pow(10, -8);
 	
-	protected GosplJointDistribution(Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> matrix){
+	protected GosplJointDistribution(Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> matrix){
 		super(matrix);
 	}
 
-	public GosplJointDistribution(Set<DemographicAttribute<? extends IValue>> dimensions, GSSurveyType metaDataType) {
+	public GosplJointDistribution(Set<Attribute<? extends IValue>> dimensions, GSSurveyType metaDataType) {
 		super(dimensions, metaDataType);
 	}
 
@@ -35,19 +35,19 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
 	
 	@Override
-	public boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value){
+	public boolean addValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value){
 		if(matrix.containsKey(coordinates))
 			return false;
 		return setValue(coordinates, value);
 	}
 	
 	@Override
-	public final boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, Double value) {
+	public final boolean addValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, Double value) {
 		return addValue(coordinates, new ControlFrequency(value));
 	}
 
 	@Override
-	public boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, AControl<? extends Number> value){
+	public boolean setValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinate, AControl<? extends Number> value){
 		if(isCoordinateCompliant(coordinate)){
 			coordinate.setHashIndex(matrix.size());
 			matrix.put(coordinate, new ControlFrequency(value.getValue().doubleValue()));
@@ -58,7 +58,7 @@ public class GosplJointDistribution extends AFullNDimensionalMatrix<Double> {
 	
 
 	@Override
-	public final boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, Double value) {
+	public final boolean setValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinate, Double value) {
 		return setValue(coordinate, new ControlFrequency(value));
 	}
 	

@@ -17,7 +17,7 @@ import org.junit.Test;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
@@ -91,7 +91,7 @@ public class TestDBaseConnection {
 		}
 		
 		
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> attributes = 
+		IGenstarDictionary<Attribute<? extends IValue>> attributes = 
 				ReadINSEEDictionaryUtils.readDictionnaryFromMODFile(
 																dictionaryFilename
 																);
@@ -104,7 +104,7 @@ public class TestDBaseConnection {
 			
 			pop = GosplInputDataManager.getSample(
 					survey, 
-					new DemographicDictionary<DemographicAttribute<? extends IValue>>(attributes), 
+					new DemographicDictionary<Attribute<? extends IValue>>(attributes), 
 					100,
 					keepOnlyEqual
 					);

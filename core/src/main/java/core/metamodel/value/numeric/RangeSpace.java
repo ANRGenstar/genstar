@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.numeric.RangeValue.RangeBound;
 import core.metamodel.value.numeric.template.GSRangeTemplate;
 import core.util.data.GSDataParser;
@@ -42,6 +42,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 
 	private List<RangeValue> values;
 	private RangeValue emptyValue;
+	private Set<String> excludedValues;
 	
 	/**
 	 * Facilitates the costly retrieval of the value for a textual value
@@ -70,6 +71,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 		this.min = minValue;
 		this.max = maxValue;
 		this.values = new ArrayList<>();
+		this.excludedValues = new HashSet<>();
 		this.emptyValue = new RangeValue(this, Double.NaN, Double.NaN);
 	}
 	
@@ -114,6 +116,8 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	
 	@Override
 	public RangeValue addValue(String value) throws IllegalArgumentException {
+		if(excludedValues.contains(value))
+			return this.getEmptyValue();
 		RangeValue iv = null;
 		try {
 			iv = getValue(value);
@@ -205,6 +209,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 					new RangeValue(this, currentVal.get(0), currentVal.get(1));
 			}
 		}
+	}
+	
+	@Override
+	public void addExceludedValue(String value) {
+		this.excludedValues.add(value);
 	}
 	
 	@Override

@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 import core.util.random.GenstarRandom;
@@ -58,14 +58,14 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		// Test whether requested aspects are part of mapped attribute
 		// If there exists a referent attribute & referents is complete, then replace
 		// mapped attribute aspects by referent ones
-		Map<DemographicAttribute<? extends IValue>, Set<IValue>> mapAttToValues = aspects.stream()
+		Map<Attribute<? extends IValue>, Set<IValue>> mapAttToValues = aspects.stream()
 				.filter(a -> !this.getDimension(a).getReferentAttribute().equals(a.getValueSpace().getAttribute())
 						&& jointDistributionSet.stream().anyMatch(jd -> 
 						jd.getDimensions().contains(this.getDimension(a).getReferentAttribute())))
 		.collect(Collectors.groupingBy(a -> this.getDimension(a), Collectors
 				.mapping(Function.identity(), Collectors.toSet())));
 				
-		for(DemographicAttribute<? extends IValue> mAtt : mapAttToValues.keySet()){
+		for(Attribute<? extends IValue> mAtt : mapAttToValues.keySet()){
 			Set<IValue> rValues = mapAttToValues.get(mAtt).stream()
 					.flatMap(a -> mAtt.findMappedAttributeValues(a).stream()).collect(Collectors.toSet());
 			Set<IValue> rToMValues = rValues.stream()
@@ -80,7 +80,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		}
 		
 		// Setup a record of visited dimension to avoid duplicated probabilities
-		Set<DemographicAttribute<? extends IValue>> remainingDimension = aspects.stream()
+		Set<Attribute<? extends IValue>> remainingDimension = aspects.stream()
 				.map(aspect -> this.getDimension(aspect)).collect(Collectors.toSet());
 
 		// Select matrices that contains at least one concerned dimension and ordered them
@@ -101,7 +101,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 				}).collect(Collectors.toList());
 
 		// Store visited dimension to compute conditional probabilities
-		Set<DemographicAttribute<? extends IValue>> assignedDimension = new HashSet<>();
+		Set<Attribute<? extends IValue>> assignedDimension = new HashSet<>();
 
 		for(AFullNDimensionalMatrix<Double> mat : concernedMatrices){
 			if(mat.getDimensions().stream()
@@ -175,7 +175,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 			conditionalProba.multiply(newProbability);
 
 			// Update visited dimension
-			Set<DemographicAttribute<? extends IValue>> updateDimension = concernedValues
+			Set<Attribute<? extends IValue>> updateDimension = concernedValues
 					.stream().filter(val -> aspects.contains(val))
 							.map(a -> this.getDimension(a)).collect(Collectors.toSet());
 			assignedDimension.addAll(updateDimension);
@@ -187,7 +187,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	// ------------------ Setters ------------------ //
 
 	@Override
-	public boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, 
+	public boolean addValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, 
 			AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().equals(coordinates.getDimensions())).collect(Collectors.toSet());
@@ -195,7 +195,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	}
 
 	@Override
-	public final boolean addValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, Double value) {
+	public final boolean addValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, Double value) {
 		return addValue(coordinates, new ControlFrequency(value));
 	}
 
@@ -207,7 +207,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	}
 
 	@Override
-	public boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value) {
+	public boolean setValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinates, AControl<? extends Number> value) {
 		Set<AFullNDimensionalMatrix<Double>> jds = jointDistributionSet
 				.stream().filter(jd -> jd.getDimensions().equals(coordinates.getDimensions())).collect(Collectors.toSet());
 		if(jds.size() != 1)
@@ -216,7 +216,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	}
 
 	@Override
-	public final boolean setValue(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate, Double value) {
+	public final boolean setValue(ACoordinate<Attribute<? extends IValue>, IValue> coordinate, Double value) {
 		return setValue(coordinate, new ControlFrequency(value));
 	}
 
@@ -245,12 +245,12 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	// -------------------- Utilities -------------------- //
 
 	@Override
-	public boolean isCoordinateCompliant(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate) {
+	public boolean isCoordinateCompliant(ACoordinate<Attribute<? extends IValue>, IValue> coordinate) {
 		return jointDistributionSet.stream().anyMatch(jd -> jd.isCoordinateCompliant(coordinate));
 	}
 
 	@Override
-	public Set<IValue> getEmptyReferentCorrelate(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coordinate){
+	public Set<IValue> getEmptyReferentCorrelate(ACoordinate<Attribute<? extends IValue>, IValue> coordinate){
 		Set<IValue> knownRef = new HashSet<>();
 		for(AFullNDimensionalMatrix<Double> mat : jointDistributionSet)
 			if(mat.getEmptyReferentCorrelate(coordinate).isEmpty())
@@ -301,16 +301,16 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	 */
 	private Map<Set<IValue>, AControl<Double>> estimateBottomUpReferences(
 			AFullNDimensionalMatrix<Double> mat, Collection<IValue> aspects,
-			Set<DemographicAttribute<? extends IValue>> assignedDimension){
-		Map<DemographicAttribute<? extends IValue>, Set<DemographicAttribute<? extends IValue>>> ratb = mat.getDimensions().stream()
+			Set<Attribute<? extends IValue>> assignedDimension){
+		Map<Attribute<? extends IValue>, Set<Attribute<? extends IValue>>> ratb = mat.getDimensions().stream()
 				.filter(att -> !att.getReferentAttribute().equals(att)
 						&& assignedDimension.contains(att.getReferentAttribute()))
 				.collect(Collectors.groupingBy(
-						DemographicAttribute::getReferentAttribute, 
+						Attribute::getReferentAttribute, 
 						Collectors.mapping(Function.identity(), Collectors.toSet())));
 		
-		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> refAttributeToBottomup = new HashMap<>();
-		for(DemographicAttribute<? extends IValue> da : ratb.keySet())
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> refAttributeToBottomup = new HashMap<>();
+		for(Attribute<? extends IValue> da : ratb.keySet())
 			refAttributeToBottomup.put(da, ratb.get(da).stream()
 					.sorted((a1, a2) -> 
 					a1.getValueSpace().getValues().size() < a2.getValueSpace().getValues().size() ? -1 :
@@ -324,7 +324,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 		Map<Set<IValue>, AControl<Double>> res = computeControlReferences(refAttributeToBottomup, 
 				aspects, assignedDimension);
 		// Transpose back from top down to bottom up for conditional value to fit **mat** dimensions
-		Set<DemographicAttribute<? extends IValue>> noneAllignedAttribute = res.keySet().stream().flatMap(set -> set.stream())
+		Set<Attribute<? extends IValue>> noneAllignedAttribute = res.keySet().stream().flatMap(set -> set.stream())
 				.filter(a -> !mat.getDimensions().contains(a.getValueSpace().getAttribute()))
 				.map(a -> this.getDimension(a)).collect(Collectors.toSet());
 		if(noneAllignedAttribute.stream().anyMatch(att -> mat.getDimensions()
@@ -344,8 +344,8 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	 */
 	private Map<Set<IValue>, AControl<Double>> estimateTopDownReferences(
 			AFullNDimensionalMatrix<Double> mat, Collection<IValue> aspects,
-			Set<DemographicAttribute<? extends IValue>> assignedDimension){
-		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> assignedAttributeToTopdown = assignedDimension.stream()
+			Set<Attribute<? extends IValue>> assignedDimension){
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> assignedAttributeToTopdown = assignedDimension.stream()
 				.filter(att -> !att.getReferentAttribute().equals(att)
 						&& mat.getDimensions().contains(att.getReferentAttribute()))
 				.collect(Collectors.toMap(Function.identity(), att -> att.getReferentAttribute()));
@@ -362,19 +362,19 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 	}
 
 	private Map<Set<IValue>, AControl<Double>> computeControlReferences(
-			Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> assignedAttToCurrentAtt,
-			Collection<IValue> aspects, Set<DemographicAttribute<? extends IValue>> assignedDimension){
+			Map<Attribute<? extends IValue>, Attribute<? extends IValue>> assignedAttToCurrentAtt,
+			Collection<IValue> aspects, Set<Attribute<? extends IValue>> assignedDimension){
 		// Map of referent attribute and their already defined value
-		Map<DemographicAttribute<? extends IValue>, Set<IValue>> CurrentAttToAssignedValues = 
+		Map<Attribute<? extends IValue>, Set<IValue>> CurrentAttToAssignedValues = 
 				aspects.stream().filter(as -> assignedDimension.contains(as.getValueSpace().getAttribute())
 						&& assignedAttToCurrentAtt.keySet().contains(as.getValueSpace().getAttribute()))
 				.collect(Collectors.groupingBy(as -> assignedAttToCurrentAtt.get(as.getValueSpace().getAttribute()), 
 						Collectors.mapping(Function.identity(), Collectors.toSet())));
 		// Transpose bottom up value set to control proportional referent
 		Map<Set<IValue>, AControl<Double>> output = new HashMap<>();
-		for(DemographicAttribute<? extends IValue> assignedAtt : assignedAttToCurrentAtt.keySet()){
+		for(Attribute<? extends IValue> assignedAtt : assignedAttToCurrentAtt.keySet()){
 			// Distinguish bottomup & topdown attribute from assigned & current attribute
-			DemographicAttribute<? extends IValue> bottomupAtt = assignedAtt.getReferentAttribute()
+			Attribute<? extends IValue> bottomupAtt = assignedAtt.getReferentAttribute()
 					.equals(assignedAttToCurrentAtt.get(assignedAtt)) ? assignedAtt : assignedAttToCurrentAtt.get(assignedAtt);
 			// Map bottomup & topdown attribute to according current & assigned values
 			Set<IValue> currentMappedVals = CurrentAttToAssignedValues.get(assignedAttToCurrentAtt.get(assignedAtt))

@@ -6,7 +6,7 @@ import java.util.List;
 import org.graphstream.graph.Node;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
@@ -29,7 +29,7 @@ public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  Abstrac
 	 * @return myNetwork final network
 	 */
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 	
 		List<Node> nodes = new ArrayList<>(network.getNodes());

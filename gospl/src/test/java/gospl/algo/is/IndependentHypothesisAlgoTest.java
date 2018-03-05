@@ -8,7 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
@@ -51,7 +51,7 @@ public class IndependentHypothesisAlgoTest {
 			e.printStackTrace();
 		}
 		
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop = generator.generate(SEGMENT_SIZE);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> pop = generator.generate(SEGMENT_SIZE);
 
 		assertEquals(pop.size(), SEGMENT_SIZE, 0.01);
 		

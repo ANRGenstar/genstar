@@ -15,10 +15,10 @@ import org.opengis.referencing.operation.TransformException;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
-import core.metamodel.attribute.demographic.DemographicAttributeFactory;
-import core.metamodel.attribute.geographic.GeographicAttribute;
-import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
@@ -31,7 +31,7 @@ import spll.popmapper.SPLocalizer;
 
 public class IoTest {
 
-	public static IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> pop;
+	public static IPopulation<ADemoEntity, Attribute<? extends IValue>> pop;
 	public static SPLRasterFile RasterF;
 	public static SPLVectorFile vectorF;
 	
@@ -50,6 +50,9 @@ public class IoTest {
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (InvalidGeoFormatException e) {
+			e.printStackTrace();
+		} catch (GSIllegalRangedData e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		SPLocalizer localizer = new SPLocalizer(pop, vectorF);
@@ -72,7 +75,7 @@ public class IoTest {
 			Map<? extends AGeoEntity<? extends IValue>, Number> transfer = entities.stream().collect(Collectors.toMap(e -> e, 
 					e -> Double.valueOf(1)));
 			
-			final GeographicAttribute<? extends IValue> transferAttribute = GeographicAttributeFactory.getFactory()
+			final Attribute<? extends IValue> transferAttribute = AttributeFactory.getFactory()
 					.createIntegerAttribute("count");
 			File f = new File("src/test/resources/raster.tif");
 			RasterF.transferTo(f, transfer, transferAttribute);
@@ -84,15 +87,18 @@ public class IoTest {
 			e.printStackTrace();
 		} catch (InvalidGeoFormatException e) {
 			e.printStackTrace();
+		} catch (GSIllegalRangedData e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
 		}
 	}
 	
 	
 	@SuppressWarnings("unchecked")
 	private static void setupRandom(){
-		DemographicDictionary<DemographicAttribute<? extends IValue>> atts = new DemographicDictionary<>();
+		DemographicDictionary<Attribute<? extends IValue>> atts = new DemographicDictionary<>();
 		try {
-			atts.addAttributes(DemographicAttributeFactory.getFactory()
+			atts.addAttributes(AttributeFactory.getFactory()
 					.createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101")));
 		} catch (GSIllegalRangedData e1) {
 			e1.printStackTrace();

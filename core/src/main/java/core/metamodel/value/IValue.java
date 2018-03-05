@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.ValueSerializer;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.OrderedValue;

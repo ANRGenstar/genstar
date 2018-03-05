@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 
@@ -46,7 +46,7 @@ public class RecordAttributeSerializer extends StdSerializer<RecordAttribute<? e
 		gen.writeStartObject();
 		gen.writeStringField(IAttribute.NAME, record.getAttributeName());
 		gen.writeStringField(RecordAttribute.PROXY_TYPE, record.getProxyAttribute().getValueSpace().getType().toString());
-		gen.writeStringField(MappedDemographicAttribute.REF, record.getReferentAttribute().getAttributeName());
+		gen.writeStringField(MappedAttribute.REF, record.getReferentAttribute().getAttributeName());
 		gen.writeEndObject();
 		gen.writeEndObject();
 		

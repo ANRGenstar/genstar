@@ -35,7 +35,7 @@ import org.opengis.referencing.operation.TransformException;
 
 import com.vividsolutions.jts.geom.Geometry;
 
-import core.metamodel.attribute.geographic.GeographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
@@ -70,7 +70,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	
 	private Collection<SpllPixel> cacheGeoEntity = null;
 	private Collection<ContinuousValue> cacheGeoValues = null;
-	private Collection<GeographicAttribute<? extends ContinuousValue>> cacheGeoAttributes = null;
+	private Collection<Attribute<? extends ContinuousValue>> cacheGeoAttributes = null;
 
 	/**
 	 * 
@@ -146,7 +146,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	@Override 
 	public IGSGeofile<SpllPixel, ContinuousValue> transferTo(File destination,
 			Map<? extends AGeoEntity<? extends IValue>, Number> transfer,
-			GeographicAttribute<? extends IValue> attribute) 
+			Attribute<? extends IValue> attribute) 
 					throws IllegalArgumentException, IOException {
 		if(!attribute.getValueSpace().getType().isNumericValue())
 			throw new IllegalArgumentException("Raster file cannot be template for non numeric data tranfer\n"
@@ -204,7 +204,7 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	}
 	
 	@Override
-	public Collection<GeographicAttribute<? extends ContinuousValue>> getGeoAttributes(){
+	public Collection<Attribute<? extends ContinuousValue>> getGeoAttributes(){
 		if (cacheGeoAttributes == null) {
 			cacheGeoAttributes = getGeoEntity().stream().flatMap(entity -> entity.getAttributes().stream())
 				.collect(Collectors.toSet());

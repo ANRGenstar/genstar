@@ -8,7 +8,7 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
@@ -43,8 +43,8 @@ public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<
 
 
 	@Override
-	public ISampler<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> inferSRSampler(
-			INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> matrix, 
+	public ISampler<ACoordinate<Attribute<? extends IValue>, IValue>> inferSRSampler(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> matrix, 
 			IHierarchicalSampler sampler)
 					throws IllegalDistributionCreation {
 		
@@ -83,8 +83,8 @@ public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<
 		
 		logger.debug("end of process");
 		
-		for (INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> currentMatrix: segmentedMatrix.getMatrices()) {
-			for (DemographicAttribute<? extends IValue> att: currentMatrix.getDimensions()) {
+		for (INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> currentMatrix: segmentedMatrix.getMatrices()) {
+			for (Attribute<? extends IValue> att: currentMatrix.getDimensions()) {
 				logger.debug("	att: {}", att);
 			}
 		}
@@ -98,7 +98,7 @@ public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<
 		//dependancyGraph.generateDotRepresentationInPNG(true);
 		
 		// TODO sampler.setDistribution(new GosplBasicDistribution(sampleDistribution));
-		Collection<List<DemographicAttribute<? extends IValue>>> explorationOrder = proposeExplorationOrder(dependancyGraph);
+		Collection<List<Attribute<? extends IValue>>> explorationOrder = proposeExplorationOrder(dependancyGraph);
 		sampler.setDistribution(explorationOrder, segmentedMatrix);
 		
 		return sampler;
@@ -109,30 +109,30 @@ public class HierarchicalHypothesisAlgo implements ISyntheticReconstructionAlgo<
 	 * for the hierarchical sampling.
 	 * @return
 	 */
-	public Collection<List<DemographicAttribute<? extends IValue>>> proposeExplorationOrder(AttributesDependanciesGraph dependancyGraph) {
+	public Collection<List<Attribute<? extends IValue>>> proposeExplorationOrder(AttributesDependanciesGraph dependancyGraph) {
 		
 		// first detect the subgraphs
-		Collection<Set<DemographicAttribute<? extends IValue>>> independantGraphs = dependancyGraph.getConnectedComponents();
+		Collection<Set<Attribute<? extends IValue>>> independantGraphs = dependancyGraph.getConnectedComponents();
 		
-		Collection<List<DemographicAttribute<? extends IValue>>> res = new LinkedList<>();
+		Collection<List<Attribute<? extends IValue>>> res = new LinkedList<>();
 
 		
-		for (Set<DemographicAttribute<? extends IValue>> component: independantGraphs) {
+		for (Set<Attribute<? extends IValue>> component: independantGraphs) {
 		
 			logger.debug("component {} ", component);
 			
 			// detect the candidate roots here 
-			Set<DemographicAttribute<? extends IValue>> potentialRoots = dependancyGraph.getRoots(component);
+			Set<Attribute<? extends IValue>> potentialRoots = dependancyGraph.getRoots(component);
 			logger.debug("might start with roots: {}", potentialRoots);
 			
 			// TODO what is the more relevant ? Start smartly with the less low probabilities to reduce biasing ? 
 			// with the highest or lowest cards ? 
 			
 			// well, right now we just select the first one :-/
-			DemographicAttribute<? extends IValue> root = potentialRoots.iterator().next();
+			Attribute<? extends IValue> root = potentialRoots.iterator().next();
 			
 			// add now build the list !
-			List<DemographicAttribute<? extends IValue>> orderForSubgraph = dependancyGraph.getOrderOfExploration(component, root);
+			List<Attribute<? extends IValue>> orderForSubgraph = dependancyGraph.getOrderOfExploration(component, root);
 			logger.debug("this component should be explore in this order: {}", orderForSubgraph);
 			res.add(orderForSubgraph);
 		}

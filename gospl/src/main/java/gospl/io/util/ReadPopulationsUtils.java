@@ -7,7 +7,7 @@ import java.util.Collections;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
@@ -32,7 +32,7 @@ public class ReadPopulationsUtils {
 
 	public static GosplPopulation readFromCSVFile(
 			String filename,
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary
 			) {
 		File fileCSV = new File(filename);
 		
@@ -49,7 +49,7 @@ public class ReadPopulationsUtils {
 	
 	public static GosplPopulation readFromCSVFile(
 			String filename,
-			IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary,
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary,
 			char separator
 			) {
 	

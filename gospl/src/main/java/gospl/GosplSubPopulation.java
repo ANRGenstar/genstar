@@ -7,7 +7,7 @@ import java.util.Set;
 import org.bouncycastle.crypto.RuntimeCryptoException;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 
@@ -19,7 +19,7 @@ import core.metamodel.value.IValue;
  * @author Samuel Thiriot
  */
 public final class GosplSubPopulation<E extends ADemoEntity> 
-				implements IPopulation<E, DemographicAttribute<? extends IValue>> {
+				implements IPopulation<E, Attribute<? extends IValue>> {
 
 	protected final GosplMultitypePopulation<E> multiPop;
 	protected final String type;
@@ -32,7 +32,7 @@ public final class GosplSubPopulation<E extends ADemoEntity>
 	}
 
 	@Override
-	public Set<DemographicAttribute<? extends IValue>> getPopulationAttributes() {
+	public Set<Attribute<? extends IValue>> getPopulationAttributes() {
 		return this.multiPop.getAttributesForType(this.type);
 	}
 	
@@ -119,11 +119,11 @@ public final class GosplSubPopulation<E extends ADemoEntity>
 	}
 
 	@Override
-	public DemographicAttribute<? extends IValue> getPopulationAttributeNamed(String name) {
-		Set<DemographicAttribute<? extends IValue>> attributes = getPopulationAttributes();
+	public Attribute<? extends IValue> getPopulationAttributeNamed(String name) {
+		Set<Attribute<? extends IValue>> attributes = getPopulationAttributes();
 		if (attributes == null)
 			return null;
-		for (DemographicAttribute<? extends IValue> a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			if (a.getAttributeName().equals(name))
 				return a;
 		}

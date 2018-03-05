@@ -6,7 +6,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.index.quadtree.Quadtree;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
@@ -24,7 +24,7 @@ public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  Abstra
 	}
 
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, DemographicAttribute<? extends IValue>> myPop) {
+	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		if(myPop instanceof SpllPopulation) {
 			return (SpinPopulation<E>) generateNetwork((SpllPopulation) myPop);
 		} else {

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.configuration.dictionary.DemographicDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 
@@ -42,7 +42,7 @@ public class GenstarConfigurationFile {
 	private final List<GSSurveyWrapper> dataFileList = new ArrayList<>();
 
 	// Demographic attributes
-	private DemographicDictionary<DemographicAttribute<? extends IValue>> demoDictionary;
+	private DemographicDictionary<Attribute<? extends IValue>> demoDictionary;
 
 	/**
 	 * The path in which the files included in this configuration is stored, if known.
@@ -79,12 +79,12 @@ public class GenstarConfigurationFile {
 	 * @return
 	 */
 	@JsonProperty(GenstarJsonUtil.DEMO_DICO)
-	public DemographicDictionary<DemographicAttribute<? extends IValue>> getDemoDictionary(){
+	public DemographicDictionary<Attribute<? extends IValue>> getDemoDictionary(){
 		return demoDictionary;
 	}
 	
 	@JsonProperty(GenstarJsonUtil.DEMO_DICO)
-	public void setDemoDictionary(DemographicDictionary<DemographicAttribute<? extends IValue>> dictionary) {
+	public void setDemoDictionary(DemographicDictionary<Attribute<? extends IValue>> dictionary) {
 		this.demoDictionary = dictionary;
 		this.isCircleReferencedAttribute();
 	}
@@ -111,14 +111,14 @@ public class GenstarConfigurationFile {
 	 * that referees to A; in this case, no any attribute can be taken as a referent one 
 	 */
 	private void isCircleReferencedAttribute() throws IllegalArgumentException {
-		Collection<DemographicAttribute<? extends IValue>> attributes = new HashSet<>();
+		Collection<Attribute<? extends IValue>> attributes = new HashSet<>();
 		if(demoDictionary != null) attributes.addAll(demoDictionary.getAttributes());
 		// store attributes that have referent attribute
-		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> attToRefAtt = 
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> attToRefAtt = 
 				attributes.stream().filter(att -> !att.getReferentAttribute().equals(att))
 				.collect(Collectors.toMap(att -> att, att -> att.getReferentAttribute()));
 		// store attributes that are referent and which also have a referent attribute
-		Map<DemographicAttribute<? extends IValue>, DemographicAttribute<? extends IValue>> opCircle = attToRefAtt.keySet()
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> opCircle = attToRefAtt.keySet()
 				.stream().filter(key -> attToRefAtt.values().contains(key))
 			.collect(Collectors.toMap(key -> key, key -> attToRefAtt.get(key)));
 		// check if all referent attributes are also ones to refer to another attributes (circle)

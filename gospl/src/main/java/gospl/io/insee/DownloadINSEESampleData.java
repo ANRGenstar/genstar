@@ -18,7 +18,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
@@ -44,7 +44,7 @@ public class DownloadINSEESampleData {
 	
 	private File zipFile = null;
 	
-	private IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary = null;
+	private IGenstarDictionary<Attribute<? extends IValue>> dictionnary = null;
 	
 	private File fileSample = null;
 	
@@ -96,7 +96,7 @@ public class DownloadINSEESampleData {
 	 * and returns its content 
 	 * @return
 	 */
-	public IGenstarDictionary<DemographicAttribute<? extends IValue>> getDictionnary() {
+	public IGenstarDictionary<Attribute<? extends IValue>> getDictionnary() {
 		
 		if (this.dictionnary != null)
 			return this.dictionnary;
@@ -238,10 +238,10 @@ public class DownloadINSEESampleData {
 		GosplPopulation pop = null;
 		
 		@SuppressWarnings("unused")
-		Set<DemographicAttribute<? extends IValue>> updatedAttributes = 
+		Set<Attribute<? extends IValue>> updatedAttributes = 
 				new HashSet<>(getDictionnary().getAttributes());
 
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> updatedDictionnary = 
+		IGenstarDictionary<Attribute<? extends IValue>> updatedDictionnary = 
 				new DemographicDictionary<>(dictionnary);
 
 		try {

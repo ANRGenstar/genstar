@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -22,7 +22,7 @@ public class AggregateMapper<V extends IValue> implements IAttributeMapper<V, V>
 
 	private Map<V, Collection<V>> map;
 	
-	private MappedDemographicAttribute<V, V> relatedAttribute;
+	private MappedAttribute<V, V> relatedAttribute;
 
 	public AggregateMapper() {
 		this.map = new LinkedHashMap<>();
@@ -57,12 +57,12 @@ public class AggregateMapper<V extends IValue> implements IAttributeMapper<V, V>
 	// -------------------- GETTER & SETTER -------------------- //
 
 	@Override
-	public void setRelatedAttribute(MappedDemographicAttribute<V, V> relatedAttribute) {
+	public void setRelatedAttribute(MappedAttribute<V, V> relatedAttribute) {
 		this.relatedAttribute = relatedAttribute;
 	}
 
 	@Override
-	public MappedDemographicAttribute<V, V> getRelatedAttribute() {
+	public MappedAttribute<V, V> getRelatedAttribute() {
 		return relatedAttribute;
 	}
 	

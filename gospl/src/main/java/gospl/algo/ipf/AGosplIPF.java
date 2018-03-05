@@ -10,7 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
@@ -65,11 +65,11 @@ public abstract class AGosplIPF<T extends Number> {
 
 	private Logger logger = LogManager.getLogger();
 
-	protected IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed;
-	protected INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> marginals;
+	protected IPopulation<ADemoEntity, Attribute<? extends IValue>> sampleSeed;
+	protected INDimensionalMatrix<Attribute<? extends IValue>, IValue, T> marginals;
 	protected MarginalsIPFBuilder<T> marginalProcessor;
 
-	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
+	protected AGosplIPF(IPopulation<ADemoEntity, Attribute<? extends IValue>> sampleSeed,
 			MarginalsIPFBuilder<T> marginalProcessor, int step, double delta){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
@@ -77,18 +77,18 @@ public abstract class AGosplIPF<T extends Number> {
 		this.delta = delta;
 	}
 
-	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
+	protected AGosplIPF(IPopulation<ADemoEntity, Attribute<? extends IValue>> sampleSeed,
 			int step, double delta){
 		this(sampleSeed, new MarginalsIPFBuilder<T>(), step, delta);
 	}
 
-	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed,
+	protected AGosplIPF(IPopulation<ADemoEntity, Attribute<? extends IValue>> sampleSeed,
 			MarginalsIPFBuilder<T> marginalProcessor){
 		this.sampleSeed = sampleSeed;
 		this.marginalProcessor = marginalProcessor;
 	}
 
-	protected AGosplIPF(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sampleSeed){
+	protected AGosplIPF(IPopulation<ADemoEntity, Attribute<? extends IValue>> sampleSeed){
 		this(sampleSeed, new MarginalsIPFBuilder<T>());
 	}
 
@@ -99,7 +99,7 @@ public abstract class AGosplIPF<T extends Number> {
 	 * @see INDimensionalMatrix#getVal(Collection)
 	 * @param marginals
 	 */
-	protected void setMarginalMatrix(INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, T> marginals){
+	protected void setMarginalMatrix(INDimensionalMatrix<Attribute<? extends IValue>, IValue, T> marginals){
 		this.marginals = marginals;
 	}
 
@@ -174,7 +174,7 @@ public abstract class AGosplIPF<T extends Number> {
 					+ "Distribution: "+Arrays.toString(marginals.getDimensions().toArray()) +"\n"
 					+ "Sample seed: :"+Arrays.toString(seed.getDimensions().toArray()));
 		
-		List<DemographicAttribute<? extends IValue>> unmatchSeedAttribute = seed.getDimensions().stream()
+		List<Attribute<? extends IValue>> unmatchSeedAttribute = seed.getDimensions().stream()
 				.filter(dim -> marginals.getDimensions().contains(dim) 
 						|| marginals.getDimensions().contains(dim.getReferentAttribute()))
 				.collect(Collectors.toList());
@@ -213,9 +213,9 @@ public abstract class AGosplIPF<T extends Number> {
 					
 					AControl<Double> factor = new ControlFrequency(marginValue / 
 							(actualValue == 0d ? marginValue : actualValue) ); // If zero seed marginal statu quo
-					Collection<ACoordinate<DemographicAttribute<? extends IValue>, IValue>> relatedCoordinates = 
+					Collection<ACoordinate<Attribute<? extends IValue>, IValue>> relatedCoordinates = 
 							seed.getCoordinates(seedMarginalDescriptor.getSeed()); 
-					for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : relatedCoordinates) {
+					for(ACoordinate<Attribute<? extends IValue>, IValue> coord : relatedCoordinates) {
 						// When no data in seed but known marginal in control tables put atomic value in
 						if(actualValue == 0d && marginValue > 0d) {seed.setValue(coord, seed.getAtomicVal());}
 						AControl<T> av = seed.getVal(coord);

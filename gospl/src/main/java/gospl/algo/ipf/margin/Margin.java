@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import gospl.algo.ipf.AGosplIPF;
 import gospl.distribution.matrix.control.AControl;
@@ -22,18 +22,18 @@ import gospl.distribution.matrix.control.AControl;
  * @author kevinchapuis
  *
  */
-public class Margin<T extends Number> implements IMargin<DemographicAttribute<? extends IValue>, IValue, T> {
+public class Margin<T extends Number> implements IMargin<Attribute<? extends IValue>, IValue, T> {
 
-	private DemographicAttribute<? extends IValue> controlAttribute;
-	private DemographicAttribute<? extends IValue> seedAttribute;
+	private Attribute<? extends IValue> controlAttribute;
+	private Attribute<? extends IValue> seedAttribute;
 	
 	protected Map<MarginDescriptor, AControl<T>> marginalControl;
 	
 	/*
 	 * protected constructor to unsure safe initialization
 	 */
-	protected Margin(DemographicAttribute<? extends IValue> controlAttribute, 
-			DemographicAttribute<? extends IValue> seedAttribute){
+	protected Margin(Attribute<? extends IValue> controlAttribute, 
+			Attribute<? extends IValue> seedAttribute){
 		this.controlAttribute = controlAttribute;
 		this.seedAttribute = seedAttribute;
 		this.marginalControl = new HashMap<>();
@@ -55,12 +55,12 @@ public class Margin<T extends Number> implements IMargin<DemographicAttribute<? 
 	}
 	
 	@Override
-	public DemographicAttribute<? extends IValue> getControlDimension() {
+	public Attribute<? extends IValue> getControlDimension() {
 		return controlAttribute;
 	}
 	
 	@Override
-	public DemographicAttribute<? extends IValue> getSeedDimension() {
+	public Attribute<? extends IValue> getSeedDimension() {
 		return seedAttribute;
 	}
 

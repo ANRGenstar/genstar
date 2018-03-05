@@ -9,10 +9,10 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.EmergentFunctionSerializer;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 
 /**
  * The main function to compute an emergent attribute value based on sub entity properties. The function contains a filter

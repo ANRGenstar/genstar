@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import gospl.algo.sr.bn.CategoricalBayesianNetwork;
 import gospl.io.util.ReadDictionaryUtils;
@@ -31,7 +31,7 @@ public class TestReadDictionary {
 
 		CategoricalBayesianNetwork bn = CategoricalBayesianNetwork.loadFromXMLBIF(new File("./src/test/resources/bayesiannetworks/gerland.xbif"));
 
-		IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary = 
+		IGenstarDictionary<Attribute<? extends IValue>> dictionary = 
 				ReadDictionaryUtils.readBayesianNetworkAsDictionary(bn);
 		
 		System.err.println(dictionary);

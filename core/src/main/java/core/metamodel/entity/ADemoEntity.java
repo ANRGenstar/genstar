@@ -10,17 +10,17 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 
-public abstract class ADemoEntity implements IEntity<DemographicAttribute<? extends IValue>> {
+public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> {
 
 	/**
 	 * The unique identifier of the entity. See {@link EntityUniqueId}
 	 */
 	private String id = null;
 	
-	protected Map<DemographicAttribute<? extends IValue>, IValue> attributes;
+	protected Map<Attribute<? extends IValue>, IValue> attributes;
 
 	
 	/**
@@ -33,7 +33,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	 * Creates a population entity by defining directly the attribute values
 	 * @param attributes
 	 */
-	public ADemoEntity(Map<DemographicAttribute<? extends IValue>, IValue> attributes) {
+	public ADemoEntity(Map<Attribute<? extends IValue>, IValue> attributes) {
 		this.attributes = attributes;
 	}
 	
@@ -42,7 +42,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	 * @param attributes
 	 */
 	public ADemoEntity() {
-		this.attributes = new HashMap<DemographicAttribute<? extends IValue>, IValue>();
+		this.attributes = new HashMap<Attribute<? extends IValue>, IValue>();
 	}
 	
 	/**
@@ -58,7 +58,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	 * creates a population entity by defining the attributes it will contain without attributing any value
 	 * @param attributes
 	 */
-	public ADemoEntity(Collection<DemographicAttribute<IValue>> attributes) {
+	public ADemoEntity(Collection<Attribute<IValue>> attributes) {
 		this.attributes = attributes.stream().collect(Collectors
 				.toMap(Function.identity(), att -> null));
 	}
@@ -99,7 +99,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	 * @param attribute
 	 * @param value
 	 */
-	public void setAttributeValue(DemographicAttribute<? extends IValue> attribute, IValue value) {
+	public void setAttributeValue(Attribute<? extends IValue> attribute, IValue value) {
 		this.attributes.put(attribute, value);
 	}
 
@@ -114,7 +114,7 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 		if (attributes.isEmpty())
 			throw new IllegalArgumentException("there is no attribute defined for this entity");
 
-		Optional<DemographicAttribute<? extends IValue>> opAtt = attributes.keySet().stream()
+		Optional<Attribute<? extends IValue>> opAtt = attributes.keySet().stream()
 				.filter(att -> att.getAttributeName().equals(attributeName)).findAny();
 		
 		if(!opAtt.isPresent())
@@ -126,30 +126,30 @@ public abstract class ADemoEntity implements IEntity<DemographicAttribute<? exte
 	// ----------------------------------------------------------------------- //
 	
 	@Override
-	public boolean hasAttribute(DemographicAttribute<? extends IValue> a) {
+	public boolean hasAttribute(Attribute<? extends IValue> a) {
 		return attributes.containsKey(a);
 	}
 
 	@Override
-	public IValue getValueForAttribute(DemographicAttribute<? extends IValue> attribute) {
+	public IValue getValueForAttribute(Attribute<? extends IValue> attribute) {
 		return attributes.get(attribute);
 	}
 
 	@Override
 	public IValue getValueForAttribute(String property) {
-		for (DemographicAttribute<? extends IValue> att :this.attributes.keySet()) {
+		for (Attribute<? extends IValue> att :this.attributes.keySet()) {
 			if (att.getAttributeName().equals(property)) return attributes.get(att);
 		}
 		return null;
 	}
 	
 	@Override
-	public Map<DemographicAttribute<? extends IValue>, IValue> getAttributeMap() {
+	public Map<Attribute<? extends IValue>, IValue> getAttributeMap() {
 		return Collections.unmodifiableMap(attributes);
 	}
 	
 	@Override
-	public Collection<DemographicAttribute<? extends IValue>> getAttributes() {
+	public Collection<Attribute<? extends IValue>> getAttributes() {
 		return attributes.keySet();
 	}
 

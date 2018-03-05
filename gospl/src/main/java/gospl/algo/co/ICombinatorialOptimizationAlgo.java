@@ -1,7 +1,7 @@
 package gospl.algo.co;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.sampler.ISampler;
@@ -17,7 +17,7 @@ public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADe
 	 * @return
 	 */
 	public ISampler<ADemoEntity> setupCOSampler(
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> sample,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
 			SamplerType sampler);
 	
 }

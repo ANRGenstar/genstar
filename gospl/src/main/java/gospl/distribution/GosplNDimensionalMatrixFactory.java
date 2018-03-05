@@ -10,7 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
@@ -55,21 +55,21 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
-			Set<DemographicAttribute<? extends IValue>> dimensions, GSSurveyType type){
+			Set<Attribute<? extends IValue>> dimensions, GSSurveyType type){
 		AFullNDimensionalMatrix<Double> matrix =  new GosplJointDistribution(dimensions, type);
 		matrix.addGenesis("created from scratch GosplNDimensionalMatrixFactory@createEmptyDistribution");
 		return matrix;
 	}
 	
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
-			Set<DemographicAttribute<? extends IValue>> dimensions){
+			Set<Attribute<? extends IValue>> dimensions){
 		return createEmptyDistribution(dimensions, GSSurveyType.GlobalFrequencyTable);
 	}
 
 	@SuppressWarnings("unchecked")
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
-			DemographicAttribute<? extends IValue> ... dimensions){
-		return createEmptyDistribution(new HashSet<DemographicAttribute<? extends IValue>>(Arrays.asList(dimensions)), GSSurveyType.GlobalFrequencyTable);
+			Attribute<? extends IValue> ... dimensions){
+		return createEmptyDistribution(new HashSet<Attribute<? extends IValue>>(Arrays.asList(dimensions)), GSSurveyType.GlobalFrequencyTable);
 	}
 	/**
 	 * Create an empty segmented distribution
@@ -79,7 +79,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @throws IllegalDistributionCreation 
 	 */
 	public ISegmentedNDimensionalMatrix<Double> createEmptyDistribution(
-			Collection<Set<DemographicAttribute<? extends IValue>>> segmentedDimensions) throws IllegalDistributionCreation{
+			Collection<Set<Attribute<? extends IValue>>> segmentedDimensions) throws IllegalDistributionCreation{
 		return new GosplConditionalDistribution(segmentedDimensions.stream()
 				.map(dimSet -> this.createEmptyDistribution(dimSet)).collect(Collectors.toSet()));
 	}
@@ -95,7 +95,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @param sampleDistribution
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Double> createDistribution(Set<DemographicAttribute<? extends IValue>> dimensions,
+	public AFullNDimensionalMatrix<Double> createDistribution(Set<Attribute<? extends IValue>> dimensions,
 			Map<Set<IValue>, Double> sampleDistribution){
 		if(sampleDistribution.isEmpty())
 			throw new IllegalArgumentException("Sample distribution cannot be empty");
@@ -141,7 +141,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Double> createDistribution(
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population){
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population){
 		// Init the output matrix
 		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(population.getPopulationAttributes(), 
 				GSSurveyType.GlobalFrequencyTable);
@@ -151,7 +151,7 @@ public class GosplNDimensionalMatrixFactory {
 		
 		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
 		for(ADemoEntity entity : population){
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
+			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
 			if(!matrix.addValue(entityCoord, new ControlFrequency(unitFreq)))
 				matrix.getVal(entityCoord).add(unitFreq);
 		}
@@ -168,8 +168,8 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Double> createDistribution(
-			Set<DemographicAttribute<? extends IValue>> attributesToMeasure,
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+			Set<Attribute<? extends IValue>> attributesToMeasure,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		
 		// Init the output matrix
 		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(attributesToMeasure, GSSurveyType.GlobalFrequencyTable);
@@ -179,7 +179,7 @@ public class GosplNDimensionalMatrixFactory {
 		
 		// iterate the whole population
 		for (ADemoEntity entity : population) {
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(
+			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(
 					entity.getAttributeMap().entrySet().stream().filter(entry -> attributesToMeasure.contains(entry.getKey()))
 					.collect(Collectors.toMap(Entry::getKey, Entry::getValue)));
 			if(!matrix.addValue(entityCoord, new ControlFrequency(unitFreq)))
@@ -198,7 +198,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Double> createDistribution(
-			Map<ACoordinate<DemographicAttribute<? extends IValue>, IValue>, AControl<Double>> matrix){
+			Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> matrix){
 		return new GosplJointDistribution(matrix);
 	}
 	
@@ -214,7 +214,7 @@ public class GosplNDimensionalMatrixFactory {
 	 * @throws IllegalDistributionCreation 
 	 */
 	public ISegmentedNDimensionalMatrix<Double> createDistributionFromPopulations(
-			Set<IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>>> populations) 
+			Set<IPopulation<ADemoEntity, Attribute<? extends IValue>>> populations) 
 					throws IllegalDistributionCreation {
 		return new GosplConditionalDistribution(populations
 				.stream().map(pop -> this.createDistribution(pop))
@@ -258,14 +258,14 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Integer> createContingency(
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(population.getPopulationAttributes());
 		matrix.addGenesis("Created from a population GosplNDimensionalMatrixFactory@createContigency");
 
 		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
 		for(ADemoEntity entity : population){
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = 
+			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = 
 					new GosplCoordinate(entity.getAttributeMap());
 			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
 				matrix.getVal(entityCoord).add(1);
@@ -281,8 +281,8 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Integer> createContingency(
-			Set<DemographicAttribute<? extends IValue>> attributesToMeasure,
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+			Set<Attribute<? extends IValue>> attributesToMeasure,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(attributesToMeasure);
@@ -291,7 +291,7 @@ public class GosplNDimensionalMatrixFactory {
 
 		// iterate the whole population
 		for (ADemoEntity entity : population) {
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
+			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
 			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
 				matrix.getVal(entityCoord).add(1);
 		}
@@ -311,8 +311,8 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Integer> createSample(
-			Set<DemographicAttribute<? extends IValue>> attributesToMeasure,
-			IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population) {
+			Set<Attribute<? extends IValue>> attributesToMeasure,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(attributesToMeasure);
@@ -321,7 +321,7 @@ public class GosplNDimensionalMatrixFactory {
 
 		// iterate the whole population
 		for (ADemoEntity entity : population) {
-			ACoordinate<DemographicAttribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
+			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
 			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
 				matrix.getVal(entityCoord).add(1);
 		}

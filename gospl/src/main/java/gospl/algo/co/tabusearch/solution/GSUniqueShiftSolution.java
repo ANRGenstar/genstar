@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandom;
@@ -26,7 +26,7 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 	 * @param population
 	 * @param sample
 	 */
-	public GSUniqueShiftSolution(IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> population,
+	public GSUniqueShiftSolution(IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
 			Collection<ADemoEntity> sample){
 		super(population, sample);
 	}
@@ -62,7 +62,7 @@ public class GSUniqueShiftSolution extends AGSSampleBasedCOSolution {
 
 	@Override
 	public IGSSampleBasedCOSolution getRandomNeighbor(int dimensionalShiftNumber) {
-		IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>> newPopulation = new GosplPopulation(population);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> newPopulation = new GosplPopulation(population);
 		for(IValue value : valueList.stream().unordered().
 				skip(dimensionalShiftNumber > valueList.size() ? 
 						0 : valueList.size() - dimensionalShiftNumber)

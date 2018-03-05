@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.RecordAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.IValueSpace;
-import core.metamodel.attribute.demographic.MappedDemographicAttribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 
@@ -32,7 +32,7 @@ public class RecordAttribute<R extends IAttribute<? extends IValue>,
 	
 	private final P proxy;
 	
-	@JsonProperty(MappedDemographicAttribute.REF)
+	@JsonProperty(MappedAttribute.REF)
 	private final R referent;
 	
 	@JsonIgnore

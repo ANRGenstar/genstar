@@ -33,7 +33,7 @@ import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.io.GSSurveyType;
@@ -100,7 +100,7 @@ public class GosplInputDataManager {
 	/**
 	 * 
 	 * Main methods to parse and get control totals from a {@link GSDataFile} file and with the help of a specified set
-	 * of {@link DemographicAttribute}
+	 * of {@link Attribute}
 	 * <p>
 	 * Method gets all data file from the builder and harmonizes them to one another using line identifier attributes
 	 * 
@@ -159,7 +159,7 @@ public class GosplInputDataManager {
 	 * Returns an unmodifiable view of input data tables, as a raw set of matrices
 	 * @return
 	 */
-	public Set<INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, ? extends Number>> 
+	public Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number>> 
 			getRawDataTables() {
 		return Collections.unmodifiableSet(this.inputData);
 	}
@@ -183,7 +183,7 @@ public class GosplInputDataManager {
 	 * Returns an unmodifiable view of input samples 
 	 * @return
 	 */
-	public Set<IPopulation<ADemoEntity, DemographicAttribute<? extends IValue>>> getRawSamples(){
+	public Set<IPopulation<ADemoEntity, Attribute<? extends IValue>>> getRawSamples(){
 		return Collections.unmodifiableSet(this.samples);
 	}
 	
@@ -197,7 +197,7 @@ public class GosplInputDataManager {
 	 * @throws MatrixCoordinateException
 	 *
 	 */
-	public INDimensionalMatrix<DemographicAttribute<? extends IValue>, IValue, Double> 
+	public INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> 
 			collapseDataTablesIntoDistribution()
 					throws IllegalDistributionCreation, IllegalControlTotalException {
 		
@@ -252,7 +252,7 @@ public class GosplInputDataManager {
 	 * @throws InvalidSurveyFormatException
 	 */
 	public static Set<AFullNDimensionalMatrix<? extends Number>> getDataTables(final IGSSurvey survey,
-			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionary) 
+			final IGenstarDictionary<Attribute<? extends IValue>> dictionary) 
 			throws IOException, InvalidSurveyFormatException {
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
@@ -307,7 +307,7 @@ public class GosplInputDataManager {
 				// Create a matrix for each set of related attribute
 				AFullNDimensionalMatrix<? extends Number> jDistribution;
 				// Matrix 'dimension / aspect' map
-				final Set<DemographicAttribute<? extends IValue>> dimTable = 
+				final Set<Attribute<? extends IValue>> dimTable = 
 						Stream.concat(
 								rSchema.stream().filter(ra -> dictionary.containsAttribute(ra))
 									.map(ra -> dictionary.getAttribute(ra)), 
@@ -339,13 +339,13 @@ public class GosplInputDataManager {
 						// Value type
 						final GSEnumDataType dt = dataParser.getValueType(stringVal);
 						// Store coordinate for the value. It is made of all line & column attribute's aspects
-						final Map<DemographicAttribute<? extends IValue>, IValue> coordSet =
+						final Map<Attribute<? extends IValue>, IValue> coordSet =
 								Stream.concat(rowHeaders.get(row).stream(), columnHeaders.get(col).stream())
 									.filter(vals -> dictionary.containsValue(vals.getStringValue())) // Filter record value
 									.collect(Collectors.toMap(
 											val -> dictionary.getAttribute(val.getValueSpace().getAttribute().getAttributeName()), 
 											Function.identity()));
-						final ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordSet);
+						final ACoordinate<Attribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordSet);
 						// Add the coordinate / parsed value pair into the matrix
 						if (dt.isNumericValue())
 							if (!jDistribution.addValue(coord, jDistribution.parseVal(dataParser, stringVal)))
@@ -370,10 +370,10 @@ public class GosplInputDataManager {
 		
 		if (matrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
 			// Identify local referent dimension
-			final Map<DemographicAttribute<? extends IValue>, List<AControl<? extends Number>>> mappedControls =
+			final Map<Attribute<? extends IValue>, List<AControl<? extends Number>>> mappedControls =
 					matrix.getDimensions().stream().collect(Collectors.toMap(d -> d, d -> d.getValueSpace().getValues()
 							.stream().map(a -> matrix.getVal(a)).collect(Collectors.toList())));
-			final DemographicAttribute<? extends IValue> localReferentDimension =
+			final Attribute<? extends IValue> localReferentDimension =
 					mappedControls.entrySet().stream()
 							.filter(e -> e.getValue().stream()
 									.allMatch(ac -> ac.equalsCastedVal(e.getValue().get(0), EPSILON)))
@@ -403,7 +403,7 @@ public class GosplInputDataManager {
 						localReferentDimension.getValueSpace().getValues().stream().collect(Collectors.toMap(lrv -> lrv,
 								lrv -> matrixOfReference.getVal(lrv).getValue().doubleValue() / totalControl));
 
-				for (final ACoordinate<DemographicAttribute<? extends IValue>, IValue> controlKey : matrix.getMatrix().keySet()) {
+				for (final ACoordinate<Attribute<? extends IValue>, IValue> controlKey : matrix.getMatrix().keySet()) {
 					freqMatrix.addValue(controlKey,
 							new ControlFrequency(matrix.getVal(controlKey).getValue().doubleValue()
 									/ localReferentControl.getValue().doubleValue()
@@ -418,18 +418,18 @@ public class GosplInputDataManager {
 			freqMatrix.setLabel((matrix.getLabel()==null?"?/joint":matrix.getLabel()+"/joint"));
 
 			if (matrix.getMetaDataType().equals(GSSurveyType.GlobalFrequencyTable)) {
-				for (final ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : matrix.getMatrix().keySet())
+				for (final ACoordinate<Attribute<? extends IValue>, IValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(matrix.getVal(coord).getValue().doubleValue()));
 			} else {
 				final AControl<? extends Number> total = matrix.getVal();
-				for (final DemographicAttribute<? extends IValue> attribut : matrix.getDimensions()) {
+				for (final Attribute<? extends IValue> attribut : matrix.getDimensions()) {
 					final AControl<? extends Number> controlAtt = matrix.getVal(attribut.getValueSpace().getValues().stream()
 							.collect(Collectors.toSet()));
 					if (Math.abs(controlAtt.getValue().doubleValue() - total.getValue().doubleValue())
 							/ controlAtt.getValue().doubleValue() > this.EPSILON)
 						throw new IllegalControlTotalException(total, controlAtt);
 				}
-				for (final ACoordinate<DemographicAttribute<? extends IValue>, IValue> coord : matrix.getMatrix().keySet())
+				for (final ACoordinate<Attribute<? extends IValue>, IValue> coord : matrix.getMatrix().keySet())
 					freqMatrix.addValue(coord, new ControlFrequency(
 							matrix.getVal(coord).getValue().doubleValue() / total.getValue().doubleValue()));
 			}
@@ -446,7 +446,7 @@ public class GosplInputDataManager {
 	 * creates a GoSPl population.
 	 */
 	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary)
+			final IGenstarDictionary<Attribute<? extends IValue>> dictionnary)
 			throws IOException, InvalidSurveyFormatException {
 		return getSample(survey, dictionnary, null, Collections.emptyMap());
 	}
@@ -456,7 +456,7 @@ public class GosplInputDataManager {
 	 * creates a GoSPl population.
 	 */
 	public static GosplPopulation getSample(final IGSSurvey survey, 
-			final IGenstarDictionary<DemographicAttribute<? extends IValue>> dictionnary, 
+			final IGenstarDictionary<Attribute<? extends IValue>> dictionnary, 
 			Integer maxIndividuals,
 			Map<String,String> keepOnlyEqual
 			)
@@ -465,7 +465,7 @@ public class GosplInputDataManager {
 		final GosplPopulation sampleSet = new GosplPopulation();
 		
 		// Read headers and store possible variables by column index
-		final Map<Integer, DemographicAttribute<? extends IValue>> columnHeaders = 
+		final Map<Integer, Attribute<? extends IValue>> columnHeaders = 
 				survey.getColumnSample(dictionnary);
 
 		if (columnHeaders.isEmpty()) 
@@ -480,7 +480,7 @@ public class GosplInputDataManager {
 			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
 				break;
 			
-			final Map<DemographicAttribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
+			final Map<Attribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
 			final List<String> indiVals = survey.readLine(i);
 			//System.err.println(i+" "+indiVals);
 
@@ -495,7 +495,7 @@ public class GosplInputDataManager {
 				
 				String actualStringValue = indiVals.get(idx);
 				
-				DemographicAttribute<? extends IValue> att = columnHeaders.get(idx);
+				Attribute<? extends IValue> att = columnHeaders.get(idx);
 				IValue val = null;
 				if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
 					val = att.getValueSpace().getEmptyValue();
@@ -537,7 +537,7 @@ public class GosplInputDataManager {
 	private AFullNDimensionalMatrix<Double> getTransposedRecord(
 			AFullNDimensionalMatrix<? extends Number> recordMatrices) {
 		
-		Set<DemographicAttribute<? extends IValue>> dims = recordMatrices.getDimensions().stream()
+		Set<Attribute<? extends IValue>> dims = recordMatrices.getDimensions().stream()
 				.filter(d -> !isRecordAttribute(d)).collect(Collectors.toSet());
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Transpose process of matrix "
@@ -552,10 +552,10 @@ public class GosplInputDataManager {
 		AControl<? extends Number> recordMatrixControl = recordMatrices.getVal();
 		
 		int iter = 1;
-		for(ACoordinate<DemographicAttribute<? extends IValue>, IValue> oldCoord : recordMatrices.getMatrix().keySet()){
+		for(ACoordinate<Attribute<? extends IValue>, IValue> oldCoord : recordMatrices.getMatrix().keySet()){
 			if(iter % (gspu.getObjectif()/10) == 0)
 				gspu.sysoStempPerformance(0.1, this);
-			Map<DemographicAttribute<? extends IValue>, IValue> newCoord = new HashMap<>(oldCoord.getMap());
+			Map<Attribute<? extends IValue>, IValue> newCoord = new HashMap<>(oldCoord.getMap());
 			dims.stream().forEach(dim -> newCoord.remove(dim));
 			freqMatrix.addValue(new GosplCoordinate(newCoord), 
 					new ControlFrequency(recordMatrices.getVal(oldCoord).getValue().doubleValue() 
@@ -565,7 +565,7 @@ public class GosplInputDataManager {
 		return freqMatrix;
 	}
 	
-	private boolean isRecordAttribute(DemographicAttribute<? extends IValue> attribute){
+	private boolean isRecordAttribute(Attribute<? extends IValue> attribute){
 		return configuration.getDemoDictionary().getRecords().contains(attribute);
 	}
 

@@ -5,10 +5,11 @@ import java.util.Collection;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import core.metamodel.attribute.geographic.GeographicAttributeFactory;
+import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
+import core.util.excpetion.GSIllegalRangedData;
 import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.SpllSetupTest;
@@ -27,7 +28,7 @@ public class LinkerTest {
 	}
 	
 	@Test
-	public void testDefaultLinker() {
+	public void testDefaultLinker() throws GSIllegalRangedData {
 		SPLocalizer localizer = new SPLocalizer(sst.pop, sst.sfBuildings);
 		SpllPopulation localizedPop = localizer.localisePopulation();
 		
@@ -36,13 +37,13 @@ public class LinkerTest {
 						SpatialDistributionFactory.getInstance()
 						.getUniformDistribution()),
 				sst.sfRoads.getGeoEntity(), 
-				GeographicAttributeFactory.getFactory().createAttribute(ATT_NAME, GSEnumDataType.Nominal));
+				AttributeFactory.getFactory().createAttribute(ATT_NAME, GSEnumDataType.Nominal));
 		
 		assert localizedPop.stream().allMatch(a -> a.getLinkedPlaces().containsKey(ATT_NAME));
 	}
 	
 	@Test
-	public void testComplexLinker() {
+	public void testComplexLinker() throws GSIllegalRangedData {
 		SPLocalizer localizer = new SPLocalizer(sst.pop, sst.sfBuildings);
 		SpllPopulation localizedPop = localizer.localisePopulation();
 				
@@ -53,7 +54,7 @@ public class LinkerTest {
 		Collection<? extends AGeoEntity<? extends IValue>> candidates = sst.sfRoads.getGeoEntity();
 		
 		localizer.linkPopulation(localizedPop, linker, candidates, 
-				GeographicAttributeFactory.getFactory().createAttribute("Driving", GSEnumDataType.Nominal));
+				AttributeFactory.getFactory().createAttribute("Driving", GSEnumDataType.Nominal));
 		
 		assert localizedPop.stream().allMatch(a -> a.getLinkedPlaces().containsKey(ATT_NAME));
 	}

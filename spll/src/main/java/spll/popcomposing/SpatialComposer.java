@@ -17,7 +17,7 @@ import org.apache.logging.log4j.Logger;
 import com.vividsolutions.jts.geom.Geometry;
 
 import core.metamodel.IMultitypePopulation;
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;
 import core.metamodel.io.IGSGeofile.GeoGSFileType;
@@ -326,7 +326,7 @@ public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 	}
 
 	@Override
-	public IMultitypePopulation<SpllEntity, DemographicAttribute<? extends IValue>> getMatchedPopulation() {
+	public IMultitypePopulation<SpllEntity, Attribute<? extends IValue>> getMatchedPopulation() {
 		return resultPopulation;
 	}
 	

@@ -6,7 +6,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.DemographicAttribute;
+import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 
 /**
@@ -16,9 +16,9 @@ import core.metamodel.value.IValue;
  * @author Kevin Chapuis
  *
  */
-public class GosplCoordinate extends ACoordinate<DemographicAttribute<? extends IValue>, IValue> {
+public class GosplCoordinate extends ACoordinate<Attribute<? extends IValue>, IValue> {
 
-	public GosplCoordinate(Map<DemographicAttribute<? extends IValue>, IValue> coordinate) {
+	public GosplCoordinate(Map<Attribute<? extends IValue>, IValue> coordinate) {
 		super(coordinate);
 	}
 	
@@ -30,13 +30,13 @@ public class GosplCoordinate extends ACoordinate<DemographicAttribute<? extends 
 	 * @param values
 	 * @return
 	 */
-	public static GosplCoordinate createCoordinate(Set<DemographicAttribute<? extends IValue>> attributes, String ... values) {
+	public static GosplCoordinate createCoordinate(Set<Attribute<? extends IValue>> attributes, String ... values) {
 		
-		Map<DemographicAttribute<? extends IValue>, IValue> coordinateValues = new HashMap<>();
+		Map<Attribute<? extends IValue>, IValue> coordinateValues = new HashMap<>();
 		
 		// collect all the attributes and index their names
-		Map<String,DemographicAttribute<? extends IValue>> name2attribute = attributes.stream()
-															.collect(Collectors.toMap(DemographicAttribute::getAttributeName,Function.identity()));
+		Map<String,Attribute<? extends IValue>> name2attribute = attributes.stream()
+															.collect(Collectors.toMap(Attribute::getAttributeName,Function.identity()));
 
 		if (values.length/2 != attributes.size()) {
 			throw new IllegalArgumentException("you should pass pairs of attribute name and corresponding value, such as attribute 1 name, value for attribute 1, attribute 2 name, value for attribute 2...");
@@ -50,7 +50,7 @@ public class GosplCoordinate extends ACoordinate<DemographicAttribute<? extends 
 			final String attributeName = values[i];
 			final String attributeValueStr = values[i+1];
 			
-			DemographicAttribute<? extends IValue> attribute = name2attribute.get(attributeName);
+			Attribute<? extends IValue> attribute = name2attribute.get(attributeName);
 			if (attribute == null)
 				throw new IllegalArgumentException("unknown attribute "+attributeName);
 			coordinateValues.put(attribute, attribute.getValueSpace().getValue(attributeValueStr)); // will raise exception if the value is not ok
@@ -62,7 +62,7 @@ public class GosplCoordinate extends ACoordinate<DemographicAttribute<? extends 
 	}
 
 	@Override
-	protected boolean isCoordinateSetComplient(Map<DemographicAttribute<? extends IValue>, IValue> coordinate) {
+	protected boolean isCoordinateSetComplient(Map<Attribute<? extends IValue>, IValue> coordinate) {
 		return coordinate.entrySet().stream()
 				.allMatch(e -> e.getValue().getValueSpace().getAttribute().equals(e.getKey()));
 	}
