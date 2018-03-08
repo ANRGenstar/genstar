@@ -33,8 +33,8 @@ public class GenstarJsonUtil {
 	
 	public final static String INPUT_FILES = "INPUT FILES";
 	
-	public final static String DEMO_DICO = "DEMOGRAPHIC DICTIONARY";
-	public static final String DEMO_RECORDS = "DEMOGRAPHIC RECORDS";
+	public final static String ATT_DICO = "ATTRIBUTE DICTIONARY";
+	public static final String RECORDS = "RECORDS ATTRIBUTES";
 	
 	public final static String GENSTAR_EXT = "gns";
 	

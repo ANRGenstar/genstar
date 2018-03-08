@@ -27,7 +27,7 @@ import org.htmlcleaner.XPather;
 import org.htmlcleaner.XPatherException;
 
 import au.com.bytecode.opencsv.CSVReader;
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
@@ -253,7 +253,7 @@ public class ReadINSEEDictionaryUtils {
 			}
 		}
 		
-		return new DemographicDictionary<Attribute<? extends IValue>>(attributes);
+		return new AttributeDictionary(attributes);
 	}
 
 	
@@ -420,7 +420,7 @@ public class ReadINSEEDictionaryUtils {
 		}
 		
 		
-		return new DemographicDictionary<Attribute<? extends IValue>>(attributes);
+		return new AttributeDictionary(attributes);
 		
 	}
 	private ReadINSEEDictionaryUtils() {}

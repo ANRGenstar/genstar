@@ -28,12 +28,12 @@ import core.metamodel.value.IValue;
 	      include = JsonTypeInfo.As.WRAPPER_OBJECT
 	      )
 @JsonSubTypes({
-    @JsonSubTypes.Type(value = DemographicDictionary.class)
+    @JsonSubTypes.Type(value = AttributeDictionary.class)
 })
 public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 
 	public static final String ATTRIBUTES = "ATTRIBUTES";
-	public static final String RECORDS = "RECORD ATTRIBUTES";
+	public static final String RECORDS = "RECORDS";
 	
 	/**
 	 * Retrieves meaningful attributes describe by this dictionary
@@ -42,7 +42,7 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * 
 	 * @return
 	 */
-	@JsonProperty(DemographicDictionary.ATTRIBUTES)
+	@JsonProperty(AttributeDictionary.ATTRIBUTES)
 	public Collection<A> getAttributes();
 	
 	@JsonIgnore
@@ -89,16 +89,6 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	
 	public IGenstarDictionary<A> addAttributes(Collection<A> attributes);
 	
-	/**
-	 * Replaces all pre-existing meaningful attributes by the provided collection of attribute.
-	 * Ordering of argument collection will be preserve.
-	 * <p>
-	 * used to serialize & deserialize configuration file
-	 * 
-	 * @param attributes
-	 */
-	//public void setAttributes(Collection<A> attributes);
-	
 	// ------------------------ RECORDS
 	
 	/**
@@ -108,7 +98,7 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * 
 	 * @return
 	 */
-	@JsonProperty(DemographicDictionary.RECORDS)
+	@JsonProperty(AttributeDictionary.RECORDS)
 	public Collection<RecordAttribute<A, A>> getRecords();
 	
 	/**

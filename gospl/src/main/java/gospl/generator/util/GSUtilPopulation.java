@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import core.configuration.GenstarJsonUtil;
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -45,7 +45,7 @@ public class GSUtilPopulation {
 	
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> population = null;
 	
-	private DemographicDictionary<Attribute<? extends IValue>> dico;
+	private AttributeDictionary dico;
 	private Path pathToDictionary = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 	public static String defaultDictionary = "defaultDictionary.gns";
 	
@@ -65,7 +65,7 @@ public class GSUtilPopulation {
 	 * @param dictionary
 	 * @param generator
 	 */
-	public GSUtilPopulation(DemographicDictionary<Attribute<? extends IValue>> dictionary,
+	public GSUtilPopulation(AttributeDictionary dictionary,
 			ISyntheticGosplPopGenerator generator) {
 		this.dico = dictionary;
 		this.generator = generator;
@@ -76,7 +76,7 @@ public class GSUtilPopulation {
 	 * 
 	 * @param dictionary
 	 */
-	public GSUtilPopulation(DemographicDictionary<Attribute<? extends IValue>> dictionary) {
+	public GSUtilPopulation(AttributeDictionary dictionary) {
 		this.dico = dictionary;
 		this.generator = new GSUtilGenerator(dico);
 	}
@@ -87,12 +87,11 @@ public class GSUtilPopulation {
 	 * @param dictionaryFile
 	 * @param generator
 	 */
-	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(String dictionaryFile, 
 			ISyntheticGosplPopGenerator generator){
 		try {
 			this.dico = new GenstarJsonUtil().unmarshalFromGenstarJson(pathToDictionary
-					.resolve(dictionaryFile), DemographicDictionary.class);
+					.resolve(dictionaryFile), AttributeDictionary.class);
 		} catch (IllegalArgumentException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -105,11 +104,10 @@ public class GSUtilPopulation {
 	 * 
 	 * @param dictionaryFile
 	 */
-	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(Path dictionaryFile){
 		try {
 			this.dico = new GenstarJsonUtil().unmarshalFromGenstarJson(
-					dictionaryFile, DemographicDictionary.class);
+					dictionaryFile, AttributeDictionary.class);
 		} catch (IllegalArgumentException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -122,11 +120,10 @@ public class GSUtilPopulation {
 	 * 
 	 * @param dictionaryFile
 	 */
-	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(String dictionaryFile){
 		try {
 			this.dico = new GenstarJsonUtil().unmarshalFromGenstarJson(pathToDictionary
-					.resolve(dictionaryFile), DemographicDictionary.class);
+					.resolve(dictionaryFile), AttributeDictionary.class);
 		} catch (IllegalArgumentException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -142,7 +139,7 @@ public class GSUtilPopulation {
 	 */
 	@SuppressWarnings("unchecked")
 	public GSUtilPopulation(Collection<Attribute<? extends IValue>> dictionary) {
-		dico = new DemographicDictionary<>();
+		dico = new AttributeDictionary();
 		dictionary.stream().forEach(att -> dico.addAttributes(att));
 		this.generator = new GSUtilGenerator(dico);
 	}
@@ -163,7 +160,7 @@ public class GSUtilPopulation {
 	 * th
 	 * @return
 	 */
-	public DemographicDictionary<Attribute<? extends IValue>> getDictionary(){
+	public AttributeDictionary getDictionary(){
 		return dico;
 	}
 	

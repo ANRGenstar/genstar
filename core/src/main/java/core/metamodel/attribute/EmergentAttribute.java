@@ -11,8 +11,7 @@ import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
- * Attribute that can retrieve value based on emergent properties. It is based on
- * the implementation of a {@link EmergentAttribute}
+ * Attribute that can retrieve value based on emergent properties.
  * 
  * @see EmergentAttribute
  * 

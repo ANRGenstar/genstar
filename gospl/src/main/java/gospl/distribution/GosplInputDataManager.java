@@ -122,7 +122,7 @@ public class GosplInputDataManager {
 										wrapper, 
 										this.configuration.getBaseDirectory()
 										), 
-						this.configuration.getDemoDictionary()
+						this.configuration.getDictionary()
 						));
 	}
 
@@ -146,7 +146,7 @@ public class GosplInputDataManager {
 								sf.getSurvey(
 										wrapper, 
 										this.configuration.getBaseDirectory()),
-								this.configuration.getDemoDictionary(), null,
+								this.configuration.getDictionary(), null,
 								Collections.emptyMap()
 						));
 	}
@@ -217,7 +217,7 @@ public class GosplInputDataManager {
 		// Matrices that contain a record attribute
 		for (AFullNDimensionalMatrix<? extends Number> recordMatrices : inputData.stream()
 				.filter(mat -> mat.getDimensions().stream().anyMatch(d -> 
-					this.configuration.getDemoDictionary().getRecords().contains(d)))
+					this.configuration.getDictionary().getRecords().contains(d)))
 				.collect(Collectors.toSet()))
 				fullMatrices.add(getTransposedRecord(recordMatrices));
 		
@@ -566,7 +566,7 @@ public class GosplInputDataManager {
 	}
 	
 	private boolean isRecordAttribute(Attribute<? extends IValue> attribute){
-		return configuration.getDemoDictionary().getRecords().contains(attribute);
+		return configuration.getDictionary().getRecords().contains(attribute);
 	}
 
 

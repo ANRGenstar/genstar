@@ -13,7 +13,6 @@ import org.junit.Test;
 
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
-import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.record.RecordAttribute;
@@ -39,7 +38,7 @@ public class TestReadMatriciesFromCSV {
 		// load the probabilities
 		GenstarConfigurationFile gcf = new GenstarConfigurationFile();
 		gcf.setBaseDirectory(FileSystems.getDefault().getPath("."));
-		gcf.setDemoDictionary((DemographicDictionary<Attribute<? extends IValue>>) dictionnary);
+		gcf.setDictionary(dictionnary);
 		
 
 		GSSurveyWrapper surveyWrapper = new GSSurveyWrapper(
@@ -597,8 +596,8 @@ public class TestReadMatriciesFromCSV {
 		GenstarConfigurationFile gcf = new GenstarJsonUtil().unmarchalConfigurationFileFromGenstarJson(
 				Paths.get("src","test","resources","rouen_demographics","rouen_iris.gns").toAbsolutePath());
 		
-		assertTrue(gcf.getDemoDictionary().size() > 0);
-		assertTrue(gcf.getDemoDictionary().getRecords().size() > 0);
+		assertTrue(gcf.getDictionary().size() > 0);
+		assertTrue(gcf.getDictionary().getRecords().size() > 0);
 		
 		GosplInputDataManager gidm = new GosplInputDataManager(gcf);
 		

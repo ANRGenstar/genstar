@@ -16,7 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
@@ -242,7 +242,7 @@ public class DownloadINSEESampleData {
 				new HashSet<>(getDictionnary().getAttributes());
 
 		IGenstarDictionary<Attribute<? extends IValue>> updatedDictionnary = 
-				new DemographicDictionary<>(dictionnary);
+				new AttributeDictionary(dictionnary);
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();

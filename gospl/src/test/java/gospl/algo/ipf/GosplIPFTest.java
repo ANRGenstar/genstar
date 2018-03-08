@@ -10,11 +10,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import core.configuration.GenstarJsonUtil;
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -124,10 +123,9 @@ public class GosplIPFTest {
 		Set<Attribute<? extends IValue>> refAttributes = new HashSet<>();
 		Set<Attribute<? extends IValue>> mappedAttributes = new HashSet<>();
 		try {
-			@SuppressWarnings("unchecked")
-			DemographicDictionary<Attribute<? extends IValue>> gju = new GenstarJsonUtil()
+			AttributeDictionary gju = new GenstarJsonUtil()
 					.unmarshalFromGenstarJson(PATH_TO_DICO.resolve("withMapDictionary.gns"), 
-					DemographicDictionary.class);
+					AttributeDictionary.class);
 			refAttributes.addAll(gju.getAttributes().stream()
 					.map(Attribute::getReferentAttribute)
 				.collect(Collectors.toSet()));
@@ -164,15 +162,14 @@ public class GosplIPFTest {
 		assertEquals(GENERATION_SIZE, popOut.size());
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Test
 	public void mappedWithSegmentedTest() {
 
-		DemographicDictionary<Attribute<? extends IValue>> gju = null;
+		AttributeDictionary gju = null;
 		try {
 			gju = new GenstarJsonUtil()
 					.unmarshalFromGenstarJson(PATH_TO_DICO.resolve("withMapDictionary.gns"), 
-					DemographicDictionary.class);
+					AttributeDictionary.class);
 		} catch (IllegalArgumentException | IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException(e);

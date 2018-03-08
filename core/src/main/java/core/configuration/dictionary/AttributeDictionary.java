@@ -35,17 +35,16 @@ import core.metamodel.value.IValue;
  *
  * @param <A>
  */
-@JsonTypeName(GenstarJsonUtil.DEMO_DICO)
+@JsonTypeName(GenstarJsonUtil.ATT_DICO)
 @JsonPropertyOrder({ IGenstarDictionary.ATTRIBUTES, IGenstarDictionary.RECORDS })
-public class DemographicDictionary<A extends Attribute<? extends IValue>>
-	implements IGenstarDictionary<A> {
+public class AttributeDictionary implements IGenstarDictionary<Attribute<? extends IValue>> {
 	
-	private Set<A> attributes;
-	private Map<String,A> name2attribute;
+	private Set<Attribute<? extends IValue>> attributes;
+	private Map<String,Attribute<? extends IValue>> name2attribute;
 	
-	private Set<RecordAttribute<A, A>> records;
+	private Set<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records;
 	
-	public DemographicDictionary() {
+	public AttributeDictionary() {
 		this.attributes = new LinkedHashSet<>();
 		this.records = new HashSet<>();
 		this.name2attribute = new HashMap<>();
@@ -55,18 +54,18 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	 * Clone constructor
 	 * @param d
 	 */
-	public DemographicDictionary(IGenstarDictionary<A> d) {
+	public AttributeDictionary(IGenstarDictionary<Attribute<? extends IValue>> d) {
 		this(d.getAttributes(), d.getRecords());
 	}
 	
-	public DemographicDictionary(Collection<A> attributes) {
+	public AttributeDictionary(Collection<Attribute<? extends IValue>> attributes) {
 		this(attributes, Collections.emptySet());
 	}
 	
 	@JsonCreator
-	public DemographicDictionary(
-			@JsonProperty(IGenstarDictionary.ATTRIBUTES) Collection<A> attributes,
-			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<A, A>> records) {
+	public AttributeDictionary(
+			@JsonProperty(IGenstarDictionary.ATTRIBUTES) Collection<Attribute<? extends IValue>> attributes,
+			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records) {
 		
 		if (records == null)
 			records = Collections.emptyList();
@@ -88,7 +87,7 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	 */
 	@SuppressWarnings("unchecked")
 	@Override
-	public DemographicDictionary<A> addAttributes(A... attributes) {
+	public AttributeDictionary addAttributes(Attribute<? extends IValue>... attributes) {
 		this.attributes.addAll(Arrays.asList(attributes));
 		this.name2attribute.putAll(Arrays.asList(attributes).stream()
 				.collect(Collectors.toMap(
@@ -98,7 +97,7 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	}
 	
 	@Override
-	public DemographicDictionary<A> addAttributes(Collection<A> attributes) {
+	public AttributeDictionary addAttributes(Collection<Attribute<? extends IValue>> attributes) {
 		this.attributes.addAll(attributes);
 		this.name2attribute.putAll(
 				attributes.stream()
@@ -112,13 +111,14 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A>... records) {
+	public IGenstarDictionary<Attribute<? extends IValue>> addRecords(
+			RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>... records) {
 		this.records.addAll(Arrays.asList(records));
 		return this;
 	}
 	
 	@Override
-	public Collection<RecordAttribute<A, A>> getRecords() {
+	public Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> getRecords() {
 		return Collections.unmodifiableSet(records);
 	}
 
@@ -130,7 +130,7 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	 * @return
 	 */
 	@Override
-	public Collection<A> getAttributes() {
+	public Collection<Attribute<? extends IValue>> getAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}
 	
@@ -141,8 +141,8 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	 * @return
 	 */
 	@Override
-	public A getAttribute(String string) {
-		A a = name2attribute.get(string);
+	public Attribute<? extends IValue> getAttribute(String string) {
+		Attribute<? extends IValue> a = name2attribute.get(string);
 		if (a == null)
 			throw new NullPointerException("This dictionary contains no reference to the attribute with name "+string);
 		return a;
@@ -160,7 +160,7 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 
 	@Override
 	public boolean containsValue(String valueStr) {
-		for (A a: attributes) {
+		for (Attribute<? extends IValue> a: attributes) {
 			if (a.getValueSpace().contains(valueStr))
 				return true;
 		}
@@ -174,8 +174,8 @@ public class DemographicDictionary<A extends Attribute<? extends IValue>>
 	}
 	
 	@Override
-	public IGenstarDictionary<A> merge(IGenstarDictionary<A> dictionnary) {
-		IGenstarDictionary<A> d = new DemographicDictionary<>(this);
+	public IGenstarDictionary<Attribute<? extends IValue>> merge(IGenstarDictionary<Attribute<? extends IValue>> dictionnary) {
+		IGenstarDictionary<Attribute<? extends IValue>> d = new AttributeDictionary(this);
 		d.addAttributes(dictionnary.getAttributes());
 		return d;
 	}

@@ -1,13 +1,11 @@
 package core.metamodel.attribute;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import core.configuration.jackson.AttributeDeserializer;
@@ -31,7 +29,6 @@ import core.metamodel.value.IValueSpace;
 	        @JsonSubTypes.Type(value = RecordAttribute.class),
 	        @JsonSubTypes.Type(value = EmergentAttribute.class)
 	    })
-@JsonIdentityInfo(generator=ObjectIdGenerators.PropertyGenerator.class, property=IAttribute.NAME)
 @JsonDeserialize(using = AttributeDeserializer.class)
 @JsonPropertyOrder({ IAttribute.NAME, IAttribute.VALUE_SPACE })
 public interface IAttribute<V extends IValue> {

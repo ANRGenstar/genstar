@@ -5,17 +5,14 @@ import static org.junit.Assert.assertEquals;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -84,7 +81,7 @@ public class TestBayesianNetworkCompletionSampler {
 		GosplPopulation pop = null;
 		
 		IGenstarDictionary<Attribute<? extends IValue>> updaptedDictionary = 
-					new DemographicDictionary<>(dictionary);
+					new AttributeDictionary(dictionary);
 
 		try {
 			//Map<String,String> keepOnlyEqual = new HashMap<>();

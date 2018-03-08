@@ -9,14 +9,14 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.demographic.map.AggregateMapper;
-import core.metamodel.attribute.demographic.map.RecordMapper;
-import core.metamodel.attribute.demographic.map.UndirectedMapper;
 import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
 import core.metamodel.attribute.emergent.EntityCountFunction;
 import core.metamodel.attribute.emergent.EntityValueForAttributeFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.mapper.AggregateMapper;
+import core.metamodel.attribute.mapper.RecordMapper;
+import core.metamodel.attribute.mapper.UndirectedMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;

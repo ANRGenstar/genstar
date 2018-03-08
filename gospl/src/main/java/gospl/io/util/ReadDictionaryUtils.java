@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import core.configuration.GenstarJsonUtil;
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
@@ -67,7 +67,7 @@ public class ReadDictionaryUtils {
 			
 		}
 		
-		return new DemographicDictionary<>(attributes);
+		return new AttributeDictionary(attributes);
 		
 	}
 	
@@ -148,7 +148,6 @@ public class ReadDictionaryUtils {
 	 * @param filename
 	 * @return
 	 */
-	@SuppressWarnings("unchecked")
 	public static IGenstarDictionary<Attribute<? extends IValue>> readFromGenstarConfig(
 			String filename) {
 		
@@ -157,7 +156,7 @@ public class ReadDictionaryUtils {
 		try {
 			return sju.unmarshalFromGenstarJson(
 					FileSystems.getDefault().getPath(filename), 
-					DemographicDictionary.class);
+					AttributeDictionary.class);
 		} catch (IllegalArgumentException | IOException e) {
 			e.printStackTrace();
 			throw new RuntimeException("error while reading the config file: "+e.getMessage(), e);

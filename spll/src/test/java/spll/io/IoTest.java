@@ -13,10 +13,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.opengis.referencing.operation.TransformException;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.metamodel.IPopulation;
-import core.metamodel.attribute.Attribute;
-import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.entity.ADemoEntity;
@@ -96,7 +94,7 @@ public class IoTest {
 	
 	@SuppressWarnings("unchecked")
 	private static void setupRandom(){
-		DemographicDictionary<Attribute<? extends IValue>> atts = new DemographicDictionary<>();
+		AttributeDictionary atts = new AttributeDictionary();
 		try {
 			atts.addAttributes(AttributeFactory.getFactory()
 					.createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101")));

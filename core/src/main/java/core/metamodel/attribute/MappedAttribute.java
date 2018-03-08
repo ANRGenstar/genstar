@@ -6,7 +6,7 @@ import java.util.Collection;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.metamodel.attribute.demographic.map.IAttributeMapper;
+import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.value.IValue;
 
 /**
@@ -25,7 +25,7 @@ import core.metamodel.value.IValue;
 @JsonTypeName(MappedAttribute.SELF)
 public class MappedAttribute<K extends IValue, V extends IValue> extends Attribute<K> {
 	
-	public static final String SELF = "MAPPED DEMOGRAPHIC ATTRIBUTE";
+	public static final String SELF = "MAPPED ATTRIBUTE";
 	
 	public static final String REF = "REFERENT ATTRIBUTE";
 	public static final String MAP = "MAPPER";

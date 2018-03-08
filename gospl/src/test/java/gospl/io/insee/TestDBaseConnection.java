@@ -15,7 +15,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -104,7 +104,7 @@ public class TestDBaseConnection {
 			
 			pop = GosplInputDataManager.getSample(
 					survey, 
-					new DemographicDictionary<Attribute<? extends IValue>>(attributes), 
+					new AttributeDictionary(attributes), 
 					100,
 					keepOnlyEqual
 					);

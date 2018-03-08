@@ -14,13 +14,12 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
@@ -48,7 +47,7 @@ public class GenstarJsonUtilTest {
 		
 		path = FileSystems.getDefault().getPath("src","test","resources","json_test.gns");
 
-		dd = new DemographicDictionary<>();
+		dd = new AttributeDictionary();
 
 		// BOOLEAN 
 		dd.addAttributes(AttributeFactory.getFactory()
@@ -155,7 +154,6 @@ public class GenstarJsonUtilTest {
 	}
 
 	@Test
-	@Ignore
 	public void test() throws JsonGenerationException, JsonMappingException, IOException {
 		for(Attribute<? extends IValue> att : dd.getAttributes()) {
 			
@@ -173,11 +171,11 @@ public class GenstarJsonUtilTest {
 			sju.marshalToGenstarJson(path, dd, false);
 			
 			// DEBUG
-			System.out.println(sju.genstarJsonToString(dd));
+			// System.out.println(sju.genstarJsonToString(dd));
 			
 			@SuppressWarnings("unchecked")
 			IGenstarDictionary<Attribute<? extends IValue>> dd2 = 
-					sju.unmarshalFromGenstarJson(path, dd.getClass());
+					sju.unmarshalFromGenstarJson(path, IGenstarDictionary.class);
 			
 			for(Attribute<? extends IValue> att : dd.getAttributes())
 				assertEquals(att, dd2.getAttribute(att.getAttributeName()));

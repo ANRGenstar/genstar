@@ -1,4 +1,4 @@
-package core.metamodel.attribute.demographic.map;
+package core.metamodel.attribute.mapper;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -13,7 +13,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
@@ -45,7 +45,7 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
-	private DemographicDictionary<Attribute<? extends IValue>> dictionary;
+	private AttributeDictionary dictionary;
 	private Map<Attribute<? extends IValue>, SortedMap<Double, IValue>> attributesProba;
 
 	Random random = GenstarRandom.getInstance();
@@ -66,7 +66,7 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 	 * 
 	 * @param attributes
 	 */
-	public GSUtilGenerator(DemographicDictionary<Attribute<? extends IValue>> attributes){
+	public GSUtilGenerator(AttributeDictionary attributes){
 		this.dictionary = attributes;
 	}
 

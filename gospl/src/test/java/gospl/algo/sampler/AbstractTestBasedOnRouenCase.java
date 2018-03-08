@@ -1,7 +1,6 @@
 package gospl.algo.sampler;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Paths;
 
@@ -72,7 +71,7 @@ public abstract class AbstractTestBasedOnRouenCase<SamplerType extends ISampler<
 			 throw new RuntimeException("cannot find the configuration file or one of its subfiles: "+e.getMessage(), e);
 		 } 
 		 System.out.println("Deserialize Genstar data configuration contains:\n"+
-						 gcf.getDemoDictionary().getAttributes().size()+" attributs\n"+
+						 gcf.getDictionary().getAttributes().size()+" attributs\n"+
 						 gcf.getSurveyWrappers().size()+" data files");
 						
 		 return gcf;

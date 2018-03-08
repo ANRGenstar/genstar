@@ -9,7 +9,7 @@ import java.util.List;
 
 import org.opengis.referencing.operation.TransformException;
 
-import core.configuration.dictionary.DemographicDictionary;
+import core.configuration.dictionary.AttributeDictionary;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
@@ -35,7 +35,7 @@ public class SpllSetupTest {
 	
 	@SuppressWarnings("unchecked")
 	public SpllSetupTest() {
-		DemographicDictionary<Attribute<? extends IValue>> atts = new DemographicDictionary<>();
+		AttributeDictionary atts = new AttributeDictionary();
 		try {
 			atts.addAttributes(AttributeFactory.getFactory()
 					.createAttribute("iris", GSEnumDataType.Nominal, Arrays.asList("765400102", "765400101")));

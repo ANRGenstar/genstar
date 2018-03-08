@@ -7,7 +7,6 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.junit.Test;
 
 import core.configuration.GenstarConfigurationFile;
-import core.configuration.dictionary.DemographicDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
@@ -65,7 +64,7 @@ public class TestYANGComposer {
 		
 		GenstarConfigurationFile gcf = new GenstarConfigurationFile();
 		gcf.setBaseDirectory(FileSystems.getDefault().getPath("."));
-		gcf.setDemoDictionary((DemographicDictionary<Attribute<? extends IValue>>) dicoMerge);
+		gcf.setDictionary(dicoMerge);
 		
 
 		GSSurveyWrapper surveyWrapper = new GSSurveyWrapper(

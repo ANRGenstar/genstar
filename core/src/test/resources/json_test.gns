@@ -1,7 +1,7 @@
 {
-  "DEMOGRAPHIC DICTIONARY" : {
+  "ATTRIBUTE DICTIONARY" : {
     "ATTRIBUTES" : [ {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Boolean attribute",
         "VALUE SPACE" : {
           "TYPE" : "Boolean",
@@ -16,14 +16,14 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Nominal attribute",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
           "VALUES" : [ {
-            "INPUT VALUE" : "Célibataire"
-          }, {
             "INPUT VALUE" : "En couple"
+          }, {
+            "INPUT VALUE" : "Célibataire"
           } ],
           "categoricTemplate" : {
             "regex" : [ ]
@@ -34,7 +34,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Ordered attribute",
         "VALUE SPACE" : {
           "TYPE" : "Order",
@@ -56,30 +56,30 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Int attribute",
         "VALUE SPACE" : {
           "TYPE" : "Integer",
           "VALUES" : [ {
             "INPUT VALUE" : "1"
           }, {
+            "INPUT VALUE" : "2"
+          }, {
             "INPUT VALUE" : "0"
           }, {
             "INPUT VALUE" : "5"
           }, {
-            "INPUT VALUE" : "4"
+            "INPUT VALUE" : "6"
           }, {
             "INPUT VALUE" : "3"
           }, {
-            "INPUT VALUE" : "2"
+            "INPUT VALUE" : "4"
           }, {
             "INPUT VALUE" : "9"
           }, {
-            "INPUT VALUE" : "8"
-          }, {
             "INPUT VALUE" : "7"
           }, {
-            "INPUT VALUE" : "6"
+            "INPUT VALUE" : "8"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
@@ -89,7 +89,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Double attribute",
         "VALUE SPACE" : {
           "TYPE" : "Continue",
@@ -102,20 +102,20 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Range attribute",
         "VALUE SPACE" : {
           "TYPE" : "Range",
           "VALUES" : [ {
-            "INPUT VALUE" : "55 et plus"
+            "INPUT VALUE" : "25 à 34"
           }, {
             "INPUT VALUE" : "moins de 14"
           }, {
-            "INPUT VALUE" : "25 à 34"
+            "INPUT VALUE" : "35 à 54"
+          }, {
+            "INPUT VALUE" : "55 et plus"
           }, {
             "INPUT VALUE" : "15 à 24"
-          }, {
-            "INPUT VALUE" : "35 à 54"
           } ],
           "min" : 0,
           "max" : 120,
@@ -128,16 +128,16 @@
         }
       }
     }, {
-      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+      "MAPPED ATTRIBUTE" : {
         "NAME" : "Range aggregated attribute",
         "VALUE SPACE" : {
           "TYPE" : "Range",
           "VALUES" : [ {
             "INPUT VALUE" : "moins de 24 ans"
           }, {
-            "INPUT VALUE" : "25 à 54"
-          }, {
             "INPUT VALUE" : "55 et plus"
+          }, {
+            "INPUT VALUE" : "25 à 54"
           } ],
           "min" : 0,
           "max" : 120,
@@ -148,14 +148,40 @@
             "INPUT VALUE" : "NaN à NaN"
           }
         },
-        "REFERENT ATTRIBUTE" : "Range attribute",
+        "REFERENT ATTRIBUTE" : {
+          "ATTRIBUTE" : {
+            "NAME" : "Range attribute",
+            "VALUE SPACE" : {
+              "TYPE" : "Range",
+              "VALUES" : [ {
+                "INPUT VALUE" : "25 à 34"
+              }, {
+                "INPUT VALUE" : "moins de 14"
+              }, {
+                "INPUT VALUE" : "35 à 54"
+              }, {
+                "INPUT VALUE" : "55 et plus"
+              }, {
+                "INPUT VALUE" : "15 à 24"
+              } ],
+              "min" : 0,
+              "max" : 120,
+              "rangeTemplate" : {
+                "numberMatcher" : "INT_POSITIF_MATCH"
+              },
+              "EMPTY VALUE" : {
+                "INPUT VALUE" : "NaN à NaN"
+              }
+            }
+          }
+        },
         "MAPPER" : {
           "TYPE" : "AGG",
-          "THE MAP" : [ "moins de 24 ans : moins de 14; 15 à 24", "25 à 54 : 25 à 34; 35 à 54", "55 et plus : 55 et plus" ]
+          "THE MAP" : [ "moins de 24 ans : moins de 14; 15 à 24", "55 et plus : 55 et plus", "25 à 54 : 25 à 34; 35 à 54" ]
         }
       }
     }, {
-      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+      "MAPPED ATTRIBUTE" : {
         "NAME" : "Mapped attribute",
         "VALUE SPACE" : {
           "TYPE" : "Order",
@@ -179,21 +205,47 @@
             "INPUT VALUE" : null
           }
         },
-        "REFERENT ATTRIBUTE" : "Range attribute",
+        "REFERENT ATTRIBUTE" : {
+          "ATTRIBUTE" : {
+            "NAME" : "Range attribute",
+            "VALUE SPACE" : {
+              "TYPE" : "Range",
+              "VALUES" : [ {
+                "INPUT VALUE" : "25 à 34"
+              }, {
+                "INPUT VALUE" : "moins de 14"
+              }, {
+                "INPUT VALUE" : "35 à 54"
+              }, {
+                "INPUT VALUE" : "55 et plus"
+              }, {
+                "INPUT VALUE" : "15 à 24"
+              } ],
+              "min" : 0,
+              "max" : 120,
+              "rangeTemplate" : {
+                "numberMatcher" : "INT_POSITIF_MATCH"
+              },
+              "EMPTY VALUE" : {
+                "INPUT VALUE" : "NaN à NaN"
+              }
+            }
+          }
+        },
         "MAPPER" : {
           "TYPE" : "UND",
           "THE MAP" : [ "Bébé; Enfant : moins de 14", "Adolescent; Jeune : 15 à 24", "Adulte : 25 à 34; 35 à 54", "Vieux : 55 et plus" ]
         }
       }
     }, {
-      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+      "MAPPED ATTRIBUTE" : {
         "NAME" : "Record attribute",
         "VALUE SPACE" : {
           "TYPE" : "Integer",
           "VALUES" : [ {
-            "INPUT VALUE" : "1"
-          }, {
             "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "1"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
@@ -201,10 +253,25 @@
           "min" : -2147483648,
           "max" : 2147483647
         },
-        "REFERENT ATTRIBUTE" : "Boolean attribute",
+        "REFERENT ATTRIBUTE" : {
+          "ATTRIBUTE" : {
+            "NAME" : "Boolean attribute",
+            "VALUE SPACE" : {
+              "TYPE" : "Boolean",
+              "VALUES" : [ {
+                "INPUT VALUE" : "false"
+              }, {
+                "INPUT VALUE" : "true"
+              } ],
+              "EMPTY VALUE" : {
+                "INPUT VALUE" : "null"
+              }
+            }
+          }
+        },
         "MAPPER" : {
           "TYPE" : "REC",
-          "THE MAP" : [ "1 : true", "2 : false" ]
+          "THE MAP" : [ "2 : false", "1 : true" ]
         }
       }
     }, {
@@ -219,7 +286,7 @@
               "LISTED ATTRIBUTES" : [ "Boolean attribute : false", "Mapped attribute : true" ],
               "CUSTOM COMPARATOR FUNCTIONS" : [ ]
             },
-            "MATCHERS" : [ "55 et plus", "25 à 34", "35 à 54" ]
+            "MATCHERS" : [ "25 à 34", "35 à 54", "55 et plus" ]
           }
         }
       }
@@ -243,7 +310,7 @@
         }
       }
     } ],
-    "RECORD ATTRIBUTES" : [ {
+    "RECORDS" : [ {
       "RECORD ATTRIBUTE" : {
         "NAME" : "Population",
         "PROXY ATTRIBUTE TYPE" : "Integer",

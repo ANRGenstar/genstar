@@ -35,7 +35,7 @@ import core.util.data.GSEnumDataType;
 @JsonTypeName(Attribute.SELF)
 public class Attribute<V extends IValue> implements IAttribute<V> {
 
-	public static final String SELF = "DEMOGRAPHIC ATTRIBUTE";
+	public static final String SELF = "ATTRIBUTE";
 
 	private IValueSpace<V> valuesSpace;
 

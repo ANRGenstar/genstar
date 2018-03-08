@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import core.metamodel.attribute.demographic.map.IAttributeMapper;
+import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
