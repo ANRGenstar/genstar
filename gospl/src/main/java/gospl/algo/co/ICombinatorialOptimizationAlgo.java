@@ -4,8 +4,23 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.sampler.IEntitySampler;
 import gospl.sampler.ISampler;
+import gospl.sampler.co.CombinatorialOptimizationSampler;
 
+/**
+ * Interface that defines combinatorial optimization general contract. This algorithm encapsulate
+ * entity sampler - that {@link IEntitySampler} - which means that they will draw individual entity directly from
+ * a sample.
+ * <p>
+ * Implementing class: {@link SampleBasedAlgorithm}
+ * 
+ * @author kevinchapuis
+ *
+ * @param <SamplerType> the type of sample. It should implement {@link IEntitySampler}
+ * 
+ * @see CombinatorialOptimizationSampler
+ */
 public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADemoEntity>> {
 
 	/**

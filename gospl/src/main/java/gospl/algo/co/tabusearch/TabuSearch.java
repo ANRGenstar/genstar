@@ -8,16 +8,19 @@ import java.util.Optional;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
-import gospl.algo.co.metamodel.AGSOptimizationAlgorithm;
-import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
-import gospl.algo.co.tabusearch.list.ITabuList;
+import gospl.algo.co.metamodel.AOptimizationAlgorithm;
+import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
+import gospl.algo.co.metamodel.neighbor.PopulationEntityNeighborSearch;
+import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
 
 /**
  * Default implementation of the Tabu Search algorithm
+ * 
  * @author Alex Ferreira
+ * @author modified by kevinchapuis
  *
  */
-public class TabuSearch extends AGSOptimizationAlgorithm {
+public class TabuSearch extends AOptimizationAlgorithm {
 	
 	private ITabuList tabuList;
 	private int maxIterations;
@@ -28,15 +31,21 @@ public class TabuSearch extends AGSOptimizationAlgorithm {
 	 * @param stopCondition the algorithm stop condition
 	 * @param solutionLocator the best neightbor solution locator to be used in each algortithm iteration
 	 */
-	public TabuSearch(ITabuList tabuList, int maxIterations) {
+	public TabuSearch(ITabuList tabulist, int maxIterations) {
+		this(new PopulationEntityNeighborSearch(), tabulist, maxIterations);
+	}
+	
+	public TabuSearch(IPopulationNeighborSearch<?> neighborSearch,
+			ITabuList tabuList, int maxIterations) {
+		super(neighborSearch);
 		this.tabuList = tabuList;
 		this.maxIterations = maxIterations;
 	}
 	
 	@Override
-	public IGSSampleBasedCOSolution run(IGSSampleBasedCOSolution initialSolution) {
-		IGSSampleBasedCOSolution bestSolution = initialSolution;
-		IGSSampleBasedCOSolution currentSolution = initialSolution;
+	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution) {
+		ISyntheticPopulationSolution bestSolution = initialSolution;
+		ISyntheticPopulationSolution currentSolution = initialSolution;
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil(
 				"Start Tabu Search algorithm in CO synthetic population generation process", 
@@ -51,15 +60,16 @@ public class TabuSearch extends AGSOptimizationAlgorithm {
 				*/
 			gspu.sysoStempPerformance("iter "+currentIteration, this);
 			
-			List<IGSSampleBasedCOSolution> solutionsInTabu = new ArrayList<>();
+			List<ISyntheticPopulationSolution> solutionsInTabu = new ArrayList<>();
 			tabuList.iterator().forEachRemaining(solutionsInTabu::add);
 			
 			gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
-			Collection<IGSSampleBasedCOSolution> neighbors = currentSolution.getNeighbors();
+			Collection<ISyntheticPopulationSolution> neighbors = currentSolution.getNeighbors(
+					super.getNeighborSearchAlgorithm());
 			
 			gspu.sysoStempPerformance("Start eliciting best neighbors", this);
 			double bestTabuValue = bestSolution.getFitness(this.getObjectives());
-			Optional<IGSSampleBasedCOSolution> optionalBestSolution = neighbors.stream()
+			Optional<ISyntheticPopulationSolution> optionalBestSolution = neighbors.stream()
 					.filter(solution -> !solutionsInTabu.contains(solution) &&
 							solution.getFitness(this.getObjectives()) > bestTabuValue)
 					.sorted((s1, s2) -> s1.getFitness(this.getObjectives()).compareTo(s2.getFitness(this.getObjectives())))

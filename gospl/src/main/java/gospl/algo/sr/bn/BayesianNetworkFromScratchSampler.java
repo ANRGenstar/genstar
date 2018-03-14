@@ -1,7 +1,7 @@
 package gospl.algo.sr.bn;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -61,7 +61,7 @@ public class BayesianNetworkFromScratchSampler implements ISampler<ACoordinate<A
 	}
 
 	@Override
-	public List<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 

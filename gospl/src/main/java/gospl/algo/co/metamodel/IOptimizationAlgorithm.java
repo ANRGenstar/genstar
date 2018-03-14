@@ -1,0 +1,65 @@
+package gospl.algo.co.metamodel;
+
+import java.util.Set;
+
+import core.metamodel.IPopulation;
+import core.metamodel.attribute.Attribute;
+import core.metamodel.entity.ADemoEntity;
+import core.metamodel.value.IValue;
+import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
+import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
+import gospl.distribution.matrix.INDimensionalMatrix;
+
+/**
+ * Main interfaces for combinatorial optimization algorithm
+ * 
+ * @author kevinchapuis
+ *
+ */
+public interface IOptimizationAlgorithm {
+
+	/**
+	 * Execute the algorithm to perform targeted optimization.
+	 * @param {@code initialSolution} the start point of the algorithm
+	 * @return the best solution found in the given conditions
+	 */
+	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution);
+	
+	/**
+	 * Retrieve the set of objectives this optimization algorithm is
+	 * calibrated with
+	 * @return
+	 */
+	public Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> getObjectives();
+	
+	/**
+	 * Add objectives to assess solution goodness-of-fit
+	 * @param objectives
+	 */
+	public void addObjectives(INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> objectives);
+	
+	/**
+	 * Returns the sample used to drive combinatorial optimization algorithme
+	 * @return
+	 */
+	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getSample();
+	
+	/**
+	 * Set the sample of entity to be used to drive combinatorial optimization algorithm
+	 * @param sample
+	 */
+	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample);
+	
+	/**
+	 * Return the algorithm to be used when asking for neighbor populations
+	 * @return
+	 */
+	public IPopulationNeighborSearch<?> getNeighborSearchAlgorithm();
+	
+	/**
+	 * Set the algorithm to be used when searching for neighbor populations
+	 * @param neighborSearch
+	 */
+	public void setNeighborSearch(IPopulationNeighborSearch<?> neighborSearch);
+	
+}

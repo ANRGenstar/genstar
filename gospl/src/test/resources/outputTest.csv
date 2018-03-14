@@ -1,8 +1,8 @@
-Activité;frequence;Education;frequence;Genre;frequence;Age;frequence;Couple;frequence
-employé;0,32;Bac;0,14;Femme;0,99;55 et plus;0,27;true;0,68
-chomage;0,23;Licence;0,17;Homme;0,01;15 à 24;0,27;null;0
-null;0;Brevet;0,57;null;0;25 à 34;0,23;false;0,32
-inactif;0,1;Master et plus;0,12;;;35 à 54;0,13;;
-indépendant;0,12;null;0;;;moins de 14;0,11;;
-fonctionnaire;0,1;;;;;NaN à NaN;0;;
-retraité;0,13;;;;;;;;
+Age;frequence;Activité;frequence;Education;frequence;Couple;frequence;Genre;frequence
+NaN à NaN;0;fonctionnaire;0,21;null;0;true;0,54;Homme;0,42
+15 à 24;0,21;inactif;0,1;Bac;0,27;null;0;Femme;0,58
+35 à 54;0,39;null;0;Licence;0,28;false;0,46;null;0
+moins de 14;0,22;indépendant;0,32;Brevet;0,29;;;;
+25 à 34;0,11;retraité;0,14;Master et plus;0,16;;;;
+55 et plus;0,07;employé;0,14;;;;;;
+;;chomage;0,09;;;;;;

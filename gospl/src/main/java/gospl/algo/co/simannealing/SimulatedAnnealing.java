@@ -3,10 +3,10 @@ package gospl.algo.co.simannealing;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
-import gospl.algo.co.metamodel.AGSOptimizationAlgorithm;
-import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
-import gospl.algo.co.simannealing.transition.GSSADefautTransFunction;
-import gospl.algo.co.simannealing.transition.IGSSimAnnealingTransFunction;
+import gospl.algo.co.metamodel.AOptimizationAlgorithm;
+import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
+import gospl.algo.co.metamodel.neighbor.PopulationEntityNeighborSearch;
+import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
 import gospl.sampler.IEntitySampler;
 
 /**
@@ -26,7 +26,7 @@ import gospl.sampler.IEntitySampler;
  * @author kevinchapuis
  *
  */
-public class SimulatedAnnealing extends AGSOptimizationAlgorithm {
+public class SimulatedAnnealing extends AOptimizationAlgorithm {
 
 	private int bottomTemp = 1;
 	private double minStateEnergy = 0;
@@ -34,35 +34,36 @@ public class SimulatedAnnealing extends AGSOptimizationAlgorithm {
 	private int temperature = 100000;
 	private double coolingRate = Math.pow(10, -3);
 	
-	private IGSSimAnnealingTransFunction transFunction;
+	private ISimulatedAnnealingTransitionFunction transFunction;
 
-	public SimulatedAnnealing(double minStateEnergy,
-			int initTemp, double coolingRate, 
-			IGSSimAnnealingTransFunction transFonction) {
+	public SimulatedAnnealing(IPopulationNeighborSearch<?> neighborSearch,
+			double minStateEnergy, int initTemp, double coolingRate, 
+			ISimulatedAnnealingTransitionFunction transFonction) {
+		super(neighborSearch);
 		this.minStateEnergy = minStateEnergy;
 		this.temperature = initTemp;
 		this.coolingRate = coolingRate;
 	}
 
-	public SimulatedAnnealing(double minStateEnergy,
-			IGSSimAnnealingTransFunction transFonction){
+	public SimulatedAnnealing(double minStateEnergy, int initTemp, double coolingRate, 
+			ISimulatedAnnealingTransitionFunction transFonction) {
+		super(new PopulationEntityNeighborSearch());
 		this.minStateEnergy = minStateEnergy;
-		this.transFunction = transFonction;
+		this.temperature = initTemp;
+		this.coolingRate = coolingRate;
 	}
-	
-	public SimulatedAnnealing(IGSSimAnnealingTransFunction transFunction){
-		this.transFunction = transFunction;
-	}
+
 	
 	public SimulatedAnnealing(){
-		this.transFunction = new GSSADefautTransFunction();
+		super(new PopulationEntityNeighborSearch());
+		this.transFunction = new SimulatedAnnealingDefaultTransitionFunction();
 	}
 	
 	@Override
-	public IGSSampleBasedCOSolution run(IGSSampleBasedCOSolution initialSolution){
+	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution){
 		
-		IGSSampleBasedCOSolution currentState = initialSolution;
-		IGSSampleBasedCOSolution bestState = initialSolution;
+		ISyntheticPopulationSolution currentState = initialSolution;
+		ISyntheticPopulationSolution bestState = initialSolution;
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil(
 				"Start Simulated annealing algorithm in CO synthetic population generation process", 
@@ -77,7 +78,8 @@ public class SimulatedAnnealing extends AGSOptimizationAlgorithm {
 				currentEnergy > minStateEnergy){
 			
 			gspu.sysoStempPerformance("Elicit a random new candidate for a transition state", this);
-			IGSSampleBasedCOSolution systemStateCandidate = currentState.getRandomNeighbor();
+			ISyntheticPopulationSolution systemStateCandidate = currentState.getRandomNeighbor(
+					super.getNeighborSearchAlgorithm());
 			double candidateEnergy = systemStateCandidate.getFitness(this.getObjectives());
 			
 			// IF probability function elicit transition state

@@ -3,17 +3,14 @@ package gospl.generator;
 import core.metamodel.entity.ADemoEntity;
 import gospl.GosplPopulation;
 import gospl.sampler.ISampler;
-import gospl.sampler.co.RandomSampler;
-import gospl.sampler.co.TabuSampler;
+import gospl.sampler.co.CombinatorialOptimizationSampler;
+import gospl.sampler.co.UniformSampler;
 
 /**
  * Generator based on sample based growth methods: these can either calls
  * optimization process or not that depend on the sampler type.
  * <p>
- * {@code Gospl} provides {@link RandomSampler} and {@link TabuSampler}
- * <p>
- * WARNING: this generator does not guarantee that resulted population
- * will not contain duplicate entities
+ * {@code Gospl} provides {@link UniformSampler} and {@link CombinatorialOptimizationSampler}
  * 
  * @author kevinchapuis
  *

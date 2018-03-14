@@ -1,6 +1,6 @@
 package gospl.sampler;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * The global contract for sampler --
@@ -33,7 +33,7 @@ public interface ISampler<T> {
 	 * @param numberOfDraw
 	 * @return
 	 */
-	public List<T> draw(int numberOfDraw);
+	public Collection<T> draw(int numberOfDraw);
 	
 	/**
 	 * Should give an overview of the underlying distribution
