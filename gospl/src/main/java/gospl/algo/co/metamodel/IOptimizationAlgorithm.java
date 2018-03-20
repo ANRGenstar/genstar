@@ -62,4 +62,22 @@ public interface IOptimizationAlgorithm {
 	 */
 	public void setNeighborSearch(IPopulationNeighborSearch<?> neighborSearch);
 	
+	public double getFitnessThreshold();
+	
+	public void setFitnessThreshold(double fitnessThreshold);
+	
+	/**
+	 * The k neighbor buffer to size default neighbor search. Put it simply,
+	 * it is the ratio of entity to be switch to neighbor population
+	 * @see IPopulationNeighborSearch
+	 * @return
+	 */
+	public double getK_neighborRatio();
+
+	/**
+	 * Set k neighbor buffer ratio
+	 * @param k_neighborRatio
+	 */
+	public void setK_neighborRatio(double k_neighborRatio);
+	
 }

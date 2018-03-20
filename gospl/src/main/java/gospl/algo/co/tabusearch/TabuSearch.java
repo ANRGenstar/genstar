@@ -31,13 +31,13 @@ public class TabuSearch extends AOptimizationAlgorithm {
 	 * @param stopCondition the algorithm stop condition
 	 * @param solutionLocator the best neightbor solution locator to be used in each algortithm iteration
 	 */
-	public TabuSearch(ITabuList tabulist, int maxIterations) {
-		this(new PopulationEntityNeighborSearch(), tabulist, maxIterations);
+	public TabuSearch(ITabuList tabulist, double fitnessThreshold, int maxIterations) {
+		this(new PopulationEntityNeighborSearch(), tabulist, fitnessThreshold, maxIterations);
 	}
 	
 	public TabuSearch(IPopulationNeighborSearch<?> neighborSearch,
-			ITabuList tabuList, int maxIterations) {
-		super(neighborSearch);
+			ITabuList tabuList, double fitnessThreshold, int maxIterations) {
+		super(neighborSearch, fitnessThreshold);
 		this.tabuList = tabuList;
 		this.maxIterations = maxIterations;
 	}
@@ -47,27 +47,37 @@ public class TabuSearch extends AOptimizationAlgorithm {
 		ISyntheticPopulationSolution bestSolution = initialSolution;
 		ISyntheticPopulationSolution currentSolution = initialSolution;
 		
+		double bestFitness = initialSolution.getFitness(this.getObjectives());
+		
 		GSPerformanceUtil gspu = new GSPerformanceUtil(
-				"Start Tabu Search algorithm in CO synthetic population generation process", 
-				Level.DEBUG);
+				"Start Tabu Search algorithm"
+				+ "\nPopulation size = "+initialSolution.getSolution().size()
+				+ "\nSample size = "+super.getSample().size()
+				+ "\nMax iteration = "+this.maxIterations, 
+				Level.TRACE);
+		gspu.setObjectif(this.maxIterations);
 		
 		Integer currentIteration = 0;
-		while (++currentIteration < this.maxIterations) {
+		while (currentIteration++ < this.maxIterations &&
+				bestFitness > this.getFitnessThreshold()) {
 			
-			/*
+			boolean doLog = false;
 			if(currentIteration % (this.maxIterations / 10d) == 0)
-				gspu.sysoStempPerformance(0.1, this);
-				*/
-			gspu.sysoStempPerformance("iter "+currentIteration, this);
+				doLog = true;
+			
+			if(doLog) {
+				gspu.sysoStempPerformance(gspu.getObjectif() / currentIteration, this);
+				gspu.sysoStempMessage("Current fitness is "+bestFitness);
+			}
 			
 			List<ISyntheticPopulationSolution> solutionsInTabu = new ArrayList<>();
 			tabuList.iterator().forEachRemaining(solutionsInTabu::add);
 			
-			gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
+			// if(doLog) gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
 			Collection<ISyntheticPopulationSolution> neighbors = currentSolution.getNeighbors(
 					super.getNeighborSearchAlgorithm());
 			
-			gspu.sysoStempPerformance("Start eliciting best neighbors", this);
+			// if(doLog) gspu.sysoStempPerformance("Start eliciting best neighbors", this);
 			double bestTabuValue = bestSolution.getFitness(this.getObjectives());
 			Optional<ISyntheticPopulationSolution> optionalBestSolution = neighbors.stream()
 					.filter(solution -> !solutionsInTabu.contains(solution) &&

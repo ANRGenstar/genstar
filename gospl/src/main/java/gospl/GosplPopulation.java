@@ -61,7 +61,7 @@ public class GosplPopulation implements IPopulation<ADemoEntity, Attribute<? ext
 		if(population.isEmpty())
 			this.population = new HashSet<>();
 		else
-			this.population = population;
+			this.population = new HashSet<>(population);
 	}
 	
 	/**

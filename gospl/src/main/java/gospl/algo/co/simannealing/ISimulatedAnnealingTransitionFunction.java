@@ -18,6 +18,6 @@ public interface ISimulatedAnnealingTransitionFunction {
 	 * @param temperature
 	 * @return
 	 */
-	public boolean getTransitionProbability(double currentEnergy, double candidateEnergy, int temperature);
+	public boolean getTransitionProbability(double currentEnergy, double candidateEnergy, double temperature);
 	
 }

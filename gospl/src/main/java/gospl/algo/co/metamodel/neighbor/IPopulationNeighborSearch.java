@@ -3,6 +3,8 @@ package gospl.algo.co.metamodel.neighbor;
 import java.util.Collection;
 import java.util.Map;
 
+import org.jdom.IllegalAddException;
+
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -56,10 +58,10 @@ public interface IPopulationNeighborSearch<U> {
 	public void setPredicates(Collection<U> predicates);
 	
 	/**
-	 * Add a new predicate
+	 * Update the state of predicate based on the current population
 	 * @param predicate
 	 */
-	public void addPredicates(U predicate);
+	public void updatePredicates(IPopulation<ADemoEntity, Attribute<? extends IValue>> population);
 	
 	/**
 	 * The sample of entities which is the reservoir to swap entities from given population to its neighbors
@@ -82,10 +84,14 @@ public interface IPopulationNeighborSearch<U> {
 	public static IPopulation<ADemoEntity, Attribute<? extends IValue>> deepSwitch(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
 			ADemoEntity oldEntity, ADemoEntity newEntity){
-		if(!population.remove(oldEntity) || !population.add(newEntity))
-				throw new RuntimeException("Encounter a problem while switching between two entities:\n"
-						+ "remove entity = "+oldEntity.toString()+"\n"
-						+ "new entity = "+newEntity.toString());
+		if(!population.contains(oldEntity))
+			throw new RuntimeException("NO WAY");
+		if(!population.remove(oldEntity))
+			throw new IllegalArgumentException("Cannot remove "
+					+oldEntity+" from population "+population);
+		if(!population.add(newEntity))
+			throw new IllegalAddException("Have not been able to add entity "
+					+newEntity+" to population "+population);
 		return population;
 	}
 	

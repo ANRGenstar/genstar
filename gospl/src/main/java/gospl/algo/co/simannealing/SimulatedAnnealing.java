@@ -29,80 +29,96 @@ import gospl.sampler.IEntitySampler;
 public class SimulatedAnnealing extends AOptimizationAlgorithm {
 
 	private int bottomTemp = 1;
-	private double minStateEnergy = 0;
-	
-	private int temperature = 100000;
+
+	private int initTemp = 100000;
 	private double coolingRate = Math.pow(10, -3);
-	
+	private int transitionLength = 4; 
+
 	private ISimulatedAnnealingTransitionFunction transFunction;
 
 	public SimulatedAnnealing(IPopulationNeighborSearch<?> neighborSearch,
 			double minStateEnergy, int initTemp, double coolingRate, 
 			ISimulatedAnnealingTransitionFunction transFonction) {
-		super(neighborSearch);
-		this.minStateEnergy = minStateEnergy;
-		this.temperature = initTemp;
+		super(neighborSearch, minStateEnergy);
+		this.initTemp = initTemp;
 		this.coolingRate = coolingRate;
 	}
 
 	public SimulatedAnnealing(double minStateEnergy, int initTemp, double coolingRate, 
 			ISimulatedAnnealingTransitionFunction transFonction) {
-		super(new PopulationEntityNeighborSearch());
-		this.minStateEnergy = minStateEnergy;
-		this.temperature = initTemp;
+		super(new PopulationEntityNeighborSearch(), minStateEnergy);
+		this.initTemp = initTemp;
 		this.coolingRate = coolingRate;
 	}
 
-	
+
 	public SimulatedAnnealing(){
-		super(new PopulationEntityNeighborSearch());
+		super(new PopulationEntityNeighborSearch(), 0d);
 		this.transFunction = new SimulatedAnnealingDefaultTransitionFunction();
 	}
-	
+
 	@Override
 	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution){
-		
+
 		ISyntheticPopulationSolution currentState = initialSolution;
 		ISyntheticPopulationSolution bestState = initialSolution;
-		
+		this.getNeighborSearchAlgorithm().updatePredicates(initialSolution.getSolution());
+		int nBuffer = (int)(super.getNeighborSearchAlgorithm().getPredicates().size()*super.getK_neighborRatio());
+
 		GSPerformanceUtil gspu = new GSPerformanceUtil(
-				"Start Simulated annealing algorithm in CO synthetic population generation process", 
-				Level.DEBUG);
-		
+				"Start Simulated annealing algorithm"
+						+ "\nPopulation size = "+initialSolution.getSolution().size()
+						+ "\nSample size = "+super.getSample().size()
+						+ "\nMin temperature = "+this.bottomTemp, 
+						Level.DEBUG);
+
 		double currentEnergy = currentState.getFitness(this.getObjectives());
 		double bestEnergy = currentEnergy;
-		
+
 		// Iterate while system temperature is above cool threshold 
 		// OR while system energy is above minimum state energy
-		while(temperature < bottomTemp ||
-				currentEnergy > minStateEnergy){
-			
-			gspu.sysoStempPerformance("Elicit a random new candidate for a transition state", this);
-			ISyntheticPopulationSolution systemStateCandidate = currentState.getRandomNeighbor(
-					super.getNeighborSearchAlgorithm());
-			double candidateEnergy = systemStateCandidate.getFitness(this.getObjectives());
-			
-			// IF probability function elicit transition state
-			// THEN change current state to be currentCandidate 
-			if(transFunction.getTransitionProbability(currentEnergy, candidateEnergy, temperature)){
-				gspu.sysoStempPerformance("Current state have been updated from "
-						+ currentEnergy+" to "+candidateEnergy, this);
-				currentState = systemStateCandidate;
-				currentEnergy = candidateEnergy;
+		double temperature = initTemp;
+		int stateTransition = 0;
+		int local_transitionLength = transitionLength;
+		while(temperature > bottomTemp &&
+				currentEnergy > super.getFitnessThreshold()){
+
+			boolean update = false;
+
+			for(int i = 0; i < local_transitionLength; i++) {
+				ISyntheticPopulationSolution systemStateCandidate = currentState.getRandomNeighbor(
+						super.getNeighborSearchAlgorithm(), nBuffer);
+				double candidateEnergy = systemStateCandidate.getFitness(this.getObjectives());
+
+				// IF probability function elicit transition state
+				// THEN change current state to be currentCandidate 
+				if(transFunction.getTransitionProbability(currentEnergy, candidateEnergy, temperature)){
+					gspu.sysoStempPerformance("Updats energy : "
+							+ currentEnergy+" -> "+candidateEnergy+" ("+temperature+"°)", this);
+					currentState = systemStateCandidate;
+					currentEnergy = candidateEnergy;
+				}
+
+				// Keep track of best state visited
+				if(bestEnergy > currentEnergy){
+					bestState = currentState;
+					bestEnergy = currentEnergy;
+					update = true;
+					this.getNeighborSearchAlgorithm().updatePredicates(currentState.getSolution());
+				}
 			}
 			
-			// Keep track of best state visited
-			if(bestEnergy > currentEnergy){
-				bestState = currentState;
-				bestEnergy = currentEnergy;
+			if(update) {
+				stateTransition++;
+				temperature = this.initTemp - coolingRate * stateTransition;
+			} else {
+				local_transitionLength *= 2;
 			}
-			
-			gspu.sysoStempPerformance("Cool down system from "
-					+ temperature+ " to " +(temperature*(1-coolingRate)), this);
-			temperature *= 1 - coolingRate;
 		}
-		
+		gspu.sysoStempPerformance("End simulated annealing with: "
+				+"Temperature = "+temperature+" | Energy = "+bestEnergy, this);
+
 		return bestState;
 	}
-	
+
 }

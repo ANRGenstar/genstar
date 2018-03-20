@@ -2,8 +2,8 @@ package gospl.algo.co.metamodel.solution;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
@@ -21,7 +21,8 @@ import gospl.validation.GosplIndicatorFactory;
 
 /**
  * Abstract Combinatorial Optimization solution to be used in {@link IOptimizationAlgorithm}. 
- * Provide essential fitness calculation, stores the original data sample to help define neighboring,
+ * Provide essential fitness calculation and the solution to combinatorial optimization problem
+ * as a {@link IPopulation}
  * 
  * @author kevinchapuis
  *
@@ -37,7 +38,7 @@ public class SyntheticPopulationSolution implements ISyntheticPopulationSolution
 		if(dataBasedPopulation)
 			this.population = new GosplPopulationInDatabase(population);
 		else
-			this.population = new GosplPopulation(population);
+			this.population = population;
 		this.dataBasedPopulation = dataBasedPopulation;
 	}
 	
@@ -53,6 +54,15 @@ public class SyntheticPopulationSolution implements ISyntheticPopulationSolution
 	// ----------------------- NEIGHBOR ----------------------- //
 	
 	@Override
+	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch) {
+		return neighborSearch.getPredicates().stream()
+				.map(u -> new SyntheticPopulationSolution(
+						neighborSearch.getNeighbor(this.population, u, 1),
+						this.dataBasedPopulation))
+				.collect(Collectors.toCollection(ArrayList::new)); 
+	}
+	
+	@Override
 	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch) {
 		return getRandomNeighbor(neighborSearch, 1);
 	}
@@ -63,23 +73,6 @@ public class SyntheticPopulationSolution implements ISyntheticPopulationSolution
 				neighborSearch.getNeighbor(this.population, 
 						GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), dimensionalShiftNumber), 
 				this.dataBasedPopulation);
-	}
-
-	@Override
-	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch) {
-		
-		Collection<ISyntheticPopulationSolution> neighbors = new ArrayList<>();
-		for(U predicate : neighborSearch.getPredicates()){
-			Map<ADemoEntity, ADemoEntity> removeAddPair = neighborSearch.findPairedTarget(this.population, predicate);
-			ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
-			ADemoEntity newEntity = this.population.contains(removeAddPair.get(oldEntity)) ?
-					(ADemoEntity) removeAddPair.get(oldEntity).clone() : removeAddPair.get(oldEntity);
-					
-			neighbors.add(new SyntheticPopulationSolution(
-							IPopulationNeighborSearch.deepSwitch(new GosplPopulation(this.population), oldEntity, newEntity),
-							this.dataBasedPopulation));
-		}
-		return neighbors;
 	}
 	
 	// ----------------------- FITNESS & SOLUTION ----------------------- //

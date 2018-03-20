@@ -14,7 +14,7 @@ import core.util.random.GenstarRandom;
 public class SimulatedAnnealingDefaultTransitionFunction implements ISimulatedAnnealingTransitionFunction {
 
 	@Override
-	public boolean getTransitionProbability(double currentEnergy, double candidateEnergy, int temperature) {
+	public boolean getTransitionProbability(double currentEnergy, double candidateEnergy, double temperature) {
 		if(currentEnergy > candidateEnergy)
 			return true;
 		return Math.exp((currentEnergy - candidateEnergy) / temperature) < GenstarRandom.getInstance().nextDouble();

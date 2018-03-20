@@ -1,9 +1,11 @@
 package gospl.algo.co.metamodel.neighbor;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -16,29 +18,51 @@ import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
 import gospl.GosplPopulation;
 
+/**
+ * Will search for neighbor based on entity as predicate: meaning that basic search will swap a given
+ * entity with another one from a sample.
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch<ADemoEntity> {
 
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> sample;
+	private Collection<ADemoEntity> predicates;
+	
+	public PopulationEntityNeighborSearch() {
+		this.predicates = new HashSet<>();
+	}
+	
+	// ---------------------------------------------- //
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * If degree is more than 1, then close entities are chosen to be swap. Closeness is define
+	 * by Hamming distance between entities @see {@link HammingEntityComparator}
+	 * 
+	 */
 	@Override
 	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, ADemoEntity predicate, int degree) {
 		
-		List<ADemoEntity> predicates = sample.stream().sorted(new HammingEntityComparator(predicate))
-				.limit(degree-1).collect(Collectors.toList());
-		predicates.add(0, predicate);
+		Set<ADemoEntity> predicates = new HashSet<>(Arrays.asList(predicate));
+		if(degree > 1)
+			predicates = population.stream().sorted(new HammingEntityComparator(predicate))
+				.limit(degree).collect(Collectors.toSet());
 		
 		IPopulation<ADemoEntity, Attribute<? extends IValue>> neighbor = new GosplPopulation(population);
+		
 		for(ADemoEntity u : predicates) {
-			Map<ADemoEntity, ADemoEntity> pair = findPairedTarget(population, u);
+			Map<ADemoEntity, ADemoEntity> pair = findPairedTarget(neighbor, u);
 			ADemoEntity oldEntity = pair.keySet().iterator().next();
-			ADemoEntity newEntity = population.contains(pair.get(oldEntity)) ? 
-					(ADemoEntity) pair.get(oldEntity).clone() : pair.get(oldEntity);
+			ADemoEntity newEntity = pair.get(oldEntity).clone();
 					
 			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, oldEntity, newEntity);
 		}
 		
-		return null;
+		return neighbor;
 	}
 
 	@Override
@@ -52,23 +76,22 @@ public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch
 
 	@Override
 	public Collection<ADemoEntity> getPredicates() {
-		return Collections.unmodifiableCollection(sample);
+		return Collections.unmodifiableCollection(predicates);
 	}
 	
 	@Override
 	public void setPredicates(Collection<ADemoEntity> predicates) {
-		this.sample = new GosplPopulation(predicates);
+		this.predicates = predicates;
 	}
 
 	@Override
-	public void addPredicates(ADemoEntity predicate) {
-		this.sample.add(predicate);
+	public void updatePredicates(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+		this.setPredicates(population);
 	}
 
 	@Override
 	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
-		// TODO Auto-generated method stub
-		
+		this.sample = sample;
 	}
 
 }

@@ -22,23 +22,30 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 public abstract class AOptimizationAlgorithm implements IOptimizationAlgorithm {
 
 	private Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives;
-	protected IPopulationNeighborSearch<?> neighborSearch;
+	private IPopulationNeighborSearch<?> neighborSearch;
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> sample;
+	
+	private double fitnessThreshold;
+	private double k_neighborRatio = Math.pow(10, -3);
 	
 	/**
 	 * CO Algorithm without sample to be set futher on
 	 * @param neighborSearch
 	 */
-	public AOptimizationAlgorithm(IPopulationNeighborSearch<?> neighborSearch) {
+	public AOptimizationAlgorithm(IPopulationNeighborSearch<?> neighborSearch,
+			double fitnessThreshold) {
 		this.neighborSearch = neighborSearch;
 		this.objectives = new HashSet<>();
+		this.setFitnessThreshold(fitnessThreshold);
 	}
 	
 	public AOptimizationAlgorithm(IPopulationNeighborSearch<?> neighborSearch,
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
+			double fitnessThreshold) {
 		this.neighborSearch = neighborSearch;
 		this.setSample(sample);
 		this.objectives = new HashSet<>();
+		this.setFitnessThreshold(fitnessThreshold);
 	}
 
 	@Override
@@ -70,6 +77,24 @@ public abstract class AOptimizationAlgorithm implements IOptimizationAlgorithm {
 	@Override
 	public void setNeighborSearch(IPopulationNeighborSearch<?> neighborSearch) {
 		this.neighborSearch = neighborSearch;
+	}
+
+	@Override
+	public double getFitnessThreshold() {
+		return fitnessThreshold;
+	}
+
+	@Override
+	public void setFitnessThreshold(double fitnessThreshold) {
+		this.fitnessThreshold = fitnessThreshold;
+	}
+
+	public double getK_neighborRatio() {
+		return k_neighborRatio;
+	}
+
+	public void setK_neighborRatio(double k_neighborRatio) {
+		this.k_neighborRatio = k_neighborRatio;
 	}
 	
 }

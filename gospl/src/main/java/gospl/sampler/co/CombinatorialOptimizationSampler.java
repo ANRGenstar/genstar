@@ -20,7 +20,6 @@ import gospl.sampler.IEntitySampler;
  */
 public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> implements IEntitySampler {
 
-	private IPopulation<ADemoEntity, Attribute<? extends IValue>> sample;
 	private UniformSampler basicSampler;
 	private A algorithm;
 
@@ -30,6 +29,7 @@ public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> 
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
 			boolean dataBasedPopulation) {
 		this.algorithm = algorithm;
+		this.basicSampler = new UniformSampler();
 		this.setSample(sample);
 		this.dataBasedPopulation = dataBasedPopulation;
 	}
@@ -41,13 +41,12 @@ public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> 
 	
 	@Override
 	public Collection<ADemoEntity> draw(int numberOfDraw) {
-		return this.algorithm.run(new SyntheticPopulationSolution(sample, dataBasedPopulation)).getSolution();
+		return this.algorithm.run(new SyntheticPopulationSolution(
+				this.basicSampler.draw(numberOfDraw), dataBasedPopulation)).getSolution();
 	}
 	
 	@Override
 	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
-		this.sample = sample;
-		this.basicSampler = new UniformSampler();
 		this.basicSampler.setSample(sample);
 		this.algorithm.setSample(sample);
 	}

@@ -25,11 +25,9 @@ public class TabuList implements ITabuList {
 
 	@Override
 	public void add(ISyntheticPopulationSolution solution) {
-		if(tabuList.size() < maxSize){
+		if(tabuList.size() == maxSize)
 			tabuList.remove(tabuList.get(0));
-			tabuList.add(solution);
-		} else
-			tabuList.add(solution);
+		tabuList.add(solution);
 	}
 
 	@Override
@@ -40,7 +38,7 @@ public class TabuList implements ITabuList {
 	@Override
 	public void updateSize(Integer currentIteration, ISyntheticPopulationSolution bestSolutionFound) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 }

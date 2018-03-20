@@ -1,9 +1,6 @@
 package gospl.sampler.co;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import core.metamodel.IPopulation;
@@ -11,6 +8,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
+import gospl.GosplPopulation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
@@ -25,10 +23,11 @@ public class UniformSampler implements IEntitySampler {
 
 	@Override
 	public Collection<ADemoEntity> draw(int numberOfDraw) {
-		final List<ADemoEntity> buffer = new ArrayList<>(sample);
-		return IntStream.range(0, numberOfDraw)
-				.mapToObj(i -> _doClone(buffer, draw()))
-				.collect(Collectors.toSet());
+		GosplPopulation pop = new GosplPopulation();
+		IntStream.range(0, numberOfDraw)
+				.mapToObj(i -> draw().clone())
+				.forEach(e -> pop.add(e));
+		return pop;
 	}
 
 	@Override
@@ -45,10 +44,6 @@ public class UniformSampler implements IEntitySampler {
 	public String toCsv(String csvSeparator) {
 		// TODO Auto-generated method stub
 		return null;
-	}
-	
-	private ADemoEntity _doClone(List<ADemoEntity> buffer, ADemoEntity entity) {
-		return buffer.remove(entity) ? entity : entity.clone();
 	}
 	
 }
