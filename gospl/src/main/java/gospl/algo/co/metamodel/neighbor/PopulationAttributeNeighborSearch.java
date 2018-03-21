@@ -3,9 +3,7 @@ package gospl.algo.co.metamodel.neighbor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 
 import core.metamodel.IPopulation;
@@ -48,13 +46,9 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 		IPopulation<ADemoEntity, Attribute<? extends IValue>> buffer = new GosplPopulation(population);
 
 		for(int i = 0; i < degree; i++) {
-			Map<ADemoEntity, ADemoEntity> removeAddPair = this.findPairedTarget(buffer, predicate);
-
-			ADemoEntity oldEntity = removeAddPair.keySet().iterator().next();
-			ADemoEntity newEntity = removeAddPair.get(oldEntity).clone();
-
-			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, oldEntity, newEntity);
-			buffer.remove(oldEntity);
+			ADemoEntity[] removeAddPair = this.findPairedTarget(buffer, predicate);
+			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, removeAddPair[0], removeAddPair[1].clone());
+			buffer.remove(removeAddPair[0]);
 		}
 		
 		return neighbor;
@@ -70,10 +64,9 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 	 * @see HammingEntityComparator
 	 */
 	@Override
-	public Map<ADemoEntity, ADemoEntity> findPairedTarget(
+	public ADemoEntity[] findPairedTarget(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
 			Attribute<? extends IValue> predicate) {
-		Map<ADemoEntity, ADemoEntity> pair = new HashMap<>();
 
 		ADemoEntity oldEntity = GenstarRandomUtils.oneOf(population);
 		IValue target = oldEntity.getValueForAttribute(predicate);
@@ -81,16 +74,14 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 		matches.remove(target);
 
 		Optional<ADemoEntity> candidateEntity = sample.stream().filter(e -> 
-		!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)) 
-		&& e.getValues().containsAll(matches)).findFirst();
+			!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)) 
+				&& e.getValues().containsAll(matches)).findFirst();
 		if(candidateEntity.isPresent())
-			pair.put(oldEntity, candidateEntity.get());
-		else {
-			pair.put(oldEntity, this.sample.stream().filter(e -> 
-			!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)))
-					.sorted(new HammingEntityComparator(oldEntity)).findFirst().get());
-		}
-		return pair;
+			return new ADemoEntity[] {oldEntity, candidateEntity.get()};
+		else 
+			return new ADemoEntity[] {oldEntity, this.sample.stream().filter(e -> 
+				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)))
+					.sorted(new HammingEntityComparator(oldEntity)).findFirst().get()};
 	}
 
 	// ---------------------------------------------------- //

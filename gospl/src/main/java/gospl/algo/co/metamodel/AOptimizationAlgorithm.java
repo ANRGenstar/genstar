@@ -8,6 +8,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
+import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
 /**
@@ -89,12 +90,18 @@ public abstract class AOptimizationAlgorithm implements IOptimizationAlgorithm {
 		this.fitnessThreshold = fitnessThreshold;
 	}
 
+	@Override
 	public double getK_neighborRatio() {
 		return k_neighborRatio;
 	}
 
+	@Override
 	public void setK_neighborRatio(double k_neighborRatio) {
 		this.k_neighborRatio = k_neighborRatio;
+	}
+	
+	public int computeBuffer(double fitness, ISyntheticPopulationSolution solution) {
+		return Math.round(Math.round(solution.getSolution().size() * k_neighborRatio * Math.log(1+fitness*k_neighborRatio)));
 	}
 	
 }

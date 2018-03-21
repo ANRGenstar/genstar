@@ -13,14 +13,14 @@ public interface ITabuList extends Iterable<ISyntheticPopulationSolution> {
 	 * Add some solution to the tabu
 	 * @param solution the solution to be added
 	 */
-	void add(ISyntheticPopulationSolution solution);
+	public void add(ISyntheticPopulationSolution solution);
 	
 	/**
 	 * Check if a given solution is inside of this tabu list
 	 * @param solution the solution to check
 	 * @return true if the given solution is contained by this tabu, false otherwise
 	 */
-	Boolean contains(ISyntheticPopulationSolution solution);
+	public Boolean contains(ISyntheticPopulationSolution solution);
 	
 	/**
 	 * Update the size of the tabu list dinamically<br>
@@ -28,6 +28,8 @@ public interface ITabuList extends Iterable<ISyntheticPopulationSolution> {
 	 * @param currentIteration the current iteration of the algorithm
 	 * @param bestSolutionFound the best solution found so far
 	 */
-	void updateSize(Integer currentIteration, ISyntheticPopulationSolution bestSolutionFound);
+	public void updateSize(Integer currentIteration, ISyntheticPopulationSolution bestSolutionFound);
+	
+	public int maxSize();
 
 }

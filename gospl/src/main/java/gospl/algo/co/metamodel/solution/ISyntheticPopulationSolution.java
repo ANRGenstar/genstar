@@ -35,6 +35,14 @@ public interface ISyntheticPopulationSolution {
 	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch);
 	
 	/**
+	 * Get the overall collection of neighbors with k neighbors 
+	 * @param neighborSearch
+	 * @param k_neighbors
+	 * @return
+	 */
+	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch, int k_neighbors);
+	
+	/**
 	 * Get one random neighbor from all possible neighbors
 	 * 
 	 * @return
@@ -42,12 +50,12 @@ public interface ISyntheticPopulationSolution {
 	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch);
 	
 	/**
-	 * Get one random neighbor with n diverging dimension
+	 * Get one random neighbor within a k neighbor 
 	 * 
-	 * @param dimensionalShiftNumber
+	 * @param k_neighbors
 	 * @return
 	 */
-	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, int dimensionalShiftNumber);
+	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, int k_neighbors);
 
 	/**
 	 * The fitness of the population or how it fits the requirement of the optimization algorithm.

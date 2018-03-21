@@ -34,6 +34,11 @@ public class TabuList implements ITabuList {
 	public Boolean contains(ISyntheticPopulationSolution solution) {
 		return tabuList.contains(solution);
 	}
+	
+	@Override
+	public int maxSize() {
+		return maxSize;
+	}
 
 	@Override
 	public void updateSize(Integer currentIteration, ISyntheticPopulationSolution bestSolutionFound) {

@@ -20,7 +20,6 @@ import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
 public class HillClimbing extends AOptimizationAlgorithm {
 
 	private int nbIteration;
-	private double maxBuffer = 0.01;
 
 	public HillClimbing(double fitnessThreshold, int nbIteration) {
 		this(new PopulationEntityNeighborSearch(), fitnessThreshold, nbIteration);
@@ -34,10 +33,12 @@ public class HillClimbing extends AOptimizationAlgorithm {
 	@Override
 	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution) {
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Start Random Walk Algorithm\n"
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Start HIll Climbing Algorithm\n"
 				+ "Population size = "+initialSolution.getSolution().size()
 				+ "\nSample size = "+super.getSample().size()
-				+ "\nMax iteration = "+nbIteration, Level.TRACE);
+				+ "\nMax iteration = "+nbIteration
+				+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName(), 
+				Level.DEBUG);
 		gspu.setObjectif(nbIteration);
 		
 		ISyntheticPopulationSolution bestSolution = initialSolution;
@@ -57,21 +58,14 @@ public class HillClimbing extends AOptimizationAlgorithm {
 				super.getNeighborSearchAlgorithm().updatePredicates(bestSolution.getSolution());
 				buffer = this.computeBuffer(bestFitness, bestSolution);
 			}
-			if(iter % (nbIteration / 100) == 0)
-				gspu.sysoStempPerformance(iter/gspu.getObjectif(), "\n"
-						+ "Best fitness = "+bestFitness +"(buffer = "+buffer+") | Pop size = "
-						+bestSolution.getSolution().size(), this);
+			if(iter % (nbIteration / 10) == 0) {
+				gspu.sysoStempPerformance(iter/gspu.getObjectif(), this);
+				gspu.sysoStempMessage("Best fitness = "+bestFitness +"(buffer = "+buffer+") | Pop size = "
+						+bestSolution.getSolution().size());
+			}
 		}
 		
 		return bestSolution;
-	}
-	
-	private int computeBuffer(double fitness, ISyntheticPopulationSolution solution) {
-		return Math.round(Math.round(solution.getSolution().size() * maxBuffer
-				* (fitness / (solution.getSolution().size() * 
-						solution.getSolution().getPopulationAttributes().stream()
-						.mapToInt(a -> a.getValueSpace().getValues().size()).reduce(1, 
-								(a1,a2) -> a1 != 0 ? a1 : 1 * a2 != 0 ? a2 : 1)))));
 	}
 
 }

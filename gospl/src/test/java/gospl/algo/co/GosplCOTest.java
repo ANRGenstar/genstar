@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import java.util.stream.Collectors;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
@@ -27,9 +26,9 @@ import gospl.sampler.co.CombinatorialOptimizationSampler;
 
 public class GosplCOTest {
 
-	public static int MAX_ITERATION = (int) Math.pow(10, 2);
+	public static int MAX_ITERATION = (int) Math.pow(10, 3);
 	// TABU SPECIFI
-	public static int TABULIST_SIZE = (int) Math.pow(10, 1);
+	public static int TABULIST_SIZE = 40;
 	
 	public static boolean DATA_BASED_POP = false;
 	public static int POPULATION_SIZE = (int) Math.pow(10, 4);
@@ -88,7 +87,6 @@ public class GosplCOTest {
 	}
 
 	@Test
-	@Ignore
 	public void randomWalkTest() {
 		IEntitySampler sampler = new SampleBasedAlgorithm()
 				.setupCOSampler(SAMPLE, new CombinatorialOptimizationSampler<>(

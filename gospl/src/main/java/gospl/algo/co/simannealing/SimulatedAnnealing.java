@@ -22,16 +22,35 @@ import gospl.sampler.IEntitySampler;
  * on its own energy (or fitness) and the temperature of the global system. As algorithm iterates, it will be less
  * incline to accept candidate state with lower energy (worst fitness) and more and more rely on the best candidate
  * he has visited. 
+ * <p>
+ * Cooling schedule use logarithmic multiplicative process: T_n = T_init /  (1 + alpha * log(1 + n)) with n the number
+ * of temperature transition state, alpha the multiplicative cooling rate and T_init the initial temperature
+ * <p>
+ * The number of k neighbors visited for each temperature transition state to find a new state: start at 4, and each time
+ * the k neighbors have been rejected k is multiplied by a factor of two: <p>
+ * <pre>
+ * {@code
+ * State S_c = null
+ * while(S_c == null){
+ *  for(k neighbors){ 
+ *   if(probaTransition(S_k)) 
+ *    then S_current = S_k
+ *  } 
+ *  if(S_c == null)
+ *   then k *= 2
+ *  }
+ * } 
+ * </pre>
  * 
  * @author kevinchapuis
  *
  */
 public class SimulatedAnnealing extends AOptimizationAlgorithm {
 
-	private int bottomTemp = 1;
+	private double coolTempRatio = 0.06;
 
 	private int initTemp = 100000;
-	private double coolingRate = Math.pow(10, -3);
+	private double coolingRate = 3;
 	private int transitionLength = 4; 
 
 	private ISimulatedAnnealingTransitionFunction transFunction;
@@ -69,7 +88,8 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 				"Start Simulated annealing algorithm"
 						+ "\nPopulation size = "+initialSolution.getSolution().size()
 						+ "\nSample size = "+super.getSample().size()
-						+ "\nMin temperature = "+this.bottomTemp, 
+						+ "\nFreezing temperature = "+this.initTemp*coolTempRatio
+						+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName(), 
 						Level.DEBUG);
 
 		double currentEnergy = currentState.getFitness(this.getObjectives());
@@ -79,11 +99,11 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 		// OR while system energy is above minimum state energy
 		double temperature = initTemp;
 		int stateTransition = 0;
-		int local_transitionLength = transitionLength;
-		while(temperature > bottomTemp &&
+		int local_transitionLength = this.transitionLength;
+		while(temperature > this.initTemp*coolTempRatio &&
 				currentEnergy > super.getFitnessThreshold()){
 
-			boolean update = false;
+			boolean tempTransition = false;
 
 			for(int i = 0; i < local_transitionLength; i++) {
 				ISyntheticPopulationSolution systemStateCandidate = currentState.getRandomNeighbor(
@@ -93,24 +113,27 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 				// IF probability function elicit transition state
 				// THEN change current state to be currentCandidate 
 				if(transFunction.getTransitionProbability(currentEnergy, candidateEnergy, temperature)){
-					gspu.sysoStempPerformance("Updats energy : "
-							+ currentEnergy+" -> "+candidateEnergy+" ("+temperature+"°)", this);
+					if(stateTransition%10==0)
+						gspu.sysoStempPerformance("Updats energy (TS = "+stateTransition+") ["
+							+ currentEnergy+" -> "+candidateEnergy+"] - "
+									+ "Temp = "+Math.round(temperature)+"° - "
+											+ "Transition lenght = "+(i+1), this);
 					currentState = systemStateCandidate;
 					currentEnergy = candidateEnergy;
+					tempTransition = true;
+					break;
 				}
 
 				// Keep track of best state visited
 				if(bestEnergy > currentEnergy){
 					bestState = currentState;
 					bestEnergy = currentEnergy;
-					update = true;
-					this.getNeighborSearchAlgorithm().updatePredicates(currentState.getSolution());
 				}
 			}
 			
-			if(update) {
-				stateTransition++;
-				temperature = this.initTemp - coolingRate * stateTransition;
+			if(tempTransition) {
+				this.getNeighborSearchAlgorithm().updatePredicates(currentState.getSolution());
+				temperature = this.initTemp / (1 + coolingRate * Math.log(1 + ++stateTransition));
 			} else {
 				local_transitionLength *= 2;
 			}

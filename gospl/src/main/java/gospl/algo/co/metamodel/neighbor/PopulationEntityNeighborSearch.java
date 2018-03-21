@@ -4,11 +4,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
@@ -55,23 +52,20 @@ public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch
 		IPopulation<ADemoEntity, Attribute<? extends IValue>> neighbor = new GosplPopulation(population);
 		
 		for(ADemoEntity u : predicates) {
-			Map<ADemoEntity, ADemoEntity> pair = findPairedTarget(neighbor, u);
-			ADemoEntity oldEntity = pair.keySet().iterator().next();
-			ADemoEntity newEntity = pair.get(oldEntity).clone();
-					
-			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, oldEntity, newEntity);
+			ADemoEntity[] pair = findPairedTarget(neighbor, u);
+			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, pair[0], pair[1].clone());
 		}
 		
 		return neighbor;
 	}
 
 	@Override
-	public Map<ADemoEntity, ADemoEntity> findPairedTarget(
+	public ADemoEntity[] findPairedTarget(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, ADemoEntity predicate) {
 		ADemoEntity candidateEntity = GenstarRandomUtils.oneOf(sample);
 		while(candidateEntity.equals(predicate))
 			candidateEntity = GenstarRandomUtils.oneOf(sample);
-		return Stream.of(candidateEntity).collect(Collectors.toMap(e -> predicate, Function.identity()));
+		return new ADemoEntity[] {predicate, candidateEntity};
 	}
 
 	@Override

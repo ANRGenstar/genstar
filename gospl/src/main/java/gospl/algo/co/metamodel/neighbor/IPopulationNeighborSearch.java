@@ -1,7 +1,6 @@
 package gospl.algo.co.metamodel.neighbor;
 
 import java.util.Collection;
-import java.util.Map;
 
 import org.jdom.IllegalAddException;
 
@@ -19,7 +18,7 @@ import core.metamodel.value.IValue;
  * @param <U>
  */
 public interface IPopulationNeighborSearch<U> {
-
+	
 	/**
 	 * Find a neighbor population given any predicate to based neighborhood on and
 	 * a degree (something close as moor or von neuman neighborhood notion). More
@@ -43,7 +42,7 @@ public interface IPopulationNeighborSearch<U> {
 	 * @param predicate
 	 * @return
 	 */
-	public Map<ADemoEntity, ADemoEntity> findPairedTarget(
+	public ADemoEntity[] findPairedTarget(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, U predicate);
 	
 	/**
