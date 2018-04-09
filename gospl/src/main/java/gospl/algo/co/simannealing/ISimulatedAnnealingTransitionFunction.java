@@ -1,4 +1,4 @@
-package gospl.algo.co.simannealing.transition;
+package gospl.algo.co.simannealing;
 
 /**
  * Define the random transition function for simulated annealing: it says if candidate energy 
@@ -8,7 +8,7 @@ package gospl.algo.co.simannealing.transition;
  * @author kevinchapuis
  *
  */
-public interface IGSSimAnnealingTransFunction {
+public interface ISimulatedAnnealingTransitionFunction {
 
 	/**
 	 * The transition function
@@ -18,6 +18,6 @@ public interface IGSSimAnnealingTransFunction {
 	 * @param temperature
 	 * @return
 	 */
-	public boolean getTransitionProbability(double currentEnergy, double candidateEnergy, int temperature);
+	public boolean getTransitionProbability(double currentEnergy, double candidateEnergy, double temperature);
 	
 }

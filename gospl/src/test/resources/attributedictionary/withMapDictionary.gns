@@ -1,7 +1,7 @@
 {
-  "DEMOGRAPHIC DICTIONARY" : {
+  "ATTRIBUTE DICTIONARY" : {
     "ATTRIBUTES" : [ {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Couple",
         "VALUE SPACE" : {
           "TYPE" : "Boolean",
@@ -16,7 +16,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Genre",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
@@ -34,7 +34,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Education",
         "VALUE SPACE" : {
           "TYPE" : "Order",
@@ -56,7 +56,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Age",
         "VALUE SPACE" : {
           "TYPE" : "Range",
@@ -82,7 +82,7 @@
         }
       }
     }, {
-      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+      "MAPPED ATTRIBUTE" : {
         "NAME" : "Age_agr",
         "VALUE SPACE" : {
           "TYPE" : "Range",
@@ -109,7 +109,7 @@
         }
       }
     }, {
-      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+      "MAPPED ATTRIBUTE" : {
         "NAME" : "Generation",
         "VALUE SPACE" : {
           "TYPE" : "Order",
@@ -136,7 +136,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Activité",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
@@ -162,7 +162,7 @@
         }
       }
     }, {
-      "MAPPED DEMOGRAPHIC ATTRIBUTE" : {
+      "MAPPED ATTRIBUTE" : {
         "NAME" : "CoupleNum",
         "VALUE SPACE" : {
           "TYPE" : "Integer",

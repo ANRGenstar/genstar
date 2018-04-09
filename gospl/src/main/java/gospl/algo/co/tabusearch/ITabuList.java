@@ -1,26 +1,26 @@
-package gospl.algo.co.tabusearch.list;
+package gospl.algo.co.tabusearch;
 
-import gospl.algo.co.metamodel.IGSSampleBasedCOSolution;
+import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
 
 /**
  * Tabu list interface
  * @author Alex Ferreira
  *
  */
-public interface ITabuList extends Iterable<IGSSampleBasedCOSolution> {
+public interface ITabuList extends Iterable<ISyntheticPopulationSolution> {
 	
 	/**
 	 * Add some solution to the tabu
 	 * @param solution the solution to be added
 	 */
-	void add(IGSSampleBasedCOSolution solution);
+	public void add(ISyntheticPopulationSolution solution);
 	
 	/**
 	 * Check if a given solution is inside of this tabu list
 	 * @param solution the solution to check
 	 * @return true if the given solution is contained by this tabu, false otherwise
 	 */
-	Boolean contains(IGSSampleBasedCOSolution solution);
+	public Boolean contains(ISyntheticPopulationSolution solution);
 	
 	/**
 	 * Update the size of the tabu list dinamically<br>
@@ -28,6 +28,8 @@ public interface ITabuList extends Iterable<IGSSampleBasedCOSolution> {
 	 * @param currentIteration the current iteration of the algorithm
 	 * @param bestSolutionFound the best solution found so far
 	 */
-	void updateSize(Integer currentIteration, IGSSampleBasedCOSolution bestSolutionFound);
+	public void updateSize(Integer currentIteration, ISyntheticPopulationSolution bestSolutionFound);
+	
+	public int maxSize();
 
 }

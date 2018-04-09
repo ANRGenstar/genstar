@@ -1,4 +1,4 @@
-package gospl.algo.co.metamodel;
+package gospl.algo.co.metamodel.solution;
 
 import java.util.Collection;
 import java.util.Set;
@@ -7,7 +7,8 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
+import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
+import gospl.distribution.matrix.INDimensionalMatrix;
 
 /**
  * Represents a solution (or state) of the combinatorial optimization algorithm. It encapsulates
@@ -24,29 +25,37 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
  * @author kevinchapuis
  *
  */
-public interface IGSSampleBasedCOSolution {
+public interface ISyntheticPopulationSolution {
 
-	/**
-	 * Get one random neighbor from all possible neighbors
-	 * 
-	 * @return
-	 */
-	public IGSSampleBasedCOSolution getRandomNeighbor();
-	
-	/**
-	 * Get one random neighbor with n diverging dimension
-	 * 
-	 * @param dimensionalShiftNumber
-	 * @return
-	 */
-	public IGSSampleBasedCOSolution getRandomNeighbor(int dimensionalShiftNumber);
-	
 	/**
 	 * Get the overall collection of neighbors
 	 * 
 	 * @return
 	 */
-	public Collection<IGSSampleBasedCOSolution> getNeighbors();
+	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch);
+	
+	/**
+	 * Get the overall collection of neighbors with k neighbors 
+	 * @param neighborSearch
+	 * @param k_neighbors
+	 * @return
+	 */
+	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch, int k_neighbors);
+	
+	/**
+	 * Get one random neighbor from all possible neighbors
+	 * 
+	 * @return
+	 */
+	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch);
+	
+	/**
+	 * Get one random neighbor within a k neighbor 
+	 * 
+	 * @param k_neighbors
+	 * @return
+	 */
+	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, int k_neighbors);
 
 	/**
 	 * The fitness of the population or how it fits the requirement of the optimization algorithm.
@@ -55,7 +64,7 @@ public interface IGSSampleBasedCOSolution {
 	 * @param objectives
 	 * @return the fitness of this solution
 	 */
-	public Double getFitness(Set<AFullNDimensionalMatrix<Integer>> objectives);
+	public Double getFitness(Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives);
 	
 	/**
 	 * The synthetic population this solution represent

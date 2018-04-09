@@ -1,7 +1,7 @@
 {
-  "DEMOGRAPHIC DICTIONARY" : {
+  "ATTRIBUTE DICTIONARY" : {
     "ATTRIBUTES" : [ {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Couple",
         "VALUE SPACE" : {
           "TYPE" : "Boolean",
@@ -16,7 +16,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Genre",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
@@ -34,7 +34,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Acitivté",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
@@ -60,7 +60,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Education",
         "VALUE SPACE" : {
           "TYPE" : "Order",
@@ -82,7 +82,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Age",
         "VALUE SPACE" : {
           "TYPE" : "Range",

@@ -74,9 +74,17 @@ public class GSPerformanceUtil {
 	public void sysoStempPerformance(int step, Object caller){
 		sysoStempMessage(getStempPerformance(step), caller);
 	}
+	
+	public void sysoStempPerformance(int step, String message, Object caller) {
+		sysoStempMessage(getStempPerformance(step)+" | "+message, caller);
+	}
 
 	public void sysoStempPerformance(double proportion, Object caller){
 		sysoStempMessage(getStempPerformance(proportion), caller);
+	}
+	
+	public void sysoStempPerformance(double proportion, String message, Object caller){
+		sysoStempMessage(getStempPerformance(proportion)+" | "+message, caller);
 	}
 	
 	public void sysoStempPerformance(String message, Object caller){
@@ -86,7 +94,7 @@ public class GSPerformanceUtil {
 	// MESSAGE
 	
 	public void sysoStempMessage(String message){
-		this.printLog(message, null);
+		this.printLog(message, this.level);
 	}
 	
 	public void sysoStempMessage(String message, Level level) {
@@ -105,7 +113,7 @@ public class GSPerformanceUtil {
 					"\n-------------------------", null);
 			firstSyso = false;
 		}
-		this.printLog(message, null);
+		this.printLog(message, this.level);
 	}
 	
 	// OBJECTIF PART (to compute advancement toward a goal)

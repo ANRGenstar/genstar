@@ -192,7 +192,7 @@ public class GosplHierarchicalSampler implements IHierarchicalSampler {
 	 * WARNING: make use of {@link Stream#parallel()}
 	 */
 	@Override
-	public final List<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
+	public final Collection<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
 		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 	

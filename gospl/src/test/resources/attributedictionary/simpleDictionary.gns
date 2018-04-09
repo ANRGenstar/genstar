@@ -1,7 +1,7 @@
 {
-  "DEMOGRAPHIC DICTIONARY" : {
+  "ATTRIBUTE DICTIONARY" : {
     "ATTRIBUTES" : [ {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Couple",
         "VALUE SPACE" : {
           "TYPE" : "Boolean",
@@ -16,7 +16,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Genre",
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
@@ -34,7 +34,7 @@
         }
       }
     }, {
-      "DEMOGRAPHIC ATTRIBUTE" : {
+      "ATTRIBUTE" : {
         "NAME" : "Range attribute",
         "VALUE SPACE" : {
           "TYPE" : "Range",
