@@ -21,7 +21,7 @@
 	    <artifactId>genstar-core</artifactId>
 	    <version>1.0.3</version>
 	</dependency>
-		<dependency>
+	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-gospl</artifactId>
 	    <version>1.0.3</version>
@@ -358,6 +358,23 @@
 		                    </instructions>
 		          </configuration>
 		        </plugin>
+          <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-my-jar-with-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>					        
 		</plugins>
 		</build>
 			<repositories>
