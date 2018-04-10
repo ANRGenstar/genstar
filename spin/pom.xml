@@ -42,7 +42,6 @@
 		<groupId>org.genstar</groupId>
 		<artifactId>genstar-spll</artifactId>
 		<version>1.0.3</version>
-		<type>bundle</type>
 	</dependency>
 </dependencies>
  

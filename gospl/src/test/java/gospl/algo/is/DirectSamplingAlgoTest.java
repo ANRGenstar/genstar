@@ -12,7 +12,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
-import gospl.algo.sr.is.IndependantHypothesisAlgo;
+import gospl.algo.sr.ds.DirectSamplingAlgo;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.generator.DistributionBasedGenerator;
@@ -21,7 +21,7 @@ import gospl.generator.util.GSUtilPopulation;
 import gospl.sampler.IDistributionSampler;
 import gospl.sampler.sr.GosplBasicSampler;
 
-public class IndependentHypothesisAlgoTest {
+public class DirectSamplingAlgoTest {
 	
 	public static ASegmentedNDimensionalMatrix<Double> partialDistribution; 
 	
@@ -42,7 +42,7 @@ public class IndependentHypothesisAlgoTest {
 		
 		IDistributionSampler sampler = new GosplBasicSampler();
 		ISyntheticGosplPopGenerator generator = new DistributionBasedGenerator(sampler);
-		ISyntheticReconstructionAlgo<IDistributionSampler> isAlgo = new IndependantHypothesisAlgo();
+		ISyntheticReconstructionAlgo<IDistributionSampler> isAlgo = new DirectSamplingAlgo();
 		
 		try {
 			isAlgo.inferSRSampler(partialDistribution, sampler);

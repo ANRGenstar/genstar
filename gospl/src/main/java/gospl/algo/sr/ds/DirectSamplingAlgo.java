@@ -1,4 +1,4 @@
-package gospl.algo.sr.is;
+package gospl.algo.sr.ds;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,12 +43,12 @@ import gospl.sampler.ISampler;
  * variable 'empty' for dimension 'job'
  * </ul><p>
  * 
- * According to these hypothesis, we refer to this algorithm as IS for Independent Sampler algorithm
+ * According to these hypothesis, we refer to this algorithm as DS for Direct Sampling algorithm
  * 
  * @author kevinchapuis
  *
  */
-public class IndependantHypothesisAlgo implements ISyntheticReconstructionAlgo<IDistributionSampler> {
+public class DirectSamplingAlgo implements ISyntheticReconstructionAlgo<IDistributionSampler> {
 
 	private Logger logger = LogManager.getLogger();
 
