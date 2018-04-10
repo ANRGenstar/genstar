@@ -117,7 +117,7 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * Returns the "parent" entity 
 	 * @return
 	 */
-	public IEntity<?> getParent();
+	public IEntity<? extends IAttribute<? extends IValue>> getParent();
 	
 	/**
 	 * defines the parent. Raises an exception if you 
@@ -126,7 +126,7 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * avoid.
 	 * @param e
 	 */
-	public void setParent(IEntity<?> e);
+	public void setParent(IEntity<? extends IAttribute<? extends IValue>> e);
 
 	/**
 	 * returns true if this entity has any children, 

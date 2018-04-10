@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
 
 public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> {
@@ -183,13 +184,13 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	/**
 	 * The parent entity, if any
 	 */
-	private IEntity<?> parent = null;
+	private IEntity<? extends IAttribute<? extends IValue>> parent = null;
 	
 	/**
 	 * The set of children, if any. 
 	 * Else remains null (lazy creation)
 	 */
-	private Set<IEntity<?>> children = null;
+	private Set<IEntity<? extends IAttribute<? extends IValue>>> children = null;
 	
 	@Override
 	public final boolean hasParent() {
@@ -197,12 +198,12 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	}
 
 	@Override
-	public final IEntity<?> getParent() {
+	public final IEntity<? extends IAttribute<? extends IValue>> getParent() {
 		return parent;
 	}
 
 	@Override
-	public final void setParent(IEntity<?> e) {
+	public final void setParent(IEntity<? extends IAttribute<? extends IValue>> e) {
 		this.parent = e;		
 	}
 	
@@ -219,21 +220,21 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	}
 
 	@Override
-	public final Set<IEntity<?>> getChildren() {
+	public final Set<IEntity<? extends IAttribute<? extends IValue>>> getChildren() {
 		if (children == null)
 			return Collections.emptySet();
 		return Collections.unmodifiableSet(children);
 	}
 
 	@Override
-	public final void addChild(IEntity<?> e) {
+	public final void addChild(IEntity<? extends IAttribute<? extends IValue>> e) {
 		if (children == null)
 			children = new HashSet<>();
 		children.add(e);
 	}
 
 	@Override
-	public final void addChildren(Collection<IEntity<?>> e) {
+	public final void addChildren(Collection<IEntity<? extends IAttribute<? extends IValue>>> e) {
 		if (children == null)
 			children = new HashSet<>();
 		children.addAll(e);

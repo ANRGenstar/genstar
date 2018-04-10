@@ -12,6 +12,7 @@ import com.vividsolutions.jts.geom.Geometry;
 import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
 import core.util.data.GSDataParser;
 
@@ -190,12 +191,12 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<
 	}
 
 	@Override
-	public IEntity<?> getParent() {
+	public IEntity<? extends IAttribute<? extends IValue>> getParent() {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
 	}
 
 	@Override
-	public void setParent(IEntity<?> e) {
+	public void setParent(IEntity<? extends IAttribute<? extends IValue>> e) {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
 	}
 
@@ -210,16 +211,16 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<
 	}
 
 	@Override
-	public Set<IEntity<?>> getChildren() {
+	public Set<IEntity<? extends IAttribute<? extends IValue>>> getChildren() {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
 	}
 
 	@Override
-	public void addChild(IEntity<?> e) {
+	public void addChild(IEntity<? extends IAttribute<? extends IValue>> e) {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");	}
 
 	@Override
-	public void addChildren(Collection<IEntity<?>> e) {
+	public void addChildren(Collection<IEntity<? extends IAttribute<? extends IValue>>> e) {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
 	}
 	
