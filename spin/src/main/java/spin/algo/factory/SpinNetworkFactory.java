@@ -5,22 +5,15 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
-import spin.algo.generator.SpinRandomNetworkGenerator;
-import spin.algo.generator.SpinRegularNetworkGenerator;
-import spin.algo.generator.SpinSFNetworkGenerator;
-import spin.algo.generator.SpinSWNetworkGenerator;
-import spin.algo.generator.SpinSpatialNetworkGenerator;
-import spin.interfaces.ENetworkGenerator;
+import spin.algo.generator.ISpinNetworkGenerator;
+import spin.algo.generator.SpinCompleteNetworkGenerator;
 
 /** Propose de generer des reseaux 
  * Si le reseau est non oriente, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
  */
 public class SpinNetworkFactory {
 	
-	// SpinNetwork est le reseau courant sur la population, donc pas plusieurs type de SpinNetwork
-	// contrairement a GraphStreamFactory possedant plusieurs graphes 
-	private SpinNetwork network;
+	public final static String COMPLETE_NETWORK = "complete";
 	
 	// Singleton
 	private static SpinNetworkFactory INSTANCE;
@@ -30,10 +23,7 @@ public class SpinNetworkFactory {
 			INSTANCE = new SpinNetworkFactory();
 		return INSTANCE;
 	}
-	
-	private SpinNetworkFactory(){
-	}
-	
+
 	/** Création d'un SpinNetwork correspondant à la population passée en paramètre
 	 * @param population
 	 * @return SpinNetwork. 
@@ -80,7 +70,12 @@ public class SpinNetworkFactory {
 	}
 	*/
 	
-	public SpinNetwork getSpinNetwork(){
-		return this.network;
-	}
+	public ISpinNetworkGenerator getSpinPopulationGenerator(String networkName, String graphGenerator) {
+		if(COMPLETE_NETWORK.equals(graphGenerator)) {
+			return new SpinCompleteNetworkGenerator(networkName);
+		}
+		
+		return null;
+	}	
+	
 }

@@ -10,23 +10,23 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 import spll.SpllEntity;
 import spll.SpllPopulation;
 
-public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E>  {
+public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinNetworkGenerator<E>  {
 	
 	private double distance;
 	
-	public SpinSpatialNetworkGenerator(double _distance){
+	public SpinSpatialNetworkGenerator(String networkName, double _distance){
+		super(networkName);
 		this.distance = _distance;
 	}
 
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
+	public SpinNetwork generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		if(myPop instanceof SpllPopulation) {
-			return (SpinPopulation<E>) generateNetwork((SpllPopulation) myPop);
+			return generateNetwork((SpllPopulation) myPop);
 		} else {
 			return null;			
 		}
@@ -41,7 +41,7 @@ public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  Abstra
 	 * @return myNetwork r�seau final
 	 */
 	
-	public SpinPopulation<SpllEntity> generateNetwork(SpllPopulation myPop) {
+	public SpinNetwork generateNetwork(SpllPopulation myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);			
 		
 		Quadtree quad = new Quadtree();
@@ -62,6 +62,6 @@ public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  Abstra
 			}
 		}
 
-		return new SpinPopulation<>(myPop, network);
+		return network;
 	}
 }

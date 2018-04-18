@@ -50,14 +50,22 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 
 	@Override
 	public Collection<? extends IValue> getMappedValues(IValue value) {
+		// Modif Benoit ! && ! 
 		if(!map.values().stream().flatMap(Collection::stream).anyMatch(val -> val.equals(value)) 
-				|| map.keySet().stream().flatMap(Collection::stream).anyMatch(val -> val.equals(value)))
+				&& !map.keySet().stream().flatMap(Collection::stream).anyMatch(val -> val.equals(value)))
 			throw new NullPointerException("Value "+value+" is not linked to this mapped attribute ("
 					+this.getRelatedAttribute()+")");
-		return map.keySet().contains(value) ? 
-				Collections.unmodifiableCollection(map.get(value))
-				: map.entrySet().stream().filter(e -> e.getValue().contains(value))
-				.flatMap(e -> e.getKey().stream()).collect(Collectors.toList());
+
+		// Modif Benoit
+		// new return : pour tenir compte que les keys, contiennent des listes.
+		return (map.entrySet().stream().filter(e -> e.getKey().contains(value)).count() != 0) ?
+				map.entrySet().stream().filter(e -> e.getKey().contains(value)).flatMap(e -> e.getValue().stream()).collect(Collectors.toList())
+				: map.entrySet().stream().filter(e -> e.getValue().contains(value)).flatMap(e -> e.getKey().stream()).collect(Collectors.toList());
+		
+//		return map.keySet().contains(value) ? 
+//				Collections.unmodifiableCollection(map.get(value))
+//				: map.entrySet().stream().filter(e -> e.getValue().contains(value))
+//				.flatMap(e -> e.getKey().stream()).collect(Collectors.toList());
 	}
 
 	// -------------------- GETTER & SETTER -------------------- //

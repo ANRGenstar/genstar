@@ -13,7 +13,7 @@ import spin.SpinNetwork;
 import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 import spin.algo.generator.SpinCompleteNetworkGenerator;
-import spin.algo.generator.ISpinPopulationGenerator;
+import spin.algo.generator.ISpinNetworkGenerator;
 import spin.algo.generator.SpinRandomNetworkGenerator;
 import spin.algo.generator.SpinRegularNetworkGenerator;
 import spin.algo.generator.SpinSFNetworkGenerator;
@@ -59,25 +59,25 @@ public class TestOnGenerator {
 //		Graph sampleGraph = networkTest.randomWalkSample(50);
 //		sampleGraph.display();
 		
-		ISpinPopulationGenerator<GosplEntity> spinPopGen = new SpinCompleteNetworkGenerator<GosplEntity>();
-		SpinPopulation<GosplEntity> networkedPop = spinPopGen.generate(30);
+		ISpinNetworkGenerator spinPopGen = new SpinCompleteNetworkGenerator<GosplEntity>("family");
+		SpinNetwork networkedPop = spinPopGen.generate(30);
 		
 		System.out.println(networkedPop.toString());
 
 		
-		spinPopGen = new SpinRegularNetworkGenerator<>(4);
+		spinPopGen = new SpinRegularNetworkGenerator<>("friends",4);
 		networkedPop = spinPopGen.generate(30);
 		
 		System.out.println(networkedPop.toString());		
 
 		
-		spinPopGen = new SpinRandomNetworkGenerator<>(0.1);
+		spinPopGen = new SpinRandomNetworkGenerator<>("workmates",0.1);
 		networkedPop = spinPopGen.generate(30);
 		
 		System.out.println(networkedPop.toString());	
 		
 		
-		spinPopGen = new SpinSFNetworkGenerator<>();
+		spinPopGen = new SpinSFNetworkGenerator<>("colleagues");
 		networkedPop = spinPopGen.generate(30);
 		
 		System.out.println(networkedPop.toString());			

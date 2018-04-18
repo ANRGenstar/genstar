@@ -11,18 +11,19 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
-public class SpinRandomNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E>  {
+
+public class SpinRandomNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinNetworkGenerator<E>  {
 	private double probability;
 	
-	public SpinRandomNetworkGenerator(double proba) {
+	public SpinRandomNetworkGenerator(String networkName, double proba) {
+		super(networkName);
 		this.probability = proba;
 	}
 
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> pop) {
+	public SpinNetwork generate(IPopulation<E, Attribute<? extends IValue>> pop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(pop);
 
 		// TODO: check random generator 
@@ -51,6 +52,7 @@ public class SpinRandomNetworkGenerator<E extends ADemoEntity>  extends  Abstrac
 			// TODO : create links
 			
 		}
-		return new SpinPopulation<>(pop, network);
+		
+		return network;
 	}
 }

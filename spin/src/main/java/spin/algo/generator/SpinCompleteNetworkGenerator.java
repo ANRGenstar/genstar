@@ -5,13 +5,16 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
-public class SpinCompleteNetworkGenerator<E extends ADemoEntity> extends  AbstractSpinPopulationGenerator<E> {
+public class SpinCompleteNetworkGenerator<E extends ADemoEntity> extends  AbstractSpinNetworkGenerator<E> {
+
+	public SpinCompleteNetworkGenerator(String _networkName) {
+		super(_networkName);
+	}
 
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
+	public SpinNetwork generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 		
 		// TODO: manage directed / undirected grph ...
@@ -22,8 +25,8 @@ public class SpinCompleteNetworkGenerator<E extends ADemoEntity> extends  Abstra
 				}
 			}
 		}
-		
-		return new SpinPopulation<>(myPop, network);
+
+		return network;
 	}
 
 }

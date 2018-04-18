@@ -1,7 +1,7 @@
 package spin;
 
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,16 +19,10 @@ import gospl.GosplPopulation;
  */
 public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Attribute<? extends IValue>> {
 
-	// Network associe a la population.
-	private SpinNetwork network;
-	
-	// Interface qui permet d'avoir acces aux proprietes du reseau associe a la population.
-	// (pas inclus dans le spinNetwork car fait parfois appelle a la structure graphStream pour le calcul
-	// de certaines proprietes)
-//	private INetProperties properties;
+	// Networks associated to a population
+	private HashMap<String,SpinNetwork> networks;
 	
 	IPopulation<E, Attribute<? extends IValue>> population;
-	//private final Collection<E> population;
 
 	/**
 	 * 
@@ -36,10 +30,9 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Att
 	 * @param prop
 	 * @param network
 	 */
-	public SpinPopulation(IPopulation<E, Attribute<? extends IValue>> popRef, 
-						 SpinNetwork network){
+	public SpinPopulation(IPopulation<E, Attribute<? extends IValue>> popRef){
 		population = popRef;
-		this.network = network; 
+		networks = new HashMap<>(); 
 	}
 	
 //	/**
@@ -47,26 +40,17 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Att
 //	 * 
 //	 */
 //	public SpinPopulation() {
-//		population =  new GosplPopulation();		
+//	//	population =  new GosplPopulation();		
 //	}
 	
-//	/**
-//	 * Place the concrete type of collection you want this population be. If the propose
-//	 * collection is not empty, then default inner collection type is choose.
-//	 * 
-//	 * @see GosplPopulation()
-//	 * 
-//	 * @param population
-//	 */
-//	public SpinPopulation(Collection<E> population){
-//		if(!population.isEmpty())
-//			this.population = new HashSet<>();
-//		else
-//			this.population = population;
-//	}
+
 	
-	public SpinNetwork getNetwork() {
-		return network;
+	public SpinNetwork getNetwork(String networkName) {
+		return networks.get(networkName);
+	}
+	
+	public void addNetwork(String networkName, SpinNetwork network) {
+		networks.put(networkName, network);
 	}
 
 
@@ -172,8 +156,11 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Att
 	
 	@Override 
 	public String toString() {
-		return"Population:\n" + population +
-				"\nNetwork: \n" + network + "\n" ;			
+		String res = "Population:\n" + population + "\nNetworks: \n";
+		for(SpinNetwork sp : networks.values()) {
+			res = res + sp + "\n";
+		}
+		return res;			
 	}
 
 }

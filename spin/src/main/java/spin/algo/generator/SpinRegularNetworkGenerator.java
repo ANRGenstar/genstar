@@ -10,15 +10,15 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
 
-public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  AbstractSpinPopulationGenerator<E> {
+public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  AbstractSpinNetworkGenerator<E> {
 
 	private int k;
 	
-	public SpinRegularNetworkGenerator(int _k) {
+	public SpinRegularNetworkGenerator(String networkName, int _k) {
+		super(networkName);
 		this.k = _k;
 	}
 	
@@ -29,7 +29,7 @@ public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  Abstrac
 	 * @return myNetwork final network
 	 */
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
+	public SpinNetwork generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 	
 		List<Node> nodes = new ArrayList<>(network.getNodes());
@@ -58,7 +58,7 @@ public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  Abstrac
 			}
 		}
 		
-		return new SpinPopulation<>(myPop, network);
+		return network;
 	}
 	
 
