@@ -374,4 +374,12 @@ public class SpinNetwork implements INetProperties{
 		res = res + "\nEdges: "+network.getEdgeCount()+"\n" ;//+ network.getEdgeSet();
 		return res;
 	}
+	
+	public boolean isDirected() {
+		return directed;
+	}
+	
+	public void setDirected (boolean direct) {
+		directed = direct;
+	}
 }
