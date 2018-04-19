@@ -114,9 +114,10 @@ public class SpinNetwork implements INetProperties{
 		for(Node n : network.getEachNode()) {
 			nodes.add(n);
 		}
+
 		return nodes;
 	}
-	
+		
 	/** Obtenir la liste de liens
 	 * 
 	 * @return
@@ -128,6 +129,11 @@ public class SpinNetwork implements INetProperties{
 		}
 		return links;
 	}
+	
+	public ADemoEntity getDemoEntityNode(Node n) {
+		return kvNodeEntityFastList.get(n);
+	}
+	
 	
 	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
 	
