@@ -7,6 +7,11 @@ import core.metamodel.value.IValue;
 import spin.SpinNetwork;
 import spin.algo.generator.ISpinNetworkGenerator;
 import spin.algo.generator.SpinCompleteNetworkGenerator;
+import spin.algo.generator.SpinRandomNetworkGenerator;
+import spin.algo.generator.SpinRegularNetworkGenerator;
+import spin.algo.generator.SpinSFNetworkGenerator;
+import spin.algo.generator.SpinSWNetworkGenerator;
+import spin.algo.generator.SpinSpatialNetworkGenerator;
 
 /** Propose de generer des reseaux 
  * Si le reseau est non oriente, chaque edges n'est mis qu'une fois, donc pas d'aller retour implicite. 
@@ -14,6 +19,11 @@ import spin.algo.generator.SpinCompleteNetworkGenerator;
 public class SpinNetworkFactory {
 	
 	public final static String COMPLETE_NETWORK = "complete";
+	public final static String RANDOM_NETWORK = "random";
+	public final static String REGULAR_NETWORK = "regular";
+	public final static String SPATIAL_NETWORK = "spatial";
+	public final static String SCALEFREE_NETWORK = "scale_free";
+	public final static String SMALLWORLD_NETWORK = "small_world";
 	
 	// Singleton
 	private static SpinNetworkFactory INSTANCE;
@@ -70,9 +80,25 @@ public class SpinNetworkFactory {
 	}
 	*/
 	
-	public ISpinNetworkGenerator getSpinPopulationGenerator(String networkName, String graphGenerator) {
+	// TODO : add tests sur les paramètres
+	public ISpinNetworkGenerator<? extends ADemoEntity> getSpinPopulationGenerator(String networkName, String graphGenerator, double probaDistance, int k) {
 		if(COMPLETE_NETWORK.equals(graphGenerator)) {
-			return new SpinCompleteNetworkGenerator(networkName);
+			return new SpinCompleteNetworkGenerator<>(networkName);
+		}
+		if(RANDOM_NETWORK.equals(graphGenerator)) {
+			return new SpinRandomNetworkGenerator<>(networkName, probaDistance);
+		}
+		if(SCALEFREE_NETWORK.equals(graphGenerator)) {
+			return new SpinSFNetworkGenerator<>(networkName);
+		}
+		if(SMALLWORLD_NETWORK.equals(graphGenerator)) {
+			return new SpinSWNetworkGenerator<>(networkName, k, probaDistance);
+		}
+		if(REGULAR_NETWORK.equals(graphGenerator)) {
+			return new SpinRegularNetworkGenerator<>(networkName, k);
+		}
+		if(SPATIAL_NETWORK.equals(graphGenerator)) {
+			return new SpinSpatialNetworkGenerator<>(networkName, probaDistance);
 		}
 		
 		return null;
