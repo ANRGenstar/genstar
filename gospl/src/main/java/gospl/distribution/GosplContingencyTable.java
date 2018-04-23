@@ -1,6 +1,8 @@
 package gospl.distribution;
 
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
@@ -26,7 +28,10 @@ public class GosplContingencyTable extends AFullNDimensionalMatrix<Integer> {
 	public GosplContingencyTable(Set<Attribute<? extends IValue>> attributes) {
 		super(attributes, GSSurveyType.ContingencyTable);
 	}
-		
+	
+	protected GosplContingencyTable(Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Integer>> matrix) {
+		super(new ConcurrentHashMap<>(matrix));
+	}
 	
 	// ----------------------- SETTER CONTRACT ----------------------- //
 

@@ -274,7 +274,7 @@ public class GosplNDimensionalMatrixFactory {
 	}
 	
 	/**
-	 * 
+	 * TODO: javadoc
 	 * 
 	 * @param attributesToMeasure
 	 * @param population
@@ -297,6 +297,16 @@ public class GosplNDimensionalMatrixFactory {
 		}
 
 		return matrix;
+	}
+	
+	/**
+	 * Clone a matrix
+	 * 
+	 * @param matrix
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> createContingency(AFullNDimensionalMatrix<Integer> matrix){
+		return new GosplContingencyTable(matrix.getMatrix());
 	}
 	
 //////////////////////////////////////////////////

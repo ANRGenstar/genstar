@@ -34,7 +34,6 @@ public class TestGosplPopulationInDatabase {
 
 	
 	private GosplPopulation getGoSPLPopulation() {
-	
 		DownloadINSEESampleData inseeData = new DownloadINSEESampleData(
 				INSEETestURLs.url_RGP2014_LocaliseRegion_ZoneD_dBase,
 				"UTF-8");

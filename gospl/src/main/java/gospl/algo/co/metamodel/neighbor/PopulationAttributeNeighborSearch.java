@@ -3,7 +3,9 @@ package gospl.algo.co.metamodel.neighbor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 
 import core.metamodel.IPopulation;
@@ -12,7 +14,6 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.comparator.HammingEntityComparator;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
-import gospl.GosplPopulation;
 
 /**
  * Will search for neighbor based on attribute as predicate: meaning that basic search will swap a given
@@ -33,27 +34,6 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 
 	// ------------------------ NEIGHBORING ------------------------ //
 
-	@Override
-	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			Attribute<? extends IValue> predicate, int degree) {
-		// If predicate does not concern this population
-		if(!population.hasPopulationAttributeNamed(predicate.getAttributeName()))
-			throw new IllegalArgumentException("Trying to search for neighbor population on attribute "
-					+predicate.getAttributeName()+" that is not present");
-
-		IPopulation<ADemoEntity, Attribute<? extends IValue>> neighbor = new GosplPopulation(population);
-		IPopulation<ADemoEntity, Attribute<? extends IValue>> buffer = new GosplPopulation(population);
-
-		for(int i = 0; i < degree; i++) {
-			ADemoEntity[] removeAddPair = this.findPairedTarget(buffer, predicate);
-			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, removeAddPair[0], removeAddPair[1].clone());
-			buffer.remove(removeAddPair[0]);
-		}
-		
-		return neighbor;
-	}
-
 	/**
 	 * {@inheritDoc}
 	 * <p>
@@ -64,24 +44,38 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 	 * @see HammingEntityComparator
 	 */
 	@Override
-	public ADemoEntity[] findPairedTarget(
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			Attribute<? extends IValue> predicate) {
+			Attribute<? extends IValue> predicate, int size) {
+		if(!population.hasPopulationAttributeNamed(predicate.getAttributeName()))
+			throw new IllegalArgumentException("Trying to search for neighbor population on attribute "
+					+predicate.getAttributeName()+" that is not present");
 
-		ADemoEntity oldEntity = GenstarRandomUtils.oneOf(population);
-		IValue target = oldEntity.getValueForAttribute(predicate);
-		Collection<IValue> matches = new ArrayList<>(oldEntity.getValues());
-		matches.remove(target);
+		Map<ADemoEntity, ADemoEntity> pair = new HashMap<>();
+		
+		Map<ADemoEntity, Collection<IValue>> keys = new HashMap<>();
+		while(keys.size() < size) {
+			ADemoEntity oldEntity = GenstarRandomUtils.oneOf(population);
+			if(keys.containsKey(oldEntity))
+				continue;
+			Collection<IValue> matches = new ArrayList<>(oldEntity.getValues());
+			matches.remove(oldEntity.getValueForAttribute(predicate));
+			keys.put(oldEntity, matches);
+		}
 
-		Optional<ADemoEntity> candidateEntity = sample.stream().filter(e -> 
-			!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)) 
-				&& e.getValues().containsAll(matches)).findFirst();
-		if(candidateEntity.isPresent())
-			return new ADemoEntity[] {oldEntity, candidateEntity.get()};
-		else 
-			return new ADemoEntity[] {oldEntity, this.sample.stream().filter(e -> 
+		for(ADemoEntity oldEntity : keys.keySet()) {
+			Optional<ADemoEntity> candidateEntity = sample.stream().filter(e -> 
+				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)) 
+				&& e.getValues().containsAll(keys.get(oldEntity))).findFirst();
+			if(candidateEntity.isPresent())
+				pair.put(oldEntity, candidateEntity.get());
+			else 
+				pair.put(oldEntity, this.sample.stream().filter(e -> 
 				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)))
-					.sorted(new HammingEntityComparator(oldEntity)).findFirst().get()};
+						.sorted(new HammingEntityComparator(oldEntity)).findFirst().get());
+		}
+		
+		return pair;
 	}
 
 	// ---------------------------------------------------- //

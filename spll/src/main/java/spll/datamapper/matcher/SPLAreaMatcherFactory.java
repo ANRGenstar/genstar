@@ -35,13 +35,6 @@ public class SPLAreaMatcherFactory implements ISPLMatcherFactory<SPLVariable, Do
 		return getMatchers(Arrays.asList(entity), regressorsFile);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * </p>
-	 * WARNING: make use of parallelism
-	 * 
-	 */
 	@Override
 	public List<ISPLMatcher<SPLVariable, Double>> getMatchers(Collection<? extends AGeoEntity<? extends IValue>> entities,
 			IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> regressorsFile) 

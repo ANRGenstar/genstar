@@ -36,7 +36,7 @@ public class ContinuousSpace implements IValueSpace<ContinuousValue> {
 	private IAttribute<ContinuousValue> attribute;
 
 	public ContinuousSpace(IAttribute<ContinuousValue> attribute) {
-		this(attribute, 0d, Double.MAX_VALUE);
+		this(attribute, -Double.MAX_VALUE, Double.MAX_VALUE);
 	}
 
 	public ContinuousSpace(IAttribute<ContinuousValue> attribute,

@@ -1,6 +1,8 @@
 package gospl.algo.co.metamodel.neighbor;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.jdom.IllegalAddException;
 
@@ -8,6 +10,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.GosplPopulation;
 
 /**
  * Express how to define neighborhood in the context of synthetic population: what are the possible
@@ -31,19 +34,41 @@ public interface IPopulationNeighborSearch<U> {
 	 * @param degree
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
+	default IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			U predicate, int degree);
+			U predicate, int degree){
+		return this.getNeighbor(population, this.getPairwisedEntities(population, predicate, degree));
+	}
 	
 	/**
-	 * Given a predicate property find two entities to be swap
+	 * @see #getNeighbor(IPopulation, Object, int)
+	 * 
+	 * @param population
+	 * @param theSwitches
+	 * @return
+	 */
+	default IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
+			Map<ADemoEntity, ADemoEntity> theSwitches){
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> neighbor = new GosplPopulation(population);
+
+		for(Entry<ADemoEntity, ADemoEntity> theSwitch : theSwitches.entrySet())
+			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, theSwitch.getKey(), theSwitch.getValue().clone());
+		
+		return neighbor;
+	}
+	
+	/**
+	 * Given a predicate property find mapped entities to swap; Entities from the current population are keys, while
+	 * entities from the sample are associated values
 	 * 
 	 * @param population
 	 * @param predicate
 	 * @return
 	 */
-	public ADemoEntity[] findPairedTarget(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, U predicate);
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
+			U predicate, int size);
 	
 	/**
 	 * The predicates to be used
