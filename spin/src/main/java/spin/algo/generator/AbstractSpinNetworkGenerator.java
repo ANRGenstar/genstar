@@ -6,18 +6,24 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplEntity;
 import gospl.GosplPopulation;
-import spin.SpinPopulation;
+import spin.SpinNetwork;
 
-public abstract class AbstractSpinPopulationGenerator<E extends ADemoEntity> implements ISpinPopulationGenerator<E>{
+public abstract class AbstractSpinNetworkGenerator<E extends ADemoEntity> implements ISpinNetworkGenerator<E>{
 
+	String networkName;
+	
+	public AbstractSpinNetworkGenerator(String _networkName) {
+		this.networkName = _networkName;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public SpinPopulation<GosplEntity> generate(int numberOfIndividual) {
+	public SpinNetwork generate(int numberOfIndividual) {
 		GosplPopulation pop = new GosplPopulation();
 		for(int i = 0 ; i<numberOfIndividual;i++) {
 			pop.add(new GosplEntity());
 		}
-		return (SpinPopulation<GosplEntity>) generate( (IPopulation<E, Attribute<? extends IValue>>) pop);
+		return generate( (IPopulation<E, Attribute<? extends IValue>>) pop);
 	}	
 	
 }

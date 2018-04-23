@@ -114,9 +114,10 @@ public class SpinNetwork implements INetProperties{
 		for(Node n : network.getEachNode()) {
 			nodes.add(n);
 		}
+
 		return nodes;
 	}
-	
+		
 	/** Obtenir la liste de liens
 	 * 
 	 * @return
@@ -128,6 +129,11 @@ public class SpinNetwork implements INetProperties{
 		}
 		return links;
 	}
+	
+	public ADemoEntity getDemoEntityNode(Node n) {
+		return kvNodeEntityFastList.get(n);
+	}
+	
 	
 	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
 	
@@ -373,5 +379,13 @@ public class SpinNetwork implements INetProperties{
 		String res = "Nodes: "+network.getNodeCount()+"\n" ;//+ network.getNodeSet() ;
 		res = res + "\nEdges: "+network.getEdgeCount()+"\n" ;//+ network.getEdgeSet();
 		return res;
+	}
+	
+	public boolean isDirected() {
+		return directed;
+	}
+	
+	public void setDirected (boolean direct) {
+		directed = direct;
 	}
 }

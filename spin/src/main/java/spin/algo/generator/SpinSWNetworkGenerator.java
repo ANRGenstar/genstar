@@ -13,19 +13,19 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
 import spin.algo.factory.SpinNetworkFactory;
 
 /**Générateur SmallWorld
  * 
  *
  */
-public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinPopulationGenerator<E> {
+public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpinNetworkGenerator<E> {
 
 	private int k;
 	private double beta;
 	
-	public SpinSWNetworkGenerator(int _k, double _beta){
+	public SpinSWNetworkGenerator(String networkName, int _k, double _beta){
+		super(networkName);
 		this.k = _k;
 		this.beta = _beta;
 	}
@@ -38,11 +38,11 @@ public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpi
 	 * @return myNetwork final network
 	 */
 	@Override
-	public SpinPopulation<E> generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
+	public SpinNetwork generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 
-		SpinRegularNetworkGenerator<E> spinPopGen = new SpinRegularNetworkGenerator<>(4);
-		SpinPopulation<E> networkedPop = spinPopGen.generate(myPop);
+		SpinRegularNetworkGenerator<E> spinPopGen = new SpinRegularNetworkGenerator<>(networkName, k);
+		SpinNetwork networkedPop = spinPopGen.generate(myPop);
 				
 		//parcourir tous les liens
 		HashSet<Edge> links = new HashSet<>(network.getLinks());
@@ -74,11 +74,9 @@ public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpi
 				}
 			}
 		}
-		
-		return new SpinPopulation<>(networkedPop, network);
-	}
-
-	
+				
+		return network;	
+	}	
 }
 
 
