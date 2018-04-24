@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -156,6 +157,8 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	public int size() {
 		return jointDistributionSet.stream().mapToInt(AFullNDimensionalMatrix::size).sum();
 	}
+	
+	// ---------------------- Matrix coordinates ---------------------- //
 
 	/* (non-Javadoc)
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getEmptyCoordinate()
@@ -202,6 +205,54 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		}
 
 		return coords;
+	}
+	
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.lang.String)
+	 */
+	@Override
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getCoordinates(String... keyAndVal)
+			throws IllegalArgumentException {
+
+		
+		return getCoordinates(getValues(keyAndVal));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: Segmented matrix is made of several full dimensional matrix; hence the coordinate do reflect
+	 * only a limited range of the overall matrix dimensionality
+	 */
+	@Override
+	public ACoordinate<Attribute<? extends IValue>, IValue> getCoordinate(Set<IValue> values)
+			throws NullPointerException {
+		Optional<AFullNDimensionalMatrix<T>> mat = jointDistributionSet
+				.stream().filter(matrix -> matrix.getAspects().containsAll(values)).findFirst();
+		
+		if(mat.isPresent())
+			return mat.get().getCoordinate(values);
+		throw new NullPointerException("Trying to access coordinate with values "+Arrays.toString(values.toArray())
+			+" with not any correlates in the matrix "+this.getLabel());
+	}
+	
+	/* (non-Javadoc)
+	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinate(java.lang.String)
+	 */
+	@Override
+	public ACoordinate<Attribute<? extends IValue>, IValue> getCoordinate(String... keyAndVal)
+			throws IllegalArgumentException {
+		
+		Collection<ACoordinate<Attribute<? extends IValue>, IValue>> s = getCoordinates(keyAndVal);
+				
+		if (s.size() > 1) 
+			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
+		
+		if (s.isEmpty()) 
+			throw new IllegalArgumentException("these coordinates do not map to any cell in the matrix");
+
+		
+		return s.iterator().next();
 	}
 
 	// ---------------------- Matrix accessors ---------------------- //
@@ -356,19 +407,6 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 	// ----------------------- String accessors ----------------------- //
 
 	/* (non-Javadoc)
-	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.lang.String)
-	 */
-	@Override
-	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getCoordinates(String... keyAndVal)
-			throws IllegalArgumentException {
-
-		
-		return getCoordinates(getValues(keyAndVal));
-	}
-	
-
-
-	/* (non-Javadoc)
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getValues(java.lang.String)
 	 */
 	@Override
@@ -399,27 +437,6 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		
 		return coordinateValues;
 		
-	}
-
-
-
-	/* (non-Javadoc)
-	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinate(java.lang.String)
-	 */
-	@Override
-	public ACoordinate<Attribute<? extends IValue>, IValue> getCoordinate(String... keyAndVal)
-			throws IllegalArgumentException {
-		
-		Collection<ACoordinate<Attribute<? extends IValue>, IValue>> s = getCoordinates(keyAndVal);
-				
-		if (s.size() > 1) 
-			throw new IllegalArgumentException("these coordinates do not map to a single cell of the matrix");
-		
-		if (s.isEmpty()) 
-			throw new IllegalArgumentException("these coordinates do not map to any cell in the matrix");
-
-		
-		return s.iterator().next();
 	}
 
 

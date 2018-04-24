@@ -37,7 +37,8 @@ public class HillClimbing extends AOptimizationAlgorithm {
 				+ "Population size = "+initialSolution.getSolution().size()
 				+ "\nSample size = "+super.getSample().size()
 				+ "\nMax iteration = "+nbIteration
-				+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName(), 
+				+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName()
+				+ "\nSolution = "+initialSolution.getClass().getSimpleName(), 
 				Level.DEBUG);
 		gspu.setObjectif(nbIteration);
 		
@@ -51,7 +52,7 @@ public class HillClimbing extends AOptimizationAlgorithm {
 		while(iter++ < nbIteration && bestFitness > this.getFitnessThreshold()) {
 			ISyntheticPopulationSolution candidateState = bestSolution.getRandomNeighbor(
 					super.getNeighborSearchAlgorithm(), buffer);
-			double currentFitness = candidateState.getFitness(this.getObjectives()); 
+			double currentFitness = candidateState.getFitness(this.getObjectives());
 			if(currentFitness < bestFitness) {
 				bestSolution = candidateState;
 				bestFitness = currentFitness;
@@ -60,8 +61,9 @@ public class HillClimbing extends AOptimizationAlgorithm {
 			}
 			if(iter % (nbIteration / 10) == 0) {
 				gspu.sysoStempPerformance(iter/gspu.getObjectif(), this);
-				gspu.sysoStempMessage("Best fitness = "+bestFitness +"(buffer = "+buffer+") | Pop size = "
+				gspu.sysoStempMessage("Best fitness = "+bestFitness +" (buffer = "+buffer+") | Pop size = "
 						+bestSolution.getSolution().size());
+				//System.out.println("BF = "+bestFitness+" | CF = "+currentFitness);
 			}
 		}
 		

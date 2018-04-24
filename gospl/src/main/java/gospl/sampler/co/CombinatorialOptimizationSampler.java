@@ -7,6 +7,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.algo.co.metamodel.IOptimizationAlgorithm;
+import gospl.algo.co.metamodel.solution.SyntheticPopulationAggregatedSolution;
 import gospl.algo.co.metamodel.solution.SyntheticPopulationSolution;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
@@ -24,14 +25,21 @@ public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> 
 	private A algorithm;
 
 	protected boolean dataBasedPopulation;
+	protected boolean aggregatedMarginals;
 
 	public CombinatorialOptimizationSampler(A algorithm, 
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
+		this(algorithm, sample, false, false);
+	}
+	
+	public CombinatorialOptimizationSampler(A algorithm, 
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
-			boolean dataBasedPopulation) {
+			boolean dataBasedPopulation, boolean aggregatedMarginals) {
 		this.algorithm = algorithm;
 		this.basicSampler = new UniformSampler();
 		this.setSample(sample);
 		this.dataBasedPopulation = dataBasedPopulation;
+		this.aggregatedMarginals = aggregatedMarginals;
 	}
 	
 	@Override
@@ -41,8 +49,11 @@ public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> 
 	
 	@Override
 	public Collection<ADemoEntity> draw(int numberOfDraw) {
-		return this.algorithm.run(new SyntheticPopulationSolution(
-				this.basicSampler.draw(numberOfDraw), dataBasedPopulation)).getSolution();
+		return this.algorithm.run(
+				aggregatedMarginals ?
+					new SyntheticPopulationAggregatedSolution(this.basicSampler.draw(numberOfDraw)) :
+					new SyntheticPopulationSolution(this.basicSampler.draw(numberOfDraw), dataBasedPopulation))
+			.getSolution();
 	}
 	
 	@Override

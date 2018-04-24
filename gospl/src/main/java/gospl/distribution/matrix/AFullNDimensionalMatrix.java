@@ -10,13 +10,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -414,6 +415,17 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 			throws IllegalArgumentException {
 
 		return getCoordinates(getValues(keyAndVal));
+	}
+	
+	@Override
+	public ACoordinate<Attribute<? extends IValue>, IValue> getCoordinate(Set<IValue> values)
+			throws NullPointerException {
+		Optional<ACoordinate<Attribute<? extends IValue>, IValue>> coord = this.matrix.keySet().stream()
+				.filter(c -> c.containsAll(values) && c.size() == values.size()).findFirst();
+		if(coord.isPresent())
+			return coord.get();
+		throw new NullPointerException("Trying to access coordinate with values "+Arrays.toString(values.toArray())
+			+" with not any correlates in the matrix "+this.getLabel());
 	}
 	
 

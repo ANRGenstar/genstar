@@ -353,6 +353,16 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 
 	/**
 	 * Retrieve the only coordinate that describe this set of value.
+	 * <p>
+	 * @throws NullPointerException if the set of values in argument does 
+	 * not correspond to any coordinate in the matrix
+	 * @param values
+	 * @return
+	 */
+	public ACoordinate<D, A> getCoordinate(Set<A> values) throws NullPointerException;
+	
+	/**
+	 * Retrieve the only coordinate that describe this set of value.
 	 * 
 	 * pass the parameters as: "gender", "male", "age", "12-25"... 
 	 * 

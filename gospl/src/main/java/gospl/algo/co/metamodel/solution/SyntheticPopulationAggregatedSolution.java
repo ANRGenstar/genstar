@@ -18,6 +18,13 @@ import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.validation.GosplIndicatorFactory;
 
+/**
+ * Solution of optimization process which encapsulate a IPopulation. Fitness computation is based on
+ * aggregated marginals, that is marginals are not recomputed each time but 
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulationSolution {
 
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> population;
@@ -38,6 +45,14 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 		this.marginals = marginals;
 	}
 	
+	public SyntheticPopulationAggregatedSolution(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+		this(population, new GosplNDimensionalMatrixFactory().createContingency(population));
+	}
+	
+	public SyntheticPopulationAggregatedSolution(Collection<ADemoEntity> population) {
+		this(population, new GosplNDimensionalMatrixFactory().createContingency(new GosplPopulation(population)));
+	}
+	
 	// ----------------------- //
 	
 	@Override
@@ -53,13 +68,12 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 		
 		for(U predicate : neighborSearch.getPredicates()) {
 			Map<ADemoEntity, ADemoEntity> theSwitch = neighborSearch
-				.getPairwisedEntities(this.population, predicate, k_neighbors);
-			
-			AFullNDimensionalMatrix<Integer> marginals = this.makeSwitch(
-					new GosplNDimensionalMatrixFactory().createContingency(this.marginals), theSwitch); 
+				.getPairwisedEntities(this.population, predicate, k_neighbors); 
 
 			neighbors.add(new SyntheticPopulationAggregatedSolution(
-					neighborSearch.getNeighbor(population, theSwitch), marginals));
+					neighborSearch.getNeighbor(population, theSwitch), 
+					this.makeSwitch(new GosplNDimensionalMatrixFactory()
+							.createContingency(this.marginals), theSwitch)));
 		}
 		
 		return neighbors;
@@ -77,7 +91,7 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 				GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors);
 		
 		return new SyntheticPopulationAggregatedSolution(neighborSearch.getNeighbor(this.population, theSwitch), 
-				makeSwitch(new GosplNDimensionalMatrixFactory().createContingency(this.marginals), theSwitch));
+				this.makeSwitch(new GosplNDimensionalMatrixFactory().createContingency(this.marginals), theSwitch));
 	}
 	
 	// ----------------------- //
@@ -103,11 +117,8 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 			Map<ADemoEntity, ADemoEntity> theSwitch){
 		
 		for(ADemoEntity oldEntity : theSwitch.keySet()) {
-			matrix.getVal(matrix.getCoordinates(new HashSet<>(oldEntity.getValues()))
-					.iterator().next()).add(-1);
-			
-			matrix.getVal(matrix.getCoordinates(new HashSet<>(theSwitch.get(oldEntity).getValues()))
-					.iterator().next()).add(1);
+			matrix.getVal(matrix.getCoordinate(new HashSet<>(oldEntity.getValues()))).add(-1);
+			matrix.getVal(matrix.getCoordinate(new HashSet<>(theSwitch.get(oldEntity).getValues()))).add(1);
 		}
 		
 		return matrix;
