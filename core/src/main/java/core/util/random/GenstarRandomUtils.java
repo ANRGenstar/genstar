@@ -68,4 +68,14 @@ public class GenstarRandomUtils {
 		throw new AssertionError();
 	}
 
+	/**
+	 * make a coin flip with given probability d to be true
+	 * 
+	 * @param d
+	 * @return
+	 */
+	public static boolean flip(double d) {
+		return GenstarRandom.getInstance().nextDouble() < d;
+	}
+
 }

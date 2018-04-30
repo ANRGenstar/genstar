@@ -108,14 +108,10 @@ public interface IPopulationNeighborSearch<U> {
 	public static IPopulation<ADemoEntity, Attribute<? extends IValue>> deepSwitch(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
 			ADemoEntity oldEntity, ADemoEntity newEntity){
-		if(!population.contains(oldEntity))
-			throw new RuntimeException("NO WAY");
 		if(!population.remove(oldEntity))
-			throw new IllegalArgumentException("Cannot remove "
-					+oldEntity+" from population "+population);
+			throw new IllegalArgumentException("Cannot remove "+oldEntity+" from population "+population);
 		if(!population.add(newEntity))
-			throw new IllegalAddException("Have not been able to add entity "
-					+newEntity+" to population "+population);
+			throw new IllegalAddException("Have not been able to add entity "+newEntity+" to population "+population);
 		return population;
 	}
 	

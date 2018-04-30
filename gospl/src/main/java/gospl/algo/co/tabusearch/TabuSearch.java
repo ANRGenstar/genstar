@@ -60,7 +60,8 @@ public class TabuSearch extends AOptimizationAlgorithm {
 						+ "\nPopulation size = "+initialSolution.getSolution().size()
 						+ "\nSample size = "+super.getSample().size()
 						+ "\nMax iteration = "+this.maxIterations
-						+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName(), 
+						+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName()
+						+ "\nSolution = "+initialSolution.getClass().getSimpleName(), 
 						Level.DEBUG);
 		gspu.setObjectif(this.maxIterations);
 

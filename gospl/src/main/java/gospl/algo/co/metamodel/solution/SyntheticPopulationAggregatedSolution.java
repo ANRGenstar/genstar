@@ -67,11 +67,10 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 		Collection<ISyntheticPopulationSolution> neighbors = new ArrayList<>();
 		
 		for(U predicate : neighborSearch.getPredicates()) {
-			Map<ADemoEntity, ADemoEntity> theSwitch = neighborSearch
-				.getPairwisedEntities(this.population, predicate, k_neighbors); 
+			Map<ADemoEntity, ADemoEntity> theSwitch = neighborSearch.getPairwisedEntities(this.population, predicate, k_neighbors); 
 
 			neighbors.add(new SyntheticPopulationAggregatedSolution(
-					neighborSearch.getNeighbor(population, theSwitch), 
+					neighborSearch.getNeighbor(this.population, theSwitch), 
 					this.makeSwitch(new GosplNDimensionalMatrixFactory()
 							.createContingency(this.marginals), theSwitch)));
 		}

@@ -306,7 +306,12 @@ public class GosplNDimensionalMatrixFactory {
 	 * @return
 	 */
 	public AFullNDimensionalMatrix<Integer> createContingency(AFullNDimensionalMatrix<Integer> matrix){
-		return new GosplContingencyTable(matrix.getMatrix());
+		Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Integer>> m = matrix.getMatrix();
+		return new GosplContingencyTable(m.keySet().stream().collect(
+				Collectors.toMap(
+						Function.identity(),
+						coord -> new ControlContingency(m.get(coord).getValue())
+				)));
 	}
 	
 //////////////////////////////////////////////////

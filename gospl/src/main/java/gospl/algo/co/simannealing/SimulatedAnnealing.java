@@ -3,6 +3,7 @@ package gospl.algo.co.simannealing;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandomUtils;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationEntityNeighborSearch;
@@ -89,7 +90,8 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 						+ "\nPopulation size = "+initialSolution.getSolution().size()
 						+ "\nSample size = "+super.getSample().size()
 						+ "\nFreezing temperature = "+this.initTemp*coolTempRatio
-						+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName(), 
+						+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName()
+						+ "\nSolution = "+initialSolution.getClass().getSimpleName(),
 						Level.DEBUG);
 
 		double currentEnergy = currentState.getFitness(this.getObjectives());
@@ -100,6 +102,7 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 		double temperature = initTemp;
 		int stateTransition = 0;
 		int local_transitionLength = this.transitionLength;
+		double forcedTransition = 1d;
 		while(temperature > this.initTemp*coolTempRatio &&
 				currentEnergy > super.getFitnessThreshold()){
 
@@ -131,11 +134,14 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 				}
 			}
 			
-			if(tempTransition) {
+			if(tempTransition || GenstarRandomUtils.flip(1 - forcedTransition)) {
 				this.getNeighborSearchAlgorithm().updatePredicates(currentState.getSolution());
 				temperature = this.initTemp / (1 + coolingRate * Math.log(1 + ++stateTransition));
+				local_transitionLength = this.transitionLength;
+				forcedTransition = 1;
 			} else {
-				local_transitionLength *= 2;
+				local_transitionLength *= 1.2;
+				forcedTransition *= 0.8;
 			}
 		}
 		gspu.sysoStempPerformance("End simulated annealing with: "
