@@ -1,6 +1,10 @@
 language: java
 jdk:
-  - oraclejdk8
-script: 
+- oraclejdk8
+script:
 - mvn clean install
-- mvn deploy
+deploy:
+  provider:bintray
+  user:genstarobot
+  key:
+    secure: 2SiY3ve39oEsUFZDt7BsXftv9fodD+3sG3ZVBkwX9sYQkSkGD5zdFOvoxg90xjku5dV/vIrRjzrwz3tx3e9DxgePVofR6P8DZxGaqjKB71VXB1Pck0zpcwKrTkyo1cvxaK90Zz5tS6u7khEOBGQT27EI/7PAJy2q1TMVV1VACAwPnIlkadh5BCWr3r2P/pQ9VigVgTW5WSl4VfmxXCbyA3vkBE02CTs2F/OhUXvr0I191+t5HNgoWeV+eYMjpat6X0vlftnJwwJnKCub+1b3lbCQUePZc8td5B1QHJXa6kCuF9ISatIubcuytKMnbxpuUoIYAiw1BEbkAxK3BZTuHje4o76hzM9c8SUbyzqjW9Vu40jXMybEIkNCw7OpqjeU0scC+go9UUzs6GuGem66KAwTMVBnd/eMJdZyZkmRwRxJTgwzTBYwC7m2rLWAPR8Fh/dG4JkkkczZd7VI/cCoKn415TKiLrJLMPWyxFTa6cF4BAXEFvSwDpvx7ByHWYHG/+Tu5IWdKEy7lDpGYh6pgfsdkLPRIMnlC09QIQzEjZWRl1moYfk7CQz0vbouv2wL/6OUEbVsjNYl92pmt2HQY8disbz4MuT6MP5qGRIoXR7So0t7lPaZTSfIRGayungxsGspaFd55QhdJW/maKiwZm3qQA25QQ56g0xd6JTVChk=
