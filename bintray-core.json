@@ -13,17 +13,17 @@
     "public_stats": false
  },
   "version": {
-    "name": "$package-version",
+    "name": "nightly",
     "released": "2018-06-19",
     "gpgSign": false
   },
   "files":
   [
-    {"includePattern": "\./core/target/(.*\.jar)", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/$package-version/$1",
+    {"includePattern": "\./core/target/(.*\.jar)", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/nightly/$1",
     "matrixParams": {
         "override": 1 }
     },
-    {"includePattern": "\./core/target/pom.xml", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/$package-version/$1",
+    {"includePattern": "\./core/target/pom.xml", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/nightly-$1",
     "matrixParams": {
         "override": 1 }
     }
