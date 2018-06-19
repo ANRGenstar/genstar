@@ -1,3 +1,5 @@
+env:
+- package-version="nightly"
 language: java
 jdk:
 - oraclejdk8
@@ -30,3 +32,4 @@ deploy:
 cache:
   directories:
   - $HOME/.m2
+
