@@ -4,6 +4,7 @@ jdk:
 script:
 - mvn clean install
 deploy:
+  file:bintray.json
   provider: bintray
   user: genstarobot
   key:
