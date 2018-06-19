@@ -1,7 +1,7 @@
 {
   "package": {
     "name": "genstar-core",
-    "repo": "genstar-packages",
+    "repo": "genstar-packages-nightly",
     "subject": "anrgenstar",
     "desc": "Bintray Genstar",
     "website_url": "genstar",
@@ -23,7 +23,7 @@
     "matrixParams": {
         "override": 1 }
     },
-    {"includePattern": "\./core/target/pom.xml", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/nightly-$1",
+    {"includePattern": "\./core/pom.xml", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/nightly/nightly-$1.xml",
     "matrixParams": {
         "override": 1 }
     }
