@@ -19,7 +19,7 @@
   },
   "files":
   [
-    {"includePattern": "/core/target/(.*)", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/1.0.4/$1"}
+    {"includePattern": "\./core/target/(.*)", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/1.0.4/$1"}
   ],
   "publish": true
 }
