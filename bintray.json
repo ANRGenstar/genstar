@@ -23,7 +23,6 @@
     {"includePattern": "/gospl/target/(.*)", "uploadPattern": "anrgenstar/genstar-packages/genstar-gospl/1.0.4/$1"},
     {"includePattern": "/spin/target/(.*)", "uploadPattern": "anrgenstar/genstar-packages/genstar-spin/1.0.4/$1"},
     {"includePattern": "/spll/target/(.*)", "uploadPattern": "anrgenstar/genstar-packages/genstar-spll/1.0.4/$1"}
-
   ],
   "publish": true
 }
