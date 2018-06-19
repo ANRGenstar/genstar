@@ -13,7 +13,7 @@
     "public_stats": false
  },
   "version": {
-    "name": "1.0.4",
+    "name": "$package-version",
     "released": "2018-06-19",
     "gpgSign": false
   },
