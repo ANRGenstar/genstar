@@ -1,8 +1,8 @@
 {
   "package": {
-    "name": "genstar",
-    "repo": "genstar",
-    "subject": "genstar",
+    "name": "test",
+    "repo": "genstar-packages",
+    "subject": "genstar-test",
     "desc": "Bintray Genstar",
     "website_url": "genstar",
     "issue_tracker_url": "https://github.com/techdev-solutions/bintray-demo/issues",
