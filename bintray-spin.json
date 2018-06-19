@@ -1,0 +1,26 @@
+{
+  "package": {
+    "name": "genstar-spin",
+    "repo": "genstar-packages",
+    "subject": "anrgenstar",
+    "desc": "Bintray Genstar",
+    "website_url": "genstar",
+    "issue_tracker_url": "https://github.com/techdev-solutions/bintray-demo/issues",
+    "vcs_url": "https://github.com/techdev-solutions/bintray-demo.git",
+    "licenses": ["Apache-2.0"],
+    "labels": ["kotlin", "bintray", "gradle"],
+    "public_download_numbers": false,
+    "public_stats": false
+ },
+  "version": {
+    "name": "1.0.4",
+    "released": "2018-06-19",
+    "gpgSign": false
+  },
+  "files":
+  [
+    {"includePattern": "\./spin/target/(.*)", "uploadPattern": "anrgenstar/genstar-packages/genstar-spin/1.0.4/$1"}
+  ],
+  "publish": true
+}
+

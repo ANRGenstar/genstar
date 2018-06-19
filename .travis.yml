@@ -9,6 +9,24 @@ deploy:
   user: genstarbot
   skip_cleanup: true
   key: 62617561ff4b6201f4514fe83eb7d6ed08743d1b
+deploy:
+  file: bintray-spll.json
+  provider: bintray
+  user: genstarbot
+  skip_cleanup: true
+  key: 62617561ff4b6201f4514fe83eb7d6ed08743d1b
+deploy:
+  file: bintray-spin.json
+  provider: bintray
+  user: genstarbot
+  skip_cleanup: true
+  key: 62617561ff4b6201f4514fe83eb7d6ed08743d1b
+deploy:
+  file: bintray-gospl.json
+  provider: bintray
+  user: genstarbot
+  skip_cleanup: true
+  key: 62617561ff4b6201f4514fe83eb7d6ed08743d1b
 cache:
   directories:
   - $HOME/.m2
