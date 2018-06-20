@@ -5,13 +5,18 @@
  <modelVersion>4.0.0</modelVersion>
   <groupId>org.genstar</groupId>
   <artifactId>genstar-spll</artifactId>
-  <version>1.0.3</version>
   <packaging>bundle</packaging>
 
   <properties>
 		<geotools.version>14.5</geotools.version>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
+
+    <parent>
+        <groupId>org.genstar</groupId>
+        <artifactId>parent</artifactId>
+        <version>${revision}</version>
+    </parent>
 
 <dependencies>
 		<!-- MODULE DEPENDENCIES -->

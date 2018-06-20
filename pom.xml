@@ -3,10 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.genstar</groupId>
 	<artifactId>parent</artifactId>
-	<version>1.0</version>
+    <version>${revision}</version>
 	<packaging>pom</packaging>
 
 	<properties>
+	    <project.version>2.1</project.version>        
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<geotools.version>14.5</geotools.version>
 		<imageio.version>1.1.11</imageio.version>
@@ -14,7 +15,6 @@
 		<jts.version>1.14.0</jts.version>
 		<jaimageio.version>1.1</jaimageio.version>
 		<maven.deploy.skip>true</maven.deploy.skip>
-
 		<!-- use the latest snapshot <geotools.version>15-SNAPSHOT</geotools.version> -->
 	</properties>
 

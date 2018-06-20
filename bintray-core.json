@@ -19,11 +19,11 @@
   },
   "files":
   [
-    {"includePattern": "\./core/target/(.*\.jar)", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/nightly/$1",
+    {"includePattern": "\./core/target/(.*\.jar)", "uploadPattern": "org/genstar/genstar-core/nightly/$1",
     "matrixParams": {
         "override": 1 }
     },
-    {"includePattern": "\./core/pom.xml", "uploadPattern": "anrgenstar/genstar-packages/genstar-core/nightly/nightly-$1.xml",
+    {"includePattern": "\./core/pom.xml", "uploadPattern": "org/genstar/genstar-core/nightly/pom-nightly.xml",
     "matrixParams": {
         "override": 1 }
     }

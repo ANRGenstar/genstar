@@ -1,10 +1,8 @@
-env:
-- package-version="nightly"
 language: java
 jdk:
 - oraclejdk8
 script:
-- mvn clean install
+- mvn -Drevision=1.0.3-SNAPSHOT clean package
 deploy:
   file: bintray-core.json
   provider: bintray

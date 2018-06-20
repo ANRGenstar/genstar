@@ -4,12 +4,17 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.genstar</groupId>
 	<artifactId>genstar-gospl</artifactId>
-	<version>1.0.3</version>
 	<packaging>bundle</packaging>
 
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
+
+    <parent>
+        <groupId>org.genstar</groupId>
+        <artifactId>parent</artifactId>
+        <version>${revision}</version>
+    </parent>
 
 	<!-- Adding repositories is a bad idea
 		(see http://blog.sonatype.com/2009/02/why-putting-repositories-in-your-poms-is-a-bad-idea/ )
