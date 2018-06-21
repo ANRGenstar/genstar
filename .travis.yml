@@ -3,6 +3,7 @@ jdk:
 - oraclejdk8
 script:
 - mvn -Drevision=1.0.3 clean package
+- mvn deploy --settings settings.xml 
 deploy:
   file: bintray-core.json
   provider: bintray
