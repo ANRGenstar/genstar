@@ -133,13 +133,19 @@
       </configuration>
     </plugin>
             
-            
+
     </plugins>
     </build>
         <distributionManagement>
                     <repository>
                     <id>bintray-anrgenstar-genstar-packages</id>
                     <name>anrgenstar-genstar-packages</name>
+                          <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
                     <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-spin/;publish=1;override=1</url>
                     </repository>
     </distributionManagement>

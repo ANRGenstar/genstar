@@ -429,13 +429,19 @@
       </configuration>
     </plugin>
             
-            
+
 		</plugins>
 		</build>
 			<repositories>
 		<repository>
 			<id>osgeo</id>
 			<name>Open Source Geospatial Foundation Repository</name>
+						<releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
 			<url>http://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 	</repositories>
