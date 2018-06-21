@@ -4,13 +4,6 @@ jdk:
 script:
 - mvn -Drevision=1.0.3 clean package
 - mvn deploy --settings settings.xml 
-deploy:
-  file: bintray-core.json
-  provider: bintray
-  user: genstarbot
-  skip_cleanup: true
-  key:
-    secure: mHPjKjWXsNtGhuAQmVQjOZaqHX4XeSIWQ9bflniBHSL3DG1b45unTEE8dz6E3grw6G0BvA9MHptWBUOdF6nqIpyMOf4JUA8w/sGofoKsz5nkZC0z0oQ/ypkN1JyeTDkY8sc7KoxO+wZBEyaesOokWoychoXcWSxATA/ymnskbWNwnR2lid6v5fLvKoOGkWfAtNXEQAnX00dWWyH8cLzwfZmZ9xQaj6JfitaBy5l2xD2X8rvDOas/I60qmGjg4SmGZWDFUaJ3Bn7oMoWVOJavAuDvqcGR86UO0bKrEJAbndUdyapDfnsprnylRYFBoMyJHoKKx9w0o57S8LVt9FMuBjjFH9dfUQVpLU81Lb/gpDPQSEKd3bgRUzwmUHFutaOva9xpS38GjsrGBezqq1MhAHvmKtZlXErkh5iflZapNl8fGAI9L45ETgyO30BDKE6mTs5uoBjO64QutsyxFtKAfI1+Pt+l863CBAqQOiad8udYfcNR3aBQpQcGX1WiaxNEj4QMAjlfCxsx+5Kd2nBtc0WemuiZoKgdbYrwB/QIUSYTjqhNN2pX20UX0UtOC+oj6/lYy0qEEmDKx/X1DbnzZ0BaG1wbEf5QOhHbs94RDnQcxfUyK2Rgpul52+J4d8wzgZ4ekJAT2jmKDjmrVoQdLplK2AzsRPpVx+zSDHltuiI=
 cache:
   directories:
   - "$HOME/.m2"
