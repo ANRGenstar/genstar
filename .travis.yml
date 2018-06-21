@@ -2,8 +2,7 @@ language: java
 jdk:
 - oraclejdk8
 script:
-- mvn -Drevision=1.0.3 clean package
-- mvn deploy --settings settings.xml 
+- mvn -Drevision=1.0.3 javadoc:jar source:jar deploy --settings settings.xml 
 cache:
   directories:
   - "$HOME/.m2"

@@ -178,7 +178,47 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>		-->				
+            </plugin>		-->	
+            			
+<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-source-plugin</artifactId>
+	  <executions>
+	    <execution>
+	      <id>attach-sources</id>
+		  <phase>deploy</phase>
+	      <goals>
+	        <goal>jar</goal>
+	      </goals>
+	    </execution>
+	  </executions>
+	</plugin>
+	<plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-javadoc-plugin</artifactId>
+   <configuration>
+        <additionalOptions>
+            <additionalOption>-Xdoclint:none</additionalOption>
+        </additionalOptions>
+    </configuration>
+      <executions>
+        <execution>
+          <id>attach-javadocs</id>
+          <phase>deploy</phase>
+          <goals>
+            <goal>jar</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+        <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-deploy-plugin</artifactId>
+      <configuration>
+        <skip>false</skip>
+      </configuration>
+    </plugin>
+            
 		</plugins>
 	</build>
 	<distributionManagement>
