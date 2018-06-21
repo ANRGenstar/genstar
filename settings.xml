@@ -3,7 +3,7 @@
           xmlns='http://maven.apache.org/SETTINGS/1.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
     <servers>
         <server>
-            <id>genstar-packages</id>
+            <id>bintray-anrgenstar-genstar-packages</id>
             <username>genstarbot</username>
             <password>${env.BINTRAY_PASSWORD}</password>
         </server>
