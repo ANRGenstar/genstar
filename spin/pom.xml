@@ -75,7 +75,7 @@
                         </instructions>
               </configuration>
             </plugin>
-          <plugin>
+       <!--   <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptorRefs>
@@ -91,7 +91,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>			            
+            </plugin>			             -->
     </plugins>
     </build>
         <distributionManagement>
