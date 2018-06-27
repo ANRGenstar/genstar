@@ -5,7 +5,6 @@
  <modelVersion>4.0.0</modelVersion>
   <groupId>org.genstar</groupId>
   <artifactId>genstar-spll</artifactId>
-  <version>1.0.3</version>
   <packaging>bundle</packaging>
 
   <properties>
@@ -13,9 +12,23 @@
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
 
+    <parent>
+        <groupId>org.genstar</groupId>
+        <artifactId>parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+
 <dependencies>
 		<!-- MODULE DEPENDENCIES -->
-		
+
+	<dependency>
+    	<groupId>com.vividsolutions</groupId>
+    	<artifactId>jts-core</artifactId>
+    </dependency>
+	<dependency>
+		<groupId>net.sf.opencsv</groupId>
+		<artifactId>opencsv</artifactId>
+	</dependency>			
 	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-core</artifactId>
@@ -358,7 +371,7 @@
 		                    </instructions>
 		          </configuration>
 		        </plugin>
-          <plugin>
+      <!--    <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <descriptorRefs>
@@ -374,13 +387,61 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>					        
+            </plugin>	-->				        
+
+
+<plugin>
+	  <groupId>org.apache.maven.plugins</groupId>
+	  <artifactId>maven-source-plugin</artifactId>
+	  <executions>
+	    <execution>
+	      <id>attach-sources</id>
+		  <phase>deploy</phase>
+	      <goals>
+	        <goal>jar</goal>
+	      </goals>
+	    </execution>
+	  </executions>
+	</plugin>
+	<plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-javadoc-plugin</artifactId>
+   <configuration>
+        <additionalOptions>
+            <additionalOption>-Xdoclint:none</additionalOption>
+        </additionalOptions>
+    </configuration>
+      <executions>
+        <execution>
+          <id>attach-javadocs</id>
+          <phase>deploy</phase>
+          <goals>
+            <goal>jar</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+        <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-deploy-plugin</artifactId>
+      <configuration>
+        <skip>false</skip>
+      </configuration>
+    </plugin>
+            
+
 		</plugins>
 		</build>
 			<repositories>
 		<repository>
 			<id>osgeo</id>
 			<name>Open Source Geospatial Foundation Repository</name>
+						<releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
 			<url>http://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 	</repositories>

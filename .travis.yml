@@ -1,4 +1,9 @@
 language: java
 jdk:
-  - oraclejdk8
-script: mvn clean install
+- oraclejdk8
+script:
+- mvn -Drevision=1.0.3 clean package javadoc:jar source:jar deploy --settings settings.xml 
+cache:
+  directories:
+  - "$HOME/.m2"
+
