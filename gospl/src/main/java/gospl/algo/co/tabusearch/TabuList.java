@@ -31,13 +31,18 @@ public class TabuList implements ITabuList {
 	}
 
 	@Override
-	public Boolean contains(ISyntheticPopulationSolution solution) {
+	public boolean contains(ISyntheticPopulationSolution solution) {
 		return tabuList.contains(solution);
 	}
 	
 	@Override
 	public int maxSize() {
 		return maxSize;
+	}
+	
+	@Override
+	public int getSize() {
+		return tabuList.size();
 	}
 
 	@Override
