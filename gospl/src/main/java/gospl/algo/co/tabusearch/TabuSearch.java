@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandomUtils;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationAttributeNeighborSearch;
@@ -27,8 +28,6 @@ public class TabuSearch extends AOptimizationAlgorithm {
 	private ITabuList tabuList;
 	private int maxIterations;
 
-	private int local_reverseJump;
-
 	/**
 	 * Construct a {@link TabuSearch} object
 	 * @param tabuList the tabu list used in the algorithm to handle tabus
@@ -44,7 +43,6 @@ public class TabuSearch extends AOptimizationAlgorithm {
 		super(neighborSearch, fitnessThreshold);
 		this.tabuList = tabuList;
 		this.maxIterations = maxIterations;
-		this.local_reverseJump = 1 + Math.round(Math.round(tabuList.maxSize() * 0.1));
 	}
 
 	@Override
@@ -76,6 +74,9 @@ public class TabuSearch extends AOptimizationAlgorithm {
 			if(currentIteration % (this.maxIterations / 10d) == 0) {
 				gspu.sysoStempPerformance(currentIteration / gspu.getObjectif(), this);
 				gspu.sysoStempMessage("Current fitness is "+bestFitness);
+				gspu.sysoStempMessage("Tabu size "+tabuList.getSize()+" "
+						+ "| number of stucked iteration "+stuckIdx
+						+ " | Current buffer "+super.computeBuffer(bestFitness * stuckIdx, currentSolution));
 			}
 
 			// gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
@@ -90,17 +91,23 @@ public class TabuSearch extends AOptimizationAlgorithm {
 
 			if(optionalBestSolution.isPresent()) {
 				double candidateFitness = optionalBestSolution.get().getFitness(this.getObjectives());
-				if(candidateFitness< 
-						bestSolution.getFitness(this.getObjectives())) {
+				if(candidateFitness < bestSolution.getFitness(this.getObjectives())) {
 					bestSolution = optionalBestSolution.get();
 					bestFitness = candidateFitness;
 					stuckIdx = 0;
 				}
-			} else
-				stuckIdx++;
+			}
+			
+			if(GenstarRandomUtils.flip(Math.log1p(stuckIdx++) / Math.log(tabuList.maxSize()))) {
+				
+				currentSolution = currentSolution.getRandomNeighbor(super.getNeighborSearchAlgorithm(), 
+						super.computeBuffer(bestFitness * stuckIdx, currentSolution));
+				stuckIdx = 0;
+
+			}	
+			
 			tabuList.add(currentSolution);
-			currentSolution = stuckIdx < local_reverseJump ? bestSolution : currentSolution
-					.getRandomNeighbor(super.getNeighborSearchAlgorithm(), super.computeBuffer(bestFitness, currentSolution));
+			 
 
 		}
 

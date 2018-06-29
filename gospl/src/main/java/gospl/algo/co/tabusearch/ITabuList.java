@@ -20,7 +20,7 @@ public interface ITabuList extends Iterable<ISyntheticPopulationSolution> {
 	 * @param solution the solution to check
 	 * @return true if the given solution is contained by this tabu, false otherwise
 	 */
-	public Boolean contains(ISyntheticPopulationSolution solution);
+	public boolean contains(ISyntheticPopulationSolution solution);
 	
 	/**
 	 * Update the size of the tabu list dinamically<br>
@@ -31,5 +31,7 @@ public interface ITabuList extends Iterable<ISyntheticPopulationSolution> {
 	public void updateSize(Integer currentIteration, ISyntheticPopulationSolution bestSolutionFound);
 	
 	public int maxSize();
+
+	public int getSize();
 
 }

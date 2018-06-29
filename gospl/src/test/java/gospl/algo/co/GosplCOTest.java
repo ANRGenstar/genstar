@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import core.metamodel.IPopulation;
@@ -64,7 +63,6 @@ public class GosplCOTest {
 	}
 
 	@Test
-	@Ignore
 	public void simulatedAnnealingTest() {
 		IEntitySampler sampler = new SampleBasedAlgorithm()
 				.setupCOSampler(SAMPLE, new CombinatorialOptimizationSampler<>(
@@ -94,7 +92,6 @@ public class GosplCOTest {
 	}
 
 	@Test
-	@Ignore
 	public void hillClimbingTest() {
 		IEntitySampler sampler = new SampleBasedAlgorithm()
 				.setupCOSampler(SAMPLE, new CombinatorialOptimizationSampler<>(
@@ -109,7 +106,6 @@ public class GosplCOTest {
 	}
 
 	@Test
-	@Ignore
 	public void comparisonWithOrWithoutAggregatedSolution() {
 
 		Map<String, IEntitySampler[]> algos = new HashMap<>();
