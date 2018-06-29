@@ -125,18 +125,18 @@
         </execution>
       </executions>
     </plugin>
-        <plugin>
+   <!--     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
       <configuration>
         <skip>false</skip>
       </configuration>
-    </plugin>
+    </plugin>-->
             
 
     </plugins>
     </build>
-        <distributionManagement>
+    <!--    <distributionManagement>
                     <repository>
                     <id>bintray-anrgenstar-genstar-packages</id>
                     <name>anrgenstar-genstar-packages</name>
@@ -148,5 +148,5 @@
             </snapshots>
                     <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-spin/;publish=1;override=1</url>
                     </repository>
-    </distributionManagement>
+    </distributionManagement>-->
 </project>
