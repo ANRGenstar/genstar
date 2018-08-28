@@ -9,6 +9,8 @@ import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
+ * Transpose a set of attribute value to one emergent attribute value given the provided {@link ITransposeValueFunction} called {@code transposer}
+ * 
  * TODO: make it functional - but still have problem on how to serialize/deserialize because of too much parametrics
  * 
  * @author kevinchapuis

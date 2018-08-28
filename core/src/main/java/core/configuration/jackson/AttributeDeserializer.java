@@ -35,6 +35,7 @@ import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.attribute.mapper.IAttributeMapper;
+import core.metamodel.attribute.mapper.value.RecordValueMapper;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
@@ -113,8 +114,15 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createAttribute(id, this.getType(node), this.getValues(node));
+		Attribute<? extends IValue> attribute; 
+		try {
+			attribute = AttributeFactory.getFactory()
+					.createRecordAttribute(id, this.getType(node), this.getValues(node), 
+							this.getRecordMapping(node));
+		} catch (IllegalArgumentException e) {
+			attribute = AttributeFactory.getFactory()
+					.createAttribute(id, this.getType(node), this.getValues(node));
+		}
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
 	}
@@ -154,6 +162,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize record mapped attribute
 	 */
+	@SuppressWarnings("deprecation")
 	private Attribute<? extends IValue> deserializeRMA(JsonNode node) throws GSIllegalRangedData {
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
@@ -232,6 +241,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize record attribute
 	 */
+	@SuppressWarnings("deprecation")
 	private RecordAttribute<? extends IAttribute<? extends IValue>, ? extends IAttribute<? extends IValue>> deserializeRA(JsonNode node) 
 			throws GSIllegalRangedData { 
 		return AttributeFactory.getFactory()
@@ -288,6 +298,23 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	}
 	
 	// MAPPER
+	
+	private Map<String, String> getRecordMapping(JsonNode node) {
+		JsonNode mapping = node.findValue(RecordValueMapper.SELF);
+		if(!mapping.isArray())
+			throw new IllegalArgumentException("Trying to unmap the mapper but cannot access array mapping: "
+					+ "node type instade is "+node.getNodeType());
+		Map<String, String> records = new HashMap<>();
+		int i = 0;
+		while(mapping.has(i)) {
+			String[] keyVal = mapping.get(i++).asText()
+					.split(RecordValueSerializer.MATCH_SYMBOL);
+			for(String record : keyVal[1].split(RecordValueSerializer.SPLIT_SYMBOL)) {
+				records.put(record, keyVal[0].trim());
+			}
+		}
+		return records;
+	}
 	
 	/*
 	 * Get the record map for mapped demographic attribute

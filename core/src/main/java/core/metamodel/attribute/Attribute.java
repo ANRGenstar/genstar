@@ -6,6 +6,7 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import core.metamodel.attribute.mapper.value.RecordValueMapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
@@ -43,6 +44,8 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 
 	@JsonIgnore
 	private String description = null;
+	
+	private RecordValueMapper<V> encodedValues;
 
 	protected Attribute(String name) {
 		this.name = name;
@@ -82,6 +85,18 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 */
 	public void setDescription(String description) {
 		this.description = description;
+	}
+	
+	/**
+	 * Add new encoded form for value
+	 * 
+	 * @param value
+	 * @param records
+	 */
+	protected void addRecords(V value, String... records) {
+		if(encodedValues == null)
+			this.encodedValues = new RecordValueMapper<>();
+		this.encodedValues.putMapping(value, records);
 	}
 
 	/**
@@ -142,7 +157,9 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 		if(this.getValueSpace().contains(value) ||
 				this.getValueSpace().isValidCandidate(value.getStringValue()))
 			return Collections.singleton(value);
-		return Collections.emptySet();
+		if(encodedValues.getRecords().contains(value))
+			return Collections.singleton(encodedValues.getRelatedValue(value));
+		throw new NullPointerException();
 	}
 
 	////////////////////////////////////////////////////////////////

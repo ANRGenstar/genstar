@@ -17,6 +17,7 @@ import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.mapper.AggregateMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
+import core.metamodel.attribute.mapper.value.RecordValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -70,7 +71,6 @@ public class AttributeFactory {
 	 * 
 	 * @param name
 	 * @param dataType
-	 * @param values
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
@@ -161,7 +161,7 @@ public class AttributeFactory {
 		//System.err.println("["+AttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}
-	
+		
 	/**
 	 * Unsafe cast based creator <p>
 	 * WARNING: all as possible, trying not to use this nasty creator !!!
@@ -246,6 +246,52 @@ public class AttributeFactory {
 	}
 	
 	/**
+	 * Create an attribute with encoded form (OTO mapping without being a mapped attribute). Values 
+	 * can have several encoding form - one main and other string based value using {@link RecordValueMapper}
+	 * \p
+	 * WARNING: default records are not provided for integer and continuous value attribute
+	 * 
+	 * @param name: the name of the attribute
+	 * @param dataType: the type of the attribute values
+	 * @param values: the values of the attribute
+	 * @param record: the mapping between encoded form and corresponding value
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public Attribute<? extends IValue> createRecordAttribute(String name, GSEnumDataType dataType,
+			List<String> values, Map<String, String> record) 
+			throws GSIllegalRangedData {
+		switch (dataType) {
+		case Order:
+			Attribute<OrderedValue> attO = this.createOrderedAttribute(name, new GSCategoricTemplate(), values);
+			for(String rec : record.keySet()) {
+				attO.addRecords(attO.getValueSpace().getValue(record.get(rec)), rec);
+			}
+			return attO;
+		case Nominal:
+			Attribute<NominalValue> attN = this.createNominalAttribute(name, new GSCategoricTemplate());
+			for(String rec : record.keySet()) {
+				attN.addRecords(attN.getValueSpace().addValue(record.get(rec)), rec);
+			}
+			return attN;
+		case Range:
+			Attribute<RangeValue> attR = this.createRangeAttribute(name, values);
+			for(String rec : record.keySet()) {
+				attR.addRecords(attR.getValueSpace().getValue(record.get(rec)), rec);
+			}
+			return attR;
+		case Boolean:
+			Attribute<BooleanValue> attB = this.createBooleanAttribute(name);
+			for(String rec : record.keySet()) {
+				attB.addRecords(attB.getValueSpace().getValue(record.get(rec)), rec);
+			}
+			return attB;
+		default:
+			throw new IllegalArgumentException("Cannot create record attribute for "+dataType+" type of value attribute");
+		}
+	}
+	
+	/**
 	 * Main method to create record (OTO) attribute
 	 * 
 	 * @param name
@@ -255,6 +301,7 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
+	@Deprecated
 	public <V extends IValue> MappedAttribute<? extends IValue, V> createRecordAttribute(
 			String name, GSEnumDataType dataType, Attribute<V> referentAttribute, 
 			Map<String, String> record) 
@@ -300,6 +347,7 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
+	@Deprecated
 	public RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>> createRecordAttribute(
 			String name, GSEnumDataType dataType, Attribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
 		switch (dataType) {
@@ -452,6 +500,7 @@ public class AttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<IntegerValue, V> createIntegerRecordAttribute(String name,
 			Attribute<V> referentAttribute, Map<String, String> record){
 		MappedAttribute<IntegerValue, V> attribute = new MappedAttribute<>(name, 
@@ -464,14 +513,6 @@ public class AttributeFactory {
 			V val2 = referentAttribute.getValueSpace().getValue(entry.getValue());
 			attribute.addMappedValue(val1, val2);
 		}
-		
-		/*
-		record.keySet().stream().forEach(key -> attribute
-				.addMappedValue(
-						attribute.getValueSpace().addValue(key), 
-						referentAttribute.getValueSpace().getValue(record.get(key))
-				));
-		 */
 		return attribute;
 	}
 	
@@ -552,6 +593,7 @@ public class AttributeFactory {
 	 * @param referentAttribute
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<ContinuousValue, V> createContinueRecordAttribute(
 			String name, Attribute<V> referentAttribute, Map<String, String> record) {
 		MappedAttribute<ContinuousValue, V> attribute = 
@@ -640,6 +682,7 @@ public class AttributeFactory {
 	 * @param referentAttribute
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<BooleanValue, V> createBooleanRecordAttribute(String name,
 			Attribute<V> referentAttribute, Map<String, String> record) {
 		MappedAttribute<BooleanValue, V> attribute = 
@@ -795,6 +838,7 @@ public class AttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<OrderedValue, V> createOrderedRecordAttribute(String name,
 			GSCategoricTemplate gsCategoricTemplate,  Attribute<V> referentAttribute, 
 			LinkedHashMap<String, String> record){
@@ -916,6 +960,7 @@ public class AttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
+	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<NominalValue, V> createNominalRecordAttribute(String name, 
 			GSCategoricTemplate gsCategoricTemplate, Attribute<V> referentAttribute,
 			Map<String, String> map) {
@@ -1093,6 +1138,7 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData 
 	 */
+	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<RangeValue, V> createRangeRecordAttribute(String name,
 			Attribute<V> referentAttribute, Map<String, String> record) throws GSIllegalRangedData {
 		MappedAttribute<RangeValue, V> attribute = 

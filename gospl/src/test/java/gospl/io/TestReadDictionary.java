@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
-import java.util.Collection;
 
 import org.junit.After;
 import org.junit.Before;

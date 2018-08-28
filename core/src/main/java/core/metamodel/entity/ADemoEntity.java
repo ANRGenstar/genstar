@@ -10,11 +10,20 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
 
-public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> {
+/**
+ * The higher order abstraction for demographic entity. Manage basic attribute / value relationship and parent / children relationship.
+ * 
+ * TODO: study the possibility of extending {@link IPopulation} - but may be too holonic
+ * 
+ * @author kevinchapuis
+ *
+ */
+public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> { // , IPopulation<ADemoEntity, Attribute<? extends IValue>> {
 
 	/**
 	 * The unique identifier of the entity. See {@link EntityUniqueId}

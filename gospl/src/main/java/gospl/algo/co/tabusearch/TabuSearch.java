@@ -6,7 +6,7 @@ import java.util.Optional;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
-import core.util.random.GenstarRandomUtils;
+import core.util.random.GenstarRandom;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationAttributeNeighborSearch;
@@ -98,7 +98,9 @@ public class TabuSearch extends AOptimizationAlgorithm {
 				}
 			}
 			
-			if(GenstarRandomUtils.flip(Math.log1p(stuckIdx++) / Math.log(tabuList.maxSize()))) {
+			double var = Math.log1p(stuckIdx++) / Math.log(tabuList.maxSize());
+			
+			if(GenstarRandom.getInstance().nextDouble() < var) {
 				
 				currentSolution = currentSolution.getRandomNeighbor(super.getNeighborSearchAlgorithm(), 
 						super.computeBuffer(bestFitness * stuckIdx, currentSolution));
