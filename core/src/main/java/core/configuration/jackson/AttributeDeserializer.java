@@ -117,7 +117,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		Attribute<? extends IValue> attribute; 
 		try {
 			attribute = AttributeFactory.getFactory()
-					.createRecordAttribute(id, this.getType(node), this.getValues(node), 
+					.createAttribute(id, this.getType(node), this.getValues(node), 
 							this.getRecordMapping(node));
 		} catch (IllegalArgumentException e) {
 			attribute = AttributeFactory.getFactory()
@@ -138,7 +138,6 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		try {
 			attribute = this.getEmergentAttribute(node);
 		} catch (IOException e) {
-			
 			e.printStackTrace();
 		}
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
@@ -153,7 +152,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
 		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createMappedAttribute(this.getName(node), this.getType(node), 
+				.createSTSMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedMapper(node));
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
@@ -162,13 +161,12 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize record mapped attribute
 	 */
-	@SuppressWarnings("deprecation")
 	private Attribute<? extends IValue> deserializeRMA(JsonNode node) throws GSIllegalRangedData {
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
 		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createRecordAttribute(this.getName(node), this.getType(node), 
+				.createOTOMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedRecord(node));
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
@@ -241,7 +239,6 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Deserialize record attribute
 	 */
-	@SuppressWarnings("deprecation")
 	private RecordAttribute<? extends IAttribute<? extends IValue>, ? extends IAttribute<? extends IValue>> deserializeRA(JsonNode node) 
 			throws GSIllegalRangedData { 
 		return AttributeFactory.getFactory()

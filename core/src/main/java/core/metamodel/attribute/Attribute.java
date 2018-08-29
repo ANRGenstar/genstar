@@ -93,10 +93,10 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 * @param value
 	 * @param records
 	 */
-	protected void addRecords(V value, String... records) {
+	public void addRecords(String value, String... records) {
 		if(encodedValues == null)
 			this.encodedValues = new RecordValueMapper<>();
-		this.encodedValues.putMapping(value, records);
+		this.encodedValues.putMapping(valuesSpace.getValue(value), records);
 	}
 
 	/**

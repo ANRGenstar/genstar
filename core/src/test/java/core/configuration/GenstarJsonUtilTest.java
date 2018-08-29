@@ -114,7 +114,7 @@ public class GenstarJsonUtilTest {
 		
 		MappedAttribute<? extends IValue, RangeValue> nominalToRangeAttribute = 
 				AttributeFactory.getFactory()
-					.createMappedAttribute("Mapped attribute", GSEnumDataType.Order, 
+					.createSTSMappedAttribute("Mapped attribute", GSEnumDataType.Order, 
 							rangeAttribute, 
 							value2value
 						);

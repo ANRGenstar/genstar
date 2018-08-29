@@ -92,7 +92,6 @@ public class GSDataParser {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	@SuppressWarnings("unlikely-arg-type")
 	public GSRangeTemplate getRangeTemplate(List<String> ranges, String match, NumMatcher numMatcher) throws GSIllegalRangedData {
 		List<Integer> rangeInt = new ArrayList<>();
 		for(String range : ranges)

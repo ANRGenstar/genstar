@@ -10,15 +10,12 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import core.metamodel.attribute.MappedAttribute;
-import core.metamodel.attribute.mapper.value.RecordValueMapper;
 import core.metamodel.value.IValue;
 
 /**
  * TODO: javadoc
  * 
- * @author kevinchapuis
- * 
- * @deprecated record mapper is just a way to details encoded value in a way consistent with aggregation ! {@link RecordValueMapper} should be used 
+ * @author kevinchapuis 
  *
  * @param <K>
  * @param <V>

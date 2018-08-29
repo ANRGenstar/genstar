@@ -195,6 +195,37 @@ public class AttributeFactory {
 		return attribute;
 	}
 	
+	
+	/**
+	 * Create an attribute with encoded form (OTO mapping without being a mapped attribute). Values 
+	 * can have several encoding form - one main and other string based value using {@link RecordValueMapper}
+	 * \p
+	 * WARNING: default records are not provided for integer and continuous value attribute
+	 * 
+	 * @param name: the name of the attribute
+	 * @param dataType: the type of the attribute values
+	 * @param values: the values of the attribute
+	 * @param record: the mapping between encoded form and corresponding value
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public Attribute<? extends IValue> createAttribute(String name, GSEnumDataType dataType,
+			List<String> values, Map<String, String> record) 
+			throws GSIllegalRangedData {
+		switch (dataType) {
+		case Order:
+			return createOrderedAttribute(name, new GSCategoricTemplate(), values, record);
+		case Nominal:
+			return createNominalAttribute(name, new GSCategoricTemplate(), record);
+		case Range:
+			return createRangeAttribute(name, record);
+		case Boolean:
+			return createBooleanAttribute(name, record);
+		default:
+			throw new IllegalArgumentException("Cannot create record attribute for "+dataType+" type of value attribute");
+		}
+	}
+	
 	/**
 	 * Main method to create mapped (STS) attribute
 	 * 
@@ -208,7 +239,7 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData 
 	 */
-	public <V extends IValue> MappedAttribute<? extends IValue, V> createMappedAttribute(
+	public <V extends IValue> MappedAttribute<? extends IValue, V> createSTSMappedAttribute(
 			String name, GSEnumDataType dataType, Attribute<V> referent, 
 			Map<Collection<String>, Collection<String>> map) 
 					throws GSIllegalRangedData {
@@ -246,49 +277,25 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create an attribute with encoded form (OTO mapping without being a mapped attribute). Values 
-	 * can have several encoding form - one main and other string based value using {@link RecordValueMapper}
-	 * \p
-	 * WARNING: default records are not provided for integer and continuous value attribute
+	 * Main method to create mapped (STS) attribute with encoded forms for values using {@link RecordValueMapper}
 	 * 
 	 * @param name: the name of the attribute
-	 * @param dataType: the type of the attribute values
-	 * @param values: the values of the attribute
-	 * @param record: the mapping between encoded form and corresponding value
+	 * @param dataType: the type of attribute's value
+	 * @param referent: the referent attribute for mapping
+	 * @param map: the mapping between values
+	 * @param record: the endoded forms of values
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	public Attribute<? extends IValue> createRecordAttribute(String name, GSEnumDataType dataType,
-			List<String> values, Map<String, String> record) 
-			throws GSIllegalRangedData {
-		switch (dataType) {
-		case Order:
-			Attribute<OrderedValue> attO = this.createOrderedAttribute(name, new GSCategoricTemplate(), values);
-			for(String rec : record.keySet()) {
-				attO.addRecords(attO.getValueSpace().getValue(record.get(rec)), rec);
-			}
-			return attO;
-		case Nominal:
-			Attribute<NominalValue> attN = this.createNominalAttribute(name, new GSCategoricTemplate());
-			for(String rec : record.keySet()) {
-				attN.addRecords(attN.getValueSpace().addValue(record.get(rec)), rec);
-			}
-			return attN;
-		case Range:
-			Attribute<RangeValue> attR = this.createRangeAttribute(name, values);
-			for(String rec : record.keySet()) {
-				attR.addRecords(attR.getValueSpace().getValue(record.get(rec)), rec);
-			}
-			return attR;
-		case Boolean:
-			Attribute<BooleanValue> attB = this.createBooleanAttribute(name);
-			for(String rec : record.keySet()) {
-				attB.addRecords(attB.getValueSpace().getValue(record.get(rec)), rec);
-			}
-			return attB;
-		default:
-			throw new IllegalArgumentException("Cannot create record attribute for "+dataType+" type of value attribute");
+	public <V extends IValue> MappedAttribute<? extends IValue, V> createSTSMappedAttribute(
+			String name, GSEnumDataType dataType, Attribute<V> referent, 
+			Map<Collection<String>, Collection<String>> map, Map<String, String> record) 
+					throws GSIllegalRangedData {
+		MappedAttribute<? extends IValue, V> att = this.createSTSMappedAttribute(name, dataType, referent, map);
+		for(String rec : record.keySet()) {
+			att.addRecords(record.get(rec), rec);
 		}
+		return att;
 	}
 	
 	/**
@@ -301,8 +308,7 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	@Deprecated
-	public <V extends IValue> MappedAttribute<? extends IValue, V> createRecordAttribute(
+	public <V extends IValue> MappedAttribute<? extends IValue, V> createOTOMappedAttribute(
 			String name, GSEnumDataType dataType, Attribute<V> referentAttribute, 
 			Map<String, String> record) 
 					throws GSIllegalRangedData{
@@ -315,7 +321,7 @@ public class AttributeFactory {
 			attribute = createContinueRecordAttribute(name, referentAttribute, record);
 			break;
 		case Order:
-			attribute = createRecordAttribute(name, dataType, referentAttribute, 
+			attribute = createOrderedRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, 
 					record.entrySet().stream().collect(Collectors.toMap(
 							Entry::getKey, 
 							Entry::getValue,
@@ -347,7 +353,6 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	@Deprecated
 	public RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>> createRecordAttribute(
 			String name, GSEnumDataType dataType, Attribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
 		switch (dataType) {
@@ -500,7 +505,6 @@ public class AttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<IntegerValue, V> createIntegerRecordAttribute(String name,
 			Attribute<V> referentAttribute, Map<String, String> record){
 		MappedAttribute<IntegerValue, V> attribute = new MappedAttribute<>(name, 
@@ -593,7 +597,6 @@ public class AttributeFactory {
 	 * @param referentAttribute
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<ContinuousValue, V> createContinueRecordAttribute(
 			String name, Attribute<V> referentAttribute, Map<String, String> record) {
 		MappedAttribute<ContinuousValue, V> attribute = 
@@ -626,6 +629,23 @@ public class AttributeFactory {
 		ba.setValueSpace(new BinarySpace(ba));
 		return ba;
 	}
+	
+	/**
+	 * Create boolean attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * @param name: the name of the attribute
+	 * @param record: the encoded form of values
+	 * @return
+	 */
+	public Attribute<BooleanValue> createBooleanAttribute(String name,
+			Map<String, String> record){
+		Attribute<BooleanValue> attB = this.createBooleanAttribute(name);
+		for(String rec : record.keySet()) {
+			attB.addRecords(record.get(rec), rec);
+		}
+		return attB;
+	}
+	
+	// AGG ----------------
 	
 	/**
 	 * Create boolean mapped value attribute
@@ -674,6 +694,8 @@ public class AttributeFactory {
 							.collect(Collectors.toSet()))));
 		return attribute;
 	}
+	
+	// REC ----------------
 
 	/**
 	 * Create boolean record value attribute with given record
@@ -682,7 +704,6 @@ public class AttributeFactory {
 	 * @param referentAttribute
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<BooleanValue, V> createBooleanRecordAttribute(String name,
 			Attribute<V> referentAttribute, Map<String, String> record) {
 		MappedAttribute<BooleanValue, V> attribute = 
@@ -736,6 +757,57 @@ public class AttributeFactory {
 	}
 	
 	/**
+	 * Create ordered attribute with several encoded forms (records) using {@link RecordValueMapper}
+	 * 
+	 * @param name: the name of the attribute
+	 * @param gsCategoricTemplate: the template that enable new value to match a given pattern
+	 * @param values: the values
+	 * @param record: the encoded forms of value (records)
+	 * @return
+	 */
+	public Attribute<OrderedValue> createOrderedAttribute(String name,
+			GSCategoricTemplate gsCategoricTemplate, List<String> values, Map<String, String> record){
+		Attribute<OrderedValue> attO = this.createOrderedAttribute(name, gsCategoricTemplate, values);
+		for(String rec : record.keySet()) {
+			attO.addRecords(record.get(rec), rec);
+		}
+		return attO;
+	}
+	
+	// AGG -----------------------
+	
+	/**
+	 * Create ordered mapped value attribute
+	 * 
+	 * @param name
+	 * @param gsCategoricTemplate
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> MappedAttribute<OrderedValue, V> createOrderedAttribute(String name,
+			GSCategoricTemplate gsCategoricTemplate, Attribute<V> referentAttribute,
+			LinkedHashMap<List<String>, Collection<String>> map) {
+		UndirectedMapper<OrderedValue, V> mapper = new UndirectedMapper<>();
+		MappedAttribute<OrderedValue, V> attribute = new MappedAttribute<>(name, referentAttribute, mapper);
+		attribute.setValueSpace(new OrderedSpace(attribute, gsCategoricTemplate));
+		mapper.setRelatedAttribute(attribute);
+		
+		LinkedHashMap<Collection<OrderedValue>, Collection<V>> newMap = new LinkedHashMap<>();
+		for(Entry<List<String>, Collection<String>> entry : map.entrySet()) {
+			List<OrderedValue> keys = entry.getKey().stream()
+					.map(val -> attribute.getValueSpace().addValue(val))
+					.collect(Collectors.toList());
+			List<V> values = entry.getValue().stream()
+					.map(val -> referentAttribute.getValueSpace().getValue(val))
+					.collect(Collectors.toList());
+			newMap.put(keys, values);
+		}
+		mapper.setMapper(newMap);
+		return attribute;
+	}
+	
+	/**
 	 * Create boolean aggregated value attribute
 	 * 
 	 * @param name
@@ -778,48 +850,6 @@ public class AttributeFactory {
 	 * Create ordered mapped value attribute
 	 * 
 	 * @param name
-	 * @param gsCategoricTemplate
-	 * @param referentAttribute
-	 * @param mapper
-	 * @return
-	 */
-	public <V extends IValue> MappedAttribute<OrderedValue, V> createOrderedAttribute(String name,
-			GSCategoricTemplate gsCategoricTemplate, Attribute<V> referentAttribute,
-			LinkedHashMap<List<String>, Collection<String>> map) {
-		UndirectedMapper<OrderedValue, V> mapper = new UndirectedMapper<>();
-		MappedAttribute<OrderedValue, V> attribute = new MappedAttribute<>(name, referentAttribute, mapper);
-		attribute.setValueSpace(new OrderedSpace(attribute, gsCategoricTemplate));
-		mapper.setRelatedAttribute(attribute);
-		
-		LinkedHashMap<Collection<OrderedValue>, Collection<V>> newMap = new LinkedHashMap<>();
-		for(Entry<List<String>, Collection<String>> entry : map.entrySet()) {
-			List<OrderedValue> keys = entry.getKey().stream()
-					.map(val -> attribute.getValueSpace().addValue(val))
-					.collect(Collectors.toList());
-			List<V> values = entry.getValue().stream()
-					.map(val -> referentAttribute.getValueSpace().getValue(val))
-					.collect(Collectors.toList());
-			newMap.put(keys, values);
-		}
-		mapper.setMapper(newMap);
-		
-		/*
-		mapper.setMapper( 
-				map.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toList()), 
-						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()),
-							(e1, e2) -> e1,
-							LinkedHashMap::new)));
-							*/
-		return attribute;
-	}
-	
-	/**
-	 * Create ordered mapped value attribute
-	 * 
-	 * @param name
 	 * @param referentAttribute
 	 * @param mapper
 	 * @return
@@ -828,6 +858,8 @@ public class AttributeFactory {
 			Attribute<V> referentAttribute, LinkedHashMap<List<String>, Collection<String>> mapper) {
 		return this.createOrderedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
 	}
+	
+	// REC ---------------
 	
 	/**
 	 * Create ordered record value attribute with given record
@@ -838,7 +870,6 @@ public class AttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<OrderedValue, V> createOrderedRecordAttribute(String name,
 			GSCategoricTemplate gsCategoricTemplate,  Attribute<V> referentAttribute, 
 			LinkedHashMap<String, String> record){
@@ -889,6 +920,51 @@ public class AttributeFactory {
 	}
 	
 	/**
+	 * Create a nominal attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * 
+	 * @param name: the name of the attribute
+	 * @param gsCategoricTemplate: the template to match string value to a given pattern
+	 * @param record: the encoded forms of the value (records)
+	 * @return
+	 */
+	public Attribute<NominalValue> createNominalAttribute(String name, 
+			GSCategoricTemplate gsCategoricTemplate, Map<String, String> record){
+		Attribute<NominalValue> attN = this.createNominalAttribute(name, new GSCategoricTemplate());
+		for(String rec : record.keySet()) {
+			attN.addRecords(record.get(rec), rec);
+		}
+		return attN;
+	}
+	
+	// AGG -----------------------
+	
+	/**
+	 * Create nominal mapped value attribute
+	 * 
+	 * @param name
+	 * @param gsCategoricTemplate
+	 * @param vs
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> MappedAttribute<NominalValue, V> createNominalAttribute(String name,
+			GSCategoricTemplate gsCategoricTemplate, Attribute<V> referentAttribute,
+			Map<Collection<String>, Collection<String>> map) {
+		UndirectedMapper<NominalValue, V> mapper = new UndirectedMapper<>();
+		MappedAttribute<NominalValue, V> attribute = 
+				new MappedAttribute<>(name, referentAttribute, mapper);
+		attribute.setValueSpace(new NominalSpace(attribute, gsCategoricTemplate));
+		attribute.getAttributeMapper().setRelatedAttribute(attribute);
+		mapper.setMapper( 
+				map.keySet().stream().collect(Collectors.toMap(
+						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
+							.collect(Collectors.toList()), 
+						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
+							.collect(Collectors.toList()))));
+		return attribute;
+	}
+	
+	/**
 	 * Create nominal aggregated value attribute
 	 * 
 	 * @param name
@@ -926,31 +1002,7 @@ public class AttributeFactory {
 		return this.createNominalAggregatedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
 	}
 	
-	/**
-	 * Create nominal mapped value attribute
-	 * 
-	 * @param name
-	 * @param gsCategoricTemplate
-	 * @param vs
-	 * @param mapper
-	 * @return
-	 */
-	public <V extends IValue> MappedAttribute<NominalValue, V> createNominalAttribute(String name,
-			GSCategoricTemplate gsCategoricTemplate, Attribute<V> referentAttribute,
-			Map<Collection<String>, Collection<String>> map) {
-		UndirectedMapper<NominalValue, V> mapper = new UndirectedMapper<>();
-		MappedAttribute<NominalValue, V> attribute = 
-				new MappedAttribute<>(name, referentAttribute, mapper);
-		attribute.setValueSpace(new NominalSpace(attribute, gsCategoricTemplate));
-		attribute.getAttributeMapper().setRelatedAttribute(attribute);
-		mapper.setMapper( 
-				map.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toList()), 
-						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
-		return attribute;
-	}
+	// REC ----------------------
 	
 	/**
 	 * Create a nominal record value attribute with given mapping
@@ -960,7 +1012,6 @@ public class AttributeFactory {
 	 * @param mapper
 	 * @return
 	 */
-	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<NominalValue, V> createNominalRecordAttribute(String name, 
 			GSCategoricTemplate gsCategoricTemplate, Attribute<V> referentAttribute,
 			Map<String, String> map) {
@@ -1061,7 +1112,52 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create range aggregated value attribute
+	 * Create range attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * 
+	 * @param name: the name of the attribute
+	 * @param record: the encoded forms of values (records)
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public Attribute<RangeValue> createRangeAttribute(String name,
+			Map<String, String> record) throws GSIllegalRangedData {
+		Attribute<RangeValue> attR = this.createRangeAttribute(name, new ArrayList<>(record.values()));
+		for(String rec : record.keySet()) {
+			attR.addRecords(record.get(rec), rec);
+		}
+		return attR;
+	}
+	
+	// AGG -----------------------
+	
+	/**
+	 * Create mapped (STS) range value attribute 
+	 * 
+	 * @param name
+	 * @param rangeTemplate
+	 * @param vs
+	 * @param mapper
+	 * @return
+	 */
+	public <V extends IValue> MappedAttribute<RangeValue, V> createRangeAttribute(String name,
+			GSRangeTemplate rangeTemplate, Attribute<V> referentAttribute,
+			Map<Collection<String>, Collection<String>> map) {
+		UndirectedMapper<RangeValue, V> mapper = new UndirectedMapper<>();
+		MappedAttribute<RangeValue, V> attribute = 
+				new MappedAttribute<>(name, referentAttribute, mapper);
+		attribute.setValueSpace(new RangeSpace(attribute, rangeTemplate));
+		attribute.getAttributeMapper().setRelatedAttribute(attribute); 
+		mapper.setMapper(
+				map.keySet().stream().collect(Collectors.toMap(
+						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
+							.collect(Collectors.toList()), 
+						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
+							.collect(Collectors.toList()))));
+		return attribute;
+	}
+	
+	/**
+	 * Create range aggregated (OTS) value attribute
 	 * 
 	 * @param name
 	 * @param gsCategoricTemplate
@@ -1087,7 +1183,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create range aggregated value attribute
+	 * Create range aggregated (OTS) value attribute
 	 * 
 	 * @param name
 	 * @param vs
@@ -1103,31 +1199,7 @@ public class AttributeFactory {
 				referentAttribute, map);
 	}
 	
-	/**
-	 * Create mapped range value attribute 
-	 * 
-	 * @param name
-	 * @param rangeTemplate
-	 * @param vs
-	 * @param mapper
-	 * @return
-	 */
-	public <V extends IValue> MappedAttribute<RangeValue, V> createRangeAttribute(String name,
-			GSRangeTemplate rangeTemplate, Attribute<V> referentAttribute,
-			Map<Collection<String>, Collection<String>> map) {
-		UndirectedMapper<RangeValue, V> mapper = new UndirectedMapper<>();
-		MappedAttribute<RangeValue, V> attribute = 
-				new MappedAttribute<>(name, referentAttribute, mapper);
-		attribute.setValueSpace(new RangeSpace(attribute, rangeTemplate));
-		attribute.getAttributeMapper().setRelatedAttribute(attribute); 
-		mapper.setMapper(
-				map.keySet().stream().collect(Collectors.toMap(
-						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toList()), 
-						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
-		return attribute;
-	}
+	// REC ---------------------
 
 	/**
 	 * Create range record value attribute
@@ -1138,7 +1210,6 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData 
 	 */
-	@SuppressWarnings("deprecation")
 	public <V extends IValue> MappedAttribute<RangeValue, V> createRangeRecordAttribute(String name,
 			Attribute<V> referentAttribute, Map<String, String> record) throws GSIllegalRangedData {
 		MappedAttribute<RangeValue, V> attribute = 
