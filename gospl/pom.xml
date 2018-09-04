@@ -31,7 +31,7 @@
 		<dependency>
 			<groupId>org.genstar</groupId>
 			<artifactId>genstar-core</artifactId>
-			<version>1.0.3</version>
+			<version>1.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>

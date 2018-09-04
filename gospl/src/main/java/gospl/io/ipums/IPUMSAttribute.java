@@ -20,10 +20,7 @@ import com.ibm.icu.util.StringTokenizer;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
-import core.metamodel.value.categoric.NominalValue;
-import core.metamodel.value.categoric.OrderedValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
-import core.metamodel.value.numeric.RangeValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -157,8 +154,7 @@ public class IPUMSAttribute {
 		GSEnumDataType refType = rt.size() == 1 ? rt.iterator().next() : GSEnumDataType.Nominal;
 		
 		if(rawContentAgg == null) {
-			return factory.createRecordAttribute(codeName, refType, 
-				factory.createAttribute(attName, refType, new ArrayList<>(theRecord.values())), theRecord);
+			return factory.createAttribute(codeName, refType, new ArrayList<>(theRecord.values()), theRecord);
 		} else {
 			
 			if(rawContent.size() < rawContentAgg.size())
@@ -179,24 +175,18 @@ public class IPUMSAttribute {
 								@Override public List<String> get() { return new ArrayList<>(); }
 							}
 					);
-					Attribute<OrderedValue> referent = factory.createOrderedAttribute(attName, new GSCategoricTemplate(), new ArrayList<>(theLinkedRecord.values()));
 					return factory.createOrderedAggregatedAttribute(attNameAgg, 
-								factory.createOrderedRecordAttribute(codeName, referent, theLinkedRecord), 
+							factory.createOrderedAttribute(attName, 
+									new GSCategoricTemplate(), new ArrayList<>(theLinkedRecord.values()),
+									theLinkedRecord), 
 							theLinkedMap);
 				case Nominal:
-					Attribute<NominalValue> nominalReferent = factory.createNominalAttribute(attName, new GSCategoricTemplate());
-					for(String val : theRecord.values()) {nominalReferent.getValueSpace().addValue(val);}
-					
 					return factory.createNominalAggregatedAttribute(attNameAgg, 
-							factory.createNominalRecordAttribute(codeName, 
-									nominalReferent, theRecord), 
+							factory.createNominalAttribute(attName, new GSCategoricTemplate(), theRecord), 
 							theMap);
 				case Range:
-					Attribute<RangeValue> rangeReferent = factory.createRangeAttribute(attName, new ArrayList<>(theRecord.values()));
-					for(String val : theRecord.values()) {rangeReferent.getValueSpace().addValue(val);}
 					return factory.createRangeAggregatedAttribute(attNameAgg,
-							factory.createRangeRecordAttribute(codeName, 
-									rangeReferent, theRecord),
+							factory.createRangeAttribute(attName, theRecord), 
 							theMap);
 				default:
 					throw new RuntimeException("Cannot construct an aggregated IPUMS attribute of type: "+refType);

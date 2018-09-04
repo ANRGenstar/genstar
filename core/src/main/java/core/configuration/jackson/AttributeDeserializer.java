@@ -34,16 +34,15 @@ import core.metamodel.attribute.emergent.IEntityEmergentFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
+import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.attribute.mapper.value.RecordValueMapper;
-import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.entity.comparator.function.IComparatorFunction;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
-import core.metamodel.value.binary.BooleanValue;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.OrderedValue;
 import core.metamodel.value.numeric.RangeValue;
@@ -151,9 +150,17 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createSTSMappedAttribute(this.getName(node), this.getType(node), 
-						this.getReferentAttribute(node), this.getOrderedMapper(node));
+		Attribute<? extends IValue> attribute;
+		try {
+			attribute = AttributeFactory.getFactory()
+					.createSTSMappedAttribute(this.getName(node), this.getType(node), 
+							this.getReferentAttribute(node), this.getOrderedMapper(node),
+							this.getRecordMapping(node));
+		} catch (IllegalArgumentException e) {
+			attribute = AttributeFactory.getFactory()
+					.createSTSMappedAttribute(this.getName(node), this.getType(node), 
+							this.getReferentAttribute(node), this.getOrderedMapper(node));
+		}
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
 	}
@@ -185,32 +192,53 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		Map<String, Collection<String>> map = this.getOrderedAggregate(node);
 		switch (this.getType(node)) {
 		case Range:
-			attribute = AttributeFactory.getFactory()
-					.createRangeAggregatedAttribute(id, 
-							this.deserializeAttribute(RangeValue.class, node.findValue(MappedAttribute.REF)),
-								map);
-			break;
-		case Boolean:
-			attribute = AttributeFactory.getFactory()
-					.createBooleanAggregatedAttribute(id, 
-							this.deserializeAttribute(BooleanValue.class, node.findValue(MappedAttribute.REF)),
-								map);
+			try {
+				attribute = AttributeFactory.getFactory()
+						.createRangeAggregatedAttribute(id, 
+								this.deserializeAttribute(RangeValue.class, node.findValue(MappedAttribute.REF)),
+									map, this.getRecordMapping(node));
+			} catch (IllegalArgumentException e) {
+				attribute = AttributeFactory.getFactory()
+						.createRangeAggregatedAttribute(id, 
+								this.deserializeAttribute(RangeValue.class, node.findValue(MappedAttribute.REF)),
+									map);
+			} 
+			
 			break;
 		case Nominal:
-			attribute = AttributeFactory.getFactory()
-					.createNominalAggregatedAttribute(id, 
-							this.deserializeAttribute(NominalValue.class, node.findValue(MappedAttribute.REF)),
-								map);
+			try {
+				attribute = AttributeFactory.getFactory()
+						.createNominalAggregatedAttribute(id, 
+								this.deserializeAttribute(NominalValue.class, node.findValue(MappedAttribute.REF)), 
+								map, this.getRecordMapping(node));
+			} catch (IllegalArgumentException e) {
+				attribute = AttributeFactory.getFactory()
+						.createNominalAggregatedAttribute(id, 
+								this.deserializeAttribute(NominalValue.class, node.findValue(MappedAttribute.REF)),
+									map);
+			}
 			break;
 		case Order:
-			attribute = AttributeFactory.getFactory()
-					.createOrderedAggregatedAttribute(id, 
-							this.deserializeAttribute(OrderedValue.class, node.findValue(MappedAttribute.REF)),
-								map.entrySet().stream().collect(Collectors.toMap(
-										Entry::getKey, 
-										entry -> new ArrayList<>(entry.getValue()),
-										(e1, e2) -> e1,
-										LinkedHashMap::new)));
+			try {
+				attribute = AttributeFactory.getFactory()
+						.createOrderedAggregatedAttribute(id, 
+								this.deserializeAttribute(OrderedValue.class, node.findValue(MappedAttribute.REF)),
+									map.entrySet().stream().collect(Collectors.toMap(
+											Entry::getKey, 
+											entry -> new ArrayList<>(entry.getValue()),
+											(e1, e2) -> e1,
+											LinkedHashMap::new)),
+									this.getRecordMapping(node));
+			} catch (IllegalArgumentException e) {
+				attribute = AttributeFactory.getFactory()
+						.createOrderedAggregatedAttribute(id, 
+								this.deserializeAttribute(OrderedValue.class, node.findValue(MappedAttribute.REF)),
+									map.entrySet().stream().collect(Collectors.toMap(
+											Entry::getKey, 
+											entry -> new ArrayList<>(entry.getValue()),
+											(e1, e2) -> e1,
+											LinkedHashMap::new)));
+			}
 			break;
 		default:
 			throw new IllegalArgumentException("Trying to parse unknown value type: "+this.getType(node));
@@ -219,6 +247,9 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		return attribute;
 	}
 	
+	/*
+	 * 
+	 */
 	@SuppressWarnings("unchecked")
 	private <V extends IValue> Attribute<V> deserializeAttribute(Class<V> clazz, JsonNode node) 
 			throws GSIllegalRangedData {
