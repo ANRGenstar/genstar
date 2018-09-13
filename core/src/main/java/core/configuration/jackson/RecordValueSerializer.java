@@ -13,11 +13,18 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import core.metamodel.attribute.mapper.value.RecordValueMapper;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.NominalValue;
 
-public class RecordValueSerializer<K extends IValue> extends StdSerializer<RecordValueMapper<K>> {
+/**
+ * Transpose {@link EncodedValueMapper} into Json 
+ * 
+ * @author kevinchapuis
+ *
+ * @param <K>
+ */
+public class RecordValueSerializer<K extends IValue> extends StdSerializer<EncodedValueMapper<K>> {
 
 	/**
 	 * 
@@ -30,23 +37,23 @@ public class RecordValueSerializer<K extends IValue> extends StdSerializer<Recor
 		this(null);
 	}
 	
-	protected RecordValueSerializer(Class<RecordValueMapper<K>> t) {
+	protected RecordValueSerializer(Class<EncodedValueMapper<K>> t) {
 		super(t);
 	}
 
 	@Override
-	public void serialize(RecordValueMapper<K> value, JsonGenerator gen, SerializerProvider provider)
+	public void serialize(EncodedValueMapper<K> value, JsonGenerator gen, SerializerProvider provider)
 			throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
-	public void serializeWithType(RecordValueMapper<K> mapper,
+	public void serializeWithType(EncodedValueMapper<K> mapper,
 			JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
 		gen.writeFieldName(typeSer.getPropertyName());
 		gen.writeStartObject();
-		gen.writeArrayFieldStart(RecordValueMapper.MAPPING);
+		gen.writeArrayFieldStart(EncodedValueMapper.MAPPING);
 		for(String entry : this.getRecordList(mapper)) {
 			gen.writeString(entry);
 		}
@@ -54,7 +61,10 @@ public class RecordValueSerializer<K extends IValue> extends StdSerializer<Recor
 		gen.writeEndObject();
 	}
 	
-	private List<String> getRecordList(RecordValueMapper<K> mapper){
+	/*
+	 * return a list view of a record value mapper (a list of pair)
+	 */
+	private List<String> getRecordList(EncodedValueMapper<K> mapper){
 		Map<K, Collection<NominalValue>> res = new HashMap<>();
 		for(NominalValue rec : mapper.getRecords()) {
 			K val = mapper.getRelatedValue(rec);

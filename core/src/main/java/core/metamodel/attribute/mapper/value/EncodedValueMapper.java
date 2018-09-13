@@ -14,6 +14,7 @@ import core.configuration.jackson.RecordValueSerializer;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
 
@@ -26,14 +27,15 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
  *
  * @param <K>
  */
-@JsonTypeName(RecordValueMapper.SELF)
+@JsonTypeName(EncodedValueMapper.SELF)
 @JsonSerialize(using = RecordValueSerializer.class)
-public class RecordValueMapper<K extends IValue> {
+public class EncodedValueMapper<K extends IValue> {
 	
 	public static final String SELF = "ENCODED VALUES";
 	public static final String ATTRIBUTE_NAME = "ENCODE ATT";
 	public static final String MAPPING = "MAPPING";
 	
+	private IValueSpace<K> values;
 	private Map<NominalValue,K> mapper;
 	
 	private Attribute<NominalValue> self;
@@ -41,7 +43,8 @@ public class RecordValueMapper<K extends IValue> {
 	/**
 	 * Default constructor
 	 */
-	public RecordValueMapper() {
+	public EncodedValueMapper(IValueSpace<K> values) {
+		this.values = values;
 		this.mapper = new HashMap<>();
 		this.self = AttributeFactory.getFactory().createNominalAttribute(ATTRIBUTE_NAME, new GSCategoricTemplate());
 	}
@@ -50,15 +53,16 @@ public class RecordValueMapper<K extends IValue> {
 	 * Constructor that add mapped record
 	 * @param mapper
 	 */
-	public RecordValueMapper(Map<String,K> mapper){
-		this();
+	public EncodedValueMapper(IValueSpace<K> values, Map<String,K> mapper){
+		this(values);
 		for(Entry<String, K> entry : mapper.entrySet()) {
 			this.putMapping(entry.getValue(), entry.getKey());
 		}
 	}
 	
 	/**
-	 * Add a new record to encode K value given in parameter
+	 * Add new record(s) to encode K value given in parameter
+	 * 
 	 * @param value
 	 * @param records
 	 */
@@ -66,6 +70,26 @@ public class RecordValueMapper<K extends IValue> {
 		for(String record : records) {
 			this.mapper.put(this.self.getValueSpace().addValue(record), value);
 		}
+	}
+	
+	/**
+	 * Add new record(s) to encoded string value given in parameter. 
+	 * 
+	 * @param value
+	 * @param records
+	 * @return true if the records have been record, false otherwise
+	 */
+	public boolean putMapping(String value, String... records) {
+		K val = null;
+		try {
+			val = values.getValue(value);
+		} catch (NullPointerException e) {
+			return false;
+		}
+		for(String record : records) {
+			this.mapper.put(this.self.getValueSpace().addValue(record), val);
+		}
+		return true;
 	}
 	
 	/**
@@ -91,8 +115,19 @@ public class RecordValueMapper<K extends IValue> {
 	 * @param value
 	 * @return
 	 */
-	public Collection<? extends IValue> getRecords(K value){
+	public Collection<NominalValue> getRecords(K value){
 		return mapper.keySet().stream().filter(k -> mapper.get(k).equals(value))
+				.collect(Collectors.toSet());
+	}
+	
+	/**
+	 * Retrieve all possible String encoded form of the String value passed in argument
+	 * @param value
+	 * @return
+	 */
+	public Collection<NominalValue> getRecords(String value){
+		K val = values.getValue(value);
+		return mapper.keySet().stream().filter(k -> mapper.get(k).equals(val))
 				.collect(Collectors.toSet());
 	}
 	

@@ -10,9 +10,14 @@ public class GSDisplayUtil {
 	
 	public static final String ELEMENT_SEPARATOR = ", ";
 	
-	static String prettyPrint(final Collection<?> theCollection, String elementSeparator, int numberOfEntry) {
+	public static String prettyPrint(final Collection<?> theCollection, String elementSeparator) {
+		return prettyPrint(theCollection, elementSeparator, 0);
+	}
+	
+	public static String prettyPrint(final Collection<?> theCollection, String elementSeparator, int numberOfEntry) {
 		
 		Class<?> clazz = theCollection.getClass();
+		numberOfEntry = numberOfEntry <= 0 ? theCollection.size() : numberOfEntry;  
 		
 		switch (clazz.getCanonicalName()) {
 		case "List":

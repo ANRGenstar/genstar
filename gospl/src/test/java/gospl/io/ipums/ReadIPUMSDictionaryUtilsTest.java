@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.After;
 import org.junit.Before;
@@ -68,7 +69,8 @@ public class ReadIPUMSDictionaryUtilsTest {
 		}
 		Map<String, String> an = ipumsReader.getAttributeNames();
 		assertEquals(an.keySet(), ATTRIBUTE_NAMES);
-		assertNotNull(dd.getAttribute(GenstarRandomUtils.oneOf(ATTRIBUTE_NAMES)));
+		System.out.println(dd.getAttributes().stream().map(a -> a.getAttributeName()).collect(Collectors.joining("; ")));
+		assertNotNull(dd.getAttribute(an.get(GenstarRandomUtils.oneOf(ATTRIBUTE_NAMES))));
 	}
 
 }

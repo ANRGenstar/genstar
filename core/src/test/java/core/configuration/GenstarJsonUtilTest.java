@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeValue;
 import core.util.GSUtilAttribute;
 import core.util.data.GSEnumDataType;
@@ -120,15 +120,15 @@ public class GenstarJsonUtilTest {
 						);
 		dd.addAttributes(nominalToRangeAttribute);
 		
-		// RECORD (CODE)
+		// ENCODE
 		Map<String,String> value2value2 = new HashMap<>();
 		value2value2.put("1", "true");
-		value2value2.put("2", "false");
-		MappedAttribute<IntegerValue, ? extends IValue> intToBoolAttribute =
+		value2value2.put("0", "false");
+		Attribute<? extends IValue> boolEncodedAttribute =
 				AttributeFactory.getFactory()
-					.createIntegerRecordAttribute("Record attribute", dd.getAttribute("Boolean attribute"),
-							value2value2);
-		dd.addAttributes(intToBoolAttribute);
+					.createAttribute("Encoded Boolean", GSEnumDataType.Boolean, 
+							new ArrayList<>(value2value2.values()), value2value2);
+		dd.addAttributes(boolEncodedAttribute);
 		
 		// RECORD
 		dd.addRecords(AttributeFactory.getFactory()

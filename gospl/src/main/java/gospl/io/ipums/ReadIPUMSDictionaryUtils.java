@@ -21,6 +21,7 @@ import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
+import core.util.GSDisplayUtil;
 import core.util.excpetion.GSIllegalRangedData;
 
 /**
@@ -170,12 +171,13 @@ public class ReadIPUMSDictionaryUtils {
 				.filter(k -> !aggAtt.containsKey(k) && !aggAtt.containsValue(k))
 				.map(k -> new IPUMSAttribute(k, attributeNames.get(k), attMap.get(k)))
 				.collect(Collectors.toList());
-
+		
 		List<Attribute<? extends IValue>> attList = new ArrayList<>();
 		for(IPUMSAttribute ipumsAtt : ipumsAttributes) {
-			Attribute<? extends IValue> att = ipumsAtt.getAttribute(); 
-			attList.addAll(Arrays.asList(att, att.getReferentAttribute()));
+			attList.add(ipumsAtt.getAttribute()); 
 		}
+		
+		System.out.println(GSDisplayUtil.prettyPrint(attList, "; "));
 		
 		/*
 		 * Do the same thing as previously but with aggregated attribute. There must be
@@ -196,7 +198,7 @@ public class ReadIPUMSDictionaryUtils {
 			
 			Attribute<? extends IValue> aggRefAtt = aggregateAttribute.getReferentAttribute();
 			
-			attList.addAll(Arrays.asList(aggregateAttribute, aggRefAtt, aggRefAtt.getReferentAttribute()));
+			attList.addAll(Arrays.asList(aggregateAttribute, aggRefAtt));
 			
 		}
 		

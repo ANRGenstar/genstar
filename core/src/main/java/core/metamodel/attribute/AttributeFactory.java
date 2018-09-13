@@ -17,7 +17,7 @@ import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.mapper.AggregateMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
-import core.metamodel.attribute.mapper.value.RecordValueMapper;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -198,7 +198,7 @@ public class AttributeFactory {
 	
 	/**
 	 * Create an attribute with encoded form (OTO mapping without being a mapped attribute). Values 
-	 * can have several encoding form - one main and other string based value using {@link RecordValueMapper}
+	 * can have several encoding form - one main and other string based value using {@link EncodedValueMapper}
 	 * \p
 	 * WARNING: default records are not provided for integer and continuous value attribute
 	 * 
@@ -277,7 +277,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Main method to create mapped (STS) attribute with encoded forms for values using {@link RecordValueMapper}
+	 * Main method to create mapped (STS) attribute with encoded forms for values using {@link EncodedValueMapper}
 	 * 
 	 * @param name: the name of the attribute
 	 * @param dataType: the type of attribute's value
@@ -631,7 +631,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create boolean attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create boolean attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * @param name: the name of the attribute
 	 * @param record: the encoded form of values
 	 * @return
@@ -672,7 +672,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create boolean mapped attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create boolean mapped attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 *  
 	 * @param name: the name of the attribute
 	 * @param referentAttribute: the referent attribute with desaggregated values
@@ -752,7 +752,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create ordered attribute with several encoded forms (records) using {@link RecordValueMapper}
+	 * Create ordered attribute with several encoded forms (records) using {@link EncodedValueMapper}
 	 * 
 	 * @param name: the name of the attribute
 	 * @param gsCategoricTemplate: the template that enable new value to match a given pattern
@@ -855,7 +855,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create boolean aggregated attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create boolean aggregated attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
 	 * @param name: the name of the attribute
 	 * @param referentAttribute: the referent attribute with disaggregated values
@@ -935,7 +935,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create a nominal attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create a nominal attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
 	 * @param name: the name of the attribute
 	 * @param gsCategoricTemplate: the template to match string value to a given pattern
@@ -1019,7 +1019,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create nominal aggregated attribute with several encoded forms for value using {@link RecordValueMapper}
+	 * Create nominal aggregated attribute with several encoded forms for value using {@link EncodedValueMapper}
 	 * 
 	 * @param name
 	 * @param referentAttribute
@@ -1148,7 +1148,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create range attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create range attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
 	 * @param name: the name of the attribute
 	 * @param record: the encoded forms of values (records)
@@ -1219,7 +1219,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create range aggregated (OTS) value attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create range aggregated (OTS) value attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
 	 * @param name
 	 * @param rangeTemplate
@@ -1257,7 +1257,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create range aggregated (OTS) attribute with several encoded forms for values using {@link RecordValueMapper}
+	 * Create range aggregated (OTS) attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * @param name
 	 * @param referentAttribute
 	 * @param map

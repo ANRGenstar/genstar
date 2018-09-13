@@ -29,6 +29,8 @@ import core.util.excpetion.GSIllegalRangedData;
  * A class that represent an attribute in IPUMS formated dictionary. It includes data description of attribute, 
  * i.e. name and the reference, and of value, encoded and real value
  * 
+ * 
+ * 
  * @author kevinchapuis
  *
  */
@@ -146,7 +148,7 @@ public class IPUMSAttribute {
 	 */
 	private Attribute<? extends IValue> createAttribute() throws GSIllegalRangedData{
 		
-		Map<String, String> theRecord = readValues(rawContent, new HashMap<String, String>());
+		Map<String, String> theRecord = readValues(rawContent, new HashMap<>());
 		AttributeFactory factory = AttributeFactory.getFactory();
 		
 		GSDataParser parser = new GSDataParser();
@@ -154,8 +156,12 @@ public class IPUMSAttribute {
 		GSEnumDataType refType = rt.size() == 1 ? rt.iterator().next() : GSEnumDataType.Nominal;
 		
 		if(rawContentAgg == null) {
-			return factory.createAttribute(codeName, refType, new ArrayList<>(theRecord.values()), theRecord);
+			return factory.createAttribute(attName, refType, new ArrayList<>(theRecord.values()), theRecord);
 		} else {
+			
+			Map<String, String> theRecordAgg = readValues(rawContentAgg, new HashMap<>());
+			rt = theRecordAgg.values().stream().map(s -> parser.getValueType(s)).collect(Collectors.toSet());
+			GSEnumDataType aggType = rt.size() == 1 ? rt.iterator().next() : GSEnumDataType.Nominal;
 			
 			if(rawContent.size() < rawContentAgg.size())
 				throw new IllegalArgumentException("Aggregated attribute "+attName+" has more values ("+rawContentAgg.size()
@@ -167,7 +173,7 @@ public class IPUMSAttribute {
 					@Override public Collection<String> get() { return new ArrayList<>(); }
 				});
 			
-			switch (refType) {
+			switch (aggType) {
 				case Order: 
 					LinkedHashMap<String, String> theLinkedRecord = readValues(rawContent, new LinkedHashMap<>());
 					LinkedHashMap<String, List<String>> theLinkedMap = readMapper(rawContent, rawContentAgg, new LinkedHashMap<>(), 
@@ -179,15 +185,15 @@ public class IPUMSAttribute {
 							factory.createOrderedAttribute(attName, 
 									new GSCategoricTemplate(), new ArrayList<>(theLinkedRecord.values()),
 									theLinkedRecord), 
-							theLinkedMap);
+							theLinkedMap, theRecordAgg);
 				case Nominal:
 					return factory.createNominalAggregatedAttribute(attNameAgg, 
 							factory.createNominalAttribute(attName, new GSCategoricTemplate(), theRecord), 
-							theMap);
+							theMap, theRecordAgg);
 				case Range:
 					return factory.createRangeAggregatedAttribute(attNameAgg,
 							factory.createRangeAttribute(attName, theRecord), 
-							theMap);
+							theMap, theRecordAgg);
 				default:
 					throw new RuntimeException("Cannot construct an aggregated IPUMS attribute of type: "+refType);
 			}
@@ -236,9 +242,10 @@ public class IPUMSAttribute {
 			String aCode = aggregatedCodes.keySet().stream()
 					.filter(rCode -> dCode.startsWith(rCode))
 					.findFirst().get();
-			if(!theMapper.containsKey(aCode))
-				theMapper.put(aCode, collectionSupplier.get());
-			theMapper.get(aCode).add(dCode);	
+			String aValue = aggregatedCodes.get(aCode);
+			if(!theMapper.containsKey(aValue))
+				theMapper.put(aValue, collectionSupplier.get());
+			theMapper.get(aValue).add(detailedCodes.get(dCode));	
 		}
 		
 		return theMapper;

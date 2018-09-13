@@ -6,7 +6,7 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.metamodel.attribute.mapper.value.RecordValueMapper;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
@@ -38,14 +38,14 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 
 	public static final String SELF = "ATTRIBUTE";
 
-	private IValueSpace<V> valuesSpace;
+	private IValueSpace<V> valueSpace;
 
 	private String name;
 
 	@JsonIgnore
 	private String description = null;
 	
-	private RecordValueMapper<V> encodedValues;
+	private EncodedValueMapper<V> encodedValues;
 
 	protected Attribute(String name) {
 		this.name = name;
@@ -60,12 +60,12 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 
 	@Override
 	public IValueSpace<V> getValueSpace(){
-		return valuesSpace;
+		return valueSpace;
 	}
 
 	@Override
 	public void setValueSpace(IValueSpace<V> valueSpace) {
-		this.valuesSpace = valueSpace;
+		this.valueSpace = valueSpace;
 	}
 
 	// --------------------------------------------------------------- //
@@ -95,8 +95,8 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 */
 	public void addRecords(String value, String... records) {
 		if(encodedValues == null)
-			this.encodedValues = new RecordValueMapper<>();
-		this.encodedValues.putMapping(valuesSpace.getValue(value), records);
+			this.encodedValues = new EncodedValueMapper<>(valueSpace);
+		this.encodedValues.putMapping(value, records);
 	}
 
 	/**
@@ -139,7 +139,7 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 */
 	@JsonIgnore
 	public IValue getEmptyValue(){
-		return valuesSpace.getEmptyValue();
+		return valueSpace.getEmptyValue();
 	}
 
 	/**

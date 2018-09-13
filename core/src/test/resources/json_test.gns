@@ -61,25 +61,25 @@
         "VALUE SPACE" : {
           "TYPE" : "Integer",
           "VALUES" : [ {
-            "INPUT VALUE" : "1"
-          }, {
             "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "1"
           }, {
             "INPUT VALUE" : "0"
           }, {
-            "INPUT VALUE" : "5"
-          }, {
             "INPUT VALUE" : "6"
           }, {
-            "INPUT VALUE" : "3"
+            "INPUT VALUE" : "5"
           }, {
             "INPUT VALUE" : "4"
           }, {
+            "INPUT VALUE" : "3"
+          }, {
             "INPUT VALUE" : "9"
           }, {
-            "INPUT VALUE" : "7"
-          }, {
             "INPUT VALUE" : "8"
+          }, {
+            "INPUT VALUE" : "7"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
@@ -97,7 +97,7 @@
           "EMPTY VALUE" : {
             "INPUT VALUE" : "NaN"
           },
-          "min" : 0.0,
+          "min" : -1.7976931348623157E308,
           "max" : 1.7976931348623157E308
         }
       }
@@ -109,13 +109,13 @@
           "VALUES" : [ {
             "INPUT VALUE" : "25 à 34"
           }, {
-            "INPUT VALUE" : "moins de 14"
-          }, {
-            "INPUT VALUE" : "35 à 54"
+            "INPUT VALUE" : "15 à 24"
           }, {
             "INPUT VALUE" : "55 et plus"
           }, {
-            "INPUT VALUE" : "15 à 24"
+            "INPUT VALUE" : "moins de 14"
+          }, {
+            "INPUT VALUE" : "35 à 54"
           } ],
           "min" : 0,
           "max" : 120,
@@ -133,11 +133,11 @@
         "VALUE SPACE" : {
           "TYPE" : "Range",
           "VALUES" : [ {
-            "INPUT VALUE" : "moins de 24 ans"
+            "INPUT VALUE" : "25 à 54"
           }, {
             "INPUT VALUE" : "55 et plus"
           }, {
-            "INPUT VALUE" : "25 à 54"
+            "INPUT VALUE" : "moins de 24 ans"
           } ],
           "min" : 0,
           "max" : 120,
@@ -156,13 +156,13 @@
               "VALUES" : [ {
                 "INPUT VALUE" : "25 à 34"
               }, {
-                "INPUT VALUE" : "moins de 14"
-              }, {
-                "INPUT VALUE" : "35 à 54"
+                "INPUT VALUE" : "15 à 24"
               }, {
                 "INPUT VALUE" : "55 et plus"
               }, {
-                "INPUT VALUE" : "15 à 24"
+                "INPUT VALUE" : "moins de 14"
+              }, {
+                "INPUT VALUE" : "35 à 54"
               } ],
               "min" : 0,
               "max" : 120,
@@ -177,7 +177,7 @@
         },
         "MAPPER" : {
           "TYPE" : "AGG",
-          "THE MAP" : [ "moins de 24 ans : moins de 14; 15 à 24", "55 et plus : 55 et plus", "25 à 54 : 25 à 34; 35 à 54" ]
+          "THE MAP" : [ "25 à 54 : 25 à 34; 35 à 54", "55 et plus : 55 et plus", "moins de 24 ans : moins de 14; 15 à 24" ]
         }
       }
     }, {
@@ -213,13 +213,13 @@
               "VALUES" : [ {
                 "INPUT VALUE" : "25 à 34"
               }, {
-                "INPUT VALUE" : "moins de 14"
-              }, {
-                "INPUT VALUE" : "35 à 54"
+                "INPUT VALUE" : "15 à 24"
               }, {
                 "INPUT VALUE" : "55 et plus"
               }, {
-                "INPUT VALUE" : "15 à 24"
+                "INPUT VALUE" : "moins de 14"
+              }, {
+                "INPUT VALUE" : "35 à 54"
               } ],
               "min" : 0,
               "max" : 120,
@@ -238,40 +238,18 @@
         }
       }
     }, {
-      "MAPPED ATTRIBUTE" : {
-        "NAME" : "Record attribute",
+      "ATTRIBUTE" : {
+        "NAME" : "Encoded Boolean",
         "VALUE SPACE" : {
-          "TYPE" : "Integer",
+          "TYPE" : "Boolean",
           "VALUES" : [ {
-            "INPUT VALUE" : "2"
+            "INPUT VALUE" : "true"
           }, {
-            "INPUT VALUE" : "1"
+            "INPUT VALUE" : "false"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
-          },
-          "min" : -2147483648,
-          "max" : 2147483647
-        },
-        "REFERENT ATTRIBUTE" : {
-          "ATTRIBUTE" : {
-            "NAME" : "Boolean attribute",
-            "VALUE SPACE" : {
-              "TYPE" : "Boolean",
-              "VALUES" : [ {
-                "INPUT VALUE" : "false"
-              }, {
-                "INPUT VALUE" : "true"
-              } ],
-              "EMPTY VALUE" : {
-                "INPUT VALUE" : "null"
-              }
-            }
           }
-        },
-        "MAPPER" : {
-          "TYPE" : "REC",
-          "THE MAP" : [ "2 : false", "1 : true" ]
         }
       }
     }, {
@@ -286,7 +264,7 @@
               "LISTED ATTRIBUTES" : [ "Boolean attribute : false", "Mapped attribute : true" ],
               "CUSTOM COMPARATOR FUNCTIONS" : [ ]
             },
-            "MATCHERS" : [ "25 à 34", "35 à 54", "55 et plus" ]
+            "MATCHERS" : [ "25 à 34", "55 et plus", "35 à 54" ]
           }
         }
       }

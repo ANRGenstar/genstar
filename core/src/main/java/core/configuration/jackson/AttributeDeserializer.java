@@ -36,7 +36,7 @@ import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.mapper.IAttributeMapper;
-import core.metamodel.attribute.mapper.value.RecordValueMapper;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
@@ -328,8 +328,8 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	// MAPPER
 	
 	private Map<String, String> getRecordMapping(JsonNode node) {
-		JsonNode mapping = node.findValue(RecordValueMapper.SELF);
-		if(!mapping.isArray())
+		JsonNode mapping = node.findValue(EncodedValueMapper.SELF);
+		if(mapping == null || !mapping.isArray())
 			throw new IllegalArgumentException("Trying to unmap the mapper but cannot access array mapping: "
 					+ "node type instade is "+node.getNodeType());
 		Map<String, String> records = new HashMap<>();
