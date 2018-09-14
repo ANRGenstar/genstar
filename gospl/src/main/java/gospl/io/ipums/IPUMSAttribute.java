@@ -20,7 +20,10 @@ import com.ibm.icu.util.StringTokenizer;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
+import core.metamodel.value.categoric.NominalValue;
+import core.metamodel.value.categoric.OrderedValue;
 import core.metamodel.value.categoric.template.GSCategoricTemplate;
+import core.metamodel.value.numeric.RangeValue;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -43,6 +46,7 @@ public class IPUMSAttribute {
 	
 	private String codeName; 
 	private String attName;
+	private String codeNameAgg;
 	private String attNameAgg;
 	private List<String> rawContent;
 	private List<String> rawContentAgg;
@@ -101,10 +105,11 @@ public class IPUMSAttribute {
 	 * @param rawContentAgg : the values (encoded & full) of aggregate attribute
 	 */
 	public IPUMSAttribute(String codeNameRef, String attNameRef, List<String> rawContentRef,
-			String attNameAgg, List<String> rawContentAgg) {
+			String codeNameAgg, String attNameAgg, List<String> rawContentAgg) {
 		this.codeName = codeNameRef;
 		this.attName = attNameRef;
 		this.rawContent = rawContentRef;
+		this.codeNameAgg = codeNameAgg;
 		this.attNameAgg = attNameAgg;
 		this.rawContentAgg = rawContentAgg;
 		try {
@@ -155,8 +160,10 @@ public class IPUMSAttribute {
 		Set<GSEnumDataType> rt = theRecord.values().stream().map(s -> parser.getValueType(s)).collect(Collectors.toSet());
 		GSEnumDataType refType = rt.size() == 1 ? rt.iterator().next() : GSEnumDataType.Nominal;
 		
+		Attribute<? extends IValue> theAttribute = null;
+		
 		if(rawContentAgg == null) {
-			return factory.createAttribute(attName, refType, new ArrayList<>(theRecord.values()), theRecord);
+			theAttribute = factory.createAttribute(codeName, refType, new ArrayList<>(theRecord.values()), theRecord);
 		} else {
 			
 			Map<String, String> theRecordAgg = readValues(rawContentAgg, new HashMap<>());
@@ -181,24 +188,34 @@ public class IPUMSAttribute {
 								@Override public List<String> get() { return new ArrayList<>(); }
 							}
 					);
-					return factory.createOrderedAggregatedAttribute(attNameAgg, 
-							factory.createOrderedAttribute(attName, 
-									new GSCategoricTemplate(), new ArrayList<>(theLinkedRecord.values()),
-									theLinkedRecord), 
-							theLinkedMap, theRecordAgg);
+					Attribute<OrderedValue> orderAttribute = factory.createOrderedAttribute(codeName, 
+								new GSCategoricTemplate(), new ArrayList<>(theLinkedRecord.values()),
+							theLinkedRecord);
+					orderAttribute.setDescription(attName);
+					theAttribute = factory.createOrderedAggregatedAttribute(codeNameAgg, 
+							orderAttribute, theLinkedMap, theRecordAgg);
+					break;
 				case Nominal:
-					return factory.createNominalAggregatedAttribute(attNameAgg, 
-							factory.createNominalAttribute(attName, new GSCategoricTemplate(), theRecord), 
-							theMap, theRecordAgg);
+					Attribute<NominalValue> nominalAttribute = factory
+						.createNominalAttribute(codeName, new GSCategoricTemplate(), theRecord);
+					nominalAttribute.setDescription(attName);
+					theAttribute = factory.createNominalAggregatedAttribute(codeNameAgg, 
+							nominalAttribute, theMap, theRecordAgg);
+					break;
 				case Range:
-					return factory.createRangeAggregatedAttribute(attNameAgg,
-							factory.createRangeAttribute(attName, theRecord), 
-							theMap, theRecordAgg);
+					Attribute<RangeValue> rangeAttribute = factory.createRangeAttribute(codeName, theRecord);
+					rangeAttribute.setDescription(attName);
+					theAttribute = factory.createRangeAggregatedAttribute(codeNameAgg,
+							rangeAttribute, theMap, theRecordAgg);
+					break;
 				default:
 					throw new RuntimeException("Cannot construct an aggregated IPUMS attribute of type: "+refType);
 			}
+			
 		}
 		
+		theAttribute.setDescription(attName);
+		return theAttribute;
 	}
 	
 	/*

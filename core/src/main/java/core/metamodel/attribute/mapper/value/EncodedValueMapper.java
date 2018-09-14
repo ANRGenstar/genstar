@@ -32,8 +32,9 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
 public class EncodedValueMapper<K extends IValue> {
 	
 	public static final String SELF = "ENCODED VALUES";
-	public static final String ATTRIBUTE_NAME = "ENCODE ATT";
 	public static final String MAPPING = "MAPPING";
+	
+	private static final String ATTRIBUTE_NAME = "ENCODE ATT";
 	
 	private IValueSpace<K> values;
 	private Map<NominalValue,K> mapper;

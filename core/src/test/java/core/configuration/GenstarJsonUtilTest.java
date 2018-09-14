@@ -124,6 +124,8 @@ public class GenstarJsonUtilTest {
 		Map<String,String> value2value2 = new HashMap<>();
 		value2value2.put("1", "true");
 		value2value2.put("0", "false");
+		value2value2.put("", "false");
+		value2value2.put("999", "false");
 		Attribute<? extends IValue> boolEncodedAttribute =
 				AttributeFactory.getFactory()
 					.createAttribute("Encoded Boolean", GSEnumDataType.Boolean, 

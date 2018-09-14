@@ -42,23 +42,22 @@ public class RecordValueSerializer<K extends IValue> extends StdSerializer<Encod
 	}
 
 	@Override
-	public void serialize(EncodedValueMapper<K> value, JsonGenerator gen, SerializerProvider provider)
+	public void serialize(EncodedValueMapper<K> mapper, JsonGenerator gen, SerializerProvider provider)
 			throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void serializeWithType(EncodedValueMapper<K> mapper,
-			JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
-		gen.writeFieldName(typeSer.getPropertyName());
-		gen.writeStartObject();
+		//gen.writeFieldName(EncodedValueMapper.SELF);
+		gen.writeStartObject(mapper);
 		gen.writeArrayFieldStart(EncodedValueMapper.MAPPING);
 		for(String entry : this.getRecordList(mapper)) {
 			gen.writeString(entry);
 		}
 		gen.writeEndArray();
 		gen.writeEndObject();
+	}
+
+	@Override
+	public void serializeWithType(EncodedValueMapper<K> mapper,
+			JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
+		
 	}
 	
 	/*

@@ -21,7 +21,6 @@ import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
-import core.util.GSDisplayUtil;
 import core.util.excpetion.GSIllegalRangedData;
 
 /**
@@ -177,8 +176,6 @@ public class ReadIPUMSDictionaryUtils {
 			attList.add(ipumsAtt.getAttribute()); 
 		}
 		
-		System.out.println(GSDisplayUtil.prettyPrint(attList, "; "));
-		
 		/*
 		 * Do the same thing as previously but with aggregated attribute. There must be
 		 * built with the referent attribute. Hence, it is the creation of a record referent
@@ -189,11 +186,12 @@ public class ReadIPUMSDictionaryUtils {
 			String attNameRef = attributeNames.get(attCode);
 			List<String> rawContentRef = attMap.get(attCode);
 			
-			String attNameAgg = attributeNames.get(aggAtt.get(attCode));
+			String attCodeAgg = aggAtt.get(attCode);
+			String attNameAgg = attributeNames.get(attCodeAgg);
 			List<String> rawContentAgg = attMap.get(aggAtt.get(attCode));
 						
 			Attribute<? extends IValue> aggregateAttribute = new IPUMSAttribute(
-						attCode, attNameRef, rawContentRef, attNameAgg, rawContentAgg)
+						attCode, attNameRef, rawContentRef, attCodeAgg, attNameAgg, rawContentAgg)
 					.getAttribute();
 			
 			Attribute<? extends IValue> aggRefAtt = aggregateAttribute.getReferentAttribute();

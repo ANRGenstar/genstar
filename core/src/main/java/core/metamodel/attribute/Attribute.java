@@ -39,13 +39,12 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	public static final String SELF = "ATTRIBUTE";
 
 	private IValueSpace<V> valueSpace;
+	private EncodedValueMapper<V> encodedValues;
 
 	private String name;
 
 	@JsonIgnore
 	private String description = null;
-	
-	private EncodedValueMapper<V> encodedValues;
 
 	protected Attribute(String name) {
 		this.name = name;
@@ -66,6 +65,16 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	@Override
 	public void setValueSpace(IValueSpace<V> valueSpace) {
 		this.valueSpace = valueSpace;
+	}
+	
+	@Override
+	public EncodedValueMapper<V> getEncodedValueMapper() {
+		return encodedValues;
+	}
+
+	@Override
+	public void setEncodedValueMapper(EncodedValueMapper<V> encodedMapper) {
+		this.encodedValues = encodedMapper;
 	}
 
 	// --------------------------------------------------------------- //
@@ -94,8 +103,9 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 * @param records
 	 */
 	public void addRecords(String value, String... records) {
-		if(encodedValues == null)
-			this.encodedValues = new EncodedValueMapper<>(valueSpace);
+		if(encodedValues == null) {
+			this.setEncodedValueMapper(new EncodedValueMapper<>(valueSpace));
+		}
 		this.encodedValues.putMapping(value, records);
 	}
 
