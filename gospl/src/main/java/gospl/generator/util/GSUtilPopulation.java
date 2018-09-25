@@ -143,6 +143,15 @@ public class GSUtilPopulation {
 		dictionary.stream().forEach(att -> dico.addAttributes(att));
 		this.generator = new GSUtilGenerator(dico);
 	}
+	
+	/**
+	 * Use util methods directly from a pre generated population
+	 * 
+	 * @param population
+	 */
+	public GSUtilPopulation(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+		this.population = population;
+	}
 		
 	// ---------------------------------------------------- //
 	

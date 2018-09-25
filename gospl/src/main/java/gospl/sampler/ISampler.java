@@ -3,12 +3,12 @@ package gospl.sampler;
 import java.util.Collection;
 
 /**
- * The global contract for sampler --
- * 
- * Must be created from a {@link GosplSPGeneratorFactory}
- * 
- * TODO: explain more
- * 
+ * The global contract for sampler -- the part of generation process responsible the creation
+ * of the entity with pre-defined rules such as provided by SR or CO algorithm. Most of the time
+ * {@link ISampler} that will be used in SR are Monte Carlo sampling methods using a pre-computed
+ * joint distribution (using IPF), but can also take the form of Markov Chains or Bayesian Network.
+ * In CO perspective, the sampler will be the entity responsible for drawing records into a sample
+ * of the real population, with parameter such as drawing with or without replacement.
  * 
  * @author kevinchapuis
  *
