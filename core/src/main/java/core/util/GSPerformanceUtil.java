@@ -24,6 +24,8 @@ public class GSPerformanceUtil {
 	private Level level;
 	
 	private double objectif;
+ 
+	private static final String END = "END OF PROCESS";
 
 	private GSPerformanceUtil(Logger logger, Level level){
 		resetStemp();
@@ -59,6 +61,11 @@ public class GSPerformanceUtil {
 		if(latestStemp != 0l)	
 			cumulStemp += timer;
 		this.latestStemp = thisStemp;
+		if(message == END) {
+			double cumul = (double) Math.round(cumulStemp * 1000) / 1000;
+			this.resetStemp();
+			return END+" -> overall time = "+cumul+" s.";
+		}
 		return message+" -> "+timer+" s / "+((double) Math.round(cumulStemp * 1000) / 1000)+" s";
 	}
 	
@@ -68,6 +75,8 @@ public class GSPerformanceUtil {
 	}
 
 	public String getStempPerformance(double proportion){
+		if(proportion == 1.0)
+			return getStempPerformance(END);
 		return getStempPerformance(Math.round(Math.round(proportion*100))+"%");
 	}
 	

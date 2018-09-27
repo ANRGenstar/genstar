@@ -3,17 +3,19 @@ package gospl.sampler.sr;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.sampler.IDistributionSampler;
 
@@ -33,30 +35,38 @@ import gospl.sampler.IDistributionSampler;
  */
 public class GosplBinarySampler implements IDistributionSampler {
 		
-	private List<ACoordinate<Attribute<? extends IValue>, IValue>> indexedKey;
-	private List<Double> indexedProbabilitySum;
+	private List<ACoordinate<Attribute<? extends IValue>, IValue>> keys;
+	private List<Double> sop;
 	
 	private final double EPSILON = Math.pow(10, -6);
+	
+	private Logger log = LogManager.getLogger();
+	private final static Level LEVEL = Level.TRACE;
 	
 	// -------------------- setup methods -------------------- //
 	
 
 	@Override
 	public void setDistribution(AFullNDimensionalMatrix<Double> distribution){
+		if(distribution == null)
+			throw new NullPointerException();
+		if(distribution.getMatrix().isEmpty())
+			throw new IllegalArgumentException("Cannot setup a sampler with an empty distribution matrix "+distribution);
+		
+		int size = distribution.size();
+		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Setup binary sample of size: "+
-				distribution.size());
+				size, log, LEVEL);
 		gspu.sysoStempPerformance(0, this);
-		this.indexedKey = new ArrayList<>(distribution.size());
-		this.indexedProbabilitySum = new ArrayList<>(distribution.size());
+		this.keys = new ArrayList<>(distribution.getMatrix().keySet());
+		this.sop = new ArrayList<>(size);
 		double sumOfProbabilities = 0d;
 		int count = 1;
-		for(Entry<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> entry : 
-				distribution.getMatrix().entrySet()){
-			indexedKey.add(entry.getKey());
-			sumOfProbabilities += entry.getValue().getValue();
-			indexedProbabilitySum.add(sumOfProbabilities);
-			if(count++ % (distribution.size() / 10) == 0)
-				gspu.sysoStempPerformance(count * 1d / distribution.size(), this);
+		for(ACoordinate<Attribute<? extends IValue>, IValue> key : keys){
+			sumOfProbabilities += distribution.getVal(key).getValue();
+			sop.add(sumOfProbabilities);
+			if(size > 10 && count++ % (size / 10) == 0)
+				gspu.sysoStempPerformance(count * 1d / size, this);
 		}
 		if(Math.abs(sumOfProbabilities - 1d) > EPSILON)
 			throw new IllegalArgumentException("Sum of probabilities for this sampler exceed 1 (SOP = "+sumOfProbabilities+")");
@@ -66,27 +76,35 @@ public class GosplBinarySampler implements IDistributionSampler {
 		
 	@Override
 	public ACoordinate<Attribute<? extends IValue>, IValue> draw(){
+		
+		int count = 0;
+		
 		double rand = GenstarRandom.getInstance().nextDouble();
 		int floor = 0;
-		int top = indexedKey.size() - 1;
+		int top = keys.size() - 1;
 		int mid;
-		double midVal;
-		while(floor < top){
+		while(floor <= top){
+			
+			// MIDDLE IS AN INTERVAL
 			mid = (floor + top) / 2;
-			midVal = indexedProbabilitySum.get(mid);
-			if(rand < midVal) top = mid - 1;
-			if(rand > midVal) floor = mid + 1;
-			if(rand == midVal) return indexedKey.get((floor + top) / 2);
+			double lowMid = mid == 0 ? 0.0 : sop.get(mid-1);
+			double highMid = sop.get(mid);
+			
+			if(rand >= lowMid && rand < highMid) return keys.get(mid);
+			if(rand < highMid) top = mid - 1;
+			if(rand >= highMid) floor = mid + 1;
+			
+			if(count++ > keys.size())
+				throw new RuntimeException("Infinity loop: floor = "+floor+" | top = "+top+" | mid = "+mid
+						+"\nRand = "+rand+" | mid range = ["+lowMid+";"+highMid+"] "
+								+ "\n next key = "+sop.get(mid+1)+" | previous key = "+sop.get(mid - 2 < 0 ? 0 : mid - 2));
+			
 		}
-		if(floor == top)
-			if(indexedProbabilitySum.get(floor) <= rand && rand < indexedProbabilitySum.get(floor + 1))
-				return indexedKey.get(floor); 
-		if (floor - 1 == top)
-			if(indexedProbabilitySum.get(top) <= rand && rand < indexedProbabilitySum.get(floor))
-				return indexedKey.get(floor);
+		
 		throw new RuntimeException("Sample engine has not been able to draw one coordinate !!!\n"
-				+ "random ("+rand+"), floor ("+floor+" = "+indexedProbabilitySum.get(floor)+") and top ("+top+" = "+indexedProbabilitySum.get(top)+") could not draw index\n"
-						+ "befor floor is: "+indexedProbabilitySum.get(floor-1));
+				+ "random ("+rand+"), floor ("+floor+" = "+sop.get(floor)+") and top ("+top+" = "+sop.get(top)+") could not draw index\n"
+						+ "befor floor is: "+sop.get(floor-1));
+						
 	}
 
 	/**
@@ -104,13 +122,13 @@ public class GosplBinarySampler implements IDistributionSampler {
 	
 	@Override
 	public String toCsv(String csvSeparator){
-		List<Attribute<? extends IValue>> attributs = new ArrayList<>(indexedKey
+		List<Attribute<? extends IValue>> attributs = new ArrayList<>(keys
 				.parallelStream().flatMap(coord -> coord.getDimensions().stream())
 				.collect(Collectors.toSet()));
 		String s = String.join(csvSeparator, attributs.stream().map(att -> att.getAttributeName()).collect(Collectors.toList()));
 		s += "; Probability\n";
 		double formerProba = 0d;
-		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : indexedKey){
+		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : keys){
 			String line = "";
 			for(Attribute<? extends IValue> att : attributs){
 				if(coord.getDimensions().contains(att)){
@@ -125,8 +143,8 @@ public class GosplBinarySampler implements IDistributionSampler {
 						line += csvSeparator + " ";
 				}
 			}
-			double actualProba = indexedProbabilitySum.get(indexedKey.indexOf(coord)) - formerProba; 
-			formerProba = indexedProbabilitySum.get(indexedKey.indexOf(coord));
+			double actualProba = sop.get(keys.indexOf(coord)) - formerProba; 
+			formerProba = sop.get(keys.indexOf(coord));
 			s += line + csvSeparator + actualProba +"\n";
 		}
 		return s;

@@ -81,7 +81,7 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 	@Override
 	public GosplPopulation generate(int numberOfIndividual) {
 
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Generate util population", log, Level.DEBUG);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Generate util population", log, Level.TRACE);
 		
 		// Basic population to feed
 		GosplPopulation gosplPop = new GosplPopulation();
@@ -121,9 +121,10 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 				}
 			}		
 			gosplPop.add(entity);
-			if((i % (numberOfIndividual/10.0)) == 0.0)
-				gspu.sysoStempPerformance(i/numberOfIndividual*1.0, "GP = "+(i/numberOfIndividual*1.0), this);
+			if((i % (numberOfIndividual/10.0)) == 0)
+				gspu.sysoStempPerformance(i/(numberOfIndividual*1.0), this);
 		}
+		gspu.sysoStempPerformance(1.0, this);
 
 		return gosplPop;
 	}

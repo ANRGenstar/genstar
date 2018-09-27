@@ -1,12 +1,13 @@
 package gospl.sampler.sr;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
-import core.util.random.roulette.ARouletteWheelSelection;
+import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.sampler.ICompletionSampler;
@@ -22,7 +23,6 @@ import gospl.sampler.ICompletionSampler;
 public class GosplCompletionDirectSampling implements ICompletionSampler<ACoordinate<Attribute<? extends IValue>, IValue>> {
 
 	AFullNDimensionalMatrix<Double> distribution;
-	ARouletteWheelSelection<Double, ACoordinate<Attribute<? extends IValue>, IValue>> sampler;
 	
 	public GosplCompletionDirectSampling(AFullNDimensionalMatrix<Double> distribution) {
 		this.distribution = distribution;
@@ -31,13 +31,17 @@ public class GosplCompletionDirectSampling implements ICompletionSampler<ACoordi
 	@Override
 	public ACoordinate<Attribute<? extends IValue>, IValue> complete(
 			ACoordinate<Attribute<? extends IValue>, IValue> originalEntity) {
+		
 		Map<ACoordinate<Attribute<? extends IValue>, IValue>, Double> subDistribution = 
 				distribution.getMatrix().entrySet()
 				.stream().filter(e -> e.getKey().containsAll(originalEntity.values()))
 			.collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue().getValue()));
-		sampler.setKeys(new ArrayList<>(subDistribution.keySet()));
-		sampler.setDistribution(sampler.getKeys().stream().map(k -> subDistribution.get(k)).collect(Collectors.toList()));
-		return sampler.drawObject();
+		
+		List<ACoordinate<Attribute<? extends IValue>, IValue>> keys = new ArrayList<>(subDistribution.keySet());
+		
+		return RouletteWheelSelectionFactory.getRouletteWheel(
+				keys.stream().map(k -> subDistribution.get(k)).collect(Collectors.toList()), 
+				keys).drawObject();
 	}
 
 	@Override

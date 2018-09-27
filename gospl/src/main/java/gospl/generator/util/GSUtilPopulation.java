@@ -45,6 +45,9 @@ public class GSUtilPopulation {
 	
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> population = null;
 	
+	private AFullNDimensionalMatrix<Double> distribution = null;
+	private AFullNDimensionalMatrix<Integer> contingency = null;
+	
 	private AttributeDictionary dico;
 	private Path pathToDictionary = FileSystems.getDefault().getPath("src","test","resources","attributedictionary");
 	public static String defaultDictionary = "defaultDictionary.gns";
@@ -199,7 +202,9 @@ public class GSUtilPopulation {
 	public AFullNDimensionalMatrix<Integer> getContingency(){
 		if(this.population == null)
 			throw new NullPointerException("No population have been generated - see #buildPopulation");
-		return new GosplNDimensionalMatrixFactory().createContingency(this.population);
+		if(this.contingency == null)
+			this.contingency = new GosplNDimensionalMatrixFactory().createContingency(this.population); 
+		return this.contingency;
 	}
 
 	/**
@@ -211,7 +216,9 @@ public class GSUtilPopulation {
 	public AFullNDimensionalMatrix<Double> getFrequency(){
 		if(this.population == null)
 			throw new NullPointerException("No population have been generated - see #buildPopulation");
-		return new GosplNDimensionalMatrixFactory().createDistribution(this.population);
+		if(this.distribution == null) 
+			this.distribution = new GosplNDimensionalMatrixFactory().createDistribution(this.population);
+		return this.distribution;
 	}
 
 	/**
