@@ -1,6 +1,7 @@
 package core.metamodel.attribute.emergent.aggregator;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
@@ -25,6 +26,16 @@ public class IntegerValueAggregator implements IAggregatorValueFunction<IntegerV
 				.mapToInt(v -> v.getActualValue()).sum()));
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p> 
+	 * WARNING: Because aggregation is a sum in this case, it is hard to decomposed back
+	 */
+	@Override
+	public Collection<IntegerValue> reverse(IntegerValue value, IValueSpace<IntegerValue> valueSpace) {
+		return Collections.emptyList();
+	}
+	
 	@Override
 	public String getType() {
 		return SELF;

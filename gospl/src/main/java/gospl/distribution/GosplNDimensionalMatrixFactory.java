@@ -14,6 +14,8 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
+import core.util.GSPerformanceUtil;
+import core.util.GSUtilAttribute;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -200,6 +202,67 @@ public class GosplNDimensionalMatrixFactory {
 	public AFullNDimensionalMatrix<Double> createDistribution(
 			Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> matrix){
 		return new GosplJointDistribution(matrix);
+	}
+	
+	/**
+	 * Transpose an unknown matrix into a full matrix. If matrix passed in argument is a segmented matrix
+	 * then, the algorithm will end up making unknown relationship between attribute independent
+	 * 
+	 * @param unknownDistribution
+	 * @param gspu: in order to track the process from the outside
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> createDistribution(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> unknownDistribution,
+			GSPerformanceUtil gspu){
+		
+		if(!unknownDistribution.isSegmented())
+			return this.createDistribution(unknownDistribution.getMatrix());
+		
+		// Reject attribute with referent, to only account for referent attribute
+		Set<Attribute<? extends IValue>> targetedDimensions = unknownDistribution.getDimensions()
+				.stream().filter(att -> att.getReferentAttribute().equals(att))
+				.collect(Collectors.toSet());
+
+		// Setup the matrix to estimate 
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplNDimensionalMatrixFactory()
+				.createEmptyDistribution(targetedDimensions);
+
+		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
+
+		// Extrapolate the whole set of coordinates
+		Collection<Map<Attribute<? extends IValue>, IValue>> coordinates = GSUtilAttribute.getValuesCombination(targetedDimensions);
+
+		gspu.sysoStempPerformance(1, this);
+		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
+
+		for(Map<Attribute<? extends IValue>, IValue> coordinate : coordinates){
+			AControl<Double> nulVal = freqMatrix.getNulVal();
+			ACoordinate<Attribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
+			AControl<Double> freq = unknownDistribution.getVal(coord);
+			if(!nulVal.getValue().equals(freq.getValue()))
+				freqMatrix.addValue(coord, freq);
+			else {
+				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
+				gspu.sysoStempMessage("Goes into a referent empty correlate: "
+						+Arrays.toString(coordinate.values().toArray()));
+				ACoordinate<Attribute<? extends IValue>, IValue	> newCoord = new GosplCoordinate(
+						coord.getDimensions().stream().collect(Collectors.toMap(Function.identity(), 
+						att -> unknownDistribution.getEmptyReferentCorrelate(coord).stream()
+									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att)) ?
+								att.getValueSpace().getEmptyValue() : coord.getMap().get(att))));
+				if(newCoord.equals(coord))
+					freqMatrix.addValue(coord, freq);
+				else
+					freqMatrix.addValue(newCoord, unknownDistribution.getVal(newCoord.values()
+							.stream().filter(value -> !unknownDistribution.getDimension(value).getEmptyValue().equals(value))
+							.collect(Collectors.toSet())));
+			}
+		}
+		
+		gspu.sysoStempMessage("Distribution has been created succefuly");
+		
+		return freqMatrix;
 	}
 	
 	//////////////////////////////////////////////////

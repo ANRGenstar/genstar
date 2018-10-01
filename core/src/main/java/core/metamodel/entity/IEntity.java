@@ -7,6 +7,7 @@ import java.util.Set;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerValue;
 
 /**
  * An entity might represent an household, an individual, or even a geographical entity etc.
@@ -139,7 +140,7 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * returns the count of children
 	 * @return
 	 */
-	public int getCountChildren();
+	public IntegerValue getCountChildren();
 	
 	/**
 	 * returns the set of children

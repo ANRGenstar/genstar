@@ -1,5 +1,8 @@
 package core.metamodel.attribute;
 
+import java.util.Collection;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -55,6 +58,17 @@ public class EmergentAttribute<V extends IValue,
 	@JsonIgnore
 	public V getEmergentValue(E entity, U predicate) {
 		return function.apply(entity, predicate);
+	}
+	
+	/**
+	 * The method to translate value attribute into child properties, i.e.
+	 * a collection of values from sub entities that characterize emergent attribute value.
+	 * Each set of the collection is a potential sub entity
+	 * @return
+	 */
+	@JsonIgnore
+	public Collection<Set<IValue>> getImergentValues(V value, U predicate){
+		return function.reverse(value, predicate);
 	}
 	
 	/**

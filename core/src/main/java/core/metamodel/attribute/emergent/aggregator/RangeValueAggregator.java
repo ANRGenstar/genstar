@@ -30,6 +30,12 @@ public class RangeValueAggregator implements IAggregatorValueFunction<RangeValue
 				.getMiddleTemplate(bottom, top));
 	}
 	
+	@Override
+	public Collection<RangeValue> reverse(RangeValue value, IValueSpace<RangeValue> vs) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
 	// ------------ UTILITIES ------------ // 
 	
 	private Number add(Number n1, Number n2) {

@@ -1,6 +1,7 @@
 package gospl.sampler.sr;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,6 +12,7 @@ import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.sampler.ICompletionSampler;
+import gospl.sampler.IDistributionSampler;
 
 /**
  * Sampler that is able to return a coordinate associated to another (partial) coordinate. In fact,
@@ -20,12 +22,13 @@ import gospl.sampler.ICompletionSampler;
  * @author kevinchapuis
  *
  */
-public class GosplCompletionDirectSampling implements ICompletionSampler<ACoordinate<Attribute<? extends IValue>, IValue>> {
+public class GosplCompletionDirectSampling implements ICompletionSampler<ACoordinate<Attribute<? extends IValue>, IValue>>, IDistributionSampler {
 
-	AFullNDimensionalMatrix<Double> distribution;
+	private AFullNDimensionalMatrix<Double> distribution;
+	private GosplBasicSampler innerSampler;
 	
-	public GosplCompletionDirectSampling(AFullNDimensionalMatrix<Double> distribution) {
-		this.distribution = distribution;
+	public GosplCompletionDirectSampling() {
+		this.innerSampler = new GosplBasicSampler();
 	}
 	
 	@Override
@@ -44,6 +47,22 @@ public class GosplCompletionDirectSampling implements ICompletionSampler<ACoordi
 				keys).drawObject();
 	}
 
+	@Override
+	public ACoordinate<Attribute<? extends IValue>, IValue> draw() {
+		return this.innerSampler.draw();
+	}
+
+	@Override
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
+		return this.innerSampler.draw(numberOfDraw);
+	}
+
+	@Override
+	public void setDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.distribution = distribution;
+		this.innerSampler.setDistribution(distribution);
+	}
+	
 	@Override
 	public String toCsv(String csvSeparator) {
 		// TODO Auto-generated method stub

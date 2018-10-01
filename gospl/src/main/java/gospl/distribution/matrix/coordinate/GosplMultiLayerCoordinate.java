@@ -18,6 +18,11 @@ public class GosplMultiLayerCoordinate extends ACoordinate<Attribute<? extends I
 
 	private Set<GosplMultiLayerCoordinate> childs;
 	
+	public GosplMultiLayerCoordinate(ACoordinate<Attribute<? extends IValue>, IValue> coordinate) {
+		super(coordinate.getMap());
+		childs = new HashSet<>();
+	}
+	
 	public GosplMultiLayerCoordinate(Map<Attribute<? extends IValue>, IValue> self) {
 		super(self);
 		childs = new HashSet<>();

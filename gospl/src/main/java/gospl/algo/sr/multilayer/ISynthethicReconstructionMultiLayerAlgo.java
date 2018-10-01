@@ -4,7 +4,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.coordinate.ACoordinate;
+import gospl.distribution.matrix.coordinate.GosplMultiLayerCoordinate;
 import gospl.sampler.ISampler;
 import gospl.sampler.multilayer.IMultiLayerSampler;
 
@@ -23,7 +23,7 @@ public interface ISynthethicReconstructionMultiLayerAlgo<SamplerType extends IMu
 	 * @throws IllegalDistributionCreation
 	 * @throws GosplSamplerException
 	 */
-	public ISampler<ACoordinate<Attribute<? extends IValue>, IValue>> inferSRMLSampler(
+	public ISampler<GosplMultiLayerCoordinate> inferSRMLSampler(
 			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> topMatrix,
 			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> bottomMatrix,
 			SamplerType sampler) 

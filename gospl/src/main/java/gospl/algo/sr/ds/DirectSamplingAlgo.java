@@ -1,12 +1,5 @@
 package gospl.algo.sr.ds;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,15 +8,11 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
-import core.util.GSUtilAttribute;
 import gospl.algo.sr.ISyntheticReconstructionAlgo;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
-import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
 import gospl.distribution.matrix.coordinate.ACoordinate;
-import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.sampler.IDistributionSampler;
 import gospl.sampler.ISampler;
 
@@ -42,8 +31,10 @@ import gospl.sampler.ISampler;
  * people under the age of 15' are usually not consider in job category, so in this algorithm they will be attached with
  * variable 'empty' for dimension 'job'
  * </ul><p>
- * 
+ * <p>
  * According to these hypothesis, we refer to this algorithm as DS for Direct Sampling algorithm
+ * <p>
+ * @see GosplNDimensionalMatrixFactory#createDistribution(INDimensionalMatrix, GSPerformanceUtil)
  * 
  * @author kevinchapuis
  *
@@ -68,61 +59,9 @@ public class DirectSamplingAlgo implements ISyntheticReconstructionAlgo<IDistrib
 		gspu.setObjectif(theoreticalSize);
 		gspu.sysoStempPerformance(0, this);
 
-		// Stop the algorithm and exit the unique matrix if there is only one
-		if(!matrix.isSegmented()){
-			sampler.setDistribution(GosplNDimensionalMatrixFactory.getFactory()
-					.createDistribution(matrix.getMatrix()));
-			return sampler;
-		}
+		sampler.setDistribution(GosplNDimensionalMatrixFactory.getFactory()
+				.createDistribution(matrix, gspu));
 
-		// Reject attribute with referent, to only account for referent attribute
-		Set<Attribute<? extends IValue>> targetedDimensions = matrix.getDimensions()
-				.stream().filter(att -> att.getReferentAttribute().equals(att))
-				.collect(Collectors.toSet());
-
-		// Setup the matrix to estimate 
-		AFullNDimensionalMatrix<Double> freqMatrix = new GosplNDimensionalMatrixFactory()
-				.createEmptyDistribution(targetedDimensions);
-
-		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
-
-		// Extrapolate the whole set of coordinates
-		Collection<Map<Attribute<? extends IValue>, IValue>> coordinates = GSUtilAttribute.getValuesCombination(targetedDimensions);
-
-		gspu.sysoStempPerformance(1, this);
-		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
-
-		for(Map<Attribute<? extends IValue>, IValue> coordinate : coordinates){
-			AControl<Double> nulVal = freqMatrix.getNulVal();
-			ACoordinate<Attribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
-			AControl<Double> freq = matrix.getVal(coord);
-			if(!nulVal.getValue().equals(freq.getValue()))
-				freqMatrix.addValue(coord, freq);
-			else {
-				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
-				gspu.sysoStempMessage("Goes into a referent empty correlate: "
-						+Arrays.toString(coordinate.values().toArray()));
-				ACoordinate<Attribute<? extends IValue>, IValue	> newCoord = new GosplCoordinate(
-						coord.getDimensions().stream().collect(Collectors.toMap(Function.identity(), 
-						att -> matrix.getEmptyReferentCorrelate(coord).stream()
-									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att)) ?
-								att.getValueSpace().getEmptyValue() : coord.getMap().get(att))));
-				if(newCoord.equals(coord))
-					freqMatrix.addValue(coord, freq);
-				else
-					freqMatrix.addValue(newCoord, matrix.getVal(newCoord.values()
-							.stream().filter(value -> !matrix.getDimension(value).getEmptyValue().equals(value))
-							.collect(Collectors.toSet())));
-			}
-		}
-		
-		gspu.sysoStempMessage("Distribution has been estimated");
-		gspu.sysoStempPerformance(2, this);
-		
-		// WARNING: cannot justify this normalization, hence find another way to fit 1 sum of probability
-		//freqMatrix.normalize();
-
-		sampler.setDistribution(freqMatrix);
 		return sampler;
 	}
 

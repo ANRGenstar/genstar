@@ -12,8 +12,11 @@ import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerValue;
 
 /**
  * The higher order abstraction for demographic entity. Manage basic attribute / value relationship and parent / children relationship.
@@ -30,6 +33,9 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private String id = null;
 	
+	/**
+	 * The map of attribute / value ! What characterize the entity: vector of value, one value for each attribute.
+	 */
 	protected Map<Attribute<? extends IValue>, IValue> attributes;
 
 	
@@ -201,6 +207,10 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<IEntity<? extends IAttribute<? extends IValue>>> children = null;
 	
+	private static final String SIZE_ATT = "SIZE ATTRIBUTE";
+	private EmergentAttribute<IntegerValue, ADemoEntity, ?> sizeAttribute = AttributeFactory.getFactory()
+			.getCountAttribute(SIZE_ATT, null);
+	
 	@Override
 	public final boolean hasParent() {
 		return parent != null;
@@ -222,10 +232,10 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	}
 
 	@Override
-	public final int getCountChildren() {
+	public final IntegerValue getCountChildren() {
 		if (children == null)
-			return 0;
-		return children.size();
+			return sizeAttribute.getValueSpace().proposeValue("0");
+		return sizeAttribute.getEmergentValue(this, null);
 	}
 
 	@Override

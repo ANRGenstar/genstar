@@ -140,8 +140,6 @@ public class BayesianNetworkCompletionSampler implements ICompletionSampler<ADem
 		
 		return resultEntity;
 	}
-	
-
 
 	@Override
 	public String toCsv(String csvSeparator) {

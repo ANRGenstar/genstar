@@ -1,5 +1,7 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,6 +51,16 @@ public interface IEntityEmergentFunction<
 	public static final String FILTER = "FILTER";
 	public static final String MATCHERS = "MATCHERS";
 	public static final String TYPE = "CLASS TYPE";
+	
+	
+	/**
+	 * Reverse an emergent attribute value to a collection of value matchers and filters
+	 * @param value
+	 * @return
+	 */
+	public Collection<Set<IValue>> reverse(V value, U predicate);
+	
+	// ------------------------------------------ //
 	
 	/**
 	 * Returns the filter that will select the appropriate child to compute emergent attribute value

@@ -37,4 +37,11 @@ public interface ITransposeValueFunction<IV extends IValue, RV extends IValue> {
 	 */
 	public RV transpose(Collection<IV> values, IValueSpace<RV> valueSpace);
 	
+	/**
+	 * Reverse the value to desaggregated values
+	 * @param value
+	 * @return
+	 */
+	public Collection<IV> reverse(RV value, IValueSpace<IV> valueSpace);
+	
 }
