@@ -207,9 +207,9 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<IEntity<? extends IAttribute<? extends IValue>>> children = null;
 	
-	private static final String SIZE_ATT = "SIZE ATTRIBUTE";
+	public static final String SIZE_ATT = "SIZE ATTRIBUTE";
 	private EmergentAttribute<IntegerValue, ADemoEntity, ?> sizeAttribute = AttributeFactory.getFactory()
-			.getCountAttribute(SIZE_ATT, null);
+			.createCountAttribute(SIZE_ATT, null);
 	
 	@Override
 	public final boolean hasParent() {

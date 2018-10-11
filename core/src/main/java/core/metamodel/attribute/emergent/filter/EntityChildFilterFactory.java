@@ -1,12 +1,28 @@
 package core.metamodel.attribute.emergent.filter;
 
-import core.metamodel.entity.comparator.ImplicitEntityComparator;
+import java.util.Map;
+import java.util.Set;
 
+import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.IEntity;
+import core.metamodel.entity.comparator.HammingEntityComparator;
+import core.metamodel.entity.comparator.ImplicitEntityComparator;
+import core.metamodel.value.IValue;
+
+/**
+ * Factory of basic filter: namely {@link EChildFilter#OneOf}, {@link EChildFilter#OneOfEach}
+ * and {@link EChildFilter#All}
+ * 
+ * @author kevinchapuis
+ *
+ */
 public class EntityChildFilterFactory {
 
 	public enum EChildFilter {
+		TheOne(new EntityMatchFilter()),
 		OneOf(new EntityOneOfMatchFilter()), 
-		OneOfEach(new EntityOneOfEachMatchFilter()), 
+		OneOfEach(new EntityOneOfEachMatchFilter()),
 		All(new EntityAllMatchFilter());
 		
 		private final IEntityChildFilter filter;
@@ -22,8 +38,29 @@ public class EntityChildFilterFactory {
 		return FACTORY;
 	}
 	
+	/**
+	 * Get the filter passed in argument with default entity comparator
+	 * 
+	 * @param filter
+	 * @return
+	 */
+	public IEntityChildFilter getFilter(EChildFilter filter) {
+		return filter.getFilter();
+	}
+	
+	/**
+	 * Get the filter passed in argument with a particular entity comparator
+	 * 
+	 * @param filter
+	 * @param comparator
+	 * @return
+	 */
 	public IEntityChildFilter getFilter(EChildFilter filter, ImplicitEntityComparator comparator) {
 		switch (filter) {
+		case TheOne:
+			IEntityChildFilter output = new EntityMatchFilter();
+			output.setComparator(comparator);
+			return output;
 		case OneOf:
 			return new EntityOneOfMatchFilter(comparator);
 		case OneOfEach:
@@ -35,4 +72,25 @@ public class EntityChildFilterFactory {
 		}
 	}
 	
+	// ---------------------- ENTITY MATCH ------------------------ //
+	
+	/**
+	 * Get the filter that retain only one entity based on Hamming distance with referent
+	 * 
+	 * @param referent
+	 * @return
+	 */
+	public EntityMatchFilter getEntityMatchFilter(IEntity<Attribute<? extends IValue>> referent) {
+		return new EntityMatchFilter(new HammingEntityComparator(referent));
+	}
+	
+	/**
+	 * 
+	 * @param referent
+	 * @return
+	 */
+	public EntityMatchFilter getEntityMatchFilter(Map<IAttribute<? extends IValue>, Set<IValue>> referent) {
+		return new EntityMatchFilter(new HammingEntityComparator(referent));
+	}
+		
 }

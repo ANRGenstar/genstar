@@ -265,6 +265,25 @@ public class GosplNDimensionalMatrixFactory {
 		return freqMatrix;
 	}
 	
+	/**
+	 * Clone the distribution so the value in it are not linked to one another (like it is the case in
+	 * createDistribution method)
+	 * 
+	 * @param distribution
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> cloneDistribution(
+			AFullNDimensionalMatrix<Double> distribution){
+		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(distribution.getDimensions(), 
+				GSSurveyType.GlobalFrequencyTable);
+		
+		distribution.getMatrix().keySet().forEach(coordinate -> 
+				matrix.setValue(coordinate, new ControlFrequency(distribution.getVal(coordinate).getValue())
+						));
+		
+		return matrix;
+	}
+	
 	//////////////////////////////////////////////////
 	//				SEGMENTED MATRIX				//
 	//////////////////////////////////////////////////
@@ -337,7 +356,8 @@ public class GosplNDimensionalMatrixFactory {
 	}
 	
 	/**
-	 * TODO: javadoc
+	 * Create a contingency matrix from entities of a population, but taking into account only the
+	 * set of attributes given in parameter
 	 * 
 	 * @param attributesToMeasure
 	 * @param population
@@ -363,12 +383,28 @@ public class GosplNDimensionalMatrixFactory {
 	}
 	
 	/**
+	 * Create a full contingency table from an unknown type contingency matrix
+	 *  
+	 * @param unknownMatrix
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> createContingency(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> unknownMatrix){
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(unknownMatrix.getDimensions());
+		unknownMatrix.getMatrix().keySet().forEach(coordinate -> 
+				matrix.addValue(coordinate, 
+						new ControlContingency(unknownMatrix.getVal(coordinate).getValue())
+						));
+		return matrix;
+	}
+	
+	/**
 	 * Clone a matrix
 	 * 
 	 * @param matrix
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> createContingency(AFullNDimensionalMatrix<Integer> matrix){
+	public AFullNDimensionalMatrix<Integer> cloneContingency(AFullNDimensionalMatrix<Integer> matrix){
 		Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Integer>> m = matrix.getMatrix();
 		return new GosplContingencyTable(m.keySet().stream().collect(
 				Collectors.toMap(

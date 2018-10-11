@@ -378,7 +378,7 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
-	EmergentAttribute<IntegerValue, E, Object> getCountAttribute(String name, 
+	EmergentAttribute<IntegerValue, E, Object> createCountAttribute(String name, 
 			IEntityChildFilter filter, IValue... matches) {
 		EmergentAttribute<IntegerValue, E, Object> attribute = new EmergentAttribute<>(name);
 		attribute.setValueSpace(new IntegerSpace(attribute));
@@ -399,7 +399,7 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, E, Attribute<V>> getValueOfAttribute(String name, Attribute<V> referent,  
+	EmergentAttribute<V, E, Attribute<V>> createValueOfAttribute(String name, Attribute<V> referent,  
 			IEntityChildFilter filter, IValue... matches) {
 		EmergentAttribute<V, E, Attribute<V>> eAttribute = new EmergentAttribute<>(name, referent);
 		eAttribute.setValueSpace(referent.getValueSpace());
@@ -420,9 +420,9 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, E, Attribute<V>> getAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
+	EmergentAttribute<V, E, Attribute<V>> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
 			IEntityChildFilter filter, IValue... matches) {
-		return this.getAggregatedValueOfAttribute(name, inputAttribute, 
+		return this.createAggregatedValueOfAttribute(name, inputAttribute, 
 				IAggregatorValueFunction.getDefaultAggregator(inputAttribute.getValueSpace().getTypeClass()), 
 				filter, matches);
 	}
@@ -441,7 +441,7 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends Attribute<V>, V extends IValue>
-	EmergentAttribute<V, E, A> getAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
+	EmergentAttribute<V, E, A> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
 			IAggregatorValueFunction<V> aggFunction, IEntityChildFilter filter, IValue... matches) {
 		EmergentAttribute<V, E, A> eAttribute = new EmergentAttribute<>(name, inputAttribute);
 		eAttribute.setValueSpace(inputAttribute.getValueSpace().clone(eAttribute));

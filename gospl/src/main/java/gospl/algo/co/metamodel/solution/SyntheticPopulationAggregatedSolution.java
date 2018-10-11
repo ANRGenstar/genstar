@@ -72,7 +72,7 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 			neighbors.add(new SyntheticPopulationAggregatedSolution(
 					neighborSearch.getNeighbor(this.population, theSwitch), 
 					this.makeSwitch(new GosplNDimensionalMatrixFactory()
-							.createContingency(this.marginals), theSwitch)));
+							.cloneContingency(this.marginals), theSwitch)));
 		}
 		
 		return neighbors;
@@ -90,7 +90,7 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 				GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors);
 		
 		return new SyntheticPopulationAggregatedSolution(neighborSearch.getNeighbor(this.population, theSwitch), 
-				this.makeSwitch(new GosplNDimensionalMatrixFactory().createContingency(this.marginals), theSwitch));
+				this.makeSwitch(new GosplNDimensionalMatrixFactory().cloneContingency(this.marginals), theSwitch));
 	}
 	
 	// ----------------------- //

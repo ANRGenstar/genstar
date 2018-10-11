@@ -1,6 +1,5 @@
 package core.metamodel.attribute.emergent;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -47,7 +46,7 @@ public class EntityValueForAttributeFunction<E extends IEntity<? extends IAttrib
 
 	@Override
 	public Collection<Set<IValue>> reverse(V value, U useless) {
-		return Collections.singleton(new HashSet<>(Arrays.asList(super.getMatchers())));
+		return Collections.singleton(new HashSet<>(super.getMatchers().values()));
 	}
 
 }

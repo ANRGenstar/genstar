@@ -432,14 +432,14 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		IValue[] m = this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS));
 		switch (function.get(IEntityEmergentFunction.TYPE).textValue()) {
 		case EntityCountFunction.SELF:
-			att = AttributeFactory.getFactory().getCountAttribute(name, f, m);
+			att = AttributeFactory.getFactory().createCountAttribute(name, f, m);
 			break;
 		case EntityAggregatedAttributeFunction.SELF:
-			att = AttributeFactory.getFactory().getAggregatedValueOfAttribute(name, DES_DEMO_ATTRIBUTES.get(refAtt), 
+			att = AttributeFactory.getFactory().createAggregatedValueOfAttribute(name, DES_DEMO_ATTRIBUTES.get(refAtt), 
 					this.getAggrgatorFunction(function.get(EntityAggregatedAttributeFunction.AGGREGATOR)), f, m);
 			break;
 		case EntityValueForAttributeFunction.SELF:
-			att = AttributeFactory.getFactory().getValueOfAttribute(name, 
+			att = AttributeFactory.getFactory().createValueOfAttribute(name, 
 					DES_DEMO_ATTRIBUTES.get(refAtt), f, m);
 			break;
 		default:

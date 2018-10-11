@@ -1,14 +1,11 @@
 package core.metamodel.attribute.emergent.filter;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
@@ -40,14 +37,8 @@ public class EntityOneOfEachMatchFilter implements IEntityChildFilter {
 	
 	@Override
 	public Collection<IEntity<? extends IAttribute<? extends IValue>>> retain(
-			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches) {
-		Map<? extends IAttribute<? extends IValue>, Set<IValue>> eachAttribute =
-				Arrays.asList(matches).stream().collect(
-						Collectors.groupingBy(v -> v.getValueSpace().getAttribute(), 
-								Collectors.mapping(Function.identity(), Collectors.toSet()))
-						);
-		return entities.stream().filter(e -> eachAttribute.keySet().stream()
-				.allMatch(a -> eachAttribute.get(a).contains(e.getValueForAttribute(a.getAttributeName()))))
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, AttributeVectorMatcher matches) {
+		return entities.stream().filter(entity -> matches.entityMatch(entity))
 				.collect(Collectors.toCollection(this.getSupplier()));
 	}
 	

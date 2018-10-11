@@ -140,7 +140,7 @@ public class GenstarJsonUtilTest {
 		// EMERGENT
 		IValue[] matches = GSUtilAttribute.getIValues(rangeAttribute, "25 à 34", "35 à 54", "55 et plus").toArray(new IValue[3]);
 		dd.addAttributes(AttributeFactory.getFactory()
-				.getValueOfAttribute("Age du référent du ménage", rangeAttribute, 
+				.createValueOfAttribute("Age du référent du ménage", rangeAttribute, 
 						EntityChildFilterFactory.getFactory().getFilter(EChildFilter.OneOf, 
 								new ImplicitEntityComparator().setAttribute(dd.getAttribute("Boolean attribute"), false)
 									.setAttribute(nominalToRangeAttribute, true)), 
@@ -148,7 +148,7 @@ public class GenstarJsonUtilTest {
 		
 		IValue[] matchesTwo = GSUtilAttribute.getIValues(rangeAggAttribute, "moins de 24 ans").toArray(new IValue[1]);
 		dd.addAttributes(AttributeFactory.getFactory()
-				.getAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, 
+				.createAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, 
 						EChildFilter.OneOf.getFilter(), matchesTwo));
 
 		sju = new GenstarJsonUtil();

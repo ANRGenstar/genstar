@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import core.configuration.jackson.EmergentFunctionSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
@@ -81,7 +82,7 @@ public interface IEntityEmergentFunction<
 	 * @return
 	 */
 	@JsonProperty(MATCHERS)
-	public IValue[] getMatchers();
+	public AttributeVectorMatcher getMatchers();
 	
 	/**
 	 * Defines the values to be used to filter sub-entities

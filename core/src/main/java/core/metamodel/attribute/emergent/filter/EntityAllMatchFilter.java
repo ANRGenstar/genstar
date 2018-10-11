@@ -1,11 +1,11 @@
 package core.metamodel.attribute.emergent.filter;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
@@ -35,8 +35,8 @@ public class EntityAllMatchFilter implements IEntityChildFilter {
 	
 	@Override
 	public Collection<IEntity<? extends IAttribute<? extends IValue>>> retain(
-			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches){
-		return entities.stream().filter(e -> e.getValues().containsAll(Arrays.asList(matches)))
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, AttributeVectorMatcher matcher){
+		return entities.stream().filter(e -> matcher.valuesMatch(e.getValues()))
 				.collect(Collectors.toCollection(this.getSupplier()));
 	}
 	
