@@ -110,8 +110,9 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	}
 
 	/**
-	 * The {@link IAttribute} this attribute target: should be itself, 
-	 * but could indicate disaggregated linked {@link IAttribute} or record linked one
+	 * The {@link Attribute} this attribute targets: should be itself, 
+	 * but could indicate disagregated {@link Attribute}, i.e. the same attribute
+	 * but with other information about values
 	 * 
 	 * @return
 	 */

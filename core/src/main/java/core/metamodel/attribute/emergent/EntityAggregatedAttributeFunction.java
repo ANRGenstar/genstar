@@ -11,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
-import core.metamodel.attribute.emergent.aggregator.ITransposeValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.emergent.transposer.ITransposeValueFunction;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 

@@ -2,6 +2,7 @@ package core.metamodel.attribute;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,13 +12,16 @@ import java.util.stream.Collectors;
 
 import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
 import core.metamodel.attribute.emergent.EntityCountFunction;
+import core.metamodel.attribute.emergent.EntityTransposedAttributeFunction;
 import core.metamodel.attribute.emergent.EntityValueForAttributeFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.emergent.transposer.MappedTransposedValueFunction;
 import core.metamodel.attribute.mapper.AggregateMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;
+import core.metamodel.attribute.mapper.value.NumericValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -35,6 +39,7 @@ import core.metamodel.value.numeric.IntegerSpace;
 import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeSpace;
 import core.metamodel.value.numeric.RangeValue;
+import core.metamodel.value.numeric.RangeValue.RangeBound;
 import core.metamodel.value.numeric.template.GSRangeTemplate;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
@@ -55,6 +60,8 @@ public class AttributeFactory {
 	private static AttributeFactory gaf = new AttributeFactory();
 	
 	public static String RECORD_NAME_EXTENSION = "_rec";
+	public static String NIU = "NIU";
+	public static Map<String, IAttribute<? extends IValue>> NIUs = new HashMap<>();
 	
 	private AttributeFactory(){};
 	
@@ -64,6 +71,48 @@ public class AttributeFactory {
 	 */
 	public static AttributeFactory getFactory() {
 		return gaf;
+	}
+	
+	/**
+	 * Static way to innitialize <i> not in universe <i/> attribute
+	 * <p>
+	 * WARNING: should not be used in any population generation, but just to manipulate {@link IValue}
+	 *  
+	 * @param type
+	 * @return
+	 */
+	@SuppressWarnings("unchecked")
+	public static <V extends IValue> Attribute<V> createNIU(Class<V> type) {
+		String name = type.getSimpleName()+NIU;
+		if(NIUs.containsKey(name))
+			return (Attribute<V>) NIUs.get(name);
+		if(GSEnumDataType.Integer.getGenstarType().equals(type)) {
+			Attribute<IntegerValue> att = new Attribute<IntegerValue>(name);
+			att.setValueSpace(new IntegerSpace(att));
+			return (Attribute<V>) NIUs.put(name, att);
+		} else if(GSEnumDataType.Continue.getGenstarType().equals(type)){
+			if(NIUs.containsKey(name))
+				return (Attribute<V>) NIUs.get(name);
+			return (Attribute<V>) NIUs.put(name, new Attribute<ContinuousValue>(name));
+		} else if(GSEnumDataType.Order.getGenstarType().equals(type)){
+			if(NIUs.containsKey(name))
+				return (Attribute<V>) NIUs.get(name);
+			return (Attribute<V>) NIUs.put(name, new Attribute<V>(name));
+		} else if(GSEnumDataType.Nominal.getGenstarType().equals(type)){
+			if(NIUs.containsKey(name))
+				return (Attribute<V>) NIUs.get(name);
+			return (Attribute<V>) NIUs.put(name, new Attribute<V>(name));
+		} else if(GSEnumDataType.Boolean.getGenstarType().equals(type)){
+			if(NIUs.containsKey(name))
+				return (Attribute<V>) NIUs.get(name);
+			return (Attribute<V>) NIUs.put(name, new Attribute<V>(name));
+		} else if(GSEnumDataType.Range.getGenstarType().equals(type)){
+			if(NIUs.containsKey(name))
+				return (Attribute<V>) NIUs.get(name);
+			return (Attribute<V>) NIUs.put(name, new Attribute<V>(name));
+		} else
+			throw new RuntimeException(type.getCanonicalName()+" has not any "+GSEnumDataType.class.getCanonicalName()
+				+" equivalent");
 	}
 	
 	/**
@@ -449,6 +498,25 @@ public class AttributeFactory {
 		return eAttribute;
 	}
 	
+	/**
+	 * Attribute that will transpose or aggregate a subset of specific values from sub-entities to one attribute value 
+	 * 
+	 * @param name
+	 * @param mapper
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue>
+	EmergentAttribute<V, E, Object> createTransposedValuesAttribute(String name, Attribute<V> inputAttribute, 
+			Map<Collection<IValue>, V> mapper, IEntityChildFilter filter, IValue... matches){
+		EmergentAttribute<V, E, Object> eAttribute = new EmergentAttribute<>(name, inputAttribute);
+		eAttribute.setValueSpace(inputAttribute.getValueSpace());
+		eAttribute.setFunction(new EntityTransposedAttributeFunction<>(eAttribute, 
+				new MappedTransposedValueFunction<>(mapper), filter, matches));
+		return eAttribute;
+	}
+	
 	// ------------------------------------------------------------- //
 	//                          BUILD METHOD							//
 	
@@ -816,7 +884,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create boolean aggregated value attribute
+	 * Create ordered aggregated value attribute
 	 * 
 	 * @param name
 	 * @param referentAttribute
@@ -841,7 +909,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create boolean aggregated value attribute
+	 * Create oredered aggregated value attribute
 	 * 
 	 * @param name
 	 * @param referentAttribute
@@ -855,7 +923,7 @@ public class AttributeFactory {
 	}
 	
 	/**
-	 * Create boolean aggregated attribute with several encoded forms for values using {@link EncodedValueMapper}
+	 * Create oredered aggregated attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
 	 * @param name: the name of the attribute
 	 * @param referentAttribute: the referent attribute with disaggregated values
@@ -870,6 +938,43 @@ public class AttributeFactory {
 				name, new GSCategoricTemplate(), referentAttribute, mapper);
 		for(String rec : record.keySet()) {
 			attribute.addRecords(record.get(rec), rec);
+		}
+		return attribute;
+	}
+	
+	/**
+	 * Create ordered attribute with mapping to numerical data (int, float or range). The map should record
+	 * mapping as follow:
+	 * <ul>
+	 *  <li> {@link IntegerValue} : an unique int in the list at the first index</li>
+	 *  <li> {@link ContinuousValue} : an unique double in the list at the first index </li>
+	 *  <li> {@link RangeValue} : two int/double value making a range. null value represent bottom or top value range </li>
+	 * </ul>
+	 * 
+	 * @param name
+	 * @param referentAttribute
+	 * @param mapper
+	 * @return
+	 */
+	public MappedAttribute<IValue, OrderedValue> createOrderedToNumericAttribute(String name,
+			Attribute<OrderedValue> referentAttribute, LinkedHashMap<String, List<Number>> map){
+		NumericValueMapper mapper = new NumericValueMapper();
+		MappedAttribute<IValue, OrderedValue> attribute = new MappedAttribute<>(name, referentAttribute, mapper);
+		for(String ov : map.keySet()) {
+			OrderedValue value = referentAttribute.getValueSpace().getValue(ov);
+			List<Number> num = map.get(ov);
+			if(num.size() == 1)
+				mapper.add(value, num.get(0));
+			else {
+				if(map.get(0) == null) {
+					 mapper.add(value, num.get(1), RangeBound.LOWER);
+				} else if(map.get(1) == null) {
+					mapper.add(value, num.get(0), RangeBound.UPPER);
+				} else {
+					mapper.add(value, num.get(0), num.get(1));
+				}
+			}
+				 
 		}
 		return attribute;
 	}

@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.emergent.aggregator.ITransposeValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.emergent.transposer.ITransposeValueFunction;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -25,31 +25,33 @@ import core.metamodel.value.IValue;
  * @param <RV>
  */
 public class EntityTransposedAttributeFunction<E extends IEntity<? extends IAttribute<? extends IValue>>, 
-		A extends IAttribute<IV>, IV extends IValue, RV extends IValue> 
-			extends AEntityEmergentFunction<E, A, RV> {
+		U, RV extends IValue> extends AEntityEmergentFunction<E, U, RV> {
 	
-	private ITransposeValueFunction<IV, RV> transposer; 
+	private ITransposeValueFunction<IValue, RV> transposer; 
 
 	public EntityTransposedAttributeFunction(IAttribute<RV> referent, 
-			ITransposeValueFunction<IV, RV> transposer,
+			ITransposeValueFunction<IValue, RV> transposer,
 			IEntityChildFilter filter, IValue[] matches) {
 		super(referent, filter, matches);
 		this.transposer = transposer;
 	}
 
 	@Override
-	public RV apply(E entity, A attribute) {
-		// TODO Auto-generated method stub
-		return transposer.transpose(this.getFilter().retain(entity.getChildren(), this.getMatchers())
-				.stream().map(e -> attribute.getValueSpace()
-						.getValue(entity.getValueForAttribute(attribute.getAttributeName()).getStringValue()))
-				.collect(Collectors.toSet()), this.getReferentAttribute().getValueSpace());
+	public RV apply(E entity, U useless) {
+		
+		Collection<IValue> toTranspose = this.getFilter().retain(entity.getChildren(), this.getMatchers())
+				.stream().flatMap(e -> e.getValues().stream())
+				.collect(Collectors.toSet()); 
+		toTranspose.addAll(entity.getValues());
+		
+		return transposer.transpose(toTranspose, 
+				this.getReferentAttribute().getValueSpace());
 	}
 
 	@Override
-	public Collection<Set<IValue>> reverse(RV value, A attribute) {
+	public Collection<Set<IValue>> reverse(RV value, U useless) {
 		// TODO Auto-generated method stub
-		return Collections.singleton(new HashSet<>(transposer.reverse(value, attribute.getValueSpace())));
+		return Collections.singleton(new HashSet<>(transposer.reverse(value, null)));
 	}
 	
 	

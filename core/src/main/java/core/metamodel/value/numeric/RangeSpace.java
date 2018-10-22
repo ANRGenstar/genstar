@@ -2,6 +2,7 @@ package core.metamodel.value.numeric;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
@@ -19,6 +21,7 @@ import core.util.data.GSDataParser;
 import core.util.data.GSDataParser.NumMatcher;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
+import core.util.random.GenstarRandomUtils;
 
 /**
  * Encapsulate pair of number that represents bottom and top value of a range. It also
@@ -55,13 +58,13 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	 * @param rt
 	 */
 	public RangeSpace(IAttribute<RangeValue> attribute, GSRangeTemplate rt){
-		this(attribute, rt, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		this(attribute, rt, rt.getTheoreticalMin(), rt.getTheoreticalMax());
 	}
 	
 	public RangeSpace(IAttribute<RangeValue> attribute, List<String> ranges,
 			Number minValue, Number maxValue) throws GSIllegalRangedData{
 		this(attribute, gsdp.getRangeTemplate(ranges, GSDataParser.DEFAULT_NUM_MATCH, NumMatcher.getDefault()),
-				Integer.MIN_VALUE, Integer.MAX_VALUE);
+				minValue, maxValue);
 	}
 	
 	public RangeSpace(IAttribute<RangeValue> attribute, GSRangeTemplate rt, 
@@ -247,6 +250,48 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	 * @return
 	 */
 	public Number getMax() {return max;}
+	
+	// ------------- RANDOM VALUE IN RANGE --------------- //
+	
+	public Number getRandom(RangeValue rv) {
+		double std = this.getStandardRange();
+		Number lb = rv.getBottomBound();
+		Number ub = rv.getTopBound();
+		if(lb.intValue() == Integer.MIN_VALUE)
+			lb = (int) (ub.intValue() - Math.round(Math.round(std)));
+		else if(lb.doubleValue() == Double.MIN_VALUE)
+			lb = ub.doubleValue() - std;
+		else if(ub.intValue() == Integer.MAX_VALUE)
+			ub = (int) (lb.intValue() + Math.round(Math.round(std)));
+		else if(ub.doubleValue() == Double.MAX_VALUE)
+			ub = lb.doubleValue() + std;
+		return GenstarRandomUtils.rnd(lb, ub);
+	}
+	
+	/*
+	 * 
+	 */
+	private double getStandardRange() {
+		List<Double> vals = values.stream()
+				.flatMap(v -> Stream.of(v.getBottomBound(), v.getTopBound()))
+				.mapToDouble(v -> v.doubleValue()).boxed()
+				.collect(Collectors.toList());
+		Collections.sort(vals);
+		Map<Double, Integer> ranges = new HashMap<>();
+		for(int i = 1 ; i < vals.size(); i++) {
+			double lRange = vals.get(i) - vals.get(i-1);
+			if(ranges.containsKey(lRange))
+				ranges.put(lRange, ranges.get(lRange)+1);
+			else
+				ranges.put(lRange,1);
+		}
+		double sor = ranges.entrySet().stream()
+				.mapToDouble(entry -> entry.getKey()*Math.pow(entry.getValue(),1.5))
+				.sum();
+		double factor = ranges.values().stream()
+				.mapToDouble(v -> Math.pow(v, 1.5)).sum();
+		return sor/factor;
+	}
 	
 	// ----------------------------------------------- //
 	

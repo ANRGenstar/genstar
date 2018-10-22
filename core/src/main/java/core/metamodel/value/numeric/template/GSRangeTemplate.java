@@ -79,6 +79,47 @@ public class GSRangeTemplate {
 		return numMatcher;
 	}
 	
+	/**
+	 * Get the minimum for this matcher
+	 * @return
+	 */
+	public Number getTheoreticalMin() {
+		switch (numMatcher) {
+		case DOUBLE_MATCH_ENG:
+		case DOUBLE_MATCH_FR:
+			return Double.MIN_VALUE;
+		case DOUBLE_POSITIF_MATCH_ENG:
+		case DOUBLE_POSITIF_MATCH_FR:
+			return 0d;
+		case INT_MATCH:
+			return Integer.MIN_VALUE;
+		case INT_POSITIF_MATCH:
+			return 0;
+		default:
+			throw new RuntimeException();
+		}
+	}
+	
+	/**
+	 * Get the maximum for this matcher
+	 * @return
+	 */
+	public Number getTheoreticalMax() {
+		switch (numMatcher) {
+		case DOUBLE_MATCH_ENG:
+		case DOUBLE_MATCH_FR:
+		case DOUBLE_POSITIF_MATCH_ENG:
+		case DOUBLE_POSITIF_MATCH_FR:
+			return Double.MAX_VALUE;
+		case INT_MATCH:
+		case INT_POSITIF_MATCH:
+			return Integer.MAX_VALUE;
+		default:
+			throw new RuntimeException();
+		}
+	}
+
+		
 	@Override
 	public String toString(){
 		return "Template: {"+bottomBound+" ... "+middle+" ... "+topBound+"}";

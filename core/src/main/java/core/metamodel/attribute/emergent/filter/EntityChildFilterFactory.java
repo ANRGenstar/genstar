@@ -1,10 +1,6 @@
 package core.metamodel.attribute.emergent.filter;
 
-import java.util.Map;
-import java.util.Set;
-
 import core.metamodel.attribute.Attribute;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.HammingEntityComparator;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
@@ -89,8 +85,8 @@ public class EntityChildFilterFactory {
 	 * @param referent
 	 * @return
 	 */
-	public EntityMatchFilter getEntityMatchFilter(Map<IAttribute<? extends IValue>, Set<IValue>> referent) {
-		return new EntityMatchFilter(new HammingEntityComparator(referent));
+	public EntityMatchFilter getEntityMatchFilter(IValue... matches) {
+		return new EntityMatchFilter(new HammingEntityComparator(matches));
 	}
 		
 }

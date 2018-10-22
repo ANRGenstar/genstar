@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -124,28 +125,27 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 
 	// ---------------------------- ACCESSORS ---------------------------- //
 	
-	/**
-	 * Retrieves attributes describe by this dictionary
-	 * 
-	 * @return
-	 */
 	@Override
 	public Collection<Attribute<? extends IValue>> getAttributes() {
 		return Collections.unmodifiableSet(attributes);
 	}
 	
-	/**
-	 * Access to attribute using attribute name define as {@link IAttribute#getAttributeName()}
-	 * 
-	 * @param string
-	 * @return
-	 */
 	@Override
 	public Attribute<? extends IValue> getAttribute(String string) {
 		Attribute<? extends IValue> a = name2attribute.get(string);
 		if (a == null)
 			throw new NullPointerException("This dictionary contains no reference to the attribute with name "+string);
 		return a;
+	}
+	
+	@Override
+	public IValue getValue(String value) {
+		Optional<Attribute<? extends IValue>> attribute = attributes.stream()
+				.filter(a -> a.getValueSpace().contains(value))
+				.findFirst();
+		if(attribute.isPresent())
+			return attribute.get().getValueSpace().getValue(value);
+		throw new NullPointerException("This dictionary contains no reference to the value "+value);
 	}
 	
 	// ------------------- UTILITIES

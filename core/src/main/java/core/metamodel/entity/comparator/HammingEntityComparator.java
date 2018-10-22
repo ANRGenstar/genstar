@@ -21,9 +21,7 @@ public class HammingEntityComparator extends ImplicitEntityComparator {
 
 	private AttributeVectorMatcher vector;
 
-	public HammingEntityComparator() {
-		
-	}
+	public HammingEntityComparator() { }
 
 	/**
 	 * Hamming distance will be computed using a referent entity (one value for each attribute) 
@@ -42,6 +40,19 @@ public class HammingEntityComparator extends ImplicitEntityComparator {
 	public HammingEntityComparator(Map<IAttribute<? extends IValue>, Set<IValue>> vector) {
 		this.vector = new AttributeVectorMatcher(vector);
 	}
+	
+	/**
+	 * Equivalent to {link @HammingEntityComparator(Map<IAttribute<? extends IValue>, Set<IValue>> vector)} but not
+	 * without consistency
+	 * 
+	 * @param vector
+	 */
+	public HammingEntityComparator(IValue... vector) {
+		this.vector = new AttributeVectorMatcher();
+		this.vector.addMatchToVector(vector);
+	}
+	
+	// ------------------------------------------------------------ //
 
 	@Override
 	public int compare(IEntity<? extends IAttribute<? extends IValue>> e1, IEntity<? extends IAttribute<? extends IValue>> e2) {
