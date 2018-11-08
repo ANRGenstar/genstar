@@ -13,7 +13,8 @@ import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
-public class EmergentAttributeSerializer extends StdSerializer<EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?>> {
+public class EmergentAttributeSerializer extends StdSerializer<EmergentAttribute<? extends IValue, ? extends IValue, 
+		? extends IEntity<? extends IAttribute<? extends IValue>>, ?>> {
 
 	/**
 	 * 
@@ -26,19 +27,19 @@ public class EmergentAttributeSerializer extends StdSerializer<EmergentAttribute
 		this(null);
 	}
 	
-	protected EmergentAttributeSerializer(Class<EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?>> t) {
+	protected EmergentAttributeSerializer(Class<EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?>> t) {
 		super(t);
 	}
 
 	@Override
 	public void serialize(
-			EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute,
+			EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute,
 			JsonGenerator gen, SerializerProvider provider) throws IOException {
 		// DO NOTHING
 	}
 	
 	@Override
-	public void serializeWithType(EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute,
+	public void serializeWithType(EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute,
 			JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
 		
 		gen.writeStartObject();
@@ -46,8 +47,10 @@ public class EmergentAttributeSerializer extends StdSerializer<EmergentAttribute
 		gen.writeStartObject();
 		gen.writeStringField(IAttribute.NAME, attribute.getAttributeName());
 		gen.writeStringField(MappedAttribute.REF, attribute.getReferentAttribute().getAttributeName());
-		EmergentFunctionSerializer fs = new EmergentFunctionSerializer();
-		fs.serializeWithType(attribute.getFunction(), gen, serializers, typeSer);
+		AttributeMapperSerializer amf = new AttributeMapperSerializer();
+		amf.serializeWithType(attribute.getAttributeMapper(), gen, serializers, typeSer);
+		EmergentFunctionSerializer efs = new EmergentFunctionSerializer();
+		efs.serializeWithType(attribute.getFunction(), gen, serializers, typeSer);
 		gen.writeEndObject();
 		gen.writeEndObject();
 		

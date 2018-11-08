@@ -18,11 +18,13 @@ import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.attribute.emergent.transposer.MappedTransposedValueFunction;
 import core.metamodel.attribute.mapper.AggregateMapper;
+import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.mapper.value.NumericValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
+import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
@@ -415,6 +417,30 @@ public class AttributeFactory {
 		}
 	}
 	
+	/* ----------------------- *
+	 * 	  EMERGENT ATTRIBUTE   *
+	 * ----------------------- */
+	
+	// EMERGENT COUNT
+	
+	/**
+	 * Attribute that will count the number of sub-entities without any referent attribute. Must then be used with care !
+	 * try to use {@link MappedAttribute#setReferentAttribute(Attribute)}
+	 * 
+	 * @param name
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
+	EmergentAttribute<IntegerValue, IValue, E, ?> createCountAttribute(String name, 
+			IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<IntegerValue, IValue, E, Object> attribute = new EmergentAttribute<>(name, null, new UndirectedMapper<>());
+		attribute.setValueSpace(new IntegerSpace(attribute));
+		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
+		return attribute;
+	}
+	
 	/**
 	 * Attribute that will count the number of sub-entities. As for any emergent attribute
 	 * it is possible to filter agent before counting; makes it possible to number sub-entities
@@ -426,13 +452,46 @@ public class AttributeFactory {
 	 * @param matches
 	 * @return
 	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
-	EmergentAttribute<IntegerValue, E, Object> createCountAttribute(String name, 
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
+	EmergentAttribute<IntegerValue, V, E, ?> createCountAttribute(String name, 
+			Attribute<V> referent, IAttributeMapper<IntegerValue, V> mapper,
 			IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<IntegerValue, E, Object> attribute = new EmergentAttribute<>(name);
+		EmergentAttribute<IntegerValue, V, E, Object> attribute = new EmergentAttribute<>(name, referent, mapper);
 		attribute.setValueSpace(new IntegerSpace(attribute));
 		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
 		return attribute;
+	}
+	
+	/**
+	 * Attribute that will count the number of sub-entities and bind this value to a predefined referent
+	 * 
+	 * @param name
+	 * @param referent
+	 * @param mapper
+	 * @param filter
+	 * @param matches
+	 * @return
+	 */
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
+	EmergentAttribute<IntegerValue, OrderedValue, E, ?> createCountAttribute(String name, 
+			Attribute<OrderedValue> referent, NumericValueMapper<IntegerValue> mapper,
+			IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<IntegerValue, OrderedValue, E, Object> attribute = new EmergentAttribute<>(name, referent, mapper);
+		attribute.setValueSpace(new IntegerSpace(attribute));
+		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
+		return attribute;
+	}
+	
+	// EMERGENT VALUE FOR ATTRIBUTE
+	
+	
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
+	EmergentAttribute<V, V, E, Attribute<V>> createValueOfAttribute(String name, 
+			Attribute<V> referent, IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<V, V, E, Attribute<V>> eAttribute = new EmergentAttribute<>(name, referent, null);
+		eAttribute.setValueSpace(referent.getValueSpace());
+		eAttribute.setFunction(new EntityValueForAttributeFunction<E, Attribute<V>, V>(referent, filter, matches));
+		return eAttribute;
 	}
 
 	/**
@@ -448,14 +507,15 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, E, Attribute<V>> createValueOfAttribute(String name, Attribute<V> referent,  
-			IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<V, E, Attribute<V>> eAttribute = new EmergentAttribute<>(name, referent);
+	EmergentAttribute<V, V, E, Attribute<V>> createValueOfAttribute(String name, Attribute<V> referent,  
+			IAttributeMapper<V,V> mapper, IEntityChildFilter filter, IValue... matches) {
+		EmergentAttribute<V, V, E, Attribute<V>> eAttribute = new EmergentAttribute<>(name, referent, mapper);
 		eAttribute.setValueSpace(referent.getValueSpace());
 		eAttribute.setFunction(new EntityValueForAttributeFunction<E, Attribute<V>, V>(referent, filter, matches));
 		return eAttribute;
 	}
 
+	// EMERGENT AGGREGATE
 
 	/**
 	 * Attribute that aggregate input values into single output value based on a default aggregator
@@ -469,7 +529,7 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, E, Attribute<V>> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
+	EmergentAttribute<V, V, E, Attribute<V>> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute,
 			IEntityChildFilter filter, IValue... matches) {
 		return this.createAggregatedValueOfAttribute(name, inputAttribute, 
 				IAggregatorValueFunction.getDefaultAggregator(inputAttribute.getValueSpace().getTypeClass()), 
@@ -490,13 +550,15 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends Attribute<V>, V extends IValue>
-	EmergentAttribute<V, E, A> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
+	EmergentAttribute<V, V, E, A> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
 			IAggregatorValueFunction<V> aggFunction, IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<V, E, A> eAttribute = new EmergentAttribute<>(name, inputAttribute);
+		EmergentAttribute<V, V, E, A> eAttribute = new EmergentAttribute<>(name, inputAttribute, null);
 		eAttribute.setValueSpace(inputAttribute.getValueSpace().clone(eAttribute));
 		eAttribute.setFunction(new EntityAggregatedAttributeFunction<E, A, V>(eAttribute, aggFunction, filter, matches));
 		return eAttribute;
 	}
+	
+	// EMERGENT TRANSPOSED 
 	
 	/**
 	 * Attribute that will transpose or aggregate a subset of specific values from sub-entities to one attribute value 
@@ -507,13 +569,14 @@ public class AttributeFactory {
 	 * @param matches
 	 * @return
 	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue>
-	EmergentAttribute<V, E, Object> createTransposedValuesAttribute(String name, Attribute<V> inputAttribute, 
-			Map<Collection<IValue>, V> mapper, IEntityChildFilter filter, IValue... matches){
-		EmergentAttribute<V, E, Object> eAttribute = new EmergentAttribute<>(name, inputAttribute);
-		eAttribute.setValueSpace(inputAttribute.getValueSpace());
+	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue, K extends IValue>
+	EmergentAttribute<K, V, E, ?> createTransposedValuesAttribute(String name, 
+			Attribute<V> inputAttribute, IAttributeMapper<K, V> mapper, IValueSpace<K> valueSpace,
+			Map<Collection<IValue>, K> transposer, IEntityChildFilter filter, IValue... matches){
+		EmergentAttribute<K, V, E, ?> eAttribute = new EmergentAttribute<>(name, inputAttribute, mapper);
+		eAttribute.setValueSpace(valueSpace);
 		eAttribute.setFunction(new EntityTransposedAttributeFunction<>(eAttribute, 
-				new MappedTransposedValueFunction<>(mapper), filter, matches));
+				new MappedTransposedValueFunction<>(transposer), filter, matches));
 		return eAttribute;
 	}
 	
@@ -958,7 +1021,7 @@ public class AttributeFactory {
 	 */
 	public MappedAttribute<IValue, OrderedValue> createOrderedToNumericAttribute(String name,
 			Attribute<OrderedValue> referentAttribute, LinkedHashMap<String, List<Number>> map){
-		NumericValueMapper mapper = new NumericValueMapper();
+		NumericValueMapper<IValue> mapper = new NumericValueMapper<>();
 		MappedAttribute<IValue, OrderedValue> attribute = new MappedAttribute<>(name, referentAttribute, mapper);
 		for(String ov : map.keySet()) {
 			OrderedValue value = referentAttribute.getValueSpace().getValue(ov);
@@ -1405,6 +1468,19 @@ public class AttributeFactory {
 						referentAttribute.getValueSpace().getValue(record.get(key))
 						));
 		return attribute;
+	}
+
+	// :: UTILES -------------------- //
+	
+	/**
+	 * Postponed the referent attribution
+	 * 
+	 * @param referee
+	 * @param referent
+	 */
+	public <V extends IValue> void setReferent(MappedAttribute<? extends IValue, V> referee,
+			Attribute<V> referent) {
+		referee.setReferentAttribute(referent);
 	}
 	
 }

@@ -35,11 +35,12 @@ import core.util.random.GenstarRandomUtils;
  * @author kevinchapuis
  *
  */
-public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue> {
+public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K, OrderedValue> {
 	
-	private Map<IValue, OrderedValue> mapper;
+	private Map<IValue, OrderedValue> innerMapper;
+	private Map<K, OrderedValue> mapper;
 
-	private MappedAttribute<IValue, OrderedValue> relatedAttribute;
+	private MappedAttribute<K, OrderedValue> relatedAttribute;
 
 	private static Attribute<ContinuousValue> CA = AttributeFactory.createNIU(ContinuousValue.class);
 	private static Attribute<IntegerValue> IA = AttributeFactory.createNIU(IntegerValue.class);
@@ -47,6 +48,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	private static GSDataParser GSDP = new GSDataParser();
 	
 	public NumericValueMapper() {
+		this.innerMapper = new HashMap<>();
 		this.mapper = new HashMap<>();
 	}
 	
@@ -60,7 +62,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	 * @param tValue
 	 */
 	public void add(OrderedValue nominal, Number bValue, Number tValue) {
-		mapper.put(RA.getValueSpace().proposeValue(bValue.toString()+" : "+tValue.toString()), nominal);
+		innerMapper.put(RA.getValueSpace().proposeValue(bValue.toString()+" : "+tValue.toString()), nominal);
 	}
 	
 	/**
@@ -76,7 +78,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 		String theString = rb.equals(RangeBound.UPPER) ? 
 				value.toString()+" : "+((RangeSpace)RA.getValueSpace()).getMax()
 				: ((RangeSpace)RA.getValueSpace()).getMin()+" : "+value.toString();
-		mapper.put(RA.getValueSpace().proposeValue(theString), nominal);
+		innerMapper.put(RA.getValueSpace().proposeValue(theString), nominal);
 	}
 	
 	/**
@@ -89,10 +91,10 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 		GSEnumDataType type = GSDP.getValueType(value.toString());
 		switch (type) {
 		case Integer:
-			mapper.put(IA.getValueSpace().proposeValue(value.toString()), nominal);
+			innerMapper.put(IA.getValueSpace().proposeValue(value.toString()), nominal);
 			break;
 		case Continue:
-			mapper.put(CA.getValueSpace().proposeValue(value.toString()), nominal);
+			innerMapper.put(CA.getValueSpace().proposeValue(value.toString()), nominal);
 			break;
 		default:
 			throw new IllegalArgumentException(value+" cannot be transpose to any numerical value");
@@ -104,7 +106,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 		if(Stream.of(GSEnumDataType.Continue, GSEnumDataType.Integer, GSEnumDataType.Range)
 				.noneMatch(type -> type.equals(mapWith.getValueSpace().getType())))
 			return false;
-		mapper.put(mapTo, mapWith);
+		innerMapper.put(mapTo, mapWith);
 		return true;
 	}
 	
@@ -116,7 +118,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	 * @return
 	 */
 	public IValue getValue(OrderedValue nominal) {
-		Optional<Entry<IValue, OrderedValue>> opt = mapper.entrySet().stream()
+		Optional<Entry<IValue, OrderedValue>> opt = innerMapper.entrySet().stream()
 				.filter(entry -> entry.getValue().equals(nominal)).findFirst();
 		if(opt.isPresent())
 			return opt.get().getKey();
@@ -159,9 +161,9 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	 * @return
 	 */
 	public OrderedValue getNominal(Number value) {
-		Optional<IValue> opt = mapper.keySet().stream().filter(k -> this.validate(value, k)).findFirst();
+		Optional<IValue> opt = innerMapper.keySet().stream().filter(k -> this.validate(value, k)).findFirst();
 		if(opt.isPresent())
-			return mapper.get(opt.get());
+			return innerMapper.get(opt.get());
 		throw new NoSuchElementException("There is no relevant numeric value mapper to "+value);
 	}
 	
@@ -171,7 +173,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	 * @return
 	 */
 	public boolean contains(Number value) {
-		return mapper.values().stream().anyMatch(v -> this.validate(value, v));
+		return innerMapper.values().stream().anyMatch(v -> this.validate(value, v));
 	}
 	
 	/**
@@ -179,23 +181,36 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	 */
 	@Override
 	public Collection<? extends IValue> getMappedValues(IValue value) {
-		if(mapper.containsKey(value))
-			return Collections.singleton(mapper.get(value));
-		return Collections.emptyList();
+		IValue output = null;
+		if(innerMapper.containsKey(value))
+			output = innerMapper.get(value);
+		else if(innerMapper.values().stream().anyMatch(v -> v.getStringValue().equals(value.getStringValue())))
+			output = innerMapper.entrySet().stream()
+						.filter(e -> e.getValue().getStringValue().equals(value.getStringValue()))
+						.findFirst().get().getKey();
+		if(output == null)
+			return Collections.emptyList();
+		return Collections.singleton(output);
 	}
 	
 	@Override
-	public void setRelatedAttribute(MappedAttribute<IValue, OrderedValue> relatedAttribute) {
+	public void setRelatedAttribute(MappedAttribute<K, OrderedValue> relatedAttribute) {
 		this.relatedAttribute = relatedAttribute;
 	}
 
 	@Override
-	public MappedAttribute<IValue, OrderedValue> getRelatedAttribute() {
+	public MappedAttribute<K, OrderedValue> getRelatedAttribute() {
 		return relatedAttribute;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * WARNING: this method could lead to unstable result
+	 */
 	@Override
-	public Map<Collection<IValue>, Collection<OrderedValue>> getRawMapper() {
+	public Map<Collection<K>, Collection<OrderedValue>> getRawMapper() {
+		this.transposeInnerMapper();
 		return mapper.entrySet().stream()
 				.collect(Collectors.toMap(
 						entry->Collections.singleton(entry.getKey()), 
@@ -229,7 +244,7 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 	private double getStandardRange() {
 		GSDataParser gsdp = new GSDataParser();
 		List<Double> vals = new ArrayList<>();
-		for(IValue v : mapper.keySet()) {
+		for(IValue v : innerMapper.keySet()) {
 			switch (v.getType()) {
 			case Range:
 				RangeValue rv = (RangeValue) v;
@@ -256,6 +271,34 @@ public class NumericValueMapper implements IAttributeMapper<IValue, OrderedValue
 		double factor = ranges.values().stream()
 				.mapToDouble(v -> Math.pow(v, 1.5)).sum();
 		return sor/factor;
+	}
+	
+	/*
+	 * 
+	 */
+	@SuppressWarnings("unchecked")
+	private void transposeInnerMapper() {
+		Map<K, OrderedValue> theMapper = new HashMap<>();
+		GSEnumDataType dataType = GSDP.getValueType(GenstarRandomUtils.oneOf(innerMapper.keySet()).getStringValue());
+		switch (dataType) {
+		case Continue:
+			for(Entry<IValue, OrderedValue> entry : innerMapper.entrySet()) {
+				theMapper.put((K)CA.getValueSpace().proposeValue(entry.getKey().getStringValue()), entry.getValue());
+			}
+			break;
+		case Range:
+			for(Entry<IValue, OrderedValue> entry : innerMapper.entrySet()) {
+				theMapper.put((K)RA.getValueSpace().proposeValue(entry.getKey().getStringValue()), entry.getValue());
+			}
+			break;
+		default:
+			for(Entry<IValue, OrderedValue> entry : innerMapper.entrySet()) {
+				theMapper.put((K)IA.getValueSpace().proposeValue(entry.getKey().getStringValue()), entry.getValue());
+			}
+			break;
+		}
+		
+		this.mapper = theMapper;
 	}
 	
 }

@@ -133,7 +133,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute = null;
+		EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute = null;
 		try {
 			attribute = this.getEmergentAttribute(node);
 		} catch (IOException e) {
@@ -416,15 +416,17 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Build emergent attribute 
 	 */
-	private EmergentAttribute<? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> getEmergentAttribute(
+	private EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> getEmergentAttribute(
 			JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		
 		String name = this.getName(node);
 		
 		JsonNode function = node.get(EmergentAttribute.FUNCTION);
 		JsonNode filter = function.get(IEntityEmergentFunction.FILTER);
+		
+		//JsonNode mapper = node.get(MappedAttribute.MAP);
 			
-		EmergentAttribute<? extends IValue, IEntity<? extends IAttribute<? extends IValue>>, ?> att = null;
+		EmergentAttribute<? extends IValue, ? extends IValue, IEntity<? extends IAttribute<? extends IValue>>, ?> att = null;
 		String refAtt = node.get(MappedAttribute.REF).asText();
 		
 		

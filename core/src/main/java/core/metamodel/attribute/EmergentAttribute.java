@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.EmergentAttributeSerializer;
 import core.metamodel.attribute.emergent.IEntityEmergentFunction;
+import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -26,25 +27,23 @@ import core.metamodel.value.IValue;
  */
 @JsonTypeName(EmergentAttribute.SELF)
 @JsonSerialize(using = EmergentAttributeSerializer.class)
-public class EmergentAttribute<V extends IValue, 
+public class EmergentAttribute<K extends IValue, V extends IValue, 
 	E extends IEntity<? extends IAttribute<? extends IValue>>,
 			U> 
-	extends Attribute<V> {
+	extends MappedAttribute<K, V> {
 
 	public static final String SELF = "EMERGENT ATTRIBUTE";
 	public static final String FUNCTION = "EMERGENT FUNCTION";
 	
 	@JsonProperty(FUNCTION)
-	private IEntityEmergentFunction<E, U, V> function;
-	private Attribute<? extends IValue> referent;
+	private IEntityEmergentFunction<E, U, K> function;
 
-	protected EmergentAttribute(String name, Attribute<? extends IValue> referent) {
-		super(name);
-		this.referent = referent == null ? this : referent;
+	protected EmergentAttribute(String name, Attribute<V> referent, IAttributeMapper<K,V> mapper) {
+		super(name, referent, mapper);
 	}
 	
 	protected EmergentAttribute(String name) {
-		this(name, null);
+		this(name, null, null);
 	}
 	
 	/**
@@ -56,7 +55,7 @@ public class EmergentAttribute<V extends IValue,
 	 * @return
 	 */
 	@JsonIgnore
-	public V getEmergentValue(E entity, U predicate) {
+	public K getEmergentValue(E entity, U predicate) {
 		return function.apply(entity, predicate);
 	}
 	
@@ -67,7 +66,7 @@ public class EmergentAttribute<V extends IValue,
 	 * @return
 	 */
 	@JsonIgnore
-	public Collection<Set<IValue>> getImergentValues(V value, U predicate){
+	public Collection<Set<IValue>> getImergentValues(K value, U predicate){
 		return function.reverse(value, predicate);
 	}
 	
@@ -77,7 +76,7 @@ public class EmergentAttribute<V extends IValue,
 	 * @return
 	 */
 	@JsonProperty(FUNCTION)
-	public IEntityEmergentFunction<E, U, V> getFunction(){
+	public IEntityEmergentFunction<E, U, K> getFunction(){
 		return this.function;
 	}
 	
@@ -87,13 +86,8 @@ public class EmergentAttribute<V extends IValue,
 	 * @param function
 	 */
 	@JsonProperty(FUNCTION)
-	public void setFunction(IEntityEmergentFunction<E, U, V> function){
+	public void setFunction(IEntityEmergentFunction<E, U, K> function){
 		this.function = function;
-	}
-	
-	@Override
-	public Attribute<? extends IValue> getReferentAttribute(){
-		return referent;
 	}
 
 }
