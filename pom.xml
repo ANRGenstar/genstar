@@ -7,6 +7,20 @@
 	<packaging>pom</packaging>
 
 
+ <distributionManagement>
+		<repository>
+		  <id>central-repository</id>
+		  <name>libs-release</name>
+		  <url>https://oss.jfrog.org/artifactory/oss-release-local/ </url>
+		</repository>
+		<snapshotRepository>
+		  <id>snapshots-repository</id>
+		  <name>libs-snapshot</name>
+		  <url>https://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
+		</snapshotRepository>
+
+    </distributionManagement>
+
 	<properties>
 	    <project.version>2.1</project.version>        
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -18,6 +32,7 @@
 		<maven.deploy.skip>false</maven.deploy.skip>
 		<!-- use the latest snapshot <geotools.version>15-SNAPSHOT</geotools.version> -->
 	</properties>
+
 
 <dependencyManagement>
 		<dependencies>
@@ -56,11 +71,9 @@
 		<module>spll</module>
 		<module>spin</module>
 	</modules>
-
 <build>
-	<plugins>
-
-    <plugin>
+<plugins>
+  <plugin>
       <groupId>org.jfrog.buildinfo</groupId>
       <artifactId>artifactory-maven-plugin</artifactId>
       <version>2.6.1</version>
@@ -72,15 +85,21 @@
             <goal>publish</goal>
           </goals>
           <configuration>
+	<deployProperties>
+           <groupId>${project.groupId}</groupId>
+           <artifactId>${project.artifactId}</artifactId>
+           <version>${project.version}</version>
+	</deployProperties>
             <artifactory>
               <includeEnvVars>true</includeEnvVars>
               <envVarsExcludePatterns>*password*,*secret*,*key*,*token*,*passphrase*</envVarsExcludePatterns>
               <timeoutSec>60</timeoutSec>
             </artifactory>
             <publisher>
-              <contextUrl>https://oss.jfrog.org/artifactory</contextUrl>
-              <username>${username}</username>
-              <password>${password}</password>
+				<!--Artifactory don't use settings.xml ...-->
+              <contextUrl>https://oss.jfrog.org/artifactory/</contextUrl>
+              <username>genstarbot</username>
+              <password>${PASSWORD}</password>
               <repoKey>oss-release-local</repoKey>
               <snapshotRepoKey>oss-snapshot-local</snapshotRepoKey>
             </publisher>
@@ -92,28 +111,6 @@
         </execution>
       </executions>
     </plugin>
-    
-    
-  </plugins>
+ </plugins>
 </build>
-<repositories>
-  <repository>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-    <id>central</id>
-    <name>bintray</name>
-    <url>http://jcenter.bintray.com</url>
-  </repository>
-</repositories>
-<pluginRepositories>
-  <pluginRepository>
-    <snapshots>
-      <enabled>true</enabled>
-    </snapshots>
-    <id>central</id>
-    <name>bintray-plugins</name>
-    <url>http://jcenter.bintray.com</url>
-  </pluginRepository>
-</pluginRepositories>
 </project>

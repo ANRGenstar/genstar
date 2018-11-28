@@ -125,6 +125,8 @@
         </execution>
       </executions>
     </plugin>
+
+
    <!--     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
@@ -136,6 +138,7 @@
 
     </plugins>
     </build>
+
     <!--    <distributionManagement>
                     <repository>
                     <id>bintray-anrgenstar-genstar-packages</id>

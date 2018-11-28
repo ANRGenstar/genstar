@@ -421,6 +421,8 @@
         </execution>
       </executions>
     </plugin>
+
+
    <!--     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
@@ -445,6 +447,7 @@
 			<url>http://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 	</repositories>
+
 		<!--	<distributionManagement>
 		                <repository>
 		                <id>bintray-anrgenstar-genstar-packages</id>
