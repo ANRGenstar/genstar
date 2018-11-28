@@ -6,11 +6,10 @@
     <version>${revision}</version>
 	<packaging>pom</packaging>
 
-
 	<repositories>
 		<repository>
 			<snapshots>
-				<enabled>false</enabled>
+				<enabled>true</enabled>
 			</snapshots>
 			<id>central</id>
 			<name>bintray</name>
@@ -20,7 +19,7 @@
 	<pluginRepositories>
 		<pluginRepository>
 			<snapshots>
-				<enabled>false</enabled>
+				<enabled>true</enabled>
 			</snapshots>
 			<id>central</id>
 			<name>bintray-plugins</name>
