@@ -7,19 +7,25 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import core.configuration.dictionary.AttributeDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
+import core.util.GSPerformanceUtil;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
+import core.util.random.GenstarRandomUtils;
+import core.util.random.roulette.ARouletteWheelSelection;
+import core.util.random.roulette.RouletteWheelSelectionFactory;
 import gospl.GosplEntity;
 import gospl.GosplPopulation;
 import gospl.generator.ISyntheticGosplPopGenerator;
@@ -46,9 +52,11 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 	char[] chars = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
 	private AttributeDictionary dictionary;
-	private Map<Attribute<? extends IValue>, SortedMap<Double, IValue>> attributesProba;
+	private Map<Attribute<? extends IValue>, ARouletteWheelSelection<Double, IValue>> attributesProba;
 
 	Random random = GenstarRandom.getInstance();
+	
+	Logger log = LogManager.getLogger();
 
 	/**
 	 * Set the maximum number of attribute and maximum value per attribute
@@ -73,12 +81,20 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 	@Override
 	public GosplPopulation generate(int numberOfIndividual) {
 
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Generate util population", log, Level.TRACE);
+		
 		// Basic population to feed
 		GosplPopulation gosplPop = new GosplPopulation();
 		
+		if(dictionary == null) {
+			dictionary = new AttributeDictionary();
+		}
+		
 		// Attribute Factory
 		if(dictionary.getAttributes() == null || dictionary.getAttributes().isEmpty()){
-			int nb = random.nextInt(maxAtt)+1;
+			gspu.getStempPerformance("Generating dictionary from scratch");
+			int nb = random.nextInt(maxAtt);
+			nb = nb <= 1 ? 2 : nb;
 			@SuppressWarnings("unchecked")
 			Attribute<? extends IValue>[] arr = new Attribute[nb];
 			this.dictionary.addAttributes(IntStream.range(0, nb)
@@ -88,6 +104,8 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 		
 		// Attribute probability table
 		this.setupAttributeProbabilityTable();
+		
+		gspu.sysoStempPerformance(0.0, "Start generating "+numberOfIndividual+" entity", this);
 
 		for(int i = 0; i < numberOfIndividual; i++) {
 			GosplEntity entity = new GosplEntity(attributesProba.keySet().stream().collect(Collectors.toMap(
@@ -103,7 +121,10 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 				}
 			}		
 			gosplPop.add(entity);
+			if((i % (numberOfIndividual/10.0)) == 0)
+				gspu.sysoStempPerformance(i/(numberOfIndividual*1.0), this);
 		}
+		gspu.sysoStempPerformance(1.0, this);
 
 		return gosplPop;
 	}
@@ -115,11 +136,13 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 
 
 	private Attribute<? extends IValue> createIntegerAtt() {
+		int valNb = random.nextInt(maxVal);
+		valNb = valNb <= 1 ? 2 : valNb;
 		Attribute<? extends IValue> asa = null;
 		try {
 			asa = AttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Integer, 
-					IntStream.range(0, maxVal).mapToObj(i -> String.valueOf(i)).collect(Collectors.toList()));
+					IntStream.range(0, valNb).mapToObj(i -> String.valueOf(i)).collect(Collectors.toList()));
 		} catch (GSIllegalRangedData e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -128,11 +151,13 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 	}
 
 	private Attribute<? extends IValue> createStringAtt(){
+		int valNb = random.nextInt(maxVal);
+		valNb = valNb <= 1 ? 2 : valNb;
 		Attribute<? extends IValue> asa = null;
 		try {
 			asa = AttributeFactory.getFactory().createAttribute(generateName(random.nextInt(6)+1), 
 					GSEnumDataType.Nominal, 
-					IntStream.range(0, random.nextInt(maxVal)).mapToObj(j -> 
+					IntStream.range(0, valNb).mapToObj(j -> 
 					generateName(random.nextInt(j+1))).collect(Collectors.toList()));
 		} catch (GSIllegalRangedData e) {
 			// TODO Auto-generated catch block
@@ -159,32 +184,27 @@ public class GSUtilGenerator implements ISyntheticGosplPopGenerator {
 		// Only set probability for referent attribute 
 		Set<Attribute<? extends IValue>> referentAttribute = dictionary.getAttributes()
 				.stream().filter(a -> a.getReferentAttribute().equals(a)).collect(Collectors.toSet());
+		
 		for(Attribute<? extends IValue> att : referentAttribute){
-			double sop = 1d;
-			attributesProba.put(att, new TreeMap<>());
-			for(IValue val : att.getValueSpace().getValues()){
-				double rnd = random.nextDouble() * sop;
-				attributesProba.get(att).put(rnd, val);
-				sop -= rnd;
-			}
+			List<IValue> keys = new ArrayList<>(att.getValueSpace().getValues());
+			List<Double> probaList = keys.stream()
+					.map(v -> random.nextDouble()).collect(Collectors.toList());
+			double sop = probaList.stream().mapToDouble(Double::doubleValue).sum();
+			attributesProba.put(att, RouletteWheelSelectionFactory
+					.getRouletteWheel(probaList.stream().map(d -> d/sop).collect(Collectors.toList()), 
+							keys));
 		}
+		
 	}
 
 	// ---------------------- utilities ---------------------- //
 
 	private IValue randomVal(Attribute<? extends IValue> attribute){
-		List<Double> dop = new ArrayList<>(attributesProba.get(attribute).keySet());
-		double rnd = random.nextDouble();
-		for(Double proba : dop)
-			if(rnd <= proba)
-				return attributesProba.get(attribute).get(proba);
-		List<IValue> values = new ArrayList<>(attributesProba.get(attribute).values());
-		return values.get(random.nextInt(values.size()));
+		return attributesProba.get(attribute).drawObject();
 	}
 	
 	private IValue randomUniformVal(Collection<? extends IValue> values){
-		List<IValue> vals = new ArrayList<>(values);
-		return vals.get(random.nextInt(values.size()));
+		return GenstarRandomUtils.oneOf(values);
 	}
 
 }

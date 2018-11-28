@@ -2,6 +2,8 @@ package core.metamodel.attribute;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -54,6 +56,10 @@ public class MappedAttribute<K extends IValue, V extends IValue> extends Attribu
 		return referentAttribute;
 	}
 	
+	protected void setReferentAttribute(Attribute<V> referent) {
+		this.referentAttribute = referent;
+	}
+	
 	@Override
 	public Collection<? extends IValue> findMappedAttributeValues(IValue value){
 		try {
@@ -88,6 +94,32 @@ public class MappedAttribute<K extends IValue, V extends IValue> extends Attribu
 	 */
 	public boolean addMappedValue(K mapTo, V mapWith) {
 		return this.attributeMapper.add(mapTo, mapWith);
+	}
+	
+	/**
+	 * Return associated keys from raw mapper
+	 * @param value
+	 * @return
+	 */
+	public Collection<K> getKey(V value){
+		Optional<Collection<K>> opt = attributeMapper.getRawMapper().entrySet().stream()
+				.filter(entry -> entry.getValue().contains(value))
+				.map(entry -> entry.getKey())
+				.findAny();
+		return opt.isPresent() ? opt.get() : Collections.emptyList();
+	}
+	
+	/**
+	 * Return associated values from raw mapper
+	 * @param key
+	 * @return
+	 */
+	public Collection<V> getValue(K key){
+		Optional<Collection<V>> opt = attributeMapper.getRawMapper().entrySet().stream()
+				.filter(entry -> entry.getKey().contains(key))
+				.map(entry -> entry.getValue())
+				.findAny();
+		return opt.isPresent() ? opt.get() : Collections.emptyList();
 	}
 	
 	// ------------------------------------------------------------------- //

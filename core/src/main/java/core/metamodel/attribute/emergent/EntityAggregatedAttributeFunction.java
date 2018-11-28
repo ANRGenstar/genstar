@@ -1,5 +1,9 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
-import core.metamodel.attribute.emergent.aggregator.ITransposeValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.emergent.transposer.ITransposeValueFunction;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -28,8 +32,7 @@ import core.metamodel.value.IValue;
 @JsonTypeName(EntityAggregatedAttributeFunction.SELF)
 public class EntityAggregatedAttributeFunction<E extends IEntity<? extends IAttribute<? extends IValue>>,
 			U extends IAttribute<V>, V extends IValue> 
-		extends AEntityEmergentFunction<E, U, V>
-		implements IEntityEmergentFunction<E, U, V> {
+		extends AEntityEmergentFunction<E, U, V> {
 
 	public static final String SELF = "AGG ATTRIBUTE FUNCTION"; 
 	public static final String AGGREGATOR = "AGGREGATOR";
@@ -48,6 +51,12 @@ public class EntityAggregatedAttributeFunction<E extends IEntity<? extends IAttr
 				.stream().map(e -> attribute.getValueSpace()
 						.getValue(entity.getValueForAttribute(attribute.getAttributeName()).getStringValue()))
 				.collect(Collectors.toSet()), this.getReferentAttribute().getValueSpace());
+	}
+	
+	@Override
+	public Collection<Set<IValue>> reverse(V value, U attribute) {
+		// TODO not sure at all
+		return Collections.singleton(new HashSet<>(aggregator.reverse(value, attribute.getValueSpace())));
 	}
 	
 	@JsonProperty(AGGREGATOR)

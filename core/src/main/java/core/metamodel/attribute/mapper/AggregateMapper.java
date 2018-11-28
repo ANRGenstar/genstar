@@ -12,9 +12,14 @@ import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 
 /**
- * TODO: javadoc
+ * Mapper for aggregate relationship between two value set of the same type. We have a 1 to n relationship,
+ * with n being an positive integer excluding null value. Will define {@link MappedAttribute} with referent
+ * attribute being the values of this mapper, see {@link #getMappedValues(IValue)} for accessing referent attribute values,
+ * and aggregated attribute being the key of this mapper.
  * 
  * @author kevinchapuis
+ *
+ * @see {@link MappedAttribute}, {@link IAttributeMapper}, {@link AttributeFactory}
  *
  * @param <V>
  */

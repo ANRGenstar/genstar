@@ -1,5 +1,7 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
+import java.util.Set;
 import java.util.function.BiFunction;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -10,6 +12,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import core.configuration.jackson.EmergentFunctionSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
@@ -50,6 +53,16 @@ public interface IEntityEmergentFunction<
 	public static final String MATCHERS = "MATCHERS";
 	public static final String TYPE = "CLASS TYPE";
 	
+	
+	/**
+	 * Reverse an emergent attribute value to a collection of value matchers and filters
+	 * @param value
+	 * @return
+	 */
+	public Collection<Set<IValue>> reverse(V value, U predicate);
+	
+	// ------------------------------------------ //
+	
 	/**
 	 * Returns the filter that will select the appropriate child to compute emergent attribute value
 	 * @return
@@ -69,7 +82,7 @@ public interface IEntityEmergentFunction<
 	 * @return
 	 */
 	@JsonProperty(MATCHERS)
-	public IValue[] getMatchers();
+	public AttributeVectorMatcher getMatchers();
 	
 	/**
 	 * Defines the values to be used to filter sub-entities

@@ -6,14 +6,15 @@
         "VALUE SPACE" : {
           "TYPE" : "Boolean",
           "VALUES" : [ {
-            "INPUT VALUE" : "false"
-          }, {
             "INPUT VALUE" : "true"
+          }, {
+            "INPUT VALUE" : "false"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
           }
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "ATTRIBUTE" : {
@@ -21,9 +22,9 @@
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
           "VALUES" : [ {
-            "INPUT VALUE" : "En couple"
-          }, {
             "INPUT VALUE" : "Célibataire"
+          }, {
+            "INPUT VALUE" : "En couple"
           } ],
           "categoricTemplate" : {
             "regex" : [ ]
@@ -31,7 +32,8 @@
           "EMPTY VALUE" : {
             "INPUT VALUE" : null
           }
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "ATTRIBUTE" : {
@@ -53,7 +55,8 @@
           "EMPTY VALUE" : {
             "INPUT VALUE" : null
           }
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "ATTRIBUTE" : {
@@ -61,32 +64,33 @@
         "VALUE SPACE" : {
           "TYPE" : "Integer",
           "VALUES" : [ {
-            "INPUT VALUE" : "1"
-          }, {
             "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "1"
           }, {
             "INPUT VALUE" : "0"
           }, {
-            "INPUT VALUE" : "5"
-          }, {
-            "INPUT VALUE" : "6"
-          }, {
-            "INPUT VALUE" : "3"
-          }, {
-            "INPUT VALUE" : "4"
-          }, {
             "INPUT VALUE" : "9"
+          }, {
+            "INPUT VALUE" : "8"
           }, {
             "INPUT VALUE" : "7"
           }, {
-            "INPUT VALUE" : "8"
+            "INPUT VALUE" : "6"
+          }, {
+            "INPUT VALUE" : "5"
+          }, {
+            "INPUT VALUE" : "4"
+          }, {
+            "INPUT VALUE" : "3"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
           },
           "min" : -2147483648,
           "max" : 2147483647
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "ATTRIBUTE" : {
@@ -97,9 +101,10 @@
           "EMPTY VALUE" : {
             "INPUT VALUE" : "NaN"
           },
-          "min" : 0.0,
+          "min" : -1.7976931348623157E308,
           "max" : 1.7976931348623157E308
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "ATTRIBUTE" : {
@@ -107,15 +112,15 @@
         "VALUE SPACE" : {
           "TYPE" : "Range",
           "VALUES" : [ {
-            "INPUT VALUE" : "25 à 34"
-          }, {
             "INPUT VALUE" : "moins de 14"
           }, {
             "INPUT VALUE" : "35 à 54"
           }, {
-            "INPUT VALUE" : "55 et plus"
+            "INPUT VALUE" : "25 à 34"
           }, {
             "INPUT VALUE" : "15 à 24"
+          }, {
+            "INPUT VALUE" : "55 et plus"
           } ],
           "min" : 0,
           "max" : 120,
@@ -125,7 +130,8 @@
           "EMPTY VALUE" : {
             "INPUT VALUE" : "NaN à NaN"
           }
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "MAPPED ATTRIBUTE" : {
@@ -154,15 +160,15 @@
             "VALUE SPACE" : {
               "TYPE" : "Range",
               "VALUES" : [ {
-                "INPUT VALUE" : "25 à 34"
-              }, {
                 "INPUT VALUE" : "moins de 14"
               }, {
                 "INPUT VALUE" : "35 à 54"
               }, {
-                "INPUT VALUE" : "55 et plus"
+                "INPUT VALUE" : "25 à 34"
               }, {
                 "INPUT VALUE" : "15 à 24"
+              }, {
+                "INPUT VALUE" : "55 et plus"
               } ],
               "min" : 0,
               "max" : 120,
@@ -172,13 +178,15 @@
               "EMPTY VALUE" : {
                 "INPUT VALUE" : "NaN à NaN"
               }
-            }
+            },
+            "ENCODED VALUES" : null
           }
         },
         "MAPPER" : {
           "TYPE" : "AGG",
           "THE MAP" : [ "moins de 24 ans : moins de 14; 15 à 24", "55 et plus : 55 et plus", "25 à 54 : 25 à 34; 35 à 54" ]
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "MAPPED ATTRIBUTE" : {
@@ -211,15 +219,15 @@
             "VALUE SPACE" : {
               "TYPE" : "Range",
               "VALUES" : [ {
-                "INPUT VALUE" : "25 à 34"
-              }, {
                 "INPUT VALUE" : "moins de 14"
               }, {
                 "INPUT VALUE" : "35 à 54"
               }, {
-                "INPUT VALUE" : "55 et plus"
+                "INPUT VALUE" : "25 à 34"
               }, {
                 "INPUT VALUE" : "15 à 24"
+              }, {
+                "INPUT VALUE" : "55 et plus"
               } ],
               "min" : 0,
               "max" : 120,
@@ -229,49 +237,32 @@
               "EMPTY VALUE" : {
                 "INPUT VALUE" : "NaN à NaN"
               }
-            }
+            },
+            "ENCODED VALUES" : null
           }
         },
         "MAPPER" : {
           "TYPE" : "UND",
           "THE MAP" : [ "Bébé; Enfant : moins de 14", "Adolescent; Jeune : 15 à 24", "Adulte : 25 à 34; 35 à 54", "Vieux : 55 et plus" ]
-        }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
-      "MAPPED ATTRIBUTE" : {
-        "NAME" : "Record attribute",
+      "ATTRIBUTE" : {
+        "NAME" : "Encoded Boolean",
         "VALUE SPACE" : {
-          "TYPE" : "Integer",
+          "TYPE" : "Boolean",
           "VALUES" : [ {
-            "INPUT VALUE" : "2"
+            "INPUT VALUE" : "true"
           }, {
-            "INPUT VALUE" : "1"
+            "INPUT VALUE" : "false"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
-          },
-          "min" : -2147483648,
-          "max" : 2147483647
-        },
-        "REFERENT ATTRIBUTE" : {
-          "ATTRIBUTE" : {
-            "NAME" : "Boolean attribute",
-            "VALUE SPACE" : {
-              "TYPE" : "Boolean",
-              "VALUES" : [ {
-                "INPUT VALUE" : "false"
-              }, {
-                "INPUT VALUE" : "true"
-              } ],
-              "EMPTY VALUE" : {
-                "INPUT VALUE" : "null"
-              }
-            }
           }
         },
-        "MAPPER" : {
-          "TYPE" : "REC",
-          "THE MAP" : [ "2 : false", "1 : true" ]
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "true : 1", "false : 0; ; 999" ]
         }
       }
     }, {
@@ -286,7 +277,7 @@
               "LISTED ATTRIBUTES" : [ "Boolean attribute : false", "Mapped attribute : true" ],
               "CUSTOM COMPARATOR FUNCTIONS" : [ ]
             },
-            "MATCHERS" : [ "25 à 34", "35 à 54", "55 et plus" ]
+            "MATCHERS" : [ "35 à 54", "25 à 34", "55 et plus" ]
           }
         }
       }

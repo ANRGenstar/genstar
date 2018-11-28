@@ -38,6 +38,15 @@ public abstract class ARouletteWheelSelection<T extends Number, K> {
 	}
 	
 	/**
+	 * Return the value used to draw keys associated to the key given in parameter
+	 * @param key
+	 * @return
+	 */
+	public T getValue(K key) {
+		return distribution.get(keys.indexOf(key));
+	}
+	
+	/**
 	 * computes the sum of the distribution (later used for normalization)
 	 */
 	protected abstract T computeDistributionSum(List<T> distribution);

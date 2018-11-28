@@ -56,7 +56,7 @@ public class GosplAliasSampler implements IDistributionSampler {
 		if(distribution == null)
 			throw new NullPointerException();
 		if(distribution.getMatrix().isEmpty())
-			throw new IllegalArgumentException("Probability vector must be nonempty.");
+			throw new IllegalArgumentException("Cannot setup a sampler with an empty distribution matrix "+distribution);
 		
 		Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> orderedDistribution = 
 				distribution.getOrderedMatrix();

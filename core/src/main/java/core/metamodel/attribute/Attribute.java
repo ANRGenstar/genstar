@@ -6,6 +6,7 @@ import java.util.Collections;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
@@ -37,7 +38,8 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 
 	public static final String SELF = "ATTRIBUTE";
 
-	private IValueSpace<V> valuesSpace;
+	private IValueSpace<V> valueSpace;
+	private EncodedValueMapper<V> encodedValues;
 
 	private String name;
 
@@ -57,12 +59,22 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 
 	@Override
 	public IValueSpace<V> getValueSpace(){
-		return valuesSpace;
+		return valueSpace;
 	}
 
 	@Override
 	public void setValueSpace(IValueSpace<V> valueSpace) {
-		this.valuesSpace = valueSpace;
+		this.valueSpace = valueSpace;
+	}
+	
+	@Override
+	public EncodedValueMapper<V> getEncodedValueMapper() {
+		return encodedValues;
+	}
+
+	@Override
+	public void setEncodedValueMapper(EncodedValueMapper<V> encodedMapper) {
+		this.encodedValues = encodedMapper;
 	}
 
 	// --------------------------------------------------------------- //
@@ -83,10 +95,24 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+	
+	/**
+	 * Add new encoded form for value
+	 * 
+	 * @param value
+	 * @param records
+	 */
+	public void addRecords(String value, String... records) {
+		if(encodedValues == null) {
+			this.setEncodedValueMapper(new EncodedValueMapper<>(valueSpace));
+		}
+		this.encodedValues.putMapping(value, records);
+	}
 
 	/**
-	 * The {@link IAttribute} this attribute target: should be itself, 
-	 * but could indicate disaggregated linked {@link IAttribute} or record linked one
+	 * The {@link Attribute} this attribute targets: should be itself, 
+	 * but could indicate disagregated {@link Attribute}, i.e. the same attribute
+	 * but with other information about values
 	 * 
 	 * @return
 	 */
@@ -124,7 +150,7 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 */
 	@JsonIgnore
 	public IValue getEmptyValue(){
-		return valuesSpace.getEmptyValue();
+		return valueSpace.getEmptyValue();
 	}
 
 	/**
@@ -142,7 +168,9 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 		if(this.getValueSpace().contains(value) ||
 				this.getValueSpace().isValidCandidate(value.getStringValue()))
 			return Collections.singleton(value);
-		return Collections.emptySet();
+		if(encodedValues.getRecords().contains(value))
+			return Collections.singleton(encodedValues.getRelatedValue(value));
+		throw new NullPointerException();
 	}
 
 	////////////////////////////////////////////////////////////////

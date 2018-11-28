@@ -14,6 +14,8 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
+import core.util.GSPerformanceUtil;
+import core.util.GSUtilAttribute;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
@@ -202,6 +204,86 @@ public class GosplNDimensionalMatrixFactory {
 		return new GosplJointDistribution(matrix);
 	}
 	
+	/**
+	 * Transpose an unknown matrix into a full matrix. If matrix passed in argument is a segmented matrix
+	 * then, the algorithm will end up making unknown relationship between attribute independent
+	 * 
+	 * @param unknownDistribution
+	 * @param gspu: in order to track the process from the outside
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> createDistribution(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> unknownDistribution,
+			GSPerformanceUtil gspu){
+		
+		if(!unknownDistribution.isSegmented())
+			return this.createDistribution(unknownDistribution.getMatrix());
+		
+		// Reject attribute with referent, to only account for referent attribute
+		Set<Attribute<? extends IValue>> targetedDimensions = unknownDistribution.getDimensions()
+				.stream().filter(att -> att.getReferentAttribute().equals(att))
+				.collect(Collectors.toSet());
+
+		// Setup the matrix to estimate 
+		AFullNDimensionalMatrix<Double> freqMatrix = new GosplNDimensionalMatrixFactory()
+				.createEmptyDistribution(targetedDimensions);
+
+		gspu.sysoStempMessage("Creation of matrix with attributes: "+Arrays.toString(targetedDimensions.toArray()));
+
+		// Extrapolate the whole set of coordinates
+		Collection<Map<Attribute<? extends IValue>, IValue>> coordinates = GSUtilAttribute.getValuesCombination(targetedDimensions);
+
+		gspu.sysoStempPerformance(1, this);
+		gspu.sysoStempMessage("Start writting down collpased distribution of size "+coordinates.size());
+
+		for(Map<Attribute<? extends IValue>, IValue> coordinate : coordinates){
+			AControl<Double> nulVal = freqMatrix.getNulVal();
+			ACoordinate<Attribute<? extends IValue>, IValue> coord = new GosplCoordinate(coordinate);
+			AControl<Double> freq = unknownDistribution.getVal(coord);
+			if(!nulVal.getValue().equals(freq.getValue()))
+				freqMatrix.addValue(coord, freq);
+			else {
+				// HINT: MUST INTEGRATE COORDINATE WITH EMPTY VALUE, e.g. age under 5 & empty occupation
+				gspu.sysoStempMessage("Goes into a referent empty correlate: "
+						+Arrays.toString(coordinate.values().toArray()));
+				ACoordinate<Attribute<? extends IValue>, IValue	> newCoord = new GosplCoordinate(
+						coord.getDimensions().stream().collect(Collectors.toMap(Function.identity(), 
+						att -> unknownDistribution.getEmptyReferentCorrelate(coord).stream()
+									.anyMatch(val -> val.getValueSpace().getAttribute().equals(att)) ?
+								att.getValueSpace().getEmptyValue() : coord.getMap().get(att))));
+				if(newCoord.equals(coord))
+					freqMatrix.addValue(coord, freq);
+				else
+					freqMatrix.addValue(newCoord, unknownDistribution.getVal(newCoord.values()
+							.stream().filter(value -> !unknownDistribution.getDimension(value).getEmptyValue().equals(value))
+							.collect(Collectors.toSet())));
+			}
+		}
+		
+		gspu.sysoStempMessage("Distribution has been created succefuly");
+		
+		return freqMatrix;
+	}
+	
+	/**
+	 * Clone the distribution so the value in it are not linked to one another (like it is the case in
+	 * createDistribution method)
+	 * 
+	 * @param distribution
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> cloneDistribution(
+			AFullNDimensionalMatrix<Double> distribution){
+		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(distribution.getDimensions(), 
+				GSSurveyType.GlobalFrequencyTable);
+		
+		distribution.getMatrix().keySet().forEach(coordinate -> 
+				matrix.setValue(coordinate, new ControlFrequency(distribution.getVal(coordinate).getValue())
+						));
+		
+		return matrix;
+	}
+	
 	//////////////////////////////////////////////////
 	//				SEGMENTED MATRIX				//
 	//////////////////////////////////////////////////
@@ -274,7 +356,8 @@ public class GosplNDimensionalMatrixFactory {
 	}
 	
 	/**
-	 * TODO: javadoc
+	 * Create a contingency matrix from entities of a population, but taking into account only the
+	 * set of attributes given in parameter
 	 * 
 	 * @param attributesToMeasure
 	 * @param population
@@ -300,12 +383,28 @@ public class GosplNDimensionalMatrixFactory {
 	}
 	
 	/**
+	 * Create a full contingency table from an unknown type contingency matrix
+	 *  
+	 * @param unknownMatrix
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> createContingency(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> unknownMatrix){
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(unknownMatrix.getDimensions());
+		unknownMatrix.getMatrix().keySet().forEach(coordinate -> 
+				matrix.addValue(coordinate, 
+						new ControlContingency(unknownMatrix.getVal(coordinate).getValue())
+						));
+		return matrix;
+	}
+	
+	/**
 	 * Clone a matrix
 	 * 
 	 * @param matrix
 	 * @return
 	 */
-	public AFullNDimensionalMatrix<Integer> createContingency(AFullNDimensionalMatrix<Integer> matrix){
+	public AFullNDimensionalMatrix<Integer> cloneContingency(AFullNDimensionalMatrix<Integer> matrix){
 		Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Integer>> m = matrix.getMatrix();
 		return new GosplContingencyTable(m.keySet().stream().collect(
 				Collectors.toMap(

@@ -1,0 +1,1075 @@
+{
+  "ATTRIBUTE DICTIONARY" : {
+    "ATTRIBUTES" : [ {
+      "ATTRIBUTE" : {
+        "NAME" : "EDUCVN",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "University year 5"
+          }, {
+            "INPUT VALUE" : "Short-term training (less than a year)"
+          }, {
+            "INPUT VALUE" : "Vocational training year 1"
+          }, {
+            "INPUT VALUE" : "Lower secondary grade 9"
+          }, {
+            "INPUT VALUE" : "Doctorate, year unknown"
+          }, {
+            "INPUT VALUE" : "251"
+          }, {
+            "INPUT VALUE" : "263"
+          }, {
+            "INPUT VALUE" : "211"
+          }, {
+            "INPUT VALUE" : "Short-term training, year unknown"
+          }, {
+            "INPUT VALUE" : "Doctorate year 3"
+          }, {
+            "INPUT VALUE" : "Trade college year 1"
+          }, {
+            "INPUT VALUE" : "College less than a year"
+          }, {
+            "INPUT VALUE" : "Master's year 5"
+          }, {
+            "INPUT VALUE" : "Vocational training year 9"
+          }, {
+            "INPUT VALUE" : "University year 6"
+          }, {
+            "INPUT VALUE" : "Unknown"
+          }, {
+            "INPUT VALUE" : "Higher secondary grade 10"
+          }, {
+            "INPUT VALUE" : "Primary grade 1"
+          }, {
+            "INPUT VALUE" : "University, undergraduate and professional"
+          }, {
+            "INPUT VALUE" : "Vocational education year 1"
+          }, {
+            "INPUT VALUE" : "Lower secondary grade 8"
+          }, {
+            "INPUT VALUE" : "Primary grade unknown"
+          }, {
+            "INPUT VALUE" : "NIU (not in universe)"
+          }, {
+            "INPUT VALUE" : "252"
+          }, {
+            "INPUT VALUE" : "Vocational education year 9"
+          }, {
+            "INPUT VALUE" : "Higher secondary less than grade 10"
+          }, {
+            "INPUT VALUE" : "212"
+          }, {
+            "INPUT VALUE" : "321"
+          }, {
+            "INPUT VALUE" : "442"
+          }, {
+            "INPUT VALUE" : "Doctorate year 2"
+          }, {
+            "INPUT VALUE" : "Higher secondary, unknown grade"
+          }, {
+            "INPUT VALUE" : "Master's year 6"
+          }, {
+            "INPUT VALUE" : "Trade college less than a year"
+          }, {
+            "INPUT VALUE" : "Higher secondary grade 12 (12+ years in 1989)"
+          }, {
+            "INPUT VALUE" : "College"
+          }, {
+            "INPUT VALUE" : "General education"
+          }, {
+            "INPUT VALUE" : "Vocational training year 3"
+          }, {
+            "INPUT VALUE" : "None"
+          }, {
+            "INPUT VALUE" : "University year 7"
+          }, {
+            "INPUT VALUE" : "Primary grade 2"
+          }, {
+            "INPUT VALUE" : "Doctorate year 6"
+          }, {
+            "INPUT VALUE" : "College, year unknown"
+          }, {
+            "INPUT VALUE" : "Lower secondary grade 7"
+          }, {
+            "INPUT VALUE" : "233"
+          }, {
+            "INPUT VALUE" : "College year 1"
+          }, {
+            "INPUT VALUE" : "Upper Secondary"
+          }, {
+            "INPUT VALUE" : "Lower secondary less than grade 6"
+          }, {
+            "INPUT VALUE" : "Doctorate year 5"
+          }, {
+            "INPUT VALUE" : "205"
+          }, {
+            "INPUT VALUE" : "Master's less than a year"
+          }, {
+            "INPUT VALUE" : "Master's year 7"
+          }, {
+            "INPUT VALUE" : "Trade college year 3"
+          }, {
+            "INPUT VALUE" : "Vocational education, year unknown"
+          }, {
+            "INPUT VALUE" : "Primary grade 3"
+          }, {
+            "INPUT VALUE" : "Professional upper secondary education"
+          }, {
+            "INPUT VALUE" : "University year 8"
+          }, {
+            "INPUT VALUE" : "Trade college"
+          }, {
+            "INPUT VALUE" : "Vocational training year 2"
+          }, {
+            "INPUT VALUE" : "Vocational upper secondary training"
+          }, {
+            "INPUT VALUE" : "Lower secondary grade 6"
+          }, {
+            "INPUT VALUE" : "Higher education"
+          }, {
+            "INPUT VALUE" : "Doctorate year 4"
+          }, {
+            "INPUT VALUE" : "Master's year 8"
+          }, {
+            "INPUT VALUE" : "Trade college year 2"
+          }, {
+            "INPUT VALUE" : "Primary grade 4"
+          }, {
+            "INPUT VALUE" : "Vocational education year 4"
+          }, {
+            "INPUT VALUE" : "University year 1"
+          }, {
+            "INPUT VALUE" : "999"
+          }, {
+            "INPUT VALUE" : "Vocational training year 12"
+          }, {
+            "INPUT VALUE" : "Doctorate year 8"
+          }, {
+            "INPUT VALUE" : "University year 9"
+          }, {
+            "INPUT VALUE" : "231"
+          }, {
+            "INPUT VALUE" : "324"
+          }, {
+            "INPUT VALUE" : "312"
+          }, {
+            "INPUT VALUE" : "Master's year 9"
+          }, {
+            "INPUT VALUE" : "203"
+          }, {
+            "INPUT VALUE" : "Master's year 1"
+          }, {
+            "INPUT VALUE" : "College year 3"
+          }, {
+            "INPUT VALUE" : "Vocational training year 4"
+          }, {
+            "INPUT VALUE" : "Primary grade 5"
+          }, {
+            "INPUT VALUE" : "University year 2"
+          }, {
+            "INPUT VALUE" : "Doctorate year 7"
+          }, {
+            "INPUT VALUE" : "University less than a year"
+          }, {
+            "INPUT VALUE" : "220"
+          }, {
+            "INPUT VALUE" : "232"
+          }, {
+            "INPUT VALUE" : "313"
+          }, {
+            "INPUT VALUE" : "204"
+          }, {
+            "INPUT VALUE" : "325"
+          }, {
+            "INPUT VALUE" : "Master's year 2"
+          }, {
+            "INPUT VALUE" : "Trade college year 4"
+          }, {
+            "INPUT VALUE" : "College year 2"
+          }, {
+            "INPUT VALUE" : "Vocational training, year unknown"
+          }, {
+            "INPUT VALUE" : "Vocational education year 2"
+          }, {
+            "INPUT VALUE" : "Higher secondary grade 11"
+          }, {
+            "INPUT VALUE" : "University year 3"
+          }, {
+            "INPUT VALUE" : "Primary less than a year"
+          }, {
+            "INPUT VALUE" : "Vocational education less than a year"
+          }, {
+            "INPUT VALUE" : "Lower secondary grade unknown"
+          }, {
+            "INPUT VALUE" : "University, graduate"
+          }, {
+            "INPUT VALUE" : "Doctorate year 1"
+          }, {
+            "INPUT VALUE" : "201"
+          }, {
+            "INPUT VALUE" : "253"
+          }, {
+            "INPUT VALUE" : "322"
+          }, {
+            "INPUT VALUE" : "Vocational education year 12"
+          }, {
+            "INPUT VALUE" : "213"
+          }, {
+            "INPUT VALUE" : "Master's year 3"
+          }, {
+            "INPUT VALUE" : "General education, unspecified"
+          }, {
+            "INPUT VALUE" : "Vocational education year 3"
+          }, {
+            "INPUT VALUE" : "Lower Secondary"
+          }, {
+            "INPUT VALUE" : "Trade college, year unknown"
+          }, {
+            "INPUT VALUE" : "University year 4"
+          }, {
+            "INPUT VALUE" : "0"
+          }, {
+            "INPUT VALUE" : "Vocational training less than a year"
+          }, {
+            "INPUT VALUE" : "University year unknown"
+          }, {
+            "INPUT VALUE" : "Pre-school"
+          }, {
+            "INPUT VALUE" : "242"
+          }, {
+            "INPUT VALUE" : "Trade college year 6"
+          }, {
+            "INPUT VALUE" : "238"
+          }, {
+            "INPUT VALUE" : "323"
+          }, {
+            "INPUT VALUE" : "202"
+          }, {
+            "INPUT VALUE" : "214"
+          }, {
+            "INPUT VALUE" : "Master's, year unknown"
+          }, {
+            "INPUT VALUE" : "College year 4"
+          }, {
+            "INPUT VALUE" : "Master's year 4"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Primary grade 4 : 204", "University year 5 : 325", "Vocational education year 4 : 254", "Short-term training (less than a year) : 220", "University year 1 : 321", "Vocational training year 1 : 241", "Vocational training year 12 : 246", "Lower secondary grade 9 : 214", "Doctorate year 8 : 468", "Doctorate, year unknown : 469", "University year 9 : 329", "Short-term training, year unknown : 229", "Master's year 9 : 449", "Doctorate year 3 : 463", "Trade college year 1 : 261", "College less than a year : 318", "Master's year 5 : 445", "Master's year 1 : 441", "Vocational training year 9 : 245", "College year 3 : 313", "University year 6 : 326", "Vocational training year 4 : 244", "Primary grade 5 : 205", "University year 2 : 322", "Unknown : 800", "Higher secondary grade 10 : 231", "Primary grade 1 : 201", "University, undergraduate and professional : 320", "Vocational education year 1 : 251", "Lower secondary grade 8 : 213", "Doctorate year 7 : 467", "Primary grade unknown : 209", "NIU (not in universe) : 999", "Vocational education year 9 : 255", "Higher secondary less than grade 10 : 238", "University less than a year : 330", "Doctorate year 2 : 462", "Trade college less than a year : 268", "Master's year 6 : 446", "Higher secondary, unknown grade : 239", "Higher secondary grade 12 (12+ years in 1989) : 233", "Master's year 2 : 442", "College : 310", "Trade college year 4 : 264", "General education : 200", "College year 2 : 312", "Vocational training, year unknown : 249", "Vocational training year 3 : 243", "None : 000", "University year 7 : 327", "Higher secondary grade 11 : 232", "Vocational education year 2 : 252", "Primary grade 2 : 202", "University year 3 : 323", "Primary less than a year : 208", "Vocational education less than a year : 258", "Doctorate year 6 : 466", "College, year unknown : 319", "Lower secondary grade unknown : 219", "Lower secondary grade 7 : 212", "University, graduate : 440", "Doctorate year 1 : 461", "College year 1 : 311", "Vocational education year 12 : 256", "Lower secondary less than grade 6 : 218", "Upper Secondary : 230", "Doctorate year 5 : 465", "Master's less than a year : 450", "Master's year 7 : 447", "Trade college year 3 : 263", "Master's year 3 : 443", "Primary grade 3 : 203", "Vocational education, year unknown : 259", "General education, unspecified : 299", "University year 8 : 328", "Professional upper secondary education : 250", "Trade college : 260", "Vocational education year 3 : 253", "Lower Secondary : 210", "Trade college, year unknown : 269", "University year 4 : 324", "Vocational training year 2 : 242", "Vocational upper secondary training : 240", "Vocational training less than a year : 248", "University year unknown : 339", "Lower secondary grade 6 : 211", "Higher education : 300", "Pre-school : 100", "Trade college year 6 : 265", "Doctorate year 4 : 464", "Master's year 8 : 448", "Master's, year unknown : 459", "College year 4 : 314", "Master's year 4 : 444", "Trade college year 2 : 262" ]
+        }
+      }
+    }, {
+      "ATTRIBUTE" : {
+        "NAME" : "SEX",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Female"
+          }, {
+            "INPUT VALUE" : "Unknown"
+          }, {
+            "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "Male"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Female : 2", "Unknown : 9", "Male : 1" ]
+        }
+      }
+    }, {
+      "ATTRIBUTE" : {
+        "NAME" : "AGE",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Not reported missing"
+          }, {
+            "INPUT VALUE" : "51"
+          }, {
+            "INPUT VALUE" : "63"
+          }, {
+            "INPUT VALUE" : "75"
+          }, {
+            "INPUT VALUE" : "87"
+          }, {
+            "INPUT VALUE" : "11"
+          }, {
+            "INPUT VALUE" : "99"
+          }, {
+            "INPUT VALUE" : "23"
+          }, {
+            "INPUT VALUE" : "35"
+          }, {
+            "INPUT VALUE" : "47"
+          }, {
+            "INPUT VALUE" : "59"
+          }, {
+            "INPUT VALUE" : "19"
+          }, {
+            "INPUT VALUE" : "0"
+          }, {
+            "INPUT VALUE" : "90"
+          }, {
+            "INPUT VALUE" : "8"
+          }, {
+            "INPUT VALUE" : "50"
+          }, {
+            "INPUT VALUE" : "62"
+          }, {
+            "INPUT VALUE" : "74"
+          }, {
+            "INPUT VALUE" : "86"
+          }, {
+            "INPUT VALUE" : "10"
+          }, {
+            "INPUT VALUE" : "98"
+          }, {
+            "INPUT VALUE" : "22"
+          }, {
+            "INPUT VALUE" : "34"
+          }, {
+            "INPUT VALUE" : "46"
+          }, {
+            "INPUT VALUE" : "58"
+          }, {
+            "INPUT VALUE" : "18"
+          }, {
+            "INPUT VALUE" : "100+"
+          }, {
+            "INPUT VALUE" : "7"
+          }, {
+            "INPUT VALUE" : "93"
+          }, {
+            "INPUT VALUE" : "41"
+          }, {
+            "INPUT VALUE" : "53"
+          }, {
+            "INPUT VALUE" : "65"
+          }, {
+            "INPUT VALUE" : "77"
+          }, {
+            "INPUT VALUE" : "89"
+          }, {
+            "INPUT VALUE" : "13"
+          }, {
+            "INPUT VALUE" : "25"
+          }, {
+            "INPUT VALUE" : "37"
+          }, {
+            "INPUT VALUE" : "49"
+          }, {
+            "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "80"
+          }, {
+            "INPUT VALUE" : "92"
+          }, {
+            "INPUT VALUE" : "40"
+          }, {
+            "INPUT VALUE" : "52"
+          }, {
+            "INPUT VALUE" : "64"
+          }, {
+            "INPUT VALUE" : "76"
+          }, {
+            "INPUT VALUE" : "88"
+          }, {
+            "INPUT VALUE" : "12"
+          }, {
+            "INPUT VALUE" : "24"
+          }, {
+            "INPUT VALUE" : "36"
+          }, {
+            "INPUT VALUE" : "48"
+          }, {
+            "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "91"
+          }, {
+            "INPUT VALUE" : "9"
+          }, {
+            "INPUT VALUE" : "71"
+          }, {
+            "INPUT VALUE" : "83"
+          }, {
+            "INPUT VALUE" : "95"
+          }, {
+            "INPUT VALUE" : "31"
+          }, {
+            "INPUT VALUE" : "43"
+          }, {
+            "INPUT VALUE" : "55"
+          }, {
+            "INPUT VALUE" : "67"
+          }, {
+            "INPUT VALUE" : "79"
+          }, {
+            "INPUT VALUE" : "15"
+          }, {
+            "INPUT VALUE" : "27"
+          }, {
+            "INPUT VALUE" : "Less than 1 year"
+          }, {
+            "INPUT VALUE" : "39"
+          }, {
+            "INPUT VALUE" : "4"
+          }, {
+            "INPUT VALUE" : "70"
+          }, {
+            "INPUT VALUE" : "82"
+          }, {
+            "INPUT VALUE" : "94"
+          }, {
+            "INPUT VALUE" : "30"
+          }, {
+            "INPUT VALUE" : "42"
+          }, {
+            "INPUT VALUE" : "54"
+          }, {
+            "INPUT VALUE" : "66"
+          }, {
+            "INPUT VALUE" : "78"
+          }, {
+            "INPUT VALUE" : "14"
+          }, {
+            "INPUT VALUE" : "26"
+          }, {
+            "INPUT VALUE" : "38"
+          }, {
+            "INPUT VALUE" : "3"
+          }, {
+            "INPUT VALUE" : "81"
+          }, {
+            "INPUT VALUE" : "61"
+          }, {
+            "INPUT VALUE" : "73"
+          }, {
+            "INPUT VALUE" : "85"
+          }, {
+            "INPUT VALUE" : "97"
+          }, {
+            "INPUT VALUE" : "21"
+          }, {
+            "INPUT VALUE" : "33"
+          }, {
+            "INPUT VALUE" : "45"
+          }, {
+            "INPUT VALUE" : "57"
+          }, {
+            "INPUT VALUE" : "2 years"
+          }, {
+            "INPUT VALUE" : "69"
+          }, {
+            "INPUT VALUE" : "17"
+          }, {
+            "INPUT VALUE" : "29"
+          }, {
+            "INPUT VALUE" : "1 year"
+          }, {
+            "INPUT VALUE" : "6"
+          }, {
+            "INPUT VALUE" : "60"
+          }, {
+            "INPUT VALUE" : "72"
+          }, {
+            "INPUT VALUE" : "84"
+          }, {
+            "INPUT VALUE" : "96"
+          }, {
+            "INPUT VALUE" : "20"
+          }, {
+            "INPUT VALUE" : "32"
+          }, {
+            "INPUT VALUE" : "44"
+          }, {
+            "INPUT VALUE" : "56"
+          }, {
+            "INPUT VALUE" : "68"
+          }, {
+            "INPUT VALUE" : "16"
+          }, {
+            "INPUT VALUE" : "28"
+          }, {
+            "INPUT VALUE" : "5"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Not reported missing : 999", "51 : 051", "63 : 063", "75 : 075", "87 : 087", "11 : 011", "99 : 099", "23 : 023", "35 : 035", "47 : 047", "59 : 059", "19 : 019", "90 : 090", "8 : 008", "50 : 050", "62 : 062", "74 : 074", "86 : 086", "10 : 010", "98 : 098", "22 : 022", "34 : 034", "46 : 046", "58 : 058", "18 : 018", "100+ : 100", "7 : 007", "93 : 093", "41 : 041", "53 : 053", "65 : 065", "77 : 077", "89 : 089", "13 : 013", "25 : 025", "37 : 037", "49 : 049", "80 : 080", "92 : 092", "40 : 040", "52 : 052", "64 : 064", "76 : 076", "88 : 088", "12 : 012", "24 : 024", "36 : 036", "48 : 048", "91 : 091", "9 : 009", "71 : 071", "83 : 083", "95 : 095", "31 : 031", "43 : 043", "55 : 055", "67 : 067", "79 : 079", "15 : 015", "27 : 027", "Less than 1 year : 000", "39 : 039", "4 : 004", "70 : 070", "82 : 082", "94 : 094", "30 : 030", "42 : 042", "54 : 054", "66 : 066", "78 : 078", "14 : 014", "26 : 026", "38 : 038", "3 : 003", "81 : 081", "61 : 061", "73 : 073", "85 : 085", "97 : 097", "21 : 021", "33 : 033", "45 : 045", "57 : 057", "2 years : 002", "69 : 069", "17 : 017", "29 : 029", "1 year : 001", "6 : 006", "60 : 060", "72 : 072", "84 : 084", "96 : 096", "20 : 020", "32 : 032", "44 : 044", "56 : 056", "68 : 068", "16 : 016", "28 : 028", "5 : 005" ]
+        }
+      }
+    }, {
+      "ATTRIBUTE" : {
+        "NAME" : "EMPSTATD",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Permanent disability"
+          }, {
+            "INPUT VALUE" : "200"
+          }, {
+            "INPUT VALUE" : "At work, and 'no work'"
+          }, {
+            "INPUT VALUE" : "At work, and 'seeking work'"
+          }, {
+            "INPUT VALUE" : "Not working, seasonal worker"
+          }, {
+            "INPUT VALUE" : "NIU (not in universe)"
+          }, {
+            "INPUT VALUE" : "Other income recipient"
+          }, {
+            "INPUT VALUE" : "Worked fewer than 6 months, permanent job"
+          }, {
+            "INPUT VALUE" : "No work available"
+          }, {
+            "INPUT VALUE" : "Pensioner"
+          }, {
+            "INPUT VALUE" : "Military trainee"
+          }, {
+            "INPUT VALUE" : "330"
+          }, {
+            "INPUT VALUE" : "Disability pension"
+          }, {
+            "INPUT VALUE" : "310"
+          }, {
+            "INPUT VALUE" : "Employed, not specified"
+          }, {
+            "INPUT VALUE" : "Inactive, other reasons"
+          }, {
+            "INPUT VALUE" : "Unknown missing"
+          }, {
+            "INPUT VALUE" : "Retirees pensioners"
+          }, {
+            "INPUT VALUE" : "0"
+          }, {
+            "INPUT VALUE" : "At work, family holding, not agricultural"
+          }, {
+            "INPUT VALUE" : "390"
+          }, {
+            "INPUT VALUE" : "Worked fewer than 6 months, temporary job"
+          }, {
+            "INPUT VALUE" : "Armed forces, not at work in reference period"
+          }, {
+            "INPUT VALUE" : "Have job, not at work in reference period"
+          }, {
+            "INPUT VALUE" : "Unable to work, disabled or health reasons"
+          }, {
+            "INPUT VALUE" : "Too young to work"
+          }, {
+            "INPUT VALUE" : "Intermittent worker"
+          }, {
+            "INPUT VALUE" : "Inactive unemployed"
+          }, {
+            "INPUT VALUE" : "Living on rents or pension"
+          }, {
+            "INPUT VALUE" : "Not working, occasional worker"
+          }, {
+            "INPUT VALUE" : "At work, and 'student'"
+          }, {
+            "INPUT VALUE" : "Dependent"
+          }, {
+            "INPUT VALUE" : "At work, and 'housework'"
+          }, {
+            "INPUT VALUE" : "230"
+          }, {
+            "INPUT VALUE" : "Disabled or imprisoned"
+          }, {
+            "INPUT VALUE" : "Prisoner"
+          }, {
+            "INPUT VALUE" : "Institutionalized"
+          }, {
+            "INPUT VALUE" : "Unemployed, experienced worker"
+          }, {
+            "INPUT VALUE" : "Unemployed, new worker"
+          }, {
+            "INPUT VALUE" : "Elderly"
+          }, {
+            "INPUT VALUE" : "At work, family holding, agricultural"
+          }, {
+            "INPUT VALUE" : "Housework"
+          }, {
+            "INPUT VALUE" : "Non-retirement pension"
+          }, {
+            "INPUT VALUE" : "At work, and other situation"
+          }, {
+            "INPUT VALUE" : "Unemployed 6 or more months"
+          }, {
+            "INPUT VALUE" : "Unemployed, not specified"
+          }, {
+            "INPUT VALUE" : "At work, and 'retired'"
+          }, {
+            "INPUT VALUE" : "At work"
+          }, {
+            "INPUT VALUE" : "Armed forces"
+          }, {
+            "INPUT VALUE" : "Inactive (not in labor force)"
+          }, {
+            "INPUT VALUE" : "Temporary illness"
+          }, {
+            "INPUT VALUE" : "At work, family holding, not specified"
+          }, {
+            "INPUT VALUE" : "110"
+          }, {
+            "INPUT VALUE" : "320"
+          }, {
+            "INPUT VALUE" : "Retirees and living on rent"
+          }, {
+            "INPUT VALUE" : "Marginally employed"
+          }, {
+            "INPUT VALUE" : "Elderly or disabled"
+          }, {
+            "INPUT VALUE" : "In school"
+          }, {
+            "INPUT VALUE" : "Retired"
+          }, {
+            "INPUT VALUE" : "Living on rents"
+          }, {
+            "INPUT VALUE" : "Armed forces, at work"
+          }, {
+            "INPUT VALUE" : "Retired without benefits"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Permanent disability : 321", "At work, and 'seeking work' : 113", "At work, and 'no work' : 115", "Not working, seasonal worker : 371", "NIU (not in universe) : 000", "Other income recipient : 380", "Worked fewer than 6 months, permanent job : 202", "No work available : 230", "Pensioner : 345", "Military trainee : 133", "Disability pension : 347", "Inactive, other reasons : 390", "Employed, not specified : 100", "Retirees pensioners : 343", "Unknown missing : 999", "At work, family holding, not agricultural : 118", "Armed forces, not at work in reference period : 132", "Worked fewer than 6 months, temporary job : 203", "Have job, not at work in reference period : 120", "Intermittent worker : 370", "Unable to work, disabled or health reasons : 320", "Too young to work : 391", "Inactive unemployed : 240", "Living on rents or pension : 342", "Not working, occasional worker : 372", "At work, and 'student' : 111", "Dependent : 392", "At work, and 'housework' : 112", "Disabled or imprisoned : 323", "Prisoner : 361", "Institutionalized : 360", "Unemployed, experienced worker : 210", "Unemployed, new worker : 220", "Elderly : 350", "At work, family holding, agricultural : 119", "Housework : 310", "Non-retirement pension : 346", "At work, and other situation : 116", "Unemployed 6 or more months : 201", "Unemployed, not specified : 200", "At work, and 'retired' : 114", "At work : 110", "Armed forces : 130", "Temporary illness : 322", "Inactive (not in labor force) : 300", "At work, family holding, not specified : 117", "Retirees and living on rent : 340", "Marginally employed : 140", "Elderly or disabled : 351", "In school : 330", "Retired : 344", "Armed forces, at work : 131", "Living on rents : 341", "Retired without benefits : 348" ]
+        }
+      }
+    }, {
+      "ATTRIBUTE" : {
+        "NAME" : "MARSTD",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Separated from consensual union"
+          }, {
+            "INPUT VALUE" : "Never married and never cohabited"
+          }, {
+            "INPUT VALUE" : "350"
+          }, {
+            "INPUT VALUE" : "Married, religious"
+          }, {
+            "INPUT VALUE" : "Married, traditional customary"
+          }, {
+            "INPUT VALUE" : "Separated from consensual union or marriage"
+          }, {
+            "INPUT VALUE" : "Single never married"
+          }, {
+            "INPUT VALUE" : "Married, monogamous"
+          }, {
+            "INPUT VALUE" : "Married, civil and religious"
+          }, {
+            "INPUT VALUE" : "Widowed or divorced"
+          }, {
+            "INPUT VALUE" : "Engaged"
+          }, {
+            "INPUT VALUE" : "Annulled"
+          }, {
+            "INPUT VALUE" : "Unknown missing"
+          }, {
+            "INPUT VALUE" : "Widowed from consensual union or marriage"
+          }, {
+            "INPUT VALUE" : "100"
+          }, {
+            "INPUT VALUE" : "330"
+          }, {
+            "INPUT VALUE" : "Widowed from consensual union"
+          }, {
+            "INPUT VALUE" : "Married, polygamous"
+          }, {
+            "INPUT VALUE" : "Separated de facto"
+          }, {
+            "INPUT VALUE" : "Separated"
+          }, {
+            "INPUT VALUE" : "Separated legally"
+          }, {
+            "INPUT VALUE" : "Widowed, divorced, or separated"
+          }, {
+            "INPUT VALUE" : "Separated or divorced"
+          }, {
+            "INPUT VALUE" : "Separated divorced spouse absent"
+          }, {
+            "INPUT VALUE" : "Consensual union"
+          }, {
+            "INPUT VALUE" : "NIU (not in universe)"
+          }, {
+            "INPUT VALUE" : "Married or consensual union"
+          }, {
+            "INPUT VALUE" : "Widowed"
+          }, {
+            "INPUT VALUE" : "Separated or annulled"
+          }, {
+            "INPUT VALUE" : "Separated from marriage"
+          }, {
+            "INPUT VALUE" : "Married, spouse absent"
+          }, {
+            "INPUT VALUE" : "Widowed from marriage"
+          }, {
+            "INPUT VALUE" : "Married, civil or religious"
+          }, {
+            "INPUT VALUE" : "Married, formally"
+          }, {
+            "INPUT VALUE" : "Divorced"
+          }, {
+            "INPUT VALUE" : "200"
+          }, {
+            "INPUT VALUE" : "Married, civil"
+          }, {
+            "INPUT VALUE" : "400"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Separated from consensual union : 334", "Never married and never cohabited : 111", "Married, religious : 212", "Married, traditional customary : 215", "Separated from consensual union or marriage : 335", "Single never married : 100", "Married, monogamous : 216", "Married, civil and religious : 213", "Widowed or divorced : 410", "Engaged : 110", "Annulled : 340", "Unknown missing : 999", "Widowed from consensual union or marriage : 411", "Married, polygamous : 217", "Widowed from consensual union : 413", "Separated : 330", "Separated de facto : 332", "Separated legally : 331", "Widowed, divorced, or separated : 420", "Separated or divorced : 310", "Separated divorced spouse absent : 300", "Consensual union : 220", "NIU (not in universe) : 000", "Married or consensual union : 200", "Widowed : 400", "Separated from marriage : 333", "Separated or annulled : 320", "Married, spouse absent : 360", "Widowed from marriage : 412", "Married, civil or religious : 214", "Married, formally : 210", "Divorced : 350", "Married, civil : 211" ]
+        }
+      }
+    }, {
+      "MAPPED ATTRIBUTE" : {
+        "NAME" : "EMPSTAT",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Unemployed"
+          }, {
+            "INPUT VALUE" : "NIU (not in universe)"
+          }, {
+            "INPUT VALUE" : "Unknown missing"
+          }, {
+            "INPUT VALUE" : "Inactive"
+          }, {
+            "INPUT VALUE" : "3"
+          }, {
+            "INPUT VALUE" : "Employed"
+          }, {
+            "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "0"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "REFERENT ATTRIBUTE" : {
+          "ATTRIBUTE" : {
+            "NAME" : "EMPSTATD",
+            "VALUE SPACE" : {
+              "TYPE" : "Nominal",
+              "VALUES" : [ {
+                "INPUT VALUE" : "Permanent disability"
+              }, {
+                "INPUT VALUE" : "200"
+              }, {
+                "INPUT VALUE" : "At work, and 'no work'"
+              }, {
+                "INPUT VALUE" : "At work, and 'seeking work'"
+              }, {
+                "INPUT VALUE" : "Not working, seasonal worker"
+              }, {
+                "INPUT VALUE" : "NIU (not in universe)"
+              }, {
+                "INPUT VALUE" : "Other income recipient"
+              }, {
+                "INPUT VALUE" : "Worked fewer than 6 months, permanent job"
+              }, {
+                "INPUT VALUE" : "No work available"
+              }, {
+                "INPUT VALUE" : "Pensioner"
+              }, {
+                "INPUT VALUE" : "Military trainee"
+              }, {
+                "INPUT VALUE" : "330"
+              }, {
+                "INPUT VALUE" : "Disability pension"
+              }, {
+                "INPUT VALUE" : "310"
+              }, {
+                "INPUT VALUE" : "Employed, not specified"
+              }, {
+                "INPUT VALUE" : "Inactive, other reasons"
+              }, {
+                "INPUT VALUE" : "Unknown missing"
+              }, {
+                "INPUT VALUE" : "Retirees pensioners"
+              }, {
+                "INPUT VALUE" : "0"
+              }, {
+                "INPUT VALUE" : "At work, family holding, not agricultural"
+              }, {
+                "INPUT VALUE" : "390"
+              }, {
+                "INPUT VALUE" : "Worked fewer than 6 months, temporary job"
+              }, {
+                "INPUT VALUE" : "Armed forces, not at work in reference period"
+              }, {
+                "INPUT VALUE" : "Have job, not at work in reference period"
+              }, {
+                "INPUT VALUE" : "Unable to work, disabled or health reasons"
+              }, {
+                "INPUT VALUE" : "Too young to work"
+              }, {
+                "INPUT VALUE" : "Intermittent worker"
+              }, {
+                "INPUT VALUE" : "Inactive unemployed"
+              }, {
+                "INPUT VALUE" : "Living on rents or pension"
+              }, {
+                "INPUT VALUE" : "Not working, occasional worker"
+              }, {
+                "INPUT VALUE" : "At work, and 'student'"
+              }, {
+                "INPUT VALUE" : "Dependent"
+              }, {
+                "INPUT VALUE" : "At work, and 'housework'"
+              }, {
+                "INPUT VALUE" : "230"
+              }, {
+                "INPUT VALUE" : "Disabled or imprisoned"
+              }, {
+                "INPUT VALUE" : "Prisoner"
+              }, {
+                "INPUT VALUE" : "Institutionalized"
+              }, {
+                "INPUT VALUE" : "Unemployed, experienced worker"
+              }, {
+                "INPUT VALUE" : "Unemployed, new worker"
+              }, {
+                "INPUT VALUE" : "Elderly"
+              }, {
+                "INPUT VALUE" : "At work, family holding, agricultural"
+              }, {
+                "INPUT VALUE" : "Housework"
+              }, {
+                "INPUT VALUE" : "Non-retirement pension"
+              }, {
+                "INPUT VALUE" : "At work, and other situation"
+              }, {
+                "INPUT VALUE" : "Unemployed 6 or more months"
+              }, {
+                "INPUT VALUE" : "Unemployed, not specified"
+              }, {
+                "INPUT VALUE" : "At work, and 'retired'"
+              }, {
+                "INPUT VALUE" : "At work"
+              }, {
+                "INPUT VALUE" : "Armed forces"
+              }, {
+                "INPUT VALUE" : "Inactive (not in labor force)"
+              }, {
+                "INPUT VALUE" : "Temporary illness"
+              }, {
+                "INPUT VALUE" : "At work, family holding, not specified"
+              }, {
+                "INPUT VALUE" : "110"
+              }, {
+                "INPUT VALUE" : "320"
+              }, {
+                "INPUT VALUE" : "Retirees and living on rent"
+              }, {
+                "INPUT VALUE" : "Marginally employed"
+              }, {
+                "INPUT VALUE" : "Elderly or disabled"
+              }, {
+                "INPUT VALUE" : "In school"
+              }, {
+                "INPUT VALUE" : "Retired"
+              }, {
+                "INPUT VALUE" : "Living on rents"
+              }, {
+                "INPUT VALUE" : "Armed forces, at work"
+              }, {
+                "INPUT VALUE" : "Retired without benefits"
+              } ],
+              "categoricTemplate" : {
+                "regex" : [ ]
+              },
+              "EMPTY VALUE" : {
+                "INPUT VALUE" : null
+              }
+            },
+            "ENCODED VALUES" : {
+              "MAPPING" : [ "Permanent disability : 321", "At work, and 'seeking work' : 113", "At work, and 'no work' : 115", "Not working, seasonal worker : 371", "NIU (not in universe) : 000", "Other income recipient : 380", "Worked fewer than 6 months, permanent job : 202", "No work available : 230", "Pensioner : 345", "Military trainee : 133", "Disability pension : 347", "Inactive, other reasons : 390", "Employed, not specified : 100", "Retirees pensioners : 343", "Unknown missing : 999", "At work, family holding, not agricultural : 118", "Armed forces, not at work in reference period : 132", "Worked fewer than 6 months, temporary job : 203", "Have job, not at work in reference period : 120", "Intermittent worker : 370", "Unable to work, disabled or health reasons : 320", "Too young to work : 391", "Inactive unemployed : 240", "Living on rents or pension : 342", "Not working, occasional worker : 372", "At work, and 'student' : 111", "Dependent : 392", "At work, and 'housework' : 112", "Disabled or imprisoned : 323", "Prisoner : 361", "Institutionalized : 360", "Unemployed, experienced worker : 210", "Unemployed, new worker : 220", "Elderly : 350", "At work, family holding, agricultural : 119", "Housework : 310", "Non-retirement pension : 346", "At work, and other situation : 116", "Unemployed 6 or more months : 201", "Unemployed, not specified : 200", "At work, and 'retired' : 114", "At work : 110", "Armed forces : 130", "Temporary illness : 322", "Inactive (not in labor force) : 300", "At work, family holding, not specified : 117", "Retirees and living on rent : 340", "Marginally employed : 140", "Elderly or disabled : 351", "In school : 330", "Retired : 344", "Armed forces, at work : 131", "Living on rents : 341", "Retired without benefits : 348" ]
+            }
+          }
+        },
+        "MAPPER" : {
+          "TYPE" : "AGG",
+          "THE MAP" : [ "Unemployed : No work available; Inactive unemployed; Unemployed, not specified; Unemployed 6 or more months; Worked fewer than 6 months, permanent job; Worked fewer than 6 months, temporary job; Unemployed, experienced worker; Unemployed, new worker", "NIU (not in universe) : NIU (not in universe)", "Unknown missing : Unknown missing", "Inactive : Inactive, other reasons; Too young to work; Dependent; Elderly; Elderly or disabled; Housework; Institutionalized; Prisoner; Unable to work, disabled or health reasons; Permanent disability; Temporary illness; Disabled or imprisoned; Intermittent worker; Not working, seasonal worker; Not working, occasional worker; In school; Other income recipient; Retirees and living on rent; Living on rents; Living on rents or pension; Retirees pensioners; Inactive (not in labor force); Retired; Pensioner; Non-retirement pension; Disability pension; Retired without benefits", "Employed : At work; At work, and 'student'; At work, and 'housework'; At work, and 'seeking work'; At work, and 'retired'; At work, and 'no work'; At work, and other situation; At work, family holding, not specified; At work, family holding, not agricultural; At work, family holding, agricultural; Have job, not at work in reference period; Armed forces; Armed forces, at work; Armed forces, not at work in reference period; Military trainee; Marginally employed; Employed, not specified" ]
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Unemployed : 2", "NIU (not in universe) : 0", "Inactive : 3", "Unknown missing : 9", "Employed : 1" ]
+        }
+      }
+    }, {
+      "MAPPED ATTRIBUTE" : {
+        "NAME" : "MARST",
+        "VALUE SPACE" : {
+          "TYPE" : "Nominal",
+          "VALUES" : [ {
+            "INPUT VALUE" : "Unknown missing"
+          }, {
+            "INPUT VALUE" : "NIU (not in universe)"
+          }, {
+            "INPUT VALUE" : "Separated divorced spouse absent"
+          }, {
+            "INPUT VALUE" : "Married in union"
+          }, {
+            "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "3"
+          }, {
+            "INPUT VALUE" : "2"
+          }, {
+            "INPUT VALUE" : "4"
+          }, {
+            "INPUT VALUE" : "Widowed"
+          }, {
+            "INPUT VALUE" : "Single never married"
+          } ],
+          "categoricTemplate" : {
+            "regex" : [ ]
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : null
+          }
+        },
+        "REFERENT ATTRIBUTE" : {
+          "ATTRIBUTE" : {
+            "NAME" : "MARSTD",
+            "VALUE SPACE" : {
+              "TYPE" : "Nominal",
+              "VALUES" : [ {
+                "INPUT VALUE" : "Separated from consensual union"
+              }, {
+                "INPUT VALUE" : "Never married and never cohabited"
+              }, {
+                "INPUT VALUE" : "350"
+              }, {
+                "INPUT VALUE" : "Married, religious"
+              }, {
+                "INPUT VALUE" : "Married, traditional customary"
+              }, {
+                "INPUT VALUE" : "Separated from consensual union or marriage"
+              }, {
+                "INPUT VALUE" : "Single never married"
+              }, {
+                "INPUT VALUE" : "Married, monogamous"
+              }, {
+                "INPUT VALUE" : "Married, civil and religious"
+              }, {
+                "INPUT VALUE" : "Widowed or divorced"
+              }, {
+                "INPUT VALUE" : "Engaged"
+              }, {
+                "INPUT VALUE" : "Annulled"
+              }, {
+                "INPUT VALUE" : "Unknown missing"
+              }, {
+                "INPUT VALUE" : "Widowed from consensual union or marriage"
+              }, {
+                "INPUT VALUE" : "100"
+              }, {
+                "INPUT VALUE" : "330"
+              }, {
+                "INPUT VALUE" : "Widowed from consensual union"
+              }, {
+                "INPUT VALUE" : "Married, polygamous"
+              }, {
+                "INPUT VALUE" : "Separated de facto"
+              }, {
+                "INPUT VALUE" : "Separated"
+              }, {
+                "INPUT VALUE" : "Separated legally"
+              }, {
+                "INPUT VALUE" : "Widowed, divorced, or separated"
+              }, {
+                "INPUT VALUE" : "Separated or divorced"
+              }, {
+                "INPUT VALUE" : "Separated divorced spouse absent"
+              }, {
+                "INPUT VALUE" : "Consensual union"
+              }, {
+                "INPUT VALUE" : "NIU (not in universe)"
+              }, {
+                "INPUT VALUE" : "Married or consensual union"
+              }, {
+                "INPUT VALUE" : "Widowed"
+              }, {
+                "INPUT VALUE" : "Separated or annulled"
+              }, {
+                "INPUT VALUE" : "Separated from marriage"
+              }, {
+                "INPUT VALUE" : "Married, spouse absent"
+              }, {
+                "INPUT VALUE" : "Widowed from marriage"
+              }, {
+                "INPUT VALUE" : "Married, civil or religious"
+              }, {
+                "INPUT VALUE" : "Married, formally"
+              }, {
+                "INPUT VALUE" : "Divorced"
+              }, {
+                "INPUT VALUE" : "200"
+              }, {
+                "INPUT VALUE" : "Married, civil"
+              }, {
+                "INPUT VALUE" : "400"
+              } ],
+              "categoricTemplate" : {
+                "regex" : [ ]
+              },
+              "EMPTY VALUE" : {
+                "INPUT VALUE" : null
+              }
+            },
+            "ENCODED VALUES" : {
+              "MAPPING" : [ "Separated from consensual union : 334", "Never married and never cohabited : 111", "Married, religious : 212", "Married, traditional customary : 215", "Separated from consensual union or marriage : 335", "Single never married : 100", "Married, monogamous : 216", "Married, civil and religious : 213", "Widowed or divorced : 410", "Engaged : 110", "Annulled : 340", "Unknown missing : 999", "Widowed from consensual union or marriage : 411", "Married, polygamous : 217", "Widowed from consensual union : 413", "Separated : 330", "Separated de facto : 332", "Separated legally : 331", "Widowed, divorced, or separated : 420", "Separated or divorced : 310", "Separated divorced spouse absent : 300", "Consensual union : 220", "NIU (not in universe) : 000", "Married or consensual union : 200", "Widowed : 400", "Separated from marriage : 333", "Separated or annulled : 320", "Married, spouse absent : 360", "Widowed from marriage : 412", "Married, civil or religious : 214", "Married, formally : 210", "Divorced : 350", "Married, civil : 211" ]
+            }
+          }
+        },
+        "MAPPER" : {
+          "TYPE" : "AGG",
+          "THE MAP" : [ "Unknown missing : Unknown missing", "NIU (not in universe) : NIU (not in universe)", "Separated divorced spouse absent : Divorced; Separated; Separated legally; Separated or divorced; Separated de facto; Separated from marriage; Separated from consensual union; Separated from consensual union or marriage; Married, spouse absent; Annulled; Separated or annulled; Separated divorced spouse absent", "Married in union : Married, formally; Married, civil; Married, religious; Married, civil and religious; Married, civil or religious; Married, traditional customary; Married, monogamous; Married, polygamous; Consensual union; Married or consensual union", "Widowed : Widowed or divorced; Widowed from consensual union or marriage; Widowed from marriage; Widowed from consensual union; Widowed, divorced, or separated; Widowed", "Single never married : Engaged; Never married and never cohabited; Single never married" ]
+        },
+        "ENCODED VALUES" : {
+          "MAPPING" : [ "Unknown missing : 9", "NIU (not in universe) : 0", "Separated divorced spouse absent : 3", "Married in union : 2", "Widowed : 4", "Single never married : 1" ]
+        }
+      }
+    } ],
+    "RECORDS" : [ ]
+  }
+}

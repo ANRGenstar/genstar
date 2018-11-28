@@ -700,7 +700,7 @@ public class GosplSurveyFactory {
 			else 
 				bw.write(" ");
 			bw.write(separator);
-			bw.write(Integer.toString(e.getCountChildren()));
+			bw.write(Integer.toString(e.getCountChildren().getActualValue()));
 			bw.write("\n");
 		}
 		bw.close();

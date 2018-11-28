@@ -42,7 +42,10 @@ public class GSDataParser {
 		INT_MATCH("-?\\d+");
 		
 		private String match;
-		private NumMatcher(String match){this.match = match;}
+		
+		private NumMatcher(String match){
+			this.match = match;
+		}
 		
 		/**
 		 * Gives the string matcher
@@ -55,6 +58,7 @@ public class GSDataParser {
 		 * @return
 		 */
 		public static NumMatcher getDefault() {return NumMatcher.INT_POSITIF_MATCH;}
+		
 	}
 	
 	/**
@@ -92,7 +96,6 @@ public class GSDataParser {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	@SuppressWarnings("unlikely-arg-type")
 	public GSRangeTemplate getRangeTemplate(List<String> ranges, String match, NumMatcher numMatcher) throws GSIllegalRangedData {
 		List<Integer> rangeInt = new ArrayList<>();
 		for(String range : ranges)
@@ -334,6 +337,9 @@ public class GSDataParser {
 		}
 	}
 	
+	/*
+	 * 
+	 */
 	private List<String> getNumbers(String string, String match){
 		List<String> numbers = new ArrayList<>();
 		Pattern p = Pattern.compile(match);

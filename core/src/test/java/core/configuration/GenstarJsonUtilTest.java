@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.IntegerValue;
 import core.metamodel.value.numeric.RangeValue;
 import core.util.GSUtilAttribute;
 import core.util.data.GSEnumDataType;
@@ -114,21 +114,23 @@ public class GenstarJsonUtilTest {
 		
 		MappedAttribute<? extends IValue, RangeValue> nominalToRangeAttribute = 
 				AttributeFactory.getFactory()
-					.createMappedAttribute("Mapped attribute", GSEnumDataType.Order, 
+					.createSTSMappedAttribute("Mapped attribute", GSEnumDataType.Order, 
 							rangeAttribute, 
 							value2value
 						);
 		dd.addAttributes(nominalToRangeAttribute);
 		
-		// RECORD (CODE)
+		// ENCODE
 		Map<String,String> value2value2 = new HashMap<>();
 		value2value2.put("1", "true");
-		value2value2.put("2", "false");
-		MappedAttribute<IntegerValue, ? extends IValue> intToBoolAttribute =
+		value2value2.put("0", "false");
+		value2value2.put("", "false");
+		value2value2.put("999", "false");
+		Attribute<? extends IValue> boolEncodedAttribute =
 				AttributeFactory.getFactory()
-					.createIntegerRecordAttribute("Record attribute", dd.getAttribute("Boolean attribute"),
-							value2value2);
-		dd.addAttributes(intToBoolAttribute);
+					.createAttribute("Encoded Boolean", GSEnumDataType.Boolean, 
+							new ArrayList<>(value2value2.values()), value2value2);
+		dd.addAttributes(boolEncodedAttribute);
 		
 		// RECORD
 		dd.addRecords(AttributeFactory.getFactory()
@@ -138,7 +140,7 @@ public class GenstarJsonUtilTest {
 		// EMERGENT
 		IValue[] matches = GSUtilAttribute.getIValues(rangeAttribute, "25 à 34", "35 à 54", "55 et plus").toArray(new IValue[3]);
 		dd.addAttributes(AttributeFactory.getFactory()
-				.getValueOfAttribute("Age du référent du ménage", rangeAttribute, 
+				.createValueOfAttribute("Age du référent du ménage", rangeAttribute, 
 						EntityChildFilterFactory.getFactory().getFilter(EChildFilter.OneOf, 
 								new ImplicitEntityComparator().setAttribute(dd.getAttribute("Boolean attribute"), false)
 									.setAttribute(nominalToRangeAttribute, true)), 
@@ -146,7 +148,7 @@ public class GenstarJsonUtilTest {
 		
 		IValue[] matchesTwo = GSUtilAttribute.getIValues(rangeAggAttribute, "moins de 24 ans").toArray(new IValue[1]);
 		dd.addAttributes(AttributeFactory.getFactory()
-				.getAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, 
+				.createAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, 
 						EChildFilter.OneOf.getFilter(), matchesTwo));
 
 		sju = new GenstarJsonUtil();

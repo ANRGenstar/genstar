@@ -98,6 +98,22 @@ public class RangeValue implements IValue {
 		return this.actualValue;
 	}
 	
+	/**
+	 * Get the lower bound of the range value
+	 * @return
+	 */
+	public Number getBottomBound() {
+		return bottomBound;
+	}
+
+	/**
+	 * Get the upper bound of the range value
+	 * @return
+	 */
+	public Number getTopBound() {
+		return topBound;
+	}
+	
 	// ------------------------------------------------------ //
 
 	@Override
@@ -118,14 +134,6 @@ public class RangeValue implements IValue {
 	@Override
 	public <T> void setActualValue(T v) throws UnsupportedOperationException {
 		this.actualValue = v;
-	}
-
-	public Number getBottomBound() {
-		return bottomBound;
-	}
-
-	public Number getTopBound() {
-		return topBound;
 	}
 	
 }

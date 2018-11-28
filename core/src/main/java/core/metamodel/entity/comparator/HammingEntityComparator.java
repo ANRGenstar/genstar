@@ -1,25 +1,68 @@
 package core.metamodel.entity.comparator;
 
-import java.util.Comparator;
+import java.util.Map;
+import java.util.Set;
 
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
-public class HammingEntityComparator implements Comparator<IEntity<Attribute<? extends IValue>>> {
+/**
+ * Compare agent using a third referent: the closest agent to referent will be sorted first !
+ * <p>
+ * WARNING: not consistant with equality
+ * 
+ * @author kevinchapuis
+ *
+ */
+public class HammingEntityComparator extends ImplicitEntityComparator {
 
-	private IEntity<Attribute<? extends IValue>> referent;
-	private IDComparator defaultComparator = IDComparator.getInstance();
+	private AttributeVectorMatcher vector;
 
-	public HammingEntityComparator(IEntity<Attribute<? extends IValue>> referent) {
-		this.referent = referent;
+	public HammingEntityComparator() { }
+
+	/**
+	 * Hamming distance will be computed using a referent entity (one value for each attribute) 
+	 * 
+	 * @param entity
+	 */
+	public HammingEntityComparator(IEntity<Attribute<? extends IValue>> entity) {
+		this.vector = new AttributeVectorMatcher(entity);
 	}
+	
+	/**
+	 * Hamming distance will be computed with several value being possible for each attribute
+	 * 
+	 * @param vector
+	 */
+	public HammingEntityComparator(Map<IAttribute<? extends IValue>, Set<IValue>> vector) {
+		this.vector = new AttributeVectorMatcher(vector);
+	}
+	
+	/**
+	 * Equivalent to {link @HammingEntityComparator(Map<IAttribute<? extends IValue>, Set<IValue>> vector)} but not
+	 * without consistency
+	 * 
+	 * @param vector
+	 */
+	public HammingEntityComparator(IValue... vector) {
+		this.vector = new AttributeVectorMatcher();
+		this.vector.addMatchToVector(vector);
+	}
+	
+	// ------------------------------------------------------------ //
 
 	@Override
-	public int compare(IEntity<Attribute<? extends IValue>> o1, IEntity<Attribute<? extends IValue>> o2) {
-		int scoreOne = (int) referent.getValues().stream().filter(v -> o1.getValues().contains(v)).count();
-		int scoreTwo = (int) referent.getValues().stream().filter(v -> o2.getValues().contains(v)).count();
-		return scoreOne > scoreTwo ? -1 : scoreOne < scoreTwo ? 1 : defaultComparator.compare(o1, o2);
+	public int compare(IEntity<? extends IAttribute<? extends IValue>> e1, IEntity<? extends IAttribute<? extends IValue>> e2) {
+		int scoreOne = 0;
+		int scoreTwo = 0;
+		if(vector != null) {
+			scoreOne = vector.getHammingDistance(e1);
+			scoreTwo = vector.getHammingDistance(e2);
+		}
+		return scoreOne > scoreTwo ? -1 : scoreOne < scoreTwo ? 1 : super.compare(e1, e2);
 	}
 
 }

@@ -54,7 +54,15 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	 * @param string
 	 * @return
 	 */
-	public A getAttribute(String string);
+	public A getAttribute(String attribute);
+	
+	/**
+	 * Access to value 
+	 * 
+	 * @param value
+	 * @return
+	 */
+	public IValue getValue(String value);
 	
 	/**
 	 * true if this dictionary contains an attribute associated to the attribute name passed as argument; 

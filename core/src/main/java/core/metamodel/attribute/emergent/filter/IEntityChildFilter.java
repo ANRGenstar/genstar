@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.value.IValue;
@@ -33,7 +34,8 @@ import core.metamodel.value.IValue;
 @JsonSubTypes({
 	        @JsonSubTypes.Type(value = EntityOneOfMatchFilter.class),
 	        @JsonSubTypes.Type(value = EntityOneOfEachMatchFilter.class),
-	        @JsonSubTypes.Type(value = EntityAllMatchFilter.class)
+	        @JsonSubTypes.Type(value = EntityAllMatchFilter.class),
+	        @JsonSubTypes.Type(value = EntityMatchFilter.class)
 	    })
 public interface IEntityChildFilter {
 	
@@ -48,19 +50,21 @@ public interface IEntityChildFilter {
 	 * @return
 	 */
 	public Collection<IEntity<? extends IAttribute<? extends IValue>>> retain(
-			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches); 
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, 
+			AttributeVectorMatcher matcher); 
 	
 	/**
 	 * Chose only one entity among a collect of entities. Have to be consistent, that is the same
 	 * arguments must always return the same entity
 	 * 
 	 * @param entities
-	 * @param matches
+	 * @param matcher
 	 * @return
 	 */
 	default IEntity<? extends IAttribute<? extends IValue>> choseOne(
-			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, IValue... matches) {
-		List<IEntity<? extends IAttribute<? extends IValue>>> retains = new ArrayList<>(this.retain(entities, matches));
+			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, 
+			AttributeVectorMatcher matcher) {
+		List<IEntity<? extends IAttribute<? extends IValue>>> retains = new ArrayList<>(this.retain(entities, matcher));
 		Collections.sort(retains, this.getComparator());
 		return retains.get(0);
 	}

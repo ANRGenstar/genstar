@@ -33,6 +33,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
  */
 public class GosplIndicatorFactory {
 
+	private static Double EPSILON = Math.pow(10, -6);
 	private static GosplIndicatorFactory gif = new GosplIndicatorFactory();
 	private double criticalPValue = 0.05;
 
@@ -173,7 +174,8 @@ public class GosplIndicatorFactory {
 			AFullNDimensionalMatrix<Double> populationMatrix, double delta){
 		return inputMatrix.getMatrix().entrySet().stream()
 				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
-						.getValue() - e.getValue().getValue().doubleValue()) > delta ? 1 : 0)
+						.getValue() - e.getValue().getValue().doubleValue()) / 
+						e.getValue().getValue().doubleValue() > delta ? 1 : 0)
 				.sum();
 	}
 	
@@ -377,15 +379,40 @@ public class GosplIndicatorFactory {
 			IQueryablePopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		return this.getTAE(inputMatrix, population) / inputMatrix.size();
 	}
+	
+	/**
+	 * @see #getAAPD(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @return
+	 */
+	public double getIntegerAAPD(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Integer> populationMatrix) {
+		return this.getIntegerTAE(inputMatrix, populationMatrix) / inputMatrix.size();
+	}
+	
+	/**
+	 * @see #getAAPD(INDimensionalMatrix, IPopulation)
+	 * 
+	 * @param inputMatrix
+	 * @param populationMatrix
+	 * @return
+	 */
+	public double getDoubleAAPD(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Double> populationMatrix) {
+		return this.getDoubleTAE(inputMatrix, populationMatrix) / inputMatrix.size();
+	}
 
 	
 	// ---------------------- Standardize Root Mean Square Error ---------------------- //
 	
 	
 	/**
-	 * Return the square root mean square error (SRMSE) for this {@code population}. This indicator
-	 * aggregates error between known control total from input data and those of the generated
-	 * synthetic population.
+	 * Return the standardized root mean square error (SRMSE also known as NRMSE) for this {@code population}. 
+	 * This indicator aggregates error between known control total from input data and those of the generated
+	 * synthetic population. The standardization (normalization) criterion is the most important discrepancy
+	 * among generated data, meaning: maxarg(generatedMatrix) - minarg(generatedMatrix).
 	 * <p>
 	 * TODO: little background for the method and advise to read output indicator
 	 * 
@@ -406,7 +433,7 @@ public class GosplIndicatorFactory {
 					.getFactory().createContingency(population));
 		case GlobalFrequencyTable:
 			return getDoubleSRMSE(inputMatrix, GosplNDimensionalMatrixFactory
-				.getFactory().createContingency(population), population.size());
+				.getFactory().createDistribution(population));
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -452,13 +479,17 @@ public class GosplIndicatorFactory {
 	public double getIntegerSRMSE(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix){
 		int nbCells = inputMatrix.size();
-		double expectedValue, actualValue, rmse = 0d;
+		double expectedValue, actualValue, mse = 0d;
+		int minVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).min().getAsInt();
+		int maxVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).max().getAsInt();
 		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
 			actualValue = populationMatrix.getVal(coord.values(), true).getValue();
-			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
+			mse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 		}
-		return Math.sqrt(rmse) / inputMatrix.getVal().getValue().intValue();
+		return Math.sqrt(mse) / (maxVal - minVal);
 	}
 	
 	/**
@@ -473,17 +504,21 @@ public class GosplIndicatorFactory {
 	public double getIntegerSRMSE(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			IQueryablePopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		int nbCells = inputMatrix.size();
-		double expectedValue, actualValue, sumofSquarError = 0d;
+		double expectedValue, actualValue, mse = 0d;
+		int minVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).min().getAsInt();
+		int maxVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).max().getAsInt();
 		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
 			actualValue = population.getCountHavingCoordinate(coord.getMap());
-			sumofSquarError += Math.pow(expectedValue - actualValue, 2) / nbCells;
+			mse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 		}
-		return Math.sqrt(sumofSquarError) / inputMatrix.getVal().getValue().intValue();
+		return Math.sqrt(mse) / (maxVal - minVal);
 	}
 
 	/**
-	 * Standardized Root Mean Square Error with population transposed as a contingency table and
+	 * Standardized Root Mean Square Error that compare a synthetic distribution and
 	 * input data as a frequency table matrix
 	 * <p>
 	 * @see #getSRMSE(INDimensionalMatrix, IPopulation)
@@ -494,16 +529,19 @@ public class GosplIndicatorFactory {
 	 * @return
 	 */
 	public double getDoubleSRMSE(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
-			AFullNDimensionalMatrix<Integer> populationMatrix, int popSize){
+			AFullNDimensionalMatrix<Double> populationMatrix){
 		int nbCells = inputMatrix.size();
-		double expectedValue, actualValue, s = 0d, rmse = 0d;
+		double expectedValue, actualValue, mse = 0d;
+		double minVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).min().getAsInt();
+		double maxVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).max().getAsInt();
 		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
-			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * popSize;
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
 			actualValue = populationMatrix.getVal(coord.values(), true).getValue();
-			rmse += Math.pow(expectedValue - actualValue, 2) / nbCells;
-			s += Math.pow(actualValue, 2) / nbCells;
+			mse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 		}
-		return Math.sqrt(rmse) / s;
+		return Math.sqrt(mse) / (maxVal - minVal);
 	}
 	
 	/**
@@ -519,13 +557,17 @@ public class GosplIndicatorFactory {
 	public double getDoubleSRMSE(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			IQueryablePopulation<ADemoEntity, Attribute<? extends IValue>> population){
 		int nbCells = inputMatrix.size();
-		double expectedValue, actualValue, sumofSquarError = 0d;
+		double expectedValue, actualValue, mse = 0d;
+		double minVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).min().getAsInt();
+		double maxVal = inputMatrix.getMatrix().values().stream()
+				.mapToInt(v -> v.getValue().intValue()).max().getAsInt();
 		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
 			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
 			actualValue = population.getCountHavingCoordinate(coord.getMap());
-			sumofSquarError += Math.pow(expectedValue - actualValue, 2) / nbCells;
+			mse += Math.pow(expectedValue - actualValue, 2) / nbCells;
 		}
-		return Math.sqrt(sumofSquarError) / inputMatrix.getVal().getValue().intValue();
+		return Math.sqrt(mse) / (maxVal - minVal);
 	}
 	
 	// ---------------------- Relative Sum of Square Modified Z-Score ---------------------- //
@@ -548,28 +590,12 @@ public class GosplIndicatorFactory {
 	 */
 	public double getRSSZstar(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population){
-		double expectedValue = 0d;
-		double actualValue = 0d;
-		double ssz = 0d;
-		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
-				.inverseCumulativeProbability(criticalPValue);
-		AFullNDimensionalMatrix<Integer> contingencyTable = GosplNDimensionalMatrixFactory
-				.getFactory().createContingency(population);
+		
 		switch (inputMatrix.getMetaDataType()) {
 		case ContingencyTable:
-			for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
-				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
-				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
-				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
-			}
-			return ssz / chiFiveCritical;
+			return this.getIntegerRSSZstar(inputMatrix, GosplNDimensionalMatrixFactory.getFactory().createContingency(population));
 		case GlobalFrequencyTable:
-			for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
-				expectedValue = inputMatrix.getVal(coord).getValue().doubleValue() * population.size();
-				actualValue = contingencyTable.getVal(coord.values(), true).getValue();
-				ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / population.size()));
-			}
-			return ssz / chiFiveCritical;
+			return this.getDoubleRSSZstar(inputMatrix, GosplNDimensionalMatrixFactory.getFactory().createDistribution(population));
 		case LocalFrequencyTable:
 			throw new IllegalArgumentException("Input contingency argument cannot be "
 					+ "of type "+ inputMatrix.getMetaDataType());
@@ -619,6 +645,56 @@ public class GosplIndicatorFactory {
 		}
 	}
 	
+	/**
+	 * 
+	 * @param inputMatrix
+	 * @param contingencyTable
+	 * @return
+	 */
+	public double getIntegerRSSZstar(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Integer> contingencyTable) {
+		double expectedValue = 0d;
+		double actualValue = 0d;
+		double ssz = 0d;
+		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
+				.inverseCumulativeProbability(criticalPValue);
+		int popSize = contingencyTable.getVal().getValue().intValue();
+		
+		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
+			actualValue = contingencyTable.getVal(coord.values(), true).getValue();
+			ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue / popSize));
+		}
+		
+		return ssz / chiFiveCritical;
+		
+	}
+	
+	/**
+	 * WARNING: not sure of implementation for distribution comparison, because literature usage have been made
+	 * using contingency tables
+	 * 
+	 * @param inputMatrix
+	 * @param distribution
+	 * @return
+	 */
+	public double getDoubleRSSZstar(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
+			AFullNDimensionalMatrix<Double> distribution) {
+		double expectedValue = 0d;
+		double actualValue = 0d;
+		double ssz = 0d;
+		double chiFiveCritical = new ChiSquaredDistribution(inputMatrix.getDegree())
+				.inverseCumulativeProbability(criticalPValue);
+		
+		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()){			 
+			expectedValue = inputMatrix.getVal(coord).getValue().doubleValue();
+			actualValue = distribution.getVal(coord.values(), true).getValue();
+			ssz += Math.pow(actualValue - expectedValue, 2) / (expectedValue * (1 - expectedValue));
+		}
+		
+		return ssz / chiFiveCritical;
+	}
+	
 	
 	///////////////////////////////////////////////////////////////////////////////
 	// ---------------------- MAIN REPORT UTILITY METHODS ---------------------- //
@@ -664,6 +740,34 @@ public class GosplIndicatorFactory {
 			bw.write(separator+decimalFormat.format(report.get(indicator).doubleValue()).toString());
 		bw.flush();
 	}
+	
+	/**
+	 * Get the desired indicator that asses error between input and created distribution
+	 * 
+	 * @param indicator
+	 * @param inputMatrix
+	 * @param distribution
+	 * @return
+	 */
+	public double getIndicator(GosplIndicator indicator,
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> inputMatrix,
+			AFullNDimensionalMatrix<Double> distribution) {
+		switch(indicator) {
+		case TAE:
+			return this.getDoubleTAE(inputMatrix, distribution);
+		case TACE:
+			return this.getDoubleTACE(inputMatrix, distribution, EPSILON);
+		case AAPD:
+			return this.getDoubleAAPD(inputMatrix, distribution);
+		case SRMSE:
+			return this.getDoubleSRMSE(inputMatrix, distribution);
+		case RSSZstar:
+			return this.getDoubleRSSZstar(inputMatrix, distribution);
+		default:
+			throw new IllegalArgumentException(indicator+" is an unknown indicator");
+		}
+	}
+	
 
 	// -------------------- Private inner methods -------------------- //
 	

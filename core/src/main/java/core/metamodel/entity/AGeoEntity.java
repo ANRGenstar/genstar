@@ -14,6 +14,7 @@ import com.vividsolutions.jts.geom.Point;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerValue;
 import core.util.data.GSDataParser;
 
 public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<? extends V>> {
@@ -206,7 +207,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<
 	}
 
 	@Override
-	public int getCountChildren() {
+	public IntegerValue getCountChildren() {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
 	}
 

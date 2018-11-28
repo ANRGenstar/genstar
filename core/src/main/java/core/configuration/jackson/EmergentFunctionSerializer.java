@@ -1,6 +1,7 @@
 package core.configuration.jackson;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -13,6 +14,7 @@ import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
 import core.metamodel.attribute.emergent.IEntityEmergentFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -59,8 +61,13 @@ public class EmergentFunctionSerializer extends StdSerializer<
 			gen.writeStringField(IEntityChildFilter.TYPE, function.getFilter().getType().toString());
 			gen.writeObjectField(IEntityChildFilter.COMPARATOR, function.getFilter().getComparator());
 			gen.writeArrayFieldStart(IEntityEmergentFunction.MATCHERS);
-			for(IValue match : function.getMatchers())
-				gen.writeString(match.getStringValue());
+			for(IAttribute<? extends IValue> att : function.getMatchers().getAttributes())
+				gen.writeString(att.getAttributeName()
+						+AttributeVectorMatcher.ATT_SEPRATOR
+						+function.getMatchers().getValues(att).stream()
+							.map(v -> v.getStringValue())
+							.collect(Collectors.joining(AttributeVectorMatcher.VAL_SEPRATOR)));
+
 			gen.writeEndArray();
 			gen.writeEndObject();
 			

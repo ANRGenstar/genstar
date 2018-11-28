@@ -3,7 +3,7 @@ package gospl.algo.co.simannealing;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
-import core.util.random.GenstarRandomUtils;
+import core.util.random.GenstarRandom;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationEntityNeighborSearch;
@@ -134,7 +134,9 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 				}
 			}
 			
-			if(tempTransition || GenstarRandomUtils.flip(1 - forcedTransition)) {
+			double var = 1 - forcedTransition;
+			
+			if(tempTransition || GenstarRandom.getInstance().nextDouble() < var) {
 				this.getNeighborSearchAlgorithm().updatePredicates(currentState.getSolution());
 				temperature = this.initTemp / (1 + coolingRate * Math.log(1 + ++stateTransition));
 				local_transitionLength = this.transitionLength;

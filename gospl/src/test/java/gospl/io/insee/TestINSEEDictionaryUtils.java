@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 

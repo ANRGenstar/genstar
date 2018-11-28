@@ -1,5 +1,12 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.IAttribute;
@@ -35,8 +42,17 @@ public class EntityCountFunction<E extends IEntity<? extends IAttribute<? extend
 		return this.getReferentAttribute().getValueSpace().proposeValue(
 				Integer.toString(super.getFilter() != null && super.getMatchers() != null ? 
 					super.getFilter().retain(entity.getChildren(), super.getMatchers()).size() : 
-						entity.getCountChildren())
+						entity.getChildren().size())
 				);
+	}
+
+	@Override
+	public Collection<Set<IValue>> reverse(IntegerValue value, U useless) {
+		Collection<IValue> matchers = super.getMatchers() != null ? 
+				Collections.emptySet() : getMatchers().values();  
+		return IntStream.range(0, value.getActualValue().intValue())
+						.mapToObj(i -> new HashSet<>(matchers))
+						.collect(Collectors.toList());
 	}
 
 }

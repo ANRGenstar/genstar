@@ -5,22 +5,38 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.AttributeFactory;
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerValue;
 
-public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> {
+/**
+ * The higher order abstraction for demographic entity. Manage basic attribute / value relationship and parent / children relationship.
+ * 
+ * TODO: study the possibility of extending {@link IPopulation} - but may be too holonic
+ * 
+ * @author kevinchapuis
+ *
+ */
+public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> { // , IPopulation<ADemoEntity, Attribute<? extends IValue>> {
 
 	/**
 	 * The unique identifier of the entity. See {@link EntityUniqueId}
 	 */
 	private String id = null;
 	
+	/**
+	 * The map of attribute / value ! What characterize the entity: vector of value, one value for each attribute.
+	 */
 	protected Map<Attribute<? extends IValue>, IValue> attributes;
 
 	
@@ -192,6 +208,26 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<IEntity<? extends IAttribute<? extends IValue>>> children = null;
 	
+	public static EmergentAttribute<IntegerValue, IValue, ADemoEntity, ?> SIZE_ATTRIBUTE = AttributeFactory.getFactory()
+			.createCountAttribute("SIZE ATTRIBUTE", null);
+	
+	/**
+	 * Set a referent for the {@link #SIZE_ATTRIBUTE}
+	 * @param referent
+	 * @param mapper
+	 */
+	public void setReferentSizeAttribute(Attribute<IValue> referent, Map<Collection<String>, Collection<String>> mapper) {
+		AttributeFactory.getFactory().setReferent(SIZE_ATTRIBUTE, referent);
+		for(Entry<Collection<String>, Collection<String>> entry : mapper.entrySet()) {
+			for(String key : entry.getKey()) {
+				IntegerValue kv = SIZE_ATTRIBUTE.getValueSpace().getValue(key);
+				for(String value : entry.getValue()) {
+					SIZE_ATTRIBUTE.addMappedValue(kv, referent.getValueSpace().getValue(value));
+				}
+			}
+		}
+	}
+	
 	@Override
 	public final boolean hasParent() {
 		return parent != null;
@@ -213,10 +249,10 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	}
 
 	@Override
-	public final int getCountChildren() {
+	public final IntegerValue getCountChildren() {
 		if (children == null)
-			return 0;
-		return children.size();
+			return SIZE_ATTRIBUTE.getValueSpace().proposeValue("0");
+		return SIZE_ATTRIBUTE.getEmergentValue(this, null);
 	}
 
 	@Override

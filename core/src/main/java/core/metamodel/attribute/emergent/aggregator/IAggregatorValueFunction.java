@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
+import core.metamodel.attribute.emergent.transposer.ITransposeValueFunction;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 

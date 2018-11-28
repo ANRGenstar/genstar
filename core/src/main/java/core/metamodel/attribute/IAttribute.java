@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import core.configuration.jackson.AttributeDeserializer;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
@@ -34,6 +35,7 @@ import core.metamodel.value.IValueSpace;
 public interface IAttribute<V extends IValue> {
 	
 	public static final String VALUE_SPACE = "VALUE SPACE";
+	public static final String ENCODED_MAPPER = "CODE MAPPER";
 	public static final String NAME = "NAME";
 
 	/**
@@ -62,6 +64,24 @@ public interface IAttribute<V extends IValue> {
 	 * @param valueSpace
 	 */
 	public void setValueSpace(IValueSpace<V> valueSpace);
+	
+	/**
+	 * Keep track of encoded form for values. In most census data, there is 
+	 * simple code form and full form for values, e.g. 0 = unemployed, 1 = employed
+	 * 2 = retired, 9 = NIU
+	 * 
+	 * @return
+	 */
+	@JsonProperty(EncodedValueMapper.SELF)
+	public EncodedValueMapper<V> getEncodedValueMapper();
+	
+	/**
+	 * Set the encoded value mapper
+	 * 
+	 * @param encodedMapper
+	 */
+	@JsonProperty(EncodedValueMapper.SELF)
+	public void setEncodedValueMapper(EncodedValueMapper<V> encodedMapper);
 	
 // -------------------------
 	

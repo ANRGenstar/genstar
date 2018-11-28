@@ -1,5 +1,6 @@
 package core.metamodel.attribute.emergent.aggregator;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -29,6 +30,13 @@ public class NominalValueAggregator implements IAggregatorValueFunction<NominalV
 	@Override
 	public String getType() {
 		return SELF;
+	}
+
+	@Override
+	public Collection<NominalValue> reverse(NominalValue value, IValueSpace<NominalValue> valueSpace) {
+		return Arrays.asList(value.getStringValue().split(getDefaultCharConcat().toString())).stream()
+				.map(v -> valueSpace.getValue(v))
+				.collect(Collectors.toSet());
 	}
 	
 }

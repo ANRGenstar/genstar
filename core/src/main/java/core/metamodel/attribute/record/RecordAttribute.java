@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import core.configuration.jackson.RecordAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.MappedAttribute;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.NominalValue;
@@ -61,6 +62,16 @@ public class RecordAttribute<R extends IAttribute<? extends IValue>,
 	
 	@Override
 	public void setValueSpace(IValueSpace<NominalValue> valueSpace) {
+		// DO NOTHING
+	}
+	
+	@Override
+	public EncodedValueMapper<NominalValue> getEncodedValueMapper() {
+		return null;
+	}
+
+	@Override
+	public void setEncodedValueMapper(EncodedValueMapper<NominalValue> encodedMapper) {
 		// DO NOTHING
 	}
 	

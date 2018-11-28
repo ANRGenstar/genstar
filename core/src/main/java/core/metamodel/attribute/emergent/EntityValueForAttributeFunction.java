@@ -1,5 +1,10 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.IAttribute;
@@ -37,6 +42,11 @@ public class EntityValueForAttributeFunction<E extends IEntity<? extends IAttrib
 				super.getFilter().choseOne(entity.getChildren(), super.getMatchers())
 				.getValueForAttribute(attribute.getAttributeName())
 				.getStringValue());
+	}
+
+	@Override
+	public Collection<Set<IValue>> reverse(V value, U useless) {
+		return Collections.singleton(new HashSet<>(super.getMatchers().values()));
 	}
 
 }

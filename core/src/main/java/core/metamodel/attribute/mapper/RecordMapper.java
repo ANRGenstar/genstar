@@ -9,13 +9,17 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.MappedAttribute;
+import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 
 /**
- * TODO: javadoc
+ * To be used when to attribute are equivalent, while being encoded in two different form. If there is
+ * only a different encoding for values of the same attribute, you should use {@link EncodedValueMapper}
+ * which are present by default in any attribute {@link Attribute#addRecords(String, String...)}
  * 
- * @author kevinchapuis
+ * @author kevinchapuis 
  *
  * @param <K>
  * @param <V>

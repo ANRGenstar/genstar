@@ -61,6 +61,11 @@ public class IntegerSpace implements IValueSpace<IntegerValue> {
 
 	// -------------------- SETTERS & GETTER CAPACITIES -------------------- //
 
+	/**
+	 * {@inheritDoc}
+	 * \p
+	 * By default integer value addition is not stored, make use of {@link #getInstanceValue(String)}
+	 */
 	@Override
 	public IntegerValue addValue(String value) {
 		if(excludedValues.contains(value))

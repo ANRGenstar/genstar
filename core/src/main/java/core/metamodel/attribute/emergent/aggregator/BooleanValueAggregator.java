@@ -1,6 +1,7 @@
 package core.metamodel.attribute.emergent.aggregator;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -50,6 +51,13 @@ public class BooleanValueAggregator implements IAggregatorValueFunction<BooleanV
 			return valueSpace.getValue(Boolean
 					.toString(values.stream().anyMatch(v -> v.getActualValue().equals(Boolean.FALSE))));
 		}
+	}
+	
+	@Override
+	public Collection<BooleanValue> reverse(BooleanValue value, IValueSpace<BooleanValue> valueSpace) {
+		return value.getActualValue() ? 
+				Collections.singleton(valueSpace.getValue(Boolean.TRUE.toString())) 
+				: Collections.singleton(valueSpace.getValue(Boolean.FALSE.toString()));
 	}
 
 	@Override

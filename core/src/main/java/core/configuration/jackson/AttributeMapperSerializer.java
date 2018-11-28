@@ -15,8 +15,8 @@ import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 
-public class AttributeMapperSerializer<K extends IValue, V extends IValue> 
-extends StdSerializer<IAttributeMapper<K, V>> {
+public class AttributeMapperSerializer
+extends StdSerializer<IAttributeMapper<? extends IValue, ? extends IValue>> {
 
 	/**
 	 * 
@@ -30,19 +30,19 @@ extends StdSerializer<IAttributeMapper<K, V>> {
 		this(null);
 	}
 
-	protected AttributeMapperSerializer(Class<IAttributeMapper<K, V>> t) {
+	protected AttributeMapperSerializer(Class<IAttributeMapper<? extends IValue, ? extends IValue>> t) {
 		super(t);
 	}
 
 	@Override
-	public void serialize(IAttributeMapper<K, V> mapper, JsonGenerator gen,
+	public void serialize(IAttributeMapper<? extends IValue, ? extends IValue> mapper, JsonGenerator gen,
 			SerializerProvider provider) throws IOException {
 		// DO NOTHING
 
 	}
 
 	@Override
-	public void serializeWithType(IAttributeMapper<K, V> mapper, 
+	public void serializeWithType(IAttributeMapper<? extends IValue, ? extends IValue> mapper, 
 			JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSer) throws IOException {
 
 		GSEnumDataType keyDataType = mapper.getRelatedAttribute().getValueSpace().getType();
@@ -64,7 +64,7 @@ extends StdSerializer<IAttributeMapper<K, V>> {
 	/*
 	 * Transpose mapper to a List of String key / value binding
 	 */
-	private List<String> getMapperEntries(IAttributeMapper<K, V> mapper) {
+	private List<String> getMapperEntries(IAttributeMapper<? extends IValue, ? extends IValue> mapper) {
 		return mapper.getRawMapper().entrySet().stream().map(entry -> 
 				this.getStringValues(entry.getKey()) + 
 					AttributeMapperSerializer.MATCHER_SYM + this.getStringValues(entry.getValue()))
@@ -74,7 +74,7 @@ extends StdSerializer<IAttributeMapper<K, V>> {
 	/*
 	 * Transpose mapper to a List of ordered String key / value binding
 	 */
-	private List<String> getOrderedMapperEntries(IAttributeMapper<K, V> mapper) {
+	private List<String> getOrderedMapperEntries(IAttributeMapper<? extends IValue, ? extends IValue> mapper) {
 		List<IValue> orderedValues = new ArrayList<>();
 		mapper.getRelatedAttribute().getValueSpace()
 					.getValues().iterator().forEachRemaining(orderedValues::add);

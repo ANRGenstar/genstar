@@ -2,6 +2,7 @@ package core.metamodel.attribute.emergent;
 
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
+import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
@@ -13,7 +14,7 @@ public abstract class AEntityEmergentFunction<E extends IEntity<? extends IAttri
 	private IAttribute<V> referent;
 	
 	private IEntityChildFilter filter;
-	private IValue[] matches;
+	private AttributeVectorMatcher matches;
 	
 	public AEntityEmergentFunction(IAttribute<V> referent, IEntityChildFilter filter, IValue... matches) {
 		this.setReferentAttribute(referent);
@@ -21,7 +22,8 @@ public abstract class AEntityEmergentFunction<E extends IEntity<? extends IAttri
 			this.filter = EChildFilter.All.getFilter();
 		else
 			this.filter = filter;
-		this.matches = matches;
+		this.matches = new AttributeVectorMatcher();
+		this.setMatchers(matches);
 	}
 	
 	@Override
@@ -35,13 +37,13 @@ public abstract class AEntityEmergentFunction<E extends IEntity<? extends IAttri
 	}
 	
 	@Override
-	public IValue[] getMatchers(){
+	public AttributeVectorMatcher getMatchers(){
 		return matches;
 	}
 	
 	@Override
 	public void setMatchers(IValue... matchers) {
-		this.matches = matchers;
+		this.matches.addMatchToVector(matchers);
 	}
 
 	@Override
