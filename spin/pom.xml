@@ -10,6 +10,7 @@
     <maven.test.skip>false</maven.test.skip>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <graphstream.version>1.3</graphstream.version>
+     <maven.deploy.skip>false</maven.deploy.skip>
 </properties>
 
     <parent>

@@ -9,6 +9,7 @@
   <properties>
 		<geotools.version>14.5</geotools.version>
 		<maven.test.skip>true</maven.test.skip>
+	  	<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
     <parent>
