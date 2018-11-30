@@ -7,6 +7,7 @@
 
  	<properties>
     <maven.test.skip>true</maven.test.skip>
+	<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
     <parent>
@@ -175,6 +176,8 @@
         </execution>
       </executions>
     </plugin>
+
+
      <!--   <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>

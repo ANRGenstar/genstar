@@ -9,6 +9,7 @@
   <properties>
 		<geotools.version>14.5</geotools.version>
 		<maven.test.skip>true</maven.test.skip>
+	  	<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
     <parent>
@@ -31,12 +32,12 @@
 	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-core</artifactId>
-	    <version>1.0.3</version>
+		<version>${revision}</version>
 	</dependency>
 	<dependency>
 	    <groupId>org.genstar</groupId>
 	    <artifactId>genstar-gospl</artifactId>
-	    <version>1.0.3</version>
+		<version>${revision}</version>
 	</dependency>
 	
 			<!-- MATH APACHE -->
@@ -420,6 +421,8 @@
         </execution>
       </executions>
     </plugin>
+
+
    <!--     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
@@ -444,6 +447,7 @@
 			<url>http://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 	</repositories>
+
 		<!--	<distributionManagement>
 		                <repository>
 		                <id>bintray-anrgenstar-genstar-packages</id>

@@ -7,6 +7,7 @@
 
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
+		<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
     <parent>
@@ -31,7 +32,7 @@
 		<dependency>
 			<groupId>org.genstar</groupId>
 			<artifactId>genstar-core</artifactId>
-			<version>1.0.5-SNAPSHOT</version>
+			<version>${revision}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
@@ -210,6 +211,7 @@
         </execution>
       </executions>
     </plugin>
+
     <!--    <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
@@ -220,6 +222,7 @@
             
 		</plugins>
 	</build>
+
 	<!--<distributionManagement>
 		<repository>
 			<id>bintray-anrgenstar-genstar-packages</id>
