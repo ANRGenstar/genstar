@@ -25,12 +25,9 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.attribute.MappedAttribute;
-import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
-import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
-import core.metamodel.entity.comparator.ImplicitEntityComparator;
+import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.RangeValue;
-import core.util.GSUtilAttribute;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 
@@ -138,18 +135,11 @@ public class GenstarJsonUtilTest {
 						dd.getAttribute("Range aggregated attribute")));
 		
 		// EMERGENT
-		IValue[] matches = GSUtilAttribute.getIValues(rangeAttribute, "25 à 34", "35 à 54", "55 et plus").toArray(new IValue[3]);
 		dd.addAttributes(AttributeFactory.getFactory()
-				.createValueOfAttribute("Age du référent du ménage", rangeAttribute, 
-						EntityChildFilterFactory.getFactory().getFilter(EChildFilter.OneOf, 
-								new ImplicitEntityComparator().setAttribute(dd.getAttribute("Boolean attribute"), false)
-									.setAttribute(nominalToRangeAttribute, true)), 
-						matches));
+				.createValueOfAttribute("Age du référent du ménage", rangeAttribute, EntityTag.HHHead));
 		
-		IValue[] matchesTwo = GSUtilAttribute.getIValues(rangeAggAttribute, "moins de 24 ans").toArray(new IValue[1]);
 		dd.addAttributes(AttributeFactory.getFactory()
-				.createAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, 
-						EChildFilter.OneOf.getFilter(), matchesTwo));
+				.createAggregatedValueOfAttribute("Age cumulé des enfants", rangeAggAttribute, EntityTag.Child));
 
 		sju = new GenstarJsonUtil();
 		

@@ -1,4 +1,4 @@
-package core.metamodel.attribute.util;
+package core.metamodel.entity.matcher;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -8,11 +8,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
+import core.util.GSDisplayUtil;
 
 /**
  * A vector of attribute with binded set of values and several utility methods to asses comparison with other entities made
@@ -21,8 +25,11 @@ import core.metamodel.value.IValue;
  * @author kevinchapuis
  *
  */
-public class AttributeVectorMatcher {
+@JsonTypeName(AttributeVectorMatcher.SELF)
+public class AttributeVectorMatcher implements IGSEntityMatcher<IValue> {
 
+	public static final String SELF = "VECTOR VALUE MATCHER";
+	
 	public static final String ATT_SEPRATOR = " : ";
 	public static final CharSequence VAL_SEPRATOR = ",";
 	
@@ -44,6 +51,12 @@ public class AttributeVectorMatcher {
 		this.vector = vector;
 	}
 	
+	
+	public AttributeVectorMatcher(IValue... vector) {
+		this();
+		this.addMatchToVector(vector);
+	}
+	
 	//-------------------------------------------//
 	
 	/**
@@ -51,8 +64,9 @@ public class AttributeVectorMatcher {
 	 * @param value
 	 * @return
 	 */
+	@Override
 	public boolean valueMatch(IValue value) {
-		return this.values().contains(value);
+		return this.getVector().contains(value);
 	}
 	
 	/**
@@ -60,8 +74,9 @@ public class AttributeVectorMatcher {
 	 * @param values
 	 * @return
 	 */
+	@Override
 	public boolean valuesMatch(Collection<? extends IValue> values) {
-		return this.values().containsAll(values);
+		return this.getVector().containsAll(values);
 	}
 	
 	/**
@@ -69,11 +84,14 @@ public class AttributeVectorMatcher {
 	 * @param entity
 	 * @return
 	 */
-	public boolean entityMatch(IEntity<? extends IAttribute<? extends IValue>> entity) {
-		return entity.getAttributes().containsAll(this.getAttributes()) ? 
-				entity.getAttributeMap().entrySet().stream()
-					.allMatch(e -> vector.get(e.getKey()).contains(e.getValue())) 
-				: false;
+	@Override
+	public boolean entityMatch(IEntity<? extends IAttribute<? extends IValue>> entity, MatchType type) {
+		switch (type) {
+		case ALL: return this.valuesMatch(entity.getValues());
+		case ANY: return entity.getValues().stream().anyMatch(value -> this.valueMatch(value));
+		case NONE: return entity.getValues().stream().noneMatch(value -> this.valueMatch(value));
+		default: throw new RuntimeException();
+		}
 	}
 	
 	/**
@@ -84,6 +102,7 @@ public class AttributeVectorMatcher {
 	 * @param entity
 	 * @return
 	 */
+	@Override
 	public int getHammingDistance(IEntity<? extends IAttribute<? extends IValue>> entity) {
 		return (int) entity.getAttributes().stream()
 				.filter(a -> vector.keySet().contains(a) 
@@ -98,8 +117,9 @@ public class AttributeVectorMatcher {
 	 * 
 	 * @param matches
 	 */
+	@Override
 	public void addMatchToVector(IValue... matches){
-		vector.putAll(Arrays.asList(matches).stream()
+		vector.putAll(Stream.of(matches)
 			.collect(Collectors.groupingBy(
 					v -> v.getValueSpace().getAttribute(),
 					Collectors.toSet())));
@@ -107,20 +127,25 @@ public class AttributeVectorMatcher {
 	
 	//-------------------------------------------//
 	
-	public Map<IAttribute<? extends IValue>, Set<IValue>> getVector(){
+	@Override
+	public String toString() {
+		return GSDisplayUtil.prettyPrint(vector.values(), ";");
+	}
+	
+	@Override
+	public void setVector(Collection<IValue> vector) {
+		this.addMatchToVector(vector.toArray(new IValue[vector.size()]));
+	}
+
+	@Override
+	public Collection<IValue> getVector() {
+		return vector.values().stream()
+				.flatMap(Collection::stream)
+				.collect(Collectors.toSet());
+	}
+
+	public Map<IAttribute<? extends IValue>, Set<IValue>> getMapVector() {
 		return Collections.unmodifiableMap(vector);
-	}
-
-	public Collection<IAttribute<? extends IValue>> getAttributes() {
-		return vector.keySet();
-	}
-
-	public Collection<IValue> getValues(IAttribute<? extends IValue> att) {
-		return Collections.unmodifiableSet(vector.get(att));
-	}
-
-	public Collection<IValue> values() {
-		return vector.values().stream().flatMap(s -> s.stream()).collect(Collectors.toSet());
 	}
 	
 }

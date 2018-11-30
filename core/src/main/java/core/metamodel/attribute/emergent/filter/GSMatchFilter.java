@@ -3,48 +3,35 @@ package core.metamodel.attribute.emergent.filter;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
+
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
-import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
-import core.metamodel.entity.comparator.HammingEntityComparator;
-import core.metamodel.entity.comparator.ImplicitEntityComparator;
+import core.metamodel.entity.matcher.IGSEntityMatcher;
+import core.metamodel.entity.matcher.MatchType;
 import core.metamodel.value.IValue;
 
-public class EntityMatchFilter implements IEntityChildFilter {
-
-	private HammingEntityComparator hComparator;
-
-	protected EntityMatchFilter() {
-		this.hComparator = new HammingEntityComparator();
-	}
+/**
+ * Filter entity by matching at least one attribute with vector matcher.
+ *  
+ * @author kevinchapuis
+ *
+ */
+@JsonTypeName(GSMatchFilter.SELF)
+public class GSMatchFilter<T> extends  AGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> {
+		
+	public static final String SELF = "MATCH FILTER";
 	
-	protected EntityMatchFilter(HammingEntityComparator comparator) {
-		this.hComparator = comparator;
+	public GSMatchFilter(IGSEntityMatcher<T> matcher, MatchType match) {
+		super(matcher, match);
 	}
-	
+
 	@Override
-	public Collection<IEntity<? extends IAttribute<? extends IValue>>> retain(
-			Collection<IEntity<? extends IAttribute<? extends IValue>>> entities, AttributeVectorMatcher matcher) {
-		return entities.stream().filter(e -> e.getValues().stream()
-				.anyMatch(v -> matcher.valueMatch(v)))
-				.sorted(hComparator)
+	public Collection<IEntity<? extends IAttribute<? extends IValue>>> apply(IEntity<? extends IAttribute<? extends IValue>> superEntity) {
+		return superEntity.getChildren().stream()
+				.filter(e -> this.validate(super.getMatchType(), e))
+				.sorted(super.getComparator())
 				.collect(Collectors.toCollection(this.getSupplier()));
 	}
-
-	@Override
-	public ImplicitEntityComparator getComparator() {
-		return null;
-	}
-
-	@Override
-	public void setComparator(ImplicitEntityComparator comparator) {
-		// Cannot change the comparator
-	}
-
-	@Override
-	public EChildFilter getType() {
-		return EChildFilter.TheOne;
-	}
-
+	
 }

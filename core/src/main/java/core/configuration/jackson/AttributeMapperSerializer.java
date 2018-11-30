@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.value.IValue;
+import core.util.GSKeywords;
 import core.util.data.GSEnumDataType;
 
 public class AttributeMapperSerializer
@@ -22,9 +23,6 @@ extends StdSerializer<IAttributeMapper<? extends IValue, ? extends IValue>> {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	public static final String MATCHER_SYM = " : ";
-	public static final String SPLIT_SYM = "; ";
 
 	protected AttributeMapperSerializer() {
 		this(null);
@@ -67,7 +65,7 @@ extends StdSerializer<IAttributeMapper<? extends IValue, ? extends IValue>> {
 	private List<String> getMapperEntries(IAttributeMapper<? extends IValue, ? extends IValue> mapper) {
 		return mapper.getRawMapper().entrySet().stream().map(entry -> 
 				this.getStringValues(entry.getKey()) + 
-					AttributeMapperSerializer.MATCHER_SYM + this.getStringValues(entry.getValue()))
+					GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR + this.getStringValues(entry.getValue()))
 				.collect(Collectors.toList());
 	}
 
@@ -82,7 +80,7 @@ extends StdSerializer<IAttributeMapper<? extends IValue, ? extends IValue>> {
 					this.getStringValues(orderedValues.stream()
 						.filter(ok -> entry.getKey().contains(ok))
 						.collect(Collectors.toList())) + 
-					AttributeMapperSerializer.MATCHER_SYM + this.getStringValues(entry.getValue()))
+					GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR + this.getStringValues(entry.getValue()))
 				.collect(Collectors.toList());
 	}
 
@@ -95,7 +93,7 @@ extends StdSerializer<IAttributeMapper<? extends IValue, ? extends IValue>> {
 		if(collection.size() == 1)
 			return collection.iterator().next().getStringValue();
 		return collection.stream().map(IValue::getStringValue)
-			.collect(Collectors.joining(AttributeMapperSerializer.SPLIT_SYM));
+			.collect(Collectors.joining(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR));
 	}
 
 }

@@ -6,9 +6,9 @@
         "VALUE SPACE" : {
           "TYPE" : "Boolean",
           "VALUES" : [ {
-            "INPUT VALUE" : "true"
-          }, {
             "INPUT VALUE" : "false"
+          }, {
+            "INPUT VALUE" : "true"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
@@ -22,9 +22,9 @@
         "VALUE SPACE" : {
           "TYPE" : "Nominal",
           "VALUES" : [ {
-            "INPUT VALUE" : "Célibataire"
-          }, {
             "INPUT VALUE" : "En couple"
+          }, {
+            "INPUT VALUE" : "Célibataire"
           } ],
           "categoricTemplate" : {
             "regex" : [ ]
@@ -64,25 +64,25 @@
         "VALUE SPACE" : {
           "TYPE" : "Integer",
           "VALUES" : [ {
-            "INPUT VALUE" : "2"
-          }, {
             "INPUT VALUE" : "1"
+          }, {
+            "INPUT VALUE" : "2"
           }, {
             "INPUT VALUE" : "0"
           }, {
-            "INPUT VALUE" : "9"
-          }, {
-            "INPUT VALUE" : "8"
-          }, {
-            "INPUT VALUE" : "7"
+            "INPUT VALUE" : "5"
           }, {
             "INPUT VALUE" : "6"
           }, {
-            "INPUT VALUE" : "5"
+            "INPUT VALUE" : "3"
           }, {
             "INPUT VALUE" : "4"
           }, {
-            "INPUT VALUE" : "3"
+            "INPUT VALUE" : "9"
+          }, {
+            "INPUT VALUE" : "7"
+          }, {
+            "INPUT VALUE" : "8"
           } ],
           "EMPTY VALUE" : {
             "INPUT VALUE" : "null"
@@ -112,20 +112,22 @@
         "VALUE SPACE" : {
           "TYPE" : "Range",
           "VALUES" : [ {
+            "INPUT VALUE" : "25 à 34"
+          }, {
             "INPUT VALUE" : "moins de 14"
           }, {
             "INPUT VALUE" : "35 à 54"
           }, {
-            "INPUT VALUE" : "25 à 34"
+            "INPUT VALUE" : "55 et plus"
           }, {
             "INPUT VALUE" : "15 à 24"
-          }, {
-            "INPUT VALUE" : "55 et plus"
           } ],
           "min" : 0,
           "max" : 120,
           "rangeTemplate" : {
-            "numberMatcher" : "INT_POSITIF_MATCH"
+            "numberMatcher" : "INT_POSITIF_MATCH",
+            "theoreticalMin" : 0,
+            "theoreticalMax" : 2147483647
           },
           "EMPTY VALUE" : {
             "INPUT VALUE" : "NaN à NaN"
@@ -148,7 +150,9 @@
           "min" : 0,
           "max" : 120,
           "rangeTemplate" : {
-            "numberMatcher" : "INT_POSITIF_MATCH"
+            "numberMatcher" : "INT_POSITIF_MATCH",
+            "theoreticalMin" : 0,
+            "theoreticalMax" : 2147483647
           },
           "EMPTY VALUE" : {
             "INPUT VALUE" : "NaN à NaN"
@@ -160,20 +164,22 @@
             "VALUE SPACE" : {
               "TYPE" : "Range",
               "VALUES" : [ {
+                "INPUT VALUE" : "25 à 34"
+              }, {
                 "INPUT VALUE" : "moins de 14"
               }, {
                 "INPUT VALUE" : "35 à 54"
               }, {
-                "INPUT VALUE" : "25 à 34"
+                "INPUT VALUE" : "55 et plus"
               }, {
                 "INPUT VALUE" : "15 à 24"
-              }, {
-                "INPUT VALUE" : "55 et plus"
               } ],
               "min" : 0,
               "max" : 120,
               "rangeTemplate" : {
-                "numberMatcher" : "INT_POSITIF_MATCH"
+                "numberMatcher" : "INT_POSITIF_MATCH",
+                "theoreticalMin" : 0,
+                "theoreticalMax" : 2147483647
               },
               "EMPTY VALUE" : {
                 "INPUT VALUE" : "NaN à NaN"
@@ -184,7 +190,7 @@
         },
         "MAPPER" : {
           "TYPE" : "AGG",
-          "THE MAP" : [ "moins de 24 ans : moins de 14; 15 à 24", "55 et plus : 55 et plus", "25 à 54 : 25 à 34; 35 à 54" ]
+          "THE MAP" : [ "moins de 24 ans : moins de 14;15 à 24", "55 et plus : 55 et plus", "25 à 54 : 25 à 34;35 à 54" ]
         },
         "ENCODED VALUES" : null
       }
@@ -219,20 +225,22 @@
             "VALUE SPACE" : {
               "TYPE" : "Range",
               "VALUES" : [ {
+                "INPUT VALUE" : "25 à 34"
+              }, {
                 "INPUT VALUE" : "moins de 14"
               }, {
                 "INPUT VALUE" : "35 à 54"
               }, {
-                "INPUT VALUE" : "25 à 34"
+                "INPUT VALUE" : "55 et plus"
               }, {
                 "INPUT VALUE" : "15 à 24"
-              }, {
-                "INPUT VALUE" : "55 et plus"
               } ],
               "min" : 0,
               "max" : 120,
               "rangeTemplate" : {
-                "numberMatcher" : "INT_POSITIF_MATCH"
+                "numberMatcher" : "INT_POSITIF_MATCH",
+                "theoreticalMin" : 0,
+                "theoreticalMax" : 2147483647
               },
               "EMPTY VALUE" : {
                 "INPUT VALUE" : "NaN à NaN"
@@ -243,7 +251,7 @@
         },
         "MAPPER" : {
           "TYPE" : "UND",
-          "THE MAP" : [ "Bébé; Enfant : moins de 14", "Adolescent; Jeune : 15 à 24", "Adulte : 25 à 34; 35 à 54", "Vieux : 55 et plus" ]
+          "THE MAP" : [ "Bébé;Enfant : moins de 14", "Adolescent;Jeune : 15 à 24", "Adulte : 25 à 34;35 à 54", "Vieux : 55 et plus" ]
         },
         "ENCODED VALUES" : null
       }
@@ -262,43 +270,100 @@
           }
         },
         "ENCODED VALUES" : {
-          "MAPPING" : [ "true : 1", "false : 0; ; 999" ]
+          "MAPPING" : [ "true : 1", "false : 999;0;" ]
         }
       }
     }, {
       "EMERGENT ATTRIBUTE" : {
         "NAME" : "Age du référent du ménage",
-        "REFERENT ATTRIBUTE" : "Range attribute",
-        "EMERGENT FUNCTION" : {
-          "CLASS TYPE" : "VALUE FOR ATTRIBUTE FUNCTION",
-          "FILTER" : {
-            "TYPE" : "OneOf",
-            "COMPARATOR" : {
-              "LISTED ATTRIBUTES" : [ "Boolean attribute : false", "Mapped attribute : true" ],
-              "CUSTOM COMPARATOR FUNCTIONS" : [ ]
-            },
-            "MATCHERS" : [ "35 à 54", "25 à 34", "55 et plus" ]
+        "VALUE SPACE" : {
+          "TYPE" : "Range",
+          "VALUES" : [ {
+            "INPUT VALUE" : "25 à 34"
+          }, {
+            "INPUT VALUE" : "moins de 14"
+          }, {
+            "INPUT VALUE" : "35 à 54"
+          }, {
+            "INPUT VALUE" : "55 et plus"
+          }, {
+            "INPUT VALUE" : "15 à 24"
+          } ],
+          "min" : 0,
+          "max" : 120,
+          "rangeTemplate" : {
+            "numberMatcher" : "INT_POSITIF_MATCH",
+            "theoreticalMin" : 0,
+            "theoreticalMax" : 2147483647
+          },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "NaN à NaN"
           }
-        }
+        },
+        "EMERGENT FUNCTION" : {
+          "TYPE ID" : "ENTITY ATTRIBUTE VALUE FUNCTION",
+          "REFERENT ATTRIBUTE" : "Range attribute",
+          "VALUE MAPPING" : [ "25 à 34 : 25 à 34", "35 à 54 : 35 à 54", "moins de 14 : moins de 14", "55 et plus : 55 et plus", "15 à 24 : 15 à 24" ]
+        },
+        "EMERGENT FILTER" : {
+          "TYPE" : "SELECTION FILTER",
+          "COMPARATOR" : {
+            "LISTED ATTRIBUTES" : [ ],
+            "CUSTOM COMPARATOR FUNCTIONS" : [ ],
+            "HAMMING VECTOR MATCHER" : {
+              "ENTITY MATCH TYPE" : "VECTOR VALUE MATCHER",
+              "MATCH VECTOR" : [ ]
+            }
+          },
+          "MATCH TYPE" : "ALL",
+          "MATCHERS" : {
+            "ENTITY MATCH TYPE" : "TAG MATCHER",
+            "MATCH VECTOR" : [ "HHHead" ]
+          }
+        },
+        "ENCODED VALUES" : null
       }
     }, {
       "EMERGENT ATTRIBUTE" : {
         "NAME" : "Age cumulé des enfants",
-        "REFERENT ATTRIBUTE" : "Range aggregated attribute",
-        "EMERGENT FUNCTION" : {
-          "CLASS TYPE" : "AGG ATTRIBUTE FUNCTION",
-          "FILTER" : {
-            "TYPE" : "OneOf",
-            "COMPARATOR" : {
-              "LISTED ATTRIBUTES" : [ ],
-              "CUSTOM COMPARATOR FUNCTIONS" : [ ]
-            },
-            "MATCHERS" : [ "moins de 24 ans" ]
+        "VALUE SPACE" : {
+          "TYPE" : "Range",
+          "VALUES" : [ ],
+          "min" : 0,
+          "max" : 120,
+          "rangeTemplate" : {
+            "numberMatcher" : "INT_POSITIF_MATCH",
+            "theoreticalMin" : 0,
+            "theoreticalMax" : 2147483647
           },
+          "EMPTY VALUE" : {
+            "INPUT VALUE" : "NaN à NaN"
+          }
+        },
+        "EMERGENT FUNCTION" : {
+          "TYPE ID" : "AGGREGATE VALUE FUNCTION",
+          "REFERENT ATTRIBUTE" : "Range aggregated attribute",
           "AGGREGATOR" : {
             "TYPE" : "DEFAULT - RANGE AGGREGATOR"
           }
-        }
+        },
+        "EMERGENT FILTER" : {
+          "TYPE" : "MATCH FILTER",
+          "COMPARATOR" : {
+            "LISTED ATTRIBUTES" : [ ],
+            "CUSTOM COMPARATOR FUNCTIONS" : [ ],
+            "HAMMING VECTOR MATCHER" : {
+              "ENTITY MATCH TYPE" : "VECTOR VALUE MATCHER",
+              "MATCH VECTOR" : [ ]
+            }
+          },
+          "MATCH TYPE" : "ALL",
+          "MATCHERS" : {
+            "ENTITY MATCH TYPE" : "TAG MATCHER",
+            "MATCH VECTOR" : [ "Child" ]
+          }
+        },
+        "ENCODED VALUES" : null
       }
     } ],
     "RECORDS" : [ {

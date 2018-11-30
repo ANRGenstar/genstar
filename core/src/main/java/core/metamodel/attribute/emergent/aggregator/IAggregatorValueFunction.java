@@ -1,13 +1,15 @@
 package core.metamodel.attribute.emergent.aggregator;
 
+import java.util.Collection;
+
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
-import core.metamodel.attribute.emergent.transposer.ITransposeValueFunction;
 import core.metamodel.value.IValue;
+import core.metamodel.value.IValueSpace;
 import core.util.data.GSEnumDataType;
 
 /**
@@ -34,11 +36,23 @@ import core.util.data.GSEnumDataType;
 	        @JsonSubTypes.Type(value = RangeValueAggregator.class)
 	    })
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
-public interface IAggregatorValueFunction<V extends IValue> extends ITransposeValueFunction<V, V> {
+public interface IAggregatorValueFunction<V extends IValue> {
 	
 	public static final String TYPE = "TYPE"; 
 	
 	public static final String DEFAULT_TAG = "DEFAULT - ";
+	
+	/**
+	 * Turnes a collection of values into one value of the same type
+	 * 
+	 * @param values
+	 * @param valueSpace
+	 * @return
+	 */
+	public V aggregate(Collection<V> values, IValueSpace<V> valueSpace);
+	
+	@JsonProperty(TYPE)
+	public String getType();
 	
 	/**
 	 * Set the char sequence that join nominal and ordinal values
@@ -47,9 +61,6 @@ public interface IAggregatorValueFunction<V extends IValue> extends ITransposeVa
 	default CharSequence getDefaultCharConcat() {
 		return "-";
 	}
-	
-	@JsonProperty(TYPE)
-	public String getType();
 	
 	@SuppressWarnings("unchecked")
 	static <A extends IValue> IAggregatorValueFunction<A> getDefaultAggregator(Class<A> clazz){

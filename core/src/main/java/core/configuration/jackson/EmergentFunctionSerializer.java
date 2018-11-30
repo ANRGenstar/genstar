@@ -1,25 +1,24 @@
 package core.configuration.jackson;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import core.metamodel.attribute.EmergentAttribute;
-import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
-import core.metamodel.attribute.emergent.IEntityEmergentFunction;
+import core.metamodel.attribute.MappedAttribute;
+import core.metamodel.attribute.emergent.AggregateValueFunction;
+import core.metamodel.attribute.emergent.CountValueFunction;
+import core.metamodel.attribute.emergent.EntityValueFunction;
+import core.metamodel.attribute.emergent.IGSValueFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
-import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
-import core.metamodel.attribute.util.AttributeVectorMatcher;
-import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
+import core.util.GSKeywords;
 
-public class EmergentFunctionSerializer extends StdSerializer<
-	IEntityEmergentFunction<? extends IEntity<? extends IAttribute<? extends IValue>>, ?, ? extends IValue>> {
+public class EmergentFunctionSerializer extends StdSerializer<IGSValueFunction<?, ? extends IValue>> {
 
 	/**
 	 * 
@@ -30,54 +29,54 @@ public class EmergentFunctionSerializer extends StdSerializer<
 		this(null);
 	}
 	
-	protected EmergentFunctionSerializer(Class<IEntityEmergentFunction<? extends IEntity<? extends IAttribute<? extends IValue>>, ?, ? extends IValue>> t) {
+	protected EmergentFunctionSerializer(Class<IGSValueFunction<?, ? extends IValue>> t) {
 		super(t);
 	}
 
 	@Override
 	public void serialize(
-			IEntityEmergentFunction<? extends IEntity<? extends IAttribute<? extends IValue>>, ?, ? extends IValue> arg0,
+			IGSValueFunction<?, ? extends IValue> arg0,
 			JsonGenerator arg1, SerializerProvider arg2) throws IOException {
 		// DO NOTHING => delegate to #serializeWithType because of polymorphism
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void serializeWithType(
-			IEntityEmergentFunction<? extends IEntity<? extends IAttribute<? extends IValue>>, ?, ? extends IValue> function,
+			IGSValueFunction<?, ? extends IValue> function,
 			JsonGenerator gen, SerializerProvider serializer, TypeSerializer typeSer) throws IOException {
 		
 		String type = typeSer.getTypeIdResolver().idFromValue(function);
 		
-		gen.writeFieldName(EmergentAttribute.FUNCTION);
+		//gen.writeFieldName(EmergentAttribute.FUNCTION);
 		gen.writeStartObject();
 		
 			// TYPE
-			gen.writeStringField(IEntityEmergentFunction.TYPE, type);
+			gen.writeStringField(IGSValueFunction.ID, type);
+			gen.writeStringField(MappedAttribute.REF, function.getReferent().getAttributeName());
 			
-			// FILTER
-			gen.writeFieldName(IEntityEmergentFunction.FILTER);
-			gen.writeStartObject();
-			gen.writeStringField(IEntityChildFilter.TYPE, function.getFilter().getType().toString());
-			gen.writeObjectField(IEntityChildFilter.COMPARATOR, function.getFilter().getComparator());
-			gen.writeArrayFieldStart(IEntityEmergentFunction.MATCHERS);
-			for(IAttribute<? extends IValue> att : function.getMatchers().getAttributes())
-				gen.writeString(att.getAttributeName()
-						+AttributeVectorMatcher.ATT_SEPRATOR
-						+function.getMatchers().getValues(att).stream()
-							.map(v -> v.getStringValue())
-							.collect(Collectors.joining(AttributeVectorMatcher.VAL_SEPRATOR)));
-
-			gen.writeEndArray();
-			gen.writeEndObject();
-			
-			if(type.equals(EntityAggregatedAttributeFunction.SELF)) {
-				gen.writeFieldName(EntityAggregatedAttributeFunction.AGGREGATOR);
+			// AGG
+			if(type.equals(AggregateValueFunction.SELF)) {
+				gen.writeFieldName(AggregateValueFunction.AGG);
 				gen.writeStartObject();
 				gen.writeStringField(IAggregatorValueFunction.TYPE, typeSer.getTypeIdResolver()
-						.idFromValue(((EntityAggregatedAttributeFunction) function)
-								.getAggregationFunction()));
+						.idFromValue(((AggregateValueFunction) function)
+								.getAggregator()));
 				gen.writeEndObject();
+			} else {
+				Map<?,? extends IValue> mapping = null;
+				if (type.equals(CountValueFunction.SELF))
+					mapping = ((CountValueFunction) function).getMapping();
+				else if(type.equals(EntityValueFunction.SELF))
+					mapping = ((EntityValueFunction) function).getMapping();
+				gen.writeArrayFieldStart(IGSValueFunction.MAPPING);
+				for(Entry<?, ? extends IValue> entry : mapping.entrySet()) {
+					String k = entry.getKey().getClass().getSuperclass().equals(IValue.class) ?
+							((IValue) entry.getKey()).getStringValue() : entry.getKey().toString();
+					String v = entry.getValue().getStringValue();
+					gen.writeString(k+GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR+v);
+				}
+				gen.writeEndArray();
 			}
 			
 		gen.writeEndObject();

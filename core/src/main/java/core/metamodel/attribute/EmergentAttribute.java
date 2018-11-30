@@ -1,16 +1,11 @@
 package core.metamodel.attribute;
 
-import java.util.Collection;
-import java.util.Set;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import core.configuration.jackson.EmergentAttributeSerializer;
-import core.metamodel.attribute.emergent.IEntityEmergentFunction;
-import core.metamodel.attribute.mapper.IAttributeMapper;
+import core.metamodel.attribute.emergent.IGSValueFunction;
+import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -21,29 +16,28 @@ import core.metamodel.value.IValue;
  * 
  * @author kevinchapuis
  *
- * @param <V>
- * @param <E>
- * @param <U>
+ * @param <K> the value type of the attribute
+ * @param <V> the value type of the referent attribute
+ * @param <E> the type of super entity this attribute will work with
+ * @param <U> the type of predicate this attributes needs to make values emerge
+ * 
  */
 @JsonTypeName(EmergentAttribute.SELF)
-@JsonSerialize(using = EmergentAttributeSerializer.class)
-public class EmergentAttribute<K extends IValue, V extends IValue, 
-	E extends IEntity<? extends IAttribute<? extends IValue>>,
-			U> 
-	extends MappedAttribute<K, V> {
+//@JsonSerialize(using = EmergentAttributeSerializer.class)
+public class EmergentAttribute<V extends IValue, U, F> 
+	extends Attribute<V> {
 
 	public static final String SELF = "EMERGENT ATTRIBUTE";
 	public static final String FUNCTION = "EMERGENT FUNCTION";
+	public static final String TRANSPOSER = "EMERGENT FILTER";
 	
 	@JsonProperty(FUNCTION)
-	private IEntityEmergentFunction<E, U, K> function;
+	private IGSValueFunction<U, V> function;
+	@JsonProperty(TRANSPOSER)
+	private IGSEntityTransposer<U, F> transposer;
 
-	protected EmergentAttribute(String name, Attribute<V> referent, IAttributeMapper<K,V> mapper) {
-		super(name, referent, mapper);
-	}
-	
 	protected EmergentAttribute(String name) {
-		this(name, null, null);
+		super(name);
 	}
 	
 	/**
@@ -51,32 +45,21 @@ public class EmergentAttribute<K extends IValue, V extends IValue,
 	 * any child properties
 	 * 
 	 * @param entity
-	 * @param predicate
+	 * @param transposer
 	 * @return
 	 */
 	@JsonIgnore
-	public K getEmergentValue(E entity, U predicate) {
-		return function.apply(entity, predicate);
+	public V getEmergentValue(IEntity<? extends IAttribute<? extends IValue>> entity) {
+		return function.apply(this.transposer.apply(entity));
 	}
-	
-	/**
-	 * The method to translate value attribute into child properties, i.e.
-	 * a collection of values from sub entities that characterize emergent attribute value.
-	 * Each set of the collection is a potential sub entity
-	 * @return
-	 */
-	@JsonIgnore
-	public Collection<Set<IValue>> getImergentValues(K value, U predicate){
-		return function.reverse(value, predicate);
-	}
-	
+		
 	/**
 	 * The main function that will look at sub-entities property to asses super entity attribute value 
 	 * 
 	 * @return
 	 */
 	@JsonProperty(FUNCTION)
-	public IEntityEmergentFunction<E, U, K> getFunction(){
+	public IGSValueFunction<U, V> getFunction(){
 		return this.function;
 	}
 	
@@ -86,8 +69,29 @@ public class EmergentAttribute<K extends IValue, V extends IValue,
 	 * @param function
 	 */
 	@JsonProperty(FUNCTION)
-	public void setFunction(IEntityEmergentFunction<E, U, K> function){
+	public void setFunction(IGSValueFunction<U, V> function){
 		this.function = function;
+	}
+	
+	/**
+	 * The function that will transpose the Entity linked to this attribute to 
+	 * any U predicate that will be transpose to value V
+	 * 
+	 * @return
+	 */
+	@JsonProperty(TRANSPOSER)
+	public IGSEntityTransposer<U, F> getTransposer(){
+		return this.transposer;
+	}
+	
+	/**
+	 * The new transposer to be set
+	 * 
+	 * @param transposer
+	 */
+	@JsonProperty(TRANSPOSER)
+	public void setTransposer(IGSEntityTransposer<U, F> transposer) {
+		this.transposer = transposer;
 	}
 
 }
