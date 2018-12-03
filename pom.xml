@@ -92,6 +92,7 @@
 		<module>spin</module>
 	</modules>
 <build>
+    <pluginManagement>
 <plugins>
 	<plugin>
 		<groupId>org.codehaus.mojo</groupId>
@@ -157,5 +158,6 @@
       </executions>
     </plugin>
  </plugins>
+     </pluginManagement>
 </build>
 </project>
