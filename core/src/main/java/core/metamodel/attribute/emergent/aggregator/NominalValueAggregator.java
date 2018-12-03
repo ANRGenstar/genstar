@@ -1,6 +1,5 @@
 package core.metamodel.attribute.emergent.aggregator;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -14,17 +13,11 @@ public class NominalValueAggregator implements IAggregatorValueFunction<NominalV
 
 	public static final String SELF = IAggregatorValueFunction.DEFAULT_TAG+"NOMINAL AGGREGATOR";
 	private static final NominalValueAggregator INSTANCE = new NominalValueAggregator();
-	
+		
 	private NominalValueAggregator() {}
 	
 	public static NominalValueAggregator getInstance() {
 		return INSTANCE;
-	}
-	
-	@Override
-	public NominalValue transpose(Collection<NominalValue> values, IValueSpace<NominalValue> vs) {
-		return vs.getInstanceValue(values.stream()
-				.map(v -> v.getStringValue()).collect(Collectors.joining(getDefaultCharConcat())));
 	}
 
 	@Override
@@ -33,10 +26,9 @@ public class NominalValueAggregator implements IAggregatorValueFunction<NominalV
 	}
 
 	@Override
-	public Collection<NominalValue> reverse(NominalValue value, IValueSpace<NominalValue> valueSpace) {
-		return Arrays.asList(value.getStringValue().split(getDefaultCharConcat().toString())).stream()
-				.map(v -> valueSpace.getValue(v))
-				.collect(Collectors.toSet());
+	public NominalValue aggregate(Collection<NominalValue> values, IValueSpace<NominalValue> valueSpace) {
+		return valueSpace.getInstanceValue(values.stream()
+				.map(v -> v.getStringValue()).collect(Collectors.joining(getDefaultCharConcat())));
 	}
 	
 }

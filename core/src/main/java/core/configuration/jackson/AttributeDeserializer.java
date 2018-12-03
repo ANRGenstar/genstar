@@ -27,25 +27,33 @@ import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.MappedAttribute;
-import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
-import core.metamodel.attribute.emergent.EntityCountFunction;
-import core.metamodel.attribute.emergent.EntityValueForAttributeFunction;
-import core.metamodel.attribute.emergent.IEntityEmergentFunction;
+import core.metamodel.attribute.emergent.AggregateValueFunction;
+import core.metamodel.attribute.emergent.CountValueFunction;
+import core.metamodel.attribute.emergent.EntityValueFunction;
+import core.metamodel.attribute.emergent.IGSValueFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
-import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory;
-import core.metamodel.attribute.emergent.filter.EntityChildFilterFactory.EChildFilter;
-import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
+import core.metamodel.attribute.emergent.filter.GSMatchFilter;
+import core.metamodel.attribute.emergent.filter.GSMatchSelection;
+import core.metamodel.attribute.emergent.filter.GSNoFilter;
+import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
 import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.entity.comparator.function.IComparatorFunction;
+import core.metamodel.entity.matcher.AttributeVectorMatcher;
+import core.metamodel.entity.matcher.IGSEntityMatcher;
+import core.metamodel.entity.matcher.MatchType;
+import core.metamodel.entity.matcher.TagMatcher;
+import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.OrderedValue;
 import core.metamodel.value.numeric.RangeValue;
+import core.util.GSDisplayUtil;
+import core.util.GSKeywords;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 
@@ -133,7 +141,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		String id = this.getName(node);
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
-		EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> attribute = null;
+		EmergentAttribute<? extends IValue, ?, ?> attribute = null;
 		try {
 			attribute = this.getEmergentAttribute(node);
 		} catch (IOException e) {
@@ -173,7 +181,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
 		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createOTOMappedAttribute(this.getName(node), this.getType(node), 
+				.createOTSMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedRecord(node));
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
@@ -336,8 +344,8 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		int i = 0;
 		while(mapping.has(i)) {
 			String[] keyVal = mapping.get(i++).asText()
-					.split(RecordValueSerializer.MATCH_SYMBOL);
-			for(String record : keyVal[1].split(RecordValueSerializer.SPLIT_SYMBOL)) {
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
+			for(String record : keyVal[1].split(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)) {
 				records.put(record, keyVal[0].trim());
 			}
 		}
@@ -353,7 +361,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		int i = 0;
 		while(mapArray.has(i)) {
 			String[] keyVal = mapArray.get(i++).asText()
-					.split(AttributeMapperSerializer.MATCHER_SYM);
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
 			if(keyVal.length != 2)
 				throw new IllegalArgumentException("Not a key / value match but has "+keyVal.length+" match");
 			record.put(keyVal[0].trim(), keyVal[1].trim());
@@ -370,12 +378,12 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		int i = 0;
 		while(mapArray.has(i)) {
 			String[] keyVal = mapArray.get(i++).asText()
-					.split(AttributeMapperSerializer.MATCHER_SYM);
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
 			if(keyVal.length != 2)
 				throw new IllegalArgumentException("Not a key / value match but has "+keyVal.length+" match");
-			mapper.put(Arrays.asList(keyVal[0].split(AttributeMapperSerializer.SPLIT_SYM)).stream()
+			mapper.put(Arrays.asList(keyVal[0].split(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)).stream()
 						.map(key -> key.trim()).collect(Collectors.toList()), 
-					Arrays.asList(keyVal[1].split(AttributeMapperSerializer.SPLIT_SYM)).stream()
+					Arrays.asList(keyVal[1].split(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)).stream()
 						.map(val -> val.trim()).collect(Collectors.toList()));
 		}
 		return mapper;
@@ -390,11 +398,11 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		int i = 0;
 		while(mapArray.has(i)) {
 			String[] keyVal = mapArray.get(i++).asText()
-					.split(AttributeMapperSerializer.MATCHER_SYM);
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
 			if(keyVal.length != 2)
 				throw new IllegalArgumentException("Not a key / value match but has "+keyVal.length+" match");
 			mapper.put(keyVal[0].trim(), 
-					Arrays.asList(keyVal[1].split(AttributeMapperSerializer.SPLIT_SYM)).stream()
+					Arrays.asList(keyVal[1].split(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)).stream()
 						.map(val -> val.trim()).collect(Collectors.toList()));
 		}
 		return mapper;
@@ -411,81 +419,194 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		return mapArray;
 	}
 	
-	// EMERGENT
+	
+	/*  -------- *
+	 *  EMERGENT *
+	 *  -------- */
+	
 	
 	/*
 	 * Build emergent attribute 
 	 */
-	private EmergentAttribute<? extends IValue, ? extends IValue, ? extends IEntity<? extends IAttribute<? extends IValue>>, ?> getEmergentAttribute(
+	private EmergentAttribute<? extends IValue, ?, ?> getEmergentAttribute(
 			JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		
 		String name = this.getName(node);
 		
 		JsonNode function = node.get(EmergentAttribute.FUNCTION);
-		JsonNode filter = function.get(IEntityEmergentFunction.FILTER);
-		
-		//JsonNode mapper = node.get(MappedAttribute.MAP);
+		JsonNode transposer = node.get(EmergentAttribute.TRANSPOSER);
+		JsonNode mapping = node.get(IGSValueFunction.MAPPING);
 			
-		EmergentAttribute<? extends IValue, ? extends IValue, IEntity<? extends IAttribute<? extends IValue>>, ?> att = null;
-		String refAtt = node.get(MappedAttribute.REF).asText();
+		EmergentAttribute<? extends IValue, ?, ?> att = null;
 		
+		String type = function.get(IGSValueFunction.ID).textValue();
+		Attribute<? extends IValue> refAtt = null;
+		if(function.has(MappedAttribute.REF))
+			refAtt = DES_DEMO_ATTRIBUTES.get(function.get(MappedAttribute.REF).asText());
 		
-		IEntityChildFilter f = this.getFilter(filter);
-		IValue[] m = this.getMatchers(filter.get(IEntityEmergentFunction.MATCHERS));
-		switch (function.get(IEntityEmergentFunction.TYPE).textValue()) {
-		case EntityCountFunction.SELF:
-			att = AttributeFactory.getFactory().createCountAttribute(name, f, m);
+		switch (type) {
+		case CountValueFunction.SELF:
+			if(refAtt == null)
+				att = AttributeFactory.getFactory().createCountAttribute(name);
+			else
+				att = AttributeFactory.getFactory().createCountAttribute(name, 
+						this.getValues(node.findValue(Attribute.SELF)),
+						this.getCountMapping(mapping), getCollectionTransposer(transposer));
 			break;
-		case EntityAggregatedAttributeFunction.SELF:
-			att = AttributeFactory.getFactory().createAggregatedValueOfAttribute(name, DES_DEMO_ATTRIBUTES.get(refAtt), 
-					this.getAggrgatorFunction(function.get(EntityAggregatedAttributeFunction.AGGREGATOR)), f, m);
+		case AggregateValueFunction.SELF:
+			att = AttributeFactory.getFactory().createAggregatedValueOfAttribute(name, refAtt, 
+					this.getAggrgatorFunction(function.get(AggregateValueFunction.AGG)), 
+					getCollectionTransposer(transposer));
 			break;
-		case EntityValueForAttributeFunction.SELF:
-			att = AttributeFactory.getFactory().createValueOfAttribute(name, 
-					DES_DEMO_ATTRIBUTES.get(refAtt), f, m);
+		case EntityValueFunction.SELF:
+			if(mapping == null) {
+				att = AttributeFactory.getFactory().createValueOfAttribute(name, refAtt, 
+						getEntityTransposer(transposer));
+			} else {
+				att = AttributeFactory.getFactory().createValueOfAttribute(name, refAtt, 
+						this.getValues(node.findValue(Attribute.SELF)),
+						this.getMapping(mapping), getEntityTransposer(transposer));
+			}
 			break;
 		default:
 			throw new IllegalStateException("Emergent function type "
-					+function.get(IEntityEmergentFunction.TYPE).textValue()+" is unrecognized");
+					+function.get(IGSValueFunction.ID).textValue()+" is unrecognized");
 		}
 		
 		return att;
 	}
-
-
-	@SuppressWarnings("unchecked")
-	private <V extends IValue> IAggregatorValueFunction<V> getAggrgatorFunction(JsonNode jsonNode) 
-			throws JsonParseException, JsonMappingException, IOException {
-		return new ObjectMapper().readValue(jsonNode.toString(), IAggregatorValueFunction.class);
+	
+	/*
+	 * 
+	 */
+	private Map<String, String> getMapping(JsonNode mapping) {
+		if(!mapping.isArray())
+			throw new RuntimeException("Error when deserializing mapping: "+mapping.toString());
+		Map<String, String> outputMap = new HashMap<>();
+		int i = 0;
+		while(mapping.has(i)) {
+			String[] keyVal = mapping.get(i++).asText()
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
+			if(keyVal.length != 2)
+				throw new IllegalArgumentException("Not a key / value match but has "+keyVal.length+" match");
+			outputMap.put(keyVal[0].trim(), keyVal[1].trim());
+		}
+		return outputMap;
 	}
 
 	/*
-	 * Retrieve the filter
+	 * 
 	 */
-	private IEntityChildFilter getFilter(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
-		EChildFilter type = EChildFilter.valueOf(node.get(IEntityChildFilter.TYPE).asText());
+	private Map<Integer, String> getCountMapping(JsonNode mapping) 
+			throws JsonParseException, JsonMappingException, IOException {
+		if(!mapping.isArray())
+			throw new RuntimeException("Error when deserializing mapping: "+mapping.toString());
+		Map<Integer, String> outputMap = new HashMap<>();
+		int i = 0;
+		while(mapping.has(i)) {
+			String[] keyVal = mapping.get(i++).asText()
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
+			if(keyVal.length != 2)
+				throw new IllegalArgumentException("Not a key / value match but has "+keyVal.length+" match");
+			outputMap.put(Integer.valueOf(keyVal[0].trim()), keyVal[1].trim());
+		}
+		return outputMap;
+	}
+
+	@SuppressWarnings("unchecked")
+	private <V extends IValue> IAggregatorValueFunction<V> getAggrgatorFunction(JsonNode function) 
+			throws JsonParseException, JsonMappingException, IOException {
+		return new ObjectMapper().readValue(function.toString(), IAggregatorValueFunction.class);
+	}
+
+	/*
+	 * Retrieve a collection transposer
+	 */
+	private IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
+		getCollectionTransposer(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		
-		JsonNode comparatorNode = node.get(IEntityChildFilter.COMPARATOR);		
-		ImplicitEntityComparator comparator = new ImplicitEntityComparator();
-		this.getCompAttributes(comparatorNode.get(ImplicitEntityComparator.ATTRIBUTES_REF))
-			.entrySet().stream().forEach(entry -> comparator.setAttribute(entry.getKey(), entry.getValue()));
-		this.getCompFunctions(comparatorNode.get(ImplicitEntityComparator.COMP_FUNCTIONS))
-			.stream().forEach(function -> comparator.setComparatorFunction(function));
+		IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> transposer = null;
 		
-		return EntityChildFilterFactory.getFactory().getFilter(type, comparator);
+		String type = node.get(IGSEntityTransposer.TYPE).asText();
+		
+		JsonNode transNode = node.get(IGSEntityTransposer.MATCHERS);
+		String transType = transNode.get(IGSEntityMatcher.TYPE).asText();
+		
+		GSDisplayUtil.println(this.getClass(), "getCollectionTransposer", transType);
+		
+		MatchType matchType = MatchType.valueOf(node.get(IGSEntityTransposer.MATCH_TYPE).asText());
+		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntityTransposer.COMPARATOR)); 
+		
+		if(type == GSMatchSelection.SELF)
+			throw new IllegalArgumentException("Trying to deserialize transposer to collection of sub entities with a selection filter");
+		
+		switch (type) {
+		case GSMatchFilter.SELF:
+			if(transType == AttributeVectorMatcher.SELF)
+				transposer =  new GSMatchFilter<>(new AttributeVectorMatcher(this.getValueMatchers(node.get(IGSEntityMatcher.VECTOR))), matchType);
+			else if(transType == TagMatcher.SELF)
+				transposer = new GSMatchFilter<>(new TagMatcher(this.getTagMatchers(node.get(IGSEntityMatcher.VECTOR))), matchType);
+			if(comparator == null)
+				transposer.setComparator(comparator);
+			return transposer;
+		case GSNoFilter.SELF:
+			return new GSNoFilter();
+		default:
+			throw new RuntimeException("Deserialization failed to create IGSEntityTransposer of type "+type);
+		}
+		
+	}
+	
+	/*
+	 * Retrieve entity transposer
+	 */
+	private IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, ?>
+		getEntityTransposer(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
+		
+		IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, ?> transposer = null;
+		
+		String tType = node.get(IGSEntityTransposer.TYPE).asText();
+		
+		JsonNode nodeMatcher = node.get(IGSEntityTransposer.MATCHERS); 
+		String mType = nodeMatcher.get(IGSEntityMatcher.TYPE).asText();
+		
+		MatchType matchType = MatchType.valueOf(node.get(IGSEntityTransposer.MATCH_TYPE).asText());
+		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntityTransposer.COMPARATOR)); 
+		
+		if(!tType.equals(GSMatchSelection.SELF))
+			throw new IllegalArgumentException("Trying to deserialize entity transposer of sub entities with a filter mechanism : "
+					+tType);
+		
+		switch (mType) {
+		case AttributeVectorMatcher.SELF:
+			transposer =  new GSMatchSelection<>(new AttributeVectorMatcher(
+					this.getValueMatchers(nodeMatcher.get(IGSEntityMatcher.VECTOR))), matchType);
+			break;
+		case TagMatcher.SELF:
+			transposer = new GSMatchSelection<>(new TagMatcher(
+					this.getTagMatchers(nodeMatcher.get(IGSEntityMatcher.VECTOR))), matchType);
+			break;
+		default:
+			throw new RuntimeException("Trying to deserialize "+IGSEntityMatcher.class.getSimpleName()
+					+" with unkown match type: "+mType);
+		}
+		
+		transposer.setComparator(comparator);
+		
+		return transposer;
 	}
 
 	/*
 	 * Retrieve the value in a matcher array
 	 */
-	private IValue[] getMatchers(JsonNode node) {
-		if(!node.isArray())
+	private IValue[] getValueMatchers(JsonNode ArrayNode) {
+		if(!ArrayNode.isArray())
 			throw new IllegalArgumentException("This node is not an array of matchers (node type is "
-					+node.getNodeType()+")");
+					+ArrayNode.getNodeType()+")");
 		List<IValue> values = new ArrayList<>();
 		int i = 0;
-		while(node.has(i)) {
-			String val = node.get(i++).asText();
+		while(ArrayNode.has(i)) {
+			String val = ArrayNode.get(i++).asText();
 			IValue value = DES_DEMO_ATTRIBUTES.values().stream()
 					.filter(att -> att.getValueSpace().contains(val))
 					.findFirst().get().getValueSpace().getValue(val);
@@ -494,34 +615,56 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		return values.toArray(new IValue[values.size()]);
 	}
 	
+	private EntityTag[] getTagMatchers(JsonNode ArrayNode) {
+		if(!ArrayNode.isArray())
+			throw new IllegalArgumentException("This node is not an array of matchers (node type is "
+					+ArrayNode.getNodeType()+")");
+		List<EntityTag> tags = new ArrayList<>();
+		int i = 0;
+		while(ArrayNode.has(i)) {
+			String val = ArrayNode.get(i++).asText();
+			tags.add(EntityTag.valueOf(val));
+		}
+		return tags.toArray(new EntityTag[tags.size()]);
+	}
+	
 	/*
-	 * Return attribute and relationship (reverse or not) to comparison process
+	 * TODO: enable deserialization of Hamming distance based comparator
 	 */
-	private Map<IAttribute<? extends IValue>, Boolean> getCompAttributes(JsonNode arrayAttributes){
+	private ImplicitEntityComparator getComparator(JsonNode comparatorNode) throws JsonParseException, JsonMappingException, IllegalArgumentException, IOException {		
+		
+		ImplicitEntityComparator comparator = new ImplicitEntityComparator();
+		
+		/*
+		 * Attribute and relationship (reverse or not) to comparison process
+		 */
+		JsonNode arrayAttributes = comparatorNode.get(ImplicitEntityComparator.ATTRIBUTES_REF);
 		int index = -1;
 		Map<IAttribute<? extends IValue>, Boolean> attributes = new HashMap<>();
 		while(arrayAttributes.has(++index)) {
 			String[] entry = arrayAttributes.get(index).asText()
-					.split(EntityComparatorSerializer.REVERSE_SEPARATOR);
+					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
 			attributes.put(
 					DES_DEMO_ATTRIBUTES.get(entry[0]), 
 					Boolean.valueOf(entry[1]));
 		}
-		return attributes;
-	}
-	
-	/*
-	 * Return custom comparison function for specific value type
-	 */
-	private Collection<IComparatorFunction<? extends IValue>> getCompFunctions(JsonNode arrayFunctions) 
-			throws JsonParseException, JsonMappingException, IllegalArgumentException, IOException {
-		int index = -1;
+		
+		attributes.entrySet().stream().forEach(entry -> comparator.setAttribute(entry.getKey(), entry.getValue()));
+		
+		/*
+		 * Custom comparison function for specific value type
+		 */
+		JsonNode arrayFunctions = comparatorNode.get(ImplicitEntityComparator.COMP_FUNCTIONS);
+		index = -1;
 		Collection<IComparatorFunction<? extends IValue>> functions = new HashSet<>();
 		ObjectMapper om = new ObjectMapper();
 		while(arrayFunctions.has(++index))
 			functions.add(om.readerFor(IComparatorFunction.class)
 					.readValue(arrayFunctions.get(index).asText()));
-		return functions;
+		
+		functions.stream().forEach(function -> comparator.setComparatorFunction(function));
+		
+		return comparator;
 	}
 	
 }

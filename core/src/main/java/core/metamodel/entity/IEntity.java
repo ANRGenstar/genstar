@@ -6,6 +6,8 @@ import java.util.Set;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.matcher.MatchType;
+import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
 
@@ -159,6 +161,24 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * @param e
 	 */
 	public void addChildren(Collection<IEntity<? extends IAttribute<? extends IValue>>> e);
+	
+	/**
+	 * Returs true if this entity is associated to each tag
+	 * given in parameter
+	 * 
+	 * @param tags
+	 * @return
+	 * 
+	 * @see MatchType
+	 */
+	public boolean hasTags(EntityTag... tags);
+
+	/**
+	 * Return the tags associated to this entity
+	 * 
+	 * @return
+	 */
+	public Collection<? extends EntityTag> getTags();
 	
 
 }

@@ -3,12 +3,14 @@ package core.metamodel.attribute.mapper.value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,6 +40,9 @@ import core.util.random.GenstarRandomUtils;
 public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K, OrderedValue> {
 	
 	private Map<IValue, OrderedValue> innerMapper;
+	
+	// Cached mapper with return type
+	private boolean upToDate = false;
 	private Map<K, OrderedValue> mapper;
 
 	private MappedAttribute<K, OrderedValue> relatedAttribute;
@@ -63,6 +68,7 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 	 */
 	public void add(OrderedValue nominal, Number bValue, Number tValue) {
 		innerMapper.put(RA.getValueSpace().proposeValue(bValue.toString()+" : "+tValue.toString()), nominal);
+		upToDate = false;
 	}
 	
 	/**
@@ -79,6 +85,7 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 				value.toString()+" : "+((RangeSpace)RA.getValueSpace()).getMax()
 				: ((RangeSpace)RA.getValueSpace()).getMin()+" : "+value.toString();
 		innerMapper.put(RA.getValueSpace().proposeValue(theString), nominal);
+		upToDate = false;
 	}
 	
 	/**
@@ -99,6 +106,7 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 		default:
 			throw new IllegalArgumentException(value+" cannot be transpose to any numerical value");
 		}
+		upToDate = false;
 	}
 	
 	@Override
@@ -107,6 +115,7 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 				.noneMatch(type -> type.equals(mapWith.getValueSpace().getType())))
 			return false;
 		innerMapper.put(mapTo, mapWith);
+		upToDate = false;
 		return true;
 	}
 	
@@ -117,8 +126,10 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 	 * @param nominal
 	 * @return
 	 */
-	public IValue getValue(OrderedValue nominal) {
-		Optional<Entry<IValue, OrderedValue>> opt = innerMapper.entrySet().stream()
+	public K getValue(OrderedValue nominal) {
+		if(!upToDate)
+			this.transposeInnerMapper();
+		Optional<Entry<K, OrderedValue>> opt = mapper.entrySet().stream()
 				.filter(entry -> entry.getValue().equals(nominal)).findFirst();
 		if(opt.isPresent())
 			return opt.get().getKey();
@@ -210,7 +221,8 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 	 */
 	@Override
 	public Map<Collection<K>, Collection<OrderedValue>> getRawMapper() {
-		this.transposeInnerMapper();
+		if(!upToDate)
+			this.transposeInnerMapper();
 		return mapper.entrySet().stream()
 				.collect(Collectors.toMap(
 						entry->Collections.singleton(entry.getKey()), 
@@ -279,7 +291,10 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 	@SuppressWarnings("unchecked")
 	private void transposeInnerMapper() {
 		Map<K, OrderedValue> theMapper = new HashMap<>();
-		GSEnumDataType dataType = GSDP.getValueType(GenstarRandomUtils.oneOf(innerMapper.keySet()).getStringValue());
+		GSEnumDataType dataType = innerMapper.keySet().stream()
+				.map(IValue::getType).collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+			    .entrySet().stream().max(Comparator.comparing(Entry::getValue))
+			    .get().getKey();
 		switch (dataType) {
 		case Continue:
 			for(Entry<IValue, OrderedValue> entry : innerMapper.entrySet()) {
@@ -299,6 +314,7 @@ public class NumericValueMapper<K extends IValue> implements IAttributeMapper<K,
 		}
 		
 		this.mapper = theMapper;
+		this.upToDate = true;
 	}
 	
 }

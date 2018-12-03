@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -15,8 +17,8 @@ import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 
 /**
- * To be used when to attribute are equivalent, while being encoded in two different form. If there is
- * only a different encoding for values of the same attribute, you should use {@link EncodedValueMapper}
+ * To be used when two attribute are equivalent while being encoded in two different forms, including disagregation (STO). 
+ * If there is only a different encoding for values of the same attribute, you should use {@link EncodedValueMapper}
  * which are present by default in any attribute {@link Attribute#addRecords(String, String...)}
  * 
  * @author kevinchapuis 
@@ -84,6 +86,37 @@ public class RecordMapper<K extends IValue, V extends IValue> implements IAttrib
 	
 	public void setMapper(Map<K, V> record) {
 		this.record = record;
+	}
+	
+	public K getKey(V value) {
+		Optional<Entry<K,V>> output = this.record.entrySet().stream()
+				.filter(entry -> entry.getValue().equals(value)).findFirst();
+		if(output.isPresent())
+			return output.get().getKey();
+		throw new NullPointerException("Not any key for value record "+value);
+	}
+	
+	public K getKey(String value) {
+		Optional<V> optValue = this.record.values().stream()
+				.filter(v -> v.getStringValue().equals(value)).findFirst();
+		if(optValue.isPresent())
+			return this.getKey(optValue.get());
+		throw new NullPointerException("Not any key for value record "+value);
+	}
+	
+	public V getValue(K key) {
+		V output = this.record.getOrDefault(key, null);
+		if(output != null)
+			return output;
+		throw new NullPointerException("Not any value for key record "+key);
+	}
+	
+	public V getValue(String key) {
+		Optional<K> optValue = this.record.keySet().stream()
+				.filter(k -> k.getStringValue().equals(key)).findFirst();
+		if(optValue.isPresent())
+			return this.getValue(optValue.get());
+		throw new NullPointerException("Not any value for key record "+key);
 	}
 	
 	// ---------------------------------------------------------- //

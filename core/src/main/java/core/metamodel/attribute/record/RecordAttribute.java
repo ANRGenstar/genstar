@@ -16,7 +16,7 @@ import core.metamodel.value.categoric.template.GSCategoricTemplate;
 
 /**
  * A type of attribute which is not aimed to describe entity but only focus on
- * data parsing. Main purpose is to 
+ * data parsing. Main purpose is to ...
  * 
  * @author kevinchapuis
  *

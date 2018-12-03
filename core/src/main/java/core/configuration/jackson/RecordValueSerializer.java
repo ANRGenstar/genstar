@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.categoric.NominalValue;
+import core.util.GSKeywords;
 
 /**
  * Transpose {@link EncodedValueMapper} into Json 
@@ -30,8 +31,6 @@ public class RecordValueSerializer<K extends IValue> extends StdSerializer<Encod
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public static final String MATCH_SYMBOL = AttributeMapperSerializer.MATCHER_SYM;
-	public static final String SPLIT_SYMBOL = AttributeMapperSerializer.SPLIT_SYM;
 
 	protected RecordValueSerializer() {
 		this(null);
@@ -73,9 +72,9 @@ public class RecordValueSerializer<K extends IValue> extends StdSerializer<Encod
 		}
 		
 		return res.entrySet().stream().map(e -> e.getKey().getStringValue()
-				+RecordValueSerializer.MATCH_SYMBOL
+				+GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR
 				+e.getValue().stream().map(r -> r.getStringValue())
-					.collect(Collectors.joining(RecordValueSerializer.SPLIT_SYMBOL)))
+					.collect(Collectors.joining(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)))
 				.collect(Collectors.toList());
 	}
 	

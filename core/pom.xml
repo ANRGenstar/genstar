@@ -60,11 +60,11 @@
 
 		</dependency>
 		
-		<!-- <dependency>
-	    <groupId>com.thoughtworks.xstream</groupId>
-	    <artifactId>xstream</artifactId>
-	    <version>1.4.9</version>
-		</dependency> -->
+		<dependency>
+    		<groupId>org.apache.commons</groupId>
+    		<artifactId>commons-text</artifactId>
+    		<version>1.6</version>
+		</dependency>
 		
 		<!-- for serialization of config files in JSON -->
 		<dependency>
@@ -145,7 +145,7 @@
                 </executions>
             </plugin>	-->		
 
-<plugin>
+	<plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-source-plugin</artifactId>
 	  <executions>

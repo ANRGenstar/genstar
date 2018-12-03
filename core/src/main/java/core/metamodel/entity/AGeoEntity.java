@@ -13,6 +13,7 @@ import com.vividsolutions.jts.geom.Point;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
 import core.util.data.GSDataParser;
@@ -223,6 +224,16 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<
 	@Override
 	public void addChildren(Collection<IEntity<? extends IAttribute<? extends IValue>>> e) {
 		throw new NotImplementedException("geo entities are not compliant with the multilevel population framework");
+	}
+	
+	@Override
+	public boolean hasTags(EntityTag... tags) {
+		throw new NotImplementedException("geo entities have no entity tag");
+	}
+	
+	@Override
+	public Collection<EntityTag> getTags() {
+		throw new NotImplementedException("geo entities have no entity tag (yet)");
 	}
 	
 	public Geometry getProxyGeometry() {

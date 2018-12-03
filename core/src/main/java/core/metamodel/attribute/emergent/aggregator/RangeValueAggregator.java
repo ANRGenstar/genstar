@@ -15,25 +15,20 @@ public class RangeValueAggregator implements IAggregatorValueFunction<RangeValue
 	private static final RangeValueAggregator INSTANCE = new RangeValueAggregator();
 	
 	private RangeValueAggregator() {}
-	
+
 	public static RangeValueAggregator getInstance() {
-		return INSTANCE;
+		return RangeValueAggregator.INSTANCE;
 	}
 	
 	@Override
-	public RangeValue transpose(Collection<RangeValue> values, IValueSpace<RangeValue> vs) {
+	public RangeValue aggregate(Collection<RangeValue> values, IValueSpace<RangeValue> valueSpace) {
 		Number bottom = values.stream().map(r -> r.getBottomBound())
 				.reduce(0, (b1, b2) -> this.add(b1, b2));
 		Number top = values.stream().map(r -> r.getTopBound())
 				.reduce(0, (b1, b2) -> this.add(b1, b2));
-		return vs.getInstanceValue(((RangeSpace)vs).getRangeTemplate()
+		return valueSpace.getInstanceValue(
+					((RangeSpace)valueSpace).getRangeTemplate()
 				.getMiddleTemplate(bottom, top));
-	}
-	
-	@Override
-	public Collection<RangeValue> reverse(RangeValue value, IValueSpace<RangeValue> vs) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 	
 	// ------------ UTILITIES ------------ // 
@@ -49,5 +44,6 @@ public class RangeValueAggregator implements IAggregatorValueFunction<RangeValue
 	public String getType() {
 		return SELF;
 	}
+
 	
 }

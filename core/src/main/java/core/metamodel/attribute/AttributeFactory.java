@@ -8,24 +8,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.attribute.emergent.EntityAggregatedAttributeFunction;
-import core.metamodel.attribute.emergent.EntityCountFunction;
-import core.metamodel.attribute.emergent.EntityTransposedAttributeFunction;
-import core.metamodel.attribute.emergent.EntityValueForAttributeFunction;
+import core.metamodel.attribute.emergent.AggregateValueFunction;
+import core.metamodel.attribute.emergent.CountValueFunction;
+import core.metamodel.attribute.emergent.EntityValueFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
-import core.metamodel.attribute.emergent.filter.IEntityChildFilter;
-import core.metamodel.attribute.emergent.transposer.MappedTransposedValueFunction;
+import core.metamodel.attribute.emergent.filter.GSMatchFilter;
+import core.metamodel.attribute.emergent.filter.GSMatchSelection;
+import core.metamodel.attribute.emergent.filter.GSNoFilter;
+import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
 import core.metamodel.attribute.mapper.AggregateMapper;
-import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.mapper.value.NumericValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
-import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
+import core.metamodel.entity.comparator.ImplicitEntityComparator;
+import core.metamodel.entity.matcher.AttributeVectorMatcher;
+import core.metamodel.entity.matcher.MatchType;
+import core.metamodel.entity.matcher.TagMatcher;
+import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
 import core.metamodel.value.IValueSpace;
 import core.metamodel.value.binary.BinarySpace;
@@ -43,6 +48,7 @@ import core.metamodel.value.numeric.RangeSpace;
 import core.metamodel.value.numeric.RangeValue;
 import core.metamodel.value.numeric.RangeValue.RangeBound;
 import core.metamodel.value.numeric.template.GSRangeTemplate;
+import core.util.GSKeywords;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -58,15 +64,15 @@ import core.util.excpetion.GSIllegalRangedData;
  *
  */
 public class AttributeFactory {
-	
+
 	private static AttributeFactory gaf = new AttributeFactory();
-	
+
 	public static String RECORD_NAME_EXTENSION = "_rec";
 	public static String NIU = "NIU";
 	public static Map<String, IAttribute<? extends IValue>> NIUs = new HashMap<>();
-	
+
 	private AttributeFactory(){};
-	
+
 	/**
 	 * Singleton pattern to setup factory
 	 * @return
@@ -74,7 +80,7 @@ public class AttributeFactory {
 	public static AttributeFactory getFactory() {
 		return gaf;
 	}
-	
+
 	/**
 	 * Static way to innitialize <i> not in universe <i/> attribute
 	 * <p>
@@ -114,9 +120,9 @@ public class AttributeFactory {
 			return (Attribute<V>) NIUs.put(name, new Attribute<V>(name));
 		} else
 			throw new RuntimeException(type.getCanonicalName()+" has not any "+GSEnumDataType.class.getCanonicalName()
-				+" equivalent");
+					+" equivalent");
 	}
-	
+
 	/**
 	 * Main method to create attribute with default parameters
 	 * 
@@ -151,7 +157,7 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	/**
 	 * Main method to create attribute with default parameters
 	 * 
@@ -165,12 +171,12 @@ public class AttributeFactory {
 			String name, 
 			GSEnumDataType dataType,
 			List<String> values, List<Object> actualValues) throws GSIllegalRangedData {
-		
+
 		if (actualValues == null)
 			return createAttribute(name, dataType, values);
-		
+
 		assert values.size() == actualValues.size();
-		
+
 		Attribute<? extends IValue> attribute = null;
 		try {
 			attribute = this.createAttribute(name, dataType);
@@ -178,7 +184,7 @@ public class AttributeFactory {
 			attribute = this.createRangeAttribute(name, new GSDataParser().getRangeTemplate(values));
 		}
 		final IValueSpace<? extends IValue> vs = attribute.getValueSpace(); 
-		
+
 		for (int i=0; i<values.size(); i++) {
 			IValue val = vs.addValue(values.get(i));
 			val.setActualValue(actualValues.get(i));
@@ -186,7 +192,7 @@ public class AttributeFactory {
 		//System.err.println("["+AttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}
-	
+
 	/**
 	 * Main method to create an attribute with default parameters
 	 * 
@@ -200,7 +206,7 @@ public class AttributeFactory {
 			String name, 
 			GSEnumDataType dataType,
 			List<String> values) throws GSIllegalRangedData {
-		
+
 		Attribute<? extends IValue> attribute = null;
 		try {
 			attribute = this.createAttribute(name, dataType);
@@ -212,7 +218,7 @@ public class AttributeFactory {
 		//System.err.println("["+AttributeFactory.class.getSimpleName()+"#createAttribute(...)] => "+name+" "+dataType);
 		return attribute;
 	}
-		
+
 	/**
 	 * Unsafe cast based creator <p>
 	 * WARNING: all as possible, trying not to use this nasty creator !!!
@@ -240,13 +246,13 @@ public class AttributeFactory {
 			attribute = (Attribute<V>) createRangeAttribute(name, values);
 		else
 			throw new RuntimeException(type.getCanonicalName()+" has not any "+GSEnumDataType.class.getCanonicalName()
-				+" equivalent");
+					+" equivalent");
 		final IValueSpace<V> vs = attribute.getValueSpace(); 
 		values.stream().forEach(val -> vs.addValue(val));
 		return attribute;
 	}
-	
-	
+
+
 	/**
 	 * Create an attribute with encoded form (OTO mapping without being a mapped attribute). Values 
 	 * can have several encoding form - one main and other string based value using {@link EncodedValueMapper}
@@ -262,7 +268,7 @@ public class AttributeFactory {
 	 */
 	public Attribute<? extends IValue> createAttribute(String name, GSEnumDataType dataType,
 			List<String> values, Map<String, String> record) 
-			throws GSIllegalRangedData {
+					throws GSIllegalRangedData {
 		switch (dataType) {
 		case Order:
 			return createOrderedAttribute(name, new GSCategoricTemplate(), values, record);
@@ -276,7 +282,7 @@ public class AttributeFactory {
 			throw new IllegalArgumentException("Cannot create record attribute for "+dataType+" type of value attribute");
 		}
 	}
-	
+
 	/**
 	 * Main method to create mapped (STS) attribute
 	 * 
@@ -284,7 +290,7 @@ public class AttributeFactory {
 	 * 
 	 * @param string
 	 * @param type
-	 * @param values
+	 * @param record
 	 * @param referent
 	 * @param map
 	 * @return
@@ -326,7 +332,7 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	/**
 	 * Main method to create mapped (STS) attribute with encoded forms for values using {@link EncodedValueMapper}
 	 * 
@@ -348,9 +354,9 @@ public class AttributeFactory {
 		}
 		return att;
 	}
-	
+
 	/**
-	 * Main method to create record (OTO) attribute
+	 * Main method to create record attribute: can represent one-to-several value relationship (OTS)
 	 * 
 	 * @param name
 	 * @param dataType
@@ -359,7 +365,7 @@ public class AttributeFactory {
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	public <V extends IValue> MappedAttribute<? extends IValue, V> createOTOMappedAttribute(
+	public <V extends IValue> MappedAttribute<? extends IValue, V> createOTSMappedAttribute(
 			String name, GSEnumDataType dataType, Attribute<V> referentAttribute, 
 			Map<String, String> record) 
 					throws GSIllegalRangedData{
@@ -393,7 +399,7 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	/**
 	 * Create integer record attribute
 	 * 
@@ -416,177 +422,14 @@ public class AttributeFactory {
 					+GSEnumDataType.Integer+" or "+GSEnumDataType.Continue);
 		}
 	}
-	
-	/* ----------------------- *
-	 * 	  EMERGENT ATTRIBUTE   *
-	 * ----------------------- */
-	
-	// EMERGENT COUNT
-	
-	/**
-	 * Attribute that will count the number of sub-entities without any referent attribute. Must then be used with care !
-	 * try to use {@link MappedAttribute#setReferentAttribute(Attribute)}
-	 * 
-	 * @param name
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
-	EmergentAttribute<IntegerValue, IValue, E, ?> createCountAttribute(String name, 
-			IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<IntegerValue, IValue, E, Object> attribute = new EmergentAttribute<>(name, null, new UndirectedMapper<>());
-		attribute.setValueSpace(new IntegerSpace(attribute));
-		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
-		return attribute;
-	}
-	
-	/**
-	 * Attribute that will count the number of sub-entities. As for any emergent attribute
-	 * it is possible to filter agent before counting; makes it possible to number sub-entities
-	 * that match any predicate
-	 * 
-	 * @param name
-	 * @param entity
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<IntegerValue, V, E, ?> createCountAttribute(String name, 
-			Attribute<V> referent, IAttributeMapper<IntegerValue, V> mapper,
-			IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<IntegerValue, V, E, Object> attribute = new EmergentAttribute<>(name, referent, mapper);
-		attribute.setValueSpace(new IntegerSpace(attribute));
-		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
-		return attribute;
-	}
-	
-	/**
-	 * Attribute that will count the number of sub-entities and bind this value to a predefined referent
-	 * 
-	 * @param name
-	 * @param referent
-	 * @param mapper
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>> 
-	EmergentAttribute<IntegerValue, OrderedValue, E, ?> createCountAttribute(String name, 
-			Attribute<OrderedValue> referent, NumericValueMapper<IntegerValue> mapper,
-			IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<IntegerValue, OrderedValue, E, Object> attribute = new EmergentAttribute<>(name, referent, mapper);
-		attribute.setValueSpace(new IntegerSpace(attribute));
-		attribute.setFunction(new EntityCountFunction<E, Object>(attribute, filter, matches));
-		return attribute;
-	}
-	
-	// EMERGENT VALUE FOR ATTRIBUTE
-	
-	
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, V, E, Attribute<V>> createValueOfAttribute(String name, 
-			Attribute<V> referent, IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<V, V, E, Attribute<V>> eAttribute = new EmergentAttribute<>(name, referent, null);
-		eAttribute.setValueSpace(referent.getValueSpace());
-		eAttribute.setFunction(new EntityValueForAttributeFunction<E, Attribute<V>, V>(referent, filter, matches));
-		return eAttribute;
-	}
 
-	/**
-	 * Attribute that will retrieve the value of one particular sub-entity attribute. This is done
-	 * by providing a filter function which drive the selection process (filter and sort sub entities)
-	 * and then retrieve associated value for the given attribute
-	 * 
-	 * @param name
-	 * @param entity
-	 * @param attribute
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, V, E, Attribute<V>> createValueOfAttribute(String name, Attribute<V> referent,  
-			IAttributeMapper<V,V> mapper, IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<V, V, E, Attribute<V>> eAttribute = new EmergentAttribute<>(name, referent, mapper);
-		eAttribute.setValueSpace(referent.getValueSpace());
-		eAttribute.setFunction(new EntityValueForAttributeFunction<E, Attribute<V>, V>(referent, filter, matches));
-		return eAttribute;
-	}
-
-	// EMERGENT AGGREGATE
-
-	/**
-	 * Attribute that aggregate input values into single output value based on a default aggregator
-	 * 
-	 * see {@link IAggregatorValueFunction#getDefaultAggregator(Class)}
-	 * 
-	 * @param name
-	 * @param referent
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue> 
-	EmergentAttribute<V, V, E, Attribute<V>> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute,
-			IEntityChildFilter filter, IValue... matches) {
-		return this.createAggregatedValueOfAttribute(name, inputAttribute, 
-				IAggregatorValueFunction.getDefaultAggregator(inputAttribute.getValueSpace().getTypeClass()), 
-				filter, matches);
-	}
-		
-	/**
-	 * Attribute that will aggregate several value to a unique value of the same type: for example, it can be used to sum up
-	 * the revenue of all individual of a household (and works even if it is integer, continuous or range value) 
-	 * <p>
-	 * 
-	 * @param name
-	 * @param entity
-	 * @param attribute
-	 * @param aggFunction
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, A extends Attribute<V>, V extends IValue>
-	EmergentAttribute<V, V, E, A> createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, 
-			IAggregatorValueFunction<V> aggFunction, IEntityChildFilter filter, IValue... matches) {
-		EmergentAttribute<V, V, E, A> eAttribute = new EmergentAttribute<>(name, inputAttribute, null);
-		eAttribute.setValueSpace(inputAttribute.getValueSpace().clone(eAttribute));
-		eAttribute.setFunction(new EntityAggregatedAttributeFunction<E, A, V>(eAttribute, aggFunction, filter, matches));
-		return eAttribute;
-	}
-	
-	// EMERGENT TRANSPOSED 
-	
-	/**
-	 * Attribute that will transpose or aggregate a subset of specific values from sub-entities to one attribute value 
-	 * 
-	 * @param name
-	 * @param mapper
-	 * @param filter
-	 * @param matches
-	 * @return
-	 */
-	public <E extends IEntity<? extends IAttribute<? extends IValue>>, V extends IValue, K extends IValue>
-	EmergentAttribute<K, V, E, ?> createTransposedValuesAttribute(String name, 
-			Attribute<V> inputAttribute, IAttributeMapper<K, V> mapper, IValueSpace<K> valueSpace,
-			Map<Collection<IValue>, K> transposer, IEntityChildFilter filter, IValue... matches){
-		EmergentAttribute<K, V, E, ?> eAttribute = new EmergentAttribute<>(name, inputAttribute, mapper);
-		eAttribute.setValueSpace(valueSpace);
-		eAttribute.setFunction(new EntityTransposedAttributeFunction<>(eAttribute, 
-				new MappedTransposedValueFunction<>(transposer), filter, matches));
-		return eAttribute;
-	}
-	
 	// ------------------------------------------------------------- //
 	//                          BUILD METHOD							//
-	
+
 	/* ----------------- *
 	 * Integer attribute *
 	 * ----------------- */
-	
+
 	/**
 	 * Create integer value attribute
 	 * 
@@ -601,7 +444,7 @@ public class AttributeFactory {
 		attribute.setValueSpace(new IntegerSpace(attribute));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create integer mapped value attribute
 	 * 
@@ -621,13 +464,13 @@ public class AttributeFactory {
 		mapper.setMapper(
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toSet()), 
+						.collect(Collectors.toSet()), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet()))));
+						.collect(Collectors.toSet()))));
 		mapper.setRelatedAttribute(attribute);
 		return attribute;
 	}
-	
+
 	/**
 	 * Create integer record value attribute with given record mapping
 	 * 
@@ -642,7 +485,7 @@ public class AttributeFactory {
 				referentAttribute, new RecordMapper<>());
 		attribute.getAttributeMapper().setRelatedAttribute(attribute);
 		attribute.setValueSpace(new IntegerSpace(attribute));
-		
+
 		for(Entry<String, String> entry : record.entrySet()) {
 			IntegerValue val1 = attribute.getValueSpace().addValue(entry.getKey());
 			V val2 = referentAttribute.getValueSpace().getValue(entry.getValue());
@@ -650,11 +493,11 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	/* ------------------ *
 	 * Continue attribute *
 	 * ------------------ */
-	
+
 	/**
 	 * Create continued value attribute
 	 * 
@@ -669,7 +512,7 @@ public class AttributeFactory {
 		ca.setValueSpace(new ContinuousSpace(ca));
 		return ca;
 	}
-	
+
 	/**
 	 * Create continued mapped value attribute
 	 * 
@@ -691,18 +534,18 @@ public class AttributeFactory {
 		mapper.setMapper(
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toSet()),
+						.collect(Collectors.toSet()),
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet())))); 
+						.collect(Collectors.toSet())))); 
 		return attribute;
 	}
-	
+
 	/**
 	 * Create continued aggregated value attribute
 	 * 
 	 * @param name
 	 * @param referentAttribute
-	 * @param values
+	 * @param record
 	 * @param mapper
 	 * @return
 	 */
@@ -717,10 +560,10 @@ public class AttributeFactory {
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> attribute.getValueSpace().addValue(key), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet()))));
+						.collect(Collectors.toSet()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create continued record value attribute with given record
 	 * 
@@ -741,11 +584,11 @@ public class AttributeFactory {
 						));
 		return attribute;
 	}
-	
+
 	/* ----------------- *
 	 * Boolean attribute *
 	 * ----------------- */
-	
+
 	/**
 	 * Create boolean attribute
 	 * 
@@ -760,7 +603,7 @@ public class AttributeFactory {
 		ba.setValueSpace(new BinarySpace(ba));
 		return ba;
 	}
-	
+
 	/**
 	 * Create boolean attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * @param name: the name of the attribute
@@ -775,9 +618,9 @@ public class AttributeFactory {
 		}
 		return attB;
 	}
-	
+
 	// AGG ----------------
-	
+
 	/**
 	 * Create boolean mapped value attribute
 	 * 
@@ -796,12 +639,12 @@ public class AttributeFactory {
 		mapper.setMapper(
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toSet()), 
+						.collect(Collectors.toSet()), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toSet()))));
+						.collect(Collectors.toSet()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create boolean mapped attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 *  
@@ -820,7 +663,7 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	// REC ----------------
 
 	/**
@@ -843,11 +686,11 @@ public class AttributeFactory {
 						));
 		return attribute;
 	}
-	
+
 	/* ------------------------- *
 	 * Ordered nominal attribute *
 	 * ------------------------- */
-	
+
 	/**
 	 * Create ordered value attribute
 	 * 
@@ -863,7 +706,7 @@ public class AttributeFactory {
 		oa.setValueSpace(new OrderedSpace(oa, ct));
 		return oa;
 	}
-	
+
 	/**
 	 * Create ordered value attribute with given values
 	 * 
@@ -881,7 +724,7 @@ public class AttributeFactory {
 		values.stream().forEach(value -> oa.getValueSpace().addValue(value));
 		return oa;
 	}
-	
+
 	/**
 	 * Create ordered attribute with several encoded forms (records) using {@link EncodedValueMapper}
 	 * 
@@ -899,9 +742,9 @@ public class AttributeFactory {
 		}
 		return attO;
 	}
-	
+
 	// AGG -----------------------
-	
+
 	/**
 	 * Create ordered mapped value attribute
 	 * 
@@ -918,7 +761,7 @@ public class AttributeFactory {
 		MappedAttribute<OrderedValue, V> attribute = new MappedAttribute<>(name, referentAttribute, mapper);
 		attribute.setValueSpace(new OrderedSpace(attribute, gsCategoricTemplate));
 		mapper.setRelatedAttribute(attribute);
-		
+
 		LinkedHashMap<Collection<OrderedValue>, Collection<V>> newMap = new LinkedHashMap<>();
 		for(Entry<List<String>, Collection<String>> entry : map.entrySet()) {
 			List<OrderedValue> keys = entry.getKey().stream()
@@ -932,7 +775,7 @@ public class AttributeFactory {
 		mapper.setMapper(newMap);
 		return attribute;
 	}
-	
+
 	/**
 	 * Create ordered mapped value attribute
 	 * 
@@ -945,13 +788,13 @@ public class AttributeFactory {
 			Attribute<V> referentAttribute, LinkedHashMap<List<String>, Collection<String>> mapper) {
 		return this.createOrderedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
 	}
-	
+
 	/**
 	 * Create ordered aggregated value attribute
 	 * 
 	 * @param name
 	 * @param referentAttribute
-	 * @param values
+	 * @param record
 	 * @param mapper
 	 * @return
 	 */
@@ -967,16 +810,16 @@ public class AttributeFactory {
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> attribute.getValueSpace().addValue(key), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
+						.collect(Collectors.toList()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create oredered aggregated value attribute
 	 * 
 	 * @param name
 	 * @param referentAttribute
-	 * @param values
+	 * @param record
 	 * @param mapper
 	 * @return
 	 */
@@ -984,7 +827,7 @@ public class AttributeFactory {
 			Attribute<OrderedValue> referentAttribute, LinkedHashMap<String, List<String>> mapper) {
 		return this.createOrderedAggregatedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
 	}
-	
+
 	/**
 	 * Create oredered aggregated attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
@@ -1004,7 +847,7 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	/**
 	 * Create ordered attribute with mapping to numerical data (int, float or range). The map should record
 	 * mapping as follow:
@@ -1030,20 +873,20 @@ public class AttributeFactory {
 				mapper.add(value, num.get(0));
 			else {
 				if(map.get(0) == null) {
-					 mapper.add(value, num.get(1), RangeBound.LOWER);
+					mapper.add(value, num.get(1), RangeBound.LOWER);
 				} else if(map.get(1) == null) {
 					mapper.add(value, num.get(0), RangeBound.UPPER);
 				} else {
 					mapper.add(value, num.get(0), num.get(1));
 				}
 			}
-				 
+
 		}
 		return attribute;
 	}
-	
+
 	// REC ---------------
-	
+
 	/**
 	 * Create ordered record value attribute with given record
 	 * 
@@ -1067,7 +910,7 @@ public class AttributeFactory {
 						));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create ordered record value attribute with given record and default template
 	 * 
@@ -1081,11 +924,11 @@ public class AttributeFactory {
 			Attribute<V> referentAttribute, LinkedHashMap<String, String> record){
 		return this.createOrderedRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, record);
 	}
-	
+
 	/* ----------------- *
 	 * Nominal attribute *
 	 * ----------------- */
-	
+
 	/**
 	 * Create nominal value attribute
 	 * 
@@ -1101,7 +944,7 @@ public class AttributeFactory {
 		na.setValueSpace(new NominalSpace(na, ct));
 		return na;
 	}
-	
+
 	/**
 	 * Create a nominal attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
@@ -1119,9 +962,9 @@ public class AttributeFactory {
 		}
 		return attN;
 	}
-	
+
 	// AGG -----------------------
-	
+
 	/**
 	 * Create nominal mapped value attribute
 	 * 
@@ -1142,12 +985,12 @@ public class AttributeFactory {
 		mapper.setMapper( 
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toList()), 
+						.collect(Collectors.toList()), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
+						.collect(Collectors.toList()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create nominal aggregated value attribute
 	 * 
@@ -1169,10 +1012,10 @@ public class AttributeFactory {
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> attribute.getValueSpace().addValue(key), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
+						.collect(Collectors.toList()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create nominal aggregated value attribute
 	 * 
@@ -1185,7 +1028,7 @@ public class AttributeFactory {
 			Attribute<NominalValue> referentAttribute, Map<String, Collection<String>> mapper) {
 		return this.createNominalAggregatedAttribute(name, new GSCategoricTemplate(), referentAttribute, mapper);
 	}
-	
+
 	/**
 	 * Create nominal aggregated attribute with several encoded forms for value using {@link EncodedValueMapper}
 	 * 
@@ -1205,9 +1048,9 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	// REC ----------------------
-	
+
 	/**
 	 * Create a nominal record value attribute with given mapping
 	 * 
@@ -1230,7 +1073,7 @@ public class AttributeFactory {
 						));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create a nominal record value attribute with given record and default template
 	 * 
@@ -1243,11 +1086,11 @@ public class AttributeFactory {
 			Attribute<V> referentAttribute, Map<String, String> record) {
 		return this.createNominalRecordAttribute(name, new GSCategoricTemplate(), referentAttribute, record);
 	}
-	
+
 	/* ----------- *
 	 * Range value *
 	 * ----------- */
-	
+
 	/**
 	 * Create range value attribute
 	 * 
@@ -1263,7 +1106,7 @@ public class AttributeFactory {
 		ra.setValueSpace(new RangeSpace(ra, rt));
 		return ra;
 	}
-	
+
 	/**
 	 * Create range value attribute with custom bottom and top bounds
 	 * 
@@ -1281,7 +1124,7 @@ public class AttributeFactory {
 		ra.setValueSpace(new RangeSpace(ra, rt, bottomBound, topBound));
 		return ra;
 	}
-	
+
 	/**
 	 * Create range value attribute based on a list of range value
 	 * 
@@ -1297,7 +1140,7 @@ public class AttributeFactory {
 		ranges.stream().forEach(value -> attribute.getValueSpace().addValue(value));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create range value attribute based on a list of range value
 	 * 
@@ -1308,13 +1151,13 @@ public class AttributeFactory {
 	 */
 	public Attribute<RangeValue> createRangeAttribute(String name, List<String> ranges,
 			Number bottomBound, Number topBound) 
-			throws GSIllegalRangedData{
+					throws GSIllegalRangedData{
 		Attribute<RangeValue> attribute = this.createRangeAttribute(name, 
 				new GSDataParser().getRangeTemplate(ranges), bottomBound, topBound);
 		ranges.stream().forEach(value -> attribute.getValueSpace().addValue(value));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create range attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
@@ -1331,9 +1174,9 @@ public class AttributeFactory {
 		}
 		return attR;
 	}
-	
+
 	// AGG -----------------------
-	
+
 	/**
 	 * Create mapped (STS) range value attribute 
 	 * 
@@ -1354,12 +1197,12 @@ public class AttributeFactory {
 		mapper.setMapper(
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> key.stream().map(val -> attribute.getValueSpace().addValue(val))
-							.collect(Collectors.toList()), 
+						.collect(Collectors.toList()), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
+						.collect(Collectors.toList()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create range aggregated (OTS) value attribute
 	 * 
@@ -1382,10 +1225,10 @@ public class AttributeFactory {
 				map.keySet().stream().collect(Collectors.toMap(
 						key -> attribute.getValueSpace().addValue(key), 
 						key -> map.get(key).stream().map(val -> referentAttribute.getValueSpace().getValue(val))
-							.collect(Collectors.toList()))));
+						.collect(Collectors.toList()))));
 		return attribute;
 	}
-	
+
 	/**
 	 * Create range aggregated (OTS) value attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * 
@@ -1406,7 +1249,7 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
+
 	/**
 	 * Create range aggregated (OTS) value attribute
 	 * 
@@ -1423,7 +1266,7 @@ public class AttributeFactory {
 				new GSDataParser().getRangeTemplate(new ArrayList<>(map.keySet())), 
 				referentAttribute, map);
 	}
-	
+
 	/**
 	 * Create range aggregated (OTS) attribute with several encoded forms for values using {@link EncodedValueMapper}
 	 * @param name
@@ -1443,8 +1286,315 @@ public class AttributeFactory {
 		}
 		return attribute;
 	}
-	
-	// REC ---------------------
+
+	/* ----------------------- *
+	 * 	  EMERGENT ATTRIBUTE   *
+	 * ----------------------- */
+
+	// EMERGENT COUNT
+
+	/**
+	 * Attribute that will count the number of sub-entities without any referent attribute. Must then be used with care !
+	 * try to use {@link MappedAttribute#setReferentAttribute(Attribute)}
+	 * 
+	 * @param name : the name of the attribute
+	 * @return
+	 */
+	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
+	createCountAttribute(String name) {
+
+		EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, Object> attribute = 
+				new EmergentAttribute<>(name);
+		attribute.setValueSpace(new IntegerSpace(attribute));
+		attribute.setFunction(new CountValueFunction<IEntity<? extends IAttribute<? extends IValue>>, IntegerValue>(attribute));
+		attribute.setTransposer(new GSNoFilter());
+		return attribute;
+
+	}
+
+	/**
+	 * Same as {@link #createCountAttribute(String)} but with a mapped attribute
+	 * 
+	 * @param name : the name of the attribute
+	 * @param values : the ordered collection of values
+	 * @param mapping : the mapping between count (int) and ordered values
+	 * @return
+	 */
+	public EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?>
+	createCountAttribute(String name, List<String> values, Map<Integer, String> mapping) {
+
+		return this.createCountAttribute(name, values, mapping, new GSNoFilter());
+
+	}
+
+	/**
+	 * Attribute that will count the number of sub-entities. As for any emergent attribute
+	 * it is possible to filter agent before counting; makes it possible to number sub-entities
+	 * that match any {@link IValue} predicate
+	 * 
+	 * @param name : the name of the attribute
+	 * @param values : the ordered collection of values
+	 * @param mapping : the mapping between count (int) and ordered values
+	 * @param matches : the matches to filter the sub-entities to be counted
+	 * @return
+	 */
+	public EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, IValue> 
+	createCountAttribute(String name, List<String> values, Map<Integer, String> mapping, IValue... matches) {
+
+		return this.createCountAttribute(name, values, mapping, new GSMatchFilter<>(new AttributeVectorMatcher(matches), MatchType.getDefault()));
+
+	}
+
+	/**
+	 * Attribute that will count the number of sub-entities. As for any emergent attribute
+	 * it is possible to filter agent before counting; makes it possible to number sub-entities
+	 * that match any {@link EntityTag} predicate
+	 * 
+	 * @param name : the name of the attribute
+	 * @param values : the ordered collection of values
+	 * @param mapping : the mapping between count (int) and ordered values
+	 * @param matches : the matches to filter the sub-entities to be counted
+	 * @return
+	 */
+	public EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, EntityTag> 
+	createCountAttribute(String name, List<String> values, Map<Integer, String> mapping, EntityTag... matches) {
+
+		return this.createCountAttribute(name, values, mapping, new GSMatchFilter<>(new TagMatcher(matches), MatchType.getDefault()));
+
+	}
+
+	/**
+	 * Attribute that will count the number of sub-entities. Sub entities can be filtered and selected using any {@link IGSEntityTransposer}
+	 * that will transpose a super-entity into a collection of sub-entity 
+	 * 
+	 * @param name
+	 * @param referent
+	 * @param mapper
+	 * @param transposer
+	 * @return
+	 */
+	public <T, U> EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T>
+	createCountAttribute(String name, List<String> values, Map<Integer, String> mapping, 
+			IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> transposer) {
+		EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> attribute = 
+				new EmergentAttribute<>(name);
+		attribute.setValueSpace(new OrderedSpace(attribute, new GSCategoricTemplate()));
+		values.forEach(value -> attribute.getValueSpace().addValue(value));
+		Map<Integer, OrderedValue> mapper = mapping.keySet().stream().collect(Collectors.toMap(
+				Function.identity(), 
+				k -> attribute.getValueSpace().getValue(mapping.get(k))
+				));
+		attribute.setFunction(new CountValueFunction<IEntity<? extends IAttribute<? extends IValue>>, OrderedValue>(attribute, mapper));
+		attribute.setTransposer(transposer);
+		return attribute;
+	}
+
+	// EMERGENT VALUE FOR ATTRIBUTE
+
+	/**
+	 * Attribute that will retrieve the value of one particular sub-entity attribute. This is done
+	 * following a {@link EntityTag} based filter
+	 * 
+	 * @param name : the name of the attribute
+	 * @param referent : the referent attribute (attribute of sub-entity to retrieve value from)
+	 * @param tags : the tags that will identify the individual to pick
+	 * @return
+	 */
+	public <V extends IValue> EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, EntityTag> 
+	createValueOfAttribute(String name, Attribute<V> referent, EntityTag... tags) {
+
+		return this.createValueOfAttribute(name, referent, 
+				new GSMatchSelection<>(new TagMatcher(tags), MatchType.getDefault()));
+
+	}
+
+
+	/**
+	 * Attribute that will retrieve the value of one particular sub-entity attribute. This is done
+	 * following a {@link IValue} based filter
+	 * 
+	 * @param name : the name of the attribute
+	 * @param referent : the referent attribute (attribute of sub-entity to retrieve value from)
+	 * @param comparator : the comparator to sort sub-entities tag matches and pick the first one
+	 * @param tags : the tags that will identify the individual to pick
+	 * 
+	 * @param <V> : the type of value this attribute is made of
+	 * 
+	 * @return
+	 */
+	public <V extends IValue> EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, IValue> 
+	createValueOfAttribute(String name, Attribute<V> referent, IValue... matches) {
+
+		return this.createValueOfAttribute(name, referent, 
+				new GSMatchSelection<>(new AttributeVectorMatcher(matches), MatchType.getDefault()));
+
+	}
+
+	/**
+	 * Attribute that will retrieve the value of one particular sub-entity attribute.
+	 * 
+	 * @param name : the name of the attribute
+	 * @param referent : the referent attribute (attribute of sub-entity to retrieve value from)
+	 * @param transposer : filter that will select one sub-entity to be transposed
+	 * 
+	 * @param <V> : the type of value this attribute is made of
+	 * @param <T> : the predicate type to filter sub-entities
+	 * 
+	 * @return
+	 */
+	public <V extends IValue, T> EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> 
+	createValueOfAttribute(String name, Attribute<V> referent, 
+			IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, T> transposer) {
+
+		EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> eAttribute = 
+				new EmergentAttribute<>(name);
+		
+		eAttribute.setValueSpace(referent.getValueSpace());
+		eAttribute.setFunction(new EntityValueFunction<>(referent));
+		eAttribute.setTransposer(transposer);
+		
+		return eAttribute;
+
+	}
+
+	/**
+	 * Attribute that will get the value of one particular sub-entities. The selection is a two step process:
+	 * <ul>
+	 *  <li> Select sub entities according to predicate: e.g. sub-entities with a particular attribute value or tagged as {@link EntityTag#Parent}
+	 *  <li> If several predicate matches, then sort them according to an {@link ImplicitEntityComparator} and pick the first one
+	 * </ul>
+	 * 
+	 * 
+	 * @param name : the name of the attribute
+	 * @param referent : the referent attribute (attribute of sub-entity to retrieve value from)
+	 * @param mapping : the mapping between super-attribute and sub-attribute
+	 * @param transposer : the filter that will transpose super entity to one sub entity {@link IGSEntityTransposer}
+	 * 
+	 * @param <V> : the type of value this attribute is made of
+	 * @param <T> : either {@link IValue} or {@link EntityTag}
+	 * 
+	 * @return
+	 */
+	public <V extends IValue, T> EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> 
+	createValueOfAttribute(String name, Attribute<V> referent, List<String> values, Map<String,String> mapping, 
+			IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, T> transposer) {
+
+		if(values.isEmpty() || mapping.isEmpty())
+			return this.createValueOfAttribute(name, referent, transposer);
+		
+		EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> eAttribute = 
+				new EmergentAttribute<>(name);
+
+		if(mapping.keySet().stream().anyMatch(key -> !referent.getValueSpace().contains(key)))
+			throw new IllegalArgumentException("Trying to setup a irregular mapping: key(s) is (are) missing: "
+					+mapping.keySet().stream().filter(key -> !referent.getValueSpace().contains(key))
+					.collect(Collectors.joining(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)));
+
+		eAttribute.setValueSpace(referent.getValueSpace().clone(eAttribute));
+		values.forEach(value -> eAttribute.getValueSpace().addValue(value));
+		Map<V,V> mapper = mapping.keySet().stream().collect(Collectors.toMap(
+				k -> referent.getValueSpace().getValue(k), 
+				k -> eAttribute.getValueSpace().getValue(mapping.get(k))
+				));
+		eAttribute.setFunction(new EntityValueFunction<>(eAttribute, referent, mapper));
+
+		eAttribute.setTransposer(transposer);
+		return eAttribute;
+
+	}
+
+	// EMERGENT AGGREGATE
+
+	/**
+	 * Attribute that aggregate input values into single output value based on a default aggregator. For example, 
+	 * it can be used to sum up the revenue of all individual of a household (and works even if it is integer, continuous or range value)
+	 * 
+	 * see {@link IAggregatorValueFunction#getDefaultAggregator(Class)}
+	 * 
+	 * @param name : name of the attribute
+	 * @param referent : the input attribute
+	 * @param matches : the {@link IValue} matches to setup transposer
+	 * 
+	 * @param <V> : the value type of the attribute
+	 * 
+	 * @return
+	 */
+	public <V extends IValue> EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, IValue> 
+	createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, IValue... matches) {
+
+		return this.createAggregatedValueOfAttribute(name, inputAttribute, 
+				IAggregatorValueFunction.getDefaultAggregator(inputAttribute.getValueSpace().getTypeClass()), 
+				new GSMatchFilter<>(new AttributeVectorMatcher(matches), MatchType.getDefault()));
+
+	}
+
+	/**
+	 * Attribute that aggregate input values into single output value based on a default aggregator. For example, 
+	 * it can be used to sum up the revenue of all individual of a household (and works even if it is integer, continuous or range value)
+	 * 
+	 * see {@link IAggregatorValueFunction#getDefaultAggregator(Class)}
+	 * 
+	 * @param name : name of the attribute
+	 * @param referent : the input attribute
+	 * @param matches : the {@link EntityTag} matches to setup transposer
+	 * 
+	 * @param <V> : the value type of the attribute
+	 * 
+	 * @return
+	 */
+	public <V extends IValue> EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, EntityTag> 
+	createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, EntityTag... matches) {
+
+		return this.createAggregatedValueOfAttribute(name, inputAttribute, 
+				IAggregatorValueFunction.getDefaultAggregator(inputAttribute.getValueSpace().getTypeClass()), 
+				new GSMatchFilter<>(new TagMatcher(matches), MatchType.getDefault()));
+
+	}
+
+	/**
+	 * Attribute that aggregate input values into single output value of same type based on a custom aggregator and
+	 * a custom transposer
+	 * 
+	 * @param name : name of the attribute
+	 * @param inputAttribute : the input attribute
+	 * @param aggFunction : the custom function
+	 * @param transposer : the transposer
+	 * 
+	 * @param <V> The input and output value type
+	 * @param <T> The return type of the transposer
+	 * 
+	 * @return
+	 */
+	public <V extends IValue, T> EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> 
+	createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, IAggregatorValueFunction<V> aggFunction,   
+			IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> transposer) {
+		EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> eAttribute = 
+				new EmergentAttribute<>(name);
+		eAttribute.setValueSpace(inputAttribute.getValueSpace().clone(eAttribute));
+		eAttribute.setFunction(new AggregateValueFunction<V>(aggFunction, inputAttribute));
+		eAttribute.setTransposer(transposer);
+		return eAttribute;
+	}
+
+	/* EMERGENT TRANSPOSED 
+
+
+	public <V extends IValue, K extends IValue, U>
+	EmergentAttribute<K, V, U> createTransposedValuesAttribute(String name,
+			Attribute<V> inputAttribute, IAttributeMapper<K, V> mapper, IValueSpace<K> valueSpace, 
+			IGSValueFunction<U, V> function, IGSEntityTransposer<V> filter, IValue... matches){
+		EmergentAttribute<K, V, U> eAttribute = new EmergentAttribute<>(name, inputAttribute, mapper);
+		eAttribute.setValueSpace(valueSpace);
+		eAttribute.setFunction(new EntityTransposedAttributeFunction<>(eAttribute, 
+				new MappedTransposedValueFunction<>(transposer), filter, matches));
+		return eAttribute;
+	}
+	 */
+
+
+	/* --------------------- *
+	 * 	  RECORD ATTRIBUTE   *
+	 * --------------------- */
 
 	/**
 	 * Create range record value attribute
@@ -1471,7 +1621,7 @@ public class AttributeFactory {
 	}
 
 	// :: UTILES -------------------- //
-	
+
 	/**
 	 * Postponed the referent attribution
 	 * 
@@ -1482,5 +1632,5 @@ public class AttributeFactory {
 			Attribute<V> referent) {
 		referee.setReferentAttribute(referent);
 	}
-	
+
 }

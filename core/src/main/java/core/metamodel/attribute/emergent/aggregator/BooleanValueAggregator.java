@@ -1,7 +1,6 @@
 package core.metamodel.attribute.emergent.aggregator;
 
 import java.util.Collection;
-import java.util.Collections;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -37,31 +36,25 @@ public class BooleanValueAggregator implements IAggregatorValueFunction<BooleanV
 	public void setBoolAggregatorStyle(BooleanAggregationStyle boolAgg) {
 		this.boolAgg = boolAgg;
 	}
-
-	@Override
-	public BooleanValue transpose(Collection<BooleanValue> values, IValueSpace<BooleanValue> valueSpace) {
-		switch (boolAgg) {
-		case MOST:
-			return valueSpace.getValue(Boolean.toString(values.stream()
-					.filter(v -> v.getActualValue()).count() >= values.size() / 2d));
-		case ATLEASTONE:
-			return valueSpace.getValue(Boolean
-					.toString(values.stream().anyMatch(v -> v.getActualValue())));
-		default:
-			return valueSpace.getValue(Boolean
-					.toString(values.stream().anyMatch(v -> v.getActualValue().equals(Boolean.FALSE))));
-		}
-	}
 	
 	@Override
-	public Collection<BooleanValue> reverse(BooleanValue value, IValueSpace<BooleanValue> valueSpace) {
-		return value.getActualValue() ? 
-				Collections.singleton(valueSpace.getValue(Boolean.TRUE.toString())) 
-				: Collections.singleton(valueSpace.getValue(Boolean.FALSE.toString()));
+	public BooleanValue aggregate(Collection<BooleanValue> values, IValueSpace<BooleanValue> spaceValue) {
+		switch (boolAgg) {
+		case MOST:
+			return spaceValue.getValue(Boolean.toString(values.stream()
+					.filter(v -> v.getActualValue()).count() >= values.size() / 2d));
+		case ATLEASTONE:
+			return spaceValue.getValue(Boolean
+					.toString(values.stream().anyMatch(v -> v.getActualValue())));
+		default:
+			return spaceValue.getValue(Boolean
+					.toString(values.stream().anyMatch(v -> v.getActualValue().equals(Boolean.FALSE))));
+		}
 	}
 
 	@Override
 	public String getType() {
 		return SELF;
 	}
+	
 }

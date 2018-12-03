@@ -10,9 +10,12 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.entity.comparator.HammingEntityComparator;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
 import core.metamodel.entity.comparator.function.IComparatorFunction;
+import core.metamodel.entity.matcher.IGSEntityMatcher;
 import core.metamodel.value.IValue;
+import core.util.GSKeywords;
 import core.util.data.GSEnumDataType;
 
 public class EntityComparatorSerializer extends StdSerializer<ImplicitEntityComparator> {
@@ -21,8 +24,6 @@ public class EntityComparatorSerializer extends StdSerializer<ImplicitEntityComp
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	
-	public static final String REVERSE_SEPARATOR = " : ";
 
 	protected EntityComparatorSerializer() {
 		this(null);
@@ -43,12 +44,21 @@ public class EntityComparatorSerializer extends StdSerializer<ImplicitEntityComp
 		gen.writeStartObject();
 		gen.writeArrayFieldStart(ImplicitEntityComparator.ATTRIBUTES_REF);
 		for(IAttribute<? extends IValue> attribute : comparator.getAttributes())
-			gen.writeString(attribute.getAttributeName()+REVERSE_SEPARATOR+comparator.isReverseAttribute(attribute));
+			gen.writeString(attribute.getAttributeName()+GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR+comparator.isReverseAttribute(attribute));
 		gen.writeEndArray();
 		gen.writeArrayFieldStart(ImplicitEntityComparator.COMP_FUNCTIONS);
 		for(IComparatorFunction<? extends IValue> function : customFunctions)
 			gen.writeObject(function);
 		gen.writeEndArray();
+		
+		if(comparator instanceof HammingEntityComparator) {
+			gen.writeFieldName(HammingEntityComparator.HAMMING_VECTOR);
+			EntityMatcherSerializer ems = new EntityMatcherSerializer(); 
+			ems.serializeWithType(((HammingEntityComparator) comparator).getVectorMatcher(), 
+					gen, serPro, serPro.findTypeSerializer(serPro.constructType(IGSEntityMatcher.class)));
+		} else {
+			gen.writeStringField(HammingEntityComparator.HAMMING_VECTOR, GSKeywords.EMPTY);
+		}
 		gen.writeEndObject();
 
 	}

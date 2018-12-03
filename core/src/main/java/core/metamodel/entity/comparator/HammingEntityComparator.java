@@ -3,25 +3,27 @@ package core.metamodel.entity.comparator;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.attribute.util.AttributeVectorMatcher;
 import core.metamodel.entity.IEntity;
+import core.metamodel.entity.matcher.AttributeVectorMatcher;
 import core.metamodel.value.IValue;
 
 /**
  * Compare agent using a third referent: the closest agent to referent will be sorted first !
- * <p>
- * WARNING: not consistant with equality
  * 
  * @author kevinchapuis
  *
  */
 public class HammingEntityComparator extends ImplicitEntityComparator {
 
+	public static final String SELF = "HAMMING ENTITY COMPARATOR";
+	public static final String HAMMING_VECTOR = "HAMMING VECTOR MATCHER";
+	
+	@JsonProperty(HammingEntityComparator.HAMMING_VECTOR)
 	private AttributeVectorMatcher vector;
-
-	public HammingEntityComparator() { }
 
 	/**
 	 * Hamming distance will be computed using a referent entity (one value for each attribute) 
@@ -50,6 +52,16 @@ public class HammingEntityComparator extends ImplicitEntityComparator {
 	public HammingEntityComparator(IValue... vector) {
 		this.vector = new AttributeVectorMatcher();
 		this.vector.addMatchToVector(vector);
+	}
+	
+	@JsonProperty(HammingEntityComparator.HAMMING_VECTOR)
+	public AttributeVectorMatcher getVectorMatcher() {
+		return this.vector;
+	}
+	
+	@JsonProperty(HammingEntityComparator.HAMMING_VECTOR)
+	public void setVectorMatcher(AttributeVectorMatcher vector) {
+		this.vector = vector;
 	}
 	
 	// ------------------------------------------------------------ //
