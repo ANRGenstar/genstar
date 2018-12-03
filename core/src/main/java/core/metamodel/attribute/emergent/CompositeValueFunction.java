@@ -4,6 +4,7 @@ import java.util.Collection;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
+import core.metamodel.attribute.emergent.predicate.IGSPredicate;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -12,9 +13,11 @@ public class CompositeValueFunction<V extends IValue> implements
 
 	private Attribute<V> referent; 
 	
+	Map<IGSPredicate, V> predicates;
+	
 	@Override
 	public V apply(Collection<IEntity<? extends IAttribute<? extends IValue>>> entities) {
-		return null;
+		return predicates.stream().filter(predicate -> predicate.verify(entities));
 	}
 
 	@Override
