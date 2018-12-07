@@ -18,7 +18,7 @@ import core.metamodel.value.IValue;
  *
  */
 @JsonTypeName(GSMatchFilter.SELF)
-public class GSMatchFilter<T> extends  AGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> {
+public class GSMatchFilter<T> extends AGSEntitySelector<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> {
 		
 	public static final String SELF = "MATCH FILTER";
 	

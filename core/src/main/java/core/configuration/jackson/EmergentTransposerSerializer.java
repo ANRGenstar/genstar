@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
+import core.metamodel.attribute.emergent.filter.IGSEntitySelector;
 
-public class EmergentTransposerSerializer extends StdSerializer<IGSEntityTransposer<?,?>> {
+public class EmergentTransposerSerializer extends StdSerializer<IGSEntitySelector<?,?>> {
 
 	/**
 	 * 
@@ -20,25 +20,25 @@ public class EmergentTransposerSerializer extends StdSerializer<IGSEntityTranspo
 		this(null);
 	}
 
-	protected EmergentTransposerSerializer(Class<IGSEntityTransposer<?, ?>> t) {
+	protected EmergentTransposerSerializer(Class<IGSEntitySelector<?, ?>> t) {
 		super(t);
 	}
 
 	@Override
-	public void serialize(IGSEntityTransposer<?,?> arg0, JsonGenerator arg1, SerializerProvider arg2) throws IOException {
+	public void serialize(IGSEntitySelector<?,?> arg0, JsonGenerator arg1, SerializerProvider arg2) throws IOException {
 		// TODO Auto-generated method stub
 		
 	}
 	
 	@Override
-	public void serializeWithType(IGSEntityTransposer<?, ?> transposer,
+	public void serializeWithType(IGSEntitySelector<?, ?> transposer,
 			JsonGenerator gen, SerializerProvider serializer, TypeSerializer typeSer) throws IOException {
 		
 		//gen.writeFieldName(EmergentAttribute.TRANSPOSER);
 		gen.writeStartObject();
-		gen.writeStringField(IGSEntityTransposer.TYPE, typeSer.getTypeIdResolver().idFromValue(transposer));
+		gen.writeStringField(IGSEntitySelector.TYPE, typeSer.getTypeIdResolver().idFromValue(transposer));
 		
-		gen.writeObjectField(IGSEntityTransposer.COMPARATOR, transposer.getComparator());
+		gen.writeObjectField(IGSEntitySelector.COMPARATOR, transposer.getComparator());
 		
 		/*
 		gen.writeFieldName(IGSEntityTransposer.COMPARATOR);
@@ -46,9 +46,9 @@ public class EmergentTransposerSerializer extends StdSerializer<IGSEntityTranspo
 		ecs.serialize(transposer.getComparator(), gen, serializer);
 		*/
 		
-		gen.writeStringField(IGSEntityTransposer.MATCH_TYPE, transposer.getMatchType().toString());
+		gen.writeStringField(IGSEntitySelector.MATCH_TYPE, transposer.getMatchType().toString());
 		
-		gen.writeObjectField(IGSEntityTransposer.MATCHERS, transposer.getMatcher());
+		gen.writeObjectField(IGSEntitySelector.MATCHERS, transposer.getMatcher());
 		
 		/*
 		gen.writeFieldName(IGSEntityTransposer.MATCHERS);

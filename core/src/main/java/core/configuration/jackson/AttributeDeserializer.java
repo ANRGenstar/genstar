@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -35,7 +36,7 @@ import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.GSMatchFilter;
 import core.metamodel.attribute.emergent.filter.GSMatchSelection;
 import core.metamodel.attribute.emergent.filter.GSNoFilter;
-import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
+import core.metamodel.attribute.emergent.filter.IGSEntitySelector;
 import core.metamodel.attribute.mapper.IAttributeMapper;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.attribute.record.RecordAttribute;
@@ -447,7 +448,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		switch (type) {
 		case CountValueFunction.SELF:
 			if(refAtt == null)
-				att = AttributeFactory.getFactory().createCountAttribute(name);
+				att = AttributeFactory.getFactory().createSizeAttribute(name, Collections.emptyMap()); // TODO: not use emptymap
 			else
 				att = AttributeFactory.getFactory().createCountAttribute(name, 
 						this.getValues(node.findValue(Attribute.SELF)),
@@ -522,20 +523,20 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Retrieve a collection transposer
 	 */
-	private IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
+	private IGSEntitySelector<Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
 		getCollectionTransposer(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		
-		IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> transposer = null;
+		IGSEntitySelector<Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> transposer = null;
 		
-		String type = node.get(IGSEntityTransposer.TYPE).asText();
+		String type = node.get(IGSEntitySelector.TYPE).asText();
 		
-		JsonNode transNode = node.get(IGSEntityTransposer.MATCHERS);
+		JsonNode transNode = node.get(IGSEntitySelector.MATCHERS);
 		String transType = transNode.get(IGSEntityMatcher.TYPE).asText();
 		
 		GSDisplayUtil.println(this.getClass(), "getCollectionTransposer", transType);
 		
-		MatchType matchType = MatchType.valueOf(node.get(IGSEntityTransposer.MATCH_TYPE).asText());
-		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntityTransposer.COMPARATOR)); 
+		MatchType matchType = MatchType.valueOf(node.get(IGSEntitySelector.MATCH_TYPE).asText());
+		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntitySelector.COMPARATOR)); 
 		
 		if(type == GSMatchSelection.SELF)
 			throw new IllegalArgumentException("Trying to deserialize transposer to collection of sub entities with a selection filter");
@@ -560,18 +561,18 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	/*
 	 * Retrieve entity transposer
 	 */
-	private IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, ?>
+	private IGSEntitySelector<IEntity<? extends IAttribute<? extends IValue>>, ?>
 		getEntityTransposer(JsonNode node) throws JsonParseException, JsonMappingException, JsonProcessingException, IOException {
 		
-		IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, ?> transposer = null;
+		IGSEntitySelector<IEntity<? extends IAttribute<? extends IValue>>, ?> transposer = null;
 		
-		String tType = node.get(IGSEntityTransposer.TYPE).asText();
+		String tType = node.get(IGSEntitySelector.TYPE).asText();
 		
-		JsonNode nodeMatcher = node.get(IGSEntityTransposer.MATCHERS); 
+		JsonNode nodeMatcher = node.get(IGSEntitySelector.MATCHERS); 
 		String mType = nodeMatcher.get(IGSEntityMatcher.TYPE).asText();
 		
-		MatchType matchType = MatchType.valueOf(node.get(IGSEntityTransposer.MATCH_TYPE).asText());
-		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntityTransposer.COMPARATOR)); 
+		MatchType matchType = MatchType.valueOf(node.get(IGSEntitySelector.MATCH_TYPE).asText());
+		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntitySelector.COMPARATOR)); 
 		
 		if(!tType.equals(GSMatchSelection.SELF))
 			throw new IllegalArgumentException("Trying to deserialize entity transposer of sub entities with a filter mechanism : "

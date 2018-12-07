@@ -18,7 +18,7 @@ import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
 import core.metamodel.attribute.emergent.filter.GSMatchFilter;
 import core.metamodel.attribute.emergent.filter.GSMatchSelection;
 import core.metamodel.attribute.emergent.filter.GSNoFilter;
-import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
+import core.metamodel.attribute.emergent.filter.IGSEntitySelector;
 import core.metamodel.attribute.mapper.AggregateMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
@@ -67,9 +67,9 @@ public class AttributeFactory {
 
 	private static AttributeFactory gaf = new AttributeFactory();
 
-	public static String RECORD_NAME_EXTENSION = "_rec";
-	public static String NIU = "NIU";
 	public static Map<String, IAttribute<? extends IValue>> NIUs = new HashMap<>();
+	public static Map<String, EmergentAttribute<IntegerValue, 
+		Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?>> SIZE_ATT = new HashMap<>();
 
 	private AttributeFactory(){};
 
@@ -91,7 +91,7 @@ public class AttributeFactory {
 	 */
 	@SuppressWarnings("unchecked")
 	public static <V extends IValue> Attribute<V> createNIU(Class<V> type) {
-		String name = type.getSimpleName()+NIU;
+		String name = type.getSimpleName()+GSKeywords.NIU;
 		if(NIUs.containsKey(name))
 			return (Attribute<V>) NIUs.get(name);
 		if(GSEnumDataType.Integer.getGenstarType().equals(type)) {
@@ -414,9 +414,9 @@ public class AttributeFactory {
 			String name, GSEnumDataType dataType, Attribute<? extends IValue> referentAttribute) throws GSIllegalRangedData{
 		switch (dataType) {
 		case Integer:
-			return new RecordAttribute<>(name, this.createIntegerAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
+			return new RecordAttribute<>(name, this.createIntegerAttribute(name+GSKeywords.RECORD_NAME_EXTENSION), referentAttribute);
 		case Continue:
-			return new RecordAttribute<>(name, this.createContinueAttribute(name+RECORD_NAME_EXTENSION), referentAttribute);
+			return new RecordAttribute<>(name, this.createContinueAttribute(name+GSKeywords.RECORD_NAME_EXTENSION), referentAttribute);
 		default:
 			throw new IllegalArgumentException("Cannot create "+dataType+" record attribute - suppose to be "
 					+GSEnumDataType.Integer+" or "+GSEnumDataType.Continue);
@@ -1294,21 +1294,24 @@ public class AttributeFactory {
 	// EMERGENT COUNT
 
 	/**
-	 * Attribute that will count the number of sub-entities without any referent attribute. Must then be used with care !
-	 * try to use {@link MappedAttribute#setReferentAttribute(Attribute)}
+	 * Attribute for size of super-entitys
 	 * 
 	 * @param name : the name of the attribute
 	 * @return
 	 */
 	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
-	createCountAttribute(String name) {
+	createSizeAttribute(String name, Map<String, List<Integer>> mapping) {
 
-		EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, Object> attribute = 
-				new EmergentAttribute<>(name);
-		attribute.setValueSpace(new IntegerSpace(attribute));
-		attribute.setFunction(new CountValueFunction<IEntity<? extends IAttribute<? extends IValue>>, IntegerValue>(attribute));
-		attribute.setTransposer(new GSNoFilter());
-		return attribute;
+		if(!SIZE_ATT.containsKey(name)) {
+			EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, Object> attribute = 
+					new EmergentAttribute<>(name);
+			attribute.setValueSpace(new IntegerSpace(attribute));
+			attribute.setFunction(new CountValueFunction<IEntity<? extends IAttribute<? extends IValue>>, IntegerValue>(attribute));
+			attribute.setTransposer(new GSNoFilter());
+			SIZE_ATT.put(name, attribute);
+		}
+		
+		return SIZE_ATT.get(name);
 
 	}
 
@@ -1364,7 +1367,7 @@ public class AttributeFactory {
 	}
 
 	/**
-	 * Attribute that will count the number of sub-entities. Sub entities can be filtered and selected using any {@link IGSEntityTransposer}
+	 * Attribute that will count the number of sub-entities. Sub entities can be filtered and selected using any {@link IGSEntitySelector}
 	 * that will transpose a super-entity into a collection of sub-entity 
 	 * 
 	 * @param name
@@ -1375,7 +1378,7 @@ public class AttributeFactory {
 	 */
 	public <T, U> EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T>
 	createCountAttribute(String name, List<String> values, Map<Integer, String> mapping, 
-			IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> transposer) {
+			IGSEntitySelector<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> transposer) {
 		EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> attribute = 
 				new EmergentAttribute<>(name);
 		attribute.setValueSpace(new OrderedSpace(attribute, new GSCategoricTemplate()));
@@ -1444,7 +1447,7 @@ public class AttributeFactory {
 	 */
 	public <V extends IValue, T> EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> 
 	createValueOfAttribute(String name, Attribute<V> referent, 
-			IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, T> transposer) {
+			IGSEntitySelector<IEntity<? extends IAttribute<? extends IValue>>, T> transposer) {
 
 		EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> eAttribute = 
 				new EmergentAttribute<>(name);
@@ -1468,7 +1471,7 @@ public class AttributeFactory {
 	 * @param name : the name of the attribute
 	 * @param referent : the referent attribute (attribute of sub-entity to retrieve value from)
 	 * @param mapping : the mapping between super-attribute and sub-attribute
-	 * @param transposer : the filter that will transpose super entity to one sub entity {@link IGSEntityTransposer}
+	 * @param transposer : the filter that will transpose super entity to one sub entity {@link IGSEntitySelector}
 	 * 
 	 * @param <V> : the type of value this attribute is made of
 	 * @param <T> : either {@link IValue} or {@link EntityTag}
@@ -1477,7 +1480,7 @@ public class AttributeFactory {
 	 */
 	public <V extends IValue, T> EmergentAttribute<V, IEntity<? extends IAttribute<? extends IValue>>, T> 
 	createValueOfAttribute(String name, Attribute<V> referent, List<String> values, Map<String,String> mapping, 
-			IGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>, T> transposer) {
+			IGSEntitySelector<IEntity<? extends IAttribute<? extends IValue>>, T> transposer) {
 
 		if(values.isEmpty() || mapping.isEmpty())
 			return this.createValueOfAttribute(name, referent, transposer);
@@ -1567,7 +1570,7 @@ public class AttributeFactory {
 	 */
 	public <V extends IValue, T> EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> 
 	createAggregatedValueOfAttribute(String name, Attribute<V> inputAttribute, IAggregatorValueFunction<V> aggFunction,   
-			IGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> transposer) {
+			IGSEntitySelector<Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> transposer) {
 		EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, T> eAttribute = 
 				new EmergentAttribute<>(name);
 		eAttribute.setValueSpace(inputAttribute.getValueSpace().clone(eAttribute));

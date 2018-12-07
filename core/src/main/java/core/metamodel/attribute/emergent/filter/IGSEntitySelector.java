@@ -33,7 +33,7 @@ import core.metamodel.value.IValue;
 @JsonTypeInfo(
 	      use = JsonTypeInfo.Id.NAME,
 	      include = JsonTypeInfo.As.EXISTING_PROPERTY,
-	      property = IGSEntityTransposer.TYPE
+	      property = IGSEntitySelector.TYPE
 	      )
 @JsonSubTypes({
     @JsonSubTypes.Type(value = GSNoFilter.class),
@@ -42,7 +42,7 @@ import core.metamodel.value.IValue;
 })
 @JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class)
 @JsonSerialize(using = EmergentTransposerSerializer.class)
-public interface IGSEntityTransposer<U, T> extends Function<IEntity<? extends IAttribute<? extends IValue>>, U> {
+public interface IGSEntitySelector<U, T> extends Function<IEntity<? extends IAttribute<? extends IValue>>, U> {
 	
 
 	public static final String TYPE = "TYPE";

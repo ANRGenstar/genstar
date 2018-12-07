@@ -2,11 +2,13 @@ package core.util;
 
 public class GSKeywords {
 
-	public static final String EMPTY = "EMPTY";
+	public static final String EMPTY = "Empty";
+	public static final String NIU = "Not in universe";
 	
 	// GOSPL
 	
 	public static final String ENTITY_SIZE_ATTRIBUTE = "Entity size";
+	public static final String RECORD_NAME_EXTENSION = "_rec";
 	
 	// SPLL
 	

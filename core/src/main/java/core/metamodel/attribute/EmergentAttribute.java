@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import core.metamodel.attribute.emergent.IGSValueFunction;
-import core.metamodel.attribute.emergent.filter.IGSEntityTransposer;
+import core.metamodel.attribute.emergent.filter.IGSEntitySelector;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
@@ -34,7 +34,7 @@ public class EmergentAttribute<V extends IValue, U, F>
 	@JsonProperty(FUNCTION)
 	private IGSValueFunction<U, V> function;
 	@JsonProperty(TRANSPOSER)
-	private IGSEntityTransposer<U, F> transposer;
+	private IGSEntitySelector<U, F> transposer;
 
 	protected EmergentAttribute(String name) {
 		super(name);
@@ -80,7 +80,7 @@ public class EmergentAttribute<V extends IValue, U, F>
 	 * @return
 	 */
 	@JsonProperty(TRANSPOSER)
-	public IGSEntityTransposer<U, F> getTransposer(){
+	public IGSEntitySelector<U, F> getTransposer(){
 		return this.transposer;
 	}
 	
@@ -90,7 +90,7 @@ public class EmergentAttribute<V extends IValue, U, F>
 	 * @param transposer
 	 */
 	@JsonProperty(TRANSPOSER)
-	public void setTransposer(IGSEntityTransposer<U, F> transposer) {
+	public void setTransposer(IGSEntitySelector<U, F> transposer) {
 		this.transposer = transposer;
 	}
 

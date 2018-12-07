@@ -8,14 +8,14 @@ import core.metamodel.entity.matcher.IGSEntityMatcher;
 import core.metamodel.entity.matcher.MatchType;
 import core.metamodel.value.IValue;
 
-public abstract class AGSEntityTransposer<U, T> implements IGSEntityTransposer<U, T> {
+public abstract class AGSEntitySelector<U, T> implements IGSEntitySelector<U, T> {
 
 	private ImplicitEntityComparator comparator;
 	
 	private MatchType match;
 	private IGSEntityMatcher<T> matcher;
 
-	public AGSEntityTransposer(IGSEntityMatcher<T> matcher, MatchType match) {
+	public AGSEntitySelector(IGSEntityMatcher<T> matcher, MatchType match) {
 		this.comparator = new HammingEntityComparator();
 		this.match = match;
 		this.matcher = matcher;

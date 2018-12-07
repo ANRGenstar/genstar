@@ -213,10 +213,14 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<IEntity<? extends IAttribute<? extends IValue>>> children = null;
 	
+	/**
+	 * The class of attribute to characterize within or between layer relationship
+	 */
 	private Set<EntityTag> tags;
 	
 	public static EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>,?> 
-		SIZE_ATTRIBUTE = AttributeFactory.getFactory().createCountAttribute(GSKeywords.ENTITY_SIZE_ATTRIBUTE);
+		SIZE_ATTRIBUTE = AttributeFactory.getFactory().createSizeAttribute(GSKeywords.ENTITY_SIZE_ATTRIBUTE, 
+				Collections.emptyMap());
 	
 	@Override
 	public final boolean hasParent() {
