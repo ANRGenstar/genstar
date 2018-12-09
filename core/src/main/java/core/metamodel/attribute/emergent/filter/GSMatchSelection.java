@@ -18,7 +18,7 @@ import core.metamodel.value.IValue;
  * @param <F>
  */
 @JsonTypeName(GSMatchSelection.SELF)
-public class GSMatchSelection<F> extends AGSEntityTransposer<IEntity<? extends IAttribute<? extends IValue>>,F> {
+public class GSMatchSelection<F> extends AGSEntitySelector<IEntity<? extends IAttribute<? extends IValue>>,F> {
 
 	public static final String SELF = "SELECTION FILTER";
 	

@@ -10,7 +10,7 @@ import core.metamodel.entity.matcher.MatchType;
 import core.metamodel.value.IValue;
 
 @JsonTypeName(GSNoFilter.SELF)
-public class GSNoFilter extends AGSEntityTransposer<Collection<IEntity<? extends IAttribute<? extends IValue>>>,Object> {
+public class GSNoFilter extends AGSEntitySelector<Collection<IEntity<? extends IAttribute<? extends IValue>>>,Object> {
 	
 	public static final String SELF = "EMPTY FILTER";
 	
