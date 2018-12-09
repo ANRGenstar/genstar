@@ -27,7 +27,6 @@ import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.IntegerValue;
 import core.util.GSKeywords;
 
 /**
@@ -48,7 +47,7 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	
 	private Set<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records;
 	
-	private EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute;
+	private EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute;
 	
 	public AttributeDictionary() {
 		this.attributes = new LinkedHashSet<>();
@@ -72,7 +71,7 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	public AttributeDictionary(
 			@JsonProperty(IGenstarDictionary.ATTRIBUTES) Collection<Attribute<? extends IValue>> attributes,
 			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records,
-			@JsonProperty(IGenstarDictionary.SIZE) EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
+			@JsonProperty(IGenstarDictionary.SIZE) EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
 		
 		if (records == null)
 			records = Collections.emptyList();
@@ -133,13 +132,13 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	
 	// ----------------- SIZE
 	
-	public void setSizeAttribute(EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
+	public void setSizeAttribute(EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
 		this.sizeAttribute = sizeAttribute;
 		this.name2attribute.put(GSKeywords.ENTITY_SIZE_ATTRIBUTE, sizeAttribute);
 	}
 	
 	@Override
-	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute() {
+	public EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute() {
 		return this.sizeAttribute;
 	}
 

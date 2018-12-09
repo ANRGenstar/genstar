@@ -12,7 +12,6 @@ import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.IntegerValue;
 
 /**
  * Encapsulate description of attributes that will characterized synthetic population entities and help
@@ -127,7 +126,7 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	// ------------------------ SIZE
 	
 	@JsonProperty(AttributeDictionary.SIZE)
-	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute();
+	public EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute();
 	
 	// ----------- UTILITIES
 
