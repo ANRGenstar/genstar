@@ -26,6 +26,10 @@ public class GSMatchSelection<F> extends AGSEntitySelector<IEntity<? extends IAt
 		super(matcher, match);
 	}
 	
+	public GSMatchSelection(IGSEntityMatcher<F> matcher) {
+		super(matcher);
+	}
+	
 	@Override
 	public IEntity<? extends IAttribute<? extends IValue>> apply(IEntity<? extends IAttribute<? extends IValue>> superEntity) {
 		Optional<IEntity<? extends IAttribute<? extends IValue>>> output = superEntity.getChildren().stream()

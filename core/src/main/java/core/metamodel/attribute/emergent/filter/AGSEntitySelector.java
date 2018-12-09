@@ -20,6 +20,10 @@ public abstract class AGSEntitySelector<U, T> implements IGSEntitySelector<U, T>
 		this.match = match;
 		this.matcher = matcher;
 	}
+	
+	public AGSEntitySelector(IGSEntityMatcher<T> matcher) {
+		this(matcher, MatchType.getDefault());
+	}
 
 	@Override
 	public boolean validate(MatchType type, IEntity<? extends IAttribute<? extends IValue>> entity) {

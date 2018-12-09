@@ -17,7 +17,9 @@ import core.metamodel.attribute.mapper.value.EncodedValueMapper;
 import core.metamodel.value.IValue;
 
 /**
- * To be used when two attribute are equivalent while being encoded in two different forms, including disagregation (STO). 
+ * To be used when two attribute are equivalent while being encoded in two different forms, including aggregation: 
+ * one key for several value. 
+ * </p>
  * If there is only a different encoding for values of the same attribute, you should use {@link EncodedValueMapper}
  * which are present by default in any attribute {@link Attribute#addRecords(String, String...)}
  * 

@@ -1,7 +1,9 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -34,9 +36,14 @@ public class CountValueFunction<E extends IEntity<? extends IAttribute<? extends
 	
 	@Override
 	public V apply(Collection<E> entity) {
+		int size = entity.size();
 		if(mapping == null)
-			return referent.getValueSpace().getValue(Integer.toString(entity.size()));
-		return mapping.get(entity.size());
+			return referent.getValueSpace().getValue(Integer.toString(size));
+		List<Integer> keys = new ArrayList<>(mapping.keySet());
+		Collections.sort(keys);
+		return keys.get(0) <= size ? mapping.get(keys.get(0)) : 
+			keys.get(keys.size()-1) >= size ? mapping.get(keys.get(keys.size()-1)) :
+				mapping.get(keys.stream().filter(k -> k == size).findFirst().get());
 	}
 
 	@Override

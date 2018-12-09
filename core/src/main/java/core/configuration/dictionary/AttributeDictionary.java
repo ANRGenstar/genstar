@@ -21,14 +21,17 @@ import com.fasterxml.jackson.annotation.JsonTypeName;
 import core.configuration.GenstarJsonUtil;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerValue;
+import core.util.GSKeywords;
 
 /**
- * Encapsulate the whole set of a given attribute type. 
- * For example, it can describe the all {@link Attribute}
+ * Encapsulate the whole set of a given attribute type: i.e. It describes all {@link Attribute}
  * used to model a {@link IPopulation} of {@link ADemoEntity} 
  * 
  * @author kevinchapuis
@@ -37,13 +40,15 @@ import core.metamodel.value.IValue;
  * @param <A>
  */
 @JsonTypeName(GenstarJsonUtil.ATT_DICO)
-@JsonPropertyOrder({ IGenstarDictionary.ATTRIBUTES, IGenstarDictionary.RECORDS })
+@JsonPropertyOrder({ IGenstarDictionary.ATTRIBUTES, IGenstarDictionary.RECORDS, IGenstarDictionary.SIZE })
 public class AttributeDictionary implements IGenstarDictionary<Attribute<? extends IValue>> {
 	
 	private Set<Attribute<? extends IValue>> attributes;
 	private Map<String,Attribute<? extends IValue>> name2attribute;
 	
 	private Set<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records;
+	
+	private EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute;
 	
 	public AttributeDictionary() {
 		this.attributes = new LinkedHashSet<>();
@@ -56,27 +61,30 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	 * @param d
 	 */
 	public AttributeDictionary(IGenstarDictionary<Attribute<? extends IValue>> d) {
-		this(d.getAttributes(), d.getRecords());
+		this(d.getAttributes(), d.getRecords(), d.getSizeAttribute());
 	}
 	
 	public AttributeDictionary(Collection<Attribute<? extends IValue>> attributes) {
-		this(attributes, Collections.emptySet());
+		this(attributes, Collections.emptySet(), null);
 	}
 	
 	@JsonCreator
 	public AttributeDictionary(
 			@JsonProperty(IGenstarDictionary.ATTRIBUTES) Collection<Attribute<? extends IValue>> attributes,
-			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records) {
+			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records,
+			@JsonProperty(IGenstarDictionary.SIZE) EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
 		
 		if (records == null)
 			records = Collections.emptyList();
 		
 		this.attributes = new LinkedHashSet<>(attributes);
 		this.records = new HashSet<>(records);
+		this.sizeAttribute = sizeAttribute;
 		this.name2attribute = attributes.stream()
 				.collect(Collectors.toMap(
 								IAttribute::getAttributeName,
 								Function.identity()));
+		this.name2attribute.put(GSKeywords.ENTITY_SIZE_ATTRIBUTE, sizeAttribute);
 	}
 	
 	// ---------------------------- ADDERS ---------------------------- //
@@ -121,6 +129,18 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	@Override
 	public Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> getRecords() {
 		return Collections.unmodifiableSet(records);
+	}
+	
+	// ----------------- SIZE
+	
+	public void setSizeAttribute(EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
+		this.sizeAttribute = sizeAttribute;
+		this.name2attribute.put(GSKeywords.ENTITY_SIZE_ATTRIBUTE, sizeAttribute);
+	}
+	
+	@Override
+	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute() {
+		return this.sizeAttribute;
 	}
 
 	// ---------------------------- ACCESSORS ---------------------------- //

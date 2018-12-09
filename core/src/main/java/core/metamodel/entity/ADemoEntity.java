@@ -14,13 +14,9 @@ import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
-import core.metamodel.attribute.AttributeFactory;
-import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.IntegerValue;
-import core.util.GSKeywords;
 
 /**
  * The higher order abstraction for demographic entity. Manage basic attribute / value relationship and parent / children relationship.
@@ -218,10 +214,6 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<EntityTag> tags;
 	
-	public static EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>,?> 
-		SIZE_ATTRIBUTE = AttributeFactory.getFactory().createSizeAttribute(GSKeywords.ENTITY_SIZE_ATTRIBUTE, 
-				Collections.emptyMap());
-	
 	@Override
 	public final boolean hasParent() {
 		return parent != null;
@@ -240,13 +232,6 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	@Override
 	public final boolean hasChildren() {
 		return children != null && !children.isEmpty();
-	}
-
-	@Override
-	public final IntegerValue getCountChildren() {
-		if (children == null)
-			return SIZE_ATTRIBUTE.getValueSpace().proposeValue("0");
-		return SIZE_ATTRIBUTE.getEmergentValue(this);
 	}
 
 	@Override

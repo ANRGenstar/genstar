@@ -7,9 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerValue;
 
 /**
  * Encapsulate description of attributes that will characterized synthetic population entities and help
@@ -34,6 +37,7 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 
 	public static final String ATTRIBUTES = "ATTRIBUTES";
 	public static final String RECORDS = "RECORDS";
+	public static final String SIZE = "SIZE ATTRIBUTE";
 	
 	/**
 	 * Retrieves meaningful attributes describe by this dictionary
@@ -119,6 +123,11 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A>... records);
 	
 	//public void setRecords(Collection<RecordAttribute<A, A>> records);
+	
+	// ------------------------ SIZE
+	
+	@JsonProperty(AttributeDictionary.SIZE)
+	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute();
 	
 	// ----------- UTILITIES
 

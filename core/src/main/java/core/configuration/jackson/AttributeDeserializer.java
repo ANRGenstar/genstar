@@ -182,7 +182,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
 		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createOTSMappedAttribute(this.getName(node), this.getType(node), 
+				.createSTOMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedRecord(node));
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
