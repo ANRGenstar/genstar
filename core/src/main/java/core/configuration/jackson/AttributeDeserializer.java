@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -448,7 +447,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		switch (type) {
 		case CountValueFunction.SELF:
 			if(refAtt == null)
-				att = AttributeFactory.getFactory().createSizeAttribute(name, Collections.emptyMap()); // TODO: not use emptymap
+				att = AttributeFactory.getFactory().createSizeAttribute(name);
 			else
 				att = AttributeFactory.getFactory().createCountAttribute(name, 
 						this.getValues(node.findValue(Attribute.SELF)),
@@ -460,7 +459,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 					getCollectionTransposer(transposer));
 			break;
 		case EntityValueFunction.SELF:
-			if(mapping == null) {
+			if(mapping.get(0).asText().equals(GSKeywords.IDENTITY)) {
 				att = AttributeFactory.getFactory().createValueOfAttribute(name, refAtt, 
 						getEntityTransposer(transposer));
 			} else {

@@ -65,16 +65,25 @@ public class EmergentFunctionSerializer extends StdSerializer<IGSValueFunction<?
 				gen.writeEndObject();
 			} else {
 				Map<?,? extends IValue> mapping = null;
+				boolean identity = false;
 				if (type.equals(CountValueFunction.SELF))
 					mapping = ((CountValueFunction) function).getMapping();
-				else if(type.equals(EntityValueFunction.SELF))
-					mapping = ((EntityValueFunction) function).getMapping();
+				else if(type.equals(EntityValueFunction.SELF)) {
+					EntityValueFunction theFunction = (EntityValueFunction) function; 
+					mapping = theFunction.getMapping();
+					identity = mapping.entrySet().stream()
+							.allMatch(e -> e.getKey().equals(e.getValue()));
+				}
 				gen.writeArrayFieldStart(IGSValueFunction.MAPPING);
-				for(Entry<?, ? extends IValue> entry : mapping.entrySet()) {
-					String k = entry.getKey().getClass().getSuperclass().equals(IValue.class) ?
-							((IValue) entry.getKey()).getStringValue() : entry.getKey().toString();
-					String v = entry.getValue().getStringValue();
-					gen.writeString(k+GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR+v);
+				if(identity) {
+					gen.writeString(GSKeywords.IDENTITY);
+				} else {
+					for(Entry<?, ? extends IValue> entry : mapping.entrySet()) {
+						String k = entry.getKey().getClass().getSuperclass().equals(IValue.class) ?
+								((IValue) entry.getKey()).getStringValue() : entry.getKey().toString();
+								String v = entry.getValue().getStringValue();
+								gen.writeString(k+GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR+v);
+					}
 				}
 				gen.writeEndArray();
 			}

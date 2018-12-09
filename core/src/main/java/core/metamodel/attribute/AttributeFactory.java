@@ -1302,7 +1302,7 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
-	createSizeAttribute(String name, Map<String, List<Integer>> mapping) {
+		createSizeAttribute(String name) {
 
 		if(!SIZE_ATT.containsKey(name)) {
 			EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, Object> attribute = 
