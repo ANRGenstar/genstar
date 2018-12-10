@@ -303,17 +303,12 @@
         "EMERGENT FUNCTION" : {
           "TYPE ID" : "ENTITY ATTRIBUTE VALUE FUNCTION",
           "REFERENT ATTRIBUTE" : "Range attribute",
-          "VALUE MAPPING" : [ "25 à 34 : 25 à 34", "35 à 54 : 35 à 54", "moins de 14 : moins de 14", "55 et plus : 55 et plus", "15 à 24 : 15 à 24" ]
+          "VALUE MAPPING" : [ "Identity" ]
         },
         "EMERGENT FILTER" : {
           "TYPE" : "SELECTION FILTER",
           "COMPARATOR" : {
-            "LISTED ATTRIBUTES" : [ ],
-            "CUSTOM COMPARATOR FUNCTIONS" : [ ],
-            "HAMMING VECTOR MATCHER" : {
-              "ENTITY MATCH TYPE" : "VECTOR VALUE MATCHER",
-              "MATCH VECTOR" : [ ]
-            }
+            "CONTENT" : "Default"
           },
           "MATCH TYPE" : "ALL",
           "MATCHERS" : {
@@ -350,12 +345,7 @@
         "EMERGENT FILTER" : {
           "TYPE" : "MATCH FILTER",
           "COMPARATOR" : {
-            "LISTED ATTRIBUTES" : [ ],
-            "CUSTOM COMPARATOR FUNCTIONS" : [ ],
-            "HAMMING VECTOR MATCHER" : {
-              "ENTITY MATCH TYPE" : "VECTOR VALUE MATCHER",
-              "MATCH VECTOR" : [ ]
-            }
+            "CONTENT" : "Default"
           },
           "MATCH TYPE" : "ALL",
           "MATCHERS" : {
@@ -372,6 +362,7 @@
         "PROXY ATTRIBUTE TYPE" : "Integer",
         "REFERENT ATTRIBUTE" : "Range aggregated attribute"
       }
-    } ]
+    } ],
+    "SIZE ATTRIBUTE" : null
   }
 }

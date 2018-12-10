@@ -10,7 +10,7 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
 /**
- * Represents a spatialized entity which can have attributes, be localated at a point (represents
+ * Represents a spatialized entity which can have attributes, be located at a point (represents
  * where it is) and a Nest (representing where it "lives"). The linkedPlaces represents the list 
  * of places linked to the entity (key: type of place, value: corresponding place).
  * Such an entity might be generated.
@@ -98,7 +98,5 @@ public class SpllEntity extends ADemoEntity {
 		if (linkedPlaces == null) linkedPlaces = new HashMap<String, AGeoEntity<? extends IValue>>();
 		linkedPlaces.put(key, place);
 	}
-	
-
 	
 }

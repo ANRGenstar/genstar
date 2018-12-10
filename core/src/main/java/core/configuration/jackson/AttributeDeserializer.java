@@ -635,6 +635,10 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		
 		ImplicitEntityComparator comparator = new ImplicitEntityComparator();
 		
+		if(comparatorNode.has(GSKeywords.CONTENT) && 
+				comparatorNode.get(GSKeywords.CONTENT).asText().equals(GSKeywords.DEFAULT))
+			return comparator;
+		
 		/*
 		 * Attribute and relationship (reverse or not) to comparison process
 		 */
