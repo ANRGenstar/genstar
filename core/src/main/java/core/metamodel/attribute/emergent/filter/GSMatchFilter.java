@@ -25,6 +25,10 @@ public class GSMatchFilter<T> extends AGSEntitySelector<Collection<IEntity<? ext
 	public GSMatchFilter(IGSEntityMatcher<T> matcher, MatchType match) {
 		super(matcher, match);
 	}
+	
+	public GSMatchFilter(IGSEntityMatcher<T> matcher) {
+		super(matcher);
+	}
 
 	@Override
 	public Collection<IEntity<? extends IAttribute<? extends IValue>>> apply(IEntity<? extends IAttribute<? extends IValue>> superEntity) {

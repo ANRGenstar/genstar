@@ -12,25 +12,20 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
-import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.IntegerValue;
-import core.util.GSKeywords;
 
 /**
  * The higher order abstraction for demographic entity. Manage basic attribute / value relationship and parent / children relationship.
  * 
- * TODO: study the possibility of extending {@link IPopulation} - but may be too holonic
- * 
  * @author kevinchapuis
  *
  */
-public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> { // , IPopulation<ADemoEntity, Attribute<? extends IValue>> {
+public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>> { 
 
 	/**
 	 * The unique identifier of the entity. See {@link EntityUniqueId}
@@ -218,9 +213,7 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<EntityTag> tags;
 	
-	public static EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>,?> 
-		SIZE_ATTRIBUTE = AttributeFactory.getFactory().createSizeAttribute(GSKeywords.ENTITY_SIZE_ATTRIBUTE, 
-				Collections.emptyMap());
+	private EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute;
 	
 	@Override
 	public final boolean hasParent() {
@@ -243,13 +236,6 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	}
 
 	@Override
-	public final IntegerValue getCountChildren() {
-		if (children == null)
-			return SIZE_ATTRIBUTE.getValueSpace().proposeValue("0");
-		return SIZE_ATTRIBUTE.getEmergentValue(this);
-	}
-
-	@Override
 	public final Set<IEntity<? extends IAttribute<? extends IValue>>> getChildren() {
 		if (children == null)
 			return Collections.emptySet();
@@ -268,6 +254,19 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 		if (children == null)
 			children = new HashSet<>();
 		children.addAll(e);
+	}
+	
+	@Override
+	public IValue getCountChildren() {
+		return sizeAttribute.getEmergentValue(this);
+	}
+	
+	/**
+	 * Set the attribute
+	 * @param sizeAttribute
+	 */
+	public void setCountAttribute(EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
+		this.sizeAttribute = sizeAttribute;
 	}
 	
 	@Override

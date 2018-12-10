@@ -12,6 +12,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.attribute.emergent.AggregateValueFunction;
+import core.metamodel.attribute.emergent.CompositeValueFunction;
 import core.metamodel.attribute.emergent.CountValueFunction;
 import core.metamodel.attribute.emergent.EntityValueFunction;
 import core.metamodel.attribute.emergent.aggregator.IAggregatorValueFunction;
@@ -19,6 +20,7 @@ import core.metamodel.attribute.emergent.filter.GSMatchFilter;
 import core.metamodel.attribute.emergent.filter.GSMatchSelection;
 import core.metamodel.attribute.emergent.filter.GSNoFilter;
 import core.metamodel.attribute.emergent.filter.IGSEntitySelector;
+import core.metamodel.attribute.emergent.filter.predicate.GSMatchPredicate;
 import core.metamodel.attribute.mapper.AggregateMapper;
 import core.metamodel.attribute.mapper.RecordMapper;
 import core.metamodel.attribute.mapper.UndirectedMapper;
@@ -356,16 +358,16 @@ public class AttributeFactory {
 	}
 
 	/**
-	 * Main method to create record attribute: can represent one-to-several value relationship (OTS)
+	 * Main method to create mapped disaggregated attribute: several-to-one value relationship (STO)
 	 * 
 	 * @param name
 	 * @param dataType
 	 * @param referentAttribute
-	 * @param record
+	 * @param record : several key can be bound to one value
 	 * @return
 	 * @throws GSIllegalRangedData
 	 */
-	public <V extends IValue> MappedAttribute<? extends IValue, V> createOTSMappedAttribute(
+	public <V extends IValue> MappedAttribute<? extends IValue, V> createSTOMappedAttribute(
 			String name, GSEnumDataType dataType, Attribute<V> referentAttribute, 
 			Map<String, String> record) 
 					throws GSIllegalRangedData{
@@ -1300,7 +1302,7 @@ public class AttributeFactory {
 	 * @return
 	 */
 	public EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> 
-	createSizeAttribute(String name, Map<String, List<Integer>> mapping) {
+		createSizeAttribute(String name) {
 
 		if(!SIZE_ATT.containsKey(name)) {
 			EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, Object> attribute = 
@@ -1579,21 +1581,139 @@ public class AttributeFactory {
 		return eAttribute;
 	}
 
-	/* EMERGENT TRANSPOSED 
+	
+	// EMERGENT COMPOSITE 
 
 
-	public <V extends IValue, K extends IValue, U>
-	EmergentAttribute<K, V, U> createTransposedValuesAttribute(String name,
-			Attribute<V> inputAttribute, IAttributeMapper<K, V> mapper, IValueSpace<K> valueSpace, 
-			IGSValueFunction<U, V> function, IGSEntityTransposer<V> filter, IValue... matches){
-		EmergentAttribute<K, V, U> eAttribute = new EmergentAttribute<>(name, inputAttribute, mapper);
-		eAttribute.setValueSpace(valueSpace);
-		eAttribute.setFunction(new EntityTransposedAttributeFunction<>(eAttribute, 
-				new MappedTransposedValueFunction<>(transposer), filter, matches));
-		return eAttribute;
+	public EmergentAttribute<? extends IValue, ?, ?> 
+			createTransposedValuesAttribute(String name, Collection<String> values, GSEnumDataType type,
+			Map<Collection<GSMatchPredicate<?, ?>>, String> predicates){
+		switch (type) {
+		case Boolean:
+			return createEmergentBoolean(name, values, predicates);
+		case Continue:
+			return createEmergentContinue(name, values, predicates);
+		case Integer:
+			return createEmergentInteger(name, values, predicates);
+		case Nominal:
+			return createEmergentNominal(name, values, predicates);
+		case Order:
+			return createEmergentOrder(name, values, predicates);
+		case Range:
+			return createEmergentRange(name, values, predicates);
+		default:
+			throw new RuntimeException("Creation attribute failure");
+		}
 	}
-	 */
 
+	/*
+	 * private emergent range attribute
+	 */
+	private EmergentAttribute<? extends IValue, ?, ?> createEmergentRange(String name, Collection<String> values,
+			Map<Collection<GSMatchPredicate<?,?>>, String> predicates) {
+		EmergentAttribute<RangeValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> att = 
+				new EmergentAttribute<>(name);
+		IValueSpace<RangeValue> vs = null;
+		try {
+			vs = new RangeSpace(att, new GSDataParser().getRangeTemplate(new ArrayList<>(values)));
+		} catch (GSIllegalRangedData e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		att.setValueSpace(vs);
+		for(String value : values)
+			vs.addValue(value);
+		CompositeValueFunction<RangeValue> cvf = new CompositeValueFunction<>(att);
+		predicates.entrySet().stream().forEach(collect -> collect.getKey().stream()
+				.forEach(predicate -> cvf.addPredicate(predicate, 
+				att.getValueSpace().getValue(collect.getValue()))));
+		return att;
+	}
+
+	/*
+	 * private emergent ordered attribute
+	 */
+	private EmergentAttribute<? extends IValue, ?, ?> createEmergentOrder(String name, Collection<String> values,
+			Map<Collection<GSMatchPredicate<?,?>>, String> predicates) {
+		EmergentAttribute<OrderedValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> att = 
+				new EmergentAttribute<>(name);
+		IValueSpace<OrderedValue> vs = new OrderedSpace(att, new GSCategoricTemplate());
+		att.setValueSpace(vs);
+		values.stream().forEach(value -> vs.addValue(value));
+		CompositeValueFunction<OrderedValue> cvf = new CompositeValueFunction<>(att);
+		predicates.entrySet().stream().forEach(collect -> collect.getKey().stream()
+				.forEach(predicate -> cvf.addPredicate(predicate, 
+				att.getValueSpace().getValue(collect.getValue()))));
+		return att;
+	}
+
+	/*
+	 * private emergent nominal attribute
+	 */
+	private EmergentAttribute<? extends IValue, ?, ?> createEmergentNominal(String name, Collection<String> values,
+			Map<Collection<GSMatchPredicate<?,?>>, String> predicates) {
+		EmergentAttribute<NominalValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> att = 
+				new EmergentAttribute<>(name);
+		IValueSpace<NominalValue> vs = new NominalSpace(att, new GSCategoricTemplate());
+		att.setValueSpace(vs);
+		values.stream().forEach(value -> vs.addValue(value));
+		CompositeValueFunction<NominalValue> cvf = new CompositeValueFunction<>(att);
+		predicates.entrySet().stream().forEach(collect -> collect.getKey().stream()
+				.forEach(predicate -> cvf.addPredicate(predicate, 
+				att.getValueSpace().getValue(collect.getValue()))));
+		return att;
+	}
+
+	/*
+	 * private emergent integer attribute
+	 */
+	private EmergentAttribute<? extends IValue, ?, ?> createEmergentInteger(String name, Collection<String> values,
+			Map<Collection<GSMatchPredicate<?,?>>, String> predicates) {
+		EmergentAttribute<IntegerValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> att = 
+				new EmergentAttribute<>(name);
+		IValueSpace<IntegerValue> vs = new IntegerSpace(att);
+		att.setValueSpace(vs);
+		values.stream().forEach(value -> vs.addValue(value));
+		CompositeValueFunction<IntegerValue> cvf = new CompositeValueFunction<>(att);
+		predicates.entrySet().stream().forEach(collect -> collect.getKey().stream()
+				.forEach(predicate -> cvf.addPredicate(predicate, 
+				att.getValueSpace().getValue(collect.getValue()))));
+		return att;
+	}
+
+	/*
+	 * private emergent continuous attribute
+	 */
+	private EmergentAttribute<? extends IValue, ?, ?> createEmergentContinue(String name, Collection<String> values,
+			Map<Collection<GSMatchPredicate<?,?>>, String> predicates) {
+		EmergentAttribute<ContinuousValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> att = 
+				new EmergentAttribute<>(name);
+		IValueSpace<ContinuousValue> vs = new ContinuousSpace(att);
+		att.setValueSpace(vs);
+		values.stream().forEach(value -> vs.addValue(value));
+		CompositeValueFunction<ContinuousValue> cvf = new CompositeValueFunction<>(att);
+		predicates.entrySet().stream().forEach(collect -> collect.getKey().stream()
+				.forEach(predicate -> cvf.addPredicate(predicate, 
+				att.getValueSpace().getValue(collect.getValue()))));
+		return att;
+	}
+
+	/*
+	 * private emergent boolean attribute
+	 */
+	private EmergentAttribute<? extends IValue, ?, ?> createEmergentBoolean(String name, Collection<String> values,
+					Map<Collection<GSMatchPredicate<?,?>>, String> predicates) {
+		EmergentAttribute<BooleanValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> att = 
+				new EmergentAttribute<>(name);
+		IValueSpace<BooleanValue> vs = new BinarySpace(att);
+		att.setValueSpace(vs);
+		values.stream().forEach(value -> vs.addValue(value));
+		CompositeValueFunction<BooleanValue> cvf = new CompositeValueFunction<>(att);
+		predicates.entrySet().stream().forEach(collect -> collect.getKey().stream()
+				.forEach(predicate -> cvf.addPredicate(predicate, 
+				att.getValueSpace().getValue(collect.getValue()))));
+		return att;
+	}
 
 	/* --------------------- *
 	 * 	  RECORD ATTRIBUTE   *

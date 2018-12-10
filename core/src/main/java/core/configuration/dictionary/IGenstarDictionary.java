@@ -7,8 +7,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.record.RecordAttribute;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
@@ -34,6 +36,7 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 
 	public static final String ATTRIBUTES = "ATTRIBUTES";
 	public static final String RECORDS = "RECORDS";
+	public static final String SIZE = "SIZE ATTRIBUTE";
 	
 	/**
 	 * Retrieves meaningful attributes describe by this dictionary
@@ -119,6 +122,11 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A>... records);
 	
 	//public void setRecords(Collection<RecordAttribute<A, A>> records);
+	
+	// ------------------------ SIZE
+	
+	@JsonProperty(AttributeDictionary.SIZE)
+	public EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute();
 	
 	// ----------- UTILITIES
 

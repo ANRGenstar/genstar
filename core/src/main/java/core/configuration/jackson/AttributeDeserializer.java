@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -182,7 +181,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		if(DES_DEMO_ATTRIBUTES.containsKey(id))
 			return DES_DEMO_ATTRIBUTES.get(id);
 		Attribute<? extends IValue> attribute = AttributeFactory.getFactory()
-				.createOTSMappedAttribute(this.getName(node), this.getType(node), 
+				.createSTOMappedAttribute(this.getName(node), this.getType(node), 
 						this.getReferentAttribute(node), this.getOrderedRecord(node));
 		DES_DEMO_ATTRIBUTES.put(id, attribute);
 		return attribute;
@@ -448,7 +447,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		switch (type) {
 		case CountValueFunction.SELF:
 			if(refAtt == null)
-				att = AttributeFactory.getFactory().createSizeAttribute(name, Collections.emptyMap()); // TODO: not use emptymap
+				att = AttributeFactory.getFactory().createSizeAttribute(name);
 			else
 				att = AttributeFactory.getFactory().createCountAttribute(name, 
 						this.getValues(node.findValue(Attribute.SELF)),
@@ -460,7 +459,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 					getCollectionTransposer(transposer));
 			break;
 		case EntityValueFunction.SELF:
-			if(mapping == null) {
+			if(mapping.get(0).asText().equals(GSKeywords.IDENTITY)) {
 				att = AttributeFactory.getFactory().createValueOfAttribute(name, refAtt, 
 						getEntityTransposer(transposer));
 			} else {
@@ -635,6 +634,10 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	private ImplicitEntityComparator getComparator(JsonNode comparatorNode) throws JsonParseException, JsonMappingException, IllegalArgumentException, IOException {		
 		
 		ImplicitEntityComparator comparator = new ImplicitEntityComparator();
+		
+		if(comparatorNode.has(GSKeywords.CONTENT) && 
+				comparatorNode.get(GSKeywords.CONTENT).asText().equals(GSKeywords.DEFAULT))
+			return comparator;
 		
 		/*
 		 * Attribute and relationship (reverse or not) to comparison process

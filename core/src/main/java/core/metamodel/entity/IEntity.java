@@ -9,7 +9,6 @@ import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.matcher.MatchType;
 import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
-import core.metamodel.value.numeric.IntegerValue;
 
 /**
  * An entity might represent an household, an individual, or even a geographical entity etc.
@@ -142,7 +141,7 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	 * returns the count of children
 	 * @return
 	 */
-	public IntegerValue getCountChildren();
+	public IValue getCountChildren();
 	
 	/**
 	 * returns the set of children

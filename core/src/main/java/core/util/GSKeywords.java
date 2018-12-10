@@ -23,5 +23,8 @@ public class GSKeywords {
 	public static final String SERIALIZE_KEY_VALUE_SEPARATOR = " : ";
 	public static final String SERIALIZE_ELEMENT_SEPARATOR = ";";
 	public static final String PROXY_ATTRIBUTE_MAPPER = "Proxy attribute mapper : ";
+	public static final String IDENTITY = "Identity";
+	public static final String DEFAULT = "Default";
+	public static final String CONTENT = "CONTENT";
 	
 }
