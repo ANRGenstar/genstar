@@ -11,7 +11,7 @@
 	</properties>
 
     <parent>
-        <groupId>org.genstar</groupId>
+        <groupId>io.github.anrgenstar</groupId>
         <artifactId>parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -30,7 +30,7 @@
  
 	<dependencies>
 		<dependency>
-			<groupId>org.genstar</groupId>
+			<groupId>io.github.anrgenstar</groupId>
 			<artifactId>genstar-core</artifactId>
 			<version>${revision}</version>
 		</dependency>
