@@ -51,6 +51,7 @@
 		<jts.version>1.14.0</jts.version>
 		<jaimageio.version>1.1</jaimageio.version>
 		<!-- use the latest snapshot <geotools.version>15-SNAPSHOT</geotools.version> -->
+		<revision>1.0.3</revision>
 	</properties>
 
 
