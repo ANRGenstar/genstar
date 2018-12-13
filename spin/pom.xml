@@ -14,7 +14,7 @@
 </properties>
 
     <parent>
-        <groupId>org.genstar</groupId>
+        <groupId>io.github.anrgenstar</groupId>
         <artifactId>parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -22,16 +22,22 @@
 
 <dependencies>
 	<dependency>
-	    <groupId>org.genstar</groupId>
+	    <groupId>io.github.anrgenstar</groupId>
 	    <artifactId>genstar-core</artifactId>
         <version>${revision}</version>
 	</dependency>
 
 	<dependency>
-	    <groupId>org.genstar</groupId>
+	    <groupId>io.github.anrgenstar</groupId>
 	    <artifactId>genstar-gospl</artifactId>
         <version>${revision}</version>
-	</dependency> 
+	</dependency>
+
+    <dependency>
+        <groupId>io.github.anrgenstar</groupId>
+        <artifactId>genstar-spll</artifactId>
+        <version>${revision}</version>
+    </dependency>
 
 	<dependency>
 	    <groupId>org.graphstream</groupId>
@@ -44,11 +50,7 @@
 	    <version>${graphstream.version}</version>
 	</dependency> 
 
-	<dependency>
-		<groupId>org.genstar</groupId>
-		<artifactId>genstar-spll</artifactId>
-        <version>${revision}</version>
-	</dependency>
+
 </dependencies>
  
  <build>
