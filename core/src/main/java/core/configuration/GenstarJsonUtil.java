@@ -28,13 +28,6 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
  *
  */
 public class GenstarJsonUtil {
-
-	public static final String BASE_DIR = "MAIN DIRECTORY";
-	
-	public final static String INPUT_FILES = "INPUT FILES";
-	
-	public final static String ATT_DICO = "ATTRIBUTE DICTIONARY";
-	public static final String RECORDS = "RECORDS ATTRIBUTES";
 	
 	public final static String GENSTAR_EXT = "gns";
 	
@@ -57,7 +50,11 @@ public class GenstarJsonUtil {
 	public GenstarJsonUtil(List<SerializationFeature> serializationFeatures,
 			List<DeserializationFeature> deserializationFeatures) {
 		this.om = new ObjectMapper();
-		om.registerModule(new SimpleModule().addSerializer(Path.class, new ToStringSerializer()));
+		
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(Path.class, new ToStringSerializer());
+		om.registerModule(module);
+		
 		serializationFeatures.stream().forEach(feat -> om.configure(feat, 
 				!om.getSerializationConfig().isEnabled(feat)));
 		deserializationFeatures.stream().forEach(feat -> om.configure(feat, 

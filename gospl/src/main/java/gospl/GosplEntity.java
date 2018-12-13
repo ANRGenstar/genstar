@@ -18,6 +18,11 @@ public class GosplEntity extends ADemoEntity {
 	public GosplEntity(Map<Attribute<? extends IValue>, IValue> attributes){
 		super(attributes);
 	}
+	
+	public GosplEntity(Map<Attribute<? extends IValue>, IValue> attributes, double weight) {
+		super(attributes);
+		super.setWeight(weight);
+	}
 
 	public GosplEntity(){
 		super();

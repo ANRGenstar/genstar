@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import core.configuration.jackson.EntityComparatorSerializer;
+import core.configuration.jackson.entity.EntityComparatorSerializer;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.IEntity;

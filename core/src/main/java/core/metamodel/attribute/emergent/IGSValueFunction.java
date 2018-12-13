@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import core.configuration.jackson.EmergentFunctionSerializer;
+import core.configuration.jackson.attribute.EmergentFunctionSerializer;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;

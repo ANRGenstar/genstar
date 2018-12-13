@@ -1,4 +1,4 @@
-package core.configuration.jackson;
+package core.configuration.jackson.attribute;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,7 +52,6 @@ import core.metamodel.value.IValueSpace;
 import core.metamodel.value.categoric.NominalValue;
 import core.metamodel.value.categoric.OrderedValue;
 import core.metamodel.value.numeric.RangeValue;
-import core.util.GSDisplayUtil;
 import core.util.GSKeywords;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
@@ -66,11 +65,11 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	 */
 	private static final long serialVersionUID = 1L;
 
-	protected AttributeDeserializer() {
+	public AttributeDeserializer() {
 		this(null);
 	}
 	
-	protected AttributeDeserializer(Class<?> vc) {
+	public AttributeDeserializer(Class<?> vc) {
 		super(vc);
 	}
 
@@ -435,7 +434,7 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		
 		JsonNode function = node.get(EmergentAttribute.FUNCTION);
 		JsonNode transposer = node.get(EmergentAttribute.TRANSPOSER);
-		JsonNode mapping = node.get(IGSValueFunction.MAPPING);
+		JsonNode mapping = function.get(IGSValueFunction.MAPPING);
 			
 		EmergentAttribute<? extends IValue, ?, ?> att = null;
 		
@@ -531,8 +530,6 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 		
 		JsonNode transNode = node.get(IGSEntitySelector.MATCHERS);
 		String transType = transNode.get(IGSEntityMatcher.TYPE).asText();
-		
-		GSDisplayUtil.println(this.getClass(), "getCollectionTransposer", transType);
 		
 		MatchType matchType = MatchType.valueOf(node.get(IGSEntitySelector.MATCH_TYPE).asText());
 		ImplicitEntityComparator comparator = this.getComparator(node.get(IGSEntitySelector.COMPARATOR)); 

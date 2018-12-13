@@ -1,25 +1,32 @@
 package core.configuration;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.dictionary.IGenstarDictionary;
+import core.configuration.jackson.GenstarConfigurationFileDeserializer;
+import core.configuration.jackson.GenstarConfigurationFileSerializer;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 
 /**
- * Data configuration consist in a base directory where to find ressources, plus
+ * Data configuration consist in a base directory where to find resources, plus
  * a list of wrapped file that encapsulate data file plus information to read it, and
  * finally dictionary to understand data in file
  * <p><ul>
@@ -35,14 +42,21 @@ import core.metamodel.value.IValue;
  *
  */
 @JsonTypeName(value = GenstarConfigurationFile.SELF)
+@JsonSerialize(using = GenstarConfigurationFileSerializer.class)
+@JsonDeserialize(using = GenstarConfigurationFileDeserializer.class)
 public class GenstarConfigurationFile {
 
-	public final static String SELF = "CONFIGURATION FILE";
+	public static final String SELF = "CONFIGURATION FILE";
+	public static final String BASE_DIR = "MAIN DIRECTORY";
 	
-	private final List<GSSurveyWrapper> dataFileList = new ArrayList<>();
-
-	// Demographic attributes
-	private IGenstarDictionary<Attribute<? extends IValue>> dictionary;
+	public static final String INPUT_FILES = "INPUT FILES";
+	public static final String DICOS = "DICTIONARIES";
+	
+	public static final String LAYER = "LAYER LEVEL";
+	
+	private Map<GSSurveyWrapper, List<Integer>> dataFiles = new HashMap<>();
+	
+	private Set<IGenstarDictionary<Attribute<? extends IValue>>> dictionaries = new HashSet<>();
 
 	/**
 	 * The path in which the files included in this configuration is stored, if known.
@@ -58,59 +72,142 @@ public class GenstarConfigurationFile {
 	
 	/**
 	 * Gives the survey wrappers
-	 * @return
+	 * @return the wrapper and associated layer level
 	 */
-	@JsonProperty(GenstarJsonUtil.INPUT_FILES)
-	public List<GSSurveyWrapper> getSurveyWrappers(){
-		return dataFileList;
-	}
-	
-	@JsonProperty(GenstarJsonUtil.INPUT_FILES)
-	public void setSurveyWrappers(List<GSSurveyWrapper> surveys) {
-		this.dataFileList.addAll(surveys);
-	}
-
-	public void addSurveyWrapper(GSSurveyWrapper survey) {
-		this.dataFileList.add(survey);
+	@JsonProperty(GenstarConfigurationFile.INPUT_FILES)
+	public Map<GSSurveyWrapper, List<Integer>> getWrappers(){
+		return Collections.unmodifiableMap(dataFiles);
 	}
 	
 	/**
-	 * Gives the dictionary of attribute
-	 * @return
+	 * Set wrappers (serialization purpose)
+	 * @param surveys
 	 */
-	@JsonProperty(GenstarJsonUtil.ATT_DICO)
-	public IGenstarDictionary<Attribute<? extends IValue>> getDictionary(){
-		return dictionary;
+	@JsonProperty(GenstarConfigurationFile.INPUT_FILES)
+	public void setWrappers(Map<GSSurveyWrapper, List<Integer>> surveys) {
+		this.dataFiles.putAll(surveys);
 	}
 	
-	@JsonProperty(GenstarJsonUtil.ATT_DICO)
-	public void setDictionary(IGenstarDictionary<Attribute<? extends IValue>> dictionary) {
-		this.dictionary = dictionary;
-		this.isCircleReferencedAttribute();
+	/**
+	 * Default wrappers for 0 layer
+	 * @return
+	 */
+	public List<GSSurveyWrapper> getSurveyWrappers(){
+		return this.getSurveyWrappers(0);
+	}
+	
+	/**
+	 * Gives a collection of survey wrapper for a particular layer
+	 * @param level
+	 * @return a collection of wrapper
+	 */
+	public List<GSSurveyWrapper> getSurveyWrappers(int level) {
+		if(this.dataFiles.values().stream().noneMatch(levels -> levels.contains(level)))
+			throw new NullPointerException("No survey wrappers for layer "+level);
+		return this.dataFiles.keySet().stream()
+			.filter(wrapper -> this.dataFiles.get(wrapper).contains(level))
+			.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Set wrappers for level 0
+	 * @param surveys
+	 */
+	public void setSurveyWrappers(List<GSSurveyWrapper> surveys) {
+		surveys.stream().forEach(wrapper -> this.dataFiles.put(wrapper, Arrays.asList(0)));
+	}
+
+	/**
+	 * Add new wrapper for layer 0
+	 * @param survey
+	 */
+	public void addSurveyWrapper(GSSurveyWrapper survey) {
+		this.dataFiles.putIfAbsent(survey, Arrays.asList(0));
+	}
+	
+	/**
+	 * Add new wrapper for specified layers
+	 * @param survey
+	 * @param layers
+	 */
+	public void addSurveyWrapper(GSSurveyWrapper survey, Integer... layers) {
+		this.dataFiles.putIfAbsent(survey, Arrays.asList(layers));
+	}
+	
+	/**
+	 * Get 0 based level dictionary
+	 * @return
+	 */
+	public IGenstarDictionary<Attribute<? extends IValue>> getDictionary(){
+		return this.getDictionaries().size() == 1 ? this.dictionaries.iterator().next() : this.getDictionary(0);
+	}
+	
+	/**
+	 * Set 0 based level dictionary
+	 * @param dictionary
+	 */
+	public void setDictionary(IGenstarDictionary<Attribute<? extends IValue>> dictionary){
+		this.dictionaries.add(dictionary);
+	}
+	
+	/**
+	 * Get {@code level} based dictionary
+	 * @param level
+	 * @return
+	 */
+	public IGenstarDictionary<Attribute<? extends IValue>> getDictionary(int level){
+		return this.dictionaries.stream().filter(dico -> dico.getLevel() == level).findFirst().get();
+	}
+	
+	/**
+	 * Gives dictionary of attributes according to the layer in multi-level or multi-typed population
+	 * @return
+	 */
+	@JsonProperty(GenstarConfigurationFile.DICOS)
+	public Set<IGenstarDictionary<Attribute<? extends IValue>>> getDictionaries(){
+		return Collections.unmodifiableSet(this.dictionaries);
+	}
+	
+	@JsonProperty(GenstarConfigurationFile.DICOS)
+	public void setDictionaries(Set<IGenstarDictionary<Attribute<? extends IValue>>> dictionaries) {
+		if(!dictionaries.stream().anyMatch(dico -> dico.getLevel() == 0))
+			throw new IllegalArgumentException("Dictionary must include 0 based layer population");
+		dictionaries.stream().forEach(dico -> this.isCircleReferencedAttribute(dico));
+		this.dictionaries = dictionaries;
 	}
 	
 	/**
 	 * The root directory from when to resolve relative path
 	 * @return
 	 */
-	@JsonProperty(GenstarJsonUtil.BASE_DIR)
+	@JsonProperty(GenstarConfigurationFile.BASE_DIR)
 	public Path getBaseDirectory() {
 		return this.baseDirectory;
 	}
 	
-	@JsonProperty(GenstarJsonUtil.BASE_DIR)
+	@JsonProperty(GenstarConfigurationFile.BASE_DIR)
 	public void setBaseDirectory(Path f) {
 		LogManager.getLogger().info("Setting Genstar configuration basepath to "+f);
 		this.baseDirectory = f;
 	}
 	
+	public int getLevels() {
+		return dictionaries.size();
+	}
+	
+	public List<Integer> getLayers(){
+		return dictionaries.stream().map(dico -> dico.getLevel()).collect(Collectors.toList());
+	}
+	
 	// --------------- UTILITIES --------------- //
 
+	
+	
 	/*
 	 * Throws an exception if attributes have feedback loop references, e.g. : A referees to B that referees to C
 	 * that referees to A; in this case, no any attribute can be taken as a referent one 
 	 */
-	private void isCircleReferencedAttribute() throws IllegalArgumentException {
+	private void isCircleReferencedAttribute(IGenstarDictionary<Attribute<? extends IValue>> dictionary) throws IllegalArgumentException {
 		Collection<Attribute<? extends IValue>> attributes = new HashSet<>();
 		if(dictionary != null) attributes.addAll(dictionary.getAttributes());
 		// store attributes that have referent attribute

@@ -208,11 +208,6 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	 */
 	private Set<IEntity<? extends IAttribute<? extends IValue>>> children = null;
 	
-	/**
-	 * The class of attribute to characterize within or between layer relationship
-	 */
-	private Set<EntityTag> tags;
-	
 	private EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute;
 	
 	@Override
@@ -269,6 +264,14 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 		this.sizeAttribute = sizeAttribute;
 	}
 	
+	// ---------------- TAGS and WEIGTH ------------------- //
+	
+	/**
+	 * The class of attribute to characterize within or between layer relationship, e.g. parent, child, head of household
+	 */
+	private Set<EntityTag> tags;
+	private double weight = 1d;
+	
 	@Override
 	public boolean hasTags(EntityTag... tags) {
 		List<EntityTag> theTags = Arrays.asList(tags);
@@ -278,6 +281,24 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	@Override
 	public Collection<EntityTag> getTags(){
 		return Collections.unmodifiableSet(this.tags);
+	}
+	
+	/**
+	 * The weight often used in association with record of a sample
+	 * 
+	 * @return double weight value attached to the entity 
+	 */
+	public double getWeight() {
+		return weight;
+	}
+	
+	/**
+	 * Set the weight of the entity
+	 * 
+	 * @param weight
+	 */
+	public void setWeight(double weight) {
+		this.weight = weight;
 	}
 	
 }

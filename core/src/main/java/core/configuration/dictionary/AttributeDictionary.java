@@ -15,10 +15,8 @@ import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
-import core.configuration.GenstarJsonUtil;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.EmergentAttribute;
@@ -38,8 +36,13 @@ import core.util.GSKeywords;
  *
  * @param <A>
  */
-@JsonTypeName(GenstarJsonUtil.ATT_DICO)
-@JsonPropertyOrder({ IGenstarDictionary.ATTRIBUTES, IGenstarDictionary.RECORDS, IGenstarDictionary.SIZE })
+@JsonTypeName(value = IGenstarDictionary.SELF)
+/*
+@JsonPropertyOrder({ IGenstarDictionary.LEVEL, 
+	IGenstarDictionary.SERIAL, IGenstarDictionary.WEIGHT, 
+	IGenstarDictionary.SIZE, IGenstarDictionary.RECORDS,
+	IGenstarDictionary.ATTRIBUTES})
+	*/
 public class AttributeDictionary implements IGenstarDictionary<Attribute<? extends IValue>> {
 	
 	private Set<Attribute<? extends IValue>> attributes;
@@ -48,6 +51,10 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	private Set<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records;
 	
 	private EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute;
+	
+	private String weightAttribute;
+	private String identifierAttribute;
+	private int level;
 	
 	public AttributeDictionary() {
 		this.attributes = new LinkedHashSet<>();
@@ -60,18 +67,21 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	 * @param d
 	 */
 	public AttributeDictionary(IGenstarDictionary<Attribute<? extends IValue>> d) {
-		this(d.getAttributes(), d.getRecords(), d.getSizeAttribute());
+		this(d.getAttributes(), d.getRecords(), d.getSizeAttribute(), "", "", 0);
 	}
 	
 	public AttributeDictionary(Collection<Attribute<? extends IValue>> attributes) {
-		this(attributes, Collections.emptySet(), null);
+		this(attributes, Collections.emptySet(), null, "", "", 0);
 	}
 	
 	@JsonCreator
 	public AttributeDictionary(
 			@JsonProperty(IGenstarDictionary.ATTRIBUTES) Collection<Attribute<? extends IValue>> attributes,
 			@JsonProperty(IGenstarDictionary.RECORDS) Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> records,
-			@JsonProperty(IGenstarDictionary.SIZE) EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute) {
+			@JsonProperty(IGenstarDictionary.SIZE) EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> sizeAttribute,
+			@JsonProperty(IGenstarDictionary.WEIGHT) String weight,
+			@JsonProperty(IGenstarDictionary.SERIAL) String serial,
+			@JsonProperty(IGenstarDictionary.LEVEL) int level) {
 		
 		if (records == null)
 			records = Collections.emptyList();
@@ -128,6 +138,38 @@ public class AttributeDictionary implements IGenstarDictionary<Attribute<? exten
 	@Override
 	public Collection<RecordAttribute<Attribute<? extends IValue>, Attribute<? extends IValue>>> getRecords() {
 		return Collections.unmodifiableSet(records);
+	}
+	
+	// -----------------
+	
+	@Override
+	public String getWeightAttributeName() {
+		return this.weightAttribute;
+	}
+
+	@Override
+	public void setWeightAttributeName(String weigthAttribute) {
+		this.weightAttribute = weigthAttribute;
+	}
+
+	@Override
+	public String getIdentifierAttributeName() {
+		return this.identifierAttribute;
+	}
+
+	@Override
+	public void setIdentifierAttributeName(String identifierAttribute) {
+		this.identifierAttribute = identifierAttribute;
+	}
+	
+	@Override
+	public int getLevel() {
+		return this.level;
+	}
+	
+	@Override
+	public void setLevel(int level) {
+		this.level = level;
 	}
 	
 	// ----------------- SIZE

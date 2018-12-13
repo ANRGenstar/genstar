@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import core.configuration.jackson.RecordAttributeSerializer;
+import core.configuration.jackson.attribute.RecordAttributeSerializer;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.attribute.mapper.value.EncodedValueMapper;

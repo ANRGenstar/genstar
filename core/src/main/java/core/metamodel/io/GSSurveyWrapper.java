@@ -3,6 +3,9 @@ package core.metamodel.io;
 import java.nio.file.Path;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import core.configuration.jackson.GSSurveyWrapperSerializer;
 
 /**
  * Wrapper class that encapsulate needed information for {@link IGSSurvey}
@@ -18,14 +21,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author kevinchapuis
  *
  */
+@JsonSerialize(using = GSSurveyWrapperSerializer.class)
 public class GSSurveyWrapper {
 	
 	public static final String RELATIVE_PATH = "RELATIVE PATH";
-	private static final String SURVEY_TYPE = "SURVEY TYPE";
-	private static final String SHEET_NB = "SHEET NB";
-	private static final String CSV_SEPARATOR = "SEPARATOR";
-	private static final String FIRST_ROW_INDEX = "FRI";
-	private static final String FIRST_COLUMN_INDEX = "FCI";
+	
+	public static final String SURVEY_TYPE = "SURVEY TYPE";
+	public static final String SHEET_NB = "SHEET NB";
+	public static final String CSV_SEPARATOR = "SEPARATOR";
+	public static final String FIRST_ROW_INDEX = "FRI";
+	public static final String FIRST_COLUMN_INDEX = "FCI";
 
 	// Cannot set a default value to these variables
 	private Path relativePath;
@@ -96,6 +101,7 @@ public class GSSurveyWrapper {
 		return relativePath;
 	}
 	
+	@JsonProperty(GSSurveyWrapper.RELATIVE_PATH)
 	public void setRelativePath(Path relativePath) {
 		this.relativePath = relativePath;
 	}
@@ -111,6 +117,7 @@ public class GSSurveyWrapper {
 		return surveyType;
 	}
 	
+	@JsonProperty(GSSurveyWrapper.SURVEY_TYPE)
 	public void setSurveyType(GSSurveyType surveyType) {
 		this.surveyType = surveyType;
 	}
@@ -126,6 +133,7 @@ public class GSSurveyWrapper {
 		return sheetNb;
 	}
 	
+	@JsonProperty(GSSurveyWrapper.SHEET_NB)
 	public void setSheetNumber(int sheetNb) {
 		this.sheetNb = sheetNb;
 	}
@@ -140,6 +148,7 @@ public class GSSurveyWrapper {
 		return csvSeparator;
 	}
 	
+	@JsonProperty(GSSurveyWrapper.CSV_SEPARATOR)
 	public void setCsvSeparator(char csvSeparator) {
 		this.csvSeparator = csvSeparator;
 	}
@@ -155,6 +164,7 @@ public class GSSurveyWrapper {
 		return firstRowIndex;
 	}
 	
+	@JsonProperty(GSSurveyWrapper.FIRST_ROW_INDEX)
 	public void setFirstRowIndex(int firstRowIndex) {
 		this.firstRowIndex = firstRowIndex;
 	}
@@ -170,6 +180,7 @@ public class GSSurveyWrapper {
 		return firstColumnIndex;
 	}
 	
+	@JsonProperty(GSSurveyWrapper.FIRST_COLUMN_INDEX)
 	public void setFirstColumnIndex(int firstColumnIndex) {
 		this.firstColumnIndex = firstColumnIndex;
 	}

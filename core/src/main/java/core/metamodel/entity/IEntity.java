@@ -162,11 +162,11 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	public void addChildren(Collection<IEntity<? extends IAttribute<? extends IValue>>> e);
 	
 	/**
-	 * Returs true if this entity is associated to each tag
+	 * Returns true if this entity is associated to each tag
 	 * given in parameter
 	 * 
 	 * @param tags
-	 * @return
+	 * @return true, if entity contains tags, false otherwise
 	 * 
 	 * @see MatchType
 	 */
@@ -175,7 +175,7 @@ public interface IEntity<A extends IAttribute<? extends IValue>> {
 	/**
 	 * Return the tags associated to this entity
 	 * 
-	 * @return
+	 * @return the collection of {@link EntityTag}
 	 */
 	public Collection<? extends EntityTag> getTags();
 	

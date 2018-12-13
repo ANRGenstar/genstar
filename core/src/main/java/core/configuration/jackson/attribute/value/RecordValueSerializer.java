@@ -1,4 +1,4 @@
-package core.configuration.jackson;
+package core.configuration.jackson.attribute.value;
 
 import java.io.IOException;
 import java.util.Collection;

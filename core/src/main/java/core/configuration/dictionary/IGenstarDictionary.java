@@ -34,9 +34,13 @@ import core.metamodel.value.IValue;
 })
 public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 
+	public final static String SELF = "DICTIONARY";
 	public static final String ATTRIBUTES = "ATTRIBUTES";
 	public static final String RECORDS = "RECORDS";
 	public static final String SIZE = "SIZE ATTRIBUTE";
+	public static final String WEIGHT = "WEIGHT ATTRIBUTE NAME";
+	public static final String SERIAL = "SERIAL ATTRIBUTE NAME";
+	public static final String LEVEL = "LAYER LEVEL";
 	
 	/**
 	 * Retrieves meaningful attributes describe by this dictionary
@@ -103,9 +107,8 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	// ------------------------ RECORDS
 	
 	/**
-	 * Retrives record attributes contain in this dictionary.
-	 * 
-	 * TODO: better description of record
+	 * Retrives record attributes contain in this dictionary. Record should only describe
+	 * brut contingency 
 	 * 
 	 * @return
 	 */
@@ -121,12 +124,51 @@ public interface IGenstarDictionary<A extends IAttribute<? extends IValue>> {
 	@SuppressWarnings("unchecked")
 	public IGenstarDictionary<A> addRecords(RecordAttribute<A, A>... records);
 	
-	//public void setRecords(Collection<RecordAttribute<A, A>> records);
+	
+	// ------------------------ SPECIAL ATTRIBUTE FOR SAMPLE DICTIONARY
+	
+	/**
+	 * 
+	 * @return string name of weight attribute
+	 */
+	public String getWeightAttributeName();
+	
+	/**
+	 * 
+	 * @param weightAttribute
+	 */
+	public void setWeightAttributeName(String weigthAttribute);
+	
+	/**
+	 * 
+	 * @return string name of 
+	 */
+	public String getIdentifierAttributeName();
+	
+	/**
+	 * 
+	 * @param identifierAttribute
+	 */
+	public void setIdentifierAttributeName(String identifierAttribute);
 	
 	// ------------------------ SIZE
 	
 	@JsonProperty(AttributeDictionary.SIZE)
 	public EmergentAttribute<? extends IValue, Collection<IEntity<? extends IAttribute<? extends IValue>>>, ?> getSizeAttribute();
+	
+	// ------------------------ LEVEL LAYER
+	
+	/**
+	 * By default set to 0 value
+	 * @return
+	 */
+	public int getLevel();
+	
+	/**
+	 * Set the layer of this dictionary
+	 * @param level
+	 */
+	public void setLevel(int level);
 	
 	// ----------- UTILITIES
 

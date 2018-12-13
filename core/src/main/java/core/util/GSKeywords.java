@@ -4,6 +4,7 @@ public class GSKeywords {
 
 	public static final String EMPTY = "Empty";
 	public static final String NIU = "Not in universe";
+	public static final String GENSTAR_REGEX = "Genstar regex";
 	
 	// GOSPL
 	

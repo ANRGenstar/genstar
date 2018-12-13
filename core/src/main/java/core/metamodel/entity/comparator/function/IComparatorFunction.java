@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
-import core.configuration.jackson.EntityComparatorSerializer;
+import core.configuration.jackson.entity.EntityComparatorSerializer;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 

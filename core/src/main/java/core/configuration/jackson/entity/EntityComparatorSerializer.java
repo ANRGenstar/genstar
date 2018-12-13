@@ -1,4 +1,4 @@
-package core.configuration.jackson;
+package core.configuration.jackson.entity;
 
 import java.io.IOException;
 import java.util.List;
@@ -16,7 +16,6 @@ import core.metamodel.entity.comparator.function.IComparatorFunction;
 import core.metamodel.entity.matcher.AttributeVectorMatcher;
 import core.metamodel.entity.matcher.IGSEntityMatcher;
 import core.metamodel.value.IValue;
-import core.util.GSDisplayUtil;
 import core.util.GSKeywords;
 import core.util.data.GSEnumDataType;
 
@@ -45,13 +44,6 @@ public class EntityComparatorSerializer extends StdSerializer<ImplicitEntityComp
 		List<IAttribute<? extends IValue>> attributes = comparator.getAttributes();
 		AttributeVectorMatcher avm = comparator instanceof HammingEntityComparator ? 
 				((HammingEntityComparator) comparator).getVectorMatcher() : null;
-
-		GSDisplayUtil.println(this, customFunctions);
-		GSDisplayUtil.println(this, "Functions are emtpy ? "+customFunctions.isEmpty());
-		GSDisplayUtil.println(this, attributes);
-		GSDisplayUtil.println(this, "Attributes are empty ? "+attributes.isEmpty());
-		GSDisplayUtil.println(this, avm);
-		GSDisplayUtil.println(this, "matcher is "+(avm==null?"null":"not null"));
 				
 		gen.writeStartObject();
 				

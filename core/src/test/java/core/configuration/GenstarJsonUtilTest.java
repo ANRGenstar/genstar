@@ -26,23 +26,30 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.entity.tag.EntityTag;
+import core.metamodel.io.GSSurveyType;
+import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 import core.metamodel.value.numeric.RangeValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
+import core.util.random.GenstarRandomUtils;
 
 public class GenstarJsonUtilTest {
 
 	private IGenstarDictionary<Attribute<? extends IValue>> dd;
 
 	private GenstarJsonUtil sju;
-	private Path path;
+	private Path base_path;
+	private String attFile, dataFile, confFile;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setupBefore() throws GSIllegalRangedData {
 		
-		path = FileSystems.getDefault().getPath("src","test","resources","json_test.gns");
+		base_path = FileSystems.getDefault().getPath("src","test","resources");
+		attFile = "json_test.gns";
+		confFile = "json_config_test.gns";
+		dataFile = "json_test.csv";
 
 		dd = new AttributeDictionary();
 
@@ -149,10 +156,10 @@ public class GenstarJsonUtilTest {
 	public void test() throws JsonGenerationException, JsonMappingException, IOException {
 		for(Attribute<? extends IValue> att : dd.getAttributes()) {
 			
-			sju.marshalToGenstarJson(path, att, false);
+			sju.marshalToGenstarJson(base_path.resolve(attFile), att, false);
 			
 			@SuppressWarnings("unchecked")
-			Attribute<? extends IValue> unmarshalAtt = sju.unmarshalFromGenstarJson(path, att.getClass());
+			Attribute<? extends IValue> unmarshalAtt = sju.unmarshalFromGenstarJson(base_path.resolve(attFile), att.getClass());
 			
 			assertEquals(att.getValueSpace(), unmarshalAtt.getValueSpace());
 		}
@@ -160,17 +167,35 @@ public class GenstarJsonUtilTest {
 
 	@Test
 	public void testDemographicDictionary() throws JsonGenerationException, JsonMappingException, IOException {
-			sju.marshalToGenstarJson(path, dd, false);
+			sju.marshalToGenstarJson(base_path.resolve(attFile), dd, false);
 			
 			// DEBUG
 			// System.out.println(sju.genstarJsonToString(dd));
 			
 			@SuppressWarnings("unchecked")
 			IGenstarDictionary<Attribute<? extends IValue>> dd2 = 
-					sju.unmarshalFromGenstarJson(path, IGenstarDictionary.class);
+					sju.unmarshalFromGenstarJson(base_path.resolve(attFile), IGenstarDictionary.class);
 			
 			for(Attribute<? extends IValue> att : dd.getAttributes())
 				assertEquals(att, dd2.getAttribute(att.getAttributeName()));
+	}
+	
+	@Test
+	public void testGenstarConfigurationFileTest() throws JsonGenerationException, JsonMappingException, IOException {
+		GenstarConfigurationFile gcf = new GenstarConfigurationFile();
+		gcf.setBaseDirectory(base_path);
+		gcf.addSurveyWrapper(new GSSurveyWrapper(base_path.resolve(dataFile), GSSurveyType.ContingencyTable, ',', 1, 0));
+		gcf.addSurveyWrapper(new GSSurveyWrapper(base_path.resolve(dataFile), GSSurveyType.Sample, ',', 0, 1));
+		gcf.setDictionary(dd);
+		
+		Attribute<? extends IValue> randAttribute = GenstarRandomUtils.oneOf(dd.getAttributes());
+		
+		sju.marshalToGenstarJson(base_path.resolve(confFile), gcf, false);
+	
+		GenstarConfigurationFile newGCF = sju.unmarshalFromGenstarJson(base_path.resolve(confFile), GenstarConfigurationFile.class);
+		assertEquals(gcf.getLevels(), newGCF.getLevels());
+		assertEquals(randAttribute, newGCF.getDictionary().getAttribute(randAttribute.getAttributeName()));
+		
 	}
 
 }
