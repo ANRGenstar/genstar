@@ -12,7 +12,6 @@ import org.opengis.referencing.operation.TransformException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
-import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.io.IGSGeofile;

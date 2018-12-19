@@ -1,9 +1,6 @@
 package gospl.algo.composer.yang;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,10 +9,7 @@ import org.apache.logging.log4j.Logger;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
-import gospl.distribution.GosplContingencyTable;
 import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.control.AControl;
-import gospl.distribution.matrix.coordinate.ACoordinate;
 
 public class YangComposerAlgo {
 
@@ -50,7 +44,8 @@ public class YangComposerAlgo {
 		
 		logger.info("computing for the dimensions: {}", parentAttributes);
 		
-		// 
+		/*
+		 * 
 		Map<Set<Attribute<? extends IValue>>,Integer> parents2matchingCandidates = new HashMap<>();
 		for (Entry<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Double>> e: 
 			pMatching.getMatrix().entrySet()) {
@@ -60,6 +55,8 @@ public class YangComposerAlgo {
 		GosplContingencyTable c = new GosplContingencyTable(pMatching.getDimensions());
 		// for each coordinate of the probabilities table 
 		// 1) compute the 
+		 * 
+		 */
 
 		
 	}

@@ -11,7 +11,6 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
-import gospl.GosplPopulation;
 
 /** Population Spin. 
  * 

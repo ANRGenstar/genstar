@@ -53,6 +53,7 @@ public class SpinSpatialNetworkGenerator<E extends ADemoEntity>  extends  Abstra
 
 		for(SpllEntity e1 : myPop) {
 			Geometry geom = e1.getLocation().buffer(distance);
+			@SuppressWarnings("unchecked")
 			List<SpllEntity> l = quad.query(geom.getEnvelopeInternal());
 			for (SpllEntity sp : l) {
 				if (sp != e1 && geom.intersects(sp.getLocation())) {

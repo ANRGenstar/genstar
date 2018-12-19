@@ -306,7 +306,8 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		for (SpllFeature ft : features) {
 			 Geometry newGeom = ft.getGeometry().buffer(maxDist);
 			 if (quadTreeMin != null && ! quadTreeMin.isEmpty()) {
-				 List<Geometry> intersection = quadTreeMin.query(newGeom.getEnvelopeInternal());
+				 @SuppressWarnings("unchecked")
+				List<Geometry> intersection = quadTreeMin.query(newGeom.getEnvelopeInternal());
 				 for (Geometry g : intersection) {
 					 if (g.isEmpty()) continue;
 					 newGeom =  SpllUtil.difference(newGeom, g);
@@ -345,6 +346,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 			for (SpllFeature ft : fts_overlap) {
 				Geometry newGeom = ft.getProxyGeometry();
 				 if (quadTreeOverlap != null && ! quadTreeOverlap.isEmpty()) {
+					@SuppressWarnings("unchecked")
 					List<Geometry> intersection =  quadTreeOverlap.query(newGeom.getEnvelopeInternal());
 					 for (Geometry g : intersection) {
 						if (g.isEmpty() ||  (g == ft.getGeometry())) continue;

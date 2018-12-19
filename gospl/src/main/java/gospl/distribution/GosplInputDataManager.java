@@ -256,17 +256,19 @@ public class GosplInputDataManager {
 			final IGenstarDictionary<Attribute<? extends IValue>> dictionary) 
 			throws IOException, InvalidSurveyFormatException {
 		
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve data table from files", logger, Level.TRACE);
+		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		final GSDataParser dataParser = new GSDataParser();
 		
 		// Read headers and store possible variables by line index
 		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionary);
-		logger.info("detected in {} {} row headers : {}", 
+		gspu.sysoStempMessage("detected in {} {} row headers : {}", 
 				survey.getSurveyFilePath(), rowHeaders.size(), rowHeaders);
 		
 		// Read headers and store possible variables by column index
 		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionary);
-		logger.info("detected in {} {} column headers : {}", 
+		gspu.sysoStempMessage("detected in {} {} column headers : {}", 
 				survey.getSurveyFilePath(), columnHeaders.size(), columnHeaders);
 
 		// Store column related attributes while keeping unrelated attributes separated
@@ -380,6 +382,8 @@ public class GosplInputDataManager {
 			)
 			throws IOException, InvalidSurveyFormatException {
 		
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a sample from a data file", logger, Level.TRACE);
+		
 		final GosplPopulation sampleSet = new GosplPopulation();
 		
 		// Read headers and store possible variables by column index
@@ -403,7 +407,7 @@ public class GosplInputDataManager {
 			//System.err.println(i+" "+indiVals);
 
 			if(indiVals.size() <= maxIndivSize){
-				logger.warn("One individual does not fit required number of attributes: \n"
+				gspu.sysoStempMessage("One individual does not fit required number of attributes: \n"
 						+ Arrays.toString(indiVals.toArray()));
 						
 				unmatchSize++;
@@ -434,7 +438,7 @@ public class GosplInputDataManager {
 							&& att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
 					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
 				else {
-					logger.warn("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+					gspu.sysoStempMessage("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
 							+att.getAttributeName());
 					unmatchSize++;
 				}
@@ -443,7 +447,7 @@ public class GosplInputDataManager {
 				sampleSet.add(new GosplEntity(entityAttributes));
 		}
 		if (unmatchSize > 0) {
-			logger.debug("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
+			gspu.sysoStempMessage("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
 				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
 		}
 		return sampleSet;

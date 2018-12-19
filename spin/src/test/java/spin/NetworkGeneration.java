@@ -10,7 +10,7 @@ public class NetworkGeneration {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		int nbNode = 100;
+		// int nbNode = 100;
 		
 		// 1 instancier la factory
 		// 2 prendre une population en param

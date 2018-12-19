@@ -42,6 +42,7 @@ public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpi
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 
 		SpinRegularNetworkGenerator<E> spinPopGen = new SpinRegularNetworkGenerator<>(networkName, k);
+		@SuppressWarnings("unused")
 		SpinNetwork networkedPop = spinPopGen.generate(myPop);
 				
 		//parcourir tous les liens

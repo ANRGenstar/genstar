@@ -4,6 +4,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.GosplEntity;
 import gospl.generator.ISyntheticGosplPopGenerator;
 import gospl.generator.util.GSUtilGenerator;
 import spin.SpinNetwork;
@@ -19,13 +20,14 @@ public class TestOnProperties {
 	 */
 	public static void main(String[] args) {
 		ISyntheticGosplPopGenerator generator = new GSUtilGenerator(2, 4);
-		IPopulation<ADemoEntity, Attribute<? extends IValue>> population =
-		generator.generate(100);
+		@SuppressWarnings("unused")
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> population = generator.generate(100);
 	
 		System.out.println("Debut de la génération de réseau Regular");
 //		SpinPopulation populationWithNetwork = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		
-		SpinRegularNetworkGenerator spinPopGen = new SpinRegularNetworkGenerator("family",4);
+		SpinRegularNetworkGenerator<GosplEntity> spinPopGen = new SpinRegularNetworkGenerator<>("family",4);
+		@SuppressWarnings("unused")
 		SpinNetwork networkedPop = spinPopGen.generate(30);	
 		
 //		SpinNetwork networkSW = populationWithNetwork.getNetwork();

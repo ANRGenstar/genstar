@@ -1,5 +1,6 @@
 package core.metamodel.entity.comparator;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
@@ -31,6 +32,7 @@ public class HammingEntityComparator extends ImplicitEntityComparator {
 	 * @param entity
 	 */
 	public HammingEntityComparator(IEntity<Attribute<? extends IValue>> entity) {
+		super(new ArrayList<>(entity.getAttributes()));
 		this.vector = new AttributeVectorMatcher(entity);
 	}
 	
@@ -40,6 +42,7 @@ public class HammingEntityComparator extends ImplicitEntityComparator {
 	 * @param vector
 	 */
 	public HammingEntityComparator(Map<IAttribute<? extends IValue>, Set<IValue>> vector) {
+		super(new ArrayList<>(vector.keySet()));
 		this.vector = new AttributeVectorMatcher(vector);
 	}
 	

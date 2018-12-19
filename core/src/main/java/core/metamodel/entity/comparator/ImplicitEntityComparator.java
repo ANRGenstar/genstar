@@ -47,9 +47,8 @@ public class ImplicitEntityComparator implements Comparator<IEntity<? extends IA
 	private final List<IAttribute<? extends IValue>> attributes;
 	private final Map<String, Integer> reversMap;
 
-	@SafeVarargs
-	public ImplicitEntityComparator(IAttribute<? extends IValue>... attributes) {
-		this.attributes = new ArrayList<>(Arrays.asList(attributes));
+	public ImplicitEntityComparator(List<IAttribute<? extends IValue>> attributes) {
+		this.attributes = attributes;
 		if(this.attributes.isEmpty())
 			reversMap = new HashMap<>();
 		else
@@ -61,6 +60,11 @@ public class ImplicitEntityComparator implements Comparator<IEntity<? extends IA
 						t -> IComparatorFunction.getDefaultFunction(t))));
 	}
 	
+	@SafeVarargs
+	public ImplicitEntityComparator(IAttribute<? extends IValue>... attributes) {
+		this(new ArrayList<>(Arrays.asList(attributes)));
+	}
+	
 	// ------------------------------------------------------------------------------------------ //
 	
 	@Override
@@ -70,7 +74,7 @@ public class ImplicitEntityComparator implements Comparator<IEntity<? extends IA
 		do {
 			IAttribute<? extends IValue> att = attributes.get(idx++); 
 			res = this.compare(o1, o2, att) * reversMap.get(att.getAttributeName());
-		} while(res == 0 || idx == attributes.size());
+		} while(idx < attributes.size());
 		return res == 0 ? this.defaultComparator.compare(o1, o2) : res;
 	}
 

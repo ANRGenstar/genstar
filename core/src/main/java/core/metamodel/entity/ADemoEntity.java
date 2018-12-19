@@ -17,6 +17,7 @@ import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.tag.EntityTag;
 import core.metamodel.value.IValue;
+import core.metamodel.value.numeric.IntegerSpace;
 import core.metamodel.value.numeric.IntegerValue;
 
 /**
@@ -253,7 +254,8 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	
 	@Override
 	public IValue getCountChildren() {
-		return sizeAttribute.getEmergentValue(this);
+		return sizeAttribute == null ? new IntegerSpace(null).proposeValue(Integer.toString(this.getChildren().size())) 
+				: sizeAttribute.getEmergentValue(this);
 	}
 	
 	/**

@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
  * @author Samuel Thiriot
  *
  */
+@SuppressWarnings("deprecation")
 public class BayesianNetwork<N extends AbstractNode<N>> {
 
 	private Logger logger = LogManager.getLogger();

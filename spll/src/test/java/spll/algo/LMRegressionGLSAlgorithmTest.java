@@ -1,10 +1,5 @@
 package spll.algo;
 
-import static org.junit.Assert.*;
-
-import java.util.Arrays;
-
-import org.apache.commons.math3.stat.regression.OLSMultipleLinearRegression;
 import org.junit.BeforeClass;
 import org.junit.Test;
 

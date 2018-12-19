@@ -1,23 +1,12 @@
 package spin.generator;
 
-import org.graphstream.graph.Graph;
-
-import core.metamodel.IPopulation;
-import core.metamodel.attribute.Attribute;
-import core.metamodel.entity.ADemoEntity;
-import core.metamodel.value.IValue;
 import gospl.GosplEntity;
-import gospl.generator.ISyntheticGosplPopGenerator;
-import gospl.generator.util.GSUtilGenerator;
 import spin.SpinNetwork;
-import spin.SpinPopulation;
-import spin.algo.factory.SpinNetworkFactory;
-import spin.algo.generator.SpinCompleteNetworkGenerator;
 import spin.algo.generator.ISpinNetworkGenerator;
+import spin.algo.generator.SpinCompleteNetworkGenerator;
 import spin.algo.generator.SpinRandomNetworkGenerator;
 import spin.algo.generator.SpinRegularNetworkGenerator;
 import spin.algo.generator.SpinSFNetworkGenerator;
-import spin.interfaces.ENetworkGenerator;
 
 public class TestOnGenerator {
 
@@ -29,9 +18,11 @@ public class TestOnGenerator {
 	 * @param args
 	 */
 	public static void main(String[] args) {
+		/*
 		ISyntheticGosplPopGenerator generator = new GSUtilGenerator(2, 4);
 		IPopulation<ADemoEntity, Attribute<? extends IValue>> population = generator.generate(100);
-/*		
+		
+		
 		System.out.println("Debut de la generation de reseau regulier");
 		SpinPopulation populationWithNetworkRegular = SpinNetworkFactory.getInstance().generateNetwork(ENetworkGenerator.Regular, population);
 		SpinNetwork networkRegular = populationWithNetworkRegular.getNetwork();
@@ -59,7 +50,7 @@ public class TestOnGenerator {
 //		Graph sampleGraph = networkTest.randomWalkSample(50);
 //		sampleGraph.display();
 		
-		ISpinNetworkGenerator spinPopGen = new SpinCompleteNetworkGenerator<GosplEntity>("family");
+		ISpinNetworkGenerator<GosplEntity> spinPopGen = new SpinCompleteNetworkGenerator<>("family");
 		SpinNetwork networkedPop = spinPopGen.generate(30);
 		
 		System.out.println(networkedPop.toString());

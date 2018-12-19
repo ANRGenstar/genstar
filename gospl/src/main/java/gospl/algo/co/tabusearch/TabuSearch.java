@@ -1,7 +1,11 @@
 package gospl.algo.co.tabusearch;
 
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.Level;
 
@@ -27,6 +31,8 @@ public class TabuSearch extends AOptimizationAlgorithm {
 
 	private ITabuList tabuList;
 	private int maxIterations;
+	
+	public static Level LOG_LEVEL = Level.DEBUG;
 
 	/**
 	 * Construct a {@link TabuSearch} object
@@ -52,6 +58,7 @@ public class TabuSearch extends AOptimizationAlgorithm {
 		this.getNeighborSearchAlgorithm().updatePredicates(initialSolution.getSolution());
 
 		double bestFitness = initialSolution.getFitness(this.getObjectives());
+		double stempFitness = bestFitness;
 
 		GSPerformanceUtil gspu = new GSPerformanceUtil(
 				"Start Tabu Search algorithm"
@@ -60,7 +67,7 @@ public class TabuSearch extends AOptimizationAlgorithm {
 						+ "\nMax iteration = "+this.maxIterations
 						+ "\nNeighbor search = "+super.getNeighborSearchAlgorithm().getClass().getSimpleName()
 						+ "\nSolution = "+initialSolution.getClass().getSimpleName(), 
-						Level.DEBUG);
+						LOG_LEVEL);
 		gspu.setObjectif(this.maxIterations);
 
 		gspu.sysoStempPerformance(0d, this);
@@ -71,24 +78,26 @@ public class TabuSearch extends AOptimizationAlgorithm {
 		while (currentIteration++ < this.maxIterations &&
 				bestFitness > this.getFitnessThreshold()) {
 
-			if(currentIteration % (this.maxIterations / 10d) == 0) {
+			if(currentIteration % (this.maxIterations / 10d) == 0
+					|| stempFitness - bestFitness > stempFitness / 10) {
 				gspu.sysoStempPerformance(currentIteration / gspu.getObjectif(), this);
 				gspu.sysoStempMessage("Current fitness is "+bestFitness);
 				gspu.sysoStempMessage("Tabu size "+tabuList.getSize()+" "
 						+ "| number of stucked iteration "+stuckIdx
 						+ " | Current buffer "+super.computeBuffer(bestFitness * stuckIdx, currentSolution));
+				stempFitness = bestFitness;
 			}
-
-			// gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
+			
+			//gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
 			Collection<ISyntheticPopulationSolution> neighbors = currentSolution.getNeighbors(
 					super.getNeighborSearchAlgorithm());
 
-			// gspu.sysoStempPerformance("Start eliciting best neighbors", this);
+			/*
 			Optional<ISyntheticPopulationSolution> optionalBestSolution = neighbors.stream()
 					.filter(candidate -> !this.tabuList.contains(candidate))
 					.sorted((s1, s2) -> s1.getFitness(this.getObjectives()).compareTo(s2.getFitness(this.getObjectives())))
-					.findFirst(); 
-
+					.findFirst();
+					
 			if(optionalBestSolution.isPresent()) {
 				double candidateFitness = optionalBestSolution.get().getFitness(this.getObjectives());
 				if(candidateFitness < bestSolution.getFitness(this.getObjectives())) {
@@ -96,6 +105,24 @@ public class TabuSearch extends AOptimizationAlgorithm {
 					bestFitness = candidateFitness;
 					stuckIdx = 0;
 				}
+			}
+					
+					*/ 
+			
+			//gspu.sysoStempPerformance("Start eliciting best neighbors", this);
+			Map<ISyntheticPopulationSolution, Double> neighborsFitness = neighbors.stream()
+					.filter(candidate -> !this.tabuList.contains(candidate))
+					.collect(Collectors.toMap( 
+							Function.identity(),
+							candidate -> candidate.getFitness(this.getObjectives())));
+
+			double candidateFitness = Collections.min(neighborsFitness.values());
+			if(candidateFitness < bestFitness) {
+				bestSolution = neighborsFitness.entrySet().stream()
+						.filter(entry -> entry.getValue() == candidateFitness)
+						.map(Entry::getKey).findFirst().get();
+				bestFitness = candidateFitness;
+				stuckIdx = 0;
 			}
 			
 			double var = Math.log1p(stuckIdx++) / Math.log(tabuList.maxSize());

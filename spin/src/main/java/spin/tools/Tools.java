@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import spin.SpinNetwork;
-
 public class Tools {
 	
 	/** Ajoute, dans une hashtable(key, arraylist<value>) une valeur, que la key existe

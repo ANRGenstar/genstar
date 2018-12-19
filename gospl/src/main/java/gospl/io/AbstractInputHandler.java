@@ -39,6 +39,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	protected final GSSurveyType dataFileType;
 	
 	private GSPerformanceUtil gspu;
+	public static Level LOG_LEVEL = Level.TRACE;
 
 	public AbstractInputHandler(GSSurveyType dataFileType, String fileName) {
 
@@ -78,7 +79,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		for (int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++) {
 			final List<String> column = readLines(0, getFirstRowIndex(), i);
 			
-			gspu.sysoStempMessage("trying to detect an attribute based on row values: "+ column, Level.DEBUG);
+			gspu.sysoStempMessage("trying to detect an attribute based on row values: "+ column, LOG_LEVEL);
 
 			for (String columnVal : column) {
 				Set<IValue> vals = dictionary.getAttributeAndRecord().stream()
@@ -125,7 +126,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					// detect the attribute by finding an attribute which has 
 					// all of these values as modalities
 					final List<String> valList = readColumn(idx);
-					gspu.sysoStempMessage("trying to detect an attribute based on header values: "+valList, Level.DEBUG);
+					gspu.sysoStempMessage("trying to detect an attribute based on header values: "+valList, LOG_LEVEL);
 					//if (dictionnary)
 					if (dictionary.getAttributes().stream()
 							.anyMatch(att -> att.getValueSpace().containsAllLabels(valList))) {

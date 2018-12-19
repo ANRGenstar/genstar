@@ -157,6 +157,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	 * @param pop
 	 * @return true if any change
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean addAll(String type, Collection<? extends E> c) {
 		

@@ -125,6 +125,10 @@ public class GSPerformanceUtil {
 		this.printLog(message, this.level);
 	}
 	
+	public void sysoStempMessage(String message, Object... fillers) {
+		logger.printf(level, message, fillers);
+	}
+	
 	// OBJECTIF PART (to compute advancement toward a goal)
 
 	public void setObjectif(double objectif) {
