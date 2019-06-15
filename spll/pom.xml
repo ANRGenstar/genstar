@@ -1,61 +1,61 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
- <modelVersion>4.0.0</modelVersion>
-  <artifactId>genstar-spll</artifactId>
-  <packaging>bundle</packaging>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>genstar-spll</artifactId>
+	<packaging>bundle</packaging>
 
-  <properties>
+	<properties>
 		<geotools.version>14.5</geotools.version>
 		<maven.test.skip>true</maven.test.skip>
-	  	<maven.deploy.skip>false</maven.deploy.skip>
+		<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
-    <parent>
-        <groupId>io.github.anrgenstar</groupId>
-        <artifactId>parent</artifactId>
-        <version>${revision}</version>
-    </parent>
+	<parent>
+		<groupId>io.github.anrgenstar</groupId>
+		<artifactId>parent</artifactId>
+		<version>${revision}</version>
+	</parent>
 
-<dependencies>
+	<dependencies>
 		<!-- MODULE DEPENDENCIES -->
 
-	<dependency>
-    	<groupId>com.vividsolutions</groupId>
-    	<artifactId>jts-core</artifactId>
-    </dependency>
-	<dependency>
-		<groupId>net.sf.opencsv</groupId>
-		<artifactId>opencsv</artifactId>
-	</dependency>			
-	<dependency>
-	    <groupId>io.github.anrgenstar</groupId>
-	    <artifactId>genstar-core</artifactId>
-		<version>${revision}</version>
-	</dependency>
-	<dependency>
-	    <groupId>io.github.anrgenstar</groupId>
-	    <artifactId>genstar-gospl</artifactId>
-		<version>${revision}</version>
-	</dependency>
-	
-			<!-- MATH APACHE -->
-	
-	<dependency>
-	    <groupId>org.apache.commons</groupId>
-	    <artifactId>commons-math3</artifactId>
-	    <version>3.6.1</version>
-	</dependency>
-	
-			<!-- GEOTOOLS DEPEDENCIES (version in properties) -->
-		
+		<dependency>
+			<groupId>com.vividsolutions</groupId>
+			<artifactId>jts-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>net.sf.opencsv</groupId>
+			<artifactId>opencsv</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.github.anrgenstar</groupId>
+			<artifactId>genstar-core</artifactId>
+			<version>${revision}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.anrgenstar</groupId>
+			<artifactId>genstar-gospl</artifactId>
+			<version>${revision}</version>
+		</dependency>
+
+		<!-- MATH APACHE -->
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-math3</artifactId>
+			<version>3.6.1</version>
+		</dependency>
+
+		<!-- GEOTOOLS DEPEDENCIES (version in properties) -->
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-coverage</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geotiff</artifactId>
@@ -67,288 +67,110 @@
 			<artifactId>gt-xml</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-shapefile</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-swing</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-epsg-hsql</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-wms</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-image</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-arcgrid</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		
-				<!-- 	UNUSED GEOTOOLS DEPENDENCIES
 
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-swt</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
+		<!-- UNUSED GEOTOOLS DEPENDENCIES <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-swt</artifactId> <version>${geotools.version}</version> </dependency> 
+			<dependency> <groupId>org.geotools</groupId> <artifactId>gt-api</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-arcsde</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-arcsde-common</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-brewer</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-cql</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-data</artifactId> <version>${geotools.version}</version> </dependency> 
+			<dependency> <groupId>org.geotools</groupId> <artifactId>gt-epsg-wkt</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools.unsupported</groupId> 
+			<artifactId>gt-feature-aggregate</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-feature-pregeneralized</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-geojson</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-geometry</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-graph</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-grassraster</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-grid</artifactId> <version>${geotools.version}</version> </dependency> 
+			<dependency> <groupId>org.geotools</groupId> <artifactId>gt-main</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-jdbc</artifactId> <version>${geotools.version}</version> </dependency> 
+			<dependency> <groupId>org.geotools.jdbc</groupId> <artifactId>gt-jdbc-db2</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools.jdbc</groupId> 
+			<artifactId>gt-jdbc-h2</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools.jdbc</groupId> <artifactId>gt-jdbc-mysql</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools.jdbc</groupId> 
+			<artifactId>gt-jdbc-oracle</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools.jdbc</groupId> <artifactId>gt-jdbc-postgis</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools.jdbc</groupId> 
+			<artifactId>gt-jdbc-spatialite</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools.jdbc</groupId> <artifactId>gt-jdbc-sqlserver</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools.jdbc</groupId> 
+			<artifactId>gt-jdbc-teradata</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-jts-wrapper</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-metadata</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-opengis</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-process</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-process-feature</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-process-geometry</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-process-raster</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-property</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-property-old</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-referencing</artifactId> <version>${geotools.version}</version> 
+			</dependency> <dependency> <groupId>org.geotools</groupId> <artifactId>gt-render</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-sfs</artifactId> <version>${geotools.version}</version> </dependency> 
+			<dependency> <groupId>org.geotools</groupId> <artifactId>gt-transform</artifactId> 
+			<version>${geotools.version}</version> </dependency> <dependency> <groupId>org.geotools</groupId> 
+			<artifactId>gt-validation</artifactId> <version>${geotools.version}</version> 
+			</dependency> -->
 
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-api</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-arcsde</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-arcsde-common</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-brewer</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-cql</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-data</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-epsg-wkt</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.unsupported</groupId>
-			<artifactId>gt-feature-aggregate</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-feature-pregeneralized</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-geojson</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-geometry</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-graph</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-grassraster</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-grid</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-main</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-jdbc</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-db2</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-h2</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-mysql</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-oracle</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-postgis</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-spatialite</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-sqlserver</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools.jdbc</groupId>
-			<artifactId>gt-jdbc-teradata</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-jts-wrapper</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>	
-		
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-metadata</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-opengis</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-process</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-process-feature</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-process-geometry</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-process-raster</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-property</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency> 
-			<groupId>org.geotools</groupId> 
-			<artifactId>gt-property-old</artifactId> 
-			<version>${geotools.version}</version> 
-		</dependency>
-		
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-referencing</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-render</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-sfs</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-transform</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-validation</artifactId>
-			<version>${geotools.version}</version>
-		</dependency>
-		
-		-->
-		
 		<!-- END OF GEOTOOLS -->
-		
- </dependencies>
 
- <build>
-	 	<plugins>
+	</dependencies>
+
+	<build>
+		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -358,103 +180,82 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-		      <plugin>
-		        <groupId>org.apache.felix</groupId>
-		          <artifactId>maven-bundle-plugin</artifactId>
-		          <version>3.2.0</version>
-		          <extensions>true</extensions>
-		          <configuration>
-		                    <instructions>
-		                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-		                        <Bundle-Version>${project.version}</Bundle-Version>
-		                        <Export-Package>spll.*</Export-Package>
-		                    </instructions>
-		          </configuration>
-		        </plugin>
-      <!--    <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>make-my-jar-with-dependencies</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>	-->				        
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<version>3.2.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<instructions>
+						<Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+						<Bundle-Version>${project.version}</Bundle-Version>
+						<Export-Package>spll.*</Export-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<!-- <plugin> <artifactId>maven-assembly-plugin</artifactId> <configuration> 
+				<descriptorRefs> <descriptorRef>jar-with-dependencies</descriptorRef> </descriptorRefs> 
+				</configuration> <executions> <execution> <id>make-my-jar-with-dependencies</id> 
+				<phase>package</phase> <goals> <goal>single</goal> </goals> </execution> 
+				</executions> </plugin> -->
 
 
-<plugin>
-	  <groupId>org.apache.maven.plugins</groupId>
-	  <artifactId>maven-source-plugin</artifactId>
-	  <version>3.0.1</version>
-	  <executions>
-	    <execution>
-	      <id>attach-sources</id>
-		  <phase>deploy</phase>
-	      <goals>
-	        <goal>jar</goal>
-	      </goals>
-	    </execution>
-	  </executions>
-	</plugin>
-	<plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-javadoc-plugin</artifactId>
-	  <version>3.0.1</version>      
-   <configuration>
-        <additionalOptions>
-            <additionalOption>-Xdoclint:none</additionalOption>
-        </additionalOptions>
-    </configuration>
-      <executions>
-        <execution>
-          <id>attach-javadocs</id>
-          <phase>deploy</phase>
-          <goals>
-            <goal>jar</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>3.0.1</version>
+				<configuration>
+					<additionalOptions>
+						<additionalOption>-Xdoclint:none</additionalOption>
+					</additionalOptions>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 
 
-   <!--     <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-deploy-plugin</artifactId>
-      <configuration>
-        <skip>false</skip>
-      </configuration>
-    </plugin>-->
-            
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-deploy-plugin</artifactId> 
+				<configuration> <skip>false</skip> </configuration> </plugin> -->
+
 
 		</plugins>
-		</build>
-			<repositories>
+	</build>
+	<repositories>
 		<repository>
 			<id>osgeo</id>
 			<name>Open Source Geospatial Foundation Repository</name>
-						<releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
 			<url>http://download.osgeo.org/webdav/geotools/</url>
 		</repository>
 	</repositories>
 
-		<!--	<distributionManagement>
-		                <repository>
-		                <id>bintray-anrgenstar-genstar-packages</id>
-		                <name>anrgenstar-genstar-packages</name>
-		                <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-spll/;publish=1;override=1</url>
-		                </repository>
-		</distributionManagement>-->
+	<!-- <distributionManagement> <repository> <id>bintray-anrgenstar-genstar-packages</id> 
+		<name>anrgenstar-genstar-packages</name> <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-spll/;publish=1;override=1</url> 
+		</repository> </distributionManagement> -->
 </project>
