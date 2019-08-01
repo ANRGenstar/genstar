@@ -26,4 +26,18 @@ public abstract class AbstractSpinNetworkGenerator<E extends ADemoEntity> implem
 		return generate( (IPopulation<E, Attribute<? extends IValue>>) pop);
 	}	
 	
+	/*
+	 * FIXME : 
+	public static SpinNetwork generate(IPopulation<? extends ADemoEntity, Attribute<? extends IValue>> pop,
+			GraphGenerator<ADemoEntity, DefaultEdge, ?> jgrapht_generator) {
+		return jgrapht_generator.generateGraph(generateEmpty(pop));
+	}
+	*/
+	
+	public static SpinNetwork generateEmpty(IPopulation<? extends ADemoEntity, Attribute<? extends IValue>> pop) {
+		SpinNetwork graph = new SpinNetwork();
+		for(ADemoEntity n : pop) {graph.putNode(n.getEntityId(), n);}
+		return graph;
+	}
+	
 }

@@ -3,8 +3,6 @@ package spin.algo.generator;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.graphstream.graph.Node;
-
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -22,7 +20,10 @@ public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  Abstrac
 		this.k = _k;
 	}
 	
-	/** Generation of a regular network
+	/** 
+	 * Generation of a regular network
+	 * 
+	 * TODO : move to JGraphT generator ;)
 	 * 
 	 * @param myNetwork base network
 	 * @param k network connectivity
@@ -32,7 +33,7 @@ public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  Abstrac
 	public SpinNetwork generate(IPopulation<E, Attribute<? extends IValue>> myPop) {
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);
 	
-		List<Node> nodes = new ArrayList<>(network.getNodes());
+		List<ADemoEntity> nodes = new ArrayList<>(network.getNodes());
 		
 		// for each node i, create a link to i+1 ... i+k/2
 		int link_id = 0;
@@ -45,11 +46,13 @@ public class SpinRegularNetworkGenerator<E extends ADemoEntity> extends  Abstrac
 		
 		if(k%2 == 1 && nodes.size()%2 == 0) {
 			for(int i=0 ; i<nodes.size() ; i++) {
-				Node n1 = nodes.get(i);
+				ADemoEntity n1 = nodes.get(i);
 				int j = (k/2)+1;
-				while(n1.getDegree()<k) {
-					Node n2 = nodes.get((i+j)%nodes.size());
-					if(n2.getDegree()<k && !n1.hasEdgeBetween(n2)) {
+				while(network.getNetwork().edgesOf(n1).size()<k) {
+					
+					ADemoEntity n2 = nodes.get((i+j)%nodes.size());
+					
+					if(network.getNetwork().edgesOf(n2).size()<k && !network.getNetwork().containsEdge(n1, n2)) {
 						network.putLink(String.valueOf(link_id), n1, n2);
 						link_id++;
 					}

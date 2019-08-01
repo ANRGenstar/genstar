@@ -2,15 +2,14 @@ package spin.algo.generator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Node;
+import org.jgrapht.graph.DefaultEdge;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import core.util.random.GenstarRandom;
 import spin.SpinNetwork;
 import spin.algo.factory.SpinNetworkFactory;
 
@@ -30,21 +29,20 @@ public class SpinSFNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpi
 		SpinNetwork network = SpinNetworkFactory.loadPopulation(myPop);	
 		
 		// Listing the nodes
-		List<Node> nodes = new ArrayList<>(network.getNodes());
+		List<ADemoEntity> nodes = new ArrayList<>(network.getNodes());
 		int nbNodes = nodes.size();
 		
 		// List of links for the selection phase
-		List<Edge> links = new ArrayList<Edge>();
+		List<DefaultEdge> links = new ArrayList<>();
 		
 		// Adding the first link
 		// At this point, the graph is composed of two linked nodes and a list of unlinked ones
 		network.putLink(String.valueOf(0), nodes.get(0), nodes.get(1));
-		links.add(network.network.getEdge(String.valueOf(0)));
+		links.add(network.getNetwork().getEdge(nodes.get(0), nodes.get(1)));
 		int nbLinks = 1;
 		
-		Random rand = new Random();
-		Node nodeFrom, nodeTo;
-		Edge ticket;
+		ADemoEntity nodeFrom, nodeTo;
+		DefaultEdge ticket;
 		int newLinkId = 1;
 		
 		for(int i=2 ; i<nbNodes ; i++) {
@@ -57,20 +55,20 @@ public class SpinSFNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpi
 			// each link a node has acts as a ticket.
 			
 			// Choosing a random link from the list
-			ticket = links.get(rand.nextInt(nbLinks));
+			ticket = links.get(GenstarRandom.getInstance().nextInt(nbLinks));
 			
 			// Choosing one of the link's extremities
 			double d = Math.random();
 			if(d<0.5) {
-				nodeTo = ticket.getNode0();
+				nodeTo = network.getNetwork().getEdgeSource(ticket);
 			} else {
-				nodeTo = ticket.getNode1();
+				nodeTo = network.getNetwork().getEdgeTarget(ticket);
 			}
 			
 			// Linking the new node and adding the new link to the list
-			if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasEdgeBetween(nodeTo)) {
+			if(!nodeFrom.equals(nodeTo) && !network.getNetwork().containsEdge(nodeFrom, nodeTo)) {
 				network.putLink(String.valueOf(newLinkId), nodeFrom, nodeTo);
-				links.add(network.network.getEdge(String.valueOf(newLinkId)));
+				links.add(network.getNetwork().getEdge(nodeFrom,nodeTo));
 				nbLinks ++;
 				newLinkId++;
 			}

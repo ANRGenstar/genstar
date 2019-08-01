@@ -5,8 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
 
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Node;
+import org.jgrapht.graph.DefaultEdge;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
@@ -46,28 +45,28 @@ public class SpinSWNetworkGenerator<E extends ADemoEntity>  extends  AbstractSpi
 		SpinNetwork networkedPop = spinPopGen.generate(myPop);
 				
 		//parcourir tous les liens
-		HashSet<Edge> links = new HashSet<>(network.getLinks());
+		HashSet<DefaultEdge> links = new HashSet<>(network.getLinks());
 		int nbLinks = links.size();
-		List<Node> nodes = new ArrayList<>(network.getNodes());
+		List<ADemoEntity> nodes = new ArrayList<>(network.getNodes());
 		int nbNodes = nodes.size();
 		
 		//pour chacun si proba < beta ; supprimer (des deux cotes) et rebrancher aleatoirement 
 		Random rand = new Random();
 		
 		int link_id = nbLinks;
-		for(Edge l : links){
+		for(DefaultEdge l : links){
 			if(rand.nextDouble()<beta){
 				network.removeLink(l);
 				
 				// create the links
-				Node nodeFrom, nodeTo;
+				ADemoEntity nodeFrom, nodeTo;
 				boolean linkCreated=false;
 				
 				while (!linkCreated) {
 					nodeFrom = nodes.get(rand.nextInt(nbNodes));
 					nodeTo = nodes.get(rand.nextInt(nbNodes));
 					
-					if(!nodeFrom.equals(nodeTo)&&!nodeFrom.hasEdgeBetween(nodeTo)){
+					if(!nodeFrom.equals(nodeTo)&&!network.getNetwork().containsEdge(nodeFrom, nodeTo)){
 						network.putLink(String.valueOf(link_id), nodeFrom, nodeTo);
 						linkCreated=true;
 						link_id++;

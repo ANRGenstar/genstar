@@ -9,7 +9,7 @@ import core.metamodel.entity.ADemoEntity;
  * genere sur la population. 
  *
  */
-public interface INetProperties {
+public interface INetProperties<E extends ADemoEntity> {
 	
 	/** obtention du plus court chemin moyen sur le graphe. 
 	 * 
@@ -22,14 +22,14 @@ public interface INetProperties {
 	 * @param entite
 	 * @return
 	 */
-	double getClustering(ADemoEntity entite);
+	double getClustering(E entite);
 	
 	/** Obtient les noeuds voisins a l'entite specifier
 	 * 
 	 * @param entite
 	 * @return
 	 */
-	Set<ADemoEntity> getNeighboor(ADemoEntity entite);
+	Set<E> getNeighboor(ADemoEntity entite);
 	
 	/** Obtient la densite du reseau
 	 * 

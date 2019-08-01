@@ -1,23 +1,22 @@
 package spin;
 
-import static org.graphstream.algorithm.Toolkit.clusteringCoefficient;
-import static org.graphstream.algorithm.Toolkit.density;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
-import org.graphstream.algorithm.Dijkstra;
-import org.graphstream.graph.Edge;
-import org.graphstream.graph.Graph;
-import org.graphstream.graph.Node;
-import org.graphstream.graph.implementations.DefaultGraph;
+import org.jgrapht.Graph;
+import org.jgrapht.alg.scoring.ClusteringCoefficient;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
+import org.jgrapht.alg.util.NeighborCache;
+import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.DefaultUndirectedGraph;
+import org.jgrapht.traverse.RandomWalkIterator;
 
 import core.metamodel.entity.ADemoEntity;
+import core.util.random.GenstarRandom;
 import spin.interfaces.INetProperties;
 
 
@@ -25,17 +24,17 @@ import spin.interfaces.INetProperties;
 /** Network compose de noeud et de lien
  * 
  */
-public class SpinNetwork implements INetProperties{
+public class SpinNetwork implements INetProperties<ADemoEntity> {
 	
-	public Graph network;
+	public Graph<ADemoEntity,DefaultEdge> network;
 	boolean directed;
 	
 	// Map d'acces rapide;
 	// FIXME : is it useless ? 
 			// On peut récupérer les entite par un getAttribute sur les nodes
 	// FIXME : set de 
-	public Map<Node, ADemoEntity> kvNodeEntityFastList;
-	public Map<ADemoEntity, Node> kvEntityNodeFastList;
+	// public Map<DefaultVertex, ADemoEntity> kvNodeEntityFastList;
+	// public Map<ADemoEntity, Node> kvEntityNodeFastList;
 	
 	/** Constructeur sans param. 
 	 * 
@@ -45,15 +44,23 @@ public class SpinNetwork implements INetProperties{
 	}
 	
 	public SpinNetwork(boolean _directed){
-		network = new DefaultGraph("network");
+		if(_directed)
+			network = new DefaultDirectedGraph<>(DefaultEdge.class);
+		else
+			network = new DefaultUndirectedGraph<>(DefaultEdge.class);
 		directed = _directed;
 		
-		kvNodeEntityFastList = new HashMap<Node, ADemoEntity>();
+		//kvNodeEntityFastList = new HashMap<Node, ADemoEntity>();
 		
-		kvEntityNodeFastList = new HashMap<ADemoEntity, Node>();
+		//kvEntityNodeFastList = new HashMap<ADemoEntity, Node>();
 	}	
 	
-	public Graph getNetwork() {
+	/**
+	 * Have the inner jgrapht network
+	 * 
+	 * @return
+	 */
+	public Graph<ADemoEntity,DefaultEdge> getNetwork() {
 		return network;
 	}
 	
@@ -65,12 +72,16 @@ public class SpinNetwork implements INetProperties{
 	 */
 	public void putNode(String nodeId, ADemoEntity entite) {
 	
+		network.addVertex(entite);
+		
+		/*
 		Node node = network.addNode(nodeId);
 		
 		node.addAttribute("entity", entite);
 	
 		kvNodeEntityFastList.put(node, entite);
 		kvEntityNodeFastList.put(entite, node);
+		*/
 	}
 
 	/** Ajout de link aux listes de link des noeuds
@@ -78,15 +89,9 @@ public class SpinNetwork implements INetProperties{
 	 * @param link
 	 */
 	public void putLink(String linkId, ADemoEntity e1, ADemoEntity e2){
-		network.addEdge(linkId, kvEntityNodeFastList.get(e1), kvEntityNodeFastList.get(e2),directed);
-	}
-
-	/** Ajout de link aux listes de link des noeuds
-	 * 
-	 * @param link
-	 */
-	public void putLink(String linkId, Node n1, Node n2){
-		network.addEdge(linkId, n1, n2, directed);
+		network.addEdge(e1, e2, new DefaultEdge());
+		
+		//network.addEdge(linkId, kvEntityNodeFastList.get(e1), kvEntityNodeFastList.get(e2), directed);
 	}	
 	
 	/** Remove a node from a graph
@@ -94,14 +99,14 @@ public class SpinNetwork implements INetProperties{
 	 * @param node the node we want to remove
 	 */
 	public void removeNode(ADemoEntity entite) {
-		network.removeNode(kvEntityNodeFastList.get(entite));
+		network.removeVertex(entite);
 	}
 	
 	/** Remove a link from the graph
 	 * 
 	 * @param link the ling we want to remove
 	 */
-	public void removeLink(Edge link) {
+	public void removeLink(DefaultEdge link) {
 		network.removeEdge(link);
 	}
 	
@@ -109,30 +114,23 @@ public class SpinNetwork implements INetProperties{
 	 * 
 	 * @return
 	 */
-	public Set<Node> getNodes() {
-		Set<Node> nodes = new HashSet<Node>();
-		for(Node n : network.getEachNode()) {
-			nodes.add(n);
-		}
-
-		return nodes;
+	public Set<ADemoEntity> getNodes() {
+		return network.vertexSet();
 	}
 		
 	/** Obtenir la liste de liens
 	 * 
 	 * @return
 	 */
-	public Set<Edge> getLinks(){
-		Set<Edge> links = new HashSet<Edge>();
-		for(Edge l : network.getEachEdge()) {
-			links.add(l);
-		}
-		return links;
+	public Set<DefaultEdge> getLinks(){
+		return network.edgeSet();
 	}
 	
+	/*
 	public ADemoEntity getDemoEntityNode(Node n) {
 		return kvNodeEntityFastList.get(n);
 	}
+	*/
 	
 	
 	// TODO [stage] Utiliser des méthodes de sampling pour alléger le calcul de l'APL
@@ -147,37 +145,54 @@ public class SpinNetwork implements INetProperties{
 		System.out.println("Debut de la generation du sample graph");
 		
 		// List of nodes from the original graph
-		List<Node> nodes = new ArrayList<>(getNodes());
+		List<ADemoEntity> nodes = new ArrayList<>(getNodes());
 		if(nodes.size() < sampleSize) {
 			System.out.println("ERROR : sample size cannot be bigger than the size of the original graph");
 			System.exit(0);
 		}
 		
-		// Map associating a weight to each node of the graph
-		Map<Node,Double> weights = new HashMap<Node,Double>();
-		for(Node n : getNodes()) {
-			weights.put(n, 1.0);
+		// Sample graph
+		Graph sampleGraph = null;
+		
+		while(sampleGraph==null || sampleGraph.vertexSet().size() != sampleSize) {
+			ADemoEntity randomStart = nodes.remove(GenstarRandom.getInstance().nextInt(nodes.size()));
+			RandomWalkIterator<ADemoEntity, DefaultEdge> rwi = new RandomWalkIterator<>(
+					network, randomStart, false, sampleSize, GenstarRandom.getInstance());
+			sampleGraph = new DefaultDirectedGraph<>(DefaultEdge.class);
+			while(rwi.hasNext()) {
+				sampleGraph.addVertex(rwi.next());
+			}
 		}
 		
-		// Random generator
-		Random rand = new Random();
+		for (DefaultEdge edge : network.edgeSet()) {
+			ADemoEntity source = network.getEdgeSource(edge);
+			ADemoEntity target = network.getEdgeTarget(edge);
+			if(network.containsVertex(source) && network.containsVertex(target)) {
+				sampleGraph.addEdge(source, target);
+			}
+		}
 		
-		// Sample graph
-		Graph sampleGraph = new DefaultGraph("sample");
+		return sampleGraph;
+		
+		/*
+		 * TODO : do I made the whole algo in 10 lines ??????
+		 * 
+		// Map associating a weight to each node of the graph
+		Map<ADemoEntity,Double> weights = getNodes().stream().collect(Collectors.toMap(Function.identity(), n -> 1.0));
 		
 		// List of nodes added to the sample graph
-		List<Node> sampleNodes = new ArrayList<>();
+		List<ADemoEntity> sampleNodes = new ArrayList<>();
 		
 		// Map associating sample nodes to original nodes
 		Map<String,String> sampleToOriginalMap = new HashMap<String, String>();
 		Map<String,String> originalToSampleMap = new HashMap<String, String>();
 		
 		// Starting point of the random walk
-		Node start = nodes.get(rand.nextInt(nodes.size()));
+		ADemoEntity start = nodes.get(GenstarRandom.getInstance().nextInt(nodes.size()));
 		
 		// Adding the starting point to the sample graph
-		int sampleNodeId = nodes.size();
-		sampleGraph.addNode(String.valueOf(sampleNodeId));
+		//int sampleNodeId = nodes.size();
+		Object snid = sampleGraph.addVertex();
 		sampleNodes.add(start);
 		sampleToOriginalMap.put(String.valueOf(sampleNodeId), start.getId());
 		originalToSampleMap.put(start.getId(), String.valueOf(sampleNodeId));
@@ -275,15 +290,16 @@ public class SpinNetwork implements INetProperties{
 		
 		System.out.println("Fin de generation du sample graph");
 		return sampleGraph;
+		*/
 	}
 	
-	public int selectNextNode(List<Node> nodes, Map<Node,Double> weights) {
+	public int selectNextNode(List<ADemoEntity> nodes, Map<ADemoEntity,Double> weights) {
 		int index = 0;
 		Random rand = new Random();
 		
 		double[] cumulatedWeights = new double[nodes.size()];
 		int i = 0;
-		for(Node n : nodes) {
+		for(ADemoEntity n : nodes) {
 			if(i == 0) {
 				cumulatedWeights[i] = weights.get(n);
 				i++;
@@ -304,80 +320,55 @@ public class SpinNetwork implements INetProperties{
 	}
 	
 	public double getSampleAPL(int sampleSize) {
-		Graph sampleGraph = randomWalkSample(sampleSize);
-		
-		double APL = 0;
-		int nbPaths = 0;
-		
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "result", null);
-		dijkstra.init(sampleGraph);
-		for(Node n1 : sampleGraph.getEachNode()) {
-			dijkstra.setSource(n1);
-			dijkstra.compute();
-			for(Node n2 : sampleGraph.getEachNode()) {
-				if(!n2.equals(n1)) {
-					APL += dijkstra.getPathLength(n2);
-					nbPaths ++;
-				}
-			}
-		}
-		dijkstra.clear();
-		
-		APL /= nbPaths;
-		return APL;
+		return getAPL(randomWalkSample(sampleSize));
 	}
 
 	@Override
 	public double getAPL() {
+		return getAPL(network);
+	}
+	
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private double getAPL(Graph graph) {
 		double APL = 0;
 		int nbPaths = 0;
 		
-		Dijkstra dijkstra = new Dijkstra(Dijkstra.Element.EDGE, "result", null);
-		dijkstra.init(network);
-		for(Node n1 : network.getEachNode()) {
-			dijkstra.setSource(n1);
-			dijkstra.compute();
-			for(Node n2 : network.getEachNode()) {
+		DijkstraShortestPath dijkstra = new DijkstraShortestPath(graph);
+		for(Object n1 : graph.vertexSet()) {
+			for(Object n2 : graph.vertexSet()) {
 				if(!n2.equals(n1)) {
-					APL += dijkstra.getPathLength(n2);
+					APL += dijkstra.getPath(n1, n2).getLength();
 					nbPaths ++;
 				}
 			}
 		}
-		dijkstra.clear();
 		
 		APL /= nbPaths;
 		return APL;
 	}
 
 	@Override
-	public double getClustering(ADemoEntity entite) {
-		Node node = kvEntityNodeFastList.get(entite);
-		return clusteringCoefficient(node);
+	public double getClustering(ADemoEntity entity) {
+		return new ClusteringCoefficient<>(network).getGlobalClusteringCoefficient();
 	}
 
 	@Override
-	public Set<ADemoEntity> getNeighboor(ADemoEntity entite) {
-		Node node = kvEntityNodeFastList.get(entite);
-		Set<ADemoEntity> neighbors = new HashSet<ADemoEntity>();
-		for(Node n : network.getEachNode()) {
-			if(!n.equals(node) && n.hasEdgeBetween(node)) {
-				ADemoEntity e = n.getAttribute("entity");
-				neighbors.add(e);
-			}
-		}
-		return neighbors;
+	public Set<ADemoEntity> getNeighboor(ADemoEntity entity) {
+		return new NeighborCache<>(network).neighborsOf(entity); 
 	}
 
 	@Override
 	public double getDensity() {
-		return density(network);
+		if(directed) 
+			return network.vertexSet().size()*2/(network.edgeSet().size()*(network.edgeSet().size()-1));
+		return network.vertexSet().size()/(network.edgeSet().size()*(network.edgeSet().size()-1));
 	}
 	
 	@Override
 	public String toString(){
-		String res = "Nodes: "+network.getNodeCount()+"\n" ;//+ network.getNodeSet() ;
-		res = res + "\nEdges: "+network.getEdgeCount()+"\n" ;//+ network.getEdgeSet();
+		String res = "Nodes: "+network.vertexSet().size()+"\n" ;//+ network.getNodeSet() ;
+		res = res + "\nEdges: "+network.edgeSet().size()+"\n" ;//+ network.getEdgeSet();
 		return res;
 	}
 	
