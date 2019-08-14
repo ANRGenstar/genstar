@@ -45,5 +45,4 @@ public class UniformSampler implements IEntitySampler {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
 }

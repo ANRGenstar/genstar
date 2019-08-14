@@ -2,11 +2,23 @@ package gospl.algo.sr;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
+import gospl.algo.IGosplConcept;
+import gospl.algo.IGosplConcept.EGosplGenerationConcept;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.sampler.ISampler;
 
+/**
+ * Generic interface of Synthetic Reconstruction algorithm. Basic principle is simple and clear: estimate or approximate the
+ * underlying joint distribution of attribute of a single level entity to be drawn from.
+ * 
+ * @see e.g. Müller, K., & Axhausen, K. W. (2010). Population synthesis for microsimulation: State of the art. Arbeitsberichte Verkehrs-und Raumplanung, 638.
+ * 
+ * @author kevinchapuis
+ *
+ * @param <SamplerType>
+ */
 public interface ISyntheticReconstructionAlgo<SamplerType extends ISampler<ACoordinate<Attribute<? extends IValue>, IValue>>> {
 
 	/**
@@ -25,5 +37,9 @@ public interface ISyntheticReconstructionAlgo<SamplerType extends ISampler<ACoor
 			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> matrix, 
 			SamplerType sampler) 
 			throws IllegalDistributionCreation;
+	
+	default EGosplGenerationConcept getConcept() {
+		return IGosplConcept.EGosplGenerationConcept.SR;
+	}
 	
 }

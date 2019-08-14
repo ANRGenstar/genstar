@@ -2,6 +2,8 @@ package gospl.sampler;
 
 import java.util.Collection;
 
+import gospl.algo.IGosplConcept.EGosplGenerationConcept;
+
 /**
  * The global contract for sampler -- the part of generation process responsible the creation
  * of the entity with pre-defined rules such as provided by SR or CO algorithm. Most of the time
@@ -42,5 +44,12 @@ public interface ISampler<T> {
 	 * @return
 	 */
 	public String toCsv(String csvSeparator);
+	
+	/**
+	 * Gives the main synthetic population concept behind this sampler
+	 * 
+	 * @return
+	 */
+	public EGosplGenerationConcept getConcept();
 
 }

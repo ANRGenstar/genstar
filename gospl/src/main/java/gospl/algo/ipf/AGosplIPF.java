@@ -14,6 +14,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
+import core.util.random.GenstarRandom;
 import gospl.algo.ipf.margin.Margin;
 import gospl.algo.ipf.margin.MarginDescriptor;
 import gospl.algo.ipf.margin.MarginalsIPFBuilder;
@@ -42,7 +43,7 @@ import gospl.sampler.IEntitySampler;
  * a maximal error for any objective {@link AGosplIPF#delta} or an increase in error fitting lower that delta itself
  * <li> zero-cell problem: As it is impossible to distinguish between structural 0 cell - i.e. impossible
  * set of value, like being age under 5 and retired - and conjonctural 0 cell - i.e. a set of value for
- * which we do not have any record  
+ * which we do not have any record, we should provide default as well as customizable behavior
  * <li> zero-margin problem: As we use sparse collection to store marginal records hence 0 margin is not
  * a problem at all
  * </ul>
@@ -220,16 +221,14 @@ public abstract class AGosplIPF<T extends Number> {
 						if(actualValue == 0d && marginValue > 0d) {seed.setValue(coord, seed.getAtomicVal());}
 						AControl<T> av = seed.getVal(coord);
 						// Store value for debug
-						// double avbu = av.getValue().doubleValue();
+						double avbu = av.getValue().doubleValue();
 						// Update value
 						av.multiply(factor);
 						
 						// DEBUG ONLY 
-						/*
-						if(GenstarRandom.getInstance().nextDouble() < 0.01)
+						if(logger.getLevel() == Level.TRACE && GenstarRandom.getInstance().nextDouble() < 0.01)
 							gspu.sysoStempMessage("Coord "+coord+":\n AV = "+avbu+" | Factor = "
-									+factor.getValue().doubleValue()+" | UV = "+av.getValue().doubleValue());
-						*/
+									+factor.getValue().doubleValue()+" | UV = "+av.getValue().doubleValue(), Level.TRACE);
 					}
 				}
 			}

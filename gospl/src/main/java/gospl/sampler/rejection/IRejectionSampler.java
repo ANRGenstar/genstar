@@ -11,6 +11,8 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandomUtils;
+import gospl.algo.IGosplConcept;
+import gospl.algo.IGosplConcept.EGosplGenerationConcept;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -85,6 +87,11 @@ public class IRejectionSampler implements IEntitySampler {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	@Override
+	public EGosplGenerationConcept getConcept() {
+		return IGosplConcept.EGosplGenerationConcept.MIXTURE;
 	}
 
 }

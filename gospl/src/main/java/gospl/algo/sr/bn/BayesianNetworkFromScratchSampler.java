@@ -11,6 +11,8 @@ import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.value.IValue;
 import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
+import gospl.algo.IGosplConcept;
+import gospl.algo.IGosplConcept.EGosplGenerationConcept;
 import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.sampler.ISampler;
@@ -69,6 +71,11 @@ public class BayesianNetworkFromScratchSampler implements ISampler<ACoordinate<A
 	public String toCsv(String csvSeparator) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public EGosplGenerationConcept getConcept() {
+		return IGosplConcept.EGosplGenerationConcept.SR;
 	}
 
 }

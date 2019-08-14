@@ -4,6 +4,8 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.algo.IGosplConcept;
+import gospl.algo.IGosplConcept.EGosplGenerationConcept;
 import gospl.distribution.matrix.INDimensionalMatrix;
 
 /**
@@ -26,5 +28,11 @@ public interface IEntitySampler extends ISampler<ADemoEntity> {
 	 * @param objectives
 	 */
 	public void addObjectives(INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> objectives);
+	
+	@Override
+	default EGosplGenerationConcept getConcept() {
+		return IGosplConcept.EGosplGenerationConcept.CO;
+	}
+	
 	
 }

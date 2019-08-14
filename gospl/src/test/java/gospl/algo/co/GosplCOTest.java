@@ -15,6 +15,7 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
+import gospl.algo.IGosplConcept.EGosplAlgorithm;
 import gospl.algo.co.hillclimbing.HillClimbing;
 import gospl.algo.co.simannealing.SimulatedAnnealing;
 import gospl.algo.co.tabusearch.TabuList;
@@ -108,9 +109,9 @@ public class GosplCOTest {
 	@Test
 	public void comparisonWithOrWithoutAggregatedSolution() {
 
-		Map<String, IEntitySampler[]> algos = new HashMap<>();
+		Map<EGosplAlgorithm, IEntitySampler[]> algos = new HashMap<>();
 
-		algos.put("HC", new IEntitySampler[] {
+		algos.put(EGosplAlgorithm.RS, new IEntitySampler[] {
 				new CombinatorialOptimizationSampler<>(
 						new HillClimbing(POPULATION_SIZE * 0.01, MAX_ITERATION), 
 						SAMPLE, DATA_BASED_POP, false),
@@ -119,7 +120,7 @@ public class GosplCOTest {
 						SAMPLE, DATA_BASED_POP, true)
 		});
 
-		algos.put("TABU", new IEntitySampler[] {
+		algos.put(EGosplAlgorithm.TABU, new IEntitySampler[] {
 				new CombinatorialOptimizationSampler<>(
 						new TabuSearch(new TabuList(TABULIST_SIZE), 
 								POPULATION_SIZE * 0.01, MAX_ITERATION), 
@@ -130,7 +131,7 @@ public class GosplCOTest {
 						SAMPLE, DATA_BASED_POP, true)
 		});
 
-		algos.put("SIM", new IEntitySampler[] {
+		algos.put(EGosplAlgorithm.SA, new IEntitySampler[] {
 				new CombinatorialOptimizationSampler<>(
 						new SimulatedAnnealing(), SAMPLE,
 						DATA_BASED_POP, false),
@@ -144,7 +145,7 @@ public class GosplCOTest {
 		double timeWA = 0d;
 
 		for(int i = 0; i < ITER_COMP; i++) {
-			for(String algo : algos.keySet()) {
+			for(EGosplAlgorithm algo : algos.keySet()) {
 				IEntitySampler swoa = new SampleBasedAlgorithm()
 						.setupCOSampler(SAMPLE, algos.get(algo)[0]);
 				swoa.addObjectives(MARGINALS);

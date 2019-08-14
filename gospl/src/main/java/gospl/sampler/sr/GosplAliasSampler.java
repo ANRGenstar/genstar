@@ -193,6 +193,5 @@ public class GosplAliasSampler implements IDistributionSampler {
 		return s;
 	}
 
-
 }
 
