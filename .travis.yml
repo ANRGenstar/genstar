@@ -8,4 +8,8 @@ script:
 cache:
   directories:
   - "$HOME/.m2"
-
+addons:
+  sonarcloud:
+    organization: "anrgenstar"
+    token:
+      secure: "ZDhAQGam0sPZTKmnDhzy6qbXRAVX9aNsFbuGEm6YBpPO89GFNq9iwaflV2DG6gU5wF2IrhzE185nvlyO/ebxkzygflwZQ0FoeQEaxT5pxrZj1lJFLEaat3GTdLDh1evRkUaBznI+fp1iNQ+VnNJkDE7UpSzzEXphuvC+F/OVlk5uYRYS3FVAd9q+PoicNDqpYMC7AviBissSMonzaWzgAVkwl4Orusje+KeAxey2ENUU2IRMxCazQ1RInZshuJr3s3co+KJWbWAbCtggWb07s/kykSU5snqzB7GHkjNdaOz38cusnpzI2Tzq33A1ERejjcjWUWue9S5X7gpV0BRqJBN6yWQJMhDzdv0MpZVlCf7ZUjigITm/8E9jI/RdsHyr2dPL3/rvuK6nKwJTXrkFZrg+j4ZQckpzUmjLkYDUiP0IRZdvbXYH3TuUWkE7Q7Es4RpSSQVQlsYNPU87egt79zeEBuAQRmz8NLFrtA0GGYF4Dq8GieRm4/RXTbP0kSfLce6ppxxVlcZjL95NE7gGTpKTDK6t4dPj/n2rlkLvZs6CeUYrXBwgjr3N8hENT800BDR/SImXkJDJ/5yvFopby7Z1a7DWtmLirqHb7SkMflz5ODjFfbahrLZ5mZJ6iq1wkF83t3osLWARi59iEVzbi7s0RTMmqv5XeFFdW++eLhw=" # encrypted value of your token
