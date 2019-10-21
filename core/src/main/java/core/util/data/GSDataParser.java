@@ -232,7 +232,7 @@ public class GSDataParser {
 	
 	/**
 	 * {@link #getRangedIntegerData(String, boolean)} for specification. Also this method allow for {@code minVal} <br/>
-	 * {@code maxVal} forced value: this is intended to encoded ranged value from "min implicit integer value" (e.g. age = 0) <br/> 
+	 * {@code maxVal} forced value: this is intended to encode ranged value from "min implicit integer value" (e.g. age = 0) <br/> 
 	 * to ranged parsed integer value or from ranged parsed to "max implicit integer value" 
 	 * 
 	 * @param range

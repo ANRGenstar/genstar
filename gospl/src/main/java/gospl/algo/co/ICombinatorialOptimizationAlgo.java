@@ -20,6 +20,7 @@ import gospl.sampler.co.CombinatorialOptimizationSampler;
  * @param <SamplerType> the type of sample. It should implement {@link IEntitySampler}
  * 
  * @see CombinatorialOptimizationSampler
+ * @see IGosplConcept.EGosplGenerationConcept#CO
  */
 public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADemoEntity>> {
 

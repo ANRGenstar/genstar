@@ -13,13 +13,22 @@ public class SpatialConstraintMaxNumber extends ASpatialConstraint {
 	protected Map<String, Integer> nestCapacities;
 	
 	
-	//maxVal: global value for the max number of entities per nest
+	/**
+	 * Constraint on maximum number of entities in every nest
+	 * 
+	 * @param nests
+	 * @param maxVal : global value for the max number of entities per nest
+	 */
 	public SpatialConstraintMaxNumber(Collection<? extends AGeoEntity<? extends IValue>> nests, Double maxVal) {
 		super();
 		nestCapacities = computeMaxPerNest(nests, maxVal);
 	}
 	
-	 //keyAttMax: name of the attribute that contains the max number of entities in the nest file
+	 /**
+	  * Constraint on maximum number of entities for each a nest
+	  * @param nests
+	  * @param keyAttMax : name of the attribute that contains the max number of entities in the nest file
+	  */
 	public SpatialConstraintMaxNumber(Collection<? extends AGeoEntity<? extends IValue>> nests, String keyAttMax) {
 		super();
 		nestCapacities = computeMaxPerNest(nests, keyAttMax);

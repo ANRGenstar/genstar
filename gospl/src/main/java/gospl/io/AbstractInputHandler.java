@@ -127,7 +127,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					// all of these values as modalities
 					final List<String> valList = readColumn(idx);
 					gspu.sysoStempMessage("trying to detect an attribute based on header values: "+valList, LOG_LEVEL);
-					//if (dictionnary)
+
 					if (dictionary.getAttributes().stream()
 							.anyMatch(att -> att.getValueSpace().containsAllLabels(valList))) {
 						attributeIdx.add(idx);
@@ -160,7 +160,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 				if (vals.size() > 1) {
 					final Set<IAttribute<? extends IValue>> inferedHeads = new HashSet<>();
 					final List<String> headList = readLines(0, getFirstRowIndex(), j);
-					if (headList.stream().allMatch(s -> s.isEmpty())) {
+					if (headList.stream().allMatch(String::isEmpty)) {
 						for (final List<String> column : readColumns(0, getFirstColumnIndex()))
 							inferedHeads.addAll(dictionary.getAttributeAndRecord().stream()
 									.filter(a -> a.getValueSpace().getValues().stream()
@@ -169,7 +169,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					} else {
 						inferedHeads.addAll(dictionary.getAttributeAndRecord().stream()
 								.flatMap(s -> dictionary.getAttributeAndRecord().stream()
-										.filter(a -> a.getAttributeName().equals(s)))
+										.filter(a -> a.getAttributeName().equals(s.getAttributeName())))
 								.collect(Collectors.toSet()));
 					}
 					final Set<IValue> vals2 = new HashSet<>(vals);

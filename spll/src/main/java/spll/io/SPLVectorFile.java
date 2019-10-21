@@ -54,7 +54,7 @@ import spll.util.SpllGeotoolsAdapter;
 import spll.util.SpllUtil;
 
 /**
- * TODO: javadoc
+ * The higher order implementation of geographic vector file in the SPLL library
  * 
  * WARNING: purpose of this file is to cover the wider number of template for geographic vector files,
  * <i>but</i> in practice it can only stand for standard shapefile
@@ -125,7 +125,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 	protected SPLVectorFile(File file, Charset charset) throws IOException, GSIllegalRangedData{
 		this(readDataStoreFromFile(file, charset), Collections.emptyList());
 	}
-	 static double t;
+	 
 	private static DataStore readDataStoreFromFile(File file, Charset charset) throws IOException {
 		
 		Map<String,Object> parameters = new HashMap<>();
@@ -288,7 +288,14 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		return dataStore;
 	}
 	
-
+	/**
+	 * Associate a proxy geometry to each spatial entity (#SpllFeature) that correspond to the area
+	 * at minDist and maxDist from the original geometry
+	 * 
+	 * @param minDist
+	 * @param maxDist
+	 * @param avoidOverlapping
+	 */
 	public void minMaxDistance(Double minDist, Double maxDist, Boolean avoidOverlapping)  {
 		Quadtree quadTreeMin = null;
 		if (minDist != null && minDist > 0) {
@@ -399,6 +406,7 @@ public class SPLVectorFile implements IGSGeofile<SpllFeature, IValue> {
 		return geom;
 	}
 
+	@Override
 	public String toString() {
 		String s = "";
 		try {
