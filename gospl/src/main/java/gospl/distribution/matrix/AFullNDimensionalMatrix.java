@@ -25,10 +25,14 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 
 /**
- * TODO: javadoc
+ * 
+ * Implement a full n-dimensional matrix (meaning that all dimension are actually connected)
+ * 
  * <p>
  * WARNING: the inner data collection is concurrent friendly. This implied a low efficiency when no parallelism
  * <p>
+ * 
+ * @see INDimensionalMatrix
  * 
  * @author kevinchapuis
  *

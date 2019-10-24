@@ -89,6 +89,7 @@ public abstract class AGeoEntity<V extends IValue> implements IEntity<Attribute<
 	 * @return
 	 */
 	public Number getNumericValueForAttribute(Attribute<? extends V> attribute) {
+		if(attribute == null) {throw new IllegalArgumentException("Cannot get numeric value for \""+attribute+"\" attribute");}
 		if(attribute.getValueSpace().getType().isNumericValue())
 			return new GSDataParser().parseNumbers(this.getValueForAttribute(attribute).getStringValue());
 		return Double.NaN;
