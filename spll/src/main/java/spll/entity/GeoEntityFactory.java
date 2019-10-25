@@ -143,13 +143,15 @@ public class GeoEntityFactory {
 				values.put(attribute, attribute.getValueSpace().getEmptyValue());
 			else {
 				if (attribute.getValueSpace().isValidCandidate(v.toString())) {
-					try {
-						values.put(attribute, attribute.getValueSpace().getValue(v.toString()));
-					} catch (NullPointerException e) {
-						values.put(attribute, attribute.getValueSpace().addValue(v.toString()));	
+					IValue val = attribute.getValueSpace().getValue(v.toString());
+					if (val == null) {
+						values.put(attribute, attribute.getValueSpace().addValue(v.toString()));
+					} else {
+						values.put(attribute, val);
 					}
 				} else {
-					values.put(attribute, attribute.getValueSpace().addValue(v.toString()));
+					throw new IllegalArgumentException("Cannot add value "+v.toString()+" to attribute "
+							+attribute+" because it is not valide data [ValueSpace =  "+attribute.getValueSpace());
 				}
 			}
 		}
