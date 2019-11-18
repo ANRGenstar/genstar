@@ -5,7 +5,14 @@ import java.util.Collection;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 
-public abstract class ASpatialConstraint implements ISpatialConstraint{
+/**
+ * Abstract numerical representation of a spatial constraint: it deals with priority (int) 
+ * among different constraints and relaxation of constraint rules
+ * 
+ * @author kevinchapuis
+ *
+ */
+public abstract class ASpatialConstraint implements ISpatialConstraint {
 
 	protected int priority = 1;
 	protected double maxIncrease = 0.0;
@@ -17,26 +24,6 @@ public abstract class ASpatialConstraint implements ISpatialConstraint{
 	@Override
 	public int getPriority() {
 		return priority;
-	}
-
-	public void setPriority(int priority) {
-		this.priority = priority;
-	}
-
-	public double getMaxIncrease() {
-		return maxIncrease;
-	}
-
-	public void setMaxIncrease(double maxIncrease) {
-		this.maxIncrease = maxIncrease;
-	}
-
-	public double getIncreaseStep() {
-		return increaseStep;
-	}
-
-	public void setIncreaseStep(double increaseStep) {
-		this.increaseStep = increaseStep;
 	}
 	
 	@Override
@@ -50,17 +37,63 @@ public abstract class ASpatialConstraint implements ISpatialConstraint{
 		}
 		relaxConstraintOp(nests);
 	}
-
-
-	public abstract void relaxConstraintOp(Collection<AGeoEntity<? extends IValue>> nests);
 	
+
+	@Override
 	public boolean isConstraintLimitReach() {
 		return constraintLimitReach;
 	}
 
+	@Override
 	public double getCurrentValue() {
 		return currentValue;
 	}
 	
+	/**
+	 * Update the priority of the current constraint
+	 * @param priority
+	 */
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+
+	/**
+	 * The maximal number associated with the constraint
+	 * @return
+	 */
+	public double getMaxIncrease() {
+		return maxIncrease;
+	}
+
+	/**
+	 * Set the maximum number for the constraint
+	 * @param maxIncrease
+	 */
+	public void setMaxIncrease(double maxIncrease) {
+		this.maxIncrease = maxIncrease;
+	}
+
+	/**
+	 * The step of relaxation
+	 * @return
+	 */
+	public double getIncreaseStep() {
+		return increaseStep;
+	}
+
+	/**
+	 * Set the relaxation step
+	 * @param increaseStep
+	 */
+	public void setIncreaseStep(double increaseStep) {
+		this.increaseStep = increaseStep;
+	}
+	
+	/**
+	 * Define how the relaxation should be made
+	 * 
+	 * @param nests
+	 */
+	public abstract void relaxConstraintOp(Collection<AGeoEntity<? extends IValue>> nests);
 	
 }

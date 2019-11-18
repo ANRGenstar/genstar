@@ -21,9 +21,25 @@ import spll.popmapper.distribution.function.ISpatialEntityFunction;
 
 /**
  * Build distribution to asses spatial entity probability to be bind with synthetic population entity.
- * This factory if purely praticle, as it is very easy to build new distribution: you only need to choose
- * basic or complex distribution (or even build your own by implementing {@link ISpatialDistribution}) and
- * build it using cutsom function, like for example by implementing {@link ISpatialComplexFunction} 
+ * This factory provide basic distribution creation methods together with example distributions:
+ * 
+ * <br/>
+ * <ul>
+ *  <li>Distribution based on simple function (lambda):</li>
+ *  <ul>
+ *   <li> according to area of spatial object: e.g. {@link #getAreaBasedDistribution()}
+ *   <li> according to a predefined number: e.g. {@link #getCapacityBasedDistribution(SpatialConstraintMaxNumber)}
+ *  </ul>
+ *  <li>Distribution based on complex bi-function (lambda):</li>
+ *  <ul>
+ *   <li> according to the distance of spatial object from other places {@link #getDistanceBasedDistribution()} </li>
+ *   <li> according to a given mass function {@link #getGravityModelDistribution(Collection, double, SpllEntity...)}
+ *  </ul>
+ * </ul>
+ *  
+ *  Defining custom {@link ISpatialEntityFunction} or {@link ISpatialComplexFunction} allows to define user made distribution
+ *  <br/>
+ *  
  * @author kevinchapuis
  *
  */
@@ -175,7 +191,7 @@ public class SpatialDistributionFactory {
 	}
 	
 	/**
-	 * Gravity model that compute 
+	 * Gravity model that associate probability (the mass in gravity model) to each candidates according to gravity model
 	 * 
 	 * @param candidates
 	 * @param frictionCoeff
@@ -190,7 +206,8 @@ public class SpatialDistributionFactory {
 	}
 	
 	/**
-	 * 
+	 * Gravity model that associate probability (the mass in gravity model) to each candidates according to gravity model, 
+	 * considering a given buffer around geometries
 	 * 
 	 * @param candidates
 	 * @param frictionCoeff

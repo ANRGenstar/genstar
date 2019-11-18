@@ -79,7 +79,7 @@ public class SPLocalizer implements ISPLocalizer {
 	//gives the number of entities per area (e.g. regression cells)
 	protected IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> map; 
 
-	protected ISPLinker<ADemoEntity> linker; // Encapsulate spatial distribution and constraint to link entity and spatial object
+	protected ISPLinker<ADemoEntity> linker; // Encapsulate spatial distribution and constraints to link entity and spatial object
 	protected SpatialConstraintLocalization localizationConstraint; //the localization constraint;
 
 	protected PointInLocalizer pointInLocalizer; //allows to return one or several points in a geometry
@@ -110,7 +110,7 @@ public class SPLocalizer implements ISPLocalizer {
 		this.population = population;
 		this.localizationConstraint = new SpatialConstraintLocalization(null);
 		this.localizationConstraint.setReferenceFile(geoFile);
-		this.linker.addConstraints(localizationConstraint);
+		//this.linker.addConstraints(localizationConstraint);
 	}
 
 	///////////////////////////////////////////////////////////
@@ -305,6 +305,12 @@ public class SPLocalizer implements ISPLocalizer {
 		return linker.getConstraints();
 	}
 
+	/**
+	 * The first constraint that allows to select only a limited 
+	 * number of nests to locate in according to a enclosing geometry 
+	 * 
+	 * @return
+	 */
 	public SpatialConstraintLocalization getLocalizationConstraint() {
 		return localizationConstraint;
 	}
@@ -327,10 +333,18 @@ public class SPLocalizer implements ISPLocalizer {
 	// ------------------ POINT LOCALIZER ------------------ //
 	// ----------------------------------------------------- //
 
+	/**
+	 * Define the {@link PointInLocalizer} that will bind synthetic entities with precise coordinate (point)
+	 * @param pointInLocalizer
+	 */
 	public void setPointInLocalizer(PointInLocalizer pointInLocalizer) {
 		this.pointInLocalizer = pointInLocalizer;
 	}
 
+	/**
+	 * Get the {@link PointInLocalizer} that will place synthetic entities at a precise coordinate (point) 
+	 * @return
+	 */
 	public PointInLocalizer getPointInLocalizer() {
 		return pointInLocalizer;
 	}
@@ -343,32 +357,50 @@ public class SPLocalizer implements ISPLocalizer {
 
 	//set to all the entities given as argument, a given nest chosen randomly in the possible geoEntities 
 	//of the localisation shapefile (all if not bounds is defined, only the one in the bounds if the one is not null)
+	/**
+	 * TODO : describe the algorithm PLZ  !
+	 * 
+	 * To be revised absolutly, because there is incoherences: e.g. loop over constraints to loop over constraint again, and then localize updating constraint.
+	 * 
+	 * @param entities
+	 * @param spatialBounds
+	 * @throws IOException
+	 * @throws TransformException
+	 */
 	private void localizationInNest(Collection<SpllEntity> entities, Geometry spatialBounds) throws IOException, TransformException {
-		List<ISpatialConstraint> otherConstraints = linker.getConstraints().stream()
-				.sorted((n1, n2) -> Integer.compare( n1.getPriority(), n2.getPriority()))
-				.collect(Collectors.toList());;
-				//remove this line because I have no idea why it is here.
-				//otherConstraints.remove(localizationConstraint);
-				
-				Collection<SpllEntity> remainingEntities = entities;
-				localizationConstraint.setBounds(spatialBounds);
-				for (ISpatialConstraint cr : otherConstraints) {
-					while (!cr.isConstraintLimitReach()) {
-						List<AGeoEntity<? extends IValue>> possibleNests = 
-								new ArrayList<>(localizationConstraint.getReferenceFile().getGeoEntity());
-						List<AGeoEntity<? extends IValue>> possibleNestsInit = 
-								localizationConstraint.getCandidates(possibleNests); 
-						possibleNests = new ArrayList<>(possibleNests);
-						for (ISpatialConstraint constraint : otherConstraints) {
-							possibleNests = constraint.getCandidates(possibleNests);
-						}
-						remainingEntities = localizationInNestOp(remainingEntities, possibleNests, null);
-						if (remainingEntities != null && !remainingEntities.isEmpty()) 
-							cr.relaxConstraint(possibleNestsInit);
-						else return;
 
+		localizationConstraint.setBounds(spatialBounds);
+		List<AGeoEntity<? extends IValue>> possibleNests = localizationConstraint.getCandidates(
+				localizationConstraint.getReferenceFile().getGeoEntity().stream().collect(Collectors.toList())); 
+		
+		if (linker.getConstraints().isEmpty()) {
+			
+			localizationInNestOp(entities, possibleNests, null);
+		
+		} else {
+			
+			List<ISpatialConstraint> otherConstraints = linker.getConstraints().stream()
+					.sorted((n1, n2) -> Integer.compare( n1.getPriority(), n2.getPriority()))
+					.collect(Collectors.toList());
+			
+			Collection<SpllEntity> remainingEntities = new ArrayList<>(entities);
+			List<AGeoEntity<? extends IValue>> candidates = new ArrayList<>(possibleNests);
+			for (ISpatialConstraint cr : otherConstraints) {
+				while (!cr.isConstraintLimitReach()) {
+					
+					candidates = new ArrayList<>(candidates);
+					for (ISpatialConstraint constraint : otherConstraints) {
+						candidates = constraint.getCandidates(candidates);
 					}
+					
+					remainingEntities = localizationInNestOp(remainingEntities, candidates, null);
+					if (remainingEntities != null && !remainingEntities.isEmpty()) 
+						cr.relaxConstraint(possibleNests);
+					else return;
+
 				}
+			}
+		}
 	}
 
 	private List<SpllEntity> localizationInNestOp(Collection<SpllEntity> entities, 
