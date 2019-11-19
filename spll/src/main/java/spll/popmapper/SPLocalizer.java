@@ -379,7 +379,7 @@ public class SPLocalizer implements ISPLocalizer {
 		
 		} else {
 			
-			List<ISpatialConstraint> otherConstraints = linker.getConstraints().stream()
+			List<ISpatialConstraint> otherConstraints = Stream.concat(linker.getConstraints().stream(), Stream.of(localizationConstraint))
 					.sorted((n1, n2) -> Integer.compare( n1.getPriority(), n2.getPriority()))
 					.collect(Collectors.toList());
 			
@@ -446,7 +446,6 @@ public class SPLocalizer implements ISPLocalizer {
 	private void localizationInNestWithNumbers(List<SpllEntity> entities, Geometry spatialBounds) 
 			throws IOException, TransformException {
 		List<ISpatialConstraint> otherConstraints = new ArrayList<>(linker.getConstraints());
-		otherConstraints.remove(localizationConstraint);
 	
 	
 		List<? extends AGeoEntity<? extends IValue>> areas = new ArrayList<>(spatialBounds == null ? 

@@ -2,6 +2,7 @@ package spll.popmapper.linker;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import core.metamodel.attribute.Attribute;
@@ -41,6 +42,17 @@ public interface ISPLinker<E extends IEntity<Attribute<? extends IValue>>> {
 	 * @return
 	 */
 	public Optional<AGeoEntity<? extends IValue>> getCandidate(E entity,
+			Collection<? extends AGeoEntity<? extends IValue>> candidates);
+	
+	/**
+	 * Main method to link a set of synthetic entities with a chosen spatial entity candidate drawn from a collection.
+	 * This involves the same element as in {@link #getCandidate(IEntity, Collection)} except that filtering is made once
+	 * 
+	 * @param entity
+	 * @param candidates
+	 * @return
+	 */
+	public Map<E, Optional<AGeoEntity<? extends IValue>>>  getCandidates(Collection<E> entities,
 			Collection<? extends AGeoEntity<? extends IValue>> candidates);
 
 	/**
