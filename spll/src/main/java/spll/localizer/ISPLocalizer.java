@@ -1,4 +1,4 @@
-package spll.popmapper;
+package spll.localizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,11 +21,11 @@ import spll.SpllPopulation;
 import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
+import spll.datamapper.normalizer.SPLUniformNormalizer;
 import spll.io.exception.InvalidGeoFormatException;
-import spll.popmapper.constraint.ISpatialConstraint;
-import spll.popmapper.distribution.ISpatialDistribution;
-import spll.popmapper.linker.ISPLinker;
-import spll.popmapper.normalizer.SPLUniformNormalizer;
+import spll.localizer.constraint.ISpatialConstraint;
+import spll.localizer.distribution.ISpatialDistribution;
+import spll.localizer.linker.ISPLinker;
 
 /**
  * This is the main object to localize population. It is the main ressource in Spll process.
@@ -87,12 +87,25 @@ public interface ISPLocalizer {
 	/**
 	 * Setup a "matched geography" between population's entities attribute and a geographical entitites
 	 * 
-	 * @param match
-	 * @param keyAttPop
-	 * @param keyAttMatch
+	 * @param match : the file of referenced geographical entities
+	 * @param keyAttPop : the population attribute to link to geographical entities
+	 * @param keyAttMatch : the geographical feature to link to population
 	 */
 	public void setMatcher(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> match, 
 			String keyAttPop, String keyAttMatch);
+	
+	/**
+	 * Add a matcher with options to release the matching constraint
+	 * 
+	 * @param match : the file of referenced geographical entities
+	 * @param keyAttPop : the population attribute to link to geographical entities
+	 * @param keyAttMatch : the geographical feature to link to population
+	 * @param releaseLimit : the maximum extend to locate synthetic entities abroad from the match
+	 * @param releaseStep : the increase step to which released constraint
+	 * @param priority : the priority of the matching over other constraint
+	 */
+	public void setMatcher(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> match, 
+			String keyAttPop, String keyAttMatch, double releaseLimit, double releaseStep, int priority);
 	
 	/**
 	 * This method must setup matcher variable (i.e. the number of entity) in

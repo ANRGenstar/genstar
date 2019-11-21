@@ -13,8 +13,10 @@ import core.util.excpetion.GSIllegalRangedData;
 import spll.SpllEntity;
 import spll.SpllPopulation;
 import spll.SpllSetupTest;
-import spll.popmapper.SPLocalizer;
-import spll.popmapper.distribution.SpatialDistributionFactory;
+import spll.localizer.SPLocalizer;
+import spll.localizer.distribution.SpatialDistributionFactory;
+import spll.localizer.linker.ISPLinker;
+import spll.localizer.linker.SPLinker;
 
 public class LinkerTest {
 

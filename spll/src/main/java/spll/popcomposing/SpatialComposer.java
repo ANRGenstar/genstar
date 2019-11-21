@@ -25,7 +25,7 @@ import core.metamodel.value.IValue;
 import gospl.GosplMultitypePopulation;
 import spll.SpllEntity;
 import spll.SpllPopulation;
-import spll.popmapper.constraint.ISpatialConstraint;
+import spll.localizer.constraint.ISpatialConstraint;
 
 public class SpatialComposer implements ISpatialComposer<SpllEntity> {
 

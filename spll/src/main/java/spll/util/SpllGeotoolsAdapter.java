@@ -16,7 +16,7 @@ import core.util.data.GSEnumDataType;
 import core.util.excpetion.GSIllegalRangedData;
 
 /**
- * A simple utility class that unable 
+ * A simple utility class that enable to transpose geotools object and variable into Gen* object
  * 
  * @author kevinchapuis
  *

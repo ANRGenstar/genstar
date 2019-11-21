@@ -21,13 +21,13 @@ import spll.algo.ISPLRegressionAlgo;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.ISPLMatcherFactory;
+import spll.datamapper.normalizer.ASPLNormalizer;
 import spll.datamapper.variable.ISPLVariable;
 import spll.entity.SpllFeature;
 import spll.io.SPLGeofileBuilder;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
 import spll.io.exception.InvalidGeoFormatException;
-import spll.popmapper.normalizer.ASPLNormalizer;
 import spll.util.SpllUtil;
 
 /**

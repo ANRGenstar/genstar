@@ -1,4 +1,4 @@
-package spll.popmapper.linker;
+package spll.localizer.linker;
 
 import java.util.Collection;
 import java.util.List;
@@ -9,8 +9,8 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
-import spll.popmapper.constraint.ISpatialConstraint;
-import spll.popmapper.distribution.ISpatialDistribution;
+import spll.localizer.constraint.ISpatialConstraint;
+import spll.localizer.distribution.ISpatialDistribution;
 
 /**
  * Encapsulate the process that binds an entity of a population to a spatial

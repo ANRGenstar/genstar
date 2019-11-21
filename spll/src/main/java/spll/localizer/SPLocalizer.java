@@ -1,4 +1,4 @@
-package spll.popmapper;
+package spll.localizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,6 +44,7 @@ import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.ASPLMapperBuilder;
 import spll.datamapper.SPLAreaMapperBuilder;
 import spll.datamapper.exception.GSMapperException;
+import spll.datamapper.normalizer.SPLUniformNormalizer;
 import spll.datamapper.variable.ISPLVariable;
 import spll.entity.GeoEntityFactory;
 import spll.entity.SpllFeature;
@@ -53,15 +54,14 @@ import spll.io.SPLGeofileBuilder.SPLGisFileExtension;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
 import spll.io.exception.InvalidGeoFormatException;
-import spll.popmapper.constraint.ISpatialConstraint;
-import spll.popmapper.constraint.SpatialConstraintLocalization;
-import spll.popmapper.distribution.ISpatialDistribution;
-import spll.popmapper.distribution.SpatialDistributionFactory;
-import spll.popmapper.linker.ISPLinker;
-import spll.popmapper.linker.SPLinker;
-import spll.popmapper.normalizer.SPLUniformNormalizer;
-import spll.popmapper.pointInalgo.PointInLocalizer;
-import spll.popmapper.pointInalgo.RandomPointInLocalizer;
+import spll.localizer.constraint.ISpatialConstraint;
+import spll.localizer.constraint.SpatialConstraintLocalization;
+import spll.localizer.distribution.ISpatialDistribution;
+import spll.localizer.distribution.SpatialDistributionFactory;
+import spll.localizer.linker.ISPLinker;
+import spll.localizer.linker.SPLinker;
+import spll.localizer.pointInalgo.PointInLocalizer;
+import spll.localizer.pointInalgo.RandomPointInLocalizer;
 import spll.util.SpllUtil;
 
 
@@ -193,6 +193,15 @@ public class SPLocalizer implements ISPLocalizer {
 		this.match = match;
 		this.keyAttPop = keyAttPop;
 		this.keyAttMatch = keyAttMatch;
+	}
+	
+	@Override
+	public void setMatcher(IGSGeofile<? extends AGeoEntity<? extends IValue>, ? extends IValue> match, String keyAttPop,
+			String keyAttMatch, double releaseLimit, double releaseStep, int priority) {
+		this.setMatcher(match, keyAttPop, keyAttMatch);
+		this.localizationConstraint.setMaxIncrease(releaseLimit);
+		this.localizationConstraint.setIncreaseStep(releaseStep);
+		this.localizationConstraint.setPriority(priority);
 	}
 
 	@Override

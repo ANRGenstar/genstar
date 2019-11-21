@@ -1,4 +1,4 @@
-package spll.popmapper.normalizer;
+package spll.datamapper.normalizer;
 
 import java.util.ArrayList;
 import java.util.Arrays;

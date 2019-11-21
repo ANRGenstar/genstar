@@ -1,4 +1,4 @@
-package spll.popmapper.distribution;
+package spll.localizer.distribution;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,13 +11,13 @@ import core.metamodel.io.IGSGeofile;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
 import spll.entity.SpllFeature;
-import spll.popmapper.constraint.SpatialConstraintMaxNumber;
-import spll.popmapper.distribution.function.AreaFunction;
-import spll.popmapper.distribution.function.CapacityFunction;
-import spll.popmapper.distribution.function.DistanceFunction;
-import spll.popmapper.distribution.function.GravityFunction;
-import spll.popmapper.distribution.function.ISpatialComplexFunction;
-import spll.popmapper.distribution.function.ISpatialEntityFunction;
+import spll.localizer.constraint.SpatialConstraintMaxNumber;
+import spll.localizer.distribution.function.AreaFunction;
+import spll.localizer.distribution.function.CapacityFunction;
+import spll.localizer.distribution.function.DistanceFunction;
+import spll.localizer.distribution.function.GravityFunction;
+import spll.localizer.distribution.function.ISpatialComplexFunction;
+import spll.localizer.distribution.function.ISpatialEntityFunction;
 
 /**
  * Build distribution to asses spatial entity probability to be bind with synthetic population entity.

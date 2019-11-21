@@ -1,4 +1,4 @@
-package spll.popmapper.distribution;
+package spll.localizer.distribution;
 
 import java.util.Collections;
 import java.util.List;

@@ -1,4 +1,4 @@
-package spll.popmapper.linker;
+package spll.localizer.linker;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,8 +13,8 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import spll.SpllEntity;
-import spll.popmapper.constraint.ISpatialConstraint;
-import spll.popmapper.distribution.ISpatialDistribution;
+import spll.localizer.constraint.ISpatialConstraint;
+import spll.localizer.distribution.ISpatialDistribution;
 
 /**
  * General implementation for spatial linker - meant to link entity with a spatial entity

@@ -25,7 +25,7 @@ import core.util.excpetion.GSIllegalRangedData;
 import gospl.generator.util.GSUtilGenerator;
 import spll.SpllPopulation;
 import spll.io.exception.InvalidGeoFormatException;
-import spll.popmapper.SPLocalizer;
+import spll.localizer.SPLocalizer;
 
 public class IoTest {
 

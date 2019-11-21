@@ -31,13 +31,13 @@ import spll.algo.LMRegressionOLS;
 import spll.algo.exception.IllegalRegressionException;
 import spll.datamapper.exception.GSMapperException;
 import spll.datamapper.matcher.SPLAreaMatcherFactory;
+import spll.datamapper.normalizer.ASPLNormalizer;
+import spll.datamapper.normalizer.SPLUniformNormalizer;
 import spll.datamapper.variable.SPLVariable;
 import spll.entity.SpllFeature;
 import spll.entity.SpllPixel;
 import spll.io.SPLRasterFile;
 import spll.io.SPLVectorFile;
-import spll.popmapper.normalizer.ASPLNormalizer;
-import spll.popmapper.normalizer.SPLUniformNormalizer;
 
 /**
  * TODO: javadoc

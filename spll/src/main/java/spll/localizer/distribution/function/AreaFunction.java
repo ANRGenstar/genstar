@@ -1,4 +1,4 @@
-package spll.popmapper.distribution.function;
+package spll.localizer.distribution.function;
 
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;

@@ -1,4 +1,4 @@
-package spll.popmapper.distribution;
+package spll.localizer.distribution;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,7 +8,7 @@ import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
 import core.util.random.roulette.ARouletteWheelSelection;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
-import spll.popmapper.distribution.function.ISpatialEntityFunction;
+import spll.localizer.distribution.function.ISpatialEntityFunction;
 
 /**
  * Spatial Distribution that relies on spatial entity attribute to asses probability. For exemple,

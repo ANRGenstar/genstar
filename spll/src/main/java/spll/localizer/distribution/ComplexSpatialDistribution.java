@@ -1,4 +1,4 @@
-package spll.popmapper.distribution;
+package spll.localizer.distribution;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,7 +11,7 @@ import core.metamodel.value.IValue;
 import core.util.random.roulette.ARouletteWheelSelection;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
 import spll.SpllEntity;
-import spll.popmapper.distribution.function.ISpatialComplexFunction;
+import spll.localizer.distribution.function.ISpatialComplexFunction;
 
 /**
  * Spatial distribution that relies on both attribute of spatial and population entity. 

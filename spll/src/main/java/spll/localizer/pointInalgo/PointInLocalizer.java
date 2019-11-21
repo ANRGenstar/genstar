@@ -1,4 +1,4 @@
-package spll.popmapper.pointInalgo;
+package spll.localizer.pointInalgo;
 
 import java.util.List;
 import java.util.Random;

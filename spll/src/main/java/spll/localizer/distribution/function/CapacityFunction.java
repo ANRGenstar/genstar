@@ -1,8 +1,8 @@
-package spll.popmapper.distribution.function;
+package spll.localizer.distribution.function;
 
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
-import spll.popmapper.constraint.SpatialConstraintMaxNumber;
+import spll.localizer.constraint.SpatialConstraintMaxNumber;
 
 public class CapacityFunction implements ISpatialEntityFunction<Integer> {
 

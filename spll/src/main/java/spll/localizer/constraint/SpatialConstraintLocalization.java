@@ -1,4 +1,4 @@
-package spll.popmapper.constraint;
+package spll.localizer.constraint;
 
 import java.util.ArrayList;
 import java.util.Collection;

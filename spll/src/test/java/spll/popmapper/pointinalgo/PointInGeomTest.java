@@ -14,8 +14,8 @@ import com.vividsolutions.jts.geom.Point;
 import com.vividsolutions.jts.geom.Polygon;
 
 import core.util.random.GenstarRandom;
-import spll.popmapper.pointInalgo.CentroidPointinLocalizer;
-import spll.popmapper.pointInalgo.RandomPointInLocalizer;
+import spll.localizer.pointInalgo.CentroidPointinLocalizer;
+import spll.localizer.pointInalgo.RandomPointInLocalizer;
 
 public class PointInGeomTest {
 

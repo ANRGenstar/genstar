@@ -1,4 +1,4 @@
-package spll.popmapper.distribution.function;
+package spll.localizer.distribution.function;
 
 import java.util.Collection;
 import java.util.function.BiFunction;
