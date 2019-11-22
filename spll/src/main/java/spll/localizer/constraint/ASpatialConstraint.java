@@ -32,10 +32,10 @@ public abstract class ASpatialConstraint implements ISpatialConstraint {
 			currentValue = Math.min(currentValue + increaseStep, maxIncrease);
 			constraintLimitReach = false;
 			nbIncrements++;
+			relaxConstraintOp(nests);
 		} else {
 			constraintLimitReach = true;
 		}
-		relaxConstraintOp(nests);
 	}
 	
 
