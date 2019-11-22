@@ -71,8 +71,9 @@ public class SPLinker<E extends ADemoEntity> implements ISPLinker<E> {
 				filteredCandidates = this.filterWithRelease(filteredCandidates);
 				res.clear();
 				for(E e : unbindedEntities) {
-					Optional<AGeoEntity<? extends IValue>> oNest = this.getCandidate(e, filteredCandidates); 
-					if(!oNest.isPresent()) {
+					Optional<AGeoEntity<? extends IValue>> oNest = Optional.ofNullable(
+							distribution.getCandidate(e, new ArrayList<>(filteredCandidates))); 
+					if(oNest.isPresent()) {
 						res.put(e, oNest); 
 						constraints.stream().forEach(c -> c.updateConstraint(oNest.get()));
 					}
