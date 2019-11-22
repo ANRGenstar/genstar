@@ -393,11 +393,10 @@ public class SPLocalizer implements ISPLocalizer {
 					.collect(Collectors.toList());
 			
 			Collection<SpllEntity> remainingEntities = new ArrayList<>(entities);
-			List<AGeoEntity<? extends IValue>> candidates = new ArrayList<>(possibleNests);
 			for (ISpatialConstraint cr : otherConstraints) {
 				while (!cr.isConstraintLimitReach()) {
 					
-					candidates = new ArrayList<>(candidates);
+					List<AGeoEntity<? extends IValue>> candidates = new ArrayList<>(localizationConstraint.getReferenceFile().getGeoEntity());
 					for (ISpatialConstraint constraint : otherConstraints) {
 						candidates = constraint.getCandidates(candidates);
 					}

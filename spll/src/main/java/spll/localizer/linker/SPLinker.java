@@ -66,9 +66,9 @@ public class SPLinker<E extends ADemoEntity> implements ISPLinker<E> {
 		}
 		
 		if(!unbindedEntities.isEmpty()) {
-			Collection<? extends AGeoEntity<? extends IValue>> filteredCandidates = new ArrayList<>(candidates);
+			Collection<? extends AGeoEntity<? extends IValue>> filteredCandidates = null;
 			do {
-				filteredCandidates = this.filterWithRelease(filteredCandidates);
+				filteredCandidates = this.filterWithRelease(candidates);
 				res.clear();
 				for(E e : unbindedEntities) {
 					Optional<AGeoEntity<? extends IValue>> oNest = Optional.ofNullable(
