@@ -70,12 +70,21 @@ public interface ISPLinker<E extends IEntity<Attribute<? extends IValue>>> {
 	public ISpatialDistribution<E> getDistribution();
 
 	/**
-	 * Filter the collection of given candidate to fit {@link ISPLinker} constraints
+	 * Filter the collection of given candidate to fit {@link ISPLinker} constraints requirement without releasing them
 	 * 
 	 * @param candidates
 	 * @return the collection of fitting spatial entities that are acceptable candidates
 	 */
 	public Collection<AGeoEntity<? extends IValue>> filter(
+			Collection<? extends AGeoEntity<? extends IValue>> candidates);
+	
+	/**
+	 * Filter the collection of given candidate with constraint release
+	 * 
+	 * @param candidates
+	 * @return the collection of fitting spatial entities that are acceptable candidates
+	 */
+	public Collection<AGeoEntity<? extends IValue>> filterWithRelease(
 			Collection<? extends AGeoEntity<? extends IValue>> candidates);
 	
 	/**

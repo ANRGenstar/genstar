@@ -4,15 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
 import core.metamodel.value.IValue;
-import spll.SpllEntity;
 import spll.localizer.constraint.ISpatialConstraint;
 import spll.localizer.distribution.ISpatialDistribution;
 
@@ -53,33 +54,33 @@ public class SPLinker<E extends ADemoEntity> implements ISPLinker<E> {
 	@Override
 	public Map<E, Optional<AGeoEntity<? extends IValue>>> getCandidates(Collection<E> entities,
 			Collection<? extends AGeoEntity<? extends IValue>> candidates) {
-		throw new UnsupportedOperationException("This method [SPLinker.getCandidates(...)] has not been yet implemented. "
-				+ "Request developpers at https://github.com/ANRGenstar/genstar");
 		
-		/*
-		List<ISpatialConstraint> otherConstraints = constraints.stream()
-				.sorted((n1, n2) -> Integer.compare( n1.getPriority(), n2.getPriority()))
-				.collect(Collectors.toList());
 		
-		Collection<SpllEntity> remainingEntities = null;
-		List<AGeoEntity<? extends IValue>> spatialCandidates = new ArrayList<>(candidates);
-		for (ISpatialConstraint cr : otherConstraints) {
-			while (!cr.isConstraintLimitReach()) {
-				
-				for (ISpatialConstraint constraint : otherConstraints) {
-					spatialCandidates = constraint.getCandidates(spatialCandidates);
-				}
-				
-				remainingEntities = localizationInNestOp(remainingEntities, candidates, null);
-				
-				if (remainingEntities != null && !remainingEntities.isEmpty()) 
-					cr.relaxConstraint(spatialCandidates);
-				else return;
-
-			}
+		Map<E, Optional<AGeoEntity<? extends IValue>>> res = entities.stream()
+				.collect(Collectors.toMap(Function.identity(), e -> this.getCandidate(e,candidates)));
+		
+		Collection<E> unbindedEntities = new HashSet<>();
+		for(E e : res.keySet()) { 
+			if(!res.get(e).isPresent()) unbindedEntities.add(e);
+			else constraints.forEach(c -> c.updateConstraint(res.get(e).get()));
 		}
-		*/
-			
+		
+		if(!unbindedEntities.isEmpty()) {
+			Collection<? extends AGeoEntity<? extends IValue>> filteredCandidates = new ArrayList<>(candidates);
+			do {
+				filteredCandidates = this.filterWithRelease(filteredCandidates);
+				res.clear();
+				for(E e : unbindedEntities) {
+					Optional<AGeoEntity<? extends IValue>> oNest = this.getCandidate(e, filteredCandidates); 
+					if(!oNest.isPresent()) {
+						res.put(e, oNest); 
+						constraints.stream().forEach(c -> c.updateConstraint(oNest.get()));
+					}
+				}
+				unbindedEntities = res.keySet().stream().filter(e -> !res.get(e).isPresent()).collect(Collectors.toList());
+			} while (!unbindedEntities.isEmpty() || this.constraints.stream().allMatch(ISpatialConstraint::isConstraintLimitReach));
+		}
+		return res;
 	}
 	
 	@Override
@@ -93,7 +94,7 @@ public class SPLinker<E extends ADemoEntity> implements ISPLinker<E> {
 	}
 	
 	@Override
-	public Collection<AGeoEntity<? extends IValue>> filter(
+	public Collection<AGeoEntity<? extends IValue>> filterWithRelease (
 			Collection<? extends AGeoEntity<? extends IValue>> candidates) {
 		List<AGeoEntity<? extends IValue>> filteredCandidates = new ArrayList<>(candidates);
 		List<ISpatialConstraint> scs = constraints.stream().sorted(
@@ -134,6 +135,21 @@ public class SPLinker<E extends ADemoEntity> implements ISPLinker<E> {
 			return filteredCandidates;
 		}
 		
+	}
+	
+	@Override
+	public Collection<AGeoEntity<? extends IValue>> filter(
+			Collection<? extends AGeoEntity<? extends IValue>> candidates) {
+		List<AGeoEntity<? extends IValue>> filteredCandidates = new ArrayList<>(candidates);
+		List<ISpatialConstraint> scs = constraints.stream().sorted(
+				(c1,c2) -> Integer.compare(c1.getPriority(), c2.getPriority()))
+				.collect(Collectors.toList());
+		for(ISpatialConstraint sc : scs) {
+			filteredCandidates = sc.getCandidates(filteredCandidates);
+			if(filteredCandidates.isEmpty())
+				return Collections.emptyList();
+		}
+		return filteredCandidates;	
 	}
 
 	@Override

@@ -431,9 +431,10 @@ public class SPLocalizer implements ISPLocalizer {
 			if (possibleNests.isEmpty()) {
 				break;
 			}
-			AGeoEntity<? extends IValue> nest =linker.getDistribution().getCandidate(entity, possibleNests);
+			Optional<AGeoEntity<? extends IValue>> oNest = linker.getCandidate(entity, possibleNests);
 			boolean removeObject = false;
-			if(nest != null) {
+			if(oNest.isPresent()) {
+				AGeoEntity<? extends IValue> nest = oNest.get();
 				for (ISpatialConstraint constraint: linker.getConstraints()) {
 					removeObject = removeObject || constraint.updateConstraint(nest);
 				}
