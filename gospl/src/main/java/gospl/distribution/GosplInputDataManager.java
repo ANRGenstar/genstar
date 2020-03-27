@@ -256,7 +256,7 @@ public class GosplInputDataManager {
 			final IGenstarDictionary<Attribute<? extends IValue>> dictionary) 
 			throws IOException, InvalidSurveyFormatException {
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve data table from files", logger, Level.TRACE);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve data table from files", logger, Level.INFO);
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		final GSDataParser dataParser = new GSDataParser();

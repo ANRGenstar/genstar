@@ -117,6 +117,22 @@ public class GSDataParser {
 					throw new GSIllegalRangedData("Range template has more than 3 range format");
 			}
 		}
+		if (lowerBound.isEmpty()) {
+			for(String range : ranges){
+				List<Integer> ints = this.getRangedIntegerData(range, numMatcher);
+				if (ints.get(0).equals(rangeInt.get(0)) && ints.size()==2) {
+					lowerBound = range.replaceAll(ints.get(1).toString(), match);
+				}
+			}
+		}
+		if (upperBound.isEmpty()) {
+			for(String range : ranges){
+				List<Integer> ints = this.getRangedIntegerData(range, numMatcher);
+				if (ints.size()==2 && ints.get(1).equals(rangeInt.get(rangeInt.size()-1))) {
+					lowerBound = range.replaceAll(ints.get(0).toString(), match);
+				}
+			}
+		}
 		return new GSRangeTemplate(lowerBound, middle, upperBound, match, numMatcher);
 	}
 	
