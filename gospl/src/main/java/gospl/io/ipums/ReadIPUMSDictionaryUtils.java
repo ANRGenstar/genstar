@@ -134,8 +134,11 @@ public class ReadIPUMSDictionaryUtils {
 			Map<String, List<String>> dictionary, IGenstarDictionary<Attribute<? extends IValue>> dd) throws GSIllegalRangedData{
 		
 		final List<String> attributeSubList = new ArrayList<>();
-		if(id.isEmpty())
-			attributeSubList.addAll(this.getAttributeVector(id, dictionary));
+		if(id.isEmpty()) {
+			IPUMSLEVEL.getSerials().stream().forEach(serial -> 
+				attributeSubList.addAll(this.getAttributeVector(serial, dictionary))
+				);
+		}
 		
 		/*
 		 *  Retrieve the paragraph of each attribute {attribute name :: lines of variable}
@@ -354,19 +357,29 @@ public class ReadIPUMSDictionaryUtils {
 		
 		boolean headerLine = true;
 		while(headerLine) {
-			if(attVector.get(0).contains(VARIABLE_COL))
-				headerLine = false;
-			attVector.remove(0);
+			if(attVector.get(0).contains(VARIABLE_COL)) attVector.remove(0);
+			else { headerLine = false; }
 		}
 		
-		List<String> identifiers = attVector.stream().filter(att -> IPUMSLEVEL.getSerials().contains(att)).collect(Collectors.toList());
-		
-		attVector = attVector.stream()
+		List<String> varVector = attVector.stream()
 				.map(l -> new StringTokenizer(l).nextToken().trim())
-				.collect(Collectors.toList())
-				.subList(attVector.indexOf(id), 
-						identifiers.size() == 1 ? attVector.size()-1 : 
-							attVector.indexOf(identifiers.stream().filter(i->!i.equals(id)).findFirst().get()));
+				.collect(Collectors.toList());
+		
+		// Att match serial
+		List<String> identifiers = varVector.stream().filter(var -> IPUMSLEVEL.getSerials()
+					.stream().anyMatch(serial->var.equals(serial)))
+				.collect(Collectors.toList());
+		
+		
+		int id_idx = varVector.indexOf(id);
+		int next_idx  = identifiers.stream()
+					.filter(i->!i.equals(id))
+					.mapToInt(ido -> varVector.indexOf(ido))
+					.filter(ido -> ido > id_idx)
+					.sorted()
+					.findFirst().orElse(attVector.size());
+		
+		attVector = varVector.subList(id_idx, next_idx);
 		
 		return attVector.stream().filter(l -> !REGEX_HEADER.contains(l))
 				.collect(Collectors.toList());
