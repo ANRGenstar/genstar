@@ -54,8 +54,8 @@ public class GosplMultiLayerCoordinate extends ACoordinate<Attribute<? extends I
 	
 	@Override
 	protected boolean isCoordinateSetComplient(Map<Attribute<? extends IValue>, IValue> coordinateSet) {
-		// TODO Auto-generated method stub
-		return false;
+		return coordinateSet.entrySet().stream()
+				.allMatch(e -> e.getValue().getValueSpace().getAttribute().equals(e.getKey()));
 	}
 	
 }

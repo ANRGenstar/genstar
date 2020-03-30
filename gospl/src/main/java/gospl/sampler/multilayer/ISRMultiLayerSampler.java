@@ -11,7 +11,7 @@ import gospl.sampler.ISampler;
  * @author kevinchapuis
  *
  */
-public interface IMultiLayerSampler extends ISampler<GosplMultiLayerCoordinate> {
+public interface ISRMultiLayerSampler extends ISampler<GosplMultiLayerCoordinate> {
 	
 	@Override
 	default EGosplGenerationConcept getConcept() {

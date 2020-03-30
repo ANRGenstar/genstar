@@ -172,6 +172,15 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 			return Collections.singleton(encodedValues.getRelatedValue(value));
 		throw new NullPointerException();
 	}
+	
+	/**
+	 * Says if this attribute is an implementation of an {@link EmergentAttribute}
+	 * 
+	 * @return true if it is an emergent attribute, false otherwise
+	 */
+	public boolean isEmergent() {
+		return false;
+	}
 
 	////////////////////////////////////////////////////////////////
 	// ------------------------- UTILITY ------------------------ //

@@ -52,6 +52,14 @@ public interface IGSSurvey {
 			IGenstarDictionary<Attribute<? extends IValue>> dictionnary);
 
 	/**
+	 * Retrieves the column headers for Id and Weight meta data
+	 * @param dictionnary
+	 * @return
+	 */
+	public Map<String, Integer> getColumnIdAndWeight(
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary);
+	
+	/**
 	 * return the unique value associated to line at {@code rowIndex} and column at {@code columnIndex}
 	 * 
 	 * @param rowIndex

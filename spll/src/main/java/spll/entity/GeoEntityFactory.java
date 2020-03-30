@@ -1,7 +1,6 @@
 package spll.entity;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -55,11 +54,7 @@ public class GeoEntityFactory {
 	
 	public GeoEntityFactory(Map<Feature, SpllFeature> feature2splFeature) {
 		this.featureAttributes = new HashMap<>();
-		
-		if (feature2splFeature == null)
-			this.feature2splFeature = Collections.emptyMap();
-		else 
-			this.feature2splFeature = feature2splFeature;
+		this.feature2splFeature = feature2splFeature;
 	}
 	
 	/**
@@ -166,7 +161,7 @@ public class GeoEntityFactory {
 	}
 	
 	/**
-	 * 
+	 * Create a vector style entity based on a geometry (as defined by JTS and a list of pair attribute::value defined by Gen*)
 	 * 
 	 * @param the_geom
 	 * @param featureValues

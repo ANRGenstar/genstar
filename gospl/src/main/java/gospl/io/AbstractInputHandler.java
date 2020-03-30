@@ -2,6 +2,7 @@ package gospl.io;
 
 import java.io.File;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -217,6 +218,28 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		return columnHeaders;
 	}
 	
+	@Override
+	public Map<String, Integer> getColumnIdAndWeight(
+			IGenstarDictionary<Attribute<? extends IValue>> dictionnary) {
+		Map<String, Integer> columnHeaders = new HashMap<>();
+		
+		List<String> idwgt = new ArrayList<>();
+		String id = dictionnary.getIdentifierAttributeName();
+		String wgt = dictionnary.getWeightAttributeName();
+		if(!id.isEmpty()) {idwgt.add(id);}
+		if(!wgt.isEmpty()) {idwgt.add(wgt);}
+		
+		if(idwgt.isEmpty()) {return columnHeaders;}
+		
+		for(int i = getFirstColumnIndex(); i <= getLastColumnIndex(); i++){
+			List<String> columnAtt = readLines(0, getFirstRowIndex(), i);
+			Optional<String> opIdWgt = idwgt.stream()
+					.filter(iw -> columnAtt.stream().anyMatch(s -> iw.equals(s)))
+					.findFirst();
+			if(opIdWgt.isPresent()) { columnHeaders.put(opIdWgt.get(),i); }
+		}
+		return columnHeaders;
+	}
 
 	@Override
 	public final GSSurveyType getDataFileType() {

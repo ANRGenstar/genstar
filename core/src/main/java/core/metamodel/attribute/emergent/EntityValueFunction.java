@@ -1,5 +1,6 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
@@ -32,12 +33,22 @@ public class EntityValueFunction<E extends IEntity<? extends IAttribute<? extend
 	private Attribute<V> superReferent;
 	private Attribute<V> subReferent;
 
+	/**
+	 * 
+	 * @param superReferent
+	 * @param subReferent
+	 * @param mapping
+	 */
 	public EntityValueFunction(Attribute<V> superReferent, Attribute<V> subReferent, Map<V, V> mapping) {
 		this.superReferent = superReferent;
 		this.subReferent = subReferent;
 		this.mapping = this.checkMapping(mapping);
 	}
 	
+	/**
+	 * 
+	 * @param referent
+	 */
 	public EntityValueFunction(Attribute<V> referent) {
 		this.mapping = referent.getValueSpace().getValues().stream()
 				.collect(Collectors.toMap(Function.identity(), Function.identity()));
@@ -45,10 +56,21 @@ public class EntityValueFunction<E extends IEntity<? extends IAttribute<? extend
 		this.subReferent = referent;
 	}
 	
+	// The general contract of the class
+	
 	@Override
 	public V apply(E entity) {
 		return mapping.get(entity.getValueForAttribute(this.subReferent.getAttributeName()));
 	}
+
+	@Override
+	public Collection<Map<IAttribute<? extends IValue>, IValue>> reverse(
+			Map<IAttribute<? extends IValue>, IValue> entities) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	// Utilities and accessors
 
 	@Override
 	public Attribute<V> getReferent() {

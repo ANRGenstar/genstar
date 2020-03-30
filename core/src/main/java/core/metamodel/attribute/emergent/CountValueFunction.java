@@ -34,6 +34,8 @@ public class CountValueFunction<E extends IEntity<? extends IAttribute<? extends
 		this.referent = referent;
 	}
 	
+	// Main (java) Function (class) contract
+	
 	@Override
 	public V apply(Collection<E> entity) {
 		int size = entity.size();
@@ -45,6 +47,15 @@ public class CountValueFunction<E extends IEntity<? extends IAttribute<? extends
 			keys.get(keys.size()-1) >= size ? mapping.get(keys.get(keys.size()-1)) :
 				mapping.get(keys.stream().filter(k -> k == size).findFirst().get());
 	}
+	
+	@Override
+	public Collection<Map<IAttribute<? extends IValue>, IValue>> reverse(
+			Map<IAttribute<? extends IValue>, IValue> entities) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	// Other part
 
 	@Override
 	public Attribute<V> getReferent() {

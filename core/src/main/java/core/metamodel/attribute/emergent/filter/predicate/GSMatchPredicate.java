@@ -3,8 +3,10 @@ package core.metamodel.attribute.emergent.filter.predicate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.emergent.filter.AGSEntitySelector;
 import core.metamodel.attribute.emergent.filter.IGSEntitySelector;
@@ -46,6 +48,11 @@ public class GSMatchPredicate<U, T> extends AGSEntitySelector<U, T> {
 	@Override
 	public U apply(IEntity<? extends IAttribute<? extends IValue>> superEntity) {
 		return transposer.apply(superEntity);
+	}
+
+	@Override
+	public <V extends IValue> Map<IAttribute<? extends IValue>, IValue> reverse(EmergentAttribute<V,U,T> attribute, V value) {
+		return transposer.reverse(attribute, value);
 	}
 
 }

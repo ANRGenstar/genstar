@@ -36,9 +36,10 @@ public class DirectSamplingMultiLayerAlgo implements ISynthethicReconstructionMu
 				|| !bottomMatrix.isSegmented() && bottomMatrix.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable))
 		 	throw new IllegalDistributionCreation("Can't create a sampler using GosplMetaDataType#LocalFrequencyTable");
 		
-		sampler.setGroupLevelDistribution(topMatrix);
+		sampler.setGroupLevelDistribution(GosplNDimensionalMatrixFactory.getFactory()
+				.createDistribution(topMatrix,gspu));
 		sampler.setEntityLevelDistribution(GosplNDimensionalMatrixFactory.getFactory()
-				.createDistribution(bottomMatrix.getMatrix()));
+				.createDistribution(bottomMatrix,gspu));
 		
 		return sampler;
 	}

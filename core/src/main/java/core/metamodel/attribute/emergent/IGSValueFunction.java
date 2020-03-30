@@ -1,5 +1,7 @@
 package core.metamodel.attribute.emergent;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.function.Function;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -11,6 +13,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.attribute.EmergentFunctionSerializer;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 
@@ -43,5 +46,15 @@ public interface IGSValueFunction<U, V extends IValue> extends Function<U, V> {
 	
 	@JsonProperty(MappedAttribute.REF)
 	public void setReferent(Attribute<V> referent);
+	
+	/**
+	 * Reverse the use of the {@link #apply(Object)} function : <\p>
+	 * ==> Return a collection (i.e. as many item as the number of concerned sub-entities) of related attributes given 
+	 * as parameter (i.e. the correlation of attribute that should determine which entity it is) <\p>
+	 * ==> i.e : it will duplicates or not 
+	 * @param entities
+	 * @return
+	 */
+	public Collection<Map<IAttribute<? extends IValue>,IValue>> reverse(Map<IAttribute<? extends IValue>,IValue> entities);
 	
 }

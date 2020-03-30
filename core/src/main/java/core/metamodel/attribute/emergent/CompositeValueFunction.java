@@ -27,6 +27,8 @@ public class CompositeValueFunction<V extends IValue> implements
 		referent.getValueSpace().getValues().stream().forEach(value -> this.predicates.put(new ArrayList<>(), value));
 	}
 	
+	// Main (Java) Function (Class) contract
+	
 	@Override
 	public V apply(IEntity<? extends IAttribute<? extends IValue>> superEntity) {
 		return predicates.entrySet().stream()
@@ -34,6 +36,15 @@ public class CompositeValueFunction<V extends IValue> implements
 						.allMatch(predicate -> predicate.validate(predicate.getMatchType(), superEntity)))
 				.findFirst().get().getValue();
 	}
+	
+	@Override
+	public Collection<Map<IAttribute<? extends IValue>, IValue>> reverse(
+			Map<IAttribute<? extends IValue>, IValue> entities) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	// Other part
 
 	@Override
 	public Attribute<V> getReferent() {

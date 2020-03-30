@@ -1,6 +1,7 @@
 package core.metamodel.attribute.emergent;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -34,6 +35,8 @@ public class AggregateValueFunction<V extends IValue> implements
 		this.referent = referent;
 	}
 	
+	// Main (Java) Function (Class) contract
+	
 	@Override
 	public V apply(Collection<IEntity<? extends IAttribute<? extends IValue>>> entities) {
 		return aggregator.aggregate(entities.stream()
@@ -42,6 +45,15 @@ public class AggregateValueFunction<V extends IValue> implements
 				.collect(Collectors.toList()), this.referent.getValueSpace());
 	}
 
+	@Override
+	public Collection<Map<IAttribute<? extends IValue>, IValue>> reverse(
+			Map<IAttribute<? extends IValue>, IValue> entities) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	// Other part
+	
 	@Override
 	public Attribute<V> getReferent() {
 		return this.referent;

@@ -76,7 +76,7 @@ public class IRejectionSampler implements IEntitySampler {
 	public void addObjectives(INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> objectives) {
 		GosplNDimensionalMatrixFactory gndmf = GosplNDimensionalMatrixFactory.getFactory();
 		if(rejectionDistribution == null) {
-			this.rejectionDistribution = gndmf.createDistribution((AFullNDimensionalMatrix<Integer>)objectives);
+			this.rejectionDistribution = gndmf.createDistribution(objectives);
 		} else {
 			AFullNDimensionalMatrix<Double> dToAdd = gndmf.createDistribution((AFullNDimensionalMatrix<Integer>)objectives);
 			AFullNDimensionalMatrix<Double> rejectD = gndmf.createDistribution(rejectionDistribution, new GSPerformanceUtil("")); 

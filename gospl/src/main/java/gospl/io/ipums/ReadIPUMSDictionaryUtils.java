@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jfree.data.time.Hour;
 
 import core.configuration.dictionary.AttributeDictionary;
 import core.configuration.dictionary.IGenstarDictionary;
@@ -44,8 +45,8 @@ public class ReadIPUMSDictionaryUtils {
 	public enum IPUMSLEVEL {
 		Household ("SERIAL","HHWT", 1),
 		Individual ("PERNUM", "PERWT", 0);
-		private String serial, weight;
-		private int level;
+		final private String serial, weight;
+		final private int level;
 		private IPUMSLEVEL(String serial, String weight, int level) {
 			this.serial = serial;
 			this.weight = weight;
@@ -56,6 +57,9 @@ public class ReadIPUMSDictionaryUtils {
 		public int getLevel() {return this.level;}
 		public static List<String> getSerials() {
 			return Stream.of(IPUMSLEVEL.values()).map(IPUMSLEVEL::getSerial).collect(Collectors.toList());
+		}
+		public static IPUMSLEVEL getLevel(String serial) {
+			switch (serial) { case "PERNUM": return Individual; case "SERIAL": return Household; default: throw new IllegalAccessError(); }
 		}
 	}
 	
@@ -134,17 +138,24 @@ public class ReadIPUMSDictionaryUtils {
 			Map<String, List<String>> dictionary, IGenstarDictionary<Attribute<? extends IValue>> dd) throws GSIllegalRangedData{
 		
 		final List<String> attributeSubList = new ArrayList<>();
+		final IPUMSLEVEL lvl;
 		if(id.isEmpty()) {
 			IPUMSLEVEL.getSerials().stream().forEach(serial -> 
 				attributeSubList.addAll(this.getAttributeVector(serial, dictionary))
 				);
+			lvl = IPUMSLEVEL.Household;
+		} else {
+			attributeSubList.addAll(this.getAttributeVector(id, dictionary));
+			lvl = IPUMSLEVEL.getLevel(id);
 		}
 		
+		final Map<String, String> attributeNameSubMap = attributeNames.entrySet().stream()
+				.filter(entry -> attributeSubList.contains(entry.getKey()))
+				.collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 		/*
 		 *  Retrieve the paragraph of each attribute {attribute name :: lines of variable}
 		 */
-		Map<String, List<String>> attMap = attributeNames.entrySet().stream()
-				.filter(entry -> attributeSubList.contains(entry.getKey()))
+		Map<String, List<String>> attMap = attributeNameSubMap.entrySet().stream()
 				.collect(Collectors.toMap(
 						e -> e.getKey(), 
 						e -> dictionary.entrySet().stream()
@@ -156,7 +167,7 @@ public class ReadIPUMSDictionaryUtils {
 		 * Map of {Detailed attribute Code = Aggregated Attribute Code} to build referent attribute FROM aggregated attribute
 		 */
 		Map<String, String> aggAtt = new HashMap<>();
-		for(Entry<String,String> attNames : attributeNames.entrySet()) {
+		for(Entry<String,String> attNames : attributeNameSubMap.entrySet()) {
 			if(attNames.getValue().contains(DETAILED_ATTRIBUTE_TAG)) {
 				String aggName = attNames.getValue();
 				String refName = attributeNames.entrySet().stream()
@@ -220,6 +231,10 @@ public class ReadIPUMSDictionaryUtils {
 		
 		dd.addAttributes(referents);
 		dd.addAttributes(attList);
+		
+		dd.setLevel(lvl.getLevel());
+		dd.setIdentifierAttributeName(lvl.getSerial());
+		dd.setWeightAttributeName(lvl.getWeight());
 
 		return dd;
 		

@@ -83,7 +83,9 @@ import spll.entity.SpllFeature;
 import spll.io.exception.InvalidGeoFormatException;
 
 /**
- * Constructs shapefiles
+ * Builder that makes it possible to create GIS based file. General underlying contract is defined by GeoTools
+ * </br>
+ * Can be used as a builder (setup all options and then build your object) or a regular factory
  * 
  * @author Kevin Chapuis
  *

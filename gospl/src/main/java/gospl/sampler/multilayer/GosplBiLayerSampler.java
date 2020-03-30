@@ -1,38 +1,57 @@
 package gospl.sampler.multilayer;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.value.IValue;
-import gospl.algo.sr.ds.DirectSamplingAlgo;
+import gospl.GosplEntity;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
-import gospl.distribution.matrix.INDimensionalMatrix;
-import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.distribution.matrix.coordinate.GosplMultiLayerCoordinate;
-import gospl.sampler.ISampler;
-import gospl.sampler.sr.GosplBasicSampler;
 import gospl.sampler.sr.GosplCompletionDirectSampling;
 
 /**
  * A sampler based on SR techniques that will draw a two layer entity, e.g. individuals in household. 
  * 
+ * TODO : development of sample-free solution based on "symbolic link" between different statistical level
+ * 
  * @author kevinchapuis
  *
  */
-public class GosplBiLayerSampler implements IMultiLayerSampler {
+public class GosplBiLayerSampler implements ISRMultiLayerSampler {
 	
-	private ISampler<ACoordinate<Attribute<? extends IValue>, IValue>> groupSampler;
+	private GosplCompletionDirectSampling groupSampler = new GosplCompletionDirectSampling();
+	private Set<Attribute<? extends IValue>> groupD;
+	private Map<EmergentAttribute<? extends IValue,?,?>,Attribute<? extends IValue>> anchorD;
 	private GosplCompletionDirectSampling entitySampler = new GosplCompletionDirectSampling();
+	private Set<Attribute<? extends IValue>> indivD;
 
 	@Override
 	public GosplMultiLayerCoordinate draw() {
-		GosplMultiLayerCoordinate coord = new GosplMultiLayerCoordinate(groupSampler.draw());
+		System.out.println("[CRADO SYSO - GosplBiLayerSampler]");
+		
+		GosplEntity indivA = new GosplEntity(entitySampler.draw().getMap());
+		System.out.println("ANCHOR INDIV: "+indivA);
+		
+		Map<Attribute<? extends IValue>, IValue> anchorCoordinates = new HashMap<>();
+		for (@SuppressWarnings("rawtypes") EmergentAttribute ea : anchorD.keySet()) { 
+			anchorCoordinates.put(anchorD.get(ea), ea.getEmergentValue(indivA));
+		}
+		System.out.println("ANCHOR VALUES: "+anchorCoordinates.values()
+			.stream().map(IValue::getStringValue).collect(Collectors.joining(";")));
+
+		GosplMultiLayerCoordinate coord = new GosplMultiLayerCoordinate(groupSampler
+				.complete(new GosplCoordinate(anchorCoordinates)));
+		System.out.println("FIRST GROUP ENTITY IS: "+coord);
+		
 		Map<Attribute<? extends IValue>, IValue> deciders = coord.getMap().keySet().stream()
 				.filter(a -> !a.getReferentAttribute().equals(a))
 				.collect(Collectors.toMap(Function.identity(), k -> coord.getMap().get(k)));
@@ -49,12 +68,18 @@ public class GosplBiLayerSampler implements IMultiLayerSampler {
 	 * Describe the distribution of attribute for group layer
 	 * \p
 	 * Mandatory in order to draw entities
+	 * 
+	 * TODO : there is a little dirty tricks here, about EmergentAttribute which are cast rather than properly retrieved
+	 * 
 	 * @param distribution
 	 * @throws IllegalDistributionCreation
 	 */
-	public void setGroupLevelDistribution(
-			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> distribution) throws IllegalDistributionCreation {
-		this.groupSampler = new DirectSamplingAlgo().inferSRSampler(distribution, new GosplBasicSampler());
+	
+	public void setGroupLevelDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.groupD = distribution.getDimensions();
+		this.anchorD = groupD.stream().filter(Attribute::isEmergent)
+				.collect(Collectors.toMap(d -> ((EmergentAttribute) d),Function.identity()));
+		this.groupSampler.setDistribution(distribution);;
 	}
 
 	/**
@@ -63,8 +88,8 @@ public class GosplBiLayerSampler implements IMultiLayerSampler {
 	 * Mandatory in order to draw entities
 	 * @param distribution
 	 */
-	public void setEntityLevelDistribution(
-			AFullNDimensionalMatrix<Double> distribution) {
+	public void setEntityLevelDistribution(AFullNDimensionalMatrix<Double> distribution) {
+		this.indivD = distribution.getDimensions();
 		this.entitySampler.setDistribution(distribution);
 	}
 	

@@ -6,9 +6,9 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.GosplMultiLayerCoordinate;
 import gospl.sampler.ISampler;
-import gospl.sampler.multilayer.IMultiLayerSampler;
+import gospl.sampler.multilayer.ISRMultiLayerSampler;
 
-public interface ISynthethicReconstructionMultiLayerAlgo<SamplerType extends IMultiLayerSampler> {
+public interface ISynthethicReconstructionMultiLayerAlgo<SamplerType extends ISRMultiLayerSampler> {
 
 	/**
 	 * This method must provide a way to build a Synthetic Reconstructive (SR) sampler for multi layer population. 

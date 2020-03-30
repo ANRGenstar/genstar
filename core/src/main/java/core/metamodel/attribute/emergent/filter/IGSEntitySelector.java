@@ -2,6 +2,7 @@ package core.metamodel.attribute.emergent.filter;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -14,6 +15,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import core.configuration.jackson.attribute.EmergentTransposerSerializer;
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.comparator.ImplicitEntityComparator;
@@ -26,9 +28,8 @@ import core.metamodel.value.IValue;
  * 
  * @author kevinchapuis
  *
- * @param <E> The input that will be an {@link IEntity}
  * @param <U> The output of the filter
- * @param <M> The predicate of filter process
+ * @param <T> The predicate of filter process
  */
 @JsonTypeInfo(
 	      use = JsonTypeInfo.Id.NAME,
@@ -51,7 +52,25 @@ public interface IGSEntitySelector<U, T> extends Function<IEntity<? extends IAtt
 	public static final String MATCHERS = "MATCHERS";
 	public static final String MATCH_TYPE = "MATCH TYPE";
 	
+	/**
+	 * TODO : @doc
+	 * Meant to validate a match with the given entity
+	 * 
+	 * @param type
+	 * @param entity
+	 * @return
+	 */
 	public boolean validate(MatchType type, IEntity<? extends IAttribute<? extends IValue>> entity);
+	
+	/**
+	 * TODO : better @doc
+	 * Should provide the combination of sub entities possible attribute/value match for a given value of emergent attribute
+	 * 
+	 * @param attribute
+	 * @param value
+	 * @return
+	 */
+	public <V extends IValue> Map<IAttribute<? extends IValue>,IValue> reverse(EmergentAttribute<V,U,T> attribute, V value);
 	
 	/**
 	 * The default supplier to collect retained entities

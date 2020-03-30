@@ -22,6 +22,13 @@ public enum EntityTag {
 		this.layer = layer;
 	}
 	
+	/**
+	 * Inform about the attribute relatives in terms of layer: to which layer this attribute talk about, according to the 
+	 * layer's entity. <\p>
+	 * ==> e.g. #Parent and #Child refer to the same layer (0), while HHHead (a.k.a. Household head) refers to upper layer (1) 
+	 * 
+	 * @return
+	 */
 	public int getLayer() {
 		return layer;
 	}

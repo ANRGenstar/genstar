@@ -1,5 +1,8 @@
 package core.metamodel.attribute;
 
+import java.util.Collection;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
@@ -16,10 +19,9 @@ import core.metamodel.value.IValue;
  * 
  * @author kevinchapuis
  *
- * @param <K> the value type of the attribute
  * @param <V> the value type of the referent attribute
- * @param <E> the type of super entity this attribute will work with
- * @param <U> the type of predicate this attributes needs to make values emerge
+ * @param <U> The type of sub-entity to deal with (i.g. emergence and imergence of super-attribute)
+ * @param <F> the type of predicate this attributes needs to make values emerge
  * 
  */
 @JsonTypeName(EmergentAttribute.SELF)
@@ -40,6 +42,11 @@ public class EmergentAttribute<V extends IValue, U, F>
 		super(name);
 	}
 	
+	@Override
+	public boolean isEmergent() {
+		return true;
+	}
+	
 	/**
 	 * The main method that can retrieve the value of an attribute based on
 	 * any child properties
@@ -51,6 +58,16 @@ public class EmergentAttribute<V extends IValue, U, F>
 	@JsonIgnore
 	public V getEmergentValue(IEntity<? extends IAttribute<? extends IValue>> entity) {
 		return function.apply(this.transposer.apply(entity));
+	}
+	
+	/**
+	 * The main method that gives a set of matching values from child entities
+	 * @param value
+	 * @return
+	 */
+	@JsonIgnore
+	public Collection<Map<IAttribute<? extends IValue>,IValue>> getImeregentValues(V value){
+		return function.reverse(this.transposer.reverse(this, value));
 	}
 		
 	/**

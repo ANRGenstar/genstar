@@ -11,7 +11,9 @@ import java.util.stream.Collectors;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.IEntity;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
@@ -131,6 +133,38 @@ public class GosplNDimensionalMatrixFactory {
 		contigency.getMatrix().keySet().stream().forEach(coord -> matrix.setValue(
 											coord, 
 											new ControlFrequency(contigency.getVal(coord).getValue().doubleValue()/total)
+											));
+		
+		return matrix;
+	}
+	
+	/**
+	 * Convert an unknonw distribution into a joint distribution with uniform hypothesis for missing statistical relationships <\p>
+	 * WARNING : Result might not be consistent with original matrix !
+	 * 
+	 * @param distribution
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Double> createDistribution(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> distribution) {
+		
+		if(distribution.getMetaDataType().equals(GSSurveyType.LocalFrequencyTable)) {
+			throw new IllegalArgumentException("Cannot generate a full distribution from a "+GSSurveyType.LocalFrequencyTable);
+		}
+		
+		// Init the output matrix
+		AFullNDimensionalMatrix<Double> matrix = new GosplJointDistribution(
+				distribution.getDimensions(), 
+				GSSurveyType.GlobalFrequencyTable
+				); 
+		matrix.addGenesis("created from distribution GosplNDimensionalMatrixFactory@createDistribution");
+
+		int total = Math.round(Math.round(distribution.getVal().getValue().doubleValue()));
+		
+		// Normalize increments to global frequency
+		distribution.getMatrix().keySet().stream().forEach(coord -> matrix.setValue(
+											coord, 
+											new ControlFrequency(distribution.getVal(coord).getValue().doubleValue()/total)
 											));
 		
 		return matrix;
@@ -349,6 +383,35 @@ public class GosplNDimensionalMatrixFactory {
 		for(ADemoEntity entity : population){
 			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = 
 					new GosplCoordinate(entity.getAttributeMap());
+			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
+				matrix.getVal(entityCoord).add(1);
+		}
+		return matrix;
+	}
+	
+	/**
+	 * Create a contingency matrix from approximatively any set of entity <\p>
+	 * WARNING : involves a lot of nasty casting 
+	 * 
+	 * @param population
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> createContingency(
+			Collection<? extends IEntity<? extends IAttribute<? extends IValue>>> population) {
+		// Init the output matrix
+		@SuppressWarnings("unchecked")
+		Set<Attribute<? extends IValue>> att = (Set<Attribute<? extends IValue>>) population.stream()
+				.flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
+		
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(att);
+		matrix.addGenesis("Created from a population GosplNDimensionalMatrixFactory@createContigency");
+
+		// Transpose each entity into a coordinate and adds it to the matrix by means of increments
+		for(IEntity<? extends IAttribute<? extends IValue>> entity : population){
+			@SuppressWarnings("unchecked")
+			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(
+					(Map<Attribute<? extends IValue>,IValue>) entity.getAttributeMap()
+					);
 			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
 				matrix.getVal(entityCoord).add(1);
 		}

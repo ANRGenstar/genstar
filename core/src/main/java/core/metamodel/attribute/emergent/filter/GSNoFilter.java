@@ -1,9 +1,11 @@
 package core.metamodel.attribute.emergent.filter;
 
 import java.util.Collection;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonTypeName;
 
+import core.metamodel.attribute.EmergentAttribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.IEntity;
 import core.metamodel.entity.matcher.MatchType;
@@ -27,5 +29,14 @@ public class GSNoFilter extends AGSEntitySelector<Collection<IEntity<? extends I
 	public boolean validate(MatchType type, IEntity<? extends IAttribute<? extends IValue>> entity) {
 		return true;
 	}
+
+	@Override
+	public <V extends IValue> Map<IAttribute<? extends IValue>, IValue> reverse(
+			EmergentAttribute<V, Collection<IEntity<? extends IAttribute<? extends IValue>>>, Object> attribute,
+			V value) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 }

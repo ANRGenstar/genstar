@@ -12,7 +12,9 @@ package gospl.distribution;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,6 +26,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.management.RuntimeErrorException;
+
+import org.apache.commons.math3.exception.ZeroException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,6 +60,7 @@ import gospl.distribution.matrix.coordinate.ACoordinate;
 import gospl.distribution.matrix.coordinate.GosplCoordinate;
 import gospl.io.GosplSurveyFactory;
 import gospl.io.exception.InvalidSurveyFormatException;
+import gospl.io.util.ReadMultiLayerEntityUtils;
 
 /**
  * Main class to setup and harmonize input data. Can handle:
@@ -150,6 +156,27 @@ public class GosplInputDataManager {
 								this.configuration.getDictionary(), null,
 								Collections.emptyMap()
 						));
+	}
+	
+	/**
+	 * Main methods to parse a multi layered population, based on {@link #getMutliLayerSample(IGSSurvey, Set, Integer, Map)}
+	 * 
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
+	 */
+	public void buildMultiLayerSamples() throws InvalidFormatException, IOException, InvalidSurveyFormatException {
+		GosplSurveyFactory sf = new GosplSurveyFactory();
+		samples = new HashSet<>();
+		for (final GSSurveyWrapper wrapper : this.configuration.getSurveyWrappers()
+				.stream().filter(survey -> survey.getSurveyType().equals(GSSurveyType.Sample))
+				.collect(Collectors.toList())) {
+			samples.addAll(
+					getMutliLayerSample(
+							sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
+							this.configuration.getDictionaries(), null, Collections.emptyMap())
+					);
+		}
 	}
 
 	/////////////////////////////////////////////////////////////////////////////////
@@ -256,7 +283,7 @@ public class GosplInputDataManager {
 			final IGenstarDictionary<Attribute<? extends IValue>> dictionary) 
 			throws IOException, InvalidSurveyFormatException {
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve data table from files", logger, Level.INFO);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve data table from files", logger, Level.TRACE);
 		
 		final Set<AFullNDimensionalMatrix<? extends Number>> cTableSet = new HashSet<>();
 		final GSDataParser dataParser = new GSDataParser();
@@ -382,7 +409,7 @@ public class GosplInputDataManager {
 			)
 			throws IOException, InvalidSurveyFormatException {
 		
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a sample from a data file", logger, Level.TRACE);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a sample from a data file", logger, Level.DEBUG);
 		
 		final GosplPopulation sampleSet = new GosplPopulation();
 		
@@ -451,6 +478,160 @@ public class GosplInputDataManager {
 				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
 		}
 		return sampleSet;
+	}
+	
+	/**
+	 * Retrieve a multi layered sample from a survey (micro-data) and a dictionary per layer
+	 * 
+	 * @param survey
+	 * @param layerDicos
+	 * @return
+	 */
+	public static List<GosplPopulation> getMutliLayerSample(final IGSSurvey survey, 
+			Set<IGenstarDictionary<Attribute<? extends IValue>>> layerDicos,
+			Integer maxIndividuals, Map<String,String> keepOnlyEqual) {
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a multi layered sample from a data file", logger, Level.DEBUG);
+		
+		final List<GosplPopulation> samples = layerDicos.stream().map(dico -> new GosplPopulation())
+				.collect(Collectors.toList());
+		
+		// Read dictionary and store attributes according to Layer level
+		Map<Integer, String> layerId = new HashMap<>();
+		Map<Integer, String> layerWgt = new HashMap<>();
+		Map<Attribute<? extends IValue>,Integer> layerAtt = new HashMap<>();
+		
+		Map<Integer,Set<ReadMultiLayerEntityUtils>> layerEntityCollection = new HashMap<>();
+		
+		// Read headers and store possible variables by column index
+		final Map<Integer, Attribute<? extends IValue>> columnHeaders = new HashMap<>();
+		final Map<String, Integer> idWgtColumnHeaders = new HashMap<>();
+		for (IGenstarDictionary<Attribute<? extends IValue>> dico : layerDicos) {
+			
+			layerId.put(dico.getLevel(), dico.getIdentifierAttributeName());
+			layerWgt.put(dico.getLevel(), dico.getWeightAttributeName());
+			
+			dico.getAttributes().stream().forEach(a -> layerAtt.put(a, dico.getLevel()));
+			
+			columnHeaders.putAll(survey.getColumnSample(dico));
+			idWgtColumnHeaders.putAll(survey.getColumnIdAndWeight(dico));
+			
+			layerEntityCollection.put(dico.getLevel(), new HashSet<>());
+		}
+		
+		int unmatchSize = 0;
+		int zeroLayerIdx = 0;
+
+		loopLines : for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+			
+			// too much ?
+			if (maxIndividuals != null && zeroLayerIdx >= maxIndividuals)
+				break;
+			
+			final List<String> indiVals = survey.readLine(i);
+			
+			List<String> localIDs = layerId.keySet().stream().sorted()
+					.map(layer -> indiVals.get(idWgtColumnHeaders.get(layerId.get(layer))))
+					.collect(Collectors.toList());
+			
+			Map<Integer,ReadMultiLayerEntityUtils> localEntities = new HashMap<>();
+			for (IGenstarDictionary<Attribute<? extends IValue>> layer : layerDicos) {
+				ReadMultiLayerEntityUtils localEntity = new ReadMultiLayerEntityUtils(
+						layer.getLevel(), // LAYER LEVEL
+						indiVals.get(idWgtColumnHeaders.get(layerId.get(layer.getLevel()))), // ID 
+						indiVals.get(idWgtColumnHeaders.get(layerWgt.get(layer.getLevel()))), // WEIGHT
+						new HashMap<>()); // ATTRIBUTE :: VALUE
+				localEntity.setIDs(localIDs);
+				localEntities.put(layer.getLevel(), localEntity);
+			}
+						
+			for (final Integer idx : columnHeaders.keySet()){
+				String actualStringValue = indiVals.get(idx);
+				
+				Attribute<? extends IValue> att = columnHeaders.get(idx);
+				IValue val = null;
+				if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
+					val = att.getValueSpace().getEmptyValue();
+				else
+					val = att.getValueSpace().addValue(actualStringValue);
+				
+				// filter
+				if (val != null) {
+					String expected = keepOnlyEqual.get(att.getAttributeName());
+					if (expected != null && !val.getStringValue().equals(expected))
+						// skip
+						continue loopLines;
+				}
+				
+				if (val == null) {
+					if (	att.getEmptyValue().getStringValue() != null 
+								&& att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
+						val = att.getValueSpace().getEmptyValue();
+					else {
+						gspu.sysoStempMessage("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
+								+att.getAttributeName());
+						unmatchSize++;
+						// skip because not valide value
+						continue loopLines;
+					}
+				}
+				
+				localEntities.get(layerAtt.get(att)).getEntity().put(att,val);
+				zeroLayerIdx++;
+				
+			}
+			
+			for (Integer layer : localEntities.keySet()) { layerEntityCollection.get(layer).add(localEntities.get(layer)); }
+			
+		}
+		
+		// Put lower level entities into upper level entities
+		
+		List<Integer> layers =  layerDicos.stream()
+				.map(IGenstarDictionary::getLevel)
+				.filter(i -> i > 0)
+				.collect(Collectors.toList());
+	
+		// Start with 0 level
+		
+		Map<ReadMultiLayerEntityUtils,GosplEntity> zeroLayerEntities = layerEntityCollection.get(0).stream()
+				.collect(Collectors.toMap(
+						Function.identity(),
+						ReadMultiLayerEntityUtils::toGosplEntity
+						));
+		samples.get(0).addAll(zeroLayerEntities.values());
+		
+		// Add upper level and build Parent > Child relationship
+		
+		for( Integer layer : layers ) {
+			Map<ReadMultiLayerEntityUtils,GosplEntity> layerEntities = layerEntityCollection.get(layer).stream()
+					.collect(Collectors.toMap(
+							Function.identity(),
+							ReadMultiLayerEntityUtils::toGosplEntity
+							));
+			for(ReadMultiLayerEntityUtils child : zeroLayerEntities.keySet()) {
+				String upperId = child.getIDs().get(layer);
+				
+				Optional<ReadMultiLayerEntityUtils> parent = layerEntities.keySet().stream()
+						.filter(upEntity -> upEntity.getId().equals(upperId)).findFirst();
+				
+				if(parent.isPresent()) {
+					layerEntities.get(parent.get()).addChild(zeroLayerEntities.get(child));
+					zeroLayerEntities.get(child).setParent(layerEntities.get(parent.get()));
+				} else {
+					throw new NullPointerException("Cannot find parent Entity for "+child);
+				}
+				
+			}
+			zeroLayerEntities = layerEntities;
+			samples.get(layer).addAll(layerEntities.values());
+		}
+		
+		if (unmatchSize > 0) {
+			gspu.sysoStempMessage("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)samples.get(0).size()*100)
+				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
+		}
+		
+		return samples;
 	}
 	
 	/*
