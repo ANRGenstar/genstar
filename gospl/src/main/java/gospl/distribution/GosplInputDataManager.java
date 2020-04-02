@@ -12,9 +12,7 @@ package gospl.distribution;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,9 +24,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.management.RuntimeErrorException;
-
-import org.apache.commons.math3.exception.ZeroException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -290,13 +285,13 @@ public class GosplInputDataManager {
 		
 		// Read headers and store possible variables by line index
 		final Map<Integer, Set<IValue>> rowHeaders = survey.getRowHeaders(dictionary);
-		gspu.sysoStempMessage("detected in {} {} row headers : {}", 
-				survey.getSurveyFilePath(), rowHeaders.size(), rowHeaders);
+		gspu.sysoStempMessage("detected in "+survey.getName()+" "+
+				rowHeaders.size()+" row headers : "+rowHeaders);
 		
 		// Read headers and store possible variables by column index
 		final Map<Integer, Set<IValue>> columnHeaders = survey.getColumnHeaders(dictionary);
-		gspu.sysoStempMessage("detected in {} {} column headers : {}", 
-				survey.getSurveyFilePath(), columnHeaders.size(), columnHeaders);
+		gspu.sysoStempMessage("detected in "+survey.getName()+" "+
+				columnHeaders.size()+" column headers : "+columnHeaders);
 
 		// Store column related attributes while keeping unrelated attributes separated
 		// WARNING: Works with attribute name because of record attribute

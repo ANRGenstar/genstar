@@ -207,6 +207,11 @@ public abstract class ASegmentedNDimensionalMatrix<T extends Number> implements 
 		return coords;
 	}
 	
+	@Override
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getOrCreateCoordinates(Set<IValue> values){
+		throw new UnsupportedOperationException("Not yet implemented");
+	}
+	
 	/* (non-Javadoc)
 	 * @see gospl.distribution.matrix.ISegmentedNDimensionalMatrix#getCoordinates(java.lang.String)
 	 */

@@ -68,7 +68,7 @@ public class IRejectionSampler implements IEntitySampler {
 	}
 
 	@Override
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
+	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean withWeights) {
 		this.basePopulation = sample;
 	}
 

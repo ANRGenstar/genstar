@@ -21,7 +21,7 @@ public interface IEntitySampler extends ISampler<ADemoEntity> {
 	 * Set the sample to draw entity from
 	 * @param sample
 	 */
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample);
+	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean weights);
 	
 	/**
 	 * Add new objectives to drive entity drawing process

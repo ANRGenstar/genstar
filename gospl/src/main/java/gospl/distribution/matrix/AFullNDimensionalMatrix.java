@@ -15,6 +15,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Sets;
+
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
 import core.metamodel.io.GSSurveyType;
@@ -390,6 +392,7 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 	
 	@Override
 	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getCoordinates(Set<IValue> values){
+		if(matrix.isEmpty()) {return Collections.emptyList();}
 		Map<IAttribute<? extends IValue>, Set<IValue>> attValues = values.stream()
 				.filter(val -> this.getDimensions().contains(val.getValueSpace().getAttribute()))
 				.collect(Collectors.groupingBy(value -> value.getValueSpace().getAttribute(),
@@ -397,6 +400,25 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 		return this.matrix.keySet().stream().filter(coord -> attValues.values()
 				.stream().allMatch(attVals -> attVals.stream().anyMatch(val -> coord.contains(val))))
 				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public Collection<ACoordinate<Attribute<? extends IValue>, IValue>> getOrCreateCoordinates(Set<IValue> values) {
+		Collection<ACoordinate<Attribute<? extends IValue>, IValue>> res = this.getCoordinates(values);
+		if(res.isEmpty()) {
+			res = new HashSet<>();
+			Map<IAttribute<? extends IValue>, Set<IValue>> attValues = values.stream()
+					.filter(val -> this.getDimensions().contains(val.getValueSpace().getAttribute()))
+					.collect(Collectors.groupingBy(value -> value.getValueSpace().getAttribute(),
+					Collectors.mapping(Function.identity(), Collectors.toSet())));
+			for (List<IValue> coord : Sets.cartesianProduct(attValues.values().stream().collect(Collectors.toList()))) {
+				Map<Attribute<? extends IValue>, IValue> mapCoord = coord.stream().collect(Collectors.toMap(
+								v -> (Attribute<? extends IValue>) v.getValueSpace().getAttribute(), 
+								Function.identity())); 
+				res.add(new GosplCoordinate(mapCoord));
+			}
+		}
+		return res;
 	}
 
 	@Override

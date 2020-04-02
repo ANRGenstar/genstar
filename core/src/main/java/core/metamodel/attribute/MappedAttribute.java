@@ -65,6 +65,17 @@ public class MappedAttribute<K extends IValue, V extends IValue> extends Attribu
 		try {
 			return attributeMapper.getMappedValues(value);
 		} catch (NullPointerException e) {
+			if(getEncodedValueMapper()!=null && getEncodedValueMapper().hasValueOrRecord(value.getStringValue())) {
+				IValue rec = getEncodedValueMapper().getRelatedValue(value.getStringValue());
+				try { return attributeMapper.getMappedValues(rec);
+				} catch (NullPointerException e2) { }
+			}
+			if(referentAttribute.getEncodedValueMapper()!=null &&
+					referentAttribute.getEncodedValueMapper().hasValueOrRecord(value.getStringValue())) {
+				IValue rec = referentAttribute.getEncodedValueMapper().transpose(value);
+				try { return attributeMapper.getMappedValues(rec);
+				} catch (NullPointerException e2) { }
+			}
 			if(getReferentAttribute().getValueSpace().contains(value))
 				return Arrays.asList(this.getEmptyValue());
 			if(this.getValueSpace().contains(value))

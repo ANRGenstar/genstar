@@ -1,4 +1,4 @@
-package gospl.sampler.multilayer;
+package gospl.sampler.multilayer.sr;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -26,7 +26,7 @@ import gospl.sampler.sr.GosplCompletionDirectSampling;
  * @author kevinchapuis
  *
  */
-public class GosplBiLayerSampler implements ISRMultiLayerSampler {
+public class GosplBiLayerReconstructionSampler implements ISRMultiLayerSampler {
 	
 	private GosplCompletionDirectSampling groupSampler = new GosplCompletionDirectSampling();
 	private Set<Attribute<? extends IValue>> groupD;

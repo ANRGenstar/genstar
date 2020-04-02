@@ -30,7 +30,18 @@ public class GosplEntity extends ADemoEntity {
 	
 	@Override
 	public GosplEntity clone(){
-		return new GosplEntity(new HashMap<>(this.getAttributeMap()));
+		GosplEntity clone = new GosplEntity(new HashMap<>(this.getAttributeMap()));
+		if (this.hasChildren()) {
+			clone.addChildren(this.getChildren());
+			clone.getChildren().stream().forEach(child -> child.setParent(clone));
+		}
+		if (this.hasParent()) {
+			clone.setParent(this.getParent());
+			this.getParent().getChildren().remove(this);
+			this.getParent().getChildren().add(clone);
+		}
+		clone.setWeight(this.getWeight());
+		return clone;
 	}
 
 

@@ -336,13 +336,14 @@ public class AttributeDeserializer extends StdDeserializer<IAttribute<? extends 
 	
 	private Map<String, String> getRecordMapping(JsonNode node) {
 		JsonNode mapping = node.findValue(EncodedValueMapper.SELF);
-		if(mapping == null || !mapping.isArray())
+		if(mapping == null || !mapping.has(EncodedValueMapper.MAPPING))
 			throw new IllegalArgumentException("Trying to unmap the mapper but cannot access array mapping: "
 					+ "node type instade is "+node.getNodeType());
 		Map<String, String> records = new HashMap<>();
+		JsonNode themap = mapping.get(EncodedValueMapper.MAPPING);
 		int i = 0;
-		while(mapping.has(i)) {
-			String[] keyVal = mapping.get(i++).asText()
+		while(themap.has(i)) {
+			String[] keyVal = themap.get(i++).asText()
 					.split(GSKeywords.SERIALIZE_KEY_VALUE_SEPARATOR);
 			for(String record : keyVal[1].split(GSKeywords.SERIALIZE_ELEMENT_SEPARATOR)) {
 				records.put(record, keyVal[0].trim());

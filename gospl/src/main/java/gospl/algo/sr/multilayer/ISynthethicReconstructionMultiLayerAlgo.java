@@ -6,7 +6,7 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.GosplMultiLayerCoordinate;
 import gospl.sampler.ISampler;
-import gospl.sampler.multilayer.ISRMultiLayerSampler;
+import gospl.sampler.multilayer.sr.ISRMultiLayerSampler;
 
 public interface ISynthethicReconstructionMultiLayerAlgo<SamplerType extends ISRMultiLayerSampler> {
 

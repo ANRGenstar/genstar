@@ -2,12 +2,15 @@ package gospl.distribution;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.logging.log4j.Level;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
@@ -390,7 +393,7 @@ public class GosplNDimensionalMatrixFactory {
 	}
 	
 	/**
-	 * Create a contingency matrix from approximatively any set of entity <\p>
+	 * Create a contingency matrix from approximatively any set of entity </p>
 	 * WARNING : involves a lot of nasty casting 
 	 * 
 	 * @param population
@@ -400,8 +403,9 @@ public class GosplNDimensionalMatrixFactory {
 			Collection<? extends IEntity<? extends IAttribute<? extends IValue>>> population) {
 		// Init the output matrix
 		@SuppressWarnings("unchecked")
-		Set<Attribute<? extends IValue>> att = (Set<Attribute<? extends IValue>>) population.stream()
-				.flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
+		Set<Attribute<? extends IValue>> att = population.stream()
+				.flatMap(e -> e.getAttributes().stream())
+				.map(atttribute -> (Attribute<? extends IValue>)atttribute).collect(Collectors.toSet());
 		
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(att);
 		matrix.addGenesis("Created from a population GosplNDimensionalMatrixFactory@createContigency");
@@ -432,14 +436,39 @@ public class GosplNDimensionalMatrixFactory {
 		
 		// Init the output matrix
 		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(attributesToMeasure);
-		
 		matrix.addGenesis("created from a population GosplNDimensionalMatrixFactory@createContigency");
 
+		final GSPerformanceUtil gspu = new GSPerformanceUtil("Create a contingency matrix from a population on "+
+						attributesToMeasure.stream().map(Attribute::getAttributeName)
+						.collect(Collectors.joining("; "))+" attribute set", Level.TRACE);
+		
+		
+		gspu.sysoStempMessage("Test createContingency with given attributes: "
+				+attributesToMeasure.stream().map(Attribute::getAttributeName)
+				.collect(Collectors.joining("; ")));
+		
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> mappedAtt = 
+				attributesToMeasure.stream().collect(Collectors.toMap(
+						Function.identity(), 
+						att -> population.getPopulationAttributes().stream()
+							.filter(popAtt -> popAtt.isLinked(att))
+							.findFirst().get())
+						);
+		
+		gspu.sysoStempMessage("Attribute mapping from required to population : "
+				+mappedAtt.entrySet().stream().map(
+						entry -> entry.getKey().getAttributeName()+"::"+entry.getValue().getAttributeName())
+				.collect(Collectors.joining("; ")));
+				
 		// iterate the whole population
 		for (ADemoEntity entity : population) {
-			ACoordinate<Attribute<? extends IValue>, IValue> entityCoord = new GosplCoordinate(entity.getAttributeMap());
-			if(!matrix.addValue(entityCoord, new ControlContingency(1)))
-				matrix.getVal(entityCoord).add(1);
+			Collection<ACoordinate<Attribute<? extends IValue>, IValue>> entityCoords = matrix.getOrCreateCoordinates(attributesToMeasure.stream()
+							.flatMap(att -> att.findMappedAttributeValues(entity.getValueForAttribute(mappedAtt.get(att))).stream())
+							.collect(Collectors.toSet()));
+			for (ACoordinate<Attribute<? extends IValue>, IValue> entityCoord : entityCoords) {
+				if(!matrix.addValue(entityCoord, new ControlContingency(1)))
+					matrix.getVal(entityCoord).add(1);
+			}
 		}
 
 		return matrix;

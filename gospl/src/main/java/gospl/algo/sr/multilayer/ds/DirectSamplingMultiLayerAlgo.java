@@ -13,9 +13,9 @@ import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.distribution.matrix.coordinate.GosplMultiLayerCoordinate;
 import gospl.sampler.ISampler;
-import gospl.sampler.multilayer.GosplBiLayerSampler;
+import gospl.sampler.multilayer.sr.GosplBiLayerReconstructionSampler;
 
-public class DirectSamplingMultiLayerAlgo implements ISynthethicReconstructionMultiLayerAlgo<GosplBiLayerSampler> {
+public class DirectSamplingMultiLayerAlgo implements ISynthethicReconstructionMultiLayerAlgo<GosplBiLayerReconstructionSampler> {
 
 	private Logger logger = LogManager.getLogger();
 	
@@ -23,7 +23,7 @@ public class DirectSamplingMultiLayerAlgo implements ISynthethicReconstructionMu
 	public ISampler<GosplMultiLayerCoordinate> inferSRMLSampler(
 			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> topMatrix, 
 			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> bottomMatrix,
-			GosplBiLayerSampler sampler)
+			GosplBiLayerReconstructionSampler sampler)
 			throws IllegalDistributionCreation {
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Compute hierachical sampler from conditional distribution", logger);

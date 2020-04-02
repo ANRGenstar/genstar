@@ -140,4 +140,31 @@ public class EncodedValueMapper<K extends IValue> {
 		return Collections.unmodifiableSet(mapper.keySet());
 	} 
 	
+	/**
+	 * Check if this mapper has a reference to any given value either as record (NominalValue) or value (K)
+	 * @param value
+	 * @return true if this mapper has a reference to this string value
+	 */
+	public boolean hasValueOrRecord(String value) {
+		return mapper.entrySet().stream().anyMatch(entry -> 
+				entry.getKey().getStringValue().equals(value) 
+			|| entry.getValue().getStringValue().equals(value));
+	}
+	
+	/**
+	 * Simply map this value with corresponding record (if value of type K) or value (if record of type NominalValue)
+	 * WARNING : if the argument is a value (of type K) and that this value has several encoded records, then the methods
+	 * can return unconsistant results (choose one record at random)
+	 * @param value
+	 * @return
+	 */
+	public IValue transpose(IValue value) {
+		if(!hasValueOrRecord(value.getStringValue())) {
+			throw new NullPointerException("There is not any mapping for "+value.getStringValue());
+		}
+		return mapper.keySet().contains(value) ? 
+				this.getRecords(value.getStringValue()).stream().findAny().get() :
+					getRelatedValue(value.getStringValue());
+	}
+	
 }

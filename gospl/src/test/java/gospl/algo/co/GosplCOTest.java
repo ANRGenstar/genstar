@@ -66,7 +66,7 @@ public class GosplCOTest {
 	@Test
 	public void simulatedAnnealingTest() {
 		IEntitySampler sampler = new SampleBasedAlgorithm()
-				.setupCOSampler(SAMPLE, new CombinatorialOptimizationSampler<>(
+				.setupCOSampler(SAMPLE, false, new CombinatorialOptimizationSampler<>(
 						new SimulatedAnnealing(), SAMPLE,
 						DATA_BASED_POP, false));
 
@@ -80,7 +80,7 @@ public class GosplCOTest {
 	@Test
 	public void tabuSearchTest() {
 		IEntitySampler sampler = new SampleBasedAlgorithm()
-				.setupCOSampler(SAMPLE, new CombinatorialOptimizationSampler<>(
+				.setupCOSampler(SAMPLE, false, new CombinatorialOptimizationSampler<>(
 						new TabuSearch(new TabuList(TABULIST_SIZE), 
 								POPULATION_SIZE * 0.01, MAX_ITERATION), 
 						SAMPLE, DATA_BASED_POP, false));
@@ -95,7 +95,7 @@ public class GosplCOTest {
 	@Test
 	public void hillClimbingTest() {
 		IEntitySampler sampler = new SampleBasedAlgorithm()
-				.setupCOSampler(SAMPLE, new CombinatorialOptimizationSampler<>(
+				.setupCOSampler(SAMPLE, false, new CombinatorialOptimizationSampler<>(
 						new HillClimbing(POPULATION_SIZE * 0.01, MAX_ITERATION), 
 						SAMPLE, DATA_BASED_POP, false));
 
@@ -147,11 +147,11 @@ public class GosplCOTest {
 		for(int i = 0; i < ITER_COMP; i++) {
 			for(EGosplAlgorithm algo : algos.keySet()) {
 				IEntitySampler swoa = new SampleBasedAlgorithm()
-						.setupCOSampler(SAMPLE, algos.get(algo)[0]);
+						.setupCOSampler(SAMPLE, false, algos.get(algo)[0]);
 				swoa.addObjectives(MARGINALS);
 				
 				IEntitySampler swa = new SampleBasedAlgorithm()
-						.setupCOSampler(SAMPLE, algos.get(algo)[1]);
+						.setupCOSampler(SAMPLE, false, algos.get(algo)[1]);
 				swa.addObjectives(MARGINALS);
 				
 				double timeStemp = System.currentTimeMillis();

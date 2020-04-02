@@ -20,7 +20,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  * @author kevinchapuis
  *
  */
-public abstract class AOptimizationAlgorithm implements IOptimizationAlgorithm {
+public abstract class AOptimizationAlgorithm implements IOptimizationAlgorithm<ISyntheticPopulationSolution> {
 
 	private Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives;
 	private IPopulationNeighborSearch<?> neighborSearch;

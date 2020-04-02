@@ -13,7 +13,7 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
 /**
- * Define higher order behavior for {@link IEntitySampler}. It relies on {@link UniformSampler}
+ * Define higher order behavior for {@link IEntitySampler}. It relies on {@link MicroDataSampler}
  * 
  * @author kevinchapuis
  *
@@ -21,7 +21,7 @@ import gospl.sampler.IEntitySampler;
  */
 public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> implements IEntitySampler {
 
-	private UniformSampler basicSampler;
+	private MicroDataSampler basicSampler;
 	private A algorithm;
 
 	protected boolean dataBasedPopulation;
@@ -36,8 +36,8 @@ public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> 
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
 			boolean dataBasedPopulation, boolean aggregatedMarginals) {
 		this.algorithm = algorithm;
-		this.basicSampler = new UniformSampler();
-		this.setSample(sample);
+		this.basicSampler = new MicroDataSampler();
+		this.setSample(sample,false);
 		this.dataBasedPopulation = dataBasedPopulation;
 		this.aggregatedMarginals = aggregatedMarginals;
 	}
@@ -57,8 +57,8 @@ public class CombinatorialOptimizationSampler<A extends IOptimizationAlgorithm> 
 	}
 	
 	@Override
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
-		this.basicSampler.setSample(sample);
+	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean weights) {
+		this.basicSampler.setSample(sample,weights);
 		this.algorithm.setSample(sample);
 	}
 

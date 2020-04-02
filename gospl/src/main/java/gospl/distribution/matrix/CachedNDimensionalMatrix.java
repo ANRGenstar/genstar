@@ -290,6 +290,11 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 	public final Collection<ACoordinate<D, A>> getCoordinates(Set<A> values) {
 		return m.getCoordinates(values);
 	}
+	
+	@Override
+	public Collection<ACoordinate<D, A>> getOrCreateCoordinates(Set<A> values) {
+		return m.getOrCreateCoordinates(values);
+	}
 
 	@Override
 	public final Collection<ACoordinate<D, A>> getCoordinates(String... keyAndVal) throws IllegalArgumentException {
@@ -367,4 +372,5 @@ public class CachedNDimensionalMatrix<D, A, T extends Number> implements INDimen
 		throw new UnsupportedOperationException();
 		
 	}
+
 }

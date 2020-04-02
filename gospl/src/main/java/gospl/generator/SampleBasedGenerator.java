@@ -5,13 +5,13 @@ import gospl.GosplPopulation;
 import gospl.sampler.IEntitySampler;
 import gospl.sampler.ISampler;
 import gospl.sampler.co.CombinatorialOptimizationSampler;
-import gospl.sampler.co.UniformSampler;
+import gospl.sampler.co.MicroDataSampler;
 
 /**
  * Generator based on sample based growth methods: randomly draw individual entity from a sample
  * Optionally drive by an optimization process
  * <p>
- * {@code Gospl} provides {@link UniformSampler} and {@link CombinatorialOptimizationSampler}
+ * {@code Gospl} provides {@link MicroDataSampler} and {@link CombinatorialOptimizationSampler}
  * 
  * @see IEntitySampler
  * 

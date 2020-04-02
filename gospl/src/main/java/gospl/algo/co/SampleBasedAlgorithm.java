@@ -11,8 +11,8 @@ public class SampleBasedAlgorithm implements ICombinatorialOptimizationAlgo<IEnt
 	@Override
 	public IEntitySampler setupCOSampler(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, 
-			IEntitySampler sampler) {
-		sampler.setSample(sample);
+			boolean withWeights, IEntitySampler sampler) {
+		sampler.setSample(sample,withWeights);
 		return sampler;
 	}
 

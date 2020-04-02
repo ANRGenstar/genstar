@@ -28,12 +28,13 @@ public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADe
 	 * This method must provide a way to build a Combinatorial Optimization (CO) sampler. CO is known in the literature
 	 * as the method to generate synthetic population growing a population sample using optimization algorithm
 	 * 
-	 * @param sample
-	 * @param sampler
+	 * @param sample : the collection of individual entities to draw from
+	 * @param withWeights : use weights on individual to draw within the sample
+	 * @param sampler : the sampler
 	 * @return
 	 */
 	public ISampler<ADemoEntity> setupCOSampler(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean withWeights,
 			SamplerType sampler);
 	
 }

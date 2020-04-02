@@ -193,7 +193,7 @@ public class GenstarJsonUtilTest {
 		sju.marshalToGenstarJson(base_path.resolve(confFile), gcf, false);
 	
 		GenstarConfigurationFile newGCF = sju.unmarshalFromGenstarJson(base_path.resolve(confFile), GenstarConfigurationFile.class);
-		assertEquals(gcf.getLevels(), newGCF.getLevels());
+		assertEquals(gcf.getLevel(), newGCF.getLevel());
 		assertEquals(randAttribute, newGCF.getDictionary().getAttribute(randAttribute.getAttributeName()));
 		
 	}

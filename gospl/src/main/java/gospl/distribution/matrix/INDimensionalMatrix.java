@@ -324,6 +324,16 @@ public interface INDimensionalMatrix<D, A, T extends Number> {
 	 */
 	public Collection<ACoordinate<D, A>> getCoordinates(Set<A> values);
 	
+	/**
+	 * Does the same as {@link #getCoordinates(Set)} but rather than return a null coordinate
+	 * if there is none in the matrix, will create it 
+	 * 
+	 * @param values
+	 * @return
+	 * @throws NullPointerException
+	 */
+	public Collection<ACoordinate<D, A>> getOrCreateCoordinates(Set<A> values);
+	
 
 	/**
 	 * Retrieve all coordinate that describe this set of value.

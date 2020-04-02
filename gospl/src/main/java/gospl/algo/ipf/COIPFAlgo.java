@@ -29,9 +29,9 @@ public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptim
 	@Override
 	public ISampler<ADemoEntity> setupCOSampler(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
-			IEntitySampler sampler) {
+			boolean withWeights, IEntitySampler sampler) {
 		
-		sampler.setSample(sample);
+		sampler.setSample(sample, withWeights);
 		sampler.addObjectives(process());
 		
 		return sampler;

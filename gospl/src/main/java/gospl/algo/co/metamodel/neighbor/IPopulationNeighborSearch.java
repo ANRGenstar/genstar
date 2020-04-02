@@ -20,7 +20,7 @@ import gospl.GosplPopulation;
  *
  * @param <U>
  */
-public interface IPopulationNeighborSearch<U> {
+public interface IPopulationNeighborSearch<Predicate> {
 	
 	/**
 	 * Find a neighbor population given any predicate to based neighborhood on and
@@ -36,8 +36,8 @@ public interface IPopulationNeighborSearch<U> {
 	 */
 	default IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			U predicate, int degree){
-		return this.getNeighbor(population, this.getPairwisedEntities(population, predicate, degree));
+			Predicate predicate, int degree, boolean keepChildNumberConstant){
+		return this.getNeighbor(population, this.getPairwisedEntities(population, predicate, degree, keepChildNumberConstant));
 	}
 	
 	/**
@@ -64,22 +64,37 @@ public interface IPopulationNeighborSearch<U> {
 	 * 
 	 * @param population
 	 * @param predicate
+	 * @param size
 	 * @return
 	 */
 	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			U predicate, int size);
+			Predicate predicate, int size);
+	
+	/**
+	 * Find mapped entities (they are close in they attributes) and should or should not have the same 
+	 * child size
+	 * @seee {@link #getPairwisedEntities(IPopulation, Object, int)}
+	 * 
+	 * @param population
+	 * @param predicate
+	 * @param size
+	 * @return
+	 */
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
+			Predicate predicate, int size, boolean childSizeConsistant);
 	
 	/**
 	 * The predicates to be used
 	 * @return
 	 */
-	public Collection<U> getPredicates();
+	public Collection<Predicate> getPredicates();
 	
 	/**
 	 * Set the collection of predicate that could be used
 	 */
-	public void setPredicates(Collection<U> predicates);
+	public void setPredicates(Collection<Predicate> predicates);
 	
 	/**
 	 * Update the state of predicate based on the current population

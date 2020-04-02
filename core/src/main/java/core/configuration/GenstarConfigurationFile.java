@@ -191,7 +191,7 @@ public class GenstarConfigurationFile {
 		this.baseDirectory = f;
 	}
 	
-	public int getLevels() {
+	public int getLevel() {
 		return dictionaries.size();
 	}
 	

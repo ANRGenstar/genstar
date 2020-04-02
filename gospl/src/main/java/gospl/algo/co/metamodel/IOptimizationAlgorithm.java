@@ -16,14 +16,14 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  * @author kevinchapuis
  *
  */
-public interface IOptimizationAlgorithm {
+public interface IOptimizationAlgorithm<Solution extends ISyntheticPopulationSolution> {
 
 	/**
 	 * Execute the algorithm to perform targeted optimization.
 	 * @param {@code initialSolution} the start point of the algorithm
 	 * @return the best solution found in the given conditions
 	 */
-	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution);
+	public Solution run(Solution initialSolution);
 	
 	/**
 	 * Retrieve the set of objectives this optimization algorithm is

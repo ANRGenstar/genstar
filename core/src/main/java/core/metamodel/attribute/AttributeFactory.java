@@ -1,6 +1,7 @@
 package core.metamodel.attribute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -1286,6 +1287,65 @@ public class AttributeFactory {
 		for(String rec : record.keySet()) {
 			attribute.addRecords(record.get(rec), rec);
 		}
+		return attribute;
+	}
+	
+	/**
+	 * Map to unknown referent attribute
+	 * @param <V>
+	 * @param name
+	 * @param referentIntegers
+	 * @param records
+	 * @return
+	 * @throws GSIllegalRangedData
+	 */
+	public <V extends IValue> MappedAttribute<RangeValue, V> createRangeAggregatedRecordAttribute(String name,
+			Attribute<V> referent, Map<String, Collection<String>> records) throws GSIllegalRangedData {
+		UndirectedMapper<RangeValue,V> mapper = new UndirectedMapper<>();
+		MappedAttribute<RangeValue, V> attribute = new MappedAttribute<RangeValue, V>(name, referent, mapper);
+		attribute.setValueSpace(new RangeSpace(attribute, 
+				new GSDataParser().getRangeTemplate(new ArrayList<>(records.keySet()))));
+		attribute.getAttributeMapper().setRelatedAttribute(attribute);
+		mapper.setMapper(
+				records.keySet().stream().collect(Collectors.toMap(
+						key -> Arrays.asList(attribute.getValueSpace().addValue(key)), 
+						key -> records.get(key).stream().map(k -> referent.getValueSpace().getValue(k))
+							.collect(Collectors.toList())
+						))
+				);
+		return attribute;
+	}
+	
+	// REC
+	
+	/**
+	 * Map a range attribute with a integer value based referent
+	 * @param name
+	 * @param referentIntegers
+	 * @param records
+	 * @return
+	 * @throws GSIllegalRangedData 
+	 */
+	public MappedAttribute<RangeValue, IntegerValue> createRangeToIntegerAggregateAttribute(String name,
+			Attribute<IntegerValue> referentIntegers, Map<String, Collection<String>> records) throws GSIllegalRangedData {
+		
+		UndirectedMapper<RangeValue,IntegerValue> mapper = new UndirectedMapper<>();
+		
+		MappedAttribute<RangeValue, IntegerValue> attribute = new MappedAttribute<RangeValue, IntegerValue>(name, referentIntegers, mapper);
+		
+		IntegerSpace refRs = (IntegerSpace) referentIntegers.getValueSpace();
+		attribute.setValueSpace(new RangeSpace(attribute, new GSDataParser().getRangeTemplate(new ArrayList<>(records.keySet())), 
+				refRs.getMin(), refRs.getMax()));
+		
+		attribute.getAttributeMapper().setRelatedAttribute(attribute);
+		mapper.setMapper(
+				records.keySet().stream().collect(Collectors.toMap(
+						key -> Arrays.asList(attribute.getValueSpace().addValue(key)), 
+						key -> records.get(key).stream().map(k ->
+								referentIntegers.getValueSpace().getValue(k))
+							.collect(Collectors.toList())
+						))
+				);
 		return attribute;
 	}
 

@@ -63,22 +63,22 @@ public class SyntheticPopulationSolution implements ISyntheticPopulationSolution
 			int k_neighbors) {
 		return neighborSearch.getPredicates().stream()
 				.map(u -> new SyntheticPopulationSolution(
-						neighborSearch.getNeighbor(this.population, u, k_neighbors),
+						neighborSearch.getNeighbor(this.population, u, k_neighbors,false),
 						this.dataBasedPopulation))
-				.collect(Collectors.toCollection(ArrayList::new));
+				.collect(Collectors.toCollection(ArrayList::new)); 
 	}
 	
 	@Override
-	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch) {
+	public <U> SyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch) {
 		return getRandomNeighbor(neighborSearch, 1);
 	}
 
 	@Override
-	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, 
+	public <U> SyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, 
 			int k_neighbors) {
 		return new SyntheticPopulationSolution(
 				neighborSearch.getNeighbor(this.population, 
-						GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors), 
+						GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors, false), 
 				this.dataBasedPopulation);
 	}
 	

@@ -47,10 +47,17 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
 			Attribute<? extends IValue> predicate, int size) {
+		return this.getPairwisedEntities(population, predicate, size, false);
+	}
+	
+	@Override
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, Attribute<? extends IValue> predicate,
+			int size, boolean childSizeConsistant) {
 		if(!population.hasPopulationAttributeNamed(predicate.getAttributeName()))
 			throw new IllegalArgumentException("Trying to search for neighbor population on attribute "
 					+predicate.getAttributeName()+" that is not present");
-
+		
 		Map<ADemoEntity, ADemoEntity> pair = new HashMap<>();
 		
 		Map<ADemoEntity, Collection<IValue>> keys = new HashMap<>();
@@ -65,13 +72,16 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 
 		for(ADemoEntity oldEntity : keys.keySet()) {
 			Optional<ADemoEntity> candidateEntity = sample.stream().filter(e -> 
-				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)) 
-				&& e.getValues().containsAll(keys.get(oldEntity))).findFirst();
+				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)) // Not the same value on predicate attribute 
+				&& e.getValues().containsAll(keys.get(oldEntity)) // Same value for the rest
+				&& childSizeConsistant ? (e.hasChildren() && oldEntity.getChildren().size() == e.getChildren().size()) : true) // And same number of children
+					.findFirst(); 
 			if(candidateEntity.isPresent())
 				pair.put(oldEntity, candidateEntity.get());
 			else 
 				pair.put(oldEntity, this.sample.stream().filter(e -> 
-				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate)))
+				!e.getValueForAttribute(predicate).equals(oldEntity.getValueForAttribute(predicate))
+				&& childSizeConsistant ? (e.hasChildren() && oldEntity.getChildren().size() == e.getChildren().size()) : true)
 						.sorted(new HammingEntityComparator(oldEntity)).findFirst().get());
 		}
 		

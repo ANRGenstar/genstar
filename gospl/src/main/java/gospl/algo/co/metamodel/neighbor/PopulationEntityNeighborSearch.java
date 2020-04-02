@@ -38,13 +38,26 @@ public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch
 	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
 			ADemoEntity predicate, int size) {
-		
+		return this.getPairwisedEntities(population, predicate, size, false);
+	}
+	
+	@Override
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, ADemoEntity predicate, int size,
+			boolean childSizeConsistant) {
 		Map<ADemoEntity, ADemoEntity> pair = new HashMap<>();
 		
 		Set<ADemoEntity> predicates = new HashSet<>(Arrays.asList(predicate));
 		if(size > 1)
 			predicates = population.stream().sorted(new HammingEntityComparator(predicate))
 				.limit(size).collect(Collectors.toSet());
+		
+		if (childSizeConsistant && predicate.hasChildren()) {
+			int sizeConstraint = predicate.getChildren().size();
+			predicates.stream().filter(candidate  -> 
+				candidate.hasChildren() && candidate.getChildren().size() == sizeConstraint 
+					).collect(Collectors.toSet());
+		}
 		
 		for(ADemoEntity oldEntity : predicates) {
 			ADemoEntity candidateEntity = GenstarRandomUtils.oneOf(sample);

@@ -46,17 +46,17 @@ public class GosplInputMultiLayerDataManager extends GosplInputDataManager {
 	
 	public GosplInputMultiLayerDataManager(final GenstarConfigurationFile configurationFile) {
 		super(configurationFile);
-		if(configurationFile.getLevels() <= 1) 
+		if(configurationFile.getLevel() <= 1) 
 			throw new IllegalArgumentException("Given configuration file should at least contains two level [actual =" 
-					+super.getConfiguration().getLevels()+"] of input data");
+					+super.getConfiguration().getLevel()+"] of input data");
 	}
 	
 	public GosplInputMultiLayerDataManager(final Path configurationFilePath) 
 			throws IllegalArgumentException, IOException {
 		super(configurationFilePath);
-		if(super.getConfiguration().getLevels() <= 1) 
+		if(super.getConfiguration().getLevel() <= 1) 
 			throw new IllegalArgumentException("Given configuration file should at least contains two level [actual = "
-					+super.getConfiguration().getLevels()+"] of input data");
+					+super.getConfiguration().getLevel()+"] of input data");
 	}
 	
 	// --------------------- Generic contract -------------------- //

@@ -1,4 +1,4 @@
-package gospl.sampler.multilayer;
+package gospl.sampler.multilayer.sr;
 
 import gospl.algo.IGosplConcept;
 import gospl.algo.IGosplConcept.EGosplGenerationConcept;
