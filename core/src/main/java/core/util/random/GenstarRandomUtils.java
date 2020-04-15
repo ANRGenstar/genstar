@@ -1,7 +1,6 @@
 package core.util.random;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -48,14 +47,17 @@ public class GenstarRandomUtils {
 		if (s.size() == 1)
 			return s.iterator().next();
 		
-		final int idx = GenstarRandom.getInstance().nextInt(s.size());
-		Iterator<T> it = s.iterator();
-		for (int i=0; i<idx; i++) {
-			it.next();
-		}
-		return it.next();
+		return s.stream().skip(GenstarRandom.getInstance().nextInt(s.size()))
+				.findFirst().orElseThrow(AssertionError::new);
+		
 	}
 	
+	/**
+	 * 
+	 * @param <T>
+	 * @param c
+	 * @return
+	 */
 	public static <T> T oneOf(Collection<T> c){
 		// check param
 		if (c.isEmpty())
@@ -64,12 +66,9 @@ public class GenstarRandomUtils {
 		// quick exit 
 		if (c.size() == 1)
 			return c.iterator().next();
-		
-		int rndNum = GenstarRandom.getInstance().nextInt(c.size());
-		for(T t: c) 
-			if (--rndNum < 0) 
-				return t;
-		throw new AssertionError();
+			
+		return c.stream().skip(GenstarRandom.getInstance().nextInt(c.size()))
+				.findFirst().orElseThrow(AssertionError::new);
 	}
 
 	/**

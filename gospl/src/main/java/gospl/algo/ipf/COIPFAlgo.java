@@ -11,7 +11,8 @@ import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 import gospl.sampler.ISampler;
 
-public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IEntitySampler> {
+public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptimizationAlgo<IPopulation<ADemoEntity, Attribute<? extends IValue>>, 
+	IEntitySampler<IPopulation<ADemoEntity, Attribute<? extends IValue>>>> {
 
 	public COIPFAlgo(IPopulation<ADemoEntity, Attribute<? extends IValue>> seed,
 			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> matrix) {
@@ -29,7 +30,7 @@ public class COIPFAlgo extends AGosplIPF<Integer> implements ICombinatorialOptim
 	@Override
 	public ISampler<ADemoEntity> setupCOSampler(
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
-			boolean withWeights, IEntitySampler sampler) {
+			boolean withWeights, IEntitySampler<IPopulation<ADemoEntity, Attribute<? extends IValue>>> sampler) {
 		
 		sampler.setSample(sample, withWeights);
 		sampler.addObjectives(process());

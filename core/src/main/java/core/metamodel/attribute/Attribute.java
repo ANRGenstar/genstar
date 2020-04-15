@@ -129,6 +129,7 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 * <li> {@code this.equals(attribute)}
 	 * <li> {@code this.equals(attribute.getReferentAttribute())}
 	 * <li> {@code this.getReferentAttribute().equals(attribute)}
+	 * <li> {@code this.getReferentAttribute().equals(attribute.getReferentAttribute())}
 	 * </ul>
 	 * <p>
 	 *  
@@ -139,7 +140,8 @@ public class Attribute<V extends IValue> implements IAttribute<V> {
 	 */
 	public boolean isLinked(Attribute<? extends IValue> attribute){
 		if(this.equals(attribute) || this.equals(attribute.getReferentAttribute())
-				|| this.getReferentAttribute().equals(attribute))
+				|| this.getReferentAttribute().equals(attribute) ||
+					this.getReferentAttribute().equals(attribute.getReferentAttribute()))
 			return true;
 		return false;
 	}

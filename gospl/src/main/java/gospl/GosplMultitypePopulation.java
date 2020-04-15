@@ -1,6 +1,8 @@
 package gospl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -10,18 +12,24 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import com.google.common.collect.Streams;
 
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.EntityUniqueId;
+import core.metamodel.entity.IEntity;
 import core.metamodel.value.IValue;
 
 /**
  * The GoSPL implementation of a multitype population, that is a population able to deal with several 
  * different types of agents and browse them.
  * 
+ * TODO : may be move to a population of GosplEntity
  * 
  * @author Samuel Thiriot
  *
@@ -30,7 +38,15 @@ import core.metamodel.value.IValue;
  */
 public class GosplMultitypePopulation<E extends ADemoEntity>
 		implements IMultitypePopulation<E, Attribute<? extends IValue>> {
-
+	
+	public static final String LAYER_ID = "Layer_";
+	
+	/**
+	 * Keep the hierarchical relationship between types of entities. As a default
+	 * behavior level will be associated with insertion order
+	 */
+	protected final Map<String, Integer> typeToLevel = new HashMap<>();
+	
 	/**
 	 * Associates to each type the corresponding agents.
 	 * We assume an agent is only stored for one given type.
@@ -42,19 +58,109 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	 */
 	protected final Map<String,Set<Attribute<? extends IValue>>> type2attributes = new HashMap<>();
 	
+	// TODO : remove this attribute
 	private int size = 0;
 	
+	/**
+	 * Build a population with given type of entities from a population
+	 * @param type
+	 * @param pop
+	 */
 	public GosplMultitypePopulation(String type, IPopulation<E, Attribute<? extends IValue>> pop) {
 		addAll(type, pop);
 	}
 	
-
+	/**
+	 * Entity type order matters for level
+	 * 
+	 * @param entityTypes
+	 */
 	public GosplMultitypePopulation(String... entityTypes) {
+		int index = 0;
 		for (String type: entityTypes) {
 			type2agents.put(type, new HashSet<>());
+			typeToLevel.put(type, index++);
 			type2attributes.put(type, new HashSet<>());
 		}
 	}
+	
+	/**
+	 * Entity type order matters for level
+	 * 
+	 * @param entityTypes
+	 */
+	public GosplMultitypePopulation(List<String> entityTypes) {
+		for (String type : entityTypes) {
+			type2agents.put(type, new HashSet<>());
+			typeToLevel.put(type, entityTypes.indexOf(type));
+			type2attributes.put(type, new HashSet<>());
+		}
+	}
+
+	// Specific constructor/builder ------------ //
+	
+	@SuppressWarnings("unchecked")
+	public static <E extends ADemoEntity> GosplMultitypePopulation<E> getMultiPopulation(Collection<E> entities, boolean cloneEntities) {
+		List<Collection<E>> subLayerEntities = new ArrayList<>();
+		List<String> layerID = new ArrayList<>();
+		boolean hasChild = entities.stream().anyMatch(e -> e.hasChildren());
+		if(hasChild) {
+			Collection<E> slEntities = entities;
+			while(hasChild) {
+				slEntities =  slEntities.stream()
+						.flatMap(e -> e.getChildren().stream()).map(e -> (E)e)
+						.collect(Collectors.toSet());
+				subLayerEntities.add(slEntities);
+				hasChild = slEntities.stream().anyMatch(e -> e.hasChildren());
+			}
+		}
+		List<Collection<E>> supLayerEntities = new ArrayList<>();
+		boolean hasMother = entities.stream().anyMatch(e -> e.hasParent());
+		if(hasMother) {
+			Collection<E> slEntities = entities;
+			while(hasMother) {
+				slEntities =  slEntities.stream()
+						.map(e -> (E) e.getParent())
+						.collect(Collectors.toSet());
+				subLayerEntities.add(slEntities);
+				hasMother = slEntities.stream().anyMatch(e -> e.hasParent());
+			}
+		}
+		
+		// Pop layered collected
+		List<Collection<E>> pop = Streams.concat(
+					subLayerEntities.stream(),
+					Stream.of(entities),
+					supLayerEntities.stream())
+				.collect(Collectors.toList());
+		
+		for(Collection<E> sPop : pop) {
+			Set<String> layerTypes= sPop.stream().map(E::getEntityType).collect(Collectors.toSet());
+			if(layerTypes.isEmpty() || layerTypes.size()!=1) { layerID.add( LAYER_ID+pop.indexOf(sPop) ); }
+			else { layerID.add(layerTypes.iterator().next()); }
+		}
+		
+		// Build pop and dispatch entities
+		GosplMultitypePopulation<E> gmp = new GosplMultitypePopulation<>(layerID);
+		for(int i = 0; i < layerID.size(); i++){ 
+			gmp.addAll(layerID.get(i), pop.get(i).stream()
+					.map(e -> (E) (cloneEntities ? e.clone() : e))
+					.collect(Collectors.toSet())); 
+		}
+		
+		return gmp;
+	}
+	
+	/**
+	 * Protected constructor to clone multi population
+	 * @param levelID
+	 * @param subPops
+	 */
+	protected GosplMultitypePopulation(List<String> levelID, Map<String, IPopulation<E, Attribute<? extends IValue>>> subPops) {
+		for(String id : levelID) { addAll(id, subPops.get(id)); }
+	}
+	
+	// ----------------------------------------- //
 	
 	protected void recomputeSize() {
 		size = 0;
@@ -73,6 +179,9 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		Set<E> setForType = type2agents.get(type);
 		if (setForType == null) {
 			setForType = new HashSet<>();
+			// update levels
+			if(typeToLevel.isEmpty()) {typeToLevel.put(type, 0);}
+			else { typeToLevel.put(type, Collections.max(typeToLevel.values())+1); }
 			type2agents.put(type, setForType);
 		}
 		return setForType;
@@ -103,14 +212,16 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 
 	@Override
 	public boolean add(E e) {
-		
-		System.err.println("addedinf it multitype pop entity with no forced type "+e.getEntityType());
 		if (!e.hasEntityType())
 			throw new RuntimeException("the population entity should be given an entity type");
 				 
 		if (getSetForType(e.getEntityType()).add(e)) {
 			type2attributes.get(e.getEntityType()).addAll(e.getAttributes());
+			e._setEntityId(EntityUniqueId.createNextId(this, e.getEntityType()));
 			this.size++;
+			for(IEntity<? extends IAttribute<? extends IValue>> child : e.getChildren()) {
+				@SuppressWarnings("unchecked") E c = (E)child; this.add(c); // Possible infinite recurrent call
+			}
 			return true;
 		} else {
 			return false;
@@ -157,7 +268,6 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	 * @param pop
 	 * @return true if any change
 	 */
-	@SuppressWarnings("rawtypes")
 	@Override
 	public boolean addAll(String type, Collection<? extends E> c) {
 		
@@ -179,14 +289,13 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		}
 		
 		// adds the corresponding attributes
-		if (c instanceof IPopulation) {
-			Set<Attribute<? extends IValue>> s = type2attributes.get(type);
-			if (s == null) {
-				s = new HashSet<>();
-				type2attributes.put(type, s);
-			}
-			s.addAll(((IPopulation) c).getPopulationAttributes());
+		Set<Attribute<? extends IValue>> s = type2attributes.get(type);
+		if (s == null) {
+			s = new HashSet<>();
+			type2attributes.put(type, s);
 		}
+		s.addAll(c.stream().flatMap(e -> e.getAttributes().stream())
+				.collect(Collectors.toSet()));
 		
 		return anyChange;
 	}
@@ -268,12 +377,26 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		}
 	}
 	
+	/**
+	 * Will also remove children of this E entity, with nasty casts
+	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean remove(Object o) {
 		for (Set<E> s: type2agents.values()) {
 			if (s.remove(o)) {
 				this.size--;
-				return true;
+				Collection<E> ec = Stream.of((E)o).collect(Collectors.toSet()); 
+				boolean removeChild = false;
+				while(ec.stream().anyMatch(e -> e.hasChildren())) {
+					removeChild = false;
+					ec = ec.stream().flatMap(e -> e.getChildren().stream())
+							.map(c -> (E)c).collect(Collectors.toSet());
+					for(Set<E> subs : type2agents.values()) {
+						if(subs.removeAll(ec)) { removeChild = true; }
+					}
+				}
+				return removeChild;
 			}
 		}
 		return false;
@@ -321,6 +444,7 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 		return res;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T[] toArray(T[] res) {
 		
@@ -338,6 +462,25 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 	public Set<String> getEntityTypes() {
 		return type2agents.keySet();
 	}
+	
+	@Override
+	public int getEntityLevel(String type) {
+		return this.typeToLevel.get(type);
+	}
+
+
+	@Override
+	public List<Integer> getEntityLevel() {
+		return new ArrayList<>(this.typeToLevel.values());
+	}
+
+
+	@Override
+	public String getEntityType(int level) {
+		return this.typeToLevel.keySet().stream()
+				.filter(k -> typeToLevel.get(k)==level)
+				.findFirst().orElseThrow(NullPointerException::new);
+	}
 
 	@Override
 	public void addEntityType(String novelType) {
@@ -351,11 +494,36 @@ public class GosplMultitypePopulation<E extends ADemoEntity>
 			throw new RuntimeException("unknown type "+entityType);
 		return new GosplSubPopulation<E>(this, entityType);
 	}
+	
+
+	@Override
+	public IPopulation<E, Attribute<? extends IValue>> getSubPopulation(int entityLevel) {
+		return this.getSubPopulation(this.getEntityType(entityLevel));
+	}
+	
+	/**
+	 * Get the size of the layered (level from 0 -- i.e. no child   -- to n -- i.e. no parent) sub population
+	 * @param layer
+	 * @return
+	 */
+	public int getSubPopulationSize(int layer) {
+		return this.getSetForType(this.getEntityType(layer)).size();
+	}
 
 	@Override
 	public void clear(String type) {
 		getSetForType(type).clear();
 		recomputeSize();
+	}
+	
+	@Override
+	public GosplMultitypePopulation<E> clone() {
+		GosplMultitypePopulation<E> gmp = new GosplMultitypePopulation<>(typeToLevel.values().stream().sorted().map(
+				level -> this.getEntityType(level)).collect(Collectors.toList()));
+		gmp.type2attributes.putAll(this.type2attributes);
+		gmp.type2agents.putAll(this.type2agents);
+		gmp.recomputeSize();
+		return gmp;
 	}
 
 	@Override

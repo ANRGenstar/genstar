@@ -1,12 +1,11 @@
 package gospl.sampler.multilayer.co;
 
 import java.util.Collection;
-import java.util.Map;
 
-import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.GosplMultitypePopulation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
@@ -16,7 +15,7 @@ import gospl.sampler.IEntitySampler;
  * @author kevinchapuis
  *
  */
-public interface ICOMultiLayerSampler extends IEntitySampler {
+public interface ICOMultiLayerSampler extends IEntitySampler<GosplMultitypePopulation<ADemoEntity>> {
 
 	/**
 	 * Specified each layer population (samples), if we should draw using weights and the layer to sample entity from
@@ -25,7 +24,7 @@ public interface ICOMultiLayerSampler extends IEntitySampler {
 	 * @param withWeigths
 	 * @param layer
 	 */
-	public void setSample(Map<Integer, IPopulation<ADemoEntity, Attribute<? extends IValue>>> samples, boolean withWeigths, int layer);
+	public void setSample(GosplMultitypePopulation<ADemoEntity> sample, boolean withWeigths, int layer);
 
 	/**
 	 * Add a fiting criterion for a given layer

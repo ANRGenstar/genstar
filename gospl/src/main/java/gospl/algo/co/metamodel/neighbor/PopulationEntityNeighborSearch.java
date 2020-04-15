@@ -15,6 +15,7 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.comparator.HammingEntityComparator;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
+import gospl.GosplPopulation;
 
 /**
  * Will search for neighbor based on entity as predicate: meaning that basic search will swap a given
@@ -23,7 +24,7 @@ import core.util.random.GenstarRandomUtils;
  * @author kevinchapuis
  *
  */
-public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch<ADemoEntity> {
+public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch<GosplPopulation, ADemoEntity> {
 
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> sample;
 	private Collection<ADemoEntity> predicates;
@@ -35,16 +36,17 @@ public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch
 	// ---------------------------------------------- //
 
 	@Override
-	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			ADemoEntity predicate, int size) {
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, ADemoEntity predicate, int size) {
 		return this.getPairwisedEntities(population, predicate, size, false);
 	}
 	
 	@Override
-	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, ADemoEntity predicate, int size,
-			boolean childSizeConsistant) {
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, int size, boolean childSizeConsistant) {
+		return this.getPairwisedEntities(population, GenstarRandomUtils.oneOf(this.getPredicates()), size, false);
+	}
+	
+	@Override
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, ADemoEntity predicate, int size, boolean childSizeConsistant) {
 		Map<ADemoEntity, ADemoEntity> pair = new HashMap<>();
 		
 		Set<ADemoEntity> predicates = new HashSet<>(Arrays.asList(predicate));
@@ -80,12 +82,12 @@ public class PopulationEntityNeighborSearch implements IPopulationNeighborSearch
 	}
 
 	@Override
-	public void updatePredicates(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+	public void updatePredicates(GosplPopulation population) {
 		this.setPredicates(population);
 	}
 
 	@Override
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
+	public void setSample(GosplPopulation sample) {
 		this.sample = sample;
 	}
 

@@ -2,15 +2,19 @@ package gospl.distribution;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+
+import com.google.common.collect.Sets;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
@@ -22,6 +26,7 @@ import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.GSUtilAttribute;
 import gospl.distribution.exception.IllegalDistributionCreation;
+import gospl.distribution.exception.IllegalNDimensionalMatrixAccess;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.ASegmentedNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -68,11 +73,22 @@ public class GosplNDimensionalMatrixFactory {
 		return matrix;
 	}
 	
+	/**
+	 * Create an empty distribution
+	 * 
+	 * @param dimensions
+	 * @return
+	 */
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
 			Set<Attribute<? extends IValue>> dimensions){
 		return createEmptyDistribution(dimensions, GSSurveyType.GlobalFrequencyTable);
 	}
 
+	/**
+	 * 
+	 * @param dimensions
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public AFullNDimensionalMatrix<Double> createEmptyDistribution(
 			Attribute<? extends IValue> ... dimensions){
@@ -89,6 +105,31 @@ public class GosplNDimensionalMatrixFactory {
 			Collection<Set<Attribute<? extends IValue>>> segmentedDimensions) throws IllegalDistributionCreation{
 		return new GosplConditionalDistribution(segmentedDimensions.stream()
 				.map(dimSet -> this.createEmptyDistribution(dimSet)).collect(Collectors.toSet()));
+	}
+	
+	/**
+	 * Create a contingency matrix with given dimension and coordinates build from cartesian product of dimensions' aspects
+	 * 
+	 * @param dimensions
+	 * @param buildCoordinate
+	 * @return an empty matrix with all coordinates build in
+	 */
+	public AFullNDimensionalMatrix<Integer> createEmtpyContingencies(Set<Attribute<? extends IValue>> dimensions,
+			boolean buildCoordinate) {
+		AFullNDimensionalMatrix<Integer> contingency = new GosplContingencyTable(dimensions);
+		if(buildCoordinate) {
+			for (List<? extends IValue> coordinate : Sets.cartesianProduct(dimensions.stream()
+					.map(dim -> dim.getValueSpace().getValues()).collect(Collectors.toList()))) {
+				contingency.addValue(new GosplCoordinate(
+							coordinate.stream().collect(Collectors.toMap(
+									v -> dimensions.stream()
+										.filter(d -> d.getValueSpace().contains(v))
+										.findFirst().get(), 
+									Function.identity()))), 
+						new ControlContingency(0));
+			}
+		}
+		return contingency; 
 	}
 	
 	//////////////////////////////////////////////////
@@ -434,25 +475,36 @@ public class GosplNDimensionalMatrixFactory {
 			Set<Attribute<? extends IValue>> attributesToMeasure,
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
 		
+		Set<Attribute<? extends IValue>> matchingAttributes = attributesToMeasure.stream()
+				.filter(att -> population.getPopulationAttributes().stream()
+						.anyMatch(popAtt -> popAtt.isLinked(att)))
+				.collect(Collectors.toSet());
+		
+		if(matchingAttributes.isEmpty()) {
+			throw new IllegalArgumentException("The given population must have "
+					+ "at least one matching attribute with the set given in argument: \n"
+					+attributesToMeasure.stream().map(Attribute::getAttributeName).collect(Collectors.joining(";  "))
+					+"\n"+population.getPopulationAttributes().stream().map(Attribute::getAttributeName).collect(Collectors.joining(";  ")));
+		}
+		
 		// Init the output matrix
-		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(attributesToMeasure);
+		AFullNDimensionalMatrix<Integer> matrix = new GosplContingencyTable(matchingAttributes);
 		matrix.addGenesis("created from a population GosplNDimensionalMatrixFactory@createContigency");
 
 		final GSPerformanceUtil gspu = new GSPerformanceUtil("Create a contingency matrix from a population on "+
-						attributesToMeasure.stream().map(Attribute::getAttributeName)
-						.collect(Collectors.joining("; "))+" attribute set", Level.TRACE);
+				matchingAttributes.stream().map(Attribute::getAttributeName)
+						.collect(Collectors.joining("; "))+" attribute set", LogManager.getLogger(), Level.TRACE);
 		
 		
 		gspu.sysoStempMessage("Test createContingency with given attributes: "
-				+attributesToMeasure.stream().map(Attribute::getAttributeName)
+				+matchingAttributes.stream().map(Attribute::getAttributeName)
 				.collect(Collectors.joining("; ")));
 		
-		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> mappedAtt = 
-				attributesToMeasure.stream().collect(Collectors.toMap(
-						Function.identity(), 
-						att -> population.getPopulationAttributes().stream()
-							.filter(popAtt -> popAtt.isLinked(att))
-							.findFirst().get())
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> mappedAtt = matchingAttributes.stream()
+					.collect(Collectors.toMap(Function.identity(), 
+							att -> population.getPopulationAttributes().stream()
+								.filter(popAtt -> popAtt.isLinked(att))
+								.findFirst().get())
 						);
 		
 		gspu.sysoStempMessage("Attribute mapping from required to population : "
@@ -462,7 +514,7 @@ public class GosplNDimensionalMatrixFactory {
 				
 		// iterate the whole population
 		for (ADemoEntity entity : population) {
-			Collection<ACoordinate<Attribute<? extends IValue>, IValue>> entityCoords = matrix.getOrCreateCoordinates(attributesToMeasure.stream()
+			Collection<ACoordinate<Attribute<? extends IValue>, IValue>> entityCoords = matrix.getOrCreateCoordinates(matchingAttributes.stream()
 							.flatMap(att -> att.findMappedAttributeValues(entity.getValueForAttribute(mappedAtt.get(att))).stream())
 							.collect(Collectors.toSet()));
 			for (ACoordinate<Attribute<? extends IValue>, IValue> entityCoord : entityCoords) {
@@ -470,6 +522,9 @@ public class GosplNDimensionalMatrixFactory {
 					matrix.getVal(entityCoord).add(1);
 			}
 		}
+		
+		gspu.sysoStempMessage("Output matrix dimensions are: "+matrix.getDimensions().stream()
+				.map(Attribute::getAttributeName).collect(Collectors.joining("; ")));
 
 		return matrix;
 	}
@@ -505,6 +560,65 @@ public class GosplNDimensionalMatrixFactory {
 				)));
 	}
 	
+	/**
+	 * Clone a matrix with a sub-set of attributes
+	 * 
+	 * @param marginalAttributes
+	 * @param contingencies
+	 * @return
+	 */
+	public AFullNDimensionalMatrix<Integer> cloneContingency(
+			Set<Attribute<? extends IValue>> marginalAttributes,
+			AFullNDimensionalMatrix<Integer> contingencies) {
+		if(!contingencies.getDimensions().containsAll(marginalAttributes)) {
+			throw new IllegalArgumentException("Cannot reduce a contingency to unknown attributes: "
+					+marginalAttributes.stream().filter(att -> !contingencies.getDimensions().contains(att))
+					.map(Attribute::getAttributeName).collect(Collectors.joining("; ")));
+		}
+		
+		AFullNDimensionalMatrix<Integer> matrix = this.createEmtpyContingencies(marginalAttributes,true);
+		Map<ACoordinate<Attribute<? extends IValue>, IValue>, AControl<Integer>> m = matrix.getMatrix();
+		
+		m.keySet().forEach(coord -> matrix.setValue(coord, contingencies.getVal(coord.values())));
+		
+		return matrix;
+	}
+	
+	
+	/**
+	 * Update matrix values with contingencies from the population (not concerned value remain untouched)
+	 * 
+	 * Population and matrix _attribute_ and _value_ must match
+	 * 
+	 * @param matrix
+	 * @param population
+	 * @return the input matrix updated with population contingencies
+	 */
+	public AFullNDimensionalMatrix<Integer> fillInContingency(AFullNDimensionalMatrix<Integer> matrix,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+		Set<Attribute<? extends IValue>> mattributes = matrix.getDimensions().stream()
+				.filter(dim -> population.getPopulationAttributes().stream()
+						.anyMatch(att -> !att.equals(dim) && att.isLinked(dim)))
+				.collect(Collectors.toSet());
+		
+		for (ADemoEntity e :  population) {
+			Collection<IValue> matchingValues = e.getValues().stream()
+					.filter(val -> matrix.getAspects().contains(val)).collect(Collectors.toSet());
+			Collection<IValue> relatedValues = mattributes.stream().flatMap(
+					att -> att.findMappedAttributeValues(
+							e.getValueForAttribute( e.getAttributes().stream().filter(dim -> dim.isLinked(att))
+									.findFirst().get())).stream()
+					).collect(Collectors.toSet());
+			if (relatedValues.stream().anyMatch(val -> !matrix.getAspects().contains(val))) { 
+				throw new IllegalNDimensionalMatrixAccess("Try to access to a coordinates related to one of these values: "+
+						Arrays.asList(relatedValues).toString()+" but matrix values are: "+Arrays.asList(matrix.getAspects()).toString());
+			}
+			matrix.getVal(Stream.concat(matchingValues.stream(),relatedValues.stream()).collect(Collectors.toSet()), true).add(1); 
+		}
+		
+		return matrix;
+	}
+	
 //////////////////////////////////////////////////
 //				    SAMPLE MATRIX				//
 //////////////////////////////////////////////////
@@ -534,4 +648,5 @@ public class GosplNDimensionalMatrixFactory {
 
 		return matrix;
 	}
+
 }

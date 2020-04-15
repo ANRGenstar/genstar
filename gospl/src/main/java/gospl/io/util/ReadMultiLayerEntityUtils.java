@@ -1,10 +1,8 @@
 package gospl.io.util;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
@@ -24,7 +22,7 @@ public class ReadMultiLayerEntityUtils {
 	
 	private int layer;
 	
-	private List<String> ids;
+	private Map<Integer,String> ids;
 	
 	private Map<Attribute<? extends IValue>,IValue> entity;
 	
@@ -34,7 +32,7 @@ public class ReadMultiLayerEntityUtils {
 		this.layer = layer;
 		this.id = id;
 		this.weight = weight;
-		this.ids = new ArrayList<>();
+		this.ids = new HashMap<>();
 	}
 	
 	public ReadMultiLayerEntityUtils(int layer, String id, String weight, Map<Attribute<? extends IValue>,IValue> entity) {
@@ -49,8 +47,8 @@ public class ReadMultiLayerEntityUtils {
 	public Map<Attribute<? extends IValue>,IValue> getEntity() {return entity;}
 	public void setEntity(Map<Attribute<? extends IValue>,IValue> entity) {this.entity = entity;}
 	
-	public List<String> getIDs() {return Collections.unmodifiableList(ids);}
-	public void setIDs(List<String> ids) {this.ids = ids;}
+	public Map<Integer,String> getIDs() {return Collections.unmodifiableMap(ids);}
+	public void setIDs(Map<Integer,String> ids) {this.ids = ids;}
 	
 	public GosplEntity toGosplEntity() {
 		return this.toGosplEntity(false);
@@ -58,10 +56,7 @@ public class ReadMultiLayerEntityUtils {
 	
 	public GosplEntity toGosplEntity(boolean withID) {
 		GosplEntity entity = new GosplEntity(this.entity, gsdp.getDouble(weight));
-		if(withID) {
-			entity._setEntityId(ids.subList(layer, ids.size())
-				.stream().collect(Collectors.joining()));
-		}
+		if(withID) { entity._setEntityId(id); }
 		return entity;
 	}
 	

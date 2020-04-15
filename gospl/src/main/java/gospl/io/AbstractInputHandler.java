@@ -1,6 +1,7 @@
 package gospl.io;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -250,5 +251,8 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	public String getSurveyFilePath() {
 		return surveyFilePath;
 	}
+	
+	@Override
+	public void close() throws IOException { throw new UnsupportedOperationException("Cannot close this input handler");}
 
 }

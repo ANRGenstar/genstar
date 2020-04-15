@@ -1,27 +1,32 @@
 package gospl.algo.co;
 
-import java.util.Map;
-
-import core.metamodel.IPopulation;
-import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
-import core.metamodel.value.IValue;
+import gospl.GosplMultitypePopulation;
 import gospl.sampler.ISampler;
 import gospl.sampler.multilayer.co.ICOMultiLayerSampler;
 
-public class MultiLayerSampleBasedAlgorithm<M extends ICOMultiLayerSampler> implements ICombinatorialOptimizationAlgo<M> {
+public class MultiLayerSampleBasedAlgorithm<M extends ICOMultiLayerSampler> implements ICombinatorialOptimizationAlgo<GosplMultitypePopulation<ADemoEntity>, M> {
 
 	@Override
-	public ISampler<ADemoEntity> setupCOSampler(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample,
+	public ISampler<ADemoEntity> setupCOSampler(
+			GosplMultitypePopulation<ADemoEntity> sample,
 			boolean withWeights, M sampler) {
 		sampler.setSample(sample,withWeights);
 		return sampler;
 	}
 	
+	/**
+	 * Will draw individual from given level with potential constraints on every layer
+	 * @param layer
+	 * @param multiLayerSample
+	 * @param withWeights
+	 * @param sampler
+	 * @return
+	 */
 	public ISampler<ADemoEntity> setupCOSampler(int layer,
-			Map<Integer,IPopulation<ADemoEntity, Attribute<? extends IValue>>> samples,
+			GosplMultitypePopulation<ADemoEntity> multiLayerSample,
 			boolean withWeights, M sampler) {
-		sampler.setSample(samples,withWeights,layer);
+		sampler.setSample(multiLayerSample,withWeights,layer);
 		return sampler;
 	}
 

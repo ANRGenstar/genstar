@@ -583,6 +583,11 @@ public class GosplPopulationInDatabase
 			throw new RuntimeException("error while dropping the table containing the entities", e);
 		}
 	}
+	
+	@Override
+	public GosplPopulationInDatabase clone() {
+		throw new UnsupportedOperationException("Not yet coded");
+	}
 
 	@Override
 	public boolean contains(Object o) {

@@ -52,4 +52,10 @@ public interface IPopulation<E extends IEntity<A>, A extends IAttribute<? extend
 	 */
 	public boolean isAllPopulationOfType(String type);
 	
+	/**
+	 * Return a copy of this object
+	 * @return
+	 */
+	public IPopulation<E, A> clone();
+	
 }

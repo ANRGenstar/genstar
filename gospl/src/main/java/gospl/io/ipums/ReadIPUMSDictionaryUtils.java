@@ -31,6 +31,8 @@ import core.util.excpetion.GSIllegalRangedData;
 /**
  * Provide utilities to read data dictionary (i.e. attribute and value description) from IPUMS data set
  * 
+ * TODO : add the description of attributes
+ * 
  * @author kevinchapuis
  *
  */

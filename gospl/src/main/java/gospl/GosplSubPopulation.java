@@ -97,6 +97,11 @@ public final class GosplSubPopulation<E extends ADemoEntity>
 			multiPop.recomputeSize();
 		return anyChange;
 	}
+	
+	@Override
+	public GosplSubPopulation<E> clone() {
+		throw new UnsupportedOperationException();
+	}
 
 	@Override
 	public int size() {

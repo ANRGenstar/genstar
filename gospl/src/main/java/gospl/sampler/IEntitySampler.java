@@ -15,13 +15,13 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  * @author kevinchapuis
  *
  */
-public interface IEntitySampler extends ISampler<ADemoEntity> {
+public interface IEntitySampler<Population extends IPopulation<ADemoEntity, Attribute<? extends IValue>>> extends ISampler<ADemoEntity> {
 
 	/**
 	 * Set the sample to draw entity from
 	 * @param sample
 	 */
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean weights);
+	public void setSample(Population sample, boolean weights);
 	
 	/**
 	 * Add new objectives to drive entity drawing process

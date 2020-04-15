@@ -2,13 +2,13 @@ package gospl.sampler.multilayer.co;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.GosplMultitypePopulation;
 import gospl.algo.co.metamodel.AMultiLayerOptimizationAlgorithm;
 import gospl.algo.co.metamodel.solution.MultiLayerSPSolution;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -16,8 +16,6 @@ import gospl.sampler.co.MicroDataSampler;
 
 /**
  * Draw multi layered entities according to layer marginals
- * 
- * TODO : replace uniform draw from sample to weighted based draws
  * 
  * @author kevinchapuis
  *
@@ -37,24 +35,32 @@ public class GosplBiLayerOptimizationSampler<A extends AMultiLayerOptimizationAl
 	
 	public GosplBiLayerOptimizationSampler(A algorithm) {
 		this.algorithm = algorithm;
-		this.childSampler = new MicroDataSampler();
-		this.parentSampler = new MicroDataSampler();
+		this.childSampler = new MicroDataSampler(true);
+		this.parentSampler = new MicroDataSampler(true);
 	}
 	
 	@Override
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean withWeigths) {
+	public void setSample(GosplMultitypePopulation<ADemoEntity> sample, boolean withWeigths) {
+		this.childSampler.setSample(sample.getSubPopulation(0), withWeigths);
 		this.algorithm.setSample(sample);
 	}
 	
 	@Override
-	public void setSample(Map<Integer, IPopulation<ADemoEntity, Attribute<? extends IValue>>> samples, boolean withWeights, int layer) {
+	public void setSample(GosplMultitypePopulation<ADemoEntity> sample, boolean withWeights, int layer) {
 		this.checkLayer(layer);
 		
-		if(samples.containsKey(0)) { this.childSampler.setSample(samples.get(0), withWeights); }
-		if(samples.containsKey(1)) { this.parentSampler.setSample(samples.get(1), withWeights); }
+		if(!sample.getEntityLevel().contains(0) || !sample.getEntityLevel().contains(1)) {
+			throw new IllegalArgumentException("Cannot setup a by-layered optimization process without two layered sample");
+		}
 		
-		this.algorithm.setSample(samples.get(layer));
-		this.algorithm.setSampledLayer(layer);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> childSample = sample.getSubPopulation(0);
+		IPopulation<ADemoEntity, Attribute<? extends IValue>> parentSample = sample.getSubPopulation(1);
+		
+		this.childSampler.setSample(childSample, withWeights);
+		this.parentSampler.setSample(parentSample, withWeights);
+		
+		this.algorithm.setSample(sample);
+		this.algorithm.setSampledLayer(layer==1?layer:0);
 		
 	}
 
@@ -111,14 +117,20 @@ public class GosplBiLayerOptimizationSampler<A extends AMultiLayerOptimizationAl
 			else if(parentSizeConstraint>0) {startingSolution = this.parentSampler.draw(numberOfDraw>parentSizeConstraint?parentSizeConstraint:numberOfDraw); }
 			else {startingSolution = this.parentSampler.draw(numberOfDraw);}
 		}
-		return this.algorithm.run(new MultiLayerSPSolution(startingSolution, algorithm.getSampledLayer(), true, false)).getSolution();
+		
+		MultiLayerSPSolution mlSolution = new MultiLayerSPSolution(startingSolution, algorithm.getSampledLayer(), true);
+		
+		if(childObjectives!=null) this.childObjectives.stream().forEach(cObjectif -> this.algorithm.addObjectives(0, cObjectif));
+		if(parentObjectives!=null) this.parentObjectives.stream().forEach(pObjectif -> this.algorithm.addObjectives(1, pObjectif));
+		
+		return this.algorithm.run(mlSolution).getSolution();
 	}
 
 	@Override
 	public Collection<ADemoEntity> drawFromLayer(int layer, int numberOfDraw) {
 		this.checkLayer(layer);
-		Collection<ADemoEntity> statingSolution = layer==0 ? this.childSampler.draw(numberOfDraw) : this.parentSampler.draw(numberOfDraw);
-		return this.algorithm.run(new MultiLayerSPSolution(statingSolution, algorithm.getSampledLayer(), true, false)).getSolution();
+		Collection<ADemoEntity> startingSolution = layer==0 ? this.childSampler.draw(numberOfDraw) : this.parentSampler.draw(numberOfDraw);
+		return this.algorithm.run(new MultiLayerSPSolution(startingSolution, algorithm.getSampledLayer(), true)).getSolution();
 	}
 	
 	@Override

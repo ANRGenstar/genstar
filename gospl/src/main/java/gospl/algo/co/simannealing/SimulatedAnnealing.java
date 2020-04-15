@@ -4,6 +4,7 @@ import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
+import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationEntityNeighborSearch;
@@ -46,7 +47,7 @@ import gospl.sampler.IEntitySampler;
  * @author kevinchapuis
  *
  */
-public class SimulatedAnnealing extends AOptimizationAlgorithm {
+public class SimulatedAnnealing extends AOptimizationAlgorithm<GosplPopulation> {
 
 	private double coolTempRatio = 0.06;
 
@@ -56,7 +57,7 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 
 	private ISimulatedAnnealingTransitionFunction transFunction;
 
-	public SimulatedAnnealing(IPopulationNeighborSearch<?> neighborSearch,
+	public SimulatedAnnealing(IPopulationNeighborSearch<GosplPopulation, ?> neighborSearch,
 			double minStateEnergy, int initTemp, double coolingRate, 
 			ISimulatedAnnealingTransitionFunction transFonction) {
 		super(neighborSearch, minStateEnergy);
@@ -78,10 +79,10 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 	}
 
 	@Override
-	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution){
+	public ISyntheticPopulationSolution<GosplPopulation> run(ISyntheticPopulationSolution<GosplPopulation> initialSolution){
 
-		ISyntheticPopulationSolution currentState = initialSolution;
-		ISyntheticPopulationSolution bestState = initialSolution;
+		ISyntheticPopulationSolution<GosplPopulation> currentState = initialSolution;
+		ISyntheticPopulationSolution<GosplPopulation> bestState = initialSolution;
 		this.getNeighborSearchAlgorithm().updatePredicates(initialSolution.getSolution());
 		int nBuffer = (int)(super.getNeighborSearchAlgorithm().getPredicates().size()*super.getK_neighborRatio());
 
@@ -109,7 +110,7 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm {
 			boolean tempTransition = false;
 
 			for(int i = 0; i < local_transitionLength; i++) {
-				ISyntheticPopulationSolution systemStateCandidate = currentState.getRandomNeighbor(
+				ISyntheticPopulationSolution<GosplPopulation> systemStateCandidate = currentState.getRandomNeighbor(
 						super.getNeighborSearchAlgorithm(), nBuffer);
 				double candidateEnergy = systemStateCandidate.getFitness(this.getObjectives());
 

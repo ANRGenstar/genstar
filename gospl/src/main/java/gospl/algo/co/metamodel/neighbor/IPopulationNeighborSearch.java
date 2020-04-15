@@ -10,7 +10,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
-import gospl.GosplPopulation;
 
 /**
  * Express how to define neighborhood in the context of synthetic population: what are the possible
@@ -20,7 +19,7 @@ import gospl.GosplPopulation;
  *
  * @param <U>
  */
-public interface IPopulationNeighborSearch<Predicate> {
+public interface IPopulationNeighborSearch<Population extends IPopulation<ADemoEntity, Attribute<? extends IValue>>, Predicate> {
 	
 	/**
 	 * Find a neighbor population given any predicate to based neighborhood on and
@@ -34,9 +33,7 @@ public interface IPopulationNeighborSearch<Predicate> {
 	 * @param degree
 	 * @return
 	 */
-	default IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			Predicate predicate, int degree, boolean keepChildNumberConstant){
+	default Population getNeighbor(Population population, Predicate predicate, int degree, boolean keepChildNumberConstant){
 		return this.getNeighbor(population, this.getPairwisedEntities(population, predicate, degree, keepChildNumberConstant));
 	}
 	
@@ -47,13 +44,16 @@ public interface IPopulationNeighborSearch<Predicate> {
 	 * @param theSwitches
 	 * @return
 	 */
-	default IPopulation<ADemoEntity, Attribute<? extends IValue>> getNeighbor(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
-			Map<ADemoEntity, ADemoEntity> theSwitches){
-		IPopulation<ADemoEntity, Attribute<? extends IValue>> neighbor = new GosplPopulation(population);
-
+	default Population getNeighbor(Population population, Map<ADemoEntity, ADemoEntity> theSwitches){
+		@SuppressWarnings("unchecked")
+		final Population neighbor = (Population) population.clone();
+		
+		if(neighbor.isEmpty()) {throw new IllegalStateException("Cannot get neighbor of an empty population");}
+		
 		for(Entry<ADemoEntity, ADemoEntity> theSwitch : theSwitches.entrySet())
-			neighbor = IPopulationNeighborSearch.deepSwitch(neighbor, theSwitch.getKey(), theSwitch.getValue().clone());
+			IPopulationNeighborSearch.deepSwitch(neighbor, theSwitch.getKey(), theSwitch.getValue());
+		
+		if(population.equals(neighbor)) {throw new IllegalStateException("Current population and neighbor should be different somehow");}
 		
 		return neighbor;
 	}
@@ -67,23 +67,31 @@ public interface IPopulationNeighborSearch<Predicate> {
 	 * @param size
 	 * @return
 	 */
-	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			Predicate predicate, int size);
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(Population population, Predicate predicate, int size);
 	
 	/**
-	 * Find mapped entities (they are close in they attributes) and should or should not have the same 
+	 * Find mapped entities according to a given Predicate and should or should not have the same 
 	 * child size
-	 * @seee {@link #getPairwisedEntities(IPopulation, Object, int)}
+	 * @see {@link #getPairwisedEntities(IPopulation, Object, int)}
 	 * 
 	 * @param population
 	 * @param predicate
 	 * @param size
 	 * @return
 	 */
-	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
-			Predicate predicate, int size, boolean childSizeConsistant);
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(Population population, Predicate predicate, int size, boolean childSizeConsistant);
+	
+	/**
+	 * Find mapped entities (they are close in they attributes) and should or should not have the same 
+	 * child size
+	 * @see {@link #getPairwisedEntities(IPopulation, Object, int)}
+	 * 
+	 * @param population
+	 * @param predicate
+	 * @param size
+	 * @return
+	 */
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(Population population, int size, boolean childSizeConsistant);
 	
 	/**
 	 * The predicates to be used
@@ -100,13 +108,13 @@ public interface IPopulationNeighborSearch<Predicate> {
 	 * Update the state of predicate based on the current population
 	 * @param predicate
 	 */
-	public void updatePredicates(IPopulation<ADemoEntity, Attribute<? extends IValue>> population);
+	public void updatePredicates(Population population);
 	
 	/**
 	 * The sample of entities which is the reservoir to swap entities from given population to its neighbors
 	 * @param sample
 	 */
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample);
+	public void setSample(Population sample);
 
 	// ----------------- UTILITY ----------------- //
 	
@@ -120,9 +128,11 @@ public interface IPopulationNeighborSearch<Predicate> {
 	 * @param newEntity
 	 * @return
 	 */
-	public static IPopulation<ADemoEntity, Attribute<? extends IValue>> deepSwitch(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
+	public static <Population extends IPopulation<ADemoEntity, Attribute<? extends IValue>>> 
+		Population deepSwitch(Population population, 
 			ADemoEntity oldEntity, ADemoEntity newEntity){
+		if(oldEntity.equals(newEntity))
+			throw new IllegalArgumentException("Equal entities should not be removed");
 		if(!population.remove(oldEntity))
 			throw new IllegalArgumentException("Cannot remove "+oldEntity+" from population "+population);
 		if(!population.add(newEntity))

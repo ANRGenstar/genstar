@@ -16,7 +16,9 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  * @author kevinchapuis
  *
  */
-public interface IOptimizationAlgorithm<Solution extends ISyntheticPopulationSolution> {
+public interface IOptimizationAlgorithm<
+	Population extends IPopulation<ADemoEntity, Attribute<? extends IValue>>,
+	Solution extends ISyntheticPopulationSolution<Population>> {
 
 	/**
 	 * Execute the algorithm to perform targeted optimization.
@@ -48,19 +50,19 @@ public interface IOptimizationAlgorithm<Solution extends ISyntheticPopulationSol
 	 * Set the sample of entity to be used to drive combinatorial optimization algorithm
 	 * @param sample
 	 */
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample);
+	public void setSample(Population sample);
 	
 	/**
 	 * Return the algorithm to be used when asking for neighbor populations
 	 * @return
 	 */
-	public IPopulationNeighborSearch<?> getNeighborSearchAlgorithm();
+	public IPopulationNeighborSearch<Population, ?> getNeighborSearchAlgorithm();
 	
 	/**
 	 * Set the algorithm to be used when searching for neighbor populations
 	 * @param neighborSearch
 	 */
-	public void setNeighborSearch(IPopulationNeighborSearch<?> neighborSearch);
+	public void setNeighborSearch(IPopulationNeighborSearch<Population, ?> neighborSearch);
 	
 	public double getFitnessThreshold();
 	

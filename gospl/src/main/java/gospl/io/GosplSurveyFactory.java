@@ -36,6 +36,7 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.IEntity;
 import core.metamodel.io.GSSurveyType;
@@ -62,7 +63,8 @@ public class GosplSurveyFactory {
 	private final DecimalFormatSymbols dfs;
 	private final DecimalFormat decimalFormat;
 
-	private char separator = ';'; // default separator for writing files if not specified 
+	private char separator = ';'; // default separator for writing files if not specified
+	private boolean storedInMemory;
 	private int sheetNb;
 	private int firstRowDataIdx;
 	private int firstColumnDataIdx;
@@ -105,7 +107,8 @@ public class GosplSurveyFactory {
 
 		this(
 				sheetNn, 
-				csvSeparator, 
+				csvSeparator,
+				false,
 				firstRowDataIndex,
 				firstColumnDataIndex,
 				new DecimalFormatSymbols(Locale.FRANCE),
@@ -123,12 +126,13 @@ public class GosplSurveyFactory {
 	 * @param firstColumnDataIndex
 	 * @param locale
 	 */
-	public GosplSurveyFactory(final int sheetNn, final char csvSeparator,
+	public GosplSurveyFactory(final int sheetNn, final char csvSeparator, boolean storedInMemory, 
 			int firstRowDataIndex, int firstColumnDataIndex, Locale locale) {
 
 		this(
 				sheetNn, 
 				csvSeparator, 
+				storedInMemory, 
 				firstRowDataIndex,
 				firstColumnDataIndex,
 				new DecimalFormatSymbols(locale),
@@ -150,6 +154,7 @@ public class GosplSurveyFactory {
 	public GosplSurveyFactory(
 			final int sheetNn, 
 			final char csvSeparator,
+			boolean storedInMemory, 
 			int firstRowDataIndex, 
 			int firstColumnDataIndex, 
 			DecimalFormatSymbols decimalFormatSymbols, 
@@ -157,6 +162,7 @@ public class GosplSurveyFactory {
 
 		this.dfs = decimalFormatSymbols;
 		this.decimalFormat = decimalFormat;
+		this.storedInMemory = storedInMemory;
 		this.sheetNb = sheetNn;
 		this.separator = csvSeparator;
 		this.firstRowDataIdx = firstRowDataIndex;
@@ -207,7 +213,7 @@ public class GosplSurveyFactory {
 				throw new IllegalArgumentException("cannot read file "+surveyFile+" .");
 
 		}
-		return this.getSurvey(surveyFile, wrapper.getSheetNumber(), 
+		return this.getSurvey(surveyFile, wrapper.getStoredInMemory(), wrapper.getSheetNumber(), 
 				wrapper.getCsvSeparator(), wrapper.getFirstRowIndex(), wrapper.getFirstColumnIndex(),
 				wrapper.getSurveyType());
 	}
@@ -310,7 +316,7 @@ public class GosplSurveyFactory {
 	 * @throws IOException
 	 * @throws InvalidSurveyFormatException
 	 */
-	public IGSSurvey getSurvey(final File file, final int sheetNn, final char csvSeparator,
+	public IGSSurvey getSurvey(final File file, boolean storeInMemory, final int sheetNn, final char csvSeparator,
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException, InvalidSurveyFormatException {
 		if (file.getName().endsWith(XLSX_EXT))
@@ -320,7 +326,7 @@ public class GosplSurveyFactory {
 			return new XlsInputHandler(file, sheetNn, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
 		if (file.getName().endsWith(CSV_EXT))
-			return new CsvInputHandler(file, csvSeparator, firstRowDataIndex, 
+			return new CsvInputHandler(file, storeInMemory, csvSeparator, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
 		if (file.getName().endsWith(DBF_EXT))
 			return new DBaseInputHandler(dataFileType, file);
@@ -340,7 +346,7 @@ public class GosplSurveyFactory {
 	 */
 	public IGSSurvey getSurvey(final File file, GSSurveyType dataFileType) 
 			throws IOException, InvalidFormatException, InvalidSurveyFormatException {
-		return this.getSurvey(file, sheetNb, separator, 
+		return this.getSurvey(file, storedInMemory, sheetNb, separator, 
 				firstRowDataIdx, firstColumnDataIdx, dataFileType);
 	}
 
@@ -417,7 +423,7 @@ public class GosplSurveyFactory {
 					throws InvalidFormatException, IOException, InvalidSurveyFormatException{
 		switch (surveyType) {
 		case Sample:
-			return createSample(surveyFile, population);
+			return createSample(surveyFile, true, population);
 		case ContingencyTable:
 			return createTableSummary(surveyFile, surveyType, population);
 		case GlobalFrequencyTable:
@@ -634,31 +640,40 @@ public class GosplSurveyFactory {
 	 * @throws InvalidFormatException 
 	 * @throws InvalidFileTypeException
 	 */
-	private IGSSurvey createSample(File surveyFile, 
+	private IGSSurvey createSample(File surveyFile, boolean withParent,
 			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) 
 					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
 
 		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
 		final Collection<Attribute<? extends IValue>> attributes = population.getPopulationAttributes();
-		bw.write("ID");
-		bw.write(separator);
-		bw.write("__type");
-		bw.write(separator);
-		bw.write(attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator))));
-		bw.write(separator);
-		bw.write("parentId");
-		bw.write(separator);
+		final Collection<IEntity<? extends IAttribute<? extends IValue>>> parents = population.stream()
+				.map(e -> e.getParent()).filter(p -> p!=null).collect(Collectors.toSet());
+		Set<IAttribute<? extends IValue>> parentAttributes = null;
+		if(parents.isEmpty()) {withParent = false;}
+		else {parentAttributes = parents.stream().flatMap(e -> e.getAttributes().stream())
+				.map(a -> (IAttribute<? extends IValue>)a).collect(Collectors.toSet());} 
+		bw.write("ID"); bw.write(separator);
+		bw.write("__type"); bw.write(separator);
+		bw.write(attributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator)))); bw.write(separator);
+		bw.write("parentId"); bw.write(separator);
+		if(withParent) {
+			bw.write("parent__type"); bw.write(separator);
+			bw.write(parentAttributes.stream().map(att -> att.getAttributeName())
+					.collect(Collectors.joining(String.valueOf(separator)))); bw.write(separator);
+			bw.write("count_parent_children"); bw.write(separator);
+		}
 		bw.write("count_children");
 		bw.write("\n");
 
-		bw.write("Individual");
-		bw.write(separator);
-		bw.write("Type of the entity");
-		bw.write(separator);
-		bw.write(attributes.stream().map(att -> att.getDescription()).collect(Collectors.joining(String.valueOf(separator))));
-		bw.write(separator);
-		bw.write("ID of the parent entity");
-		bw.write(separator);
+		bw.write("Individual"); bw.write(separator);
+		bw.write("Type of the entity"); bw.write(separator);
+		bw.write(attributes.stream().map(att -> att.getDescription()).collect(Collectors.joining(String.valueOf(separator)))); bw.write(separator);
+		bw.write("ID of the parent entity"); bw.write(separator);
+		if(withParent) {
+			bw.write("parent__type"); bw.write(separator);
+			bw.write(parentAttributes.stream().map(att -> att.getDescription())
+					.collect(Collectors.joining(String.valueOf(separator)))); bw.write(separator);
+		}
 		bw.write("count of children of this entity");
 		bw.write("\n");
 
@@ -699,6 +714,36 @@ public class GosplSurveyFactory {
 				bw.write(e.getParent().getEntityId());
 			else 
 				bw.write(" ");
+			if(withParent) {
+				ADemoEntity p = (ADemoEntity) parent;
+				bw.write(separator);
+				if (p.getEntityType() != null)
+					bw.write(p.getEntityType());
+				else 
+					bw.write(" ");
+				for (final IAttribute<? extends IValue> attribute : parentAttributes) {
+					bw.write(separator);
+					
+					try {
+
+						IValue val = p.getValueForAttribute((Attribute<? extends IValue>)attribute); 
+						String v = val.getStringValue();
+
+						if (!attribute.getValueSpace().getType().isNumericValue()) {
+							bw.write("\"");
+							bw.write(v);
+							bw.write("\"");
+						} else {
+							bw.write(v);
+						}
+
+					} catch (NullPointerException e2) {
+						bw.write(UNKNOWN_VARIABLE+"\""); // WARNING: i don't understand why i have to add extra "
+					}
+				}
+				bw.write(separator);
+				bw.write(Integer.toString(p.getCountChildren().getActualValue()));
+			}
 			bw.write(separator);
 			bw.write(Integer.toString(e.getCountChildren().getActualValue()));
 			bw.write("\n");

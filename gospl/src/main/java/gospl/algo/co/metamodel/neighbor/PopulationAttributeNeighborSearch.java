@@ -14,6 +14,7 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.comparator.HammingEntityComparator;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
+import gospl.GosplPopulation;
 
 /**
  * Will search for neighbor based on attribute as predicate: meaning that basic search will swap a given
@@ -23,7 +24,7 @@ import core.util.random.GenstarRandomUtils;
  * @author kevinchapuis
  *
  */
-public class PopulationAttributeNeighborSearch implements IPopulationNeighborSearch<Attribute<? extends IValue>> {
+public class PopulationAttributeNeighborSearch implements IPopulationNeighborSearch<GosplPopulation, Attribute<? extends IValue>> {
 
 	private Collection<Attribute<? extends IValue>> predicates;
 	private IPopulation<ADemoEntity, Attribute<? extends IValue>> sample;
@@ -44,15 +45,18 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 	 * @see HammingEntityComparator
 	 */
 	@Override
-	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, 
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, 
 			Attribute<? extends IValue> predicate, int size) {
 		return this.getPairwisedEntities(population, predicate, size, false);
 	}
 	
 	@Override
-	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> population, Attribute<? extends IValue> predicate,
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, int size, boolean childSizeConsistant) {
+		return this.getPairwisedEntities(population, GenstarRandomUtils.oneOf(this.getPredicates()), size, childSizeConsistant);
+	}
+	
+	@Override
+	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, Attribute<? extends IValue> predicate,
 			int size, boolean childSizeConsistant) {
 		if(!population.hasPopulationAttributeNamed(predicate.getAttributeName()))
 			throw new IllegalArgumentException("Trying to search for neighbor population on attribute "
@@ -101,12 +105,12 @@ public class PopulationAttributeNeighborSearch implements IPopulationNeighborSea
 	}
 
 	@Override
-	public void updatePredicates(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+	public void updatePredicates(GosplPopulation population) {
 		this.setPredicates(population.getPopulationAttributes());
 	}
 
 	@Override
-	public void setSample(IPopulation<ADemoEntity, Attribute<? extends IValue>> sample) {
+	public void setSample(GosplPopulation sample) {
 		this.sample = sample;
 	}
 

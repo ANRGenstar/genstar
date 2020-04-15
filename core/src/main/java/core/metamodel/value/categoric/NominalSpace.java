@@ -98,7 +98,7 @@ public class NominalSpace implements IValueSpace<NominalValue> {
 	
 	@Override
 	public boolean contains(IValue value) {
-		if(!value.getClass().equals(NominalValue.class))
+		if(value==null || !value.getClass().equals(NominalValue.class))
 			return false;
 		return values.values().contains(value);
 	}

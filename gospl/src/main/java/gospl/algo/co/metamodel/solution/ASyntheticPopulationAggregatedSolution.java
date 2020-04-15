@@ -1,6 +1,5 @@
 package gospl.algo.co.metamodel.solution;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -10,8 +9,6 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
-import core.util.random.GenstarRandomUtils;
-import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -25,73 +22,70 @@ import gospl.validation.GosplIndicatorFactory;
  * @author kevinchapuis
  *
  */
-public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulationSolution {
+public abstract class ASyntheticPopulationAggregatedSolution<Population extends IPopulation<ADemoEntity, Attribute<? extends IValue>>> 
+	implements ISyntheticPopulationSolution<Population> {
 
-	private IPopulation<ADemoEntity, Attribute<? extends IValue>> population;
+	private Population population;
 	
 	private AFullNDimensionalMatrix<Integer> marginals;
 	
 	private double fitness = -1;
 	
-	public SyntheticPopulationAggregatedSolution(IPopulation<ADemoEntity, Attribute<? extends IValue>> population,
+	public ASyntheticPopulationAggregatedSolution(Population population,
 			AFullNDimensionalMatrix<Integer> marginals){
-		this.population = new GosplPopulation(population);
+		this.population = population;
 		this.marginals = marginals;
 	}
 	
-	public SyntheticPopulationAggregatedSolution(Collection<ADemoEntity> population,
-			AFullNDimensionalMatrix<Integer> marginals){
-		this.population = new GosplPopulation(population);
-		this.marginals = marginals;
-	}
-	
-	public SyntheticPopulationAggregatedSolution(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+	public ASyntheticPopulationAggregatedSolution(Population population) {
 		this(population, new GosplNDimensionalMatrixFactory().createContingency(population));
-	}
-	
-	public SyntheticPopulationAggregatedSolution(Collection<ADemoEntity> population) {
-		this(population, new GosplNDimensionalMatrixFactory().createContingency(new GosplPopulation(population)));
 	}
 	
 	// ----------------------- //
 	
 	@Override
-	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch) {
+	public <U> Collection<ISyntheticPopulationSolution<Population>> getNeighbors(IPopulationNeighborSearch<Population, U> neighborSearch) {
 		 return getNeighbors(neighborSearch, 1);
 	}
 	
+	/*
 	@Override
-	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch,
+	public <U> Collection<ISyntheticPopulationSolution<Population>> getNeighbors(IPopulationNeighborSearch<Population, U> neighborSearch,
 			int k_neighbors) {
 		
-		Collection<ISyntheticPopulationSolution> neighbors = new ArrayList<>();
+		Collection<ISyntheticPopulationSolution<Population>> neighbors = new ArrayList<>();
 		
 		for(U predicate : neighborSearch.getPredicates()) {
 			Map<ADemoEntity, ADemoEntity> theSwitch = neighborSearch.getPairwisedEntities(this.population, predicate, k_neighbors); 
 
-			neighbors.add(new SyntheticPopulationAggregatedSolution(
+			neighbors.add(new ASyntheticPopulationAggregatedSolution<>(
 					neighborSearch.getNeighbor(this.population, theSwitch), 
 					this.makeSwitch(new GosplNDimensionalMatrixFactory()
 							.cloneContingency(this.marginals), theSwitch)));
 		}
 		
 		return neighbors;
-	}
+	}*/
 	
 	@Override
-	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch) {
+	public <U> ISyntheticPopulationSolution<Population> getRandomNeighbor(IPopulationNeighborSearch<Population, U> neighborSearch) {
 		return getRandomNeighbor(neighborSearch, 1);
 	}
 
+	/*
 	@Override
-	public <U> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, 
+	public <U> ISyntheticPopulationSolution<Population> getRandomNeighbor(IPopulationNeighborSearch<Population, U> neighborSearch, 
 			int k_neighbors) {
 		Map<ADemoEntity, ADemoEntity> theSwitch = neighborSearch.getPairwisedEntities(this.population, 
 				GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors);
 		
-		return new SyntheticPopulationAggregatedSolution(neighborSearch.getNeighbor(this.population, theSwitch), 
+		return new ASyntheticPopulationAggregatedSolution<>(neighborSearch.getNeighbor(this.population, theSwitch), 
 				this.makeSwitch(new GosplNDimensionalMatrixFactory().cloneContingency(this.marginals), theSwitch));
-	}
+	}*/
+	
+	// ----------------------- //
+	
+	public abstract ASyntheticPopulationAggregatedSolution<Population> spSolutionProvider();
 	
 	// ----------------------- //
 
@@ -104,15 +98,22 @@ public class SyntheticPopulationAggregatedSolution implements ISyntheticPopulati
 		}
 		return fitness;
 	}
+	
+	@Override
+	public INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> getAbsoluteErrors(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> errorMatrix,
+			Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives) {
+		throw new UnsupportedOperationException("Ask dev to code it ;)");
+	}
 
 	@Override
-	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getSolution() {
+	public Population getSolution() {
 		return population;
 	}
 	
 	// ------------------------ //
 	
-	private AFullNDimensionalMatrix<Integer> makeSwitch(AFullNDimensionalMatrix<Integer> matrix, 
+	protected AFullNDimensionalMatrix<Integer> makeSwitch(AFullNDimensionalMatrix<Integer> matrix, 
 			Map<ADemoEntity, ADemoEntity> theSwitch){
 		
 		for(ADemoEntity oldEntity : theSwitch.keySet()) {

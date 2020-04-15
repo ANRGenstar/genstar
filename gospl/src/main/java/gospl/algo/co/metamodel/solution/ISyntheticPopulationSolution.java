@@ -25,14 +25,15 @@ import gospl.distribution.matrix.INDimensionalMatrix;
  * @author kevinchapuis
  *
  */
-public interface ISyntheticPopulationSolution {
+public interface ISyntheticPopulationSolution<Population extends IPopulation<ADemoEntity, Attribute<? extends IValue>>> {
 
 	/**
 	 * Get the overall collection of neighbors
 	 * 
 	 * @return
 	 */
-	public <Predicate> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<Predicate> neighborSearch);
+	public <Predicate> Collection<ISyntheticPopulationSolution<Population>> 
+		getNeighbors(IPopulationNeighborSearch<Population, Predicate> neighborSearch);
 	
 	/**
 	 * Get the overall collection of neighbors with k neighbors 
@@ -40,14 +41,16 @@ public interface ISyntheticPopulationSolution {
 	 * @param k_neighbors
 	 * @return
 	 */
-	public <Predicate> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<Predicate> neighborSearch, int k_neighbors);
+	public <Predicate> Collection<ISyntheticPopulationSolution<Population>> 
+		getNeighbors(IPopulationNeighborSearch<Population, Predicate> neighborSearch, int k_neighbors);
 	
 	/**
 	 * Get one random neighbor from all possible neighbors
 	 * 
 	 * @return
 	 */
-	public <Predicate> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<Predicate> neighborSearch);
+	public <Predicate> ISyntheticPopulationSolution<Population> 
+		getRandomNeighbor(IPopulationNeighborSearch<Population, Predicate> neighborSearch);
 	
 	/**
 	 * Get one random neighbor within a k neighbor 
@@ -55,7 +58,8 @@ public interface ISyntheticPopulationSolution {
 	 * @param k_neighbors
 	 * @return
 	 */
-	public <Predicate> ISyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<Predicate> neighborSearch, int k_neighbors);
+	public <Predicate> ISyntheticPopulationSolution<Population> 
+		getRandomNeighbor(IPopulationNeighborSearch<Population, Predicate> neighborSearch, int k_neighbors);
 
 	/**
 	 * The fitness of the population or how it fits the requirement of the optimization algorithm.
@@ -67,10 +71,20 @@ public interface ISyntheticPopulationSolution {
 	public Double getFitness(Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives);
 	
 	/**
+	 * The Absolute error for this solution on any marginals : the vector of absolute difference between population and targeted marginals
+	 * 
+	 * @param objectives
+	 * @return
+	 */
+	public INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> getAbsoluteErrors(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> errorMatrix,
+			Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives);
+	
+	/**
 	 * The synthetic population this solution represent
 	 * 
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getSolution();
+	public Population getSolution();
 	
 }

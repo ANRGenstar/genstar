@@ -15,7 +15,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.google.common.collect.Streams;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;
@@ -561,6 +563,44 @@ public abstract class AFullNDimensionalMatrix<T extends Number> implements INDim
 				csv += csvLine+csvSeparator+emptyVal+"\n";
 			}
 		}
+		return csv;
+	}
+	
+	public String toMatrixCsv(char csvSeparator) {
+		List<Attribute<? extends IValue>> atts = new ArrayList<>(getDimensions());
+		
+		List<Attribute<? extends IValue>> xAtts = atts.subList(0, (atts.size()%2==0?atts.size()/2:atts.size()/2+1)+1);
+		List<List<IValue>> xVals = new ArrayList<>();
+		for(Attribute<? extends IValue> a : xAtts) { xVals.add(new ArrayList<>(a.getValueSpace().getValues())); }
+		List<List<IValue>> xValCoord = Lists.cartesianProduct(xVals);
+		
+		List<Attribute<? extends IValue>> yAtts = atts.subList((atts.size()%2==0?atts.size()/2:atts.size()/2+1)+1,atts.size()+1);
+		List<List<IValue>> yVals = new ArrayList<>();
+		for(Attribute<? extends IValue> a : yAtts) { yVals.add(new ArrayList<>(a.getValueSpace().getValues())); }
+		List<List<IValue>> yValCoord = Lists.cartesianProduct(yVals);
+		
+		String csv = "";
+		
+		// TODO : build header
+		for(int i = 0; i < xValCoord.size(); i++){ 
+			csv += yValCoord.stream().map(a->"").collect(Collectors.joining(String.valueOf(csvSeparator)));
+			final int index = i;
+			csv += String.valueOf(csvSeparator)
+					+xValCoord.stream().map(column -> column.get(index).getStringValue())
+						.collect(Collectors.joining(String.valueOf(csvSeparator)));
+			csv += "\n";
+		}
+		
+		// TODO : for each line, build row header
+		for(List<IValue> yCoord : yValCoord) {
+			csv += yCoord.stream().map(IValue::getStringValue).collect(Collectors.joining(String.valueOf(csvSeparator)));
+			for(List<IValue> xCoord : xValCoord) {
+				csv += String.valueOf(csvSeparator)
+						+this.getVal(Streams.concat(xCoord.stream(),yCoord.stream()).collect(Collectors.toSet()),true).getValue();
+			}
+			csv += "\n";
+		}
+		
 		return csv;
 	}
 

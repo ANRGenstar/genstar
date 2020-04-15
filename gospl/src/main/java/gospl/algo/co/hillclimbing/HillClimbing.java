@@ -3,6 +3,7 @@ package gospl.algo.co.hillclimbing;
 import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
+import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationEntityNeighborSearch;
@@ -17,7 +18,7 @@ import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
  * @author kevinchapuis
  *
  */
-public class HillClimbing extends AOptimizationAlgorithm {
+public class HillClimbing extends AOptimizationAlgorithm<GosplPopulation> {
 
 	private int nbIteration;
 
@@ -25,13 +26,13 @@ public class HillClimbing extends AOptimizationAlgorithm {
 		this(new PopulationEntityNeighborSearch(), fitnessThreshold, nbIteration);
 	}
 	
-	public HillClimbing(IPopulationNeighborSearch<?> neighborSearch, double fitnessThreshold, int nbIteration) {
+	public HillClimbing(IPopulationNeighborSearch<GosplPopulation,?> neighborSearch, double fitnessThreshold, int nbIteration) {
 		super(neighborSearch, fitnessThreshold);
 		this.nbIteration = nbIteration;
 	}
 		
 	@Override
-	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution) {
+	public ISyntheticPopulationSolution<GosplPopulation> run(ISyntheticPopulationSolution<GosplPopulation> initialSolution) {
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Start HIll Climbing Algorithm\n"
 				+ "Population size = "+initialSolution.getSolution().size()
@@ -42,7 +43,7 @@ public class HillClimbing extends AOptimizationAlgorithm {
 				Level.DEBUG);
 		gspu.setObjectif(nbIteration);
 		
-		ISyntheticPopulationSolution bestSolution = initialSolution;
+		ISyntheticPopulationSolution<GosplPopulation> bestSolution = initialSolution;
 		double bestFitness = bestSolution.getFitness(this.getObjectives());
 		super.getNeighborSearchAlgorithm().updatePredicates(initialSolution.getSolution());
 		
@@ -50,7 +51,7 @@ public class HillClimbing extends AOptimizationAlgorithm {
 		int buffer = this.computeBuffer(bestFitness, initialSolution);
 		
 		while(iter++ < nbIteration && bestFitness > this.getFitnessThreshold()) {
-			ISyntheticPopulationSolution candidateState = bestSolution.getRandomNeighbor(
+			ISyntheticPopulationSolution<GosplPopulation> candidateState = bestSolution.getRandomNeighbor(
 					super.getNeighborSearchAlgorithm(), buffer);
 			double currentFitness = candidateState.getFitness(this.getObjectives());
 			if(currentFitness < bestFitness) {

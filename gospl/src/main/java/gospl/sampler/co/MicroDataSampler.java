@@ -2,7 +2,9 @@ package gospl.sampler.co;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.IntStream;
 
 import core.metamodel.IPopulation;
@@ -12,7 +14,6 @@ import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
 import core.util.random.roulette.ARouletteWheelSelection;
 import core.util.random.roulette.RouletteWheelSelectionFactory;
-import gospl.GosplPopulation;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
@@ -22,27 +23,42 @@ import gospl.sampler.IEntitySampler;
  * @author kevinchapuis
  *
  */
-public class MicroDataSampler implements IEntitySampler {
+public class MicroDataSampler implements IEntitySampler<IPopulation<ADemoEntity, Attribute<? extends IValue>>> {
 
-	Collection<ADemoEntity> sample;
+	private final boolean clone;
+	private Collection<ADemoEntity> sample;
+	private ARouletteWheelSelection<Double, ADemoEntity> roulette;
 	
-	ARouletteWheelSelection<Double, ADemoEntity> roulette;
+	public MicroDataSampler() {this(true);}
+	
+	public MicroDataSampler(boolean cloneEntity) {this.clone = cloneEntity;}
 	
 	@Override
 	public ADemoEntity draw() {
-		return (roulette!=null ? (ADemoEntity) roulette.drawObject() : GenstarRandomUtils.oneOf(sample)).clone();
+		ADemoEntity original = (roulette!=null ? (ADemoEntity) roulette.drawObject() : GenstarRandomUtils.oneOf(sample)); 
+		return clone ? original.clone() : original;
 	}
 
 	@Override
 	public Collection<ADemoEntity> draw(int numberOfDraw) {
-		GosplPopulation pop = new GosplPopulation();
+		Set<ADemoEntity> pop = new HashSet<>();
 		IntStream.range(0, numberOfDraw).mapToObj(i -> draw()).forEach(e -> pop.add(e));
 		return pop;
 	}
 	
+	/**
+	 * Draw as many entities to obtain a certain number of children {@link ADemoEntity#getChildren()}
+	 * 
+	 * @param numberOfDraw
+	 * @return
+	 */
 	public Collection<ADemoEntity> drawWithChildrenNumber(int numberOfDraw) {
-		GosplPopulation pop = new GosplPopulation();
-		do { pop.add(draw()); } while (pop.stream().flatMap(entity -> entity.getChildren().stream()).count() < numberOfDraw);
+		Set<ADemoEntity> pop = new HashSet<>();
+		int childDrawn = 0;
+		do { ADemoEntity e = draw(); 
+			pop.add(e); 
+			childDrawn += e.getChildren().size();
+		} while (childDrawn < numberOfDraw);
 		return pop;
 	}
 	
@@ -71,5 +87,18 @@ public class MicroDataSampler implements IEntitySampler {
 	public String toCsv(String csvSeparator) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * Intended to check if current object has the ability to draw {@link ADemoEntity} or not, i.e.
+	 * if it is empty then it will not be able to draw entities
+	 * 
+	 * @return If the sample have not been initialized correctly, then will return true
+	 * otherwise false
+	 */
+	public boolean isEmpty() {
+		return (this.sample==null && this.roulette==null) ||
+				(this.sample!=null && this.sample.isEmpty()) || 
+				(this.roulette!=null && this.roulette.getKeys().isEmpty());
 	}
 }

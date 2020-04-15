@@ -15,12 +15,11 @@ import org.apache.logging.log4j.Logger;
 
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.AttributeDictionary;
-import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
-import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.excpetion.GSIllegalRangedData;
 import core.util.random.GenstarRandom;
+import gospl.GosplPopulation;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.exception.IllegalDistributionCreation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -43,7 +42,7 @@ public class GSUtilPopulation {
 	
 	private ISyntheticGosplPopGenerator generator;
 	
-	private IPopulation<ADemoEntity, Attribute<? extends IValue>> population = null;
+	private GosplPopulation population = null;
 	
 	private AFullNDimensionalMatrix<Double> distribution = null;
 	private AFullNDimensionalMatrix<Integer> contingency = null;
@@ -152,7 +151,7 @@ public class GSUtilPopulation {
 	 * 
 	 * @param population
 	 */
-	public GSUtilPopulation(IPopulation<ADemoEntity, Attribute<? extends IValue>> population) {
+	public GSUtilPopulation(GosplPopulation population) {
 		this.population = population;
 	}
 		
@@ -185,7 +184,7 @@ public class GSUtilPopulation {
 	 * @return 
 	 * @return
 	 */
-	public IPopulation<ADemoEntity, Attribute<? extends IValue>> buildPopulation(int size){
+	public GosplPopulation buildPopulation(int size){
 		this.population = generator.generate(size);
 		return this.population;
 	}

@@ -46,6 +46,12 @@ public interface IAttribute<V extends IValue> {
 	@JsonProperty(NAME)
 	public String getAttributeName();
 	
+	/**
+	 * String description of the attribute
+	 * @return
+	 */
+	public String getDescription();
+	
 // ------------------------- value related methods ------------------------- //
 
 

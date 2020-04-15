@@ -2,6 +2,7 @@ package core.metamodel;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import core.metamodel.attribute.IAttribute;
@@ -31,6 +32,17 @@ public interface IMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	 */
 	public Set<String> getEntityTypes();
 	
+	public int getEntityLevel(String type);
+	
+	/**
+	 * Returns the set of the types of agents which might be stored into this 
+	 * populations
+	 * @return
+	 */
+	public List<Integer> getEntityLevel();
+	
+	public String getEntityType(int level);
+	
 	/**
 	 * Adds the entity type if it is not declared already.
 	 * @param novelType
@@ -43,6 +55,13 @@ public interface IMultitypePopulation<E extends IEntity<A>, A extends IAttribute
 	 * @return
 	 */
 	public IPopulation<E,A> getSubPopulation(String entityType);
+	
+	/**
+	 * Returns as a IPopulation the subpopulation of agents of the given level.
+	 * @param entityType
+	 * @return
+	 */
+	public IPopulation<E,A> getSubPopulation(int entityLevel);
 	
 	/**
 	 * Returns an Iterator on the given subpopulation 

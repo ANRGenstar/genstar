@@ -126,6 +126,11 @@ public class SpinPopulation<E extends ADemoEntity> implements IPopulation<E, Att
 		population.clear();
 	}
 	
+	@Override
+	public SpinPopulation<E> clone() {
+		return null;
+	}
+	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
 	public Set<Attribute<? extends IValue>> getPopulationAttributes(){

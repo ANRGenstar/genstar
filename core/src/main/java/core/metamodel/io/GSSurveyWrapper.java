@@ -31,6 +31,8 @@ public class GSSurveyWrapper {
 	public static final String CSV_SEPARATOR = "SEPARATOR";
 	public static final String FIRST_ROW_INDEX = "FRI";
 	public static final String FIRST_COLUMN_INDEX = "FCI";
+	
+	public static final String STORE_IN_MEMORY = "STORE DATA";
 
 	// Cannot set a default value to these variables
 	private Path relativePath;
@@ -41,6 +43,8 @@ public class GSSurveyWrapper {
 	private char csvSeparator = ',';
 	private int firstRowIndex = 1;
 	private int firstColumnIndex = 1;
+
+	private boolean storedInMemory = true;
 
 	/**
 	 * Json required default constructor
@@ -67,12 +71,26 @@ public class GSSurveyWrapper {
 	 */
 	public GSSurveyWrapper(Path relativePath, GSSurveyType surveyType, 
 			int sheetNb, int firstRowIndex, int firstColumnIndex) {
+		this(relativePath, true, surveyType, sheetNb, firstRowIndex, firstColumnIndex);
+	}
+	
+	/**
+	 * Wrapper for Excel type survey
+	 * 
+	 * @param absoluteFilePath
+	 * @param sheetNb
+	 * @param firstRowIndex
+	 * @param firstColumnIndex
+	 */
+	public GSSurveyWrapper(Path relativePath, boolean storeInMemory, GSSurveyType surveyType, 
+			int sheetNb, int firstRowIndex, int firstColumnIndex) {
 		this(relativePath, surveyType);
 		this.setSheetNumber(sheetNb);
+		this.setStoredInMemory(storeInMemory);
 		this.setFirstRowIndex(firstRowIndex);
 		this.setFirstColumnIndex(firstColumnIndex);
 	}
-
+	
 	/**
 	 * Wrapper for csv type survey
 	 * 
@@ -83,8 +101,23 @@ public class GSSurveyWrapper {
 	 */
 	public GSSurveyWrapper(Path relativePath, GSSurveyType surveyType, 
 			char csvSeparator, int firstRowIndex, int firstColumnIndex) {
+		this(relativePath, true, surveyType, csvSeparator, firstRowIndex, firstColumnIndex);
+	}
+
+	/**
+	 * Wrapper for csv type survey
+	 * 
+	 * @param absoluteFilePath
+	 * @param csvSeparator
+	 * @param firstRowIndex
+	 * @param firstColumnIndex
+	 */
+	public GSSurveyWrapper(Path relativePath, boolean storeInMemory, GSSurveyType surveyType, 
+			char csvSeparator, int firstRowIndex, int firstColumnIndex) {
 		this(relativePath, surveyType);
+		this.setStoredInMemory(storeInMemory);
 		this.setCsvSeparator(csvSeparator);
+		this.setStoredInMemory(storeInMemory);
 		this.setFirstColumnIndex(firstColumnIndex);
 		this.setFirstRowIndex(firstRowIndex);
 	}
@@ -183,6 +216,21 @@ public class GSSurveyWrapper {
 	@JsonProperty(GSSurveyWrapper.FIRST_COLUMN_INDEX)
 	public void setFirstColumnIndex(int firstColumnIndex) {
 		this.firstColumnIndex = firstColumnIndex;
+	}
+	
+	/**
+	 * If the data should be stored in memory or not
+	 * 
+	 * @return
+	 */
+	@JsonProperty(GSSurveyWrapper.STORE_IN_MEMORY)
+	public boolean getStoredInMemory() {
+		return this.storedInMemory ;
+	}
+	
+	@JsonProperty(GSSurveyWrapper.STORE_IN_MEMORY)
+	public void setStoredInMemory(boolean storedInMemory) {
+		this.storedInMemory = storedInMemory;
 	}
 
 	// ------------------------------------------------------- //

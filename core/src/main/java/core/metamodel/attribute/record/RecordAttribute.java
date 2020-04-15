@@ -53,6 +53,11 @@ public class RecordAttribute<R extends IAttribute<? extends IValue>,
 	}
 	
 	@Override
+	public String getDescription() {
+		return this.getAttributeName()+" >> "+referent.getAttributeName();
+	}
+	
+	@Override
 	public RecordValueSpace getValueSpace() {
 		if(valuesSpace == null)
 			valuesSpace = new RecordValueSpace(this, new GSCategoricTemplate(), this.getAttributeName());

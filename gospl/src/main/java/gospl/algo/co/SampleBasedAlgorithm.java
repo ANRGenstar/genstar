@@ -1,17 +1,13 @@
 package gospl.algo.co;
 
-import core.metamodel.IPopulation;
-import core.metamodel.attribute.Attribute;
-import core.metamodel.entity.ADemoEntity;
-import core.metamodel.value.IValue;
+import gospl.GosplPopulation;
 import gospl.sampler.IEntitySampler;
 
-public class SampleBasedAlgorithm implements ICombinatorialOptimizationAlgo<IEntitySampler> {
+public class SampleBasedAlgorithm implements ICombinatorialOptimizationAlgo<GosplPopulation, IEntitySampler<GosplPopulation>> {
 
 	@Override
-	public IEntitySampler setupCOSampler(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, 
-			boolean withWeights, IEntitySampler sampler) {
+	public IEntitySampler<GosplPopulation> setupCOSampler(GosplPopulation sample, 
+			boolean withWeights, IEntitySampler<GosplPopulation> sampler) {
 		sampler.setSample(sample,withWeights);
 		return sampler;
 	}

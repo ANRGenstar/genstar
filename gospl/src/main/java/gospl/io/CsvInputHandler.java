@@ -26,81 +26,124 @@ public class CsvInputHandler extends AbstractInputHandler {
 	/**
 	 * The list of the separators which might be detected automatically.
 	 */
-	private static final char[] CSV_SEPARATORS_FROM_DETECTION = new char[] {',',';',':','|',' '};
+	private static final char[] CSV_SEPARATORS_FROM_DETECTION = new char[] {',',';',':','|',' ','\t'};
 
+	private CSVReader tableReader;
 	private List<String[]> dataTable;
 	
 	private int firstRowDataIndex;
 	private int firstColumnDataIndex;
 	
 	private String charset;
+	
+	private boolean storeInMemory;
 
 	protected CsvInputHandler(String fileName, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
-		
-		this(fileName, Charset.defaultCharset().name(), csvSeparator, 
+		this(fileName, true, csvSeparator, firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+	
+	protected CsvInputHandler(String fileName, boolean storeInMemory, char csvSeparator, int firstRowDataIndex, 
+			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
+		this(fileName, storeInMemory, Charset.defaultCharset().name(), csvSeparator, 
 				firstRowDataIndex, firstColumnDataIndex, dataFileType);
 	}
 	
-	protected CsvInputHandler(String fileName, String charset, char csvSeparator, int firstRowDataIndex, 
+	/**
+	 * 
+	 * @param fileName
+	 * @param storeInMemory
+	 * @param charset
+	 * @param csvSeparator
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param dataFileType
+	 * @throws IOException
+	 */
+	protected CsvInputHandler(String fileName, boolean storeInMemory, String charset, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
 		super(dataFileType, fileName);
 		
+		this.storeInMemory = storeInMemory;
 		this.charset = charset;
 		
 		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
-		dataTable = reader.readAll();
+		if(this.storeInMemory) {dataTable = reader.readAll(); reader.close();}
+		else {this.tableReader = reader;}
 		
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		reader.close();
 	}
 	
 	protected CsvInputHandler(File file, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
-		this(file, Charset.defaultCharset().name(), csvSeparator, firstRowDataIndex, firstColumnDataIndex, dataFileType);
+		this(file, true, csvSeparator, firstRowDataIndex, firstColumnDataIndex, dataFileType);
 	}
 	
-	protected CsvInputHandler(File file, String charset, char csvSeparator, int firstRowDataIndex, 
+	protected CsvInputHandler(File file, boolean storeInMemory, char csvSeparator, int firstRowDataIndex, 
+			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
+		this(file, storeInMemory, Charset.defaultCharset().name(), csvSeparator, firstRowDataIndex, firstColumnDataIndex, dataFileType);
+	}
+	
+	/**
+	 * 
+	 * @param file
+	 * @param storeInMemory
+	 * @param charset
+	 * @param csvSeparator
+	 * @param firstRowDataIndex
+	 * @param firstColumnDataIndex
+	 * @param dataFileType
+	 * @throws IOException
+	 */
+	protected CsvInputHandler(File file, boolean storeInMemory, String charset, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException {
 		
 		super(dataFileType, file);
 		
+		this.storeInMemory = storeInMemory;
 		this.charset = charset;
 		
 		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
-		dataTable = reader.readAll();
+		if (this.storeInMemory) {
+			dataTable = reader.readAll(); 
+			reader.close();
+		}
+		else {this.tableReader = reader;}
+		
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		reader.close();
 		
 	}
 
 
 	protected CsvInputHandler(String fileName, InputStream surveyIS, char csvSeparator, 
 			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException { 
-		this(fileName, Charset.defaultCharset().name(), surveyIS, csvSeparator, 
+		this(fileName, Charset.defaultCharset().name(), surveyIS, true, csvSeparator, 
 				firstRowDataIndex, firstColumnDataIndex, dataFileType);
 	}
 
-	protected CsvInputHandler(String fileName, String charset, InputStream surveyIS, char csvSeparator, 
-			int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
+	protected CsvInputHandler(String fileName, String charset, InputStream surveyIS, boolean storeInMemory, 
+			char csvSeparator, int firstRowDataIndex, int firstColumnDataIndex, GSSurveyType dataFileType) 
 					throws IOException {
 		super(dataFileType, fileName);
 
+		this.storeInMemory = storeInMemory;
 		this.charset = charset;
 		
 		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS, this.charset), csvSeparator);
-		dataTable = reader.readAll();
+		if (this.storeInMemory) {dataTable = reader.readAll(); reader.close();}
+		else {this.tableReader = reader;}
+		
 		this.firstRowDataIndex = firstRowDataIndex;
 		this.firstColumnDataIndex = firstColumnDataIndex;
-		reader.close();
 	}
 
 // ------------------------ unique value parser ------------------------ //
 	
 	@Override
 	public String read(int rowIndex, int columnIndex){
+		if(!storeInMemory) { this.readLine(rowIndex).get(columnIndex); }
 		return dataTable.get(rowIndex)[columnIndex].trim();
 	}
 	
@@ -108,6 +151,15 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	@Override
 	public List<String> readLine(int rowNum) {
+		if(!storeInMemory) {
+			int ri = 0;
+			try {
+				while (++ri < rowNum) { tableReader.readNext(); }
+				return Arrays.asList(tableReader.readNext());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 		List<String> line = Arrays.asList(dataTable.get(rowNum));
 		return line;
 	}
@@ -145,6 +197,16 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	@Override
 	public List<String> readColumn(int columnIndex) {
+		if(!storeInMemory) {
+			List<String> col = new ArrayList<>();
+			while(true) {
+				try {
+					col.add(tableReader.readNext()[columnIndex]);
+				} catch (IOException e) {
+					return col;
+				}
+			}
+		}
 		List<String> column = new ArrayList<String>();
 		Iterator<String[]> it = dataTable.iterator();
 		while(it.hasNext()){
@@ -222,6 +284,10 @@ public class CsvInputHandler extends AbstractInputHandler {
 		return s;
 	}
 	
+	@Override
+	public void close() throws IOException {
+		this.tableReader.close();
+	}
 
 	/**
 	 * From a given CSV file, tries to detect a plausible separator. 

@@ -11,7 +11,6 @@ import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import core.util.random.GenstarRandomUtils;
 import gospl.GosplPopulation;
-import gospl.GosplPopulationInDatabase;
 import gospl.algo.co.metamodel.IOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
@@ -27,59 +26,47 @@ import gospl.validation.GosplIndicatorFactory;
  * @author kevinchapuis
  *
  */
-public class SyntheticPopulationSolution implements ISyntheticPopulationSolution {
+public class SyntheticPopulationSolution implements ISyntheticPopulationSolution<GosplPopulation> {
 
-	protected IPopulation<ADemoEntity, Attribute<? extends IValue>> population;
-	protected boolean dataBasedPopulation;
+	protected GosplPopulation population;
 		
 	private double fitness = -1;
 	
-	public SyntheticPopulationSolution(IPopulation<ADemoEntity, Attribute<? extends IValue>> population, boolean dataBasedPopulation){
-		if(dataBasedPopulation)
-			this.population = new GosplPopulationInDatabase(population);
-		else
-			this.population = population;
-		this.dataBasedPopulation = dataBasedPopulation;
+	public SyntheticPopulationSolution(GosplPopulation population){
+		this.population = population;
 	}
 	
-	public SyntheticPopulationSolution(Collection<ADemoEntity> population, boolean dataBasedPopulation){
-		if(dataBasedPopulation) {
-			this.population = new GosplPopulationInDatabase();
-			this.population.addAll(population);
-		} else
-			this.population = new GosplPopulation(population);
-		this.dataBasedPopulation = dataBasedPopulation;
+	public SyntheticPopulationSolution(Collection<ADemoEntity> population){
+		this(new GosplPopulation(population));
 	}
 	
 	// ----------------------- NEIGHBOR ----------------------- //
 	
 	@Override
-	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch) {
+	public <U> Collection<ISyntheticPopulationSolution<GosplPopulation>> getNeighbors(IPopulationNeighborSearch<GosplPopulation, U> neighborSearch) {
 		 return getNeighbors(neighborSearch, 1);
 	}
 	
 	@Override
-	public <U> Collection<ISyntheticPopulationSolution> getNeighbors(IPopulationNeighborSearch<U> neighborSearch,
+	public <U> Collection<ISyntheticPopulationSolution<GosplPopulation>> getNeighbors(IPopulationNeighborSearch<GosplPopulation, U> neighborSearch,
 			int k_neighbors) {
 		return neighborSearch.getPredicates().stream()
 				.map(u -> new SyntheticPopulationSolution(
-						neighborSearch.getNeighbor(this.population, u, k_neighbors,false),
-						this.dataBasedPopulation))
+						neighborSearch.getNeighbor(this.population, u, k_neighbors,false)))
 				.collect(Collectors.toCollection(ArrayList::new)); 
 	}
 	
 	@Override
-	public <U> SyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch) {
+	public <U> SyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<GosplPopulation, U> neighborSearch) {
 		return getRandomNeighbor(neighborSearch, 1);
 	}
 
 	@Override
-	public <U> SyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<U> neighborSearch, 
+	public <U> SyntheticPopulationSolution getRandomNeighbor(IPopulationNeighborSearch<GosplPopulation, U> neighborSearch, 
 			int k_neighbors) {
 		return new SyntheticPopulationSolution(
 				neighborSearch.getNeighbor(this.population, 
-						GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors, false), 
-				this.dataBasedPopulation);
+						GenstarRandomUtils.oneOf(neighborSearch.getPredicates()), k_neighbors, false));
 	}
 	
 	// ----------------------- FITNESS & SOLUTION ----------------------- //
@@ -96,9 +83,15 @@ public class SyntheticPopulationSolution implements ISyntheticPopulationSolution
 		return fitness;
 	}
 	
+	@Override
+	public INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> getAbsoluteErrors(
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> errorMatrix,
+			Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives) {
+		throw new UnsupportedOperationException("Ask dev to code it ;)");
+	}
 	
 	@Override
-	public IPopulation<ADemoEntity, Attribute<? extends IValue>> getSolution() {
+	public GosplPopulation getSolution() {
 		return population;
 	}
 	

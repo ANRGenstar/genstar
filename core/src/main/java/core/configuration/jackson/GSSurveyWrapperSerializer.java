@@ -28,6 +28,7 @@ public class GSSurveyWrapperSerializer extends StdSerializer<GSSurveyWrapper> {
 		
 		gen.writeStartObject();
 		gen.writeObjectField(GSSurveyWrapper.RELATIVE_PATH, wrapper.getRelativePath());
+		gen.writeBooleanField(GSSurveyWrapper.STORE_IN_MEMORY, wrapper.getStoredInMemory());
 		gen.writeStringField(GSSurveyWrapper.SURVEY_TYPE, wrapper.getSurveyType().toString());
 		gen.writeStringField(GSSurveyWrapper.CSV_SEPARATOR, String.valueOf(wrapper.getCsvSeparator()));
 		gen.writeStringField(GSSurveyWrapper.FIRST_ROW_INDEX, String.valueOf(wrapper.getFirstRowIndex()));

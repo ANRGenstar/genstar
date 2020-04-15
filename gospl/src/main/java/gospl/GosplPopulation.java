@@ -170,11 +170,16 @@ public class GosplPopulation implements IPopulation<ADemoEntity, Attribute<? ext
 		population.clear();
 	}
 	
+	@Override
+	public GosplPopulation clone() {
+		return new GosplPopulation(this.population);
+	}
+	
 // ------------------------------------ POP ACCESSORS ------------------------------------ //
 	
 	public Set<Attribute<? extends IValue>> getPopulationAttributes(){
 		if (attributes == null) {
-			// rebuild the list of attributes
+			// build the list of attributes
 			attributes = population.stream().flatMap(e -> e.getAttributes().stream()).collect(Collectors.toSet());
 			return Collections.unmodifiableSet(attributes);
 		} else {

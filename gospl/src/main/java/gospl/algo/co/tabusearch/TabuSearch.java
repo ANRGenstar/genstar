@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Level;
 
 import core.util.GSPerformanceUtil;
 import core.util.random.GenstarRandom;
+import gospl.GosplPopulation;
 import gospl.algo.co.metamodel.AOptimizationAlgorithm;
 import gospl.algo.co.metamodel.neighbor.IPopulationNeighborSearch;
 import gospl.algo.co.metamodel.neighbor.PopulationAttributeNeighborSearch;
@@ -27,7 +28,7 @@ import gospl.algo.co.metamodel.solution.ISyntheticPopulationSolution;
  * @author modified by kevinchapuis
  *
  */
-public class TabuSearch extends AOptimizationAlgorithm {
+public class TabuSearch extends AOptimizationAlgorithm<GosplPopulation> {
 
 	private ITabuList tabuList;
 	private int maxIterations;
@@ -44,7 +45,7 @@ public class TabuSearch extends AOptimizationAlgorithm {
 		this(new PopulationAttributeNeighborSearch(), tabulist, fitnessThreshold, maxIterations);
 	}
 
-	public TabuSearch(IPopulationNeighborSearch<?> neighborSearch,
+	public TabuSearch(IPopulationNeighborSearch<GosplPopulation,?> neighborSearch,
 			ITabuList tabuList, double fitnessThreshold, int maxIterations) {
 		super(neighborSearch, fitnessThreshold);
 		this.tabuList = tabuList;
@@ -52,9 +53,9 @@ public class TabuSearch extends AOptimizationAlgorithm {
 	}
 
 	@Override
-	public ISyntheticPopulationSolution run(ISyntheticPopulationSolution initialSolution) {
-		ISyntheticPopulationSolution bestSolution = initialSolution;
-		ISyntheticPopulationSolution currentSolution = initialSolution;
+	public ISyntheticPopulationSolution<GosplPopulation> run(ISyntheticPopulationSolution<GosplPopulation> initialSolution) {
+		ISyntheticPopulationSolution<GosplPopulation> bestSolution = initialSolution;
+		ISyntheticPopulationSolution<GosplPopulation> currentSolution = initialSolution;
 		this.getNeighborSearchAlgorithm().updatePredicates(initialSolution.getSolution());
 
 		double bestFitness = initialSolution.getFitness(this.getObjectives());
@@ -89,7 +90,7 @@ public class TabuSearch extends AOptimizationAlgorithm {
 			}
 			
 			//gspu.sysoStempPerformance("Retrieve neighbors from current solution", this);
-			Collection<ISyntheticPopulationSolution> neighbors = currentSolution.getNeighbors(
+			Collection<ISyntheticPopulationSolution<GosplPopulation>> neighbors = currentSolution.getNeighbors(
 					super.getNeighborSearchAlgorithm());
 
 			/*
@@ -110,7 +111,7 @@ public class TabuSearch extends AOptimizationAlgorithm {
 					*/ 
 			
 			//gspu.sysoStempPerformance("Start eliciting best neighbors", this);
-			Map<ISyntheticPopulationSolution, Double> neighborsFitness = neighbors.stream()
+			Map<ISyntheticPopulationSolution<GosplPopulation>, Double> neighborsFitness = neighbors.stream()
 					.filter(candidate -> !this.tabuList.contains(candidate))
 					.collect(Collectors.toMap( 
 							Function.identity(),

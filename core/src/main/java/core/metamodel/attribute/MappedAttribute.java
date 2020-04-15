@@ -65,6 +65,7 @@ public class MappedAttribute<K extends IValue, V extends IValue> extends Attribu
 		try {
 			return attributeMapper.getMappedValues(value);
 		} catch (NullPointerException e) {
+			if(value==null) {throw e;}
 			if(getEncodedValueMapper()!=null && getEncodedValueMapper().hasValueOrRecord(value.getStringValue())) {
 				IValue rec = getEncodedValueMapper().getRelatedValue(value.getStringValue());
 				try { return attributeMapper.getMappedValues(rec);

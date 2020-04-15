@@ -35,7 +35,7 @@ import gospl.sampler.IEntitySampler;
  * Transportation Research Part B: Methodological 114 (August 2018): 199–212. https://doi.org/10.1016/j.trb.2018.06.002.
  *
  */
-public class IRejectionSampler implements IEntitySampler {
+public class IRejectionSampler implements IEntitySampler<IPopulation<ADemoEntity, Attribute<? extends IValue>>> {
 
 	INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> rejectionDistribution;
 	IPopulation<ADemoEntity, Attribute<? extends IValue>> basePopulation;

@@ -1,8 +1,10 @@
 package core.metamodel.entity.comparator;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -47,16 +49,18 @@ public class HammingEntityComparator extends ImplicitEntityComparator {
 	}
 	
 	/**
-	 * Equivalent to {link @HammingEntityComparator(Map<IAttribute<? extends IValue>, Set<IValue>> vector)} but not
-	 * without consistency
+	 * Equivalent to {link {@link #HammingEntityComparator(Map)}} but without consistency
 	 * 
 	 * @param vector
 	 */
 	public HammingEntityComparator(IValue... vector) {
+		super(new ArrayList<>(Arrays.asList(vector).stream()
+				.map(v -> v.getValueSpace().getAttribute())
+				.collect(Collectors.toSet())));
 		this.vector = new AttributeVectorMatcher();
 		this.vector.addMatchToVector(vector);
 	}
-	
+
 	@JsonProperty(HammingEntityComparator.HAMMING_VECTOR)
 	public AttributeVectorMatcher getVectorMatcher() {
 		return this.vector;

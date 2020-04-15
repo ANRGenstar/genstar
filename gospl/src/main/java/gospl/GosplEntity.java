@@ -2,6 +2,7 @@ package gospl;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
@@ -32,14 +33,11 @@ public class GosplEntity extends ADemoEntity {
 	public GosplEntity clone(){
 		GosplEntity clone = new GosplEntity(new HashMap<>(this.getAttributeMap()));
 		if (this.hasChildren()) {
-			clone.addChildren(this.getChildren());
+			clone.addChildren(this.getChildren().stream()
+					.map(e -> ((ADemoEntity)e).clone()).collect(Collectors.toSet()));
 			clone.getChildren().stream().forEach(child -> child.setParent(clone));
 		}
-		if (this.hasParent()) {
-			clone.setParent(this.getParent());
-			this.getParent().getChildren().remove(this);
-			this.getParent().getChildren().add(clone);
-		}
+		clone.setEntityType(this.getEntityType());
 		clone.setWeight(this.getWeight());
 		return clone;
 	}

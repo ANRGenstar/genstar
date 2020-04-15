@@ -4,6 +4,7 @@ import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import gospl.algo.IGosplConcept;
 import gospl.sampler.IEntitySampler;
 import gospl.sampler.ISampler;
 import gospl.sampler.co.CombinatorialOptimizationSampler;
@@ -14,6 +15,7 @@ import gospl.sampler.co.CombinatorialOptimizationSampler;
  * a sample.
  * <p>
  * Implementing class: {@link SampleBasedAlgorithm}
+ * <p>
  * 
  * @author kevinchapuis
  *
@@ -22,7 +24,9 @@ import gospl.sampler.co.CombinatorialOptimizationSampler;
  * @see CombinatorialOptimizationSampler
  * @see IGosplConcept.EGosplGenerationConcept#CO
  */
-public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADemoEntity>> {
+public interface ICombinatorialOptimizationAlgo<
+	SampleType extends IPopulation<ADemoEntity, Attribute<? extends IValue>>,
+	SamplerType extends ISampler<ADemoEntity>> {
 
 	/**
 	 * This method must provide a way to build a Combinatorial Optimization (CO) sampler. CO is known in the literature
@@ -34,7 +38,7 @@ public interface ICombinatorialOptimizationAlgo<SamplerType extends ISampler<ADe
 	 * @return
 	 */
 	public ISampler<ADemoEntity> setupCOSampler(
-			IPopulation<ADemoEntity, Attribute<? extends IValue>> sample, boolean withWeights,
+			SampleType sample, boolean withWeights,
 			SamplerType sampler);
 	
 }

@@ -7,17 +7,22 @@ import java.nio.file.Files;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.math3.distribution.ChiSquaredDistribution;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
 
 import core.metamodel.IPopulation;
 import core.metamodel.IQueryablePopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import core.util.GSPerformanceUtil;
 import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
@@ -37,9 +42,12 @@ public class GosplIndicatorFactory {
 	private static GosplIndicatorFactory gif = new GosplIndicatorFactory();
 	private double criticalPValue = 0.05;
 
+	private GSPerformanceUtil gspu;
+	
 	private GosplIndicatorFactory(){}
 
 	public static GosplIndicatorFactory getFactory() {
+		gif.gspu = new GSPerformanceUtil("GSUtil print for indicator factory", LogManager.getLogger(gif));
 		return gif;
 	}
 
@@ -47,6 +55,60 @@ public class GosplIndicatorFactory {
 		this.criticalPValue  = criticalPValue;
 	}
 	
+	// ----------------------------- Matrix error ---------------------------- //
+	
+	/**
+	 * Return the absolute error on each control marginals for the given population
+	 * 
+	 * @param layer
+	 * @param errorMatrix
+	 * @param objectives
+	 * @return
+	 */
+	public INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> getAbsoluteErrors(
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> pop,
+			INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer> errorMatrix,
+			Set<INDimensionalMatrix<Attribute<? extends IValue>, IValue, Integer>> objectives) {
+
+		
+		Set<Attribute<? extends IValue>> marginals = objectives.stream()
+				.flatMap(mat -> mat.getDimensions().stream()).collect(Collectors.toSet());
+		
+		if (errorMatrix.getDimensions().stream().allMatch(att -> marginals.stream().anyMatch(m -> m.isLinked(att)))) {
+			throw new IllegalArgumentException("Some attribute of the errorMatrix does not match with any marginals:\n"
+					+ errorMatrix.getDimensions().stream().filter(att -> marginals.stream().noneMatch(m -> m.isLinked(att)))
+						.map(Attribute::getAttributeName).collect(Collectors.joining("; ")));
+		}
+		
+		Map<Attribute<? extends IValue>, Attribute<? extends IValue>> margeToAtt = marginals.stream()
+				.filter(att -> pop.getPopulationAttributes().stream()
+						.anyMatch(popAtt -> att.isLinked(popAtt)))
+				.collect(Collectors.toMap(
+						Function.identity(),
+						marginal -> pop.getPopulationAttributes().stream()
+							.filter(popAtt -> marginal.isLinked(popAtt))
+							.findFirst().get()
+						));
+		
+		AFullNDimensionalMatrix<Integer> popMat = GosplNDimensionalMatrixFactory.getFactory()
+				.createContingency(new HashSet<>(margeToAtt.keySet()), pop);
+		
+		for(ACoordinate<Attribute<? extends IValue>, IValue> coord : errorMatrix.getMatrix().keySet()) {
+			int input = objectives.stream()
+					.filter(mat -> mat.getDimensions().containsAll(coord.getDimensions()))
+					.findFirst().get().getVal(coord.values())
+					.getValue();
+			
+			Collection<IValue> popCoord = popMat.getDimensions().stream()
+					.flatMap(att -> margeToAtt.get(att).findMappedAttributeValues(coord.getMap().get(att)).stream())
+					.collect(Collectors.toSet());
+			int output = popMat.getVal(popCoord,true).getValue();
+			
+			errorMatrix.setValue(coord, input-output);
+		}
+		
+		return errorMatrix;
+	}
 	
 	// ---------------------- Total Absolute Cell Error ---------------------- //
 
@@ -288,8 +350,30 @@ public class GosplIndicatorFactory {
 	 */
 	public int getIntegerTAE(INDimensionalMatrix<Attribute<? extends IValue>, IValue, ? extends Number> inputMatrix,
 			AFullNDimensionalMatrix<Integer> populationMatrix){
+		
+		if(gspu.getLogger().getLevel()==Level.TRACE) {
+			gspu.sysoStempMessage("Compute TAE for matrix "+inputMatrix.getGenesisAsString()+" and "+populationMatrix.getGenesisAsString());
+			for(ACoordinate<Attribute<? extends IValue>, IValue> coord : inputMatrix.getMatrix().keySet()) {
+				gspu.sysoStempMessage("Matrix coordinate :"+coord.values().stream().map(IValue::getStringValue).collect(Collectors.joining("; ")));
+				gspu.sysoStempMessage("\tValue = "+inputMatrix.getVal(coord));
+				Collection<IValue> vals = null;
+				try {
+					vals = populationMatrix.getCoordinates(coord.values().stream().collect(Collectors.toSet())).stream()
+							.flatMap(c -> c.values().stream()).collect(Collectors.toSet());
+				} catch (NullPointerException e) {
+					gspu.sysoStempMessage(populationMatrix.getAspects().stream().map(IValue::getStringValue)
+							.collect(Collectors.joining("; ")));
+					throw e;
+				}
+				
+				gspu.sysoStempMessage("Population coordinate :"+vals.stream().map(IValue::getStringValue).collect(Collectors.joining("; ")));
+				gspu.sysoStempMessage("\tValue = "+populationMatrix.getVal(vals.stream().collect(Collectors.toSet())));
+			}
+		}
+		
 		return inputMatrix.getMatrix().entrySet().stream()
-				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values(), true)
+				.mapToInt(e -> Math.abs(populationMatrix.getVal(e.getKey().values().stream()
+							.filter(v -> populationMatrix.getAspects().contains(v)).collect(Collectors.toSet()), true)
 						.getValue() - e.getValue().getValue().intValue()))
 				.sum();
 	}
