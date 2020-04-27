@@ -6,6 +6,8 @@ import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
 import gospl.GosplMultitypePopulation;
+import gospl.algo.IGosplConcept;
+import gospl.algo.IGosplConcept.EGosplGenerationConcept;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.sampler.IEntitySampler;
 
@@ -57,5 +59,10 @@ public interface ICOMultiLayerSampler extends IEntitySampler<GosplMultitypePopul
 	 * @return
 	 */
 	public boolean checkLayer(int layer);
+	
+	@Override
+	default EGosplGenerationConcept getConcept() {
+		return IGosplConcept.EGosplGenerationConcept.MULTILEVEL;
+	}
 	
 }

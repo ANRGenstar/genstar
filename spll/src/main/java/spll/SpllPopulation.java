@@ -343,6 +343,11 @@ public class SpllPopulation implements IPopulation<SpllEntity, Attribute<? exten
 	public void clear() {
 		population.clear();
 	}
+	
+	@Override
+	public SpllPopulation clone() {
+		return new SpllPopulation(this);
+	}
 
 	@Override
 	public boolean isAllPopulationOfType(String type) {

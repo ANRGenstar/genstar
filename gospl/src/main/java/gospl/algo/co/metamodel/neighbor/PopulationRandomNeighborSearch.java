@@ -14,6 +14,11 @@ import gospl.sampler.co.MicroDataSampler;
 public class PopulationRandomNeighborSearch<Predicate> implements IPopulationNeighborSearch<GosplPopulation, Predicate> {
 
 	private MicroDataSampler toSample;
+	private boolean useWeights;
+	
+	public PopulationRandomNeighborSearch() {this(false);}
+	
+	public PopulationRandomNeighborSearch(boolean useWeights) {this.useWeights = useWeights;}
 
 	@Override
 	public Map<ADemoEntity, ADemoEntity> getPairwisedEntities(GosplPopulation population, Predicate predicate, int size) {
@@ -33,7 +38,7 @@ public class PopulationRandomNeighborSearch<Predicate> implements IPopulationNei
 		Map<ADemoEntity, ADemoEntity> output = new HashMap<>();
 		// Utility sampler for current population pick entities to remove
 		MicroDataSampler toRemove = new MicroDataSampler(false);
-		toRemove.setSample(population, true);
+		toRemove.setSample(population, useWeights);
 		
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Random neighbor search", Level.TRACE);
 		gspu.sysoStempMessage("Sample from "+toSample.draw().getEntityType()+" entity type to switch with "
@@ -78,7 +83,7 @@ public class PopulationRandomNeighborSearch<Predicate> implements IPopulationNei
 	@Override
 	public void setSample(GosplPopulation sample) {
 		if(this.toSample==null) { this.toSample = new MicroDataSampler(); }
-		this.toSample.setSample(sample, true);
+		this.toSample.setSample(sample, useWeights);
 	}
 
 }

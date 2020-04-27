@@ -1,7 +1,6 @@
 package gospl.io;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,8 +16,8 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 
 import core.configuration.dictionary.IGenstarDictionary;
-import core.metamodel.attribute.IAttribute;
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.IAttribute;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.io.IGSSurvey;
 import core.metamodel.value.IValue;
@@ -251,8 +250,5 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 	public String getSurveyFilePath() {
 		return surveyFilePath;
 	}
-	
-	@Override
-	public void close() throws IOException { throw new UnsupportedOperationException("Cannot close this input handler");}
 
 }

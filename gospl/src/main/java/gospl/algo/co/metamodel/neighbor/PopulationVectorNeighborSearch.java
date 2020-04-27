@@ -57,7 +57,9 @@ public class PopulationVectorNeighborSearch implements IPopulationNeighborSearch
 		
 		if (predicate.getDimensions().stream().anyMatch(dim -> population.getPopulationAttributes().stream()
 				.noneMatch(att -> att.isLinked(dim)))) {
-			throw new IllegalArgumentException("Population must share attributes (if not all) with predicat matrix");
+				throw new IllegalArgumentException("Population must share attributes ("+
+					population.getPopulationAttributes().stream().map(Attribute::getAttributeName).collect(Collectors.joining("; "))+") with predicat matrix: "
+					+predicate.getDimensions().stream().map(Attribute::getAttributeName).collect(Collectors.joining("; ")));
 		}
 		
 		// Store a map of related attributes to transpose pop att > predicate att

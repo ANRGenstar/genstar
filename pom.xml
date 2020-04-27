@@ -58,7 +58,7 @@
 		<github.global.server>github</github.global.server>
 		
 		<!-- use the latest snapshot <geotools.version>15-SNAPSHOT</geotools.version> -->
-		<revision>1.0.3</revision>
+		<revision>1.0.4</revision>
 	</properties>
 
 

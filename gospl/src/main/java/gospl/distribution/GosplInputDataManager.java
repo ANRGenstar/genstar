@@ -408,8 +408,6 @@ public class GosplInputDataManager {
 			}
 		}
 		
-		try {survey.close();} catch (IOException | NullPointerException e) {}
-		
 		return cTableSet;
 	}
 
@@ -503,15 +501,11 @@ public class GosplInputDataManager {
 				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
 		}
 		
-		try {survey.close();} catch (IOException | NullPointerException e) {}
-		
 		return sampleSet;
 	}
 	
 	/**
 	 * Retrieve a multi layered sample from a survey (micro-data) and a dictionary per layer
-	 * 
-	 * TODO : one day move to GosplMultitypePopulation
 	 * 
 	 * @param survey
 	 * @param layerDicos
@@ -664,8 +658,6 @@ public class GosplInputDataManager {
 			gspu.sysoStempMessage("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)population.size()*100)
 				+"% ("+unmatchSize+") of entities due to unmatching attribute's value");
 		}
-		
-		try {survey.close();} catch (IOException | NullPointerException e) {}
 		
 		return population;
 	}

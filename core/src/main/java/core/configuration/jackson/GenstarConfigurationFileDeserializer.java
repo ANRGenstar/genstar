@@ -100,6 +100,7 @@ public class GenstarConfigurationFileDeserializer extends StdDeserializer<Gensta
 			surveyWrapper.setFirstRowIndex(wrap.get(GSSurveyWrapper.FIRST_ROW_INDEX).asInt());
 			surveyWrapper.setFirstColumnIndex(wrap.get(GSSurveyWrapper.FIRST_COLUMN_INDEX).asInt());
 			surveyWrapper.setSheetNumber(wrap.get(GSSurveyWrapper.SHEET_NB).asInt());
+			surveyWrapper.setStoredInMemory(wrap.get(GSSurveyWrapper.STORE_IN_MEMORY).asBoolean());
 			
 			wrappers.put(surveyWrapper, listLayers);
 		}
