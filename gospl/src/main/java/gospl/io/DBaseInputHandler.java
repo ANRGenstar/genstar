@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import au.com.bytecode.opencsv.CSVReader;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;
@@ -453,5 +454,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		return res;
 	}
 	
-
+	@Override
+	public CSVReader getBufferReader(boolean skipHeader) { throw new UnsupportedOperationException(); }
+	
 }

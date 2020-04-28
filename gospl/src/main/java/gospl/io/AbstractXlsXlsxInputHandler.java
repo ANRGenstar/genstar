@@ -10,6 +10,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
+import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.io.GSSurveyType;
 
 /**
@@ -191,6 +192,11 @@ public abstract class AbstractXlsXlsxInputHandler extends AbstractInputHandler {
 	protected Sheet getCurrentSheet(){
 		return currentSheet;
 	}
+	
+// ------------------------------------------------------------------------ //
+	
+	@Override
+	public CSVReader getBufferReader(boolean skipHeader) { throw new UnsupportedOperationException(); }
 	
 	@Override
 	public String toString(){

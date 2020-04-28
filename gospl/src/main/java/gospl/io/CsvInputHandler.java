@@ -3,9 +3,11 @@ package gospl.io;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jfree.util.Log;
@@ -23,6 +26,16 @@ import org.jfree.util.Log;
 import au.com.bytecode.opencsv.CSVReader;
 import core.metamodel.io.GSSurveyType;
 
+/**
+ * A wrapper of OpenCSV to read csv based data
+ * 
+ * TODO : from the API, DEAL WITH IT => "Reads the entire file into a List with each element being a String[] of tokens. 
+ * Since the current implementation returns a LinkedList, you are strongly discouraged from using index-based access methods to get at items in the list. 
+ * Instead, iterate over the list."
+ *  
+ * @author kevinchapuis
+ *
+ */
 public class CsvInputHandler extends AbstractInputHandler {
 
 	/**
@@ -34,16 +47,21 @@ public class CsvInputHandler extends AbstractInputHandler {
 	 * 
 	 */
 	private static final int CHUNK_SIZE = 100000;
-	
+	private static final boolean CHUNK = false;
 	private Map<Integer,List<String[]>> dataTables;
+	
 	private List<String[]> dataTable;
 	
 	private int firstRowDataIndex;
 	private int firstColumnDataIndex;
 	
 	private String charset;
+	private char csvSeparator;
 	
 	private boolean storeInMemory;
+	// If the data have not been stored in memory still have to get some stats
+	private int lastRowIndex = -1;
+	private int lastColumnIndex = -1;
 
 	protected CsvInputHandler(String fileName, char csvSeparator, int firstRowDataIndex, 
 			int firstColumnDataIndex, GSSurveyType dataFileType) throws IOException{
@@ -72,11 +90,22 @@ public class CsvInputHandler extends AbstractInputHandler {
 		super(dataFileType, fileName);
 		
 		this.storeInMemory = storeInMemory;
+		this.csvSeparator = csvSeparator;
 		this.charset = charset;
 		
 		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
-		if(this.storeInMemory) {dataTable = reader.readAll();}
-		else {this.dataTables = chunkData(reader, CHUNK_SIZE);}
+		if(this.storeInMemory) {
+			if (CHUNK) {this.dataTables = chunkData(reader, CHUNK_SIZE);}
+			else {dataTable = reader.readAll();}
+		} else {
+			// Store header in memory
+			dataTable = new ArrayList<>();
+			int length = 0;
+			for (int row = 0; row <  firstRowDataIndex; row++) { dataTable.add(reader.readNext()); length++;}
+			String[] rec = null;
+			do { rec = reader.readNext(); if (this.lastColumnIndex < 0)  {this.lastColumnIndex = rec.length-1;} length++;}  while (rec != null);
+			this.lastRowIndex = length-1;
+		}
 		reader.close();
 		
 		this.firstRowDataIndex = firstRowDataIndex;
@@ -111,10 +140,21 @@ public class CsvInputHandler extends AbstractInputHandler {
 		
 		this.storeInMemory = storeInMemory;
 		this.charset = charset;
+		this.csvSeparator = csvSeparator;
 		
 		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
-		if(this.storeInMemory) {dataTable = reader.readAll();}
-		else {this.dataTables = chunkData(reader, CHUNK_SIZE);}
+		if(this.storeInMemory) {
+			if(CHUNK) {this.dataTables = chunkData(reader, CHUNK_SIZE);}
+			else {dataTable = reader.readAll();}
+		} else {
+			// Store header in memory
+			dataTable = new ArrayList<>();
+			int length = 0;
+			for (int row = 0; row <  firstRowDataIndex; row++) { dataTable.add(reader.readNext()); length++;}
+			String[] rec = null;
+			do { rec = reader.readNext(); if (this.lastColumnIndex < 0)  {this.lastColumnIndex = rec.length-1;} length++;}  while (rec != null);
+			this.lastRowIndex = length-1;
+		}
 		reader.close();
 		
 		this.firstRowDataIndex = firstRowDataIndex;
@@ -136,10 +176,21 @@ public class CsvInputHandler extends AbstractInputHandler {
 
 		this.storeInMemory = storeInMemory;
 		this.charset = charset;
+		this.csvSeparator = csvSeparator;
 		
 		CSVReader reader = new CSVReader(new InputStreamReader(surveyIS, this.charset), csvSeparator);
-		if(this.storeInMemory) {dataTable = reader.readAll();}
-		else {this.dataTables = chunkData(reader, CHUNK_SIZE);}
+		if(this.storeInMemory) {
+			if (CHUNK) {this.dataTables = chunkData(reader, CHUNK_SIZE);}
+			else {dataTable = reader.readAll();}
+		} else {
+			// Store header in memory
+			dataTable = new ArrayList<>();
+			int length = 0;
+			for (int row = 0; row <  firstRowDataIndex; row++) { dataTable.add(reader.readNext()); length++;}
+			String[] rec = null;
+			do { rec = reader.readNext(); if (this.lastColumnIndex < 0)  {this.lastColumnIndex = rec.length-1;} length++;}  while (rec != null);
+			this.lastRowIndex = length-1;
+		}
 		reader.close();
 		
 		this.firstRowDataIndex = firstRowDataIndex;
@@ -150,7 +201,7 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	@Override
 	public String read(int rowIndex, int columnIndex){
-		if(!storeInMemory) { this.readLine(rowIndex).get(columnIndex); }
+		if(CHUNK) { return this.readLine(rowIndex).get(columnIndex); }
 		return dataTable.get(rowIndex)[columnIndex].trim();
 	}
 	
@@ -158,7 +209,8 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	@Override
 	public List<String> readLine(int rowNum) {
-		if(!storeInMemory) {
+		if(!storeInMemory) {throw new NullPointerException("Data have not been stored in memory - use #getBufferReader() to access data");}
+		if(CHUNK) {
 			List<String[]> chunk = dataTables.get(((int) rowNum/CHUNK_SIZE) * CHUNK_SIZE);
 			return Arrays.asList(chunk.get(rowNum%CHUNK_SIZE));
 		}
@@ -199,7 +251,8 @@ public class CsvInputHandler extends AbstractInputHandler {
 	
 	@Override
 	public List<String> readColumn(int columnIndex) {
-		if(!storeInMemory) {
+		if(!storeInMemory) {throw new NullPointerException("Data have not been stored in memory - use #getBufferReader() to access data");}
+		if(CHUNK) {
 			List<String> col = new ArrayList<>();
 			for(Integer chunkIdx : dataTables.keySet()) {
 				Iterator<String[]> it = dataTables.get(chunkIdx).iterator();
@@ -266,14 +319,16 @@ public class CsvInputHandler extends AbstractInputHandler {
 	}
 	
 	@Override
-	public int getLastRowIndex(){ 
-			return dataTable==null || dataTable.isEmpty() ? 
-					(dataTables.keySet().size()-1)*CHUNK_SIZE+dataTables.get(Collections.max(dataTables.keySet())).size() : 
-						dataTable.size() - 1;
+	public int getLastRowIndex(){
+		if(!storeInMemory) {return lastRowIndex;}
+		return dataTable==null || dataTable.isEmpty() ? 
+				(dataTables.keySet().size()-1)*CHUNK_SIZE+dataTables.get(Collections.max(dataTables.keySet())).size() : 
+					dataTable.size() - 1;
 	}
 	
 	@Override
 	public int getLastColumnIndex() {
+		if(!storeInMemory) {return lastColumnIndex;}
 		if(dataTable == null || dataTable.isEmpty()) {
 			return dataTables.values().stream().findFirst().get().iterator().next().length;
 		}
@@ -285,8 +340,8 @@ public class CsvInputHandler extends AbstractInputHandler {
 	public String toString(){
 		String s = "";
 		s+="Survey name: "+getName()+"\n";
-		s+="\tline number: "+dataTable==null?Double.NaN:dataTable.size();
-		s+="\tcolumn number: "+dataTable==null?Double.NaN:dataTable.get(0).length;
+		s+="\tline number: "+(!storeInMemory?lastRowIndex+1:dataTable.size());
+		s+="\tcolumn number: "+(!storeInMemory?lastColumnIndex+1:dataTable.get(0).length);
 		return s;
 	}
 
@@ -401,21 +456,41 @@ public class CsvInputHandler extends AbstractInputHandler {
 		
 	}
 
-	static Map<Integer, List<String[]>> chunkData(CSVReader reader, int chunkSize) {
+	/**
+	 * TODO : move List<String[]> to a proper CharBuffer with decoder to be lighter in memory 
+	 * 
+	 * @param reader
+	 * @param chunkSize
+	 * @return
+	 * @throws IOException
+	 */
+	static Map<Integer, List<String[]>> chunkData(CSVReader reader, int chunkSize) throws IOException {
 		Map<Integer,List<String[]>> chunks = new HashMap<>();
 		chunks.put(chunkSize, new ArrayList<>());
 		int idx = chunkSize;
 		int count = 0;
 		do {
-			try {
-				chunks.get(idx).add(reader.readNext());
-				count++;
-				if(count%chunkSize==0) { idx += chunkSize; chunks.put(idx, new ArrayList<>()); 
-				System.out.println("[SYSO::"+CsvInputHandler.class.getSimpleName()+"] "+idx+" record have been done");}
-			} catch (IOException e) {
-				return chunks;
-			}
+			String[] line = reader.readNext();
+			if(line==null) {return chunks;}
+			else {chunks.get(idx).add(line);}
+			count++;
+			if(count%chunkSize==0) { idx += chunkSize; chunks.put(idx, new ArrayList<>()); 
+			System.out.println("[SYSO::"+CsvInputHandler.class.getSimpleName()+"] "+idx+" record have been done");}
 		} while (true);
+	}
+
+	@Override
+	public CSVReader getBufferReader(boolean skipHeader) throws UnsupportedEncodingException, FileNotFoundException {
+		CSVReader reader = new CSVReader(new InputStreamReader(new FileInputStream(surveyCompleteFile), this.charset), csvSeparator);
+		if(skipHeader) { IntStream.range(0, firstRowDataIndex).forEach(i -> {
+			try {
+				reader.readNext();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}); }
+		return reader;
 	}
 
 }

@@ -26,7 +26,8 @@ import core.util.GSPerformanceUtil;
 /**
  * Abstraction for any input handler: able to store the path to the file its based on, 
  * and the nature of data stored there. Also provides basic algos for detecting row and 
- * column headers, suitable for tabular files.
+ * column headers, suitable for tabular files. </br>
+ * TODO : build an explicit header object
  * 
  * @author Samuel Thiriot
  * @author Kevin Chapuis

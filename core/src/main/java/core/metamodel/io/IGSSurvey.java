@@ -1,16 +1,20 @@
 package core.metamodel.io;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import au.com.bytecode.opencsv.CSVReader;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 
 /**
- * Main interface for access to survey as a table (List of list) 
- * Data are access through line (raw) and variable (column) indexes.
+ * Main interface for access to survey as a table (List of list). Default behavior stores data in memory so they 
+ * can be accessed through line (raw) and variable (column) indexes. However, for large (to huge) data, most of 
+ * the time samples, they can be accessed using dedicated buffer reader
  * 
  * @author kevinchapuis
  *
@@ -169,6 +173,14 @@ public interface IGSSurvey {
 			int fromFirstRowIndex, int toLastRowIndex, 
 			int fromFirstColumnIndex, int toLastColumnIndex);
 	
+	/**
+	 * Makes it possible to read data content without saving it in memory -
+	 * WARNING : only available for csv type encoded data
+	 * @return the buffer reader provided by OpenCSV
+	 * @throws FileNotFoundException 
+	 * @throws UnsupportedEncodingException 
+	 */
+	public CSVReader getBufferReader(boolean skipHeader) throws UnsupportedEncodingException, FileNotFoundException;
 	
 	@Override
 	public String toString();

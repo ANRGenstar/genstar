@@ -9,7 +9,9 @@
  **********************************************************************************************/
 package gospl.distribution;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -31,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 
+import au.com.bytecode.opencsv.CSVReader;
 import core.configuration.GenstarConfigurationFile;
 import core.configuration.GenstarJsonUtil;
 import core.configuration.dictionary.IGenstarDictionary;
@@ -46,6 +49,7 @@ import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
+import core.util.random.GenstarRandomUtils;
 import gospl.GosplEntity;
 import gospl.GosplMultitypePopulation;
 import gospl.GosplPopulation;
@@ -67,8 +71,9 @@ import gospl.io.util.ReadMultiLayerEntityUtils;
  * <li>Contingency or frequency table => collapse into one distribution of attribute, i.e. {@link INDimensionalMatrix}
  * <li>Sample => convert to population, i.e. {@link IPopulation}
  * </ul><p>
- * TODO: the ability to input statistical moment or custom distribution
- * TODO: move all static method into a factory
+ * TODO: the ability to input statistical moment or custom distribution </br>
+ * TODO: move all static method into a factory </br>
+ * WARNING: sample size is limited to 5 * 10^6 due to data organization
  * 
  * @author kevinchapuis
  *
@@ -78,6 +83,7 @@ public class GosplInputDataManager {
 	protected final static Logger logger = LogManager.getLogger();
 	
 	protected final static double EPSILON = Math.pow(10d, -3);
+	protected final static double MAX_SAMPLE_SIZE = (int) Math.pow(10, 6) /** 5*/;
 
 	private final GenstarConfigurationFile configuration;
 
@@ -444,57 +450,53 @@ public class GosplInputDataManager {
 			throw new RuntimeException("no column header was decoded in survey "+survey+"; are you sure you provided a relevant dictionnary of data?");
 		
 		int unmatchSize = 0;
-		int maxIndivSize = columnHeaders.keySet().stream().max((i1, i2) -> i1.compareTo(i2)).get();
 		
-		loopLines: for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+		
+		// --------------------------------------------------------
+		// Try with the buffer reader first, only available for csv
+		// --------------------------------------------------------
+		CSVReader surveyReader = null;
+		try {
 			
-			// too much ?
-			if (maxIndividuals != null && sampleSet.size() >= maxIndividuals)
-				break;
-			
-			final Map<Attribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
-			final List<String> indiVals = survey.readLine(i);
-			//System.err.println(i+" "+indiVals);
+			surveyReader = survey.getBufferReader(true);
+			String[] l = null;
 
-			if(indiVals.size() <= maxIndivSize){
-				gspu.sysoStempMessage("One individual does not fit required number of attributes: \n"
-						+ Arrays.toString(indiVals.toArray()));
-						
-				unmatchSize++;
-				continue;
+			double probaJump = MAX_SAMPLE_SIZE / survey.getLastRowIndex();
+			
+			while (sampleSet.size() <= maxIndividuals) {
+				
+				try { do {l = surveyReader.readNext();} while (GenstarRandomUtils.flip(probaJump)); } catch (IOException e) { e.printStackTrace(); }
+				if (l==null) {break;}
+
+				GosplEntity entity = readRecord(Arrays.asList(l), columnHeaders, keepOnlyEqual, gspu);
+
+				if (entity != null) {sampleSet.add(entity);}
+				else {unmatchSize++;}
+
+			} 
+
+			try {
+				surveyReader.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			}
-			for (final Integer idx : columnHeaders.keySet()){
-				
-				String actualStringValue = indiVals.get(idx);
-				
-				Attribute<? extends IValue> att = columnHeaders.get(idx);
-				IValue val = null;
-				if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
-					val = att.getValueSpace().getEmptyValue();
-				else
-					val = att.getValueSpace().addValue(actualStringValue);
-				
-				// filter
-				if (val != null) {
-					String expected = keepOnlyEqual.get(att.getAttributeName());
-					if (expected != null && !val.getStringValue().equals(expected))
-						// skip
-						continue loopLines;
-				}
-				
-				if (val!=null)
-					entityAttributes.put(att, val);
-				else if (	att.getEmptyValue().getStringValue() != null 
-							&& att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
-					entityAttributes.put(att, att.getValueSpace().getEmptyValue());
-				else {
-					gspu.sysoStempMessage("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
-							+att.getAttributeName());
-					unmatchSize++;
-				}
+		} catch (UnsupportedEncodingException | FileNotFoundException e1) {
+			e1.getStackTrace();
+		} 
+		// ---------------------------------------------------------------------------------
+		// If trying to do it with other type of data, go through stored-in-memory algorithm
+		// ---------------------------------------------------------------------------------
+		catch (UnsupportedOperationException e) {
+			for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+				// too much ?
+				if (sampleSet.size() >= maxIndividuals) break;
+
+				GosplEntity entity = readRecord(survey.readLine(i), columnHeaders, keepOnlyEqual, gspu);
+
+				if (entity != null) {sampleSet.add(entity);}
+				else {unmatchSize++;}
 			}
-			if(entityAttributes.size() == entityAttributes.size())
-				sampleSet.add(new GosplEntity(entityAttributes));
 		}
 		if (unmatchSize > 0) {
 			gspu.sysoStempMessage("Input sample has bypass "+new DecimalFormat("#.##").format(unmatchSize/(double)sampleSet.size()*100)
@@ -502,6 +504,51 @@ public class GosplInputDataManager {
 		}
 		
 		return sampleSet;
+	}
+	
+	/**
+	 * The inner reader for individual entities
+	 *  
+	 * @param record
+	 * @return null if value have not been correctly read, keepOnlyEqual filter have been activated or number
+	 * of attribute is not coherent with population schema
+	 */
+	private static GosplEntity readRecord(List<String> record, Map<Integer, Attribute<? extends IValue>> columnHeaders,
+			Map<String,String> keepOnlyEqual, GSPerformanceUtil gspu) {
+		
+		final Map<Attribute<? extends IValue>, IValue> entityAttributes = new HashMap<>();
+		for (final Integer idx : columnHeaders.keySet()){
+			
+			String actualStringValue = record.get(idx);
+			
+			Attribute<? extends IValue> att = columnHeaders.get(idx);
+			IValue val = null;
+			if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
+				val = att.getValueSpace().getEmptyValue();
+			else
+				val = att.getValueSpace().addValue(actualStringValue);
+			
+			// filter
+			if (val != null) {
+				String expected = keepOnlyEqual.get(att.getAttributeName());
+				if (expected != null && !val.getStringValue().equals(expected))
+					// skip
+					return null;
+			}
+			
+			if (val!=null)
+				entityAttributes.put(att, val);
+			else if (	att.getEmptyValue().getStringValue() != null 
+						&& att.getEmptyValue().getStringValue().equals(record.get(idx)))
+				entityAttributes.put(att, att.getValueSpace().getEmptyValue());
+			else {
+				gspu.sysoStempMessage("Data modality "+record.get(idx)+" does not match any value for attribute "
+						+att.getAttributeName());
+				return null;
+			}
+		}
+		
+		return new GosplEntity(entityAttributes);
 	}
 	
 	/**
@@ -545,75 +592,67 @@ public class GosplInputDataManager {
 		
 		int unmatchSize = 0;
 		int zeroLayerIdx = 0;
+		maxIndividuals = maxIndividuals == null ? (int) MAX_SAMPLE_SIZE : maxIndividuals;
 
-		loopLines : for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+		// --------------------------------------------------------
+		// Try with the buffer reader first, only available for csv
+		// --------------------------------------------------------
+		CSVReader surveyReader = null;
+		try {
+			surveyReader = survey.getBufferReader(true);
+			String[] l = null;
 			
-			// too much ?
-			if (maxIndividuals != null && zeroLayerIdx >= maxIndividuals)
-				break;
+			// Only take (max / size) individual record to match MAX_SAMPLE_SIZE
+			double probaJump = maxIndividuals < MAX_SAMPLE_SIZE ? 1d : MAX_SAMPLE_SIZE / survey.getLastRowIndex();
 			
-			final List<String> indiVals = survey.readLine(i);
-			
-			Map<Integer, String> localIDs = layerId.keySet().stream().sorted()
-					.collect(Collectors.toMap(
-							Function.identity(),
-							layer -> indiVals.get(idWgtColumnHeaders.get(layerId.get(layer)))
-							));
-			
-			
-			// Build Util MultiLayer entity
-			Map<Integer,ReadMultiLayerEntityUtils> localEntities = new HashMap<>();
-			for (IGenstarDictionary<Attribute<? extends IValue>> layer : layerDicos) {
-				ReadMultiLayerEntityUtils localEntity = new ReadMultiLayerEntityUtils(
-						layer.getLevel(), // LAYER LEVEL
-						indiVals.get(idWgtColumnHeaders.get(layerId.get(layer.getLevel()))), // ID 
-						indiVals.get(idWgtColumnHeaders.get(layerWgt.get(layer.getLevel()))), // WEIGHT
-						new HashMap<>()); // ATTRIBUTE :: VALUE
-				localEntity.setIDs(localIDs);
-				localEntities.put(layer.getLevel(), localEntity);
-			}
-						
-			for (final Integer idx : columnHeaders.keySet()){
-				String actualStringValue = indiVals.get(idx);
+			while (zeroLayerIdx <= maxIndividuals) {
 				
-				Attribute<? extends IValue> att = columnHeaders.get(idx);
-				IValue val = null;
-				if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
-					val = att.getValueSpace().getEmptyValue();
-				else
-					val = att.getValueSpace().addValue(actualStringValue);
+				try { do {l = surveyReader.readNext();} while (GenstarRandomUtils.flip(probaJump)); } catch (IOException e) { e.printStackTrace(); }
+				if (l==null) {break;}
 				
-				// filter
-				if (val != null) {
-					Collection<String> expected = keepOnlyEqual.get(att.getAttributeName());
-					if (expected != null && !expected.contains(val.getStringValue()))
-						// skip
-						continue loopLines;
-				}
-				
-				if (val == null) {
-					if (	att.getEmptyValue().getStringValue() != null 
-								&& att.getEmptyValue().getStringValue().equals(indiVals.get(idx)))
-						val = att.getValueSpace().getEmptyValue();
-					else {
-						gspu.sysoStempMessage("Data modality "+indiVals.get(idx)+" does not match any value for attribute "
-								+att.getAttributeName());
-						unmatchSize++;
-						// skip because not valide value
-						continue loopLines;
+				Map<Integer,Set<ReadMultiLayerEntityUtils>> localEntityCollection = readComplexRecord(Arrays.asList(l),
+						layerDicos, columnHeaders, layerAtt, idWgtColumnHeaders, layerId, layerWgt, keepOnlyEqual);
+				if(localEntityCollection.isEmpty()) { unmatchSize++; continue;}
+				else { 
+					
+					for(Integer localLayer : localEntityCollection.keySet()) { 
+						layerEntityCollection.get(localLayer).addAll(localEntityCollection.get(localLayer)); 
 					}
+					
+					zeroLayerIdx += localEntityCollection.get(Collections.min(layerId.keySet())).size();
+					if(zeroLayerIdx%(maxIndividuals/100d)==0) { gspu.sysoStempMessage(1d*zeroLayerIdx/maxIndividuals+" of total sample has been build"); }
 				}
 				
-				localEntities.get(layerAtt.get(att)).getEntity().put(att,val);
+			} 
+			
+			try {
+				surveyReader.close();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		} catch (UnsupportedEncodingException | FileNotFoundException e1) {
+			e1.getStackTrace();
+		} 
+		// ---------------------------------------------------------------------------------
+		// If trying to do it with other type of data, go through stored-in-memory algorithm
+		// ---------------------------------------------------------------------------------
+		catch (UnsupportedOperationException e) {
+			for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
+				
+				// too much ?
+				if (zeroLayerIdx >= maxIndividuals) break;
+				
+				final List<String> indiVals = survey.readLine(i);
+				Map<Integer,Set<ReadMultiLayerEntityUtils>> localEntityCollection = readComplexRecord(indiVals,
+						layerDicos, columnHeaders, layerAtt, idWgtColumnHeaders, layerId, layerWgt, keepOnlyEqual);
+				if(localEntityCollection.isEmpty()) { unmatchSize++; continue;}
+				else { 
+					layerEntityCollection.putAll(localEntityCollection);
+					zeroLayerIdx += localEntityCollection.get(Collections.min(layerId.keySet())).size();
+				}
 				
 			}
-			
-			zeroLayerIdx++;
-			
-			for (Integer layer : localEntities.keySet()) { 
-				layerEntityCollection.get(layer).add(localEntities.get(layer)); 
-			}
-			
 		}
 		
 		// Put lower level entities into upper level entities
@@ -660,6 +699,85 @@ public class GosplInputDataManager {
 		}
 		
 		return population;
+	}
+	
+	
+	/**
+	 * Inner private multi-layer reader record
+	 * 
+	 * @param record
+	 * @param layerDicos
+	 * @param columnHeaders
+	 * @param layerAtt
+	 * @param idWgtColumnHeaders
+	 * @param layerId
+	 * @param layerWgt
+	 * @param keepOnlyEqual
+	 * @return
+	 */
+	private static Map<Integer,Set<ReadMultiLayerEntityUtils>> readComplexRecord(List<String> record,
+			Set<IGenstarDictionary<Attribute<? extends IValue>>> layerDicos,
+			Map<Integer, Attribute<? extends IValue>> columnHeaders, Map<Attribute<? extends IValue>,Integer> layerAtt, 
+			Map<String, Integer> idWgtColumnHeaders, Map<Integer, String> layerId,  Map<Integer, String> layerWgt, Map<String,List<String>> keepOnlyEqual) {
+		
+		Map<Integer, String> localIDs = layerId.keySet().stream().sorted()
+				.collect(Collectors.toMap(
+						Function.identity(),
+						layer -> record.get(idWgtColumnHeaders.get(layerId.get(layer)))
+						));
+		
+		Map<Integer,Set<ReadMultiLayerEntityUtils>> layerEntityCollection = new HashMap<>();
+		
+		// Build Util MultiLayer entity
+		Map<Integer,ReadMultiLayerEntityUtils> localEntities = new HashMap<>();
+		for (IGenstarDictionary<Attribute<? extends IValue>> layer : layerDicos) {
+			ReadMultiLayerEntityUtils localEntity = new ReadMultiLayerEntityUtils(
+					layer.getLevel(), // LAYER LEVEL
+					record.get(idWgtColumnHeaders.get(layerId.get(layer.getLevel()))), // ID 
+					record.get(idWgtColumnHeaders.get(layerWgt.get(layer.getLevel()))), // WEIGHT
+					new HashMap<>()); // ATTRIBUTE :: VALUE
+			localEntity.setIDs(localIDs);
+			localEntities.put(layer.getLevel(), localEntity);
+			layerEntityCollection.put(layer.getLevel(),new HashSet<>());
+		}
+					
+		for (final Integer idx : columnHeaders.keySet()){
+			String actualStringValue = record.get(idx);
+			
+			Attribute<? extends IValue> att = columnHeaders.get(idx);
+			IValue val = null;
+			if(actualStringValue == GosplSurveyFactory.UNKNOWN_VARIABLE)
+				val = att.getValueSpace().getEmptyValue();
+			else
+				val = att.getValueSpace().addValue(actualStringValue);
+			
+			// filter
+			if (val != null) {
+				Collection<String> expected = keepOnlyEqual.get(att.getAttributeName());
+				if (expected != null && !expected.contains(val.getStringValue()))
+					// skip
+					return layerEntityCollection;
+			}
+			
+			if (val == null) {
+				if (	att.getEmptyValue().getStringValue() != null 
+							&& att.getEmptyValue().getStringValue().equals(record.get(idx)))
+					val = att.getValueSpace().getEmptyValue();
+				else {
+					// skip because not valide value
+					return null;
+				}
+			}
+			
+			localEntities.get(layerAtt.get(att)).getEntity().put(att,val);
+			
+		}
+		
+		for (Integer layer : localEntities.keySet()) { 
+			layerEntityCollection.get(layer).add(localEntities.get(layer)); 
+		}
+	
+		return layerEntityCollection;
 	}
 	
 	/*
@@ -745,6 +863,12 @@ public class GosplInputDataManager {
 
 		return freqMatrix;
 	}
+	
+	
+	// --------------------------------------------------- //
+	// ----------- RECORD ATTRIBUTE MANAGEMENT ----------- //
+	// --------------------------------------------------- //
+	
 	
 	/*
 	 * Result in the same matrix without any record attribute
