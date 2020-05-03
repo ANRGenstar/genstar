@@ -8,12 +8,6 @@ script:
 cache:
   directories:
   - "$HOME/.m2"
-deploy:
-  provider: bintray
-  file: "./bintray-core.json"
-  user: "genstar-lib-bot"
-  key: $BINTRAY_API_KEY
-  skip_cleanup: true # to upload artifacts created during the build
 addons:
   sonarcloud:
     organization: "anrgenstar"
