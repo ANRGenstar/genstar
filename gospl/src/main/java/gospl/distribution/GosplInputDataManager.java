@@ -83,7 +83,7 @@ public class GosplInputDataManager {
 	protected final static Logger logger = LogManager.getLogger();
 	
 	protected final static double EPSILON = Math.pow(10d, -3);
-	protected final static double MAX_SAMPLE_SIZE = (int) Math.pow(10, 6) /** 5*/;
+	protected final static double MAX_SAMPLE_SIZE = (int) Math.pow(10, 6);
 
 	private final GenstarConfigurationFile configuration;
 
@@ -172,7 +172,18 @@ public class GosplInputDataManager {
 	 * @throws InvalidSurveyFormatException
 	 */
 	public void buildMultiLayerSamples() throws InvalidFormatException, IOException, InvalidSurveyFormatException {
-		this.buildMultiLayerSamples(Collections.emptyMap());
+		this.buildMultiLayerSamples(Collections.emptyMap(), null);
+	}
+	
+	/**
+	 * @see #buildMultiLayerSamples(Map, Integer)
+	 * @param sampleLimit
+	 * @throws InvalidFormatException
+	 * @throws IOException
+	 * @throws InvalidSurveyFormatException
+	 */
+	public void buildMultiLayerSamples(int sampleLimit) throws InvalidFormatException, IOException, InvalidSurveyFormatException {
+		this.buildMultiLayerSamples(Collections.emptyMap(), sampleLimit);
 	}
 	
 	/**
@@ -183,7 +194,7 @@ public class GosplInputDataManager {
 	 * @throws IOException
 	 * @throws InvalidSurveyFormatException
 	 */
-	public void buildMultiLayerSamples(Map<String,List<String>> keepOnlyValues) 
+	public void buildMultiLayerSamples(Map<String,List<String>> keepOnlyValues, Integer sampleLimit) 
 			throws InvalidFormatException, IOException, InvalidSurveyFormatException {
 		GosplSurveyFactory sf = new GosplSurveyFactory();
 		multiSamples = new HashSet<>();
@@ -193,7 +204,7 @@ public class GosplInputDataManager {
 			multiSamples.add(
 					getMutliLayerSample(
 							sf.getSurvey(wrapper, this.configuration.getBaseDirectory()), 
-							this.configuration.getDictionaries(), null, keepOnlyValues)
+							this.configuration.getDictionaries(), sampleLimit, keepOnlyValues)
 					);
 		}
 	}
@@ -592,7 +603,7 @@ public class GosplInputDataManager {
 		
 		int unmatchSize = 0;
 		int zeroLayerIdx = 0;
-		maxIndividuals = maxIndividuals == null ? (int) MAX_SAMPLE_SIZE : maxIndividuals;
+		int sizeLimit = maxIndividuals == null ? (int) MAX_SAMPLE_SIZE : maxIndividuals;
 
 		// --------------------------------------------------------
 		// Try with the buffer reader first, only available for csv
@@ -603,9 +614,9 @@ public class GosplInputDataManager {
 			String[] l = null;
 			
 			// Only take (max / size) individual record to match MAX_SAMPLE_SIZE
-			double probaJump = maxIndividuals < MAX_SAMPLE_SIZE ? 1d : MAX_SAMPLE_SIZE / survey.getLastRowIndex();
+			double probaJump = sizeLimit / survey.getLastRowIndex();
 			
-			while (zeroLayerIdx <= maxIndividuals) {
+			while (zeroLayerIdx <= sizeLimit) {
 				
 				try { do {l = surveyReader.readNext();} while (GenstarRandomUtils.flip(probaJump)); } catch (IOException e) { e.printStackTrace(); }
 				if (l==null) {break;}
@@ -620,7 +631,9 @@ public class GosplInputDataManager {
 					}
 					
 					zeroLayerIdx += localEntityCollection.get(Collections.min(layerId.keySet())).size();
-					if(zeroLayerIdx%(maxIndividuals/100d)==0) { gspu.sysoStempMessage(1d*zeroLayerIdx/maxIndividuals+" of total sample has been build"); }
+					if(zeroLayerIdx%(sizeLimit/10d)==0) { 
+						gspu.sysoStempMessage(100d*zeroLayerIdx/sizeLimit+"% of total sample has been build"); 
+					}
 				}
 				
 			} 
@@ -641,7 +654,7 @@ public class GosplInputDataManager {
 			for (int i = survey.getFirstRowIndex(); i <= survey.getLastRowIndex(); i++) {
 				
 				// too much ?
-				if (zeroLayerIdx >= maxIndividuals) break;
+				if (zeroLayerIdx >= sizeLimit) break;
 				
 				final List<String> indiVals = survey.readLine(i);
 				Map<Integer,Set<ReadMultiLayerEntityUtils>> localEntityCollection = readComplexRecord(indiVals,

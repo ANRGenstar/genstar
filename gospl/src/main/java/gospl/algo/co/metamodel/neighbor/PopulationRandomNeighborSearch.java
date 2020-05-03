@@ -47,7 +47,7 @@ public class PopulationRandomNeighborSearch<Predicate> implements IPopulationNei
 		if(toRemove.isEmpty() || toSample.isEmpty()) { throw new IllegalStateException("Cannot have inner samplers empty"); }
 		
 		int tries = 0;
-		while(output.size()<size || tries++>Math.pow(10, 6)) {
+		while(output.size()<size && tries++<Math.pow(10, 6)) {
 			ADemoEntity er = toRemove.draw();
 			ADemoEntity ea = toSample.draw(10).stream().filter(candidate -> 
 				!candidate.getValues().containsAll(er.getValues()) &&
@@ -59,8 +59,8 @@ public class PopulationRandomNeighborSearch<Predicate> implements IPopulationNei
 		
 		if(output.containsKey(null)) { throw new IllegalArgumentException("This pairwised collection of entity contains null val"); }
 		
-		gspu.sysoStempMessage("The output is key::"+output.keySet().stream().findFirst().get().getEntityType()
-				+" | value::"+output.values().stream().findFirst().get().getEntityType());
+		gspu.sysoStempMessage("The output is key::"+output.keySet().stream().findFirst().get().getEntityType()+" ("+output.keySet().size()+")"
+				+" | value::"+output.values().stream().findFirst().get().getEntityType()+" ("+output.values().size()+")");
 		
 		return output;
 	}

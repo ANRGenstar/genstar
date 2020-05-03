@@ -111,7 +111,7 @@ public abstract class AMultiLayerOptimizationAlgorithm implements IOptimizationA
 	public void setSampledLayer(int layer) {this.layer = layer;}
 	
 	public int computeBuffer(double fitness, ISyntheticPopulationSolution<GosplMultitypePopulation<ADemoEntity>> solution) {
-		return Math.round(Math.round(solution.getSolution().getSubPopulationSize(layer) * k_neighborRatio * Math.log(1+fitness*k_neighborRatio)));
+		return Math.round(Math.round(solution.getSolution().getSubPopulationSize(layer) * k_neighborRatio /* Math.log(1+fitness*k_neighborRatio)*/));
 	}
 
 }
