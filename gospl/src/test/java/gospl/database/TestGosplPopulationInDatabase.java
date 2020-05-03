@@ -129,7 +129,7 @@ public class TestGosplPopulationInDatabase {
 		Iterator<ADemoEntity> itEntities = p.iterator();
 		int count = 0;
 		while (itEntities.hasNext()) {
-			ADemoEntity e = itEntities.next();
+			itEntities.next();
 			count++;
 		}
 		assertEquals("the cound should be 0", 0, count);

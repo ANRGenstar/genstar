@@ -107,6 +107,7 @@ public class GosplInputMultiLayerDataManager extends GosplInputDataManager {
 		return this.collapseDataTablesIntoDistribution(0);
 	}
 	
+	@SuppressWarnings("unlikely-arg-type")
 	public INDimensionalMatrix<Attribute<? extends IValue>, IValue, Double> collapseDataTablesIntoDistribution(int level) 
 			throws IllegalControlTotalException, IllegalDistributionCreation {
 		if (dataTables == null || dataTables.isEmpty())

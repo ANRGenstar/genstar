@@ -3,11 +3,13 @@ package gospl.algo.sampler.sr;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThan;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Test;
+
+import com.google.common.collect.Lists;
+import com.google.common.primitives.Ints;
 
 import gospl.GosplPopulation;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
@@ -104,7 +106,7 @@ public class GosplSamplerTest {
 	private Map<Integer, GosplPopulation> getPops(SamplerTestSetup<?> sampler, int... divisionFactors){
 		Map<Integer, GosplPopulation> res = new HashMap<>();
 		
-		if(!Arrays.asList(divisionFactors).contains(0))
+		if(!Lists.newArrayList(Ints.asList(divisionFactors)).contains(0))
 			res.put(0, sampler.drawPopulation(POPSIZE));
 		
 		for(int nb : divisionFactors) {

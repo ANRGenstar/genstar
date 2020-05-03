@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import core.metamodel.attribute.IAttribute;
-import core.metamodel.io.GSSurveyWrapper;
 import core.metamodel.value.IValue;
 
 public class GSUtilAttribute {

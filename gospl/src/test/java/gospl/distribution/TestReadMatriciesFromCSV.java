@@ -130,6 +130,7 @@ public class TestReadMatriciesFromCSV {
 		IGenstarDictionary<Attribute<? extends IValue>> dicoDwellings = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_DWELLING.txt");
 		
+		@SuppressWarnings("unused")
 		GosplPopulation popDwellings = ReadPopulationsUtils.readFromCSVFile(
 				"src/test/resources/yang/dwelling_household_toy/list_dwellings.csv", 
 				dicoDwellings);
@@ -138,6 +139,7 @@ public class TestReadMatriciesFromCSV {
 		IGenstarDictionary<Attribute<? extends IValue>> dicoHouseholds = ReadINSEEDictionaryUtils
 				.readDictionnaryFromMODFile("src/test/resources/yang/dwelling_household_toy/MOD_HOUSEHOLD.txt");
 		
+		@SuppressWarnings("unused")
 		GosplPopulation popHouseholds = ReadPopulationsUtils.readFromCSVFile(
 				"src/test/resources/yang/dwelling_household_toy/list_households.csv", 
 				dicoHouseholds);

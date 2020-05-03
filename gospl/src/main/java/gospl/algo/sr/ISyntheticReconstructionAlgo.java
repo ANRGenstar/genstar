@@ -1,6 +1,7 @@
 package gospl.algo.sr;
 
 import core.metamodel.attribute.Attribute;
+import core.metamodel.attribute.MappedAttribute;
 import core.metamodel.value.IValue;
 import gospl.algo.IGosplConcept;
 import gospl.algo.IGosplConcept.EGosplGenerationConcept;

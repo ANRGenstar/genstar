@@ -13,7 +13,6 @@ import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.value.IValue;
 import gospl.GosplPopulation;
-import gospl.io.insee.INSEETestURLs;
 
 public class TestDownloadINSEEData {
 

@@ -72,7 +72,7 @@ public class GosplConditionalDistribution extends ASegmentedNDimensionalMatrix<D
 					.flatMap(a -> mAtt.findMappedAttributeValues(a).stream())
 					.collect(Collectors.toSet());
 			if(mapAttToValues.get(mAtt).equals(rToMValues)){
-				aspects.remove(mapAttToValues.get(mAtt));
+				aspects.removeAll(mapAttToValues.get(mAtt));
 				aspects.addAll(rValues);
 			} else 
 				throw new IllegalArgumentException("Elicit a value for which this n dimensional matrix "

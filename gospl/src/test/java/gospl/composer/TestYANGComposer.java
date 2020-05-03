@@ -49,7 +49,8 @@ public class TestYANGComposer {
 		// load the probabilities
 		GosplSurveyFactory gsf = new GosplSurveyFactory();
 
-		IGSSurvey survey;
+		@SuppressWarnings("unused")
+		IGSSurvey survey = null;
 		try {
 			survey = gsf.getSurvey(
 					"src/test/resources/yang/dwelling_household_toy/surface vs size.csv", 

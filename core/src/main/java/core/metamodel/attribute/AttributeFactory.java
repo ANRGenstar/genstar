@@ -875,9 +875,9 @@ public class AttributeFactory {
 			if(num.size() == 1)
 				mapper.add(value, num.get(0));
 			else {
-				if(map.get(0) == null) {
+				if(num.get(0) == null) {
 					mapper.add(value, num.get(1), RangeBound.LOWER);
-				} else if(map.get(1) == null) {
+				} else if(num.get(1) == null) {
 					mapper.add(value, num.get(0), RangeBound.UPPER);
 				} else {
 					mapper.add(value, num.get(0), num.get(1));

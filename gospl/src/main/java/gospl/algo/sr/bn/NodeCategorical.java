@@ -14,6 +14,7 @@ import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+@SuppressWarnings("deprecation")
 public final class NodeCategorical extends FiniteNode<NodeCategorical> {
 
 	private static Logger logger = LogManager.getLogger();

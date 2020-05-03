@@ -36,7 +36,7 @@ public class UndirectedMapper<K extends IValue, V extends IValue> implements IAt
 		if(map.keySet().stream().anyMatch(set -> set.contains(mapTo))) {
 			return map.get(map.keySet().stream().filter(key -> key.contains(mapTo))
 					.findFirst().get()).add(mapWith);
-		} else if(map.containsValue(mapWith)) {
+		} else if(map.values().stream().anyMatch(vSet -> vSet.contains(mapWith))) {
 			return map.keySet().stream().filter(key -> map.get(key).contains(mapWith))
 					.findFirst().get().add(mapTo);
 		} else if(this.getRelatedAttribute().getValueSpace().contains(mapTo) 

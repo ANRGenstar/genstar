@@ -97,7 +97,10 @@ public final class EliminationOrderBestFirstSearch {
 	}
 	
 	private void removeOpenList(NodeExplored n) {
-		openList.remove(n);
+		openList.remove(openList.entrySet().stream()
+				.filter(e -> e.getValue().equals(n)).findAny()
+				.orElseThrow(NullPointerException::new).getKey()
+				);
 		openListSorted.remove(n);
 	}
 	
@@ -158,7 +161,11 @@ public final class EliminationOrderBestFirstSearch {
 					if (width2 < alreadyExplored.width) {
 
 						logger.debug("we already explored {} but we found a better width {} (instead of {}); keeping this better solution", g2.variables(), width2, alreadyExplored.width);
-						openList.remove(alreadyExplored);
+						
+						openList.remove(openList.entrySet().stream()
+								.filter(e -> e.getValue().equals(n)).findAny()
+								.orElseThrow(NullPointerException::new).getKey()
+								);
 						addOpenList(new NodeExplored(
 								prefix2, 
 								width2, 

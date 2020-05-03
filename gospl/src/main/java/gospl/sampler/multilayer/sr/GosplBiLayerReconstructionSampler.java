@@ -32,8 +32,8 @@ public class GosplBiLayerReconstructionSampler implements ISRMultiLayerSampler {
 	private Set<Attribute<? extends IValue>> groupD;
 	private Map<EmergentAttribute<? extends IValue,?,?>,Attribute<? extends IValue>> anchorD;
 	private GosplCompletionDirectSampling entitySampler = new GosplCompletionDirectSampling();
-	private Set<Attribute<? extends IValue>> indivD;
-
+	
+	@SuppressWarnings("unchecked")
 	@Override
 	public GosplMultiLayerCoordinate draw() {
 		System.out.println("[CRADO SYSO - GosplBiLayerSampler]");
@@ -75,6 +75,7 @@ public class GosplBiLayerReconstructionSampler implements ISRMultiLayerSampler {
 	 * @throws IllegalDistributionCreation
 	 */
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public void setGroupLevelDistribution(AFullNDimensionalMatrix<Double> distribution) {
 		this.groupD = distribution.getDimensions();
 		this.anchorD = groupD.stream().filter(Attribute::isEmergent)
@@ -89,7 +90,7 @@ public class GosplBiLayerReconstructionSampler implements ISRMultiLayerSampler {
 	 * @param distribution
 	 */
 	public void setEntityLevelDistribution(AFullNDimensionalMatrix<Double> distribution) {
-		this.indivD = distribution.getDimensions();
+		distribution.getDimensions();
 		this.entitySampler.setDistribution(distribution);
 	}
 	
