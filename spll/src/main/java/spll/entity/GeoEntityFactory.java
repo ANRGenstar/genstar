@@ -133,7 +133,7 @@ public class GeoEntityFactory {
 			if (attribute.getValueSpace() == null)
 				throw new NullPointerException("the value space of attribute "+attribute+" is null");
 			
-			Object v = property.getValue().toString();
+			Object v = property.getValue();
 			if (v == null)
 				values.put(attribute, attribute.getValueSpace().getEmptyValue());
 			else {
