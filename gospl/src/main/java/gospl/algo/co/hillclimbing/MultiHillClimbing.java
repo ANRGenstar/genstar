@@ -46,6 +46,8 @@ public class MultiHillClimbing extends AMultiLayerOptimizationAlgorithm {
 		// WARNING : strong hypothesis in fitness aggregation, better use pareto frontier
 		Double bestFitness = this.getFitness(bestSolution.getFitness(this.getLayeredObjectives()));
 		
+		gspu.sysoStempPerformance("Compute initial fitness", this);
+		
 		MultiPopulationNeighborSearch pns = (MultiPopulationNeighborSearch) super.getNeighborSearchAlgorithm();
 		for(Integer layer : super.getLayeredObjectives().keySet()) {
 			super.getLayeredObjectives().get(layer).stream().forEach(lObjectif ->  
@@ -66,7 +68,12 @@ public class MultiHillClimbing extends AMultiLayerOptimizationAlgorithm {
 			MultiLayerSPSolution candidateState = bestSolution
 					.getRandomNeighbor(super.getNeighborSearchAlgorithm(), buffer);
 			
+			gspu.sysoStempPerformance("Elicit a new neighbor candidate", this);
+			
 			double currentFitness = this.getFitness(candidateState.getFitness(this.getLayeredObjectives()));
+			
+			gspu.sysoStempPerformance("New neighbor candidate fitness "+currentFitness, this);
+			
 			if(currentFitness < bestFitness) {
 				bestSolution = candidateState;
 				bestFitness = currentFitness;

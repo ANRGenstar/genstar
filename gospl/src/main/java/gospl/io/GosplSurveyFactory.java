@@ -48,6 +48,7 @@ import gospl.distribution.GosplNDimensionalMatrixFactory;
 import gospl.distribution.matrix.AFullNDimensionalMatrix;
 import gospl.distribution.matrix.INDimensionalMatrix;
 import gospl.io.exception.InvalidSurveyFormatException;
+import gospl.io.ipums.ReadIPUMSDictionaryUtils;
 
 /**
  * Factory to setup data input into gospl generator
@@ -748,6 +749,91 @@ public class GosplSurveyFactory {
 			bw.write(Integer.toString(e.getCountChildren().getActualValue()));
 			bw.write("\n");
 		}
+		bw.close();
+		return this.getSurvey(surveyFile, GSSurveyType.Sample);
+	}
+	
+	/*
+	 * 
+	 */
+	public IGSSurvey createIPUMSStyleSample(File surveyFile, ReadIPUMSDictionaryUtils ipumsDictionaries,
+			IPopulation<ADemoEntity, Attribute<? extends IValue>> population) 
+					throws IOException, InvalidSurveyFormatException, InvalidFormatException{
+
+		final BufferedWriter bw = Files.newBufferedWriter(surveyFile.toPath());
+		final Collection<Attribute<? extends IValue>> attributes = population.getPopulationAttributes();
+		final Collection<IEntity<? extends IAttribute<? extends IValue>>> parents = population.stream()
+				.map(e -> e.getParent()).filter(p -> p!=null).collect(Collectors.toSet());
+		Set<IAttribute<? extends IValue>> parentAttributes = parents.stream().flatMap(e -> e.getAttributes().stream())
+				.map(a -> (IAttribute<? extends IValue>)a).collect(Collectors.toSet());
+		
+		String[] ipumsheader = new String[] {"COUNTRY","YEAR","SAMPLE"};
+		String[] ipumshousehold = new String[] {"SERIAL","HHWT"};
+		String[] ipumsindividual = new String[] {"PERNUM","PERWT"};
+		
+		String lineStarter = ipumsDictionaries.getCountry().concat(String.valueOf(separator))
+				.concat(String.valueOf(ipumsDictionaries.getYear())).concat(String.valueOf(separator))
+				.concat("NA").concat(String.valueOf(separator));
+		
+		bw.write(ipumsheader[0]); bw.write(separator);
+		bw.write(ipumsheader[1]); bw.write(separator);
+		bw.write(ipumsheader[2]); bw.write(separator);
+		bw.write(ipumshousehold[0]); bw.write(separator);
+		bw.write(ipumshousehold[1]); bw.write(separator);
+		bw.write(parentAttributes.stream().map(att -> att.getAttributeName()).collect(Collectors.joining(String.valueOf(separator)))); bw.write(separator);
+		bw.write(ipumsindividual[0]); bw.write(separator);
+		bw.write(ipumsindividual[1]); bw.write(separator);
+		bw.write(attributes.stream().map(att -> att.getDescription()).collect(Collectors.joining(String.valueOf(separator)))); bw.write(separator);
+		bw.write("\n");
+
+		for (final IEntity<? extends IAttribute<? extends IValue>> e : parents) {
+			String parentLine = lineStarter;
+			parentLine.concat(e.getEntityId()).concat(String.valueOf(separator));
+			parentLine.concat("1");
+			for (final IAttribute<? extends IValue> attribute : parentAttributes) {
+				parentLine.concat(String.valueOf(separator));
+				try {
+					IValue val = e.getValueForAttribute(attribute.getAttributeName()); 
+					String v = val.getStringValue();
+
+					if (!attribute.getValueSpace().getType().isNumericValue()) {
+						parentLine.concat("\"");
+						parentLine.concat(v);
+						parentLine.concat("\"");
+					} else {
+						parentLine.concat(v);
+					}
+
+				} catch (NullPointerException e2) {
+					parentLine.concat(UNKNOWN_VARIABLE+"\""); // WARNING: i don't understand why i have to add extra "
+				}
+			}
+			for( IEntity<? extends IAttribute<? extends IValue>> child : e.getChildren() ) {
+				bw.write(parentLine); bw.write(separator);
+				bw.write(e.getEntityId().concat(child.getEntityId())); bw.write(separator);
+				bw.write("1");
+				for (final IAttribute<? extends IValue> attribute : attributes) {
+					bw.write(separator);
+					try {
+						IValue val = e.getValueForAttribute(attribute.getAttributeName()); 
+						String v = val.getStringValue();
+
+						if (!attribute.getValueSpace().getType().isNumericValue()) {
+							bw.write("\"");
+							bw.write(v);
+							bw.write("\"");
+						} else {
+							bw.write(v);
+						}
+
+					} catch (NullPointerException e2) {
+						bw.write(UNKNOWN_VARIABLE+"\""); // WARNING: i don't understand why i have to add extra "
+					}
+				}
+				bw.write("\n");
+			}
+		}
+			
 		bw.close();
 		return this.getSurvey(surveyFile, GSSurveyType.Sample);
 	}

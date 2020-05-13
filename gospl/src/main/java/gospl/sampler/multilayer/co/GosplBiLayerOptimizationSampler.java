@@ -4,10 +4,13 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.logging.log4j.Level;
+
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.value.IValue;
+import core.util.GSPerformanceUtil;
 import gospl.GosplMultitypePopulation;
 import gospl.algo.co.metamodel.AMultiLayerOptimizationAlgorithm;
 import gospl.algo.co.metamodel.solution.MultiLayerSPSolution;
@@ -108,7 +111,10 @@ public class GosplBiLayerOptimizationSampler<A extends AMultiLayerOptimizationAl
 	
 	@Override
 	public Collection<ADemoEntity> draw(int numberOfDraw) {
+		
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Generating initial random solution from sample", Level.DEBUG);
 		Collection<ADemoEntity> startingSolution;
+		
 		if(this.algorithm.getSampledLayer()==0) {
 			numberOfDraw = childSizeConstraint==0 ? numberOfDraw : (numberOfDraw < childSizeConstraint ? numberOfDraw : childSizeConstraint);
 			startingSolution = this.childSampler.draw(numberOfDraw);
@@ -118,11 +124,14 @@ public class GosplBiLayerOptimizationSampler<A extends AMultiLayerOptimizationAl
 			else {startingSolution = this.parentSampler.draw(numberOfDraw);}
 		}
 		
+		gspu.sysoStempMessage("Init solution ok !");
+		
 		MultiLayerSPSolution mlSolution = new MultiLayerSPSolution(startingSolution, algorithm.getSampledLayer(), true);
 		
 		if(childObjectives!=null) this.childObjectives.stream().forEach(cObjectif -> this.algorithm.addObjectives(0, cObjectif));
 		if(parentObjectives!=null) this.parentObjectives.stream().forEach(pObjectif -> this.algorithm.addObjectives(1, pObjectif));
 		
+		gspu.sysoStempMessage("Start running the algorithm");
 		return this.algorithm.run(mlSolution).getSolution();
 	}
 

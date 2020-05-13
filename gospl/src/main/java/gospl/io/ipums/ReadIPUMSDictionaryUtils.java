@@ -74,7 +74,7 @@ public class ReadIPUMSDictionaryUtils {
 	public static final String VARIABLE_COL = "Variable";
 	
 	private static final List<String> REGEX_HEADER = Arrays.asList(
-			"COUNTRY", "YEAR", "SAMPLE", "Variable Availability Key:",
+			"COUNTRY", "YEAR", "SAMPLE", "RECTYPE", "Variable Availability Key:",
 			IPUMSLEVEL.Household.getSerial(), IPUMSLEVEL.Household.getWeight(),
 			IPUMSLEVEL.Individual.getSerial(), IPUMSLEVEL.Individual.getWeight());
 	
