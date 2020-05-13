@@ -76,7 +76,7 @@ public class GosplBasicSampler implements IDistributionSampler {
 	 */
 	@Override
 	public final Collection<ACoordinate<Attribute<? extends IValue>, IValue>> draw(int numberOfDraw) {
-		return IntStream.range(0, numberOfDraw).parallel().mapToObj(i -> draw()).collect(Collectors.toList());
+		return IntStream.range(0, numberOfDraw).mapToObj(i -> draw()).collect(Collectors.toList());
 	}
 		
 	// -------------------- utility -------------------- //
