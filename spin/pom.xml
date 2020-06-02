@@ -3,6 +3,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
                       https://maven.apache.org/xsd/maven-4.0.0.xsd">
  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.genstar</groupId>
   <artifactId>genstar-spin</artifactId>
   <packaging>bundle</packaging>
 
@@ -10,47 +11,44 @@
     <maven.test.skip>false</maven.test.skip>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <graphstream.version>1.3</graphstream.version>
-     <maven.deploy.skip>false</maven.deploy.skip>
 </properties>
 
     <parent>
-        <groupId>io.github.anrgenstar</groupId>
+        <groupId>org.genstar</groupId>
         <artifactId>parent</artifactId>
         <version>${revision}</version>
     </parent>
 
 
 <dependencies>
-	<dependency>
-	    <groupId>io.github.anrgenstar</groupId>
-	    <artifactId>genstar-core</artifactId>
-        <version>${revision}</version>
-	</dependency>
+  <dependency>
+      <groupId>org.genstar</groupId>
+      <artifactId>genstar-core</artifactId>
+      <version>${revision}</version>
+  </dependency>
 
-	<dependency>
-	    <groupId>io.github.anrgenstar</groupId>
-	    <artifactId>genstar-gospl</artifactId>
-        <version>${revision}</version>
-	</dependency>
+  <dependency>
+      <groupId>org.genstar</groupId>
+      <artifactId>genstar-gospl</artifactId>
+      <version>${revision}</version>
+  </dependency> 
 
-    <dependency>
-        <groupId>io.github.anrgenstar</groupId>
-        <artifactId>genstar-spll</artifactId>
-        <version>${revision}</version>
-    </dependency>
+  <dependency>
+      <groupId>org.genstar</groupId>
+      <artifactId>genstar-spll</artifactId>
+      <version>${revision}</version>
+  </dependency>   
 
-	<dependency>
-	    <groupId>org.graphstream</groupId>
-	    <artifactId>gs-core</artifactId>
-	    <version>${graphstream.version}</version>
-	</dependency> 
-	<dependency>
-	    <groupId>org.graphstream</groupId>
-	    <artifactId>gs-algo</artifactId>
-	    <version>${graphstream.version}</version>
-	</dependency> 
-
-
+  <dependency>
+      <groupId>org.graphstream</groupId>
+      <artifactId>gs-core</artifactId>
+      <version>${graphstream.version}</version>
+  </dependency> 
+  <dependency>
+      <groupId>org.graphstream</groupId>
+      <artifactId>gs-algo</artifactId>
+      <version>${graphstream.version}</version>
+  </dependency> 
 </dependencies>
  
  <build>
@@ -93,13 +91,13 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>			             -->
+            </plugin>                  -->
 
 
 <plugin>
     <groupId>org.apache.maven.plugins</groupId>
     <artifactId>maven-source-plugin</artifactId>
-    <version>3.0.1</version>    
+    <version>3.0.1</version>        
     <executions>
       <execution>
         <id>attach-sources</id>
@@ -113,8 +111,8 @@
   <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-javadoc-plugin</artifactId>
- 	  <version>3.0.1</version>
- 	  <configuration>
+    <version>3.0.1</version>          
+   <configuration>
         <additionalOptions>
             <additionalOption>-Xdoclint:none</additionalOption>
         </additionalOptions>
@@ -129,21 +127,18 @@
         </execution>
       </executions>
     </plugin>
-
-
-   <!--     <plugin>
+        <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
       <configuration>
         <skip>false</skip>
       </configuration>
-    </plugin>-->
+    </plugin>
             
 
     </plugins>
     </build>
-
-    <!--    <distributionManagement>
+        <distributionManagement>
                     <repository>
                     <id>bintray-anrgenstar-genstar-packages</id>
                     <name>anrgenstar-genstar-packages</name>
@@ -155,5 +150,5 @@
             </snapshots>
                     <url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-spin/;publish=1;override=1</url>
                     </repository>
-    </distributionManagement>-->
+    </distributionManagement>
 </project>
