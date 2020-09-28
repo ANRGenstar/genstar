@@ -572,7 +572,7 @@ public class GosplInputDataManager {
 	public static GosplMultitypePopulation<ADemoEntity> getMutliLayerSample(final IGSSurvey survey, 
 			Set<IGenstarDictionary<Attribute<? extends IValue>>> layerDicos,
 			Integer maxIndividuals, Map<String,List<String>> keepOnlyEqual) {
-		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a multi layered sample from a data file", logger, Level.DEBUG);
+		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a multi layered sample from a data file", Level.DEBUG);
 		
 		GosplMultitypePopulation<ADemoEntity> population = new GosplMultitypePopulation<>(layerDicos.stream()
 				.map(IGenstarDictionary::getIdentifierAttributeName)
@@ -614,7 +614,8 @@ public class GosplInputDataManager {
 			String[] l = null;
 			
 			// Only take (max / size) individual record to match MAX_SAMPLE_SIZE
-			double probaJump = sizeLimit / survey.getLastRowIndex();
+			int surveySize = survey.getLastRowIndex();
+			double probaJump = surveySize < sizeLimit ? 0.0 : sizeLimit / survey.getLastRowIndex();
 			
 			while (zeroLayerIdx <= sizeLimit) {
 				

@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -102,6 +103,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			throw new IllegalArgumentException("Proposed values "+value+" are "
 					+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? "below" : "beyond") + " given bound ("
 							+ (currentVal.stream().anyMatch(d -> d.doubleValue() < min.doubleValue()) ? min : max) + ")");
+		
 		return currentVal.size() == 1 ? 
 				(rt.getBottomTemplate(currentVal.get(0)).equals(value) ? 
 						new RangeValue(this, currentVal.get(0), RangeBound.LOWER) :
@@ -241,15 +243,76 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	
 	/**
 	 * Get the minimum value
-	 * @return
+	 * @return Number : minimum
 	 */
 	public Number getMin() {return min;}
 	
 	/**
 	 * Get the maximum value
-	 * @return
+	 * @return Number : maximum
 	 */
 	public Number getMax() {return max;}
+	
+	/**
+	 * Get all the Number inside every stored ranges
+	 * @return a list of number
+	 */
+	public List<Number> getNumbers() {
+		return values.stream()
+				.flatMap(range -> Stream.of(range.getBottomBound(),range.getTopBound()))
+				.collect(Collectors.toList());
+	}
+	
+	/**
+	 * Get the usual difference between upper and lower range values in the entire range set. If the range is not uniform, then return NaN
+	 * @return Number
+	 */
+	public Double getUsualRange() {
+		Set<Double> regRange = values.stream().map(range -> range.getTopBound().doubleValue() - range.getBottomBound().doubleValue())
+				.collect(Collectors.toSet());
+		if (regRange.size() > 1) { return Double.NaN; }
+		else { return regRange.iterator().next(); }
+	}
+	
+	/**
+	 * Deal with ranges that share a common bound, e.g. ("above 5 years old" and "5 to 9 years old")
+	 */
+	public void consolidateRanges() {
+		
+		Map<Number, Long> the_count = getNumbers().stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+		Double usualRange = this.getUsualRange();
+		
+		for(Number conflictingNumber : the_count.keySet().stream()
+				.filter(num -> the_count.get(num) > 1)
+				.collect(Collectors.toList())) {
+			RangeValue conflictingRange;
+			RangeValue newRange = null;
+			List<RangeValue> conflictingRanges = values.stream()
+					.filter(v -> v.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ||
+						v.getTopBound().doubleValue() == conflictingNumber.doubleValue())
+					.collect(Collectors.toList());
+			if (usualRange==Double.NaN) {
+				conflictingRange = GenstarRandomUtils.oneOf(conflictingRanges);
+				newRange = conflictingRange.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ?
+						new RangeValue(this, conflictingRange.getBottomBound().doubleValue()+1, conflictingRange.getTopBound()) :
+						new RangeValue(this, conflictingRange.getBottomBound(), conflictingRange.getTopBound().doubleValue()-1);
+			} else {
+				conflictingRange = conflictingRanges.stream()
+						.filter(r -> r.getTopBound().doubleValue() - r.getBottomBound().doubleValue() > usualRange)
+						.findFirst().get();
+				double modifier = conflictingRange.getTopBound().doubleValue() - conflictingRange.getBottomBound().doubleValue() - usualRange.doubleValue();
+				newRange = conflictingRange.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ?
+					new RangeValue(this, conflictingRange.getBottomBound().doubleValue() + modifier, conflictingRange.getTopBound()) :
+					new RangeValue(this, conflictingRange.getBottomBound(), conflictingRange.getTopBound().doubleValue() - modifier);
+			}
+			values.remove(conflictingRange);
+			textual2valueCached.remove(conflictingRange.getStringValue());
+			values.add(newRange);
+			textual2valueCached.put(conflictingRange.getStringValue(), newRange);
+		}
+			
+
+	}
 	
 	// ------------- RANDOM VALUE IN RANGE --------------- //
 	

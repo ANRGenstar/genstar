@@ -1141,6 +1141,7 @@ public class AttributeFactory {
 		Attribute<RangeValue> attribute = this.createRangeAttribute(name, 
 				new GSDataParser().getRangeTemplate(ranges)); 
 		ranges.stream().forEach(value -> attribute.getValueSpace().addValue(value));
+		((RangeSpace) attribute.getValueSpace()).consolidateRanges();
 		return attribute;
 	}
 
@@ -1158,6 +1159,7 @@ public class AttributeFactory {
 		Attribute<RangeValue> attribute = this.createRangeAttribute(name, 
 				new GSDataParser().getRangeTemplate(ranges), bottomBound, topBound);
 		ranges.stream().forEach(value -> attribute.getValueSpace().addValue(value));
+		((RangeSpace) attribute.getValueSpace()).consolidateRanges();
 		return attribute;
 	}
 
