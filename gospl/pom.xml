@@ -7,11 +7,10 @@
 
 	<properties>
 		<maven.test.skip>true</maven.test.skip>
-		<maven.deploy.skip>false</maven.deploy.skip>
 	</properties>
 
     <parent>
-        <groupId>io.github.anrgenstar</groupId>
+        <groupId>org.genstar</groupId>
         <artifactId>parent</artifactId>
         <version>${revision}</version>
     </parent>
@@ -30,7 +29,7 @@
  
 	<dependencies>
 		<dependency>
-			<groupId>io.github.anrgenstar</groupId>
+			<groupId>org.genstar</groupId>
 			<artifactId>genstar-core</artifactId>
 			<version>${revision}</version>
 		</dependency>
@@ -103,7 +102,7 @@
 		<version>1.1.1</version>
 		</dependency>
 		 -->	
-		 
+
 	<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
 	<!-- Because I 'funkin' need cartesian product -->
 	<dependency>
@@ -111,7 +110,7 @@
 	    <artifactId>guava</artifactId>
 	    <version>28.2-jre</version>
 	</dependency>
-		 
+
 	<!-- https://mvnrepository.com/artifact/org.hsqldb/hsqldb -->
 	<!--  for the storage of populations in a database for quick querying -->
 	<dependency>
@@ -185,7 +184,7 @@
 <plugin>
 	  <groupId>org.apache.maven.plugins</groupId>
 	  <artifactId>maven-source-plugin</artifactId>
-	  <version>3.0.1</version>
+	  <version>3.0.1</version>	  
 	  <executions>
 	    <execution>
 	      <id>attach-sources</id>
@@ -199,8 +198,8 @@
 	<plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-javadoc-plugin</artifactId>
-	  <version>3.0.1</version>
-      <configuration>
+	  <version>3.0.1</version>      
+   <configuration>
         <additionalOptions>
             <additionalOption>-Xdoclint:none</additionalOption>
         </additionalOptions>
@@ -215,19 +214,17 @@
         </execution>
       </executions>
     </plugin>
-
-    <!--    <plugin>
+        <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-deploy-plugin</artifactId>
       <configuration>
         <skip>false</skip>
       </configuration>
-    </plugin>-->
+    </plugin>
             
 		</plugins>
 	</build>
-
-	<!--<distributionManagement>
+	<distributionManagement>
 		<repository>
 			<id>bintray-anrgenstar-genstar-packages</id>
 			<name>anrgenstar-genstar-packages</name>
@@ -239,7 +236,7 @@
             </snapshots>
 			<url>https://api.bintray.com/maven/anrgenstar/genstar-packages/genstar-gospl/;publish=1;override=1</url>
 		</repository>
-	</distributionManagement>-->
+	</distributionManagement>
 
 
 </project>
