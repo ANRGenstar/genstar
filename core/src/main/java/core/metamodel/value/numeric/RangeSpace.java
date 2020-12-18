@@ -275,7 +275,7 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 	}
 	
 	/**
-	 * Deal with ranges that share a common bound, e.g. ("above 5 years old" and "5 to 9 years old")
+	 * Deal with ranges that share a common bound, e.g. ("below 5 years old" and "5 to 9 years old")
 	 */
 	public void consolidateRanges() {
 		
@@ -291,20 +291,19 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 					.filter(v -> v.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ||
 						v.getTopBound().doubleValue() == conflictingNumber.doubleValue())
 					.collect(Collectors.toList());
+			double modifier = 1;
 			if (usualRange==Double.NaN) {
-				conflictingRange = GenstarRandomUtils.oneOf(conflictingRanges);
-				newRange = conflictingRange.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ?
-						new RangeValue(this, conflictingRange.getBottomBound().doubleValue()+1, conflictingRange.getTopBound()) :
-						new RangeValue(this, conflictingRange.getBottomBound(), conflictingRange.getTopBound().doubleValue()-1);
-			} else {
 				conflictingRange = conflictingRanges.stream()
 						.filter(r -> r.getTopBound().doubleValue() - r.getBottomBound().doubleValue() > usualRange)
 						.findFirst().get();
-				double modifier = conflictingRange.getTopBound().doubleValue() - conflictingRange.getBottomBound().doubleValue() - usualRange.doubleValue();
-				newRange = conflictingRange.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ?
+				modifier = conflictingRange.getTopBound().doubleValue() - conflictingRange.getBottomBound().doubleValue() - usualRange.doubleValue();
+				
+			} else {
+				conflictingRange = GenstarRandomUtils.oneOf(conflictingRanges);
+			}
+			newRange = conflictingRange.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ?
 					new RangeValue(this, conflictingRange.getBottomBound().doubleValue() + modifier, conflictingRange.getTopBound()) :
 					new RangeValue(this, conflictingRange.getBottomBound(), conflictingRange.getTopBound().doubleValue() - modifier);
-			}
 			values.remove(conflictingRange);
 			textual2valueCached.remove(conflictingRange.getStringValue());
 			values.add(newRange);
