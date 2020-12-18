@@ -26,7 +26,7 @@ public class RangeValue implements IValue {
 	 * as the String value if long to construct and often used, 
 	 * we cache it here
 	 */
-	private String stringValueCached = null;
+	public String stringValueCached = null;
 
 	/**
 	 * The actual value of a Range might be any object:

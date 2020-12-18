@@ -304,10 +304,11 @@ public class RangeSpace implements IValueSpace<RangeValue> {
 			newRange = conflictingRange.getBottomBound().doubleValue() == conflictingNumber.doubleValue() ?
 					new RangeValue(this, conflictingRange.getBottomBound().doubleValue() + modifier, conflictingRange.getTopBound()) :
 					new RangeValue(this, conflictingRange.getBottomBound(), conflictingRange.getTopBound().doubleValue() - modifier);
+			newRange.stringValueCached = conflictingRange.getStringValue();
 			values.remove(conflictingRange);
 			textual2valueCached.remove(conflictingRange.getStringValue());
 			values.add(newRange);
-			textual2valueCached.put(conflictingRange.getStringValue(), newRange);
+			textual2valueCached.put(newRange.getStringValue(), newRange);
 		}
 			
 
