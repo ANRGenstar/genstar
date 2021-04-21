@@ -130,12 +130,13 @@
 	</dependency>
 	
 	<!-- https://mvnrepository.com/artifact/nl.knaw.dans.common/dans-dbf-lib -->
-	<!-- for DBF INSEE file format -->
+	<!-- for DBF INSEE file format 
 	<dependency>
     	<groupId>nl.knaw.dans.common</groupId>
 	    <artifactId>dans-dbf-lib</artifactId>
     	<version>1.0.0-beta-10</version>
 	</dependency>
+	-->
 
 	</dependencies>
 

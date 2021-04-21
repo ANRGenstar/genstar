@@ -246,8 +246,8 @@ public class GosplSurveyFactory {
 		if (filepath.endsWith(CSV_EXT))
 			return new CsvInputHandler(filepath, csvSeparator, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
-		if (filepath.endsWith(DBF_EXT))
-			return new DBaseInputHandler(dataFileType, filepath);
+		//if (filepath.endsWith(DBF_EXT))
+		//	return new DBaseInputHandler(dataFileType, filepath);
 
 		final String[] pathArray = filepath.split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
@@ -281,8 +281,8 @@ public class GosplSurveyFactory {
 		if (processAsFormat.equals(CSV_EXT))
 			return new CsvInputHandler(filepath, csvSeparator, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
-		if (processAsFormat.equals(DBF_EXT))
-			return new DBaseInputHandler(dataFileType, filepath);
+		//if (processAsFormat.equals(DBF_EXT))
+		//	return new DBaseInputHandler(dataFileType, filepath);
 
 		final String[] pathArray = filepath.split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
@@ -329,8 +329,8 @@ public class GosplSurveyFactory {
 		if (file.getName().endsWith(CSV_EXT))
 			return new CsvInputHandler(file, storeInMemory, csvSeparator, firstRowDataIndex, 
 					firstColumnDataIndex, dataFileType);
-		if (file.getName().endsWith(DBF_EXT))
-			return new DBaseInputHandler(dataFileType, file);
+		//if (file.getName().endsWith(DBF_EXT))
+		//	return new DBaseInputHandler(dataFileType, file);
 		final String[] pathArray = file.getPath().split(File.separator);
 		throw new InvalidSurveyFormatException(pathArray[pathArray.length - 1], supportedFileFormat);
 	}

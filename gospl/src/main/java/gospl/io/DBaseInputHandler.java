@@ -1,7 +1,6 @@
 package gospl.io;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,32 +9,32 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import au.com.bytecode.opencsv.CSVReader;
 import core.configuration.dictionary.IGenstarDictionary;
 import core.metamodel.attribute.Attribute;
-import core.metamodel.attribute.AttributeFactory;
 import core.metamodel.io.GSSurveyType;
 import core.metamodel.value.IValue;
-import core.util.data.GSEnumDataType;
-import core.util.excpetion.GSIllegalRangedData;
-import nl.knaw.dans.common.dbflib.CorruptedTableException;
-import nl.knaw.dans.common.dbflib.Field;
-import nl.knaw.dans.common.dbflib.IfNonExistent;
-import nl.knaw.dans.common.dbflib.Record;
-import nl.knaw.dans.common.dbflib.Table;
 
 /**
  * Handles the DBF DBase INSEE tables.
  * 
  * @see https://en.wikipedia.org/wiki/.dbf
  * 
+ * TODO : switch from nl.knaw.dans.common.dbflib to another support for dbf readings - no more available as maven dependancies
+ * 
  * @author Samuel Thiriot
  */
+@Deprecated
 public class DBaseInputHandler extends AbstractInputHandler {
+	
+	
+	public DBaseInputHandler(GSSurveyType dataFileType, File file) {
+		super(dataFileType, file);
+		// TODO Auto-generated constructor stub
+	}
 
+	/*
+	
 	private static Logger logger = LogManager.getLogger();
 	
 	private Table table = null;
@@ -72,6 +71,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			    for (int i=0; i<fields.size(); i++) {
 			    	idx2columnName.put(i, fields.get(i).getName());
 			    }
+			    
 			    /*
 			    for (final Field field : fields)
 			    {
@@ -82,6 +82,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			        System.out.println();
 			    }
 				*/
+				/*
 			    //table.getFields().
 	
 			    
@@ -97,6 +98,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		return table;
 		
 	}
+	*/
 
 	@Override
 	public String getName() {
@@ -106,12 +108,12 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	@Override
 	public int getLastRowIndex() {
 
-		return getDBFTable().getRecordCount();
+		return 0;//getDBFTable().getRecordCount();
 	}
 
 	@Override
 	public int getLastColumnIndex() {
-		return getDBFTable().getFields().size();
+		return 0; // getDBFTable().getFields().size();
 	}
 
 	@Override
@@ -126,7 +128,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 
 	@Override
 	public String read(int rowIndex, int columnIndex) {
-		
+		return "";
+		/*
 		try {
 			return getDBFTable().getRecordAt(rowIndex).getTypedValue(idx2columnName.get(columnIndex)).toString();
 		} catch (CorruptedTableException e) {
@@ -134,12 +137,12 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
-		
+		*/
 	}
 	
 	@Override
 	public List<String> readLine(int rowIndex) {
-		
+		/*
 		Record record;
 		try {
 			record = getDBFTable().getRecordAt(rowIndex);
@@ -150,7 +153,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		}
 				
 		return getDBFTable().getFields().stream().map(f -> record.getTypedValue(f.getName()).toString()).collect(Collectors.toList());
-		
+		*/
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -165,7 +169,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	public List<String> readLines(int fromFirstRowIndex, int toLastRowIndex, int columnIndex) {
 		
 		List<String> res = new ArrayList<>(toLastRowIndex-fromFirstRowIndex);
-
+		
+		/*
 		final Table table = getDBFTable();
 		final String colName = idx2columnName.get(columnIndex);
 		
@@ -177,7 +182,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			
+		*/
+		
 		return res;
 	}
 
@@ -186,7 +192,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			int toLastColumnIndex) {
 		
 		List<List<String>> res = new ArrayList<>(toLastRowIndex-fromFirstRowIndex);
-
+		/*
 		final Table table = getDBFTable();
 		
 		final List<String> colNames = table.getFields().subList(fromFirstColumnIndex, toLastColumnIndex).stream().map(f -> f.getName()).collect(Collectors.toList());
@@ -200,13 +206,13 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-			
+		*/	
 		return res;
 	}
 
 	@Override
 	public List<String> readColumn(int columnIndex) {
-		
+		/*
 		final Table table = getDBFTable();
 		List<String> res = new ArrayList<>(table.getRecordCount());
 		
@@ -222,11 +228,13 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			}
 			
 		return res;
+		*/
+		return Collections.emptyList();
 	}
 
 	@Override
 	public List<List<String>> readColumns(int fromFirstColumnIndex, int toLastColumnIndex) {
-
+		/*
 		final Table table = getDBFTable();
 		
 		List<List<String>> res = new ArrayList<>(table.getRecordCount());
@@ -244,11 +252,14 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			}
 			
 		return res;
+		*/
+		return Collections.emptyList();
 	}
 
 	@Override
 	public List<String> readColumns(int fromFirstColumnIndex, int toLastColumnIndex, int rowIndex) {
 		
+		/*
 		final Table table = getDBFTable();
 		final List<String> colNames = table.getFields().subList(fromFirstColumnIndex, toLastColumnIndex).stream().map(f -> f.getName()).collect(Collectors.toList());
 
@@ -260,14 +271,15 @@ public class DBaseInputHandler extends AbstractInputHandler {
 		}
 		
 		return colNames.stream().map(n -> record.getTypedValue(n).toString()).collect(Collectors.toList());
-		
+		*/
+		return Collections.emptyList();
 
 	}
 
 	@Override
 	public List<List<String>> readColumns(int fromFirstRowIndex, int toLastRowIndex, int fromFirstColumnIndex,
 			int toLastColumnIndex) {
-		
+		/*
 		final Table table = getDBFTable();
 		
 		List<List<String>> res = new ArrayList<>(table.getRecordCount());
@@ -285,6 +297,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			}
 			
 		return res;
+		*/
+		return Collections.emptyList();
 	}
 
 	@Override
@@ -298,6 +312,8 @@ public class DBaseInputHandler extends AbstractInputHandler {
 				dictionnary.getAttributes()
 							.stream()
 							.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
+		
+		/*
 		
 		// prepare table information
 		final Table table = getDBFTable();
@@ -315,6 +331,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			
 			res.put(iField, att.getValueSpace().getValues().stream().collect(Collectors.toSet()));
 		}
+		*/
 		
 		return res;
 		
@@ -322,7 +339,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 
 	@Override
 	protected void finalize() throws Throwable {
-		
+		/*
 		if (table != null) {
 		    try {
 				table.close();
@@ -332,7 +349,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			}  
 		    table = null;
 		}
-		
+		*/
 		super.finalize();
 	}
 
@@ -349,6 +366,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 	 * @param t
 	 * @return
 	 */
+	/*
 	protected GSEnumDataType getGosplDatatypeForDatabaseType(Field f, Table t) {
 		switch (f.getType()) {
 		case NUMBER:
@@ -389,6 +407,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			throw new IllegalArgumentException();
 		}
 	}
+	*/
 
 	@Override
 	public Map<Integer, Attribute<? extends IValue>> getColumnSample(
@@ -403,6 +422,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 						.collect(Collectors.toMap(a->a.getAttributeName(), a->a));
 		
 		// prepare table information
+		/*
 		final Table table = getDBFTable();
 		final List<Field> fields = table.getFields();
 		
@@ -450,7 +470,7 @@ public class DBaseInputHandler extends AbstractInputHandler {
 			}
 			
 		}
-		
+		*/
 		return res;
 	}
 	
