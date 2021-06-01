@@ -4,7 +4,7 @@ import java.util.Map;
 
 import org.opengis.feature.Feature;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;

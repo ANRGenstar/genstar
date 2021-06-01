@@ -2,8 +2,8 @@ package spin.algo.generator;
 
 import java.util.List;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.index.quadtree.Quadtree;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.index.quadtree.Quadtree;
 
 import core.metamodel.IPopulation;
 import core.metamodel.attribute.Attribute;

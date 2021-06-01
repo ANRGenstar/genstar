@@ -8,8 +8,8 @@ import java.util.stream.Collectors;
 
 import org.apache.poi.ss.formula.eval.NotImplementedException;
 
-import com.vividsolutions.jts.geom.Geometry;
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Point;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.IAttribute;

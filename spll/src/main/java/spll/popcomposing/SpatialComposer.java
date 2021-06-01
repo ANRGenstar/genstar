@@ -14,7 +14,7 @@ import org.apache.commons.collections4.map.LRUMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import core.metamodel.IMultitypePopulation;
 import core.metamodel.attribute.Attribute;

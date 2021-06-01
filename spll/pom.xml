@@ -7,7 +7,7 @@
   <packaging>bundle</packaging>
 
   <properties>
-		<geotools.version>14.5</geotools.version>
+		<geotools.version>25.0</geotools.version>
 		<maven.test.skip>true</maven.test.skip>
 	</properties>
 
@@ -20,10 +20,6 @@
 <dependencies>
 		<!-- MODULE DEPENDENCIES -->
 
-	<dependency>
-    	<groupId>com.vividsolutions</groupId>
-    	<artifactId>jts-core</artifactId>
-    </dependency>
 	<dependency>
 		<groupId>net.sf.opencsv</groupId>
 		<artifactId>opencsv</artifactId>
@@ -340,6 +336,17 @@
 			<version>${geotools.version}</version>
 		</dependency>
 		
+		<dependency>
+		   <groupId>org.geotools</groupId>
+		   <artifactId>gt-http</artifactId>
+		   <version>${geotools.version}</version>
+		</dependency>
+		
+		<dependency>
+		   <groupId>org.geotools</groupId>
+		   <artifactId>gt-http-commons</artifactId>
+		   <version>${geotools.version}</version>
+		</dependency>
 		-->
 		
 		<!-- END OF GEOTOOLS -->
@@ -349,18 +356,18 @@
  <build>
 	 	<plugins>
 			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.5.1</version>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
+			    <groupId>org.apache.maven.plugins</groupId>
+			    <artifactId>maven-compiler-plugin</artifactId>
+			    <version>3.8.0</version>
+			    <configuration>
+			        <release>11</release>
+			    </configuration>
 			</plugin>
+
 		      <plugin>
 		        <groupId>org.apache.felix</groupId>
 		          <artifactId>maven-bundle-plugin</artifactId>
-		          <version>3.2.0</version>
+		          <version>4.2.1</version>
 		          <extensions>true</extensions>
 		          <configuration>
 		                    <instructions>
@@ -435,15 +442,11 @@
 		</build>
 			<repositories>
 		<repository>
-			<id>osgeo</id>
-			<name>Open Source Geospatial Foundation Repository</name>
-						<releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-   			 <url>https://repo.osgeo.org/repository/release/</url>
+		    <id>osgeo</id>
+		    <name>OSGeo Release Repository</name>
+		    <url>https://repo.osgeo.org/repository/release/</url>
+		    <snapshots><enabled>false</enabled></snapshots>
+		    <releases><enabled>true</enabled></releases>
 		</repository>
 	</repositories>
 			<distributionManagement>

@@ -41,6 +41,18 @@ public class GosplEntity extends ADemoEntity {
 		clone.setWeight(this.getWeight());
 		return clone;
 	}
+	
+
+	public boolean equals(Object obj) {
+		if (obj instanceof GosplEntity) {
+			GosplEntity entity = (GosplEntity) obj;
+			return (this.getAttributes().equals(entity.getAttributes()) &&
+					this.getValues().equals(entity.getValues()) &&
+					this.getEntityId().equals(entity.getEntityId()));
+		} else {
+			return false;
+		}
+	}
 
 
 }

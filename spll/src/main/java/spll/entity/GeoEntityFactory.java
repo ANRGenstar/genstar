@@ -20,7 +20,7 @@ import org.opengis.feature.Feature;
 import org.opengis.feature.Property;
 import org.opengis.feature.simple.SimpleFeatureType;
 
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Geometry;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.attribute.AttributeFactory;

@@ -8,8 +8,8 @@ import java.util.Map;
 
 import javax.xml.crypto.dsig.TransformException;
 
-import com.vividsolutions.jts.geom.Envelope;
-import com.vividsolutions.jts.geom.Geometry;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.AGeoEntity;

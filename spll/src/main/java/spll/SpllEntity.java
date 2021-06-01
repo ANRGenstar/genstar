@@ -3,7 +3,7 @@ package spll;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.vividsolutions.jts.geom.Point;
+import org.locationtech.jts.geom.Point;
 
 import core.metamodel.entity.ADemoEntity;
 import core.metamodel.entity.AGeoEntity;
