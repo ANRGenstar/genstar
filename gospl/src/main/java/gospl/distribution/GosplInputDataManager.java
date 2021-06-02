@@ -471,8 +471,12 @@ public class GosplInputDataManager {
 			
 			surveyReader = survey.getBufferReader(true);
 			String[] l = null;
+			
+			
 
 			double probaJump = MAX_SAMPLE_SIZE / survey.getLastRowIndex();
+			
+			maxIndividuals = maxIndividuals == null ? (int) Math.pow(10d, 6) : maxIndividuals;
 			
 			while (sampleSet.size() <= maxIndividuals) {
 				
