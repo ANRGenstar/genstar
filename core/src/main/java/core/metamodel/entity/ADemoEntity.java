@@ -88,11 +88,12 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 
 	@Override
 	public final void _setEntityId(String novelid) throws IllegalStateException {
-		if (this.id != null)
-			throw new IllegalArgumentException("cannot change the identifier of an agent; "+
+		if (this.id == null)
+			this.id = novelid;
+			/*throw new IllegalArgumentException("cannot change the identifier of an agent; "+
 						"this agent already had id "+this.id+" but we were asked "+
-					"to change it for "+novelid);
-		this.id = novelid;
+					"to change it for "+novelid);*/
+		
 	}
 
 	@Override
@@ -194,6 +195,22 @@ public abstract class ADemoEntity implements IEntity<Attribute<? extends IValue>
 	@Override
 	public void setEntityType(String type) {
 		this.type = type;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if(obj == null) {
+			return false;
+		}
+		if (obj instanceof ADemoEntity) {
+			ADemoEntity entity = (ADemoEntity) obj;
+			return (this.attributes.equals(entity.getAttributes()) &&
+					this.getValues().equals(entity.getValues()) &&
+					this.id.equals(entity.getEntityId()) &&
+					this.type.equals(entity.getEntityType()));
+		} else {
+			return false;
+		}
 	}
 	
 	// ------------ MULTI-LAYER ENTITY ATTRIBUTES ------------ // 

@@ -49,6 +49,7 @@ import core.metamodel.value.IValue;
 import core.util.GSPerformanceUtil;
 import core.util.data.GSDataParser;
 import core.util.data.GSEnumDataType;
+import core.util.random.GenstarRandom;
 import core.util.random.GenstarRandomUtils;
 import gospl.GosplEntity;
 import gospl.GosplMultitypePopulation;
@@ -471,23 +472,35 @@ public class GosplInputDataManager {
 			
 			surveyReader = survey.getBufferReader(true);
 			String[] l = null;
-			
-			
-
-			double probaJump = MAX_SAMPLE_SIZE / survey.getLastRowIndex();
-			
+			double probaJump = (MAX_SAMPLE_SIZE / survey.getLastRowIndex()) ;
 			maxIndividuals = maxIndividuals == null ? (int) Math.pow(10d, 6) : maxIndividuals;
+			boolean endOfFile = false;
 			
-			while (sampleSet.size() <= maxIndividuals) {
+			while (sampleSet.size() <= maxIndividuals && !endOfFile) {
+				if (probaJump > 1) {
+					try {
+						l = surveyReader.readNext();
+						}
+					catch (IOException e){
+						e.printStackTrace();
+						}
+				} else {
+					do {
+						l = surveyReader.readNext();
+					} while (GenstarRandomUtils.flip(probaJump));
+				}
 				
-				try { do {l = surveyReader.readNext();} while (GenstarRandomUtils.flip(probaJump)); } catch (IOException e) { e.printStackTrace(); }
-				if (l==null) {break;}
+				
+				if (l != null) {
+					GosplEntity entity = readRecord(Arrays.asList(l), columnHeaders, keepOnlyEqual, gspu);
 
-				GosplEntity entity = readRecord(Arrays.asList(l), columnHeaders, keepOnlyEqual, gspu);
-
-				if (entity != null) {sampleSet.add(entity);}
-				else {unmatchSize++;}
-
+					if (entity != null)
+						sampleSet.add(entity);
+					else 
+						unmatchSize++;
+				} else {
+					endOfFile = true;
+				}
 			} 
 
 			try {
@@ -572,10 +585,11 @@ public class GosplInputDataManager {
 	 * @param survey
 	 * @param layerDicos
 	 * @return
+	 * @throws IOException 
 	 */
 	public static GosplMultitypePopulation<ADemoEntity> getMutliLayerSample(final IGSSurvey survey, 
 			Set<IGenstarDictionary<Attribute<? extends IValue>>> layerDicos,
-			Integer maxIndividuals, Map<String,List<String>> keepOnlyEqual) {
+			Integer maxIndividuals, Map<String,List<String>> keepOnlyEqual) throws IOException {
 		GSPerformanceUtil gspu = new GSPerformanceUtil("Retrieve a multi layered sample from a data file", Level.DEBUG);
 		
 		GosplMultitypePopulation<ADemoEntity> population = new GosplMultitypePopulation<>(layerDicos.stream()
@@ -620,25 +634,45 @@ public class GosplInputDataManager {
 			// Only take (max / size) individual record to match MAX_SAMPLE_SIZE
 			int surveySize = survey.getLastRowIndex();
 			double probaJump = surveySize < sizeLimit ? 0.0 : sizeLimit / survey.getLastRowIndex();
+			boolean endOfFile = false;
 			
-			while (zeroLayerIdx <= sizeLimit) {
+			while (zeroLayerIdx <= sizeLimit && !endOfFile) {
 				
-				try { do {l = surveyReader.readNext();} while (GenstarRandomUtils.flip(probaJump)); } catch (IOException e) { e.printStackTrace(); }
-				if (l==null) {break;}
-				
-				Map<Integer,Set<ReadMultiLayerEntityUtils>> localEntityCollection = readComplexRecord(Arrays.asList(l),
-						layerDicos, columnHeaders, layerAtt, idWgtColumnHeaders, layerId, layerWgt, keepOnlyEqual);
-				if(localEntityCollection.isEmpty()) { unmatchSize++; continue;}
-				else { 
-					
-					for(Integer localLayer : localEntityCollection.keySet()) { 
-						layerEntityCollection.get(localLayer).addAll(localEntityCollection.get(localLayer)); 
+				if (probaJump > 1) {
+					try {
+						l = surveyReader.readNext();
+						}
+					catch (IOException e){
+						e.printStackTrace();
+						}
+				} else {
+					do {
+						l = surveyReader.readNext();
+					} while (GenstarRandomUtils.flip(probaJump));
+				}
+				if (l != null) {
+
+
+					Map<Integer,Set<ReadMultiLayerEntityUtils>> localEntityCollection = readComplexRecord(Arrays.asList(l),
+							layerDicos, columnHeaders, layerAtt, idWgtColumnHeaders, layerId, layerWgt, keepOnlyEqual);
+
+					if(localEntityCollection.isEmpty()){
+						unmatchSize++; 
+						continue;
+					} else { 
+
+						for(Integer localLayer : localEntityCollection.keySet()) { 
+							layerEntityCollection.get(localLayer).addAll(localEntityCollection.get(localLayer)); 
+						}
+
+						zeroLayerIdx += localEntityCollection.get(Collections.min(layerId.keySet())).size();
+						if(zeroLayerIdx%(sizeLimit/10d)==0) { 
+							gspu.sysoStempMessage(100d*zeroLayerIdx/sizeLimit+"% of total sample has been build"); 
+						}
 					}
-					
-					zeroLayerIdx += localEntityCollection.get(Collections.min(layerId.keySet())).size();
-					if(zeroLayerIdx%(sizeLimit/10d)==0) { 
-						gspu.sysoStempMessage(100d*zeroLayerIdx/sizeLimit+"% of total sample has been build"); 
-					}
+
+				} else {
+					endOfFile = true;
 				}
 				
 			} 

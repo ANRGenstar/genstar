@@ -105,7 +105,7 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm<GosplPopulation> 
 		int local_transitionLength = this.transitionLength;
 		double forcedTransition = 1d;
 		while(temperature > this.initTemp*coolTempRatio &&
-				currentEnergy > super.getFitnessThreshold()){
+				currentEnergy > super.getFitnessThreshold()){ 
 
 			boolean tempTransition = false;
 
@@ -122,7 +122,7 @@ public class SimulatedAnnealing extends AOptimizationAlgorithm<GosplPopulation> 
 							+ currentEnergy+" -> "+candidateEnergy+"] - "
 									+ "Temp = "+Math.round(temperature)+"° - "
 											+ "Transition lenght = "+(i+1), this);
-					currentState = systemStateCandidate;
+					currentState = systemStateCandidate; 
 					currentEnergy = candidateEnergy;
 					tempTransition = true;
 					break;

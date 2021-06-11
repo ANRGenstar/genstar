@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import core.metamodel.attribute.Attribute;
 import core.metamodel.entity.ADemoEntity;
+import core.metamodel.entity.EntityUniqueId;
 import core.metamodel.value.IValue;
 
 /**
@@ -39,19 +40,13 @@ public class GosplEntity extends ADemoEntity {
 		}
 		clone.setEntityType(this.getEntityType());
 		clone.setWeight(this.getWeight());
+		clone._setEntityId(EntityUniqueId.createNextId(clone));
 		return clone;
 	}
 	
 
 	public boolean equals(Object obj) {
-		if (obj instanceof GosplEntity) {
-			GosplEntity entity = (GosplEntity) obj;
-			return (this.getAttributes().equals(entity.getAttributes()) &&
-					this.getValues().equals(entity.getValues()) &&
-					this.getEntityId().equals(entity.getEntityId()));
-		} else {
-			return false;
-		}
+		return super.equals(obj);
 	}
 
 
