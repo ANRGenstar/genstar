@@ -9,7 +9,7 @@
 
 	<properties>
 		<!-- BEN : revisions version ! TO CHANGE -->
-	    <revision>1.0.4</revision>
+	    <revision>1.1</revision>
 	    <!-- -->
 	    <project.version>2.1</project.version>        
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
