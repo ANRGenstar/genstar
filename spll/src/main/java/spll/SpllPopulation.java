@@ -362,6 +362,10 @@ public class SpllPopulation implements IPopulation<SpllEntity, Attribute<? exten
 		return this.feature2entity.get(feature);
 	}
 	
+	public Set<SpllEntity> getPopulation() {
+		return population;
+	}
+	
 	/**
 	 * Returns the internal mapping between the spatial entity and the corresponding SPLEntity.
 	 * @return

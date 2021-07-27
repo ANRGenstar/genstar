@@ -469,7 +469,10 @@ public class SPLGeofileBuilder {
 				this.features = Collections.emptyList();
 				Set<String> links = new HashSet<>();
 				for(SpllEntity ent: population) {
-					links.addAll(ent.getLinkedPlaces().keySet());
+					Map<String, AGeoEntity<? extends IValue>> linkedPlaces = ent.getLinkedPlaces();
+					if (linkedPlaces != null) {
+						links.addAll(ent.getLinkedPlaces().keySet());
+					}
 				}
 				for (String link : links) {
 					specs.append(',').append(link).append(':').append("String");

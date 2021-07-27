@@ -116,7 +116,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 		for (int line = 0; line < getFirstRowIndex(); line++) {
 			final List<String> sLine = readLine(line);
 			for (int idx = 0; idx < getFirstColumnIndex(); idx++) {
-				final String headAtt = sLine.get(idx);
+				final String headAtt = sLine.get(idx).replaceAll("[^\\p{Graph}\n\r\t ]", "");
 				
 				if (dictionary.containsAttribute(headAtt) 
 						|| dictionary.containsRecord(headAtt))
@@ -124,7 +124,7 @@ public abstract class AbstractInputHandler implements IGSSurvey {
 					// we found it.
 					attributeIdx.add(idx);
 				
-				if (headAtt.isEmpty()) {
+				if (headAtt.isBlank()) {
 					// detect the attribute by finding an attribute which has 
 					// all of these values as modalities
 					final List<String> valList = readColumn(idx);
