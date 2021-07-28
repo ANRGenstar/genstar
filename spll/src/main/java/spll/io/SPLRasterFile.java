@@ -366,9 +366,14 @@ public class SPLRasterFile implements IGSGeofile<SpllPixel, ContinuousValue> {
 	@Override
 	public String toString(){
 		String s = "";
-		for(String key : store.getMetadataNames()){
-			s += key+": "+store.getMetadataValue(key)+"\n";
-		}
+		if (store.getMetadataNames() != null && store.getMetadataNames().length > 0)
+			for(String key : store.getMetadataNames()){
+				s += key+": "+store.getMetadataValue(key)+"\n";
+			}
+		if (store.getGridCoverageNames() != null && store.getGridCoverageNames().length > 0)
+			for(String key : store.getGridCoverageNames()){
+				s += key+" ";
+			}
 		return s;
 	}
 	
